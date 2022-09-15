@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rarible.core.common.justOrEmpty
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemFilter
@@ -9,15 +8,12 @@ import com.rarible.protocol.union.core.model.EsItemSort
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQueryBuilderService
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQueryCursorService
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsEntitySearchAfterCursorService
 import kotlinx.coroutines.reactive.awaitFirst
-import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.index.query.QueryBuilders.termQuery
-import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.SearchHit
-import org.springframework.data.elasticsearch.core.SearchHits
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.stereotype.Component
@@ -25,7 +21,7 @@ import org.springframework.stereotype.Component
 @Component
 class EsItemRepository(
     private val queryBuilderService: EsItemQueryBuilderService,
-    private val queryCursorService: EsItemQueryCursorService,
+    private val queryCursorService: EsEntitySearchAfterCursorService,
     objectMapper: ObjectMapper,
     elasticsearchConverter: ElasticsearchConverter,
     esOperations: ReactiveElasticsearchOperations,

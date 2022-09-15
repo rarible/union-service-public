@@ -64,6 +64,7 @@ abstract class ElasticSearchRepository<T>(
 
         return esOperations.save(entity, entityDefinition.writeIndexCoordinates).awaitFirst()
     }
+
     @Deprecated("Use bulk() instead")
     suspend fun saveAll(
         entities: List<T>,
@@ -115,6 +116,15 @@ abstract class ElasticSearchRepository<T>(
         indexName: String? = null,
         refreshPolicy: WriteRequest.RefreshPolicy = WriteRequest.RefreshPolicy.IMMEDIATE,
     ) {
+        if (entitiesToSave.isEmpty() && idsToDelete.isEmpty()) {
+            logger.info("Nothing to save or delete")
+            return
+        }
+
+        if (brokenEsState) {
+            throw IllegalStateException("No indexes to save")
+        }
+
         val bulkRequest = BulkRequest()
             .setRefreshPolicy(refreshPolicy)
 

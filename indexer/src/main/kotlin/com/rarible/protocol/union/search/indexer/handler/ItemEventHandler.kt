@@ -51,18 +51,14 @@ class ItemEventHandler(
                     WriteRequest.RefreshPolicy.NONE
             }
 
-        repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
-        countSaves(convertedEvents)
-
         val deletedIds = event
             .filterIsInstance<ItemDeleteEventDto>()
             .map {
                 it.itemId.fullId()
             }
-        if (deletedIds.isNotEmpty()) {
-            logger.debug("Deleting ${deletedIds.size} ItemDeleteEventDto events to ElasticSearch")
-            repository.deleteAll(deletedIds)
-        }
+
+        repository.bulk(convertedEvents, deletedIds, refreshPolicy = refreshPolicy)
+        countSaves(convertedEvents)
 
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
         logger.info("Handling of ${event.size} ItemEventDto events completed in $elapsedTime ms" +

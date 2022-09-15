@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.handler
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.FeatureFlagsProperties
@@ -27,6 +28,7 @@ class OrderEventHandler(
     }
 
     override suspend fun handle(event: List<OrderEventDto>) {
+        val startTime = nowMillis()
         logger.info("Handling ${event.size} OrderDto events")
 
         val convertedEvents = event.map {
@@ -41,9 +43,11 @@ class OrderEventHandler(
                 } else {
                     WriteRequest.RefreshPolicy.NONE
                 }
-            val saved = repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
+            repository.bulk(convertedEvents, idsToDelete = emptyList(), refreshPolicy = refreshPolicy)
             countSaves(convertedEvents)
-            logger.info("Handling completed, {}", saved.map { it.orderId })
+
+            val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
+            logger.info("Handling of ${event.size} OrderDto events completed in $elapsedTime ms")
         }
     }
 

@@ -7,8 +7,6 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
-import com.rarible.protocol.union.core.service.ItemService
-import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
@@ -22,7 +20,7 @@ class ActivityEventHandler(
     private val repository: EsActivityRepository,
     private val converter: EsActivityConverter,
     metricFactory: IndexerMetricFactory,
-): ConsumerBatchEventHandler<ActivityDto> {
+) : ConsumerBatchEventHandler<ActivityDto> {
 
     companion object {
         private val logger by Logger()
@@ -49,25 +47,22 @@ class ActivityEventHandler(
 
         val convertedEvents = converter.batchConvert(normalEvents)
 
-        if (convertedEvents.isNotEmpty()) {
-            val refreshPolicy =
-                if (featureFlagsProperties.enableActivitySaveImmediateToElasticSearch) {
-                    WriteRequest.RefreshPolicy.IMMEDIATE
-                }
-                else {
-                    WriteRequest.RefreshPolicy.NONE
-                }
-            repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
-            countSaves(convertedEvents)
-            logger.info("Saved ${convertedEvents.size} activities")
-        }
-        if (revertedEvents.isNotEmpty()) {
-            val deleted = repository.deleteAll(revertedEvents.map { it.id.toString() })
-            logger.info("Deleted $deleted activities")
-        }
+        val refreshPolicy =
+            if (featureFlagsProperties.enableActivitySaveImmediateToElasticSearch) {
+                WriteRequest.RefreshPolicy.IMMEDIATE
+            } else {
+                WriteRequest.RefreshPolicy.NONE
+            }
+
+        val idsToDelete = revertedEvents.map { it.id.toString() }
+        repository.bulk(convertedEvents, idsToDelete, refreshPolicy = refreshPolicy)
+        countSaves(convertedEvents)
+
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
-        logger.info("Handling of ${event.size} ActivityDto events completed in $elapsedTime ms" +
-                " (saved ${convertedEvents.size}, deleted ${revertedEvents.size})")
+        logger.info(
+            "Handling of ${event.size} ActivityDto events completed in $elapsedTime ms" +
+                    " (saved ${convertedEvents.size}, deleted ${revertedEvents.size})"
+        )
     }
 
     private fun countSaves(activities: List<EsActivity>) {

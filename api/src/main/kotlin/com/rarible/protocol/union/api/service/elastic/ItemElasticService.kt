@@ -12,6 +12,7 @@ import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemSort
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
+import com.rarible.protocol.union.core.model.EsOwnershipSort
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -164,14 +165,15 @@ class ItemElasticService(
         val ownerships = esOwnershipRepository.search(
             EsOwnershipByOwnerFilter(
                 owner = ownerAddress,
-                blockchains = evaluatedBlockchains,
+                blockchains = evaluatedBlockchains.toSet(),
                 cursor = continuation,
             ),
+            EsOwnershipSort.DEFAULT,
             size,
         )
 
-        val cursor = ownerships.lastOrNull()?.let { DateIdContinuation(it.date, it.ownershipId).toString() }
-        val items: List<UnionItem> = getItemsByOwnerships(ownerships)
+        val cursor = ownerships.continuation
+        val items: List<UnionItem> = getItemsByOwnerships(ownerships.entities)
 
         val enriched = itemEnrichService.enrich(items)
 
@@ -193,13 +195,12 @@ class ItemElasticService(
     ): ItemsWithOwnershipDto {
         val ownerAddress = IdParser.parseAddress(owner)
         val safeSize = PageSize.OWNERSHIP.limit(size)
-        val ownerships = ownershipElasticHelper.getRawOwnershipsByOwner(
+        val (cursor, ownerships) = ownershipElasticHelper.getRawOwnershipsByOwner(
             owner = ownerAddress,
             continuation = continuation,
             size = safeSize,
         )
         val resultOwnerships = ownerships.map { ItemOwnershipConverter.convert(it) }
-        val cursor = ownerships.lastOrNull()?.let { DateIdContinuation(it.createdAt, it.id.fullId()).toString() }
 
         val items: List<UnionItem> = getItemsByIdsInner(resultOwnerships.map { it.id.getItemId().fullId() })
         val enriched = itemEnrichService.enrich(items)

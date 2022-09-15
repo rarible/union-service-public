@@ -4,7 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.EsOwnershipFilter
+import com.rarible.protocol.union.core.model.EsOwnershipSort
 import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsEntitySearchAfterCursorService
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsOwnershipQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Component
 @Component
 class EsOwnershipRepository(
     private val queryBuilderService: EsOwnershipQueryBuilderService,
+    private val queryCursorService: EsEntitySearchAfterCursorService,
     objectMapper: ObjectMapper,
     elasticsearchConverter: ElasticsearchConverter,
     esOperations: ReactiveElasticsearchOperations,
@@ -34,13 +38,23 @@ class EsOwnershipRepository(
         return entity.ownershipId
     }
 
-    suspend fun search(filter: EsOwnershipFilter, limit: Int? = null): List<EsOwnership> {
-        val query = queryBuilderService.build(filter)
+    suspend fun search(
+        filter: EsOwnershipFilter,
+        sort: EsOwnershipSort = EsOwnershipSort.DEFAULT,
+        limit: Int? = null
+    ): Slice<EsOwnership> {
+        val query = queryBuilderService.build(filter, sort)
         query.maxResults = PageSize.OWNERSHIP.limit(limit)
         query.trackTotalHits = false
 
-        return esOperations.search(query, EsOwnership::class.java, entityDefinition.searchIndexCoordinates)
-            .collectList().awaitFirst().map { it.content }
-    }
+        val searchHits = esOperations.search(query, EsOwnership::class.java, entityDefinition.searchIndexCoordinates)
+            .collectList().awaitFirst()
 
+        val cursor = queryCursorService.buildCursor(searchHits.lastOrNull())
+
+        return Slice(
+            continuation = cursor,
+            entities = searchHits.map { it.content },
+        )
+    }
 }
