@@ -4,10 +4,13 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.dto.EthereumApiMetaErrorDto
 import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.NftItemRoyaltyListDto
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.union.core.exception.UnionMetaException
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
@@ -21,7 +24,10 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
@@ -96,6 +102,89 @@ class EthItemServiceTest {
         val result = service.getItemMetaById(itemId.value)
 
         assertThat(result).isEqualTo(expected)
+    }
+
+    @Test
+    fun `ethereum meta unparseable link`() = runBlocking {
+        coEvery { itemControllerApi.getNftItemMetaById(any()) } throws NftItemControllerApi.ErrorGetNftItemMetaById(
+            WebClientResponseException(500, "", null, null, null)
+        ).apply {
+            on500 = EthereumApiMetaErrorDto(
+                code = EthereumApiMetaErrorDto.Code.UNPARSEABLE_LINK,
+                message = "Unparseable link"
+            )
+        }
+
+        val exception = assertThrows<UnionMetaException> {
+            service.getItemMetaById("")
+        }
+
+        Assertions.assertEquals(UnionMetaException.ErrorCode.UNPARSEABLE_LINK, exception.code)
+    }
+
+    @Test
+    fun `ethereum meta unparseable json`() = runBlocking {
+        coEvery { itemControllerApi.getNftItemMetaById(any()) } throws NftItemControllerApi.ErrorGetNftItemMetaById(
+            WebClientResponseException(500, "", null, null, null)
+        ).apply {
+            on500 = EthereumApiMetaErrorDto(
+                code = EthereumApiMetaErrorDto.Code.UNPARSEABLE_JSON,
+                message = "Unparseable json"
+            )
+        }
+
+        val exception = assertThrows<UnionMetaException> {
+            service.getItemMetaById("")
+        }
+
+        Assertions.assertEquals(UnionMetaException.ErrorCode.UNPARSEABLE_JSON, exception.code)
+    }
+
+    @Test
+    fun `ethereum meta timeout`() = runBlocking {
+        coEvery { itemControllerApi.getNftItemMetaById(any()) } throws NftItemControllerApi.ErrorGetNftItemMetaById(
+            WebClientResponseException(500, "", null, null, null)
+        ).apply {
+            on500 = EthereumApiMetaErrorDto(
+                code = EthereumApiMetaErrorDto.Code.TIMEOUT,
+                message = "Timeout"
+            )
+        }
+
+        val exception = assertThrows<UnionMetaException> {
+            service.getItemMetaById("")
+        }
+
+        Assertions.assertEquals(UnionMetaException.ErrorCode.TIMEOUT, exception.code)
+    }
+
+    @Test
+    fun `ethereum meta not found`() = runBlocking<Unit> {
+        coEvery { itemControllerApi.getNftItemMetaById(any()) } throws NftItemControllerApi.ErrorGetNftItemMetaById(
+            WebClientResponseException(404, "", null, null, null)
+        )
+
+        assertThrows<UnionNotFoundException> {
+            service.getItemMetaById("")
+        }
+    }
+
+    @Test
+    fun `ethereum meta unknown error`() = runBlocking<Unit> {
+        coEvery { itemControllerApi.getNftItemMetaById(any()) } throws NftItemControllerApi.ErrorGetNftItemMetaById(
+            WebClientResponseException(500, "", null, null, null)
+        ).apply {
+            on500 = EthereumApiMetaErrorDto(
+                code = EthereumApiMetaErrorDto.Code.ERROR,
+                message = "Timeout"
+            )
+        }
+
+        val exception = assertThrows<UnionMetaException> {
+            service.getItemMetaById("")
+        }
+
+        Assertions.assertEquals(UnionMetaException.ErrorCode.UNKNOWN, exception.code)
     }
 
     @Test
