@@ -8,9 +8,9 @@ import com.rarible.dipdup.client.core.model.OrderStatus
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
-import com.rarible.protocol.union.integration.tezos.data.randomTezosNftItemDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosTzktItemDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
-import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosTzktOwnershipDto
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.tzkt.model.Alias
 import com.rarible.tzkt.model.Page
@@ -22,7 +22,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.ZoneOffset
@@ -42,9 +41,9 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
         val order = randomTezosOrderDto()
         val orderId = order.id
 
-        val item = randomTezosNftItemDto()
+        val item = randomTezosTzktItemDto()
 
-        val ownership = randomTezosOwnershipDto()
+        val ownership = randomTezosTzktOwnershipDto()
 
         val token = token(item.contract!!.address)
         coEvery { tokenClient.token(any()) } returns token

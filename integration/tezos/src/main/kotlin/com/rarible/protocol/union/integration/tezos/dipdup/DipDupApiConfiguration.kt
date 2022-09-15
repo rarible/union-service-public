@@ -7,6 +7,8 @@ import com.rarible.dipdup.client.OrderClient
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupItemService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupOwnershipService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
@@ -69,6 +71,12 @@ class DipDupApiConfiguration(
     fun dipdupOrderActivityApi() = OrderActivityClient(apolloClient)
 
     @Bean
+    fun dipdupTokenApi() = com.rarible.dipdup.client.TokenClient(apolloClient)
+
+    @Bean
+    fun dipdupOwnershipApi() = com.rarible.dipdup.client.OwnershipClient(apolloClient)
+
+    @Bean
     fun tzktBigMapKeyClient() = BigMapKeyClient(tzktWebClient)
 
     @Bean
@@ -119,6 +127,16 @@ class DipDupApiConfiguration(
         dipDupActivityConverter: DipDupActivityConverter
     ): DipdupOrderActivityService {
         return DipdupOrderActivityServiceImpl(orderActivityClient, dipDupActivityConverter)
+    }
+
+    @Bean
+    fun dipdupItemService(tokenClient: com.rarible.dipdup.client.TokenClient): DipDupItemService {
+        return DipDupItemService(tokenClient)
+    }
+
+    @Bean
+    fun dipdupOwnershipService(ownershipClient: com.rarible.dipdup.client.OwnershipClient): DipDupOwnershipService {
+        return DipDupOwnershipService(ownershipClient)
     }
 
     @Bean

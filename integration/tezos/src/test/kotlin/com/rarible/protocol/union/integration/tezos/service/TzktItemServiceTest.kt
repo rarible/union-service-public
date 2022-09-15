@@ -12,6 +12,7 @@ import com.rarible.tzkt.model.Token
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -29,10 +30,11 @@ class TzktItemServiceTest {
     private val dipdupProps: DipDupIntegrationProperties = mockk()
 
     private val tzktItemService = TzktItemServiceImpl(tokenClient, dipdupProps)
-    private val service = TezosItemService(tzktItemService)
+    private val service = TezosItemService(tzktItemService, mockk(), dipdupProps)
 
     @BeforeEach
     fun beforeEach() {
+        every { dipdupProps.useDipDupTokens } returns false
         clearMocks(tokenClient)
     }
 

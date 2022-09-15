@@ -31,7 +31,7 @@ open class DipDupActivityEventHandler(
                 val unionEvent = dipDupOrderConverter.convert(event, blockchain)
                 handler.onEvent(unionEvent)
 
-                if (dipDupTransfersEventHandler.isTransfersEvent(unionEvent)) {
+                if (!properties.useDipDupTokens && dipDupTransfersEventHandler.isTransfersEvent(unionEvent)) {
                     dipDupTransfersEventHandler.handle(unionEvent)
                 }
             }

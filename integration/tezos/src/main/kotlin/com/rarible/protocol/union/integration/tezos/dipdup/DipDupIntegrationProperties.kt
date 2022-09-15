@@ -21,7 +21,10 @@ data class DipDupIntegrationProperties(
     val consumer: DefaultConsumerProperties?,
     val network: String,
     val fungibleContracts: Set<String> = emptySet(),
-    val daemon: DaemonWorkerProperties = DaemonWorkerProperties()
+    val daemon: DaemonWorkerProperties = DaemonWorkerProperties(),
+
+    // This enables query directly to dipdup indexer
+    val useDipDupTokens: Boolean = false
 ) {
 
     data class TzktProperties(

@@ -5,6 +5,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipServiceImpl
 import com.rarible.tzkt.client.OwnershipClient
 import com.rarible.tzkt.model.Alias
@@ -15,6 +16,7 @@ import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -26,13 +28,14 @@ import java.time.ZoneOffset
 class TzktOwnershipServiceTest {
 
     private val ownershipClient: OwnershipClient = mockk()
-
+    private val dipdupProps: DipDupIntegrationProperties = mockk()
 
     private val tzktOwnershipService = TzktOwnershipServiceImpl(ownershipClient)
-    private val service = TezosOwnershipService(tzktOwnershipService)
+    private val service = TezosOwnershipService(tzktOwnershipService, mockk(), dipdupProps)
 
     @BeforeEach
     fun beforeEach() {
+        every { dipdupProps.useDipDupTokens } returns false
         clearMocks(ownershipClient)
     }
 

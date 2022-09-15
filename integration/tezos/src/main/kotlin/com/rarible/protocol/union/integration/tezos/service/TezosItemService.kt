@@ -8,11 +8,15 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 
 @CaptureSpan(type = "blockchain")
 open class TezosItemService(
-    private val tzktItemService: TzktItemService
+    private val tzktItemService: TzktItemService,
+    private val dipDupItemService: DipDupItemService,
+    private val properties: DipDupIntegrationProperties
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ItemService {
 
     override suspend fun getAllItems(
@@ -22,13 +26,21 @@ open class TezosItemService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
     ): Page<UnionItem> {
-        return tzktItemService.getAllItems(continuation, size)
+        return if (properties.useDipDupTokens) {
+            dipDupItemService.getAllItems(continuation, size)
+        } else {
+            tzktItemService.getAllItems(continuation, size)
+        }
     }
 
     override suspend fun getItemById(
         itemId: String
     ): UnionItem {
-        return tzktItemService.getItemById(itemId)
+        return if (properties.useDipDupTokens) {
+            dipDupItemService.getItemById(itemId)
+        } else {
+            tzktItemService.getItemById(itemId)
+        }
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
@@ -69,7 +81,11 @@ open class TezosItemService(
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
-        return tzktItemService.getItemsByIds(itemIds)
+        return if (properties.useDipDupTokens) {
+            dipDupItemService.getItemsByIds(itemIds)
+        } else {
+            tzktItemService.getItemsByIds(itemIds)
+        }
     }
 
     override suspend fun getItemCollectionId(itemId: String): String? {

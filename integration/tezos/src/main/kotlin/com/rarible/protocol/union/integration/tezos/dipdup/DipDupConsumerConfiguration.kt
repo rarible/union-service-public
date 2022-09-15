@@ -7,6 +7,8 @@ import com.rarible.dipdup.client.core.model.DipDupActivity
 import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.listener.config.DipDupEventsConsumerFactory
+import com.rarible.dipdup.listener.model.DipDupItemEvent
+import com.rarible.dipdup.listener.model.DipDupOwnershipEvent
 import com.rarible.protocol.union.core.ConsumerFactory
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
@@ -20,12 +22,13 @@ import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupColle
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupActivityEventHandler
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupCollectionEventHandler
+import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupItemEventHandler
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupOrderEventHandler
+import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupOwnershipEventHandler
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupTransfersEventHandler
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
-import org.apache.commons.lang3.StringUtils
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 
@@ -46,12 +49,9 @@ class DipDupConsumerConfiguration(
     @Bean
     fun dipDupConsumerFactory(): DipDupEventsConsumerFactory {
         return DipDupEventsConsumerFactory(
-            dipDupProperties.network,
             dipDupProperties.consumer!!.brokerReplicaSet!!,
             host,
-            env,
-            StringUtils.trimToNull(dipDupProperties.consumer.username),
-            StringUtils.trimToNull(dipDupProperties.consumer.password)
+            env
         )
     }
 
@@ -121,6 +121,40 @@ class DipDupConsumerConfiguration(
     ): KafkaConsumerWorker<DipDupCollection> {
         val consumer = factory.createCollectionConsumer(consumerFactory.collectionGroup)
         return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
+    }
+
+    @Bean
+    fun dipDupItemEventHandler(
+        handler: IncomingEventHandler<UnionItemEvent>,
+        mapper: ObjectMapper
+    ): DipDupItemEventHandler {
+        return DipDupItemEventHandler(handler, mapper)
+    }
+
+    @Bean
+    fun dipDupItemEventWorker(
+        factory: DipDupEventsConsumerFactory,
+        handler: DipDupItemEventHandler
+    ): KafkaConsumerWorker<DipDupItemEvent> {
+        val consumer = factory.createItemConsumer(consumerFactory.itemGroup)
+        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
+    }
+
+    @Bean
+    fun dipDupOwnershipEventHandler(
+        handler: IncomingEventHandler<UnionOwnershipEvent>,
+        mapper: ObjectMapper
+    ): DipDupOwnershipEventHandler {
+        return DipDupOwnershipEventHandler(handler, mapper)
+    }
+
+    @Bean
+    fun dipDupOwnershipEventWorker(
+        factory: DipDupEventsConsumerFactory,
+        handler: DipDupOwnershipEventHandler
+    ): KafkaConsumerWorker<DipDupOwnershipEvent> {
+        val consumer = factory.createOwnershipConsumer(consumerFactory.itemGroup)
+        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
     }
 
     companion object {

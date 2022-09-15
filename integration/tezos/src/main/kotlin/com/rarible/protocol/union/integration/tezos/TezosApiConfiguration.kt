@@ -7,6 +7,9 @@ import com.rarible.protocol.union.core.service.router.OrderProxyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupApiConfiguration
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupItemService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupOwnershipService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
@@ -46,15 +49,21 @@ class TezosApiConfiguration {
     //-------------------- Services --------------------//
 
     @Bean
-    fun tezosItemService(tzktItemService: TzktItemService): TezosItemService {
-        return TezosItemService(tzktItemService)
+    fun tezosItemService(
+        tzktItemService: TzktItemService,
+        dipdupItemService: DipDupItemService,
+        properties: DipDupIntegrationProperties
+    ): TezosItemService {
+        return TezosItemService(tzktItemService, dipdupItemService, properties)
     }
 
     @Bean
     fun tezosOwnershipService(
-        tzktOwnershipService: TzktOwnershipService
+        tzktOwnershipService: TzktOwnershipService,
+        dipDupOwnershipService: DipDupOwnershipService,
+        properties: DipDupIntegrationProperties
     ): TezosOwnershipService {
-        return TezosOwnershipService(tzktOwnershipService)
+        return TezosOwnershipService(tzktOwnershipService, dipDupOwnershipService, properties)
     }
 
     @Bean

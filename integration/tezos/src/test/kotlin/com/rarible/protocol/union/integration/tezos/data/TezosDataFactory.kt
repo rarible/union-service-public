@@ -8,10 +8,12 @@ import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupActivity
 import com.rarible.dipdup.client.core.model.DipDupBurnActivity
+import com.rarible.dipdup.client.core.model.DipDupItem
 import com.rarible.dipdup.client.core.model.DipDupMintActivity
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.client.core.model.DipDupOrderCancelActivity
 import com.rarible.dipdup.client.core.model.DipDupOrderListActivity
+import com.rarible.dipdup.client.core.model.DipDupOwnership
 import com.rarible.dipdup.client.core.model.DipDupTransferActivity
 import com.rarible.dipdup.client.core.model.OrderStatus
 import com.rarible.dipdup.client.core.model.Part
@@ -28,6 +30,7 @@ import com.rarible.tzkt.model.TokenBalance
 import com.rarible.tzkt.model.TokenInfo
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -67,9 +70,9 @@ fun randomTezosCollectionDto(address: String): Contract {
 fun randomTezosOwnershipId() = randomTezosOwnershipId(randomTezosItemId())
 fun randomTezosOwnershipId(itemId: ItemIdDto) = itemId.toOwnership(randomTezosAddress().value)
 
-fun randomTezosNftItemDto() = randomTezosNftItemDto(randomTezosItemId(), randomString())
-fun randomTezosNftItemDto(itemId: ItemIdDto) = randomTezosNftItemDto(itemId, randomString())
-fun randomTezosNftItemDto(itemId: ItemIdDto, creator: String): Token {
+fun randomTezosTzktItemDto() = randomTezosTzktItemDto(randomTezosItemId(), randomString())
+fun randomTezosTzktItemDto(itemId: ItemIdDto) = randomTezosTzktItemDto(itemId, randomString())
+fun randomTezosTzktItemDto(itemId: ItemIdDto, creator: String): Token {
     val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
     return Token(
         id = 1,
@@ -87,15 +90,33 @@ fun randomTezosNftItemDto(itemId: ItemIdDto, creator: String): Token {
     )
 }
 
-fun randomTezosOwnershipDto() = randomTezosOwnershipDto(randomTezosOwnershipId())
-fun randomTezosOwnershipDto(ownershipId: OwnershipIdDto) = randomTezosOwnershipDto(
+fun randomTezosDipDupItemDto() = randomTezosDipDupItemDto(randomTezosItemId())
+fun randomTezosDipDupItemDto(itemId: ItemIdDto): DipDupItem {
+    val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
+    return DipDupItem(
+        id = itemId.value,
+        metadataSynced = true,
+        minted = BigInteger.ONE,
+        mintedAt = Instant.now(),
+        supply = BigInteger.ONE,
+        tokenId = tokenId,
+        updated = Instant.now(),
+        contract = contract,
+        deleted = false,
+        metadataRetries = 0,
+        tzktId = 1
+    )
+}
+
+fun randomTezosTzktOwnershipDto() = randomTezosTzktOwnershipDto(randomTezosOwnershipId())
+fun randomTezosTzktOwnershipDto(ownershipId: OwnershipIdDto) = randomTezosTzktOwnershipDto(
     ownershipId.getItemId(),
     Part(ownershipId.owner.value, randomInt())
 )
-fun randomTezosOwnershipDto(itemId: ItemIdDto) = randomTezosOwnershipDto(
+fun randomTezosTzktOwnershipDto(itemId: ItemIdDto) = randomTezosTzktOwnershipDto(
     itemId.toOwnership(randomString())
 )
-fun randomTezosOwnershipDto(itemId: ItemIdDto, creator: Part): TokenBalance {
+fun randomTezosTzktOwnershipDto(itemId: ItemIdDto, creator: Part): TokenBalance {
     val ownershipId = itemId.toOwnership(creator.account)
     val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
     return TokenBalance(
@@ -118,6 +139,25 @@ fun randomTezosOwnershipDto(itemId: ItemIdDto, creator: Part): TokenBalance {
         firstTime = OffsetDateTime.now(),
         lastLevel = 2,
         lastTime = OffsetDateTime.now()
+    )
+}
+
+fun randomTezosDipDupOwnershipDto() = randomTezosDipDupOwnershipDto(randomTezosOwnershipId())
+fun randomTezosDipDupOwnershipDto(ownershipId: OwnershipIdDto) = randomTezosDipDupOwnershipDto(
+    ownershipId.getItemId(),
+    Part(ownershipId.owner.value, randomInt())
+)
+fun randomTezosDipDupOwnershipDto(itemId: ItemIdDto, creator: Part): DipDupOwnership {
+    val ownershipId = itemId.toOwnership(creator.account)
+    val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
+    return DipDupOwnership(
+        id = ownershipId.value,
+        updated = Instant.now(),
+        created = Instant.now(),
+        contract = contract,
+        tokenId = tokenId,
+        owner = ownershipId.owner.value,
+        balance = BigInteger.ONE
     )
 }
 
