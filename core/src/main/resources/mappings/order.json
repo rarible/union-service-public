@@ -24,7 +24,10 @@
     },
     "make": {
       "properties": {
-        "address": {
+        "token": {
+          "type": "keyword"
+        },
+        "tokenId": {
           "type": "keyword"
         },
         "isNft": {
