@@ -97,6 +97,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
+        origin?.let { return Slice.empty() }
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
         val orders = orderClient
             .getBuyOrdersByItem(token, tokenId, makers, status, currencyAddress, continuation, size)
@@ -115,6 +116,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
+        origin?.let { return Slice.empty() }
         val orders = orderClient.getBuyOrdersByMaker(maker, status, continuation, size)
             .map { ImxOrderConverter.convert(it, blockchain) }
 
@@ -152,6 +154,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
+        origin?.let { return Slice.empty() }
         val orders = orderClient.getSellOrders(continuation, size).map {
             ImxOrderConverter.convert(it, blockchain)
         }
@@ -165,6 +168,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
+        origin?.let { return Slice.empty() }
         val orders = orderClient.getSellOrdersByCollection(collection, continuation, size).map {
             ImxOrderConverter.convert(it, blockchain)
         }
@@ -197,6 +201,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
+        origin?.let { return Slice.empty() }
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
         val orders = orderClient.getSellOrdersByItem(
             token,
@@ -219,6 +224,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
     ): Slice<OrderDto> {
+        origin?.let { return Slice.empty() }
         val orders = orderClient.getSellOrdersByMaker(maker, status, continuation, size).map {
             ImxOrderConverter.convert(it, blockchain)
         }
