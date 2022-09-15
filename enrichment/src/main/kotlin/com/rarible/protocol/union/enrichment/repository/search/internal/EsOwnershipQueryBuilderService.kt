@@ -4,38 +4,64 @@ import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.EsOwnershipByItemFilter
 import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
 import com.rarible.protocol.union.core.model.EsOwnershipFilter
+import com.rarible.protocol.union.core.model.EsOwnershipSort
 import com.rarible.protocol.union.core.model.EsOwnershipsSearchFilter
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.UnionBlockchainId
 import org.elasticsearch.index.query.BoolQueryBuilder
+import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.RangeQueryBuilder
-import org.elasticsearch.search.sort.SortOrder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.stereotype.Component
 
 @Component
 class EsOwnershipQueryBuilderService(
-    private val cursorService: EsOwnershipQueryCursorService
+    private val cursorService: EsEntitySearchAfterCursorService,
+    private val sortService: EsOwnershipQuerySortService,
+    private val scoreService: EsOwnershipQueryScoreService,
+    private val priceFilterService: EsOwnershipQueryPriceFilterService,
 ) {
+    companion object {
+        private val SCORE_SORT_TYPES: Set<EsOwnershipSort> = setOf(
+            EsOwnershipSort.LOWEST_SELL_PRICE_FIRST,
+            EsOwnershipSort.HIGHEST_SELL_PRICE_FIRST,
+        )
+    }
 
-    fun build(filter: EsOwnershipFilter): NativeSearchQuery {
+    suspend fun build(filter: EsOwnershipFilter, sort: EsOwnershipSort): NativeSearchQuery {
         val builder = NativeSearchQueryBuilder()
-        val query = BoolQueryBuilder()
+        val isScoreSort = SCORE_SORT_TYPES.contains(sort)
+
+        val blockchains = if (filter.blockchains.isNullOrEmpty()) {
+            BlockchainDto.values().toSet()
+        } else {
+            filter.blockchains!!
+        }
+
+        var query: QueryBuilder = BoolQueryBuilder()
+        query as BoolQueryBuilder
 
         when (filter) {
             is EsOwnershipByItemFilter -> query.applyByItemFilter(filter)
             is EsOwnershipByOwnerFilter -> query.applyByOwnerFilter(filter)
-            is EsOwnershipsSearchFilter -> query.applySearchFilter(filter)
+            is EsOwnershipsSearchFilter -> {
+                query.applySearchFilter(filter)
+                priceFilterService.applyPriceFilter(query, filter, blockchains)
+            }
         }
 
-        cursorService.applyCursor(query, filter.cursor)
+        if (isScoreSort) {
+            query = scoreService.buildQuery(query, sort, blockchains)
+        }
 
-        builder.sortByField(EsOwnership::date, SortOrder.DESC)
-        builder.sortByField(EsOwnership::ownershipId, SortOrder.DESC)
+        sortService.applySort(builder, sort)
 
         builder.withQuery(query)
-        return builder.build()
+        val resultQuery = builder.build()
+        resultQuery.searchAfter = cursorService.buildSearchAfterClause(filter.cursor)
+        return resultQuery
     }
 
     private fun BoolQueryBuilder.applyByItemFilter(filter: EsOwnershipByItemFilter) {

@@ -39,16 +39,17 @@ class OwnershipElasticService(
         continuation: String?,
         size: Int,
     ): Slice<UnionOwnership> {
+        val (cursor, entities) = elasticHelper.getRawOwnershipsByOwner(owner, continuation, size)
         return apiHelper.getEnrichedOwnerships(
             continuation,
             size,
             { enrichmentAuctionService.findBySeller(owner) },
-            { elasticHelper.getRawOwnershipsByOwner(owner, continuation, it) },
+            { entities },
             { ownerships ->
-                Paging(
-                    UnionOwnershipContinuation.ByLastUpdatedAndId,
-                    apiHelper.merge(ownerships),
-                ).getSlice(size)
+                Slice(
+                    continuation = cursor,
+                    entities = apiHelper.merge(ownerships),
+                )
             }
         )
     }
@@ -58,15 +59,17 @@ class OwnershipElasticService(
         continuation: String?,
         size: Int,
     ): OwnershipsDto {
+        val (cursor, entities) = elasticHelper.getRawOwnershipsByItem(itemId, continuation, size)
         return apiHelper.getEnrichedOwnerships(
             continuation,
             size,
             { enrichmentAuctionService.findByItem(ShortItemId(itemId)) },
-            { elasticHelper.getRawOwnershipsByItem(itemId, continuation, it) },
+            { entities },
             { ownerships ->
-                val page =
-                    Paging(UnionAuctionOwnershipWrapperContinuation.ByLastUpdatedAndId, ownerships).getSlice(size)
-                OwnershipsDto(page.entities.size.toLong(), page.continuation, apiHelper.enrich(page.entities))
+                OwnershipsDto(
+                    null,
+                    cursor,
+                    apiHelper.enrich(ownerships))
             }
         )
     }
@@ -92,20 +95,16 @@ class OwnershipElasticService(
             )
         }
 
+        val (cursor, entities) = elasticHelper.getRawOwnershipsBySearchRequest(request)
         return apiHelper.getEnrichedOwnerships(
             continuation = request.continuation,
             size = request.size,
             { auctions.awaitAll().flatten() },
-            { elasticHelper.getRawOwnershipsBySearchRequest(request) },
+            { entities },
             { ownerships ->
-                val paging =
-                    Paging(
-                        UnionAuctionOwnershipWrapperContinuation.ByLastUpdatedAndId,
-                        ownerships
-                    ).getSlice(request.size)
                 OwnershipsDto(
-                    continuation = paging.continuation,
-                    ownerships = apiHelper.enrich(paging.entities)
+                    continuation = cursor,
+                    ownerships = apiHelper.enrich(ownerships)
                 )
             }
         )

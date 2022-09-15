@@ -16,6 +16,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -76,7 +77,7 @@ class OwnershipElasticServiceTest {
         coEvery { enrichmentOwnershipService.findAll(any()) } returns emptyList()
         coEvery { enrichmentOwnershipService.mergeWithAuction(any<OwnershipDto>(), any()) } returnsArgument 0
         coEvery { enrichmentOwnershipService.mergeWithAuction(any<UnionOwnership>(), any()) } returnsArgument 0
-        coEvery { repository.search(any()) } returns emptyList()
+        coEvery { repository.search(any()) } returns Slice.empty()
     }
 
     @Test
@@ -121,7 +122,7 @@ class OwnershipElasticServiceTest {
             )
         }
 
-        val result = ownershipElasticService.getOwnershipsByItem(itemId, null, 2).ownerships
+        val result = ownershipElasticService.getOwnershipsByItem(itemId, null, 3).ownerships
 
         // Full auction ownership - the earliest
         assertThat(result[0].id).isEqualTo(fullAuctionOwnership.id.copy(owner = fullAuction.seller))
@@ -185,7 +186,7 @@ class OwnershipElasticServiceTest {
     ) {
         coEvery {
             elasticHelper.getRawOwnershipsByItem(itemId, continuation, size)
-        } returns ownerships.asList()
+        } returns Slice(null, ownerships.toList())
     }
 
     private suspend fun mockOwnerships(vararg ownerships: UnionOwnership) {

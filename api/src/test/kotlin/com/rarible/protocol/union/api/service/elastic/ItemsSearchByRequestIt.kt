@@ -32,6 +32,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
 import com.rarible.protocol.union.test.mock.CurrencyMock.currencyControllerApiMock
+import com.rarible.protocol.union.test.mock.CurrencyMock.mockCurrencies
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.every
@@ -495,23 +496,5 @@ class ItemsSearchByRequestIt {
         assertThat(items.items).withFailMessage(failMessage).isNotEmpty
         assertThat(items.items.map { it.id.fullId().lowercase() }).withFailMessage(failMessage)
             .containsAll(expected.map { it.itemId.lowercase() })
-    }
-
-    private suspend fun mockCurrencies(): Map<String, Double> {
-        val ratesPerCurrency = mutableMapOf<String, Double>()
-
-        nativeTestCurrencies().forEachIndexed { index, currency ->
-            val rate = 1.0 + 2.0.pow(index.toDouble())
-            ratesPerCurrency["${currency.blockchain}:${currency.address}"] = rate
-            every { currencyControllerApiMock.getCurrencyRate(currency.blockchain, currency.address, any()) } returns
-                    CurrencyRateDto(
-                        fromCurrencyId = currency.currencyId,
-                        toCurrencyId = "",
-                        rate = rate.toBigDecimal(),
-                        date = nowMillis(),
-                    ).toMono()
-        }
-
-        return  ratesPerCurrency
     }
 }

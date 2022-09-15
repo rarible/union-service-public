@@ -6,7 +6,6 @@ import com.rarible.protocol.union.core.model.EsOwnershipByItemFilter
 import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
@@ -96,7 +95,7 @@ internal class EsOwnershipRepositoryFt {
         repository.saveAll(listOf(toFind1, toFind2, toMiss1, toMiss2))
 
         // when
-        val actual = repository.search(EsOwnershipByOwnerFilter(owner))
+        val actual = repository.search(EsOwnershipByOwnerFilter(owner)).entities
 
         // then
         assertThat(actual).containsExactly(toFind1, toFind2)
@@ -113,7 +112,7 @@ internal class EsOwnershipRepositoryFt {
         repository.saveAll(listOf(toFind1, toFind2, toMiss1, toMiss2))
 
         // when
-        val actual = repository.search(EsOwnershipByItemFilter(id))
+        val actual = repository.search(EsOwnershipByItemFilter(id)).entities
 
         // then
         assertThat(actual).containsExactly(toFind1, toFind2)
@@ -122,82 +121,113 @@ internal class EsOwnershipRepositoryFt {
     @Test
     fun `should find with by owner filter + continuation`(): Unit = runBlocking {
         val id = randomOwnershipId()
-        val data = (1..10).map {
+        val data = (0..9).map {
             randomEsOwnership(id.copy(itemIdValue = randomString())).copy(
-                date = Instant.ofEpochSecond((it / 3).toLong()),
+                // 0 0 0 1 1 1 2 2 2 3 (desc)
+                // 0 1 2 3 4 5 6 7 8 9  (asc)
+                date = Instant.ofEpochSecond(100 * (it / 3).toLong()),
                 ownershipId = it.toHexString()
             )
         }
-        repository.saveAll(data)
+        repository.bulk(data, emptyList())
 
-        val c1 = repository.search(EsOwnershipByOwnerFilter(owner = id.owner), 3).let { result ->
+        val c1 = repository.search(EsOwnershipByOwnerFilter(owner = id.owner), limit = 3).let { (cursor, result) ->
             println(null)
             println(result.joinToString("\n"))
-            assertThat(result).containsExactly(data[9], data[8], data[7])
-            result.last().let { DateIdContinuation(it.date, it.ownershipId) }
+            assertThat(result).containsExactly(data[9], data[6], data[7])
+            cursor
         }
 
-        val c2 = repository.search(EsOwnershipByOwnerFilter(owner = id.owner, cursor = c1.toString()), 3)
-            .let { result ->
+        val c2 = repository.search(EsOwnershipByOwnerFilter(owner = id.owner, cursor = c1), limit = 3)
+            .let { (cursor, result) ->
                 println(c1)
                 println(result.joinToString("\n"))
-                assertThat(result).containsExactly(data[6], data[5], data[4])
-                result.last().let { DateIdContinuation(it.date, it.ownershipId) }
+                assertThat(result).containsExactly(data[8], data[3], data[4])
+                cursor
             }
 
-        val c3 = repository.search(EsOwnershipByOwnerFilter(owner = id.owner, cursor = c2.toString()), 3)
-            .let { result ->
+        val c3 = repository.search(EsOwnershipByOwnerFilter(owner = id.owner, cursor = c2), limit = 3)
+            .let { (cursor, result) ->
                 println(c2)
                 println(result.joinToString("\n"))
-                assertThat(result).containsExactly(data[3], data[2], data[1])
-                result.last().let { DateIdContinuation(it.date, it.ownershipId) }
+                assertThat(result).containsExactly(data[5], data[0], data[1])
+                cursor
             }
 
-        repository.search(EsOwnershipByOwnerFilter(owner = id.owner, cursor = c3.toString()), 3).let { result ->
-            println(c3)
-            println(result.joinToString("\n"))
-            assertThat(result).containsExactly(data[0])
-            result.last().let { DateIdContinuation(it.date, it.ownershipId) }
-        }
+        val c4 = repository.search(EsOwnershipByOwnerFilter(owner = id.owner, cursor = c3), limit = 3)
+            .let { (cursor, result) ->
+                println(c3)
+                println(result.joinToString("\n"))
+                assertThat(result).containsExactly(data[2])
+                cursor
+            }
+
+        repository.search(EsOwnershipByOwnerFilter(owner = id.owner, cursor = c4), limit = 3)
+            .let { (cursor, result) ->
+                println(c4)
+                println(result.joinToString("\n"))
+                assertThat(result).isEmpty()
+                assertThat(cursor).isNull()
+            }
     }
 
     @Test
     fun `should find with by itemId filter + continuation`(): Unit = runBlocking {
         val id = randomOwnershipId()
-        val data = (1..10).map {
-            randomEsOwnership(id.copy(owner = randomUnionAddress(blockchain = id.blockchain, value = randomString()))).copy(
-                date = Instant.ofEpochSecond((it / 3).toLong()),
+        val data = (0..9).map {
+            randomEsOwnership(
+                id.copy(
+                    owner = randomUnionAddress(
+                        blockchain = id.blockchain,
+                        value = randomString()
+                    )
+                )
+            ).copy(
+                // 0 0 0 1 1 1 2 2 2 3 (desc)
+                // 0 1 2 3 4 5 6 7 8 9  (asc)
+                date = Instant.ofEpochSecond(100 * (it / 3).toLong()),
                 ownershipId = it.toHexString()
             )
         }
-        repository.saveAll(data)
+        repository.bulk(data, emptyList())
 
-        val c1 = repository.search(EsOwnershipByItemFilter(id.getItemId()), 3).let { result ->
+        val c1 = repository.search(EsOwnershipByItemFilter(id.getItemId()), limit = 3).let { (cursor, result) ->
             println(null)
             println(result.joinToString("\n"))
-            assertThat(result).containsExactly(data[9], data[8], data[7])
-            result.last().let { DateIdContinuation(it.date, it.ownershipId) }
+            assertThat(result).containsExactly(data[9], data[6], data[7])
+            cursor
         }
 
-        val c2 = repository.search(EsOwnershipByItemFilter(id.getItemId(), c1.toString()), 3).let { result ->
-            println(c1)
-            println(result.joinToString("\n"))
-            assertThat(result).containsExactly(data[6], data[5], data[4])
-            result.last().let { DateIdContinuation(it.date, it.ownershipId) }
-        }
+        val c2 = repository.search(EsOwnershipByItemFilter(id.getItemId(), c1), limit = 3)
+            .let { (cursor, result) ->
+                println(c1)
+                println(result.joinToString("\n"))
+                assertThat(result).containsExactly(data[8], data[3], data[4])
+                cursor
+            }
 
-        val c3 = repository.search(EsOwnershipByItemFilter(id.getItemId(), c2.toString()), 3).let { result ->
-            println(c2)
-            println(result.joinToString("\n"))
-            assertThat(result).containsExactly(data[3], data[2], data[1])
-            result.last().let { DateIdContinuation(it.date, it.ownershipId) }
-        }
+        val c3 = repository.search(EsOwnershipByItemFilter(id.getItemId(), c2), limit = 3)
+            .let { (cursor, result) ->
+                println(c2)
+                println(result.joinToString("\n"))
+                assertThat(result).containsExactly(data[5], data[0], data[1])
+                cursor
+            }
 
-        repository.search(EsOwnershipByItemFilter(id.getItemId(), c3.toString()), 3).let { result ->
-            println(c3)
-            println(result.joinToString("\n"))
-            assertThat(result).containsExactly(data[0])
-            result.last().let { DateIdContinuation(it.date, it.ownershipId) }
-        }
+        val c4 = repository.search(EsOwnershipByItemFilter(id.getItemId(), c3), limit = 3)
+            .let { (cursor, result) ->
+                println(c3)
+                println(result.joinToString("\n"))
+                assertThat(result).containsExactly(data[2])
+                cursor
+            }
+
+        repository.search(EsOwnershipByItemFilter(id.getItemId(), c4), limit = 3)
+            .let { (cursor, result) ->
+                println(c4)
+                println(result.joinToString("\n"))
+                assertThat(result).isEmpty()
+                assertThat(cursor).isNull()
+            }
     }
 }

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class EsItemQueryBuilderService(
-    private val cursorService: EsItemQueryCursorService,
+    private val cursorService: EsEntitySearchAfterCursorService,
     private val scoreService: EsItemQueryScoreService,
     private val sortService: EsItemQuerySortService,
     private val priceFilterService: EsItemQueryPriceFilterService,
