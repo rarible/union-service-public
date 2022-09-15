@@ -50,7 +50,7 @@ class CollectionEventHandler(
                     WriteRequest.RefreshPolicy.NONE
             }
 
-        repository.saveAll(convertedEvents, refreshPolicy = refreshPolicy)
+        repository.bulk(convertedEvents, idsToDelete = emptyList(), refreshPolicy = refreshPolicy)
         countSaves(convertedEvents)
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
         logger.info("Handling of ${event.size} CollectionEventDto events completed in $elapsedTime ms")
