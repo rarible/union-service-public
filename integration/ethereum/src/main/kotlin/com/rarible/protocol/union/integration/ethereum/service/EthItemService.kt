@@ -1,9 +1,12 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.dto.EthereumApiMetaErrorDto
 import com.rarible.protocol.dto.NftItemIdsDto
 import com.rarible.protocol.dto.parser.AddressParser
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.union.core.exception.UnionMetaException
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
@@ -17,6 +20,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverte
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
+import org.springframework.http.HttpStatus
 
 open class EthItemService(
     blockchain: BlockchainDto,
@@ -52,8 +56,34 @@ open class EthItemService(
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
-        val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
-        return EthMetaConverter.convert(meta, itemId)
+        try {
+            val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
+            return EthMetaConverter.convert(meta, itemId)
+        } catch (e: NftItemControllerApi.ErrorGetNftItemMetaById) {
+            if (e.statusCode == HttpStatus.NOT_FOUND) throw UnionNotFoundException("Meta not found for: $itemId")
+
+            when (e.on500.code) {
+                EthereumApiMetaErrorDto.Code.UNPARSEABLE_LINK -> throw UnionMetaException(
+                    UnionMetaException.ErrorCode.UNPARSEABLE_LINK,
+                    "Can't parse meta url for: $itemId"
+                )
+
+                EthereumApiMetaErrorDto.Code.UNPARSEABLE_JSON -> throw UnionMetaException(
+                    UnionMetaException.ErrorCode.UNPARSEABLE_JSON,
+                    "Can't parse meta json for: $itemId"
+                )
+
+                EthereumApiMetaErrorDto.Code.TIMEOUT -> throw UnionMetaException(
+                    UnionMetaException.ErrorCode.TIMEOUT,
+                    "Timeout during loading meta for: $itemId"
+                )
+
+                EthereumApiMetaErrorDto.Code.ERROR -> throw UnionMetaException(
+                    UnionMetaException.ErrorCode.UNKNOWN,
+                    e.message
+                )
+            }
+        }
     }
 
     override suspend fun resetItemMeta(itemId: String) {
