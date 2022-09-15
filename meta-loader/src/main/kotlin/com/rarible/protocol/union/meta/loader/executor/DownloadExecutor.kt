@@ -8,6 +8,8 @@ import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryReposi
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
 import com.rarible.protocol.union.enrichment.util.optimisticLockWithInitial
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory
 
@@ -17,13 +19,12 @@ import org.slf4j.LoggerFactory
 class DownloadExecutor<T>(
     private val repository: DownloadEntryRepository<T>,
     private val downloader: Downloader<T>,
-    private val debouncer: DownloadDebouncer,
     private val notifier: DownloadNotifier<T>,
     private val pool: DownloadPool,
-    private val maxRetries: Int
+    private val maxRetries: Int,
+    meterRegistry: MeterRegistry
 ) : AutoCloseable {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val metricSkippedDownloadTask = Counter.builder(SKIPPED_DOWNLOAD_TASK).register(meterRegistry)
 
     suspend fun execute(tasks: List<DownloadTask>) {
         tasks.map {
@@ -33,8 +34,8 @@ class DownloadExecutor<T>(
 
     private suspend fun execute(task: DownloadTask) {
         val current = getOrDefault(task)
-        if (debouncer.debounce(task, current)) {
-            // TODO add metrics
+        if (current.succeedAt != null && task.scheduledAt.isBefore(current.succeedAt)) {
+            metricSkippedDownloadTask.increment()
             return
         }
 
@@ -112,4 +113,8 @@ class DownloadExecutor<T>(
         pool.close()
     }
 
+    private companion object {
+        private val logger = LoggerFactory.getLogger(DownloadExecutor::class.java)
+        const val SKIPPED_DOWNLOAD_TASK = "skipped_download_task"
+    }
 }

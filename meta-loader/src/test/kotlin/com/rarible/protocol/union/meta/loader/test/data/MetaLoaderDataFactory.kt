@@ -7,7 +7,7 @@ import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 
-private fun randomMetaEntry(itemId: String, meta: UnionMeta = randomUnionMeta()): DownloadEntry<UnionMeta> {
+fun randomMetaEntry(itemId: String, meta: UnionMeta = randomUnionMeta()): DownloadEntry<UnionMeta> {
     val now = nowMillis()
     return DownloadEntry(
         id = itemId,
