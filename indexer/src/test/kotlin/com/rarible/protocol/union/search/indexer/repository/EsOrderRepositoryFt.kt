@@ -219,9 +219,8 @@ internal class EsOrderRepositoryFt {
 
         //then
         filters.forEach { filter ->
-            assertThat(
-                repository.findByFilter(filter).first().orderId
-            ).isEqualTo(exampleOrder.orderId)
+            val orderId = repository.findByFilter(filter).first().orderId
+            assertThat(orderId).isEqualTo(exampleOrder.orderId)
         }
 
     }
