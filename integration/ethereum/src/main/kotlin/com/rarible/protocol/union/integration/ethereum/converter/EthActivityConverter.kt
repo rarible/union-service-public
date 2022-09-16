@@ -371,8 +371,8 @@ class EthActivityConverter(
             type = type,
             reverted = source.reverted ?: false,
             lastUpdatedAt = source.lastUpdatedAt,
-            sellMarketplaceMarker = source.marketplaceMarker?.toString(),
-            buyMarketplaceMarker = source.counterMarketplaceMarker?.toString()
+            sellMarketplaceMarker = if (type == OrderMatchSellDto.Type.SELL) source.marketplaceMarker?.toString() else source.counterMarketplaceMarker?.toString(),
+            buyMarketplaceMarker = if (type == OrderMatchSellDto.Type.ACCEPT_BID) source.marketplaceMarker?.toString() else source.counterMarketplaceMarker?.toString(),
         )
     }
 
