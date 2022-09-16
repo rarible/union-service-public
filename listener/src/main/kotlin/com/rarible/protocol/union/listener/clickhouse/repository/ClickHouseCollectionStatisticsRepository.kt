@@ -12,12 +12,10 @@ import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.model.StatisticsPeriod
 import com.rarible.protocol.union.enrichment.model.StatisticsValue
 import com.rarible.protocol.union.listener.clickhouse.client.ClickHouseSimpleClient
-import org.springframework.stereotype.Component
 import java.math.BigDecimal
 
-@Component
 @CaptureSpan(type = SpanType.DB)
-class ClickHouseCollectionStatisticsRepository(
+open class ClickHouseCollectionStatisticsRepository(
     private val clickHouseSimpleClient: ClickHouseSimpleClient
 ) {
 
