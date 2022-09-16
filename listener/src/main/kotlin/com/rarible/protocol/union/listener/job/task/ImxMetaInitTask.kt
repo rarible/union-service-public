@@ -4,11 +4,9 @@ import com.rarible.core.task.RunTask
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.listener.job.ImxMetaInitJob
 import kotlinx.coroutines.flow.Flow
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
-import org.springframework.stereotype.Component
 
-@Component
-@ConditionalOnBean(ImxMetaInitJob::class)
+//@Component
+@Deprecated("Only for launch, remove later")
 class ImxMetaInitTask(
     private val job: ImxMetaInitJob
 ) : TaskHandler<String> {

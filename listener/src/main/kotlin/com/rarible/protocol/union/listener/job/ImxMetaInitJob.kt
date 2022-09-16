@@ -19,12 +19,9 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
-import org.springframework.stereotype.Component
 import java.util.concurrent.atomic.AtomicInteger
 
-@Component
-@ConditionalOnBean(ImxItemService::class)
+//@Component
 @Deprecated("Only for launch, remove later")
 class ImxMetaInitJob(
     private val cacheRepository: CacheRepository,
