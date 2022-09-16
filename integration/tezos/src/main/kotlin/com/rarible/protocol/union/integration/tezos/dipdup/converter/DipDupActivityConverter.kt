@@ -200,7 +200,11 @@ class DipDupActivityConverter(
             TezosPlatform.RARIBLE_V1, TezosPlatform.RARIBLE_V2 -> OrderActivitySourceDto.RARIBLE
             TezosPlatform.TEIA_V1 -> OrderActivitySourceDto.TEIA
             TezosPlatform.VERSUM_V1 -> OrderActivitySourceDto.VERSUM
-            else -> throw RuntimeException("Not implemented for ${source} platform")
+            else -> {
+                // Hotfix for ECHO-295, it's not needed for 1.35 release!
+                logger.warn("Not implemented for ${source} platform, Rarible will be used as default")
+                OrderActivitySourceDto.RARIBLE
+            }
         }
     }
 }
