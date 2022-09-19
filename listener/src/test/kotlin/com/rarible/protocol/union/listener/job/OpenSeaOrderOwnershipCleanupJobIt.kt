@@ -68,7 +68,8 @@ class OpenSeaOrderOwnershipCleanupJobIt {
 
         val updatedOpenSea = ownershipRepository.get(withOpenSea.id)
 
-        assertThat(updatedOpenSea).isNull()
+        assertThat(updatedOpenSea?.bestSellOrder).isNull()
+        assertThat(updatedOpenSea?.bestSellOrders).isEmpty()
 
         val skipped = ownershipRepository.get(withoutOpenSea.id)!!
 

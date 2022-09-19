@@ -87,14 +87,9 @@ class EnrichmentCollectionEventService(
         orderUpdateAction: suspend (item: ShortCollection) -> ShortCollection
     ) = optimisticLock {
         val (short, updated, exist) = update(itemId, orderUpdateAction)
-        if (short != updated) {
-            if (updated.isNotEmpty()) {
-                saveAndNotify(updated = updated, notificationEnabled = notificationEnabled, order = order)
-                logger.info("Saved Collection [{}] after Order event [{}]", itemId, order.id)
-            } else if (exist) {
-                cleanupAndNotify(updated = updated, notificationEnabled = notificationEnabled, order = order)
-                logger.info("Deleted Collection [{}] without enrichment data", itemId)
-            }
+        if (short != updated && (exist || updated.isNotEmpty())) {
+            saveAndNotify(updated = updated, notificationEnabled = notificationEnabled, order = order)
+            logger.info("Saved Collection [{}] after Order event [{}]", itemId, order.id)
         } else {
             logger.info(
                 "Collection [{}] not changed after Order event [{}], event won't be published", itemId, order.id
@@ -141,22 +136,6 @@ class EnrichmentCollectionEventService(
 
         val event = buildUpdateEvent(updated, collection, order)
         enrichmentCollectionService.save(updated)
-        sendUpdate(event)
-    }
-
-    private suspend fun cleanupAndNotify(
-        updated: ShortCollection,
-        notificationEnabled: Boolean,
-        collection: UnionCollection? = null,
-        order: OrderDto? = null,
-    ) {
-        if (!notificationEnabled) {
-            enrichmentCollectionService.delete(updated.id)
-            return
-        }
-
-        val event = buildUpdateEvent(updated, collection, order)
-        enrichmentCollectionService.delete(updated.id)
         sendUpdate(event)
     }
 
