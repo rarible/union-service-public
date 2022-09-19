@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
@@ -22,7 +23,7 @@ import java.math.BigDecimal
 internal class EnrichmentOrderServiceUnitTest {
 
     @Test
-    fun `should get best sell order by item`() = runBlocking<Unit> {
+    fun `should get best sell order by item with preferred platform`() = runBlocking<Unit> {
         val service = mockService(
             mockk<EthOrderService> {
                 coEvery {
@@ -36,24 +37,92 @@ internal class EnrichmentOrderServiceUnitTest {
                         any(),
                         any()
                     )
-                } returns Slice(null, listOf(
-                    randomUnionSellOrderDto().copy(platform = PlatformDto.OPEN_SEA, takePrice = BigDecimal(1337)), // first is best
-                    randomUnionSellOrderDto().copy(platform = PlatformDto.RARIBLE),
-                    randomUnionSellOrderDto().copy(platform = PlatformDto.CRYPTO_PUNKS),
-                ))
+                } returns Slice(
+                    null, listOf(
+                        randomUnionSellOrderDto().copy(
+                            platform = PlatformDto.OPEN_SEA,
+                            takePriceUsd = BigDecimal("1337.0")
+                        ), // first is best
+                    )
+                )
+                coEvery {
+                    getSellOrdersByItem(
+                        PlatformDto.RARIBLE,
+                        any(),
+                        any(),
+                        any(),
+                        listOf(OrderStatusDto.ACTIVE),
+                        any(),
+                        any(),
+                        any()
+                    )
+                } returns Slice(
+                    null, listOf(
+                        randomUnionSellOrderDto().copy(
+                            platform = PlatformDto.RARIBLE,
+                            takePriceUsd = BigDecimal("1337.00")
+                        ),
+                    )
+                )
             }
         )
 
-        assertThat(
-            service.getBestSell(ShortItemId(randomEthItemId()), "USD", null)?.takePrice
-        ).isEqualTo(BigDecimal(1337))
+        assertThat(service.getBestSell(ShortItemId(randomEthItemId()), "USD", null))
+            .hasFieldOrPropertyWithValue(OrderDto::takePriceUsd.name, BigDecimal("1337.00"))
+            .hasFieldOrPropertyWithValue(OrderDto::platform.name, PlatformDto.RARIBLE)
     }
 
+    @Test
+    fun `should get best sell order by item with preferred platform not best price`() = runBlocking<Unit> {
+        val service = mockService(
+            mockk<EthOrderService> {
+                coEvery {
+                    getSellOrdersByItem(
+                        isNull(),
+                        any(),
+                        any(),
+                        any(),
+                        listOf(OrderStatusDto.ACTIVE),
+                        any(),
+                        any(),
+                        any()
+                    )
+                } returns Slice(
+                    null, listOf(
+                        randomUnionSellOrderDto().copy(
+                            platform = PlatformDto.OPEN_SEA,
+                            takePriceUsd = BigDecimal(1337)
+                        ), // first is best
+                    )
+                )
+                coEvery {
+                    getSellOrdersByItem(
+                        PlatformDto.RARIBLE,
+                        any(),
+                        any(),
+                        any(),
+                        listOf(OrderStatusDto.ACTIVE),
+                        any(),
+                        any(),
+                        any()
+                    )
+                } returns Slice(
+                    null, listOf(
+                        randomUnionSellOrderDto().copy(platform = PlatformDto.RARIBLE, takePriceUsd = BigDecimal(1338)),
+                    )
+                )
+            }
+        )
+
+        assertThat(service.getBestSell(ShortItemId(randomEthItemId()), "USD", null))
+            .hasFieldOrPropertyWithValue(OrderDto::takePriceUsd.name, BigDecimal(1337))
+            .hasFieldOrPropertyWithValue(OrderDto::platform.name, PlatformDto.OPEN_SEA)
+    }
 
     private fun mockService(vararg specificServices: OrderService): EnrichmentOrderService {
         val router = mockk<BlockchainRouter<OrderService>> {
             specificServices.forEach { orderService ->
-                when(orderService) {
+                when (orderService) {
                     is EthOrderService -> every {
                         getService(BlockchainDto.ETHEREUM)
                     } returns orderService
@@ -67,6 +136,4 @@ internal class EnrichmentOrderServiceUnitTest {
 
         return EnrichmentOrderService(router)
     }
-
-
 }
