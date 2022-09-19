@@ -80,15 +80,9 @@ class EnrichmentOwnershipEventService(
         val origins = enrichmentItemService.getItemOrigins(ownershipId.getItemId())
         val updated = bestOrderService.updateBestSellOrder(short, order, origins)
 
-        if (short != updated) {
-            if (updated.isNotEmpty()) {
-                saveAndNotify(updated, notificationEnabled, null, null, order)
-                enrichmentItemEventService.onOwnershipUpdated(ownershipId, order, notificationEnabled)
-            } else if (exist) {
-                logger.info("Deleting Ownership [{}] without related bestSellOrder", ownershipId)
-                cleanupAndNotify(updated, notificationEnabled, null, null, order)
-                enrichmentItemEventService.onOwnershipUpdated(ownershipId, order, notificationEnabled)
-            }
+        if (short != updated && (exist || updated.isNotEmpty())) {
+            saveAndNotify(updated, notificationEnabled, null, null, order)
+            enrichmentItemEventService.onOwnershipUpdated(ownershipId, order, notificationEnabled)
         } else {
             logger.info("Ownership [{}] not changed after order updated, event won't be published", ownershipId)
         }
@@ -217,25 +211,8 @@ class EnrichmentOwnershipEventService(
             return
         }
 
-        val event = buildUpdateEvent(updated, ownership, auction, order)
-        enrichmentOwnershipService.save(updated)
-        event?.let { sendUpdate(event) }
-    }
-
-    private suspend fun cleanupAndNotify(
-        updated: ShortOwnership,
-        notificationEnabled: Boolean,
-        ownership: UnionOwnership? = null,
-        auction: AuctionDto? = null,
-        order: OrderDto? = null
-    ) {
-        if (!notificationEnabled) {
-            enrichmentOwnershipService.delete(updated.id)
-            return
-        }
-
-        val event = buildUpdateEvent(updated, ownership, auction, order)
-        enrichmentOwnershipService.delete(updated.id)
+        val saved = enrichmentOwnershipService.save(updated)
+        val event = buildUpdateEvent(saved, ownership, auction, order)
         event?.let { sendUpdate(event) }
     }
 

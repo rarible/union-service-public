@@ -181,17 +181,11 @@ class EnrichmentRefreshService(
                 originOrders = bestOrders.originOrders
             )
 
-            if (shortCollection.isNotEmpty()) {
-                logger.info(
-                    "Saving refreshed Collection [{}] with gathered enrichment data [{}]", shortCollectionId,
-                    shortCollection
-                )
-                enrichmentCollectionService.save(shortCollection)
-            } else {
-                logger.info("Collection [{}] has no enrichment data, will be deleted", shortCollectionId)
-                enrichmentCollectionService.delete(shortCollectionId)
-            }
-            shortCollection
+            logger.info(
+                "Saving refreshed Collection [{}] with gathered enrichment data [{}]", shortCollectionId,
+                shortCollection
+            )
+            enrichmentCollectionService.save(shortCollection)
         }
 
         val ordersHint = bestOrders.all
@@ -305,14 +299,8 @@ class EnrichmentRefreshService(
                 source = ownershipSource.await()
             )
 
-            if (shortOwnership.isNotEmpty()) {
-                logger.info("Updating Ownership [{}] : {}", shortOwnershipId, shortOwnership)
-                ownershipService.save(shortOwnership)
-            } else {
-                logger.info("Ownership [{}] has no enrichment data, will be deleted", shortOwnershipId)
-                ownershipService.delete(shortOwnershipId)
-            }
-            shortOwnership
+            logger.info("Updating Ownership [{}] : {}", shortOwnershipId, shortOwnership)
+            ownershipService.save(shortOwnership)
         }
 
         val ordersHint = bestOrders.all

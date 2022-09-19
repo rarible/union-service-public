@@ -145,7 +145,8 @@ class EnrichmentOwnershipEventServiceTest {
             bestOrderService.updateBestSellOrder(shortOwnership, order, emptyList())
         } returns expectedShortOwnership
 
-        coEvery { ownershipService.delete(shortOwnership.id) } returns DeleteResult.acknowledged(1)
+        coEvery { ownershipService.save(expectedShortOwnership) } returns expectedShortOwnership
+
         coEvery {
             ownershipService.enrichOwnership(
                 expectedShortOwnership,
@@ -157,9 +158,9 @@ class EnrichmentOwnershipEventServiceTest {
 
         // Listener should be notified, Ownership - deleted and Item data should be recalculated
         coVerify(exactly = 1) { eventListener.onEvent(any()) }
-        coVerify(exactly = 0) { ownershipService.save(shortOwnership) }
+        coVerify(exactly = 1) { ownershipService.save(expectedShortOwnership) }
         coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, order) }
-        coVerify(exactly = 1) { ownershipService.delete(shortOwnership.id) }
+        coVerify(exactly = 0) { ownershipService.delete(shortOwnership.id) }
         coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
 

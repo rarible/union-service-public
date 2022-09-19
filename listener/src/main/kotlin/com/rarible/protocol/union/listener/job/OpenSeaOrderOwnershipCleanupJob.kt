@@ -73,13 +73,8 @@ class OpenSeaOrderOwnershipCleanupJob(
 
         val updated = ownership.copy(bestSellOrder = null, bestSellOrders = emptyMap())
 
-        if (updated.isNotEmpty()) {
-            logger.info("Updated ownership [{}], OpenSea order removed: [{}]", updated, openSeaOrder.id)
-            ownershipRepository.save(updated)
-        } else {
-            logger.info("Deleted enriched ownership [{}], OpenSea order removed: [{}]", updated, openSeaOrder.id)
-            ownershipRepository.delete(ownership.id)
-        }
+        logger.info("Updated ownership [{}], OpenSea order removed: [{}]", updated, openSeaOrder.id)
+        ownershipRepository.save(updated.withCalculatedFields())
 
         ignoreApi404 {
             val dto = ownershipService.enrichOwnership(updated)
