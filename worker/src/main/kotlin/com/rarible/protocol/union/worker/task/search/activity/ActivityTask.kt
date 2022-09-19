@@ -42,7 +42,9 @@ class ActivityTask(
                     blockchain = taskParam.blockchain,
                     type = taskParam.type,
                     index = taskParam.index,
-                    cursor = from
+                    cursor = from,
+                    from = taskParam.from,
+                    to = taskParam.to,
                 )
                 .takeWhile { taskRepository.findByTypeAndParam(type, param).awaitSingleOrNull()?.running ?: false }
         }

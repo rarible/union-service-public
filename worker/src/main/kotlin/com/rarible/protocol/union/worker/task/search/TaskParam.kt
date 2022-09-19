@@ -29,7 +29,9 @@ data class ActivityTaskParam(
     override val settingsHash: String?,
     override val blockchain: BlockchainDto,
     val type: ActivityTypeDto,
-    override val index: String
+    override val index: String,
+    val from: Long? = null,
+    val to: Long? = null,
 ) : TaskParam()
 
 data class OrderTaskParam(

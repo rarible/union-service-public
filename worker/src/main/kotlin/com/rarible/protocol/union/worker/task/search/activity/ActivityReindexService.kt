@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Component
-import kotlin.system.measureTimeMillis
 
 @Component
 class ActivityReindexService(
@@ -33,7 +32,9 @@ class ActivityReindexService(
         blockchain: BlockchainDto,
         type: ActivityTypeDto,
         index: String?,
-        cursor: String? = null
+        cursor: String? = null,
+        from: Long? = null,
+        to: Long? = null,
     ): Flow<String> {
         val counter = searchTaskMetricFactory.createReindexActivityCounter(blockchain, type)
 
@@ -63,11 +64,12 @@ class ActivityReindexService(
                     index,
                     refreshPolicy = WriteRequest.RefreshPolicy.NONE,
                 )
-                logger.info("Saved ${res.activities.size} activities, continuation: $continuation, took ${nowMillis().toEpochMilli() - before.toEpochMilli()}ms")
-                continuation = res.cursor
                 counter.increment(savedActivities.size)
-                emit(res.cursor ?: "")
-            } while (res.cursor.isNullOrEmpty().not())
+                logger.info("Saved ${res.activities.size} activities, continuation: $continuation, took ${nowMillis().toEpochMilli() - before.toEpochMilli()}ms")
+
+                continuation = TimePeriodContinuationHelper.adjustContinuation(res.cursor, from, to)
+                emit(continuation ?: "")
+            } while (continuation.isNullOrEmpty().not())
         }
     }
 }
