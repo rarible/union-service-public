@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.evaluator
 
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import org.assertj.core.api.Assertions.assertThat
@@ -59,4 +60,14 @@ class BestBidOrderComparatorTest {
         assertThat(result).isEqualTo(shortCurrent)
     }
 
+    @Test
+    fun `updated has same price as current and from RARIBLE`() {
+        val current = randomUnionSellOrderDto().copy(takePrice = BigDecimal.valueOf(1), platform = PlatformDto.X2Y2)
+        val updated = randomUnionSellOrderDto().copy(takePrice = BigDecimal.valueOf(1), platform = PlatformDto.RARIBLE)
+        val shortCurrent = ShortOrderConverter.convert(current)
+        val shortUpdated = ShortOrderConverter.convert(updated)
+        val result = BestBidOrderComparator.compare(shortCurrent, shortUpdated)
+        // Current best order should be changed
+        assertThat(result).isEqualTo(shortUpdated)
+    }
 }

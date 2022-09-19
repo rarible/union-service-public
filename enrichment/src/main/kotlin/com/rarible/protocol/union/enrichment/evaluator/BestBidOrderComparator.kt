@@ -15,7 +15,11 @@ object BestBidOrderComparator : BestOrderComparator {
 
         val isCurrentTakePriceLesser = when {
             currentTakePrice == null -> true
-            updatedTakePrice != null -> currentTakePrice < updatedTakePrice
+            updatedTakePrice != null -> {
+                val compared = currentTakePrice.compareTo(updatedTakePrice)
+                compared < 0 || compared == 0 &&
+                    BestSellOrderComparator.isPreferred(updated) && updated.platform != current.platform
+            }
             else -> false
         }
         // We have new price, which is higher, then current - updated order is better, using it

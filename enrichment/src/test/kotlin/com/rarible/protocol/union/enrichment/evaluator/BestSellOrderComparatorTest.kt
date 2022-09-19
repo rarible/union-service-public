@@ -1,8 +1,9 @@
 package com.rarible.protocol.union.enrichment.evaluator
 
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
@@ -15,7 +16,7 @@ class BestSellOrderComparatorTest {
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
         val result = BestSellOrderComparator.compare(shortCurrent, shortUpdated)
-        Assertions.assertThat(result).isEqualTo(shortUpdated)
+        assertThat(result).isEqualTo(shortUpdated)
     }
 
     @Test
@@ -25,7 +26,7 @@ class BestSellOrderComparatorTest {
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
         val result = BestSellOrderComparator.compare(shortCurrent, shortUpdated)
-        Assertions.assertThat(result).isEqualTo(shortCurrent)
+        assertThat(result).isEqualTo(shortCurrent)
     }
 
     @Test
@@ -35,7 +36,7 @@ class BestSellOrderComparatorTest {
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
         val result = BestSellOrderComparator.compare(shortCurrent, shortUpdated)
-        Assertions.assertThat(result).isEqualTo(shortUpdated)
+        assertThat(result).isEqualTo(shortUpdated)
     }
 
     @Test
@@ -45,7 +46,7 @@ class BestSellOrderComparatorTest {
         val shortCurrent = ShortOrderConverter.convert(current)
         val shortUpdated = ShortOrderConverter.convert(updated)
         val result = BestSellOrderComparator.compare(shortCurrent, shortUpdated)
-        Assertions.assertThat(result).isEqualTo(shortUpdated)
+        assertThat(result).isEqualTo(shortUpdated)
     }
 
     @Test
@@ -56,6 +57,18 @@ class BestSellOrderComparatorTest {
         val shortUpdated = ShortOrderConverter.convert(updated)
         val result = BestSellOrderComparator.compare(shortCurrent, shortUpdated)
         // Current best order should not be changed
-        Assertions.assertThat(result).isEqualTo(shortCurrent)
+        assertThat(result).isEqualTo(shortCurrent)
+    }
+
+    @Test
+    fun `update has same price as current and update from RARIBLE`() {
+        val current = randomUnionSellOrderDto().copy(makePrice = BigDecimal.valueOf(1), platform = PlatformDto.X2Y2)
+        val updated = randomUnionSellOrderDto().copy(makePrice = BigDecimal.valueOf(1), platform = PlatformDto.RARIBLE)
+        val shortCurrent = ShortOrderConverter.convert(current)
+        val shortUpdated = ShortOrderConverter.convert(updated)
+
+        val result = BestSellOrderComparator.compare(shortCurrent, shortUpdated)
+
+        assertThat(result).isEqualTo(shortUpdated)
     }
 }
