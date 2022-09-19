@@ -2,11 +2,14 @@ package com.rarible.protocol.union.listener.job.task
 
 import com.rarible.core.task.RunTask
 import com.rarible.core.task.TaskHandler
+import com.rarible.protocol.union.integration.immutablex.ImxConfiguration
 import com.rarible.protocol.union.listener.job.ImxMetaInitJob
 import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Component
 
 @Component
+@ImxConfiguration
+@Deprecated("Only for launch, remove later")
 class ImxMetaInitTask(
     private val job: ImxMetaInitJob
 ) : TaskHandler<String> {

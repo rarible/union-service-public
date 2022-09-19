@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
+import com.rarible.protocol.union.integration.immutablex.ImxConfiguration
 import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -19,12 +20,11 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean
 import org.springframework.stereotype.Component
 import java.util.concurrent.atomic.AtomicInteger
 
 @Component
-@ConditionalOnBean(ImxItemService::class)
+@ImxConfiguration
 @Deprecated("Only for launch, remove later")
 class ImxMetaInitJob(
     private val cacheRepository: CacheRepository,

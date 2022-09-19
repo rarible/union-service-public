@@ -5,7 +5,6 @@ import com.clickhouse.client.ClickHouseNode
 import com.clickhouse.client.ClickHouseRecord
 import com.clickhouse.client.ClickHouseValues
 import kotlinx.coroutines.future.await
-import org.springframework.stereotype.Component
 
 /**
  * Simple client for working with ClickHouse.
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Component
  * @property clickHouseNode          node of ClickHouse server.
  * @property clickHouseClientBuilder builder of ClickHouse clients.
  */
-@Component
 class DefaultClickHouseSimpleClient(
     private val clickHouseNode: ClickHouseNode,
     private val clickHouseClientBuilder: ClickHouseClientBuilder

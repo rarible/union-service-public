@@ -4,6 +4,7 @@ import com.rarible.core.logging.Logger
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.enrichment.model.CollectionStatistics
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.listener.clickhouse.configuration.ConditionalOnClickhouseEnabled
 import com.rarible.protocol.union.listener.clickhouse.repository.ClickHouseCollectionStatisticsRepository
 import com.rarible.protocol.union.listener.service.EnrichmentCollectionEventService
 import kotlinx.coroutines.flow.Flow
@@ -13,6 +14,7 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
 @Component
+@ConditionalOnClickhouseEnabled
 class CollectionStatisticsResyncTask(
     private val clickHouseCollectionStatisticsRepository: ClickHouseCollectionStatisticsRepository,
     private val enrichmentCollectionEventService: EnrichmentCollectionEventService
