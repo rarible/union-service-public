@@ -380,8 +380,8 @@ class ItemsSearchByRequestIt {
         // when && then
         checkResult(
             filter = ItemsSearchFilterDto(
-                sellPriceFrom = priceFrom,
-                sellPriceTo = priceTo,
+                sellPriceFrom = priceFrom * 0.999,
+                sellPriceTo = priceTo * 1.001,
                 sellCurrency = "ETHEREUM:0x0000000000000000000000000000000000000000"
             ),
             expected = expected,
@@ -426,8 +426,8 @@ class ItemsSearchByRequestIt {
         // when && then
         checkResult(
             filter = ItemsSearchFilterDto(
-                bidPriceFrom = priceFrom,
-                bidPriceTo = priceTo,
+                bidPriceFrom = priceFrom * 0.999,
+                bidPriceTo = priceTo * 1.001,
                 bidCurrency = "ETHEREUM:0x0000000000000000000000000000000000000000"
             ),
             expected = expected,
@@ -450,8 +450,8 @@ class ItemsSearchByRequestIt {
         // when && then
         checkResult(
             filter = ItemsSearchFilterDto(
-                sellPriceFrom = priceFrom,
-                sellPriceTo = priceTo,
+                sellPriceFrom = priceFrom * 0.999,
+                sellPriceTo = priceTo * 1.001,
                 sellCurrency = null
             ),
             expected = expected,
@@ -474,8 +474,8 @@ class ItemsSearchByRequestIt {
         // when && then
         checkResult(
             filter = ItemsSearchFilterDto(
-                bidPriceFrom = priceFrom,
-                bidPriceTo = priceTo,
+                bidPriceFrom = priceFrom * 0.999,
+                bidPriceTo = priceTo * 1.001,
                 bidCurrency = null
             ),
             expected = expected,
@@ -498,8 +498,8 @@ class ItemsSearchByRequestIt {
             size = 2,
             continuation = null,
             filter = ItemsSearchFilterDto(
-                sellPriceFrom = priceFrom,
-                sellPriceTo = priceTo,
+                sellPriceFrom = priceFrom * 0.999,
+                sellPriceTo = priceTo * 1.001,
                 sellCurrency = null,
                 ),
             sort = ItemsSearchSortDto.LOWEST_SELL
