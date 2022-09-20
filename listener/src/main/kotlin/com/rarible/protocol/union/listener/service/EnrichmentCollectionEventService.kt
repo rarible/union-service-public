@@ -26,14 +26,13 @@ class EnrichmentCollectionEventService(
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val reconciliationEventService: ReconciliationEventService,
     private val bestOrderService: BestOrderService,
-    private val originService: OriginService,
-    private val collectionRepository: CollectionRepository,
+    private val originService: OriginService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
 
     suspend fun onCollectionUpdate(collection: UnionCollection) {
-        val existing = collectionRepository.getOrCreateWithLastUpdatedAtUpdate(ShortCollectionId(collection.id))
+        val existing = enrichmentCollectionService.getOrCreateWithLastUpdatedAtUpdate(ShortCollectionId(collection.id))
         val updateEvent = buildUpdateEvent(short = existing, collection = collection)
         sendUpdate(updateEvent)
     }

@@ -46,6 +46,11 @@ class EnrichmentOwnershipService(
         return ownershipRepository.get(ownershipId)
     }
 
+    suspend fun getOrCreateWithLastUpdatedAtUpdate(ownershipId: ShortOwnershipId): ShortOwnership {
+        val ownership = ownershipRepository.get(ownershipId) ?: ShortOwnership.empty(ownershipId)
+        return ownershipRepository.save(ownership.withCalculatedFields())
+    }
+
     suspend fun getOrEmpty(ownershipId: ShortOwnershipId): ShortOwnership {
         return ownershipRepository.get(ownershipId) ?: ShortOwnership.empty(ownershipId)
     }

@@ -23,7 +23,6 @@ import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -40,18 +39,19 @@ class EnrichmentItemEventService(
     private val enrichmentActivityService: EnrichmentActivityService,
     private val itemEventListeners: List<OutgoingEventListener<ItemEventDto>>,
     private val bestOrderService: BestOrderService,
-    private val reconciliationEventService: ReconciliationEventService,
-    private val itemRepository: ItemRepository,
+    private val reconciliationEventService: ReconciliationEventService
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemEventService::class.java)
 
-    suspend fun onItemChanged(itemId: ItemIdDto) = onItemUpdateOrChange(itemId)
+    suspend fun onItemChanged(itemId: ItemIdDto) {
+        val existing = enrichmentItemService.getOrEmpty(ShortItemId(itemId))
+        val updateEvent = buildUpdateEvent(short = existing)
+        sendUpdate(updateEvent)
+    }
 
-    suspend fun onItemUpdated(item: UnionItem) = onItemUpdateOrChange(item.id, item)
-
-    private suspend fun onItemUpdateOrChange(itemId: ItemIdDto, item: UnionItem? = null) {
-        val existing = itemRepository.getOrCreateWithLastUpdatedAtUpdate(ShortItemId(itemId))
+    suspend fun onItemUpdated(item: UnionItem) {
+        val existing = enrichmentItemService.getOrCreateWithLastUpdatedAtUpdate(ShortItemId(item.id))
         val updateEvent = buildUpdateEvent(short = existing, item = item)
         sendUpdate(updateEvent)
     }

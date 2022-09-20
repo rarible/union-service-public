@@ -74,7 +74,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         // Item should be created since it wasn't in DB before update
         assertThat(created).isEqualTo(
-            ShortItem.empty(created.id).copy(lastUpdatedAt = created.lastUpdatedAt, version = 1)
+            ShortItem.empty(created.id).copy(lastUpdatedAt = created.lastUpdatedAt, version = 0)
         )
         assertThat(created.lastUpdatedAt).isAfter(Instant.now().minusSeconds(5))
         // But there should be single Item event "as is"

@@ -63,7 +63,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val created = ownershipService.get(ShortOwnershipId(ownershipId))!!
         // Ownership should not be updated since it wasn't in DB before update
         assertThat(created).isEqualTo(
-            ShortOwnership.empty(created.id).copy(lastUpdatedAt = created.lastUpdatedAt, version = 1)
+            ShortOwnership.empty(created.id).copy(lastUpdatedAt = created.lastUpdatedAt, version = 0)
         )
 
         // But there should be single Ownership event "as is"

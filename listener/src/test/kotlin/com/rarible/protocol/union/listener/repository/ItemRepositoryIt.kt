@@ -3,7 +3,6 @@ package com.rarible.protocol.union.listener.repository
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
@@ -106,23 +105,5 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
         itemRepository.updateLastUpdatedAt(itemId)
 
         assertThat(itemRepository.get(itemId)).isNull()
-    }
-
-    @Test
-    fun getOrCreateWithLastUpdatedAtUpdate() = runBlocking<Unit> {
-        val itemId = ShortItemId(randomEthItemId())
-
-        val item = itemRepository.getOrCreateWithLastUpdatedAtUpdate(itemId)
-
-        assertThat(item).isEqualTo(
-            ShortItem.empty(itemId).copy(lastUpdatedAt = item.lastUpdatedAt, version = 1)
-        )
-        assertThat(item.lastUpdatedAt).isAfter(Instant.now().minusSeconds(5))
-
-        val updated = itemRepository.getOrCreateWithLastUpdatedAtUpdate(itemId)
-        assertThat(updated).isEqualTo(
-            ShortItem.empty(itemId).copy(lastUpdatedAt = updated.lastUpdatedAt, version = 2)
-        )
-        assertThat(updated.lastUpdatedAt).isAfter(item.lastUpdatedAt)
     }
 }
