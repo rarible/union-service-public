@@ -1,14 +1,11 @@
 package com.rarible.protocol.union.worker.task.search.activity
 
 import com.rarible.core.task.TaskHandler
-import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.worker.config.ActivityReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.RemoveRevertedActivityTaskParam
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.takeWhile
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Component
 
 @Component
@@ -16,7 +13,6 @@ class RemoveRevertedActivityTask(
     private val properties: ActivityReindexProperties,
     private val paramFactory: ParamFactory,
     private val activityReindexService: ActivityReindexService,
-    private val taskRepository: TaskRepository,
 ): TaskHandler<String> {
 
     override val type: String
@@ -42,7 +38,6 @@ class RemoveRevertedActivityTask(
                     type = taskParam.type,
                     cursor = from,
                 )
-                .takeWhile { taskRepository.findByTypeAndParam(type, param).awaitSingleOrNull()?.running ?: false }
         }
     }
 }
