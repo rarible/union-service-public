@@ -7,6 +7,7 @@ import com.rarible.dipdup.client.OrderClient
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupOwnershipService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
@@ -77,6 +78,9 @@ class DipDupApiConfiguration(
     fun dipdupOwnershipApi() = com.rarible.dipdup.client.OwnershipClient(apolloClient)
 
     @Bean
+    fun dipdupCollectionApi() = com.rarible.dipdup.client.CollectionClient(apolloClient)
+
+    @Bean
     fun tzktBigMapKeyClient() = BigMapKeyClient(tzktWebClient)
 
     @Bean
@@ -137,6 +141,11 @@ class DipDupApiConfiguration(
     @Bean
     fun dipdupOwnershipService(ownershipClient: com.rarible.dipdup.client.OwnershipClient): DipDupOwnershipService {
         return DipDupOwnershipService(ownershipClient)
+    }
+
+    @Bean
+    fun dipdupCollectionService(collectionClient: com.rarible.dipdup.client.CollectionClient): DipDupCollectionService {
+        return DipDupCollectionService(collectionClient)
     }
 
     @Bean

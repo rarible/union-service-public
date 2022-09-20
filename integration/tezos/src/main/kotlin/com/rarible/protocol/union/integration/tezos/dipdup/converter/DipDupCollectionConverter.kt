@@ -8,10 +8,8 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
-@Component
-class DipDupCollectionConverter {
+object DipDupCollectionConverter {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val blockchain = BlockchainDto.TEZOS
@@ -25,8 +23,7 @@ class DipDupCollectionConverter {
         }
     }
 
-    private fun convertInternal(source: DipDupCollection): UnionCollection {
-        val collection = source.collection
+    private fun convertInternal(collection: DipDupCollection): UnionCollection {
         return UnionCollection(
             id = CollectionIdDto(blockchain, collection.id),
             name = collection.name,
@@ -38,7 +35,7 @@ class DipDupCollectionConverter {
         )
     }
 
-    private fun minters(source: DipDupCollection.Collection): List<UnionAddress> {
+    private fun minters(source: DipDupCollection): List<UnionAddress> {
         val minters = source.minters.map { UnionAddress(blockchain.group(), it) }
 
         // We need to do that due to marketplace will ignore event without minters

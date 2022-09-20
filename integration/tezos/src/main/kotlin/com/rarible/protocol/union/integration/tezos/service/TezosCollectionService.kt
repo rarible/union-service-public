@@ -8,6 +8,8 @@ import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.entity.TezosCollectionRepository
 import java.math.BigInteger
@@ -15,18 +17,28 @@ import java.math.BigInteger
 @CaptureSpan(type = "blockchain")
 open class TezosCollectionService(
     private val tzktCollectionService: TzktCollectionService,
-    private val tezosCollectionRepository: TezosCollectionRepository
+    private val dipdupCollectionService: DipDupCollectionService,
+    private val tezosCollectionRepository: TezosCollectionRepository,
+    private val properties: DipDupIntegrationProperties
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), CollectionService {
 
     override suspend fun getAllCollections(
         continuation: String?,
         size: Int
     ): Page<UnionCollection> {
-        return tzktCollectionService.getAllCollections(continuation, size)
+        return if (properties.useDipDupTokens) {
+            dipdupCollectionService.getCollectionsAll(continuation, size)
+        } else {
+            tzktCollectionService.getAllCollections(continuation, size)
+        }
     }
 
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
-        return tzktCollectionService.getCollectionById(collectionId)
+        return if (properties.useDipDupTokens) {
+            dipdupCollectionService.getCollectionById(collectionId)
+        } else {
+            tzktCollectionService.getCollectionById(collectionId)
+        }
     }
 
     override suspend fun refreshCollectionMeta(collectionId: String) {
@@ -34,7 +46,11 @@ open class TezosCollectionService(
     }
 
     override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
-        return tzktCollectionService.getCollectionByIds(ids)
+        return if (properties.useDipDupTokens) {
+            dipdupCollectionService.getCollectionByIds(ids)
+        } else {
+            tzktCollectionService.getCollectionByIds(ids)
+        }
     }
 
     override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {

@@ -11,6 +11,7 @@ import com.rarible.tzkt.model.Contract
 import com.rarible.tzkt.model.Page
 import io.mockk.clearMocks
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -22,13 +23,14 @@ class TezosCollectionServiceTest {
 
     private val tzktCollectionClient: CollectionClient = mockk()
     private val tezosCollectionRepository: TezosCollectionRepository = mockk()
-
+    private val dipdupProps: DipDupIntegrationProperties = mockk()
 
     private val tzktCollectionService = TzktCollectionServiceImpl(tzktCollectionClient, mockk(), tezosCollectionRepository, DipDupIntegrationProperties.TzktProperties())
-    private val service = TezosCollectionService(tzktCollectionService, mockk())
+    private val service = TezosCollectionService(tzktCollectionService, mockk(), mockk(), dipdupProps)
 
     @BeforeEach
     fun beforeEach() {
+        every { dipdupProps.useDipDupTokens } returns false
         clearMocks(tzktCollectionClient)
     }
 

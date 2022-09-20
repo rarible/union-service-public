@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupApiConfiguration
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupOwnershipService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
@@ -69,9 +70,11 @@ class TezosApiConfiguration {
     @Bean
     fun tezosCollectionService(
         tzktCollectionService: TzktCollectionService,
+        dipdupCollectionService: DipDupCollectionService,
         tezosCollectionRepository: TezosCollectionRepository,
+        properties: DipDupIntegrationProperties
     ): TezosCollectionService {
-        return TezosCollectionService(tzktCollectionService, tezosCollectionRepository)
+        return TezosCollectionService(tzktCollectionService, dipdupCollectionService, tezosCollectionRepository, properties)
     }
 
     @Bean
