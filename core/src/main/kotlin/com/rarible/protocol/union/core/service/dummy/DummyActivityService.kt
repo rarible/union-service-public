@@ -36,6 +36,15 @@ class DummyActivityService(
         return Slice.empty()
     }
 
+    override suspend fun getAllRevertedActivitiesSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
+    ): Slice<ActivityDto> {
+        return Slice.empty()
+    }
+
     override suspend fun getActivitiesByCollection(
         types: List<ActivityTypeDto>,
         collection: String,
