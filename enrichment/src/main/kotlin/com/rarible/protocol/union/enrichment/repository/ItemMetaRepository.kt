@@ -2,7 +2,10 @@ package com.rarible.protocol.union.enrichment.repository
 
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
+import com.rarible.protocol.union.core.model.download.DownloadStatus
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
+import com.rarible.protocol.union.enrichment.model.ShortItemId
 import kotlinx.coroutines.reactive.awaitFirst
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
@@ -14,12 +17,19 @@ import org.springframework.stereotype.Component
 // TODO CaptureSpan breaks bean creation
 //@CaptureSpan(type = SpanType.DB)
 class ItemMetaRepository(
-    template: ReactiveMongoTemplate
+    template: ReactiveMongoTemplate,
+    private val itemRepository: ItemRepository,
 ) : DownloadEntryRepository<UnionMeta>(
     template,
     "enrichment_item_meta"
 ) {
     private val logger = LoggerFactory.getLogger(ItemMetaRepository::class.java)
+
+    override suspend fun onSave(entry: DownloadEntry<UnionMeta>) {
+        if (entry.status == DownloadStatus.SUCCESS) {
+            itemRepository.updateLastUpdatedAt(ShortItemId(IdParser.parseItemId(entry.id)))
+        }
+    }
 
     suspend fun createIndices() {
         ALL_INDEXES.forEach { index ->

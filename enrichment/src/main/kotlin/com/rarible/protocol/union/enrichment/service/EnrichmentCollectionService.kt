@@ -32,6 +32,11 @@ class EnrichmentCollectionService(
         return collectionRepository.get(collectionId)
     }
 
+    suspend fun getOrCreateWithLastUpdatedAtUpdate(collectionId: ShortCollectionId): ShortCollection {
+        val collection = collectionRepository.get(collectionId) ?: ShortCollection.empty(collectionId)
+        return collectionRepository.save(collection.withCalculatedFields())
+    }
+
     suspend fun save(collection: ShortCollection): ShortCollection? {
         return collectionRepository.save(collection.withCalculatedFields())
     }

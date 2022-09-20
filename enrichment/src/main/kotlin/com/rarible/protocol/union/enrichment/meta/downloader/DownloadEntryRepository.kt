@@ -18,6 +18,7 @@ abstract class DownloadEntryRepository<T>(
 ) {
 
     suspend fun save(entry: DownloadEntry<T>): DownloadEntry<T> {
+        onSave(entry)
         return template.save(entry, collection).awaitFirst()
     }
 
@@ -36,4 +37,5 @@ abstract class DownloadEntryRepository<T>(
         return result.deletedCount > 0
     }
 
+    protected open suspend fun onSave(entry: DownloadEntry<T>) {}
 }

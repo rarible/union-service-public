@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
+import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
@@ -59,9 +60,11 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         ownershipEventHandler.onOwnershipUpdated(ownershipDto)
 
-        val created = ownershipService.get(ShortOwnershipId(ownershipId))
+        val created = ownershipService.get(ShortOwnershipId(ownershipId))!!
         // Ownership should not be updated since it wasn't in DB before update
-        assertThat(created).isNull()
+        assertThat(created).isEqualTo(
+            ShortOwnership.empty(created.id).copy(lastUpdatedAt = created.lastUpdatedAt, version = 0)
+        )
 
         // But there should be single Ownership event "as is"
         waitAssert {

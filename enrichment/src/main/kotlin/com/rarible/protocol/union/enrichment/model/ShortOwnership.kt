@@ -18,14 +18,14 @@ data class ShortOwnership(
     val itemId: String, // ItemId without blockchain prefix
     val owner: String, // Owner without blockchain prefix
 
-    override val bestSellOrder: ShortOrder?,
+    override val bestSellOrder: ShortOrder? = null,
     override val bestSellOrders: Map<String, ShortOrder>,
 
     override val originOrders: Set<OriginOrders> = emptySet(),
 
     val multiCurrency: Boolean = bestSellOrders.size > 1,
 
-    val source: OwnershipSourceDto?,
+    val source: OwnershipSourceDto? = null,
 
     val lastUpdatedAt: Instant,
 
