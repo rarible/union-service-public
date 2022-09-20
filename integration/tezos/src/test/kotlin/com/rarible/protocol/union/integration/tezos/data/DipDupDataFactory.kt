@@ -10,6 +10,7 @@ import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrderListActivity
 import com.rarible.dipdup.client.core.model.EventType
 import com.rarible.dipdup.client.core.model.TezosPlatform
+import com.rarible.dipdup.listener.model.DipDupCollectionEvent
 import com.rarible.tzkt.model.ActivityType
 import com.rarible.tzkt.model.Alias
 import com.rarible.tzkt.model.TokenActivity
@@ -17,6 +18,7 @@ import com.rarible.tzkt.model.TokenInfo
 import com.rarible.tzkt.model.TypedTokenActivity
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.UUID
@@ -90,19 +92,19 @@ fun randomTzktItemBurnActivity(activityId: String): TypedTokenActivity {
     )
 }
 
-fun randomDipDupCollectionEvent(collectionId: String): DipDupCollection {
-    return DipDupCollection(
+fun randomDipDupCollectionEvent(collectionId: String): DipDupCollectionEvent {
+    return DipDupCollectionEvent(
         id = UUID.randomUUID(),
-        network = "test",
         eventId = randomString(),
-        collection = DipDupCollection.Collection(
+        collection = DipDupCollection(
             id = collectionId,
             owner = randomString(),
             name = randomString(),
             minters = emptyList(),
             standard = "fa2",
-            symbol = null
+            symbol = null,
+            updated = Instant.now()
         ),
-        type = EventType.UPDATE
+        type = "UPDATE"
     )
 }

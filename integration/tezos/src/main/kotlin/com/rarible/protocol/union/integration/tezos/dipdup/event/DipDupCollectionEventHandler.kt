@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.event
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rarible.dipdup.client.core.model.DipDupCollection
+import com.rarible.dipdup.listener.model.DipDupCollectionEvent
 import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
@@ -13,17 +13,16 @@ import org.slf4j.LoggerFactory
 
 open class DipDupCollectionEventHandler(
     override val handler: IncomingEventHandler<UnionCollectionEvent>,
-    private val dipDupCollectionConverter: DipDupCollectionConverter,
     private val tzktCollectionService: TzktCollectionService,
     private val mapper: ObjectMapper
-) : AbstractBlockchainEventHandler<DipDupCollection, UnionCollectionEvent>(com.rarible.protocol.union.dto.BlockchainDto.TEZOS) {
+) : AbstractBlockchainEventHandler<DipDupCollectionEvent, UnionCollectionEvent>(com.rarible.protocol.union.dto.BlockchainDto.TEZOS) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override suspend fun handle(event: DipDupCollection) {
+    override suspend fun handle(event: DipDupCollectionEvent) {
         logger.info("Received DipDup collection event: {}", mapper.writeValueAsString(event))
         try {
-            val collection = dipDupCollectionConverter.convert(event)
+            val collection = DipDupCollectionConverter.convert(event.collection)
 
             // Enrich by meta fields, lately it's better to move it to the indexer
             val tzktCollection = tzktCollectionService.getCollectionById(event.collection.id, true)

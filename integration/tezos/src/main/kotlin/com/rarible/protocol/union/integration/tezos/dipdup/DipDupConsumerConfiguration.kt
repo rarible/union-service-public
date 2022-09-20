@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.logging.Logger
 import com.rarible.dipdup.client.core.model.DipDupActivity
-import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.listener.config.DipDupEventsConsumerFactory
+import com.rarible.dipdup.listener.model.DipDupCollectionEvent
 import com.rarible.dipdup.listener.model.DipDupItemEvent
 import com.rarible.dipdup.listener.model.DipDupOwnershipEvent
 import com.rarible.protocol.union.core.ConsumerFactory
@@ -107,18 +107,17 @@ class DipDupConsumerConfiguration(
     @Bean
     fun dipDupCollectionEventHandler(
         handler: IncomingEventHandler<UnionCollectionEvent>,
-        converter: DipDupCollectionConverter,
         mapper: ObjectMapper,
         tzktCollectionService: TzktCollectionService
     ): DipDupCollectionEventHandler {
-        return DipDupCollectionEventHandler(handler, converter, tzktCollectionService, mapper)
+        return DipDupCollectionEventHandler(handler, tzktCollectionService, mapper)
     }
 
     @Bean
     fun dipDupCollectionEventWorker(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupCollectionEventHandler
-    ): KafkaConsumerWorker<DipDupCollection> {
+    ): KafkaConsumerWorker<DipDupCollectionEvent> {
         val consumer = factory.createCollectionConsumer(consumerFactory.collectionGroup)
         return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
     }
