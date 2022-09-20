@@ -3,6 +3,8 @@ package com.rarible.protocol.union.listener.repository
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.model.ShortItem
+import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -18,6 +20,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
 
 @IntegrationTest
 internal class ItemRepositoryIt : AbstractIntegrationTest() {
@@ -83,5 +86,43 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
 
         val pool2 = itemRepository.findByPoolOrder(item1.blockchain, poolOrder2.order.id).toList()
         assertThat(pool2).containsExactlyInAnyOrder(item1.id)
+    }
+
+    @Test
+    fun `update lastUpdatedAt`() = runBlocking<Unit> {
+        val item = itemRepository.save(randomShortItem().copy(lastUpdatedAt = Instant.ofEpochMilli(0)))
+
+        val result = itemRepository.updateLastUpdatedAt(item.id)
+        val updated = itemRepository.get(item.id)!!
+        assertThat(updated.lastUpdatedAt).isEqualTo(result)
+        assertThat(Instant.now().toEpochMilli() - updated.lastUpdatedAt.toEpochMilli()).isLessThan(100)
+        assertThat(updated.version!! - item.version!!).isEqualTo(1)
+    }
+
+    @Test
+    fun `update lastUpdatedAt on non existent item`() = runBlocking<Unit> {
+        val itemId = ShortItemId(randomEthItemId())
+
+        itemRepository.updateLastUpdatedAt(itemId)
+
+        assertThat(itemRepository.get(itemId)).isNull()
+    }
+
+    @Test
+    fun getOrCreateWithLastUpdatedAtUpdate() = runBlocking<Unit> {
+        val itemId = ShortItemId(randomEthItemId())
+
+        val item = itemRepository.getOrCreateWithLastUpdatedAtUpdate(itemId)
+
+        assertThat(item).isEqualTo(
+            ShortItem.empty(itemId).copy(lastUpdatedAt = item.lastUpdatedAt, version = 1)
+        )
+        assertThat(item.lastUpdatedAt).isAfter(Instant.now().minusSeconds(5))
+
+        val updated = itemRepository.getOrCreateWithLastUpdatedAtUpdate(itemId)
+        assertThat(updated).isEqualTo(
+            ShortItem.empty(itemId).copy(lastUpdatedAt = updated.lastUpdatedAt, version = 2)
+        )
+        assertThat(updated.lastUpdatedAt).isAfter(item.lastUpdatedAt)
     }
 }

@@ -10,6 +10,7 @@ import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverte
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
@@ -43,6 +44,7 @@ class EnrichmentOwnershipEventServiceTest {
     private val ownershipEventListeners = listOf(eventListener)
     private val bestOrderService: BestOrderService = mockk()
     private val reconciliationEventService: ReconciliationEventService = mockk()
+    private val ownershipRepository: OwnershipRepository = mockk()
 
     private val ownershipEventService = EnrichmentOwnershipEventService(
         ownershipService,
@@ -53,7 +55,8 @@ class EnrichmentOwnershipEventServiceTest {
         ownershipEventListeners,
         bestOrderService,
         auctionContractService,
-        reconciliationEventService
+        reconciliationEventService,
+        ownershipRepository
     )
 
     @BeforeEach

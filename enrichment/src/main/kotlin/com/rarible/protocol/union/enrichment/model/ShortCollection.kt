@@ -22,10 +22,10 @@ data class ShortCollection(
 
     val statistics: CollectionStatistics? = null,
 
-    override val bestSellOrder: ShortOrder?,
+    override val bestSellOrder: ShortOrder? = null,
     override val bestSellOrders: Map<String, ShortOrder>,
 
-    override val bestBidOrder: ShortOrder?,
+    override val bestBidOrder: ShortOrder? = null,
     override val bestBidOrders: Map<String, ShortOrder>,
 
     override val originOrders: Set<OriginOrders> = emptySet(),

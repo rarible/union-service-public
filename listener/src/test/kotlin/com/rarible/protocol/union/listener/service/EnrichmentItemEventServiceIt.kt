@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
@@ -39,6 +40,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.Instant
 
 @IntegrationTest
 class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
@@ -68,10 +70,13 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         itemEventService.onItemUpdated(unionItem)
 
-        val created = itemService.get(ShortItemId(itemId))
+        val created = itemService.get(ShortItemId(itemId))!!
 
-        // Item should not be updated since it wasn't in DB before update
-        assertThat(created).isNull()
+        // Item should be created since it wasn't in DB before update
+        assertThat(created).isEqualTo(
+            ShortItem.empty(created.id).copy(lastUpdatedAt = created.lastUpdatedAt, version = 1)
+        )
+        assertThat(created.lastUpdatedAt).isAfter(Instant.now().minusSeconds(5))
         // But there should be single Item event "as is"
         waitAssert {
             val messages = findItemUpdates(itemId.value)

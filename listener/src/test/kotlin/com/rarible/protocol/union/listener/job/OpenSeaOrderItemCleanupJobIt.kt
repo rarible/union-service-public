@@ -46,7 +46,6 @@ class OpenSeaOrderItemCleanupJobIt {
             val shortItem = it.invocation.args[0] as ShortItem
             EnrichedItemConverter.convert(randomUnionItem(shortItem.id.toDto()), shortItem)
         }
-
     }
 
     @Test
@@ -93,8 +92,14 @@ class OpenSeaOrderItemCleanupJobIt {
 
         assertThat(skipped.copy(version = null)).isEqualTo(withoutOpenSea)
 
-        val deleted = itemRepository.get(withOpenSeaEmpty.id)
-        assertThat(deleted).isNull()
+        val updated = itemRepository.get(withOpenSeaEmpty.id)!!
+        assertThat(updated).isEqualTo(
+            withOpenSeaEmpty.copy(
+                bestSellOrder = null,
+                bestSellOrders = emptyMap(),
+                lastUpdatedAt = updated.lastUpdatedAt,
+                version = 1
+            )
+        )
     }
-
 }

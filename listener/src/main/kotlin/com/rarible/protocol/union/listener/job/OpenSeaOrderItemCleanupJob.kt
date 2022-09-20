@@ -74,13 +74,8 @@ class OpenSeaOrderItemCleanupJob(
 
         val updated = item.copy(bestSellOrder = null, bestSellOrders = emptyMap())
 
-        if (updated.isNotEmpty()) {
-            logger.info("Updated item [{}], OpenSea order removed: [{}]", updated, openSeaOrder.id)
-            itemRepository.save(updated)
-        } else {
-            logger.info("Deleted enriched item [{}], OpenSea order removed: [{}]", updated, openSeaOrder.id)
-            itemRepository.delete(item.id)
-        }
+        logger.info("Updated item [{}], OpenSea order removed: [{}]", updated, openSeaOrder.id)
+        itemRepository.save(updated)
 
         val dto = itemService.enrichItem(
             shortItem = updated,

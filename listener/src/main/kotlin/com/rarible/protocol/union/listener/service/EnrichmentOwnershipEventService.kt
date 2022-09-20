@@ -20,6 +20,7 @@ import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipSourceComparator
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
@@ -42,13 +43,14 @@ class EnrichmentOwnershipEventService(
     private val ownershipEventListeners: List<OutgoingEventListener<OwnershipEventDto>>,
     private val bestOrderService: BestOrderService,
     private val auctionContractService: AuctionContractService,
-    private val reconciliationEventService: ReconciliationEventService
+    private val reconciliationEventService: ReconciliationEventService,
+    private val ownershipRepository: OwnershipRepository,
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipEventService::class.java)
 
     suspend fun onOwnershipUpdated(ownership: UnionOwnership) {
-        val existing = enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(ownership.id))
+        val existing = ownershipRepository.getOrCreateWithLastUpdatedAtUpdate(ShortOwnershipId(ownership.id))
         val event = buildUpdateEvent(existing, ownership)
         event?.let { sendUpdate(it) }
     }

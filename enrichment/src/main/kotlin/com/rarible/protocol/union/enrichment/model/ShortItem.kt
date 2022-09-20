@@ -22,10 +22,10 @@ data class ShortItem(
     val sellers: Int = 0,
     val totalStock: BigInteger,
 
-    override val bestSellOrder: ShortOrder?,
+    override val bestSellOrder: ShortOrder? = null,
     override val bestSellOrders: Map<String, ShortOrder>,
 
-    override val bestBidOrder: ShortOrder?,
+    override val bestBidOrder: ShortOrder? = null,
     override val bestBidOrders: Map<String, ShortOrder>,
 
     override val originOrders: Set<OriginOrders> = emptySet(),
@@ -34,7 +34,7 @@ data class ShortItem(
 
     val auctions: Set<AuctionIdDto> = emptySet(),
 
-    val lastSale: ItemLastSale?,
+    val lastSale: ItemLastSale? = null,
 
     val lastUpdatedAt: Instant,
 

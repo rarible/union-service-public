@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -28,6 +29,7 @@ class EnrichmentItemEventServiceTest {
     private val ownershipService: EnrichmentOwnershipService = mockk()
     private val activityService: EnrichmentActivityService = mockk()
     private val eventListener: OutgoingItemEventListener = mockk()
+    private val itemRepository: ItemRepository = mockk()
 
     private val bestOrderService: BestOrderService = mockk()
     private val reconciliationEventService: ReconciliationEventService = mockk()
@@ -38,7 +40,8 @@ class EnrichmentItemEventServiceTest {
         activityService,
         listOf(eventListener),
         bestOrderService,
-        reconciliationEventService
+        reconciliationEventService,
+        itemRepository,
     )
 
     @BeforeEach

@@ -23,6 +23,7 @@ import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -30,7 +31,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class EnrichmentItemEventService(
@@ -39,19 +40,18 @@ class EnrichmentItemEventService(
     private val enrichmentActivityService: EnrichmentActivityService,
     private val itemEventListeners: List<OutgoingEventListener<ItemEventDto>>,
     private val bestOrderService: BestOrderService,
-    private val reconciliationEventService: ReconciliationEventService
+    private val reconciliationEventService: ReconciliationEventService,
+    private val itemRepository: ItemRepository,
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemEventService::class.java)
 
-    suspend fun onItemChanged(itemId: ItemIdDto) {
-        val existing = enrichmentItemService.getOrEmpty(ShortItemId(itemId))
-        val updateEvent = buildUpdateEvent(short = existing)
-        sendUpdate(updateEvent)
-    }
+    suspend fun onItemChanged(itemId: ItemIdDto) = onItemUpdateOrChange(itemId)
 
-    suspend fun onItemUpdated(item: UnionItem) {
-        val existing = enrichmentItemService.getOrEmpty(ShortItemId(item.id))
+    suspend fun onItemUpdated(item: UnionItem) = onItemUpdateOrChange(item.id, item)
+
+    private suspend fun onItemUpdateOrChange(itemId: ItemIdDto, item: UnionItem? = null) {
+        val existing = itemRepository.getOrCreateWithLastUpdatedAtUpdate(ShortItemId(itemId))
         val updateEvent = buildUpdateEvent(short = existing, item = item)
         sendUpdate(updateEvent)
     }

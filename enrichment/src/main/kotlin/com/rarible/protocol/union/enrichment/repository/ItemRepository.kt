@@ -3,31 +3,40 @@ package com.rarible.protocol.union.enrichment.repository
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.common.nowMillis
 import com.rarible.core.mongo.util.div
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.enrichment.model.OriginOrders
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
+import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.Document
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lte
+import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 import java.time.Instant
 
 @Component
@@ -54,6 +63,27 @@ class ItemRepository(
     suspend fun get(id: ShortItemId): ShortItem? {
         return template.findById<ShortItem>(id).awaitFirstOrNull()
     }
+
+    suspend fun getOrCreateWithLastUpdatedAtUpdate(id: ShortItemId): ShortItem =
+        template.findAndModify(
+            Query(where(ShortItem::id).isEqualTo(id)),
+            Update()
+                .setOnInsert(ShortItem::id.name, id)
+                .setOnInsert(ShortItem::blockchain.name, id.blockchain)
+                .setOnInsert(ShortItem::itemId.name, id.itemId)
+                .setOnInsert(ShortItem::sellers.name, 0)
+                .setOnInsert(ShortItem::totalStock.name, BigDecimal.ZERO)
+                .setOnInsert(ShortItem::bestSellOrders.name, emptyMap<String, ShortOrder>())
+                .setOnInsert(ShortItem::bestBidOrders.name, emptyMap<String, ShortOrder>())
+                .setOnInsert(ShortItem::originOrders.name, emptySet<OriginOrders>())
+                .setOnInsert(ShortItem::multiCurrency.name, false)
+                .setOnInsert(ShortItem::auctions.name, emptySet<AuctionIdDto>())
+                .setOnInsert(ShortItem::poolSellOrders.name, emptyList<ShortPoolOrder>())
+                .set(ShortItem::lastUpdatedAt.name, nowMillis())
+                .inc(ShortItem::version.name, 1),
+            FindAndModifyOptions.options().returnNew(true).upsert(true),
+            ShortItem::class.java
+        ).awaitSingle()
 
     suspend fun getAll(ids: List<ShortItemId>): List<ShortItem> {
         val criteria = Criteria("_id").inValues(ids)
@@ -127,6 +157,17 @@ class ItemRepository(
     suspend fun delete(itemId: ShortItemId): DeleteResult? {
         val criteria = Criteria("_id").isEqualTo(itemId)
         return template.remove(Query(criteria), collection).awaitFirstOrNull()
+    }
+
+    suspend fun updateLastUpdatedAt(itemId: ShortItemId): Instant {
+        val date = nowMillis()
+        template.updateFirst(
+            Query(where(ShortItem::id).isEqualTo(itemId)),
+            Update().set(ShortItem::lastUpdatedAt.name, date)
+                .inc(ShortItem::version.name, 1),
+            ShortItem::class.java
+        ).awaitSingleOrNull()
+        return date
     }
 
     companion object {

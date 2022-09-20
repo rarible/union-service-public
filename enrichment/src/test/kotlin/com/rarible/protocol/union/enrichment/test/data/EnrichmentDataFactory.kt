@@ -12,12 +12,13 @@ import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.CollectionStatistics
 import com.rarible.protocol.union.enrichment.model.StatisticsPeriod
 import com.rarible.protocol.union.enrichment.model.StatisticsValue
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 
 fun randomShortItem() = ShortItemConverter.convert(randomUnionItem(randomEthItemId()))
 fun randomShortItem(id: ItemIdDto) = ShortItemConverter.convert(randomUnionItem(id))
 
-fun randomShortCollection(id: CollectionIdDto) = ShortCollectionConverter.convert(
+fun randomShortCollection(id: CollectionIdDto = randomEthCollectionId()) = ShortCollectionConverter.convert(
     collection = randomUnionCollection(id),
     statistics = randomCollectionStatistics()
 )

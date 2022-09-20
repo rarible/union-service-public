@@ -3,9 +3,11 @@ package com.rarible.protocol.union.enrichment.repository
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.common.nowMillis
 import com.rarible.core.mongo.util.div
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
+import com.rarible.protocol.union.enrichment.model.OriginOrders
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -15,19 +17,23 @@ import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrElse
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.bson.Document
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.FindAndModifyOptions
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.exists
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lte
+import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
 import java.math.BigInteger
 import java.time.Instant
@@ -56,6 +62,23 @@ class OwnershipRepository(
     suspend fun get(id: ShortOwnershipId): ShortOwnership? {
         return template.findById<ShortOwnership>(id).awaitFirstOrNull()
     }
+
+    suspend fun getOrCreateWithLastUpdatedAtUpdate(id: ShortOwnershipId): ShortOwnership =
+        template.findAndModify(
+            Query(where(ShortOwnership::id).isEqualTo(id)),
+            Update()
+                .setOnInsert(ShortOwnership::id.name, id)
+                .setOnInsert(ShortOwnership::blockchain.name, id.blockchain)
+                .setOnInsert(ShortOwnership::itemId.name, id.itemId)
+                .setOnInsert(ShortOwnership::owner.name, id.owner)
+                .setOnInsert(ShortOwnership::bestSellOrders.name, emptyMap<String, ShortOrder>())
+                .setOnInsert(ShortOwnership::originOrders.name, emptySet<OriginOrders>())
+                .setOnInsert(ShortOwnership::multiCurrency.name, false)
+                .set(ShortOwnership::lastUpdatedAt.name, nowMillis())
+                .inc(ShortOwnership::version.name, 1),
+            FindAndModifyOptions.options().returnNew(true).upsert(true),
+            ShortOwnership::class.java
+        ).awaitSingle()
 
     suspend fun getAll(ids: List<ShortOwnershipId>): List<ShortOwnership> {
         return template.find(
