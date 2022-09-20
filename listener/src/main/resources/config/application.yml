@@ -38,6 +38,8 @@ rarible:
           enabled: false
       annotation:
         enabled: true
+    client:
+      name: rarible-protocol
   ethereum:
     converter:
       enabled: true
