@@ -95,7 +95,6 @@ fun randomTezosDipDupItemDto(itemId: ItemIdDto): DipDupItem {
     val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
     return DipDupItem(
         id = itemId.value,
-        metadataSynced = true,
         minted = BigInteger.ONE,
         mintedAt = Instant.now(),
         supply = BigInteger.ONE,
@@ -103,7 +102,6 @@ fun randomTezosDipDupItemDto(itemId: ItemIdDto): DipDupItem {
         updated = Instant.now(),
         contract = contract,
         deleted = false,
-        metadataRetries = 0,
         tzktId = 1
     )
 }
