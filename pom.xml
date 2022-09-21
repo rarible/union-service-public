@@ -46,16 +46,16 @@
         <postgresql.version>42.3.4</postgresql.version>
         <okhttp.version>4.9.3</okhttp.version>
 
-        <rarible.core.version>2.4.25</rarible.core.version>
+        <rarible.core.version>2.4.26</rarible.core.version>
         <rarible.ethereum.version>1.6.1</rarible.ethereum.version>
 
-        <rarible.protocol.currency.version>1.31.1</rarible.protocol.currency.version>
-        <rarible.protocol.ethereum.version>1.36.1</rarible.protocol.ethereum.version>
+        <rarible.protocol.currency.version>1.35.0</rarible.protocol.currency.version>
+        <rarible.protocol.ethereum.version>1.36.2</rarible.protocol.ethereum.version>
         <rarible.protocol.flow.version>3.1.14</rarible.protocol.flow.version>
-        <rarible.protocol.solana.version>0.1.49</rarible.protocol.solana.version>
+        <rarible.protocol.solana.version>0.1.50</rarible.protocol.solana.version>
         <rarible.protocol.tezos.api.version>1.2.22</rarible.protocol.tezos.api.version>
 
-        <rarible.protocol.union.version>1.36.1</rarible.protocol.union.version>
+        <rarible.protocol.union.version>1.36.2</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>

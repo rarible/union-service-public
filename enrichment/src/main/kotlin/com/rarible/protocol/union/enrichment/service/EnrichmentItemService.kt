@@ -52,6 +52,11 @@ class EnrichmentItemService(
         return itemRepository.get(itemId)
     }
 
+    suspend fun getOrCreateWithLastUpdatedAtUpdate(itemId: ShortItemId): ShortItem {
+        val item = itemRepository.get(itemId) ?: ShortItem.empty(itemId)
+        return itemRepository.save(item.withCalculatedFields())
+    }
+
     suspend fun getItemCollection(itemId: ShortItemId): CollectionIdDto? {
         val collectionId = itemServiceRouter.getService(itemId.blockchain)
             .getItemCollectionId(itemId.itemId) ?: return null
@@ -192,5 +197,4 @@ class EnrichmentItemService(
         spanType: String = SpanType.APP,
         block: suspend () -> T
     ): Deferred<T> = async { withSpan(name = spanName, type = spanType, body = block) }
-
 }

@@ -11,6 +11,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.model.CollectionStatistics
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
@@ -31,7 +32,7 @@ class EnrichmentCollectionEventService(
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
 
     suspend fun onCollectionUpdate(collection: UnionCollection) {
-        val existing = enrichmentCollectionService.getOrEmpty(ShortCollectionId(collection.id))
+        val existing = enrichmentCollectionService.getOrCreateWithLastUpdatedAtUpdate(ShortCollectionId(collection.id))
         val updateEvent = buildUpdateEvent(short = existing, collection = collection)
         sendUpdate(updateEvent)
     }

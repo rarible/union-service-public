@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.repository
 import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
+import com.rarible.core.common.nowMillis
 import com.rarible.core.mongo.util.div
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.Document
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
@@ -24,9 +26,11 @@ import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lte
+import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
 import java.time.Instant
 
@@ -127,6 +131,17 @@ class ItemRepository(
     suspend fun delete(itemId: ShortItemId): DeleteResult? {
         val criteria = Criteria("_id").isEqualTo(itemId)
         return template.remove(Query(criteria), collection).awaitFirstOrNull()
+    }
+
+    suspend fun updateLastUpdatedAt(itemId: ShortItemId): Instant {
+        val date = nowMillis()
+        template.updateFirst(
+            Query(where(ShortItem::id).isEqualTo(itemId)),
+            Update().set(ShortItem::lastUpdatedAt.name, date)
+                .inc(ShortItem::version.name, 1),
+            ShortItem::class.java
+        ).awaitSingleOrNull()
+        return date
     }
 
     companion object {

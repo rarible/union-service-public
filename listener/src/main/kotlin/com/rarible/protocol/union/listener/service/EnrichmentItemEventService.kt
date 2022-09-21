@@ -30,7 +30,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class EnrichmentItemEventService(
@@ -51,7 +51,7 @@ class EnrichmentItemEventService(
     }
 
     suspend fun onItemUpdated(item: UnionItem) {
-        val existing = enrichmentItemService.getOrEmpty(ShortItemId(item.id))
+        val existing = enrichmentItemService.getOrCreateWithLastUpdatedAtUpdate(ShortItemId(item.id))
         val updateEvent = buildUpdateEvent(short = existing, item = item)
         sendUpdate(updateEvent)
     }

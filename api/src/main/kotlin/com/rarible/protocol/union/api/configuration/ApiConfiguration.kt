@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.configuration
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.rarible.core.autoconfigure.filter.cors.EnableRaribleCorsWebFilter
+import com.rarible.core.telemetry.actuator.WebRequestClientTagContributor
 import com.rarible.protocol.union.dto.UnionModelJacksonModule
 import com.rarible.protocol.union.dto.UnionPrimitivesJacksonModule
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
@@ -51,5 +52,10 @@ class ApiConfiguration {
         config.maxAge = 3600
         source.registerCorsConfiguration("/**", config)
         return source
+    }
+
+    @Bean
+    fun webRequestClientTagContributor(): WebRequestClientTagContributor {
+        return WebRequestClientTagContributor()
     }
 }

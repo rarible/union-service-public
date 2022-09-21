@@ -30,7 +30,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class EnrichmentOwnershipEventService(
@@ -48,7 +48,7 @@ class EnrichmentOwnershipEventService(
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipEventService::class.java)
 
     suspend fun onOwnershipUpdated(ownership: UnionOwnership) {
-        val existing = enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(ownership.id))
+        val existing = enrichmentOwnershipService.getOrCreateWithLastUpdatedAtUpdate(ShortOwnershipId(ownership.id))
         val event = buildUpdateEvent(existing, ownership)
         event?.let { sendUpdate(it) }
     }
