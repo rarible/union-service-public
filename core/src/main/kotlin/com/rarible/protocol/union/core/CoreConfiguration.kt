@@ -71,7 +71,7 @@ class CoreConfiguration(
             }.build()
         val webClient = WebClient.builder().exchangeStrategies(strategies)
 
-        DefaultUnionWebClientCustomizer().customize(webClient)
+        DefaultUnionWebClientCustomizer("protocol-rarible").customize(webClient)
 
         return webClient.build()
     }

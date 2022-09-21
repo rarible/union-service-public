@@ -123,6 +123,30 @@ open class EthActivityService(
         ).getSlice(size)
     }
 
+    override suspend fun getAllRevertedActivitiesSync(
+        continuation: String?,
+        size: Int,
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
+    ): Slice<ActivityDto> {
+        val continuationFactory = when (sort) {
+            SyncSortDto.DB_UPDATE_DESC -> ActivityContinuation.ByLastUpdatedSyncAndIdDesc
+            SyncSortDto.DB_UPDATE_ASC, null -> ActivityContinuation.ByLastUpdatedSyncAndIdAsc
+        }
+        val ethSort = EthConverter.convert(sort)
+
+        val allActivities = when (type) {
+            SyncTypeDto.ORDER -> orderRevertedActivitiesAsync(continuation, size, ethSort).await()
+            SyncTypeDto.NFT -> itemRevertedActivitiesAsync(continuation, size, ethSort).await()
+            SyncTypeDto.AUCTION -> auctionRevertedActivitiesAsync(continuation, size, ethSort).await()
+            null -> allRevertedActivities(continuation, size, ethSort)
+        }
+        return Paging(
+            continuationFactory,
+            allActivities
+        ).getSlice(size)
+    }
+
     private suspend fun allActivities(
         continuation: String?,
         size: Int,
@@ -133,6 +157,17 @@ open class EthActivityService(
         val auctionActivities = auctionActivitiesAsync(continuation, size, ethSort)
 
         itemActivities.await() + orderActivities.await() + auctionActivities.await()
+    }
+
+    private suspend fun allRevertedActivities(
+        continuation: String?,
+        size: Int,
+        ethSort: com.rarible.protocol.dto.SyncSortDto?
+    ): List<ActivityDto> = coroutineScope {
+        val orderRevertedActivities = orderRevertedActivitiesAsync(continuation, size, ethSort)
+        val itemRevertedActivities = itemRevertedActivitiesAsync(continuation, size, ethSort)
+        val auctionRevertedActivities = auctionRevertedActivitiesAsync(continuation, size, ethSort)
+        orderRevertedActivities.await() + itemRevertedActivities.await() + auctionRevertedActivities.await()
     }
 
     private suspend fun itemActivitiesAsync(
@@ -173,6 +208,35 @@ open class EthActivityService(
                 ethActivityConverter.convert(it, blockchain)
             }
         }
+    }
+
+    private suspend fun orderRevertedActivitiesAsync(
+        continuation: String?,
+        size: Int,
+        ethSort: com.rarible.protocol.dto.SyncSortDto?
+    ): Deferred<List<ActivityDto>> = coroutineScope {
+        async {
+            val itemsDto = activityOrderControllerApi.getOrderRevertedActivitiesSync(continuation, size, ethSort).awaitFirst()
+            itemsDto.items.map {
+                ethActivityConverter.convert(it, blockchain)
+            }
+        }
+    }
+
+    private suspend fun auctionRevertedActivitiesAsync(
+        continuation: String?,
+        size: Int,
+        ethSort: com.rarible.protocol.dto.SyncSortDto?
+    ): Deferred<List<ActivityDto>> = coroutineScope {
+        async { emptyList() }
+    }
+
+    private suspend fun itemRevertedActivitiesAsync(
+        continuation: String?,
+        size: Int,
+        ethSort: com.rarible.protocol.dto.SyncSortDto?
+    ): Deferred<List<ActivityDto>> = coroutineScope {
+        async { emptyList() }
     }
 
     override suspend fun getActivitiesByCollection(

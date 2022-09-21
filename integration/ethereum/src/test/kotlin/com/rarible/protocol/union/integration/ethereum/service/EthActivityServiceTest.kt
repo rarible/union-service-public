@@ -3,6 +3,7 @@ package com.rarible.protocol.union.integration.ethereum.service
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
+import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.ActivitiesByIdRequestDto
 import com.rarible.protocol.dto.ActivitySortDto
 import com.rarible.protocol.dto.AuctionActivitiesDto
@@ -22,10 +23,13 @@ import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemTransferActivity
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -176,5 +180,36 @@ internal class EthActivityServiceTest {
             // then
             assertThat(actual).containsExactlyInAnyOrder(unionActivityA, unionActivityB, unionActivityC, unionActivityD, unionActivityE, unionActivityF)
         }
+    }
+
+    @Test
+    @Suppress("ReactiveStreamsUnusedPublisher")
+    fun `ethereum get reverted order activities`() = runBlocking<Unit> {
+        val continuation = randomString()
+        val size = 10
+        val sort = SyncSortDto.DB_UPDATE_DESC
+        val activities = OrderActivitiesDto(
+            continuation = randomString(),
+            items = (1..size).map { randomEthOrderActivityMatch() }
+        )
+        val expectedActivity = activities.items.map {
+            mockk<ActivityDto> {
+                every { lastUpdatedAt } returns Instant.now()
+                every { id } returns ActivityIdDto(blockchainDto, "test")
+            }
+        }
+        coEvery {
+            activityOrderControllerApi.getOrderRevertedActivitiesSync(
+                continuation,
+                size,
+                com.rarible.protocol.dto.SyncSortDto.DB_UPDATE_DESC
+            )
+        } returns Mono.just(activities)
+
+        activities.items.forEachIndexed { index, dto ->
+            coEvery { ethActivityConverter.convert(dto, blockchainDto) } returns expectedActivity[index]
+        }
+        val result = service.getAllRevertedActivitiesSync(continuation, size, sort, SyncTypeDto.ORDER)
+        assertThat(result.entities).containsExactlyInAnyOrderElementsOf(expectedActivity)
     }
 }

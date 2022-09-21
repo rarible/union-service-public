@@ -28,6 +28,14 @@ interface ActivityQueryService {
         type: SyncTypeDto?
     ): ActivitiesDto
 
+    suspend fun getAllRevertedActivitiesSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
+    ): ActivitiesDto
+
     suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
         collection: List<String>,

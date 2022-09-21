@@ -6,6 +6,8 @@ import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiMergeService
@@ -15,7 +17,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Component
-import kotlin.system.measureTimeMillis
 
 @Component
 class ActivityReindexService(
@@ -33,16 +34,12 @@ class ActivityReindexService(
         blockchain: BlockchainDto,
         type: ActivityTypeDto,
         index: String?,
-        cursor: String? = null
+        cursor: String? = null,
+        from: Long? = null,
+        to: Long? = null,
     ): Flow<String> {
         val counter = searchTaskMetricFactory.createReindexActivityCounter(blockchain, type)
-
-        // TODO read values from config
-        val size = when (blockchain) {
-            BlockchainDto.IMMUTABLEX -> 200 // Max size allowed by IMX
-            else -> PageSize.ACTIVITY.max
-        }
-
+        val size = limit(blockchain)
         return flow {
             var continuation = cursor
             do {
@@ -63,11 +60,47 @@ class ActivityReindexService(
                     index,
                     refreshPolicy = WriteRequest.RefreshPolicy.NONE,
                 )
-                logger.info("Saved ${res.activities.size} activities, continuation: $continuation, took ${nowMillis().toEpochMilli() - before.toEpochMilli()}ms")
-                continuation = res.cursor
                 counter.increment(savedActivities.size)
-                emit(res.cursor ?: "")
-            } while (res.cursor.isNullOrEmpty().not())
+                logger.info("Saved ${res.activities.size} activities, continuation: $continuation, took ${nowMillis().toEpochMilli() - before.toEpochMilli()}ms")
+
+                continuation = TimePeriodContinuationHelper.adjustContinuation(res.cursor, from, to)
+                emit(continuation ?: "")
+            } while (continuation.isNullOrEmpty().not())
+        }
+    }
+
+    fun removeReverted(
+        blockchain: BlockchainDto,
+        type: SyncTypeDto,
+        cursor: String?,
+    ) : Flow<String> {
+        val size = limit(blockchain)
+        return flow {
+            var continuation = cursor
+            do {
+                val result = activityApiMergeService.getAllRevertedActivitiesSync(
+                    blockchain = blockchain,
+                    continuation = continuation,
+                    size = size,
+                    sort = SyncSortDto.DB_UPDATE_DESC,
+                    type = type
+                )
+                logger.info("Delete reverted ${result.activities.size} activities, continuation: $continuation")
+                if (result.activities.isNotEmpty()) {
+                    val deleted = esActivityRepository.deleteAll(result.activities.map { it.id.toString() })
+                    logger.info("Deleted $deleted reverted activities")
+                }
+                continuation = result.continuation
+                emit(continuation ?: "")
+            } while (continuation.isNullOrEmpty().not())
+        }
+    }
+
+    private fun limit(blockchain: BlockchainDto): Int {
+        // TODO read values from config
+        return when (blockchain) {
+            BlockchainDto.IMMUTABLEX -> 200 // Max size allowed by IMX
+            else -> PageSize.ACTIVITY.max
         }
     }
 }

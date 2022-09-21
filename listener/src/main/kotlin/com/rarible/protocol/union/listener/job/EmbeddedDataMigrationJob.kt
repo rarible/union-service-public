@@ -275,7 +275,7 @@ class EmbeddedDataMigrationJob(
 
     private fun createWebClient(): WebClient {
         val builder = WebClient.builder()
-        DefaultUnionWebClientCustomizer().customize(builder)
+        DefaultUnionWebClientCustomizer("protocol-rarible").customize(builder)
         return builder.build()
     }
 }

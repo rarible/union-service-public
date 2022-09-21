@@ -8,8 +8,8 @@ spring:
         reactive:
           endpoints:  ${elasticsearch.api-nodes}
           max-in-memory-size: 4194304
-          socket-timeout: 20000
-          connection-timeout: 30000
+          socket-timeout: 60000
+          connection-timeout: 60000
 
   elasticsearch:
     rest:
