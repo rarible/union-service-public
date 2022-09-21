@@ -31,6 +31,7 @@ object ImxWebClientFactory {
             .exchangeStrategies(strategies)
             .clientConnector(ReactorClientHttpConnector(httpClient))
 
+        //TODO: Get client name from config
         DefaultUnionWebClientCustomizer("protocol-rarible").customize(webClient)
         apiKey?.let {
             webClient.defaultHeaders {

@@ -275,6 +275,7 @@ class EmbeddedDataMigrationJob(
 
     private fun createWebClient(): WebClient {
         val builder = WebClient.builder()
+        //TODO: Get client name from config
         DefaultUnionWebClientCustomizer("protocol-rarible").customize(builder)
         return builder.build()
     }

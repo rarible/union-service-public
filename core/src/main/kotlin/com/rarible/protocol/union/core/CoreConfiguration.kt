@@ -71,6 +71,7 @@ class CoreConfiguration(
             }.build()
         val webClient = WebClient.builder().exchangeStrategies(strategies)
 
+        //TODO: Get client name from config
         DefaultUnionWebClientCustomizer("protocol-rarible").customize(webClient)
 
         return webClient.build()
