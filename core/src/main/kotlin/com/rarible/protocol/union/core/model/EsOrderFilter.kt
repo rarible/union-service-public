@@ -14,7 +14,6 @@ import org.elasticsearch.index.query.QueryBuilders.boolQuery
 import org.elasticsearch.index.query.QueryBuilders.termsQuery
 import org.elasticsearch.search.sort.SortBuilders
 import org.elasticsearch.search.sort.SortOrder
-import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.data.elasticsearch.core.query.Query
 
@@ -25,25 +24,47 @@ interface EsOrderFilter {
     fun genericBuild(
         continuation: DateIdContinuation?,
         size: Int,
-        sort: OrderSortDto,
+        sort: EsOrderSort,
         vararg queryBuilders: QueryBuilder,
     ): Query {
 
         val fullQueryBuilder = queryBuilders.singleOrNull()
-            ?: QueryBuilders.boolQuery().also { queryBuilders.forEach(it::must) }
+            ?: boolQuery().also { queryBuilders.forEach(it::must) }
 
-        val sortOrder = if (sort == OrderSortDto.LAST_UPDATE_DESC) SortOrder.DESC else SortOrder.ASC
-        val searchQueryBuilder: NativeSearchQuery = NativeSearchQueryBuilder()
+        val searchQueryBuilder = NativeSearchQueryBuilder()
             .withQuery(fullQueryBuilder)
-            .withSort(SortBuilders.fieldSort(EsOrder::lastUpdatedAt.name).order(sortOrder))
-            .withSort(SortBuilders.fieldSort(EsOrder::orderId.name).order(sortOrder))
             .withMaxResults(size)
-            .build()
-        continuation?.run {
-            searchQueryBuilder.searchAfter = listOf(date.toEpochMilli(), id)
+
+        when (sort) {
+            EsOrderSort.LAST_UPDATE_DESC -> {
+                searchQueryBuilder
+                    .withSort(SortBuilders.fieldSort(EsOrder::lastUpdatedAt.name).order(SortOrder.DESC))
+                    .withSort(SortBuilders.fieldSort(EsOrder::orderId.name).order(SortOrder.DESC))
+            }
+            EsOrderSort.LAST_UPDATE_ASC -> {
+                searchQueryBuilder
+                    .withSort(SortBuilders.fieldSort(EsOrder::lastUpdatedAt.name).order(SortOrder.ASC))
+                    .withSort(SortBuilders.fieldSort(EsOrder::orderId.name).order(SortOrder.ASC))
+            }
+            EsOrderSort.TAKE_PRICE_DESC -> {
+                searchQueryBuilder
+                    .withSort(SortBuilders.fieldSort(EsOrder::takePrice.name).order(SortOrder.DESC))
+                    .withSort(SortBuilders.fieldSort(EsOrder::orderId.name).order(SortOrder.DESC))
+            }
+            EsOrderSort.MAKE_PRICE_ASC -> {
+                searchQueryBuilder
+                    .withSort(SortBuilders.fieldSort(EsOrder::makePrice.name).order(SortOrder.ASC))
+                    .withSort(SortBuilders.fieldSort(EsOrder::orderId.name).order(SortOrder.ASC))
+            }
         }
 
-        return searchQueryBuilder
+        val searchQuery = searchQueryBuilder.build()
+
+        continuation?.run {
+            searchQuery.searchAfter = listOf(date.toEpochMilli(), id)
+        }
+
+        return searchQuery
     }
 }
 
@@ -51,7 +72,7 @@ data class EsAllOrderFilter(
     private val blockchains: Collection<BlockchainDto>?,
     private val cursor: DateIdContinuation?,
     private val size: Int,
-    private val sort: OrderSortDto,
+    private val sort: EsOrderSort,
     private val status: List<OrderStatusDto>?
 ) : EsOrderFilter {
 
@@ -70,6 +91,22 @@ data class EsAllOrderFilter(
     }
 }
 
+enum class EsOrderSort {
+    LAST_UPDATE_ASC,
+    LAST_UPDATE_DESC,
+    TAKE_PRICE_DESC,
+    MAKE_PRICE_ASC; // getSellOrdersByItem;
+
+    companion object {
+        fun of(sort: OrderSortDto?): EsOrderSort? = sort?.let {
+            when (sort) {
+                OrderSortDto.LAST_UPDATE_ASC -> LAST_UPDATE_ASC
+                OrderSortDto.LAST_UPDATE_DESC -> LAST_UPDATE_DESC
+            }
+        }
+    }
+}
+
 data class EsOrderSellOrdersByItem(
     val itemId: String,
     val platform: PlatformDto?,
@@ -77,7 +114,6 @@ data class EsOrderSellOrdersByItem(
     val origin: String?,
     val status: List<OrderStatusDto>?,
     val continuation: DateIdContinuation?,
-    val sort: OrderSortDto,
     val size: Int
 ) : EsOrderFilter {
     override fun asQuery(): Query {
@@ -143,7 +179,7 @@ data class EsOrderSellOrdersByItem(
 
         }
 
-        return genericBuild(continuation, size, sort, *list.toTypedArray())
+        return genericBuild(continuation, size, EsOrderSort.MAKE_PRICE_ASC, *list.toTypedArray())
     }
 }
 
@@ -154,7 +190,6 @@ data class EsOrderBidOrdersByItem(
     val origin: String?,
     val status: List<OrderStatusDto>?,
     val continuation: DateIdContinuation?,
-    val sort: OrderSortDto,
     val size: Int
 ) : EsOrderFilter {
     override fun asQuery(): Query {
@@ -217,7 +252,7 @@ data class EsOrderBidOrdersByItem(
 
         }
 
-        return genericBuild(continuation, size, sort, *list.toTypedArray())
+        return genericBuild(continuation, size, EsOrderSort.MAKE_PRICE_ASC, *list.toTypedArray())
     }
 }
 
@@ -228,7 +263,7 @@ data class EsOrdersByMakers(
     val status: List<OrderStatusDto>?,
     val continuation: DateIdContinuation?,
     val size: Int,
-    val sort: OrderSortDto,
+    val sort: EsOrderSort,
     val type: EsOrder.Type
 ) : EsOrderFilter {
     override fun asQuery(): Query {
@@ -268,7 +303,7 @@ data class EsOrderSellOrders(
     val origin: String?,
     val continuation: DateIdContinuation?,
     val size: Int,
-    val sort: OrderSortDto,
+    val sort: EsOrderSort,
 ) : EsOrderFilter {
     override fun asQuery(): Query {
         val list = buildList {

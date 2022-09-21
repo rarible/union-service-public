@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.model.EsOrderBidOrdersByItem
 import com.rarible.protocol.union.core.model.EsOrderFilter
 import com.rarible.protocol.union.core.model.EsOrderSellOrders
 import com.rarible.protocol.union.core.model.EsOrderSellOrdersByItem
+import com.rarible.protocol.union.core.model.EsOrderSort
 import com.rarible.protocol.union.core.model.EsOrdersByMakers
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -44,7 +45,7 @@ class OrderElasticService(
             blockchains = evaluatedBlockchains,
             cursor = DateIdContinuation.parse(continuation),
             size = safeSize,
-            sort = sort ?: OrderSortDto.LAST_UPDATE_DESC,
+            sort = EsOrderSort.of(sort) ?: EsOrderSort.LAST_UPDATE_DESC,
             status = statuses,
         )
         return fetchOrders(orderFilter)
@@ -77,8 +78,7 @@ class OrderElasticService(
             origin = origin,
             status = status,
             continuation = DateIdContinuation.parse(continuation),
-            size = safeSize,
-            sort = OrderSortDto.LAST_UPDATE_DESC
+            size = safeSize
         )
         return fetchOrders(orderFilter)
     }
@@ -103,8 +103,7 @@ class OrderElasticService(
             origin = origin,
             status = status,
             continuation = DateIdContinuation.parse(continuation),
-            size = safeSize,
-            sort = OrderSortDto.LAST_UPDATE_DESC
+            size = safeSize
         )
         return fetchOrders(orderFilter)
     }
@@ -129,7 +128,7 @@ class OrderElasticService(
             status = status,
             continuation = DateIdContinuation.parse(continuation),
             size = safeSize,
-            sort = OrderSortDto.LAST_UPDATE_DESC,
+            sort = EsOrderSort.LAST_UPDATE_DESC,
             type = EsOrder.Type.BID
         )
         return fetchOrders(orderFilter)
@@ -150,7 +149,7 @@ class OrderElasticService(
             origin = origin,
             continuation = DateIdContinuation.parse(continuation),
             size = safeSize,
-            sort = OrderSortDto.LAST_UPDATE_DESC
+            sort = EsOrderSort.LAST_UPDATE_DESC
         )
         return fetchOrders(orderFilter)
     }
@@ -173,7 +172,7 @@ class OrderElasticService(
             status = status,
             continuation = DateIdContinuation.parse(continuation),
             size = safeSize,
-            sort = OrderSortDto.LAST_UPDATE_DESC,
+            sort = EsOrderSort.LAST_UPDATE_DESC,
             type = EsOrder.Type.SELL
         )
         return fetchOrders(orderFilter)
@@ -185,7 +184,7 @@ class OrderElasticService(
 
         val slices = orderIdsByBlockchain.flatMapAsync { (blockchain, ids) ->
             val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
-            if(isBlockchainEnabled) {
+            if (isBlockchainEnabled) {
                 val rawIds = ids.map { IdParser.parseOrderId(it).value }
                 router.getService(blockchain).getOrdersByIds(rawIds)
             } else emptyList()
@@ -193,7 +192,7 @@ class OrderElasticService(
 
         val sortedOrders = esOrders.mapNotNull { slices[it.orderId] }
 
-        return if(esOrders.isEmpty()) {
+        return if (esOrders.isEmpty()) {
             OrdersDto(orders = emptyList(), continuation = null)
         } else {
             val last = esOrders.last()

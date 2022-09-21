@@ -2,10 +2,10 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.core.converter.EsOrderConverter
 import com.rarible.protocol.union.core.model.EsAllOrderFilter
+import com.rarible.protocol.union.core.model.EsOrderSort
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import io.mockk.coEvery
@@ -14,7 +14,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-
 import randomOrder
 import randomOrderId
 
@@ -62,7 +61,7 @@ internal class OrderElasticServiceTest {
                 cursor = null,
                 size = 100,
                 status = null,
-                sort = OrderSortDto.LAST_UPDATE_DESC
+                sort = EsOrderSort.LAST_UPDATE_DESC
             )
         )
 

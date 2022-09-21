@@ -26,8 +26,10 @@ data class EsOrder(
     val platform: PlatformDto,
     val maker: String,
     val make: Asset,
+    val makePrice: BigDecimal?,
     val taker: String?,
     val take: Asset,
+    val takePrice: BigDecimal?,
     val start: Instant?,
     val end: Instant?,
     val origins: List<String>, //list of address fulIds

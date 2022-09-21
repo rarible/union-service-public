@@ -41,6 +41,12 @@
     "taker": {
       "type": "keyword"
     },
+    "makePrice": {
+      "type": "double"
+    },
+    "takePrice": {
+      "type": "double"
+    },
     "take": {
       "properties": {
         "token": {
