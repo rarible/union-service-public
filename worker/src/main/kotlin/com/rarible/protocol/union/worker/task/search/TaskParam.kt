@@ -2,6 +2,7 @@ package com.rarible.protocol.union.worker.task.search
 
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 
 sealed class TaskParam {
     abstract val versionData: Int?
@@ -29,8 +30,15 @@ data class ActivityTaskParam(
     override val settingsHash: String?,
     override val blockchain: BlockchainDto,
     val type: ActivityTypeDto,
-    override val index: String
+    override val index: String,
+    val from: Long? = null,
+    val to: Long? = null,
 ) : TaskParam()
+
+data class RemoveRevertedActivityTaskParam(
+    val blockchain: BlockchainDto,
+    val type: SyncTypeDto
+)
 
 data class OrderTaskParam(
     override val versionData: Int?,

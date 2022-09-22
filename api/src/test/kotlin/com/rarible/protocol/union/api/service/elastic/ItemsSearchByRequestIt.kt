@@ -18,9 +18,11 @@ import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
+import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsSearchFilterDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
+import com.rarible.protocol.union.dto.ItemsSearchSortDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -379,8 +381,8 @@ class ItemsSearchByRequestIt {
         // when && then
         checkResult(
             filter = ItemsSearchFilterDto(
-                sellPriceFrom = priceFrom,
-                sellPriceTo = priceTo,
+                sellPriceFrom = priceFrom * 0.999,
+                sellPriceTo = priceTo * 1.001,
                 sellCurrency = "ETHEREUM:0x0000000000000000000000000000000000000000"
             ),
             expected = expected,
@@ -425,8 +427,8 @@ class ItemsSearchByRequestIt {
         // when && then
         checkResult(
             filter = ItemsSearchFilterDto(
-                bidPriceFrom = priceFrom,
-                bidPriceTo = priceTo,
+                bidPriceFrom = priceFrom * 0.999,
+                bidPriceTo = priceTo * 1.001,
                 bidCurrency = "ETHEREUM:0x0000000000000000000000000000000000000000"
             ),
             expected = expected,
@@ -449,8 +451,8 @@ class ItemsSearchByRequestIt {
         // when && then
         checkResult(
             filter = ItemsSearchFilterDto(
-                sellPriceFrom = priceFrom,
-                sellPriceTo = priceTo,
+                sellPriceFrom = priceFrom * 0.999,
+                sellPriceTo = priceTo * 1.001,
                 sellCurrency = null
             ),
             expected = expected,
@@ -473,13 +475,47 @@ class ItemsSearchByRequestIt {
         // when && then
         checkResult(
             filter = ItemsSearchFilterDto(
-                bidPriceFrom = priceFrom,
-                bidPriceTo = priceTo,
+                bidPriceFrom = priceFrom * 0.999,
+                bidPriceTo = priceTo * 1.001,
                 bidCurrency = null
             ),
             expected = expected,
             failMessage = "Failed to filter by bid price in usd"
         )
+    }
+
+    @Test
+    fun `should find by usd sell price, with cursor`() = runBlocking<Unit> {
+        // given
+        val ratesPerCurrency = mockCurrencies()
+        val expected: List<EsItem> =
+            esItems.sortedBy { it.bestSellAmount?.times(ratesPerCurrency[it.bestSellCurrency]!!) }
+                .drop(esItems.size / 4)
+                .take(esItems.size / 2)
+
+        val priceFrom = expected.first().bestSellAmount!! * ratesPerCurrency[expected.first().bestSellCurrency]!!
+        val priceTo = expected.last().bestSellAmount!! * ratesPerCurrency[expected.last().bestSellCurrency]!!
+        var request = ItemsSearchRequestDto(
+            size = 2,
+            continuation = null,
+            filter = ItemsSearchFilterDto(
+                sellPriceFrom = priceFrom * 0.999,
+                sellPriceTo = priceTo * 1.001,
+                sellCurrency = null,
+                ),
+            sort = ItemsSearchSortDto.LOWEST_SELL
+        )
+        // when
+        val actual = mutableListOf<ItemDto>()
+        do {
+            val result = itemElasticService.searchItems(request)
+            actual.addAll(result.items)
+            request = request.copy(continuation = result.continuation)
+        } while (!result.continuation.isNullOrEmpty())
+
+        // then
+        assertThat(actual.map { it.id.fullId().lowercase() })
+            .isEqualTo(expected.map { it.itemId.lowercase() })
     }
 
     private fun takeRandomItems(): List<EsItem> {

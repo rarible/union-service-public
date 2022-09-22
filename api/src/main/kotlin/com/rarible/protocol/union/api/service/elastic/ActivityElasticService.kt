@@ -98,6 +98,16 @@ class ActivityElasticService(
         throw UnsupportedOperationException("Operation is not supported for Elastic Search")
     }
 
+    override suspend fun getAllRevertedActivitiesSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
+    ): ActivitiesDto {
+        throw UnsupportedOperationException("Operation is not supported for Elastic Search")
+    }
+
     override suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
         collection: List<String>,

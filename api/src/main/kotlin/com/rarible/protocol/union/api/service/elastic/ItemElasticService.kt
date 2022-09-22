@@ -232,8 +232,7 @@ class ItemElasticService(
     }
 
     suspend fun searchItems(request: ItemsSearchRequestDto): ItemsDto {
-        val cursor = DateIdContinuation.parse(request.continuation)?.toString()
-        val filter = itemFilterConverter.searchItems(request.filter, cursor)
+        val filter = itemFilterConverter.searchItems(request.filter, request.continuation)
         val sort = convertSort(request.sort)
         val result = esItemRepository.search(filter, sort, request.size)
         if (result.entities.isEmpty()) return ItemsDto()

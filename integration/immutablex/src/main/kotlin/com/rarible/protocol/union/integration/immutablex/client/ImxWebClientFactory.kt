@@ -31,7 +31,8 @@ object ImxWebClientFactory {
             .exchangeStrategies(strategies)
             .clientConnector(ReactorClientHttpConnector(httpClient))
 
-        DefaultUnionWebClientCustomizer().customize(webClient)
+        //TODO: Get client name from config
+        DefaultUnionWebClientCustomizer("protocol-rarible").customize(webClient)
         apiKey?.let {
             webClient.defaultHeaders {
                 it.add("x-api-key", apiKey)

@@ -94,6 +94,27 @@ class ActivityApiMergeService(
         return dto
     }
 
+    override suspend fun getAllRevertedActivitiesSync(
+        blockchain: BlockchainDto,
+        continuation: String?,
+        size: Int?,
+        sort: SyncSortDto?,
+        type: SyncTypeDto?
+    ): ActivitiesDto {
+        val safeSize = PageSize.ACTIVITY.limit(size)
+        val activitySlice = router.getService(blockchain).getAllRevertedActivitiesSync(continuation, safeSize, sort, type)
+        val dto = ActivitiesDto(
+            activities = activitySlice.entities,
+            continuation = activitySlice.continuation
+        )
+        logger.info(
+            "Response for getRevertedActivitiesSync(continuation={}, size={}, ty[e={}, sort={}): " +
+                    "Slice(size={}, continuation={}) ",
+            continuation, size, type, sort, dto.activities.size, dto.continuation
+        )
+        return dto
+    }
+
     override suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
         collection: List<String>,

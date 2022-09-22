@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.RateLimiter
@@ -44,6 +45,10 @@ internal class ActivityReindexServiceTest {
         coEvery {
             saveAll(any(), any(), WriteRequest.RefreshPolicy.NONE)
         } answers { arg(0) }
+
+        coEvery {
+            deleteAll(any())
+        } returns 1
     }
 
     private val converter = mockk<EsActivityConverter> {
@@ -118,6 +123,35 @@ internal class ActivityReindexServiceTest {
         coVerify(exactly = 2) {
             esRepo.saveAll(any(), "test_index", WriteRequest.RefreshPolicy.NONE)
             counter.increment(1)
+        }
+    }
+
+    @Test
+    fun `should remove reverted`() = runBlocking<Unit> {
+        val service = ActivityReindexService(
+            mockk {
+                coEvery {
+                    getAllRevertedActivitiesSync(BlockchainDto.ETHEREUM, eq("test_index"), any(), any(), any())
+                } returns ActivitiesDto("step_1", "step_1", listOf(randomActivityDto()))
+
+                coEvery {
+                    getAllRevertedActivitiesSync(BlockchainDto.ETHEREUM, eq("step_1"), any(), any(), any())
+                } returns ActivitiesDto(null, null, listOf(randomActivityDto()))
+            },
+            esRepo,
+            searchTaskMetricFactory,
+            converter,
+            rateLimiter
+        )
+
+        assertThat(
+            service
+                .removeReverted(BlockchainDto.ETHEREUM, SyncTypeDto.ORDER, "test_index")
+                .toList()
+        ).containsExactly("step_1", "") // an empty string is always emitted in the end of loop
+
+        coVerify(exactly = 2) {
+            esRepo.deleteAll(any())
         }
     }
 
