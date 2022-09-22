@@ -118,7 +118,7 @@ fun randomTezosTzktOwnershipDto(itemId: ItemIdDto, creator: Part): TokenBalance 
     val ownershipId = itemId.toOwnership(creator.account)
     val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
     return TokenBalance(
-        id = randomInt(),
+        id = randomLong(),
         account = Alias(
             alias = null,
             address = ownershipId.owner.value
@@ -339,7 +339,7 @@ fun randomTzktToken(itemId: String) = Token(
 
 fun randomTzktTokenBalance(ownerId: OwnershipIdDto): TokenBalance {
     return TokenBalance(
-        id = randomInt(),
+        id = randomLong(),
         account = Alias(
             alias = null,
             address = ownerId.owner.value
