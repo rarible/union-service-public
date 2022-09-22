@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.service
 
-import com.rarible.core.test.data.randomInt
+import com.rarible.core.test.data.randomLong
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -90,9 +90,8 @@ class TzktOwnershipServiceTest {
         confirmVerified(ownershipClient)
     }
 
-
-    fun ownership() = ownership(randomInt())
-    fun ownership(id: Int) = TokenBalance(
+    fun ownership() = ownership(randomLong())
+    fun ownership(id: Long) = TokenBalance(
         id = id,
         account = Alias(
             address = "tz2QH8sqmgnFajFb5vN6b9KaDmd4ht2yGv6d"

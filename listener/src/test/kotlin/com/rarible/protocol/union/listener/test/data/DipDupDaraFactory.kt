@@ -3,6 +3,7 @@ package com.rarible.protocol.union.listener.tezos
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
+import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupActivity
@@ -19,8 +20,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.UUID
-
+import java.util.*
 
 fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
     return DipDupOrderListActivity(
@@ -114,7 +114,7 @@ fun randomTzktToken() =
 
 fun randomTzktToken(contract: String, tokenId: BigInteger, supply: BigInteger): Token {
     return Token(
-        id = randomInt(),
+        id = randomLong(),
         contract = Alias(
             address = contract
         ),

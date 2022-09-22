@@ -19,7 +19,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.UUID
+import java.util.*
 
 fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
     return DipDupOrderListActivity(
@@ -48,7 +48,7 @@ fun randomTzktItemMintActivity(activityId: String): TypedTokenActivity {
     return TypedTokenActivity(
         type = ActivityType.MINT,
         tokenActivity = TokenActivity(
-            id = activityId.toInt(),
+            id = activityId.toLong(),
             token = TokenInfo(
                 id = 1,
                 contract = Alias(
@@ -71,7 +71,7 @@ fun randomTzktItemBurnActivity(activityId: String): TypedTokenActivity {
     return TypedTokenActivity(
         type = ActivityType.BURN,
         tokenActivity = TokenActivity(
-            id = activityId.toInt(),
+            id = activityId.toLong(),
             token = TokenInfo(
                 id = 1,
                 contract = Alias(
