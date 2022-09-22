@@ -45,7 +45,7 @@ fun randomTzktItemMintActivity(activityId: String, date: Instant): TypedTokenAct
     return TypedTokenActivity(
         type = ActivityType.MINT,
         tokenActivity = TokenActivity(
-            id = activityId.toInt(),
+            id = activityId.toLong(),
             token = TokenInfo(
                 id = 1,
                 contract = Alias(
