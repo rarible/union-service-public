@@ -11,7 +11,7 @@ import org.springframework.data.annotation.Version
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
-@Document("enrichment_ownership")
+@Document(ShortOwnership.COLLECTION)
 data class ShortOwnership(
 
     val blockchain: BlockchainDto,
@@ -41,6 +41,7 @@ data class ShortOwnership(
     }
 
     companion object {
+        const val COLLECTION = "enrichment_ownership"
 
         fun empty(ownershipId: ShortOwnershipId): ShortOwnership {
             return ShortOwnership(
