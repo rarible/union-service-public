@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
+import com.rarible.protocol.union.enrichment.test.data.randomEsCollection
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -66,6 +67,27 @@ class CollectionConsumerIt {
         }
     }
 
+    @Test
+    fun `should remove collection when event with error status comes`() = runBlocking<Unit> {
+        // given
+        val saved = randomEsCollection().copy(collectionId = collectionId.fullId())
+        repository.bulk(listOf(saved), emptyList())
+        val event = CollectionUpdateEventDto(
+            eventId = randomString(),
+            collectionId = collectionId,
+            collection = collection.copy(status = CollectionDto.Status.ERROR)
+        )
+
+        // when
+        producer.send(KafkaEventFactory.collectionEvent(event)).ensureSuccess()
+
+        // then
+        WaitAssert.wait {
+            val notFound = repository.findById(collectionId.fullId())
+            assertThat(notFound).isNull()
+        }
+    }
+
     private suspend fun assert(actualCollection: EsCollection?) {
         assertThat(actualCollection).isNotNull
         actualCollection as EsCollection
@@ -75,6 +97,5 @@ class CollectionConsumerIt {
         assertThat(actualCollection.owner).isEqualTo(collection.owner?.fullId())
         assertThat(actualCollection.meta).isNotNull
         assertThat(actualCollection.meta!!.name).isEqualTo(collection.meta!!.name)
-        assertThat(actualCollection.meta!!.description).isEqualTo(collection.meta!!.description)
     }
 }

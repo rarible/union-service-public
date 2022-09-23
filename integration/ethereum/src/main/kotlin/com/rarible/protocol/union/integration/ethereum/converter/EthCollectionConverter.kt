@@ -29,6 +29,7 @@ object EthCollectionConverter {
         return UnionCollection(
             id = CollectionIdDto(blockchain, contract),
             name = source.name,
+            status = convert(source.status),
             symbol = source.symbol,
             type = convert(source.type),
             owner = source.owner?.let { EthConverter.convert(it, blockchain) },
@@ -37,6 +38,15 @@ object EthCollectionConverter {
             meta = EthMetaConverter.convert(source.meta, blockchain),
             self = source.isRaribleContract
         )
+    }
+
+    private fun convert(status: NftCollectionDto.Status?): CollectionDto.Status? {
+        return when (status) {
+            NftCollectionDto.Status.PENDING -> CollectionDto.Status.PENDING
+            NftCollectionDto.Status.ERROR -> CollectionDto.Status.ERROR
+            NftCollectionDto.Status.CONFIRMED -> CollectionDto.Status.CONFIRMED
+            null -> null
+        }
     }
 
     fun convert(page: NftCollectionsDto, blockchain: BlockchainDto): Page<UnionCollection> {
