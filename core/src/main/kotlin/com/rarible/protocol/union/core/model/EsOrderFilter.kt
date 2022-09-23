@@ -48,12 +48,12 @@ interface EsOrderFilter {
             }
             EsOrderSort.TAKE_PRICE_DESC -> {
                 searchQueryBuilder
-                    .withSort(SortBuilders.fieldSort(EsOrder::takePrice.name).order(SortOrder.DESC))
+                    .withSort(SortBuilders.fieldSort(EsOrder::takePriceUsd.name).order(SortOrder.DESC))
                     .withSort(SortBuilders.fieldSort(EsOrder::orderId.name).order(SortOrder.DESC))
             }
             EsOrderSort.MAKE_PRICE_ASC -> {
                 searchQueryBuilder
-                    .withSort(SortBuilders.fieldSort(EsOrder::makePrice.name).order(SortOrder.ASC))
+                    .withSort(SortBuilders.fieldSort(EsOrder::makePriceUsd.name).order(SortOrder.ASC))
                     .withSort(SortBuilders.fieldSort(EsOrder::orderId.name).order(SortOrder.ASC))
             }
         }

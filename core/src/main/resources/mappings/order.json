@@ -44,7 +44,13 @@
     "makePrice": {
       "type": "double"
     },
+    "makePriceUsd": {
+      "type": "double"
+    },
     "takePrice": {
+      "type": "double"
+    },
+    "takePriceUsd": {
       "type": "double"
     },
     "take": {
