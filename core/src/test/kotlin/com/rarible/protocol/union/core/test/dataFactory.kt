@@ -1,3 +1,4 @@
+
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
@@ -5,7 +6,6 @@ import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.core.converter.EsOwnershipConverter
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.AssetDto
@@ -170,8 +170,8 @@ fun randomOrder(
     cancelled: Boolean = randomBoolean(),
     createdAt: Instant = randomInstant(),
     lastUpdatedAt: Instant = randomInstant(),
-    makePrice: BigDecimal? = null,
-    takePrice: BigDecimal? = null,
+    makePrice: BigDecimal? = randomBigDecimal(),
+    takePrice: BigDecimal? = randomBigDecimal(),
     makePriceUsd: BigDecimal? = null,
     takePriceUsd: BigDecimal? = null,
     maker: UnionAddress = randomUnionAddress(id.blockchain),

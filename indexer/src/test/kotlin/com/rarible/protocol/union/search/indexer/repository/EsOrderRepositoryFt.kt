@@ -7,9 +7,9 @@ import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.core.model.EsOrderBidOrdersByItem
 import com.rarible.protocol.union.core.model.EsOrderSellOrders
 import com.rarible.protocol.union.core.model.EsOrderSellOrdersByItem
+import com.rarible.protocol.union.core.model.EsOrderSort
 import com.rarible.protocol.union.core.model.EsOrdersByMakers
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -19,7 +19,6 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
@@ -84,7 +83,7 @@ internal class EsOrderRepositoryFt {
                     cursor = cursor,
                     size = pageSize,
                     status = null,
-                    sort = OrderSortDto.LAST_UPDATE_ASC
+                    sort = EsOrderSort.LAST_UPDATE_ASC
                 )
             )
             val last = actual.last()
@@ -110,7 +109,7 @@ internal class EsOrderRepositoryFt {
                 cursor = cursor,
                 size = pageSize,
                 status = null,
-                sort = OrderSortDto.LAST_UPDATE_ASC
+                sort = EsOrderSort.LAST_UPDATE_ASC
             )
         )
         val ids = actual.map { it.orderId }
@@ -150,7 +149,7 @@ internal class EsOrderRepositoryFt {
                     cursor = cursor,
                     size = pageSize,
                     status = null,
-                    sort = OrderSortDto.LAST_UPDATE_DESC
+                    sort = EsOrderSort.LAST_UPDATE_DESC
                 )
             )
             val last = actual.last()
@@ -176,7 +175,7 @@ internal class EsOrderRepositoryFt {
                 cursor = cursor,
                 size = pageSize,
                 status = null,
-                sort = OrderSortDto.LAST_UPDATE_DESC
+                sort = EsOrderSort.LAST_UPDATE_DESC
             )
         )
         val ids = actual.map { it.orderId }
@@ -190,7 +189,7 @@ internal class EsOrderRepositoryFt {
     }
 
     @Test
-    @Disabled("Test fails after recent changes, to be fixed under PT-1216")
+//    @Disabled("Test fails after recent changes, to be fixed under PT-1216")
     fun `EsOrderSellOrdersByItem filter`(): Unit = runBlocking {
         // given
         val orders = List(100) { randomOrder() }.map { EsOrderConverter.convert(it) }
@@ -208,7 +207,6 @@ internal class EsOrderRepositoryFt {
             origin = null,
             size = 1000,
             continuation = null,
-            sort = OrderSortDto.LAST_UPDATE_DESC,
             status = OrderStatusDto.values().asList()
         )
         val filters = listOf(
@@ -246,7 +244,6 @@ internal class EsOrderRepositoryFt {
             origin = null,
             size = 1000,
             continuation = null,
-            sort = OrderSortDto.LAST_UPDATE_DESC,
             status = OrderStatusDto.values().asList()
         )
         val filters = listOf(
@@ -286,7 +283,7 @@ internal class EsOrderRepositoryFt {
             origin = null,
             size = 1000,
             continuation = null,
-            sort = OrderSortDto.LAST_UPDATE_DESC,
+            sort = EsOrderSort.LAST_UPDATE_DESC,
             status = OrderStatusDto.values().asList(),
             type = EsOrder.Type.SELL
         )
@@ -317,7 +314,7 @@ internal class EsOrderRepositoryFt {
             origin = o1.origins.first(),
             size = 1000,
             continuation = null,
-            sort = OrderSortDto.LAST_UPDATE_DESC,
+            sort = EsOrderSort.LAST_UPDATE_DESC,
             status = OrderStatusDto.values().asList(),
             type = EsOrder.Type.SELL
         )
@@ -352,7 +349,7 @@ internal class EsOrderRepositoryFt {
             origin = null,
             size = 1000,
             continuation = null,
-            sort = OrderSortDto.LAST_UPDATE_DESC,
+            sort = EsOrderSort.LAST_UPDATE_DESC,
         )
 
         //then
