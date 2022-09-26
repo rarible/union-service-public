@@ -17,9 +17,11 @@ import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.and
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lte
+import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
 import java.time.Instant
 
@@ -69,6 +71,25 @@ class CollectionRepository(
         return template.find(query, ShortCollection::class.java).asFlow()
     }
 
+    suspend fun findIdsByLastUpdatedAt(
+        lastUpdatedFrom: Instant,
+        lastUpdatedTo: Instant,
+        continuation: ShortCollectionId?,
+        size: Int = 20
+    ): List<ShortCollection> =
+        template.find(
+            Query(
+                where(ShortCollection::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)
+                .apply {
+                    if (continuation != null) {
+                        and(ShortCollection::id).gt(continuation)
+                    }
+                })
+                .with(Sort.by(ShortCollection::id.name))
+                .limit(size),
+            ShortCollection::class.java
+        ).collectList().awaitFirst()
+
     companion object {
 
         private val BLOCKCHAIN_DEFINITION = Index()
@@ -81,9 +102,15 @@ class CollectionRepository(
             .on(ShortCollection::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
+        private val LAST_UPDATED_AT_ID: Index = Index()
+            .on(ShortCollection::lastUpdatedAt.name, Sort.Direction.ASC)
+            .on("_id", Sort.Direction.ASC)
+            .background()
+
         private val ALL_INDEXES = listOf(
             BLOCKCHAIN_DEFINITION,
-            MULTI_CURRENCY_DEFINITION
+            MULTI_CURRENCY_DEFINITION,
+            LAST_UPDATED_AT_ID,
         )
     }
 }
