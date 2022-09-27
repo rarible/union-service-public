@@ -10,6 +10,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrder
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupOwnershipService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupRoyaltyService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
@@ -75,6 +76,9 @@ class DipDupApiConfiguration(
     fun dipdupTokenApi() = com.rarible.dipdup.client.TokenClient(apolloClient)
 
     @Bean
+    fun dipdupRoyaltyApi() = com.rarible.dipdup.client.RoyaltiesClient(apolloClient)
+
+    @Bean
     fun dipdupOwnershipApi() = com.rarible.dipdup.client.OwnershipClient(apolloClient)
 
     @Bean
@@ -136,6 +140,11 @@ class DipDupApiConfiguration(
     @Bean
     fun dipdupItemService(tokenClient: com.rarible.dipdup.client.TokenClient): DipDupItemService {
         return DipDupItemService(tokenClient)
+    }
+
+    @Bean
+    fun dipdupRoyaltiyService(royltiesClient: com.rarible.dipdup.client.RoyaltiesClient): DipDupRoyaltyService {
+        return DipDupRoyaltyService(royltiesClient)
     }
 
     @Bean

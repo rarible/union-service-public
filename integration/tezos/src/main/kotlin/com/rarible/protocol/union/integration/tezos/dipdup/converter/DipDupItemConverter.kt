@@ -1,6 +1,9 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.converter
 
 import com.rarible.dipdup.client.core.model.DipDupItem
+import com.rarible.dipdup.client.core.model.DipDupRoyalties
+import com.rarible.dipdup.client.core.model.Part
+import com.rarible.dipdup.client.core.model.TokenMeta
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -12,8 +15,6 @@ import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.tzkt.model.Part
-import com.rarible.tzkt.model.TokenMeta
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
 
@@ -39,7 +40,7 @@ object DipDupItemConverter {
         )
     }
 
-    fun convert(source: TokenMeta, blockchain: BlockchainDto): UnionMeta {
+    fun convertMeta(source: TokenMeta): UnionMeta {
         try {
             return convertInternal(source)
         } catch (e: Exception) {
@@ -48,9 +49,9 @@ object DipDupItemConverter {
         }
     }
 
-    fun convert(source: List<Part>, blockchain: BlockchainDto): List<RoyaltyDto> {
+    fun convert(source: DipDupRoyalties): List<RoyaltyDto> {
         try {
-            return source.map { toRoyalty(it, blockchain) }
+            return source.parts.map { toRoyalty(it, blockchain) }
         } catch (e: Exception) {
             logger.error("Failed to convert {} Royalty: {} \n{}", blockchain, e.message, source)
             throw e
@@ -59,8 +60,8 @@ object DipDupItemConverter {
 
     private fun toRoyalty(source: Part, blockchain: BlockchainDto): RoyaltyDto {
         return RoyaltyDto(
-            account = UnionAddressConverter.convert(blockchain, source.address),
-            value = source.share
+            account = UnionAddressConverter.convert(blockchain, source.account),
+            value = source.value
         )
     }
 

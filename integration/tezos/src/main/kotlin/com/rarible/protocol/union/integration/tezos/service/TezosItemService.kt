@@ -10,12 +10,14 @@ import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupItemService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupRoyaltyService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 
 @CaptureSpan(type = "blockchain")
 open class TezosItemService(
     private val tzktItemService: TzktItemService,
     private val dipDupItemService: DipDupItemService,
+    private val dipDupRoyaltyService: DipDupRoyaltyService,
     private val properties: DipDupIntegrationProperties
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ItemService {
 
@@ -44,11 +46,19 @@ open class TezosItemService(
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
-        return tzktItemService.getItemRoyaltiesById(itemId)
+        return if (properties.useDipDupTokens) {
+            dipDupRoyaltyService.getItemRoyaltiesById(itemId)
+        } else {
+            tzktItemService.getItemRoyaltiesById(itemId)
+        }
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
-        return tzktItemService.getItemMetaById(itemId)
+        return if (properties.useDipDupTokens) {
+            dipDupItemService.getMetaById(itemId)
+        } else {
+            tzktItemService.getItemMetaById(itemId)
+        }
     }
 
     override suspend fun resetItemMeta(itemId: String) {

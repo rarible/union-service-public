@@ -11,6 +11,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProp
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupOwnershipService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupRoyaltyService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
@@ -53,9 +54,10 @@ class TezosApiConfiguration {
     fun tezosItemService(
         tzktItemService: TzktItemService,
         dipdupItemService: DipDupItemService,
+        dipDupRoyaltyService: DipDupRoyaltyService,
         properties: DipDupIntegrationProperties
     ): TezosItemService {
-        return TezosItemService(tzktItemService, dipdupItemService, properties)
+        return TezosItemService(tzktItemService, dipdupItemService, dipDupRoyaltyService, properties)
     }
 
     @Bean

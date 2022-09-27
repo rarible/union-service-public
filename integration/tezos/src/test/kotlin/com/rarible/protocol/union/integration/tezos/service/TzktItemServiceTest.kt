@@ -30,7 +30,7 @@ class TzktItemServiceTest {
     private val dipdupProps: DipDupIntegrationProperties = mockk()
 
     private val tzktItemService = TzktItemServiceImpl(tokenClient, dipdupProps)
-    private val service = TezosItemService(tzktItemService, mockk(), dipdupProps)
+    private val service = TezosItemService(tzktItemService, mockk(), mockk(), dipdupProps)
 
     @BeforeEach
     fun beforeEach() {
