@@ -68,8 +68,8 @@ internal class CollectionReconciliationControllerFt : AbstractIntegrationTest() 
         val result = testRestTemplate.getForObject(
             "$baseUri/reconciliation/collections?lastUpdatedFrom={from}&lastUpdatedTo={to}",
             CollectionsDto::class.java,
-            1000,
-            4000
+            Instant.ofEpochMilli(1000),
+            Instant.ofEpochMilli(4000)
         )
 
         assertThat(result.collections.map { it.id.fullId() }).containsExactlyInAnyOrder(

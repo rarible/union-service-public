@@ -5,6 +5,8 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
@@ -12,6 +14,7 @@ import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
+import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -23,7 +26,8 @@ class EnrichmentCollectionService(
     private val collectionServiceRouter: BlockchainRouter<CollectionService>,
     private val collectionRepository: CollectionRepository,
     private val enrichmentOrderService: EnrichmentOrderService,
-    private val contentMetaService: ContentMetaService
+    private val contentMetaService: ContentMetaService,
+    private val orderApiService: OrderApiMergeService,
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionService::class.java)
@@ -87,5 +91,35 @@ class EnrichmentCollectionService(
             shortCollection = shortCollection,
             orders = bestOrders
         )
+    }
+
+    suspend fun enrich(shortCollections: List<ShortCollection>): List<CollectionDto> {
+        if (shortCollections.isEmpty()) {
+            return emptyList()
+        }
+        val shortCollectionsById: Map<CollectionIdDto, ShortCollection> = shortCollections.associateBy { it.id.toDto() }
+
+        val shortOrderIds = shortCollectionsById.values
+            .map { it.getAllBestOrders() }
+            .flatten()
+            .map { it.dtoId }
+
+        val groupedIds = shortCollections.groupBy({ it.blockchain }, { it.id.collectionId })
+
+        val unionCollections = groupedIds.flatMap {
+            collectionServiceRouter.getService(it.key).getCollectionsByIds(it.value)
+        }
+
+        val orders = orderApiService.getByIds(shortOrderIds)
+            .associateBy { it.id }
+        return unionCollections.map {
+            EnrichedCollectionConverter.convert(
+                collection = it,
+                // replacing inner IPFS urls with public urls
+                meta = contentMetaService.exposePublicUrls(it.meta, it.id),
+                shortCollection = shortCollectionsById[it.id],
+                orders = orders
+            )
+        }
     }
 }

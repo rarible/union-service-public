@@ -22,36 +22,22 @@ class CollectionReconciliationController(
 
     @GetMapping(value = ["/reconciliation/collections"], produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getCollections(
-        @RequestParam lastUpdatedFrom: Long,
-        @RequestParam lastUpdatedTo: Long,
+        @RequestParam lastUpdatedFrom: Instant,
+        @RequestParam lastUpdatedTo: Instant,
         @RequestParam(required = false) continuation: String? = null,
     ): CollectionsDto {
         val shortCollections = collectionRepository.findIdsByLastUpdatedAt(
-            lastUpdatedFrom = Instant.ofEpochMilli(lastUpdatedFrom),
-            lastUpdatedTo = Instant.ofEpochMilli(lastUpdatedTo),
+            lastUpdatedFrom = lastUpdatedFrom,
+            lastUpdatedTo = lastUpdatedTo,
             continuation = continuation?.let { ShortCollectionId(IdParser.parseCollectionId(continuation)) }
         )
         if (shortCollections.isEmpty()) {
             return CollectionsDto()
         }
-        val groupedIds = shortCollections.groupBy({ it.blockchain }, { it.id.collectionId })
-
-        val unionCollections = groupedIds.flatMap {
-            router.getService(it.key).getCollectionsByIds(it.value)
-        }.groupBy { it.id }
-
-        val collections = shortCollections.mapNotNull { shortCollection ->
-            val unionCollection = unionCollections[shortCollection.id.toDto()]
-            if (unionCollection.isNullOrEmpty()) {
-                null
-            } else {
-                enrichmentCollectionService.enrichCollection(shortCollection, unionCollection[0])
-            }
-        }
 
         return CollectionsDto(
             total = 0,
-            collections = collections,
+            collections = enrichmentCollectionService.enrich(shortCollections),
             continuation = shortCollections.last().id.toDto().fullId()
         )
     }
