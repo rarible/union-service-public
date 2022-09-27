@@ -19,13 +19,13 @@ class OwnershipReconciliationController(
 
     @GetMapping(value = ["/reconciliation/ownerships"], produces = [MediaType.APPLICATION_JSON_VALUE])
     suspend fun getOwnerships(
-        @RequestParam lastUpdatedFrom: Long,
-        @RequestParam lastUpdatedTo: Long,
+        @RequestParam lastUpdatedFrom: Instant,
+        @RequestParam lastUpdatedTo: Instant,
         @RequestParam(required = false) continuation: String? = null,
     ): OwnershipsDto {
         val ids = ownershipRepository.findIdsByLastUpdatedAt(
-            lastUpdatedFrom = Instant.ofEpochMilli(lastUpdatedFrom),
-            lastUpdatedTo = Instant.ofEpochMilli(lastUpdatedTo),
+            lastUpdatedFrom = lastUpdatedFrom,
+            lastUpdatedTo = lastUpdatedTo,
             continuation = continuation?.let { ShortOwnershipId(OwnershipIdParser.parseFull(continuation)) }
         ).map { it.toDto() }
         if (ids.isEmpty()) {
