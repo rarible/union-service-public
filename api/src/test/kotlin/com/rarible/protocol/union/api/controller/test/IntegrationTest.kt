@@ -23,7 +23,8 @@ import org.springframework.test.context.ActiveProfiles
         "spring.cloud.consul.config.enabled = false",
         "spring.cloud.service-registry.auto-registration.enabled = false",
         "spring.cloud.discovery.enabled = false",
-        "logging.logstash.tcp-socket.enabled = false"
+        "logging.logstash.tcp-socket.enabled = false",
+        "logging.logfmt.enabled = false",
     ]
 )
 @ActiveProfiles("test")

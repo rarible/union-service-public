@@ -24,10 +24,12 @@ import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.and
 import org.springframework.data.mongodb.core.query.exists
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lte
+import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
 import java.math.BigInteger
 import java.time.Instant
@@ -120,6 +122,29 @@ class OwnershipRepository(
         return ItemSellStats(mapping.first, mapping.second)
     }
 
+    suspend fun findIdsByLastUpdatedAt(
+        lastUpdatedFrom: Instant,
+        lastUpdatedTo: Instant,
+        continuation: ShortOwnershipId?,
+        size: Int = 1000
+    ): List<ShortOwnershipId> =
+        template.find(
+            Query(where(ShortOwnership::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)
+                .apply {
+                    if (continuation != null) {
+                        and(ShortOwnership::id).gt(continuation)
+                    }
+                })
+                .with(Sort.by(ShortOwnership::id.name))
+                .limit(size),
+            IdObject::class.java,
+            ShortOwnership.COLLECTION
+        ).map { it.id }.collectList().awaitFirst()
+
+    private data class IdObject(
+        val id: ShortOwnershipId
+    )
+
     object Indices {
 
         private val BLOCKCHAIN_ITEM_ID: Index = Index()
@@ -137,10 +162,16 @@ class OwnershipRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
+        private val LAST_UPDATED_AT_ID: Index = Index()
+            .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.ASC)
+            .on("_id", Sort.Direction.ASC)
+            .background()
+
         val ALL = listOf(
             BY_BEST_SELL_PLATFORM_DEFINITION,
             BLOCKCHAIN_ITEM_ID,
-            MULTI_CURRENCY_OWNERSHIP
+            MULTI_CURRENCY_OWNERSHIP,
+            LAST_UPDATED_AT_ID
         )
     }
 }
