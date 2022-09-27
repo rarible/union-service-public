@@ -17,7 +17,6 @@ object EsCollectionConverter {
             meta = collection.meta?.let {
                 EsCollection.CollectionMeta(
                     name = it.name,
-                    description = it.description,
                 )
             },
             self = collection.self

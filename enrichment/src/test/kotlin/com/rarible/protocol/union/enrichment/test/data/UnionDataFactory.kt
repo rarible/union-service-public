@@ -295,7 +295,6 @@ fun randomEsCollection() = EsCollection(
     owner = randomString(),
     meta = EsCollection.CollectionMeta(
         name = randomString(),
-        description = randomString(),
     ),
 )
 
