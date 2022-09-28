@@ -99,25 +99,44 @@ class EnrichmentCollectionService(
         }
         val shortCollectionsById: Map<CollectionIdDto, ShortCollection> = shortCollections.associateBy { it.id.toDto() }
 
-        val shortOrderIds = shortCollectionsById.values
-            .map { it.getAllBestOrders() }
-            .flatten()
-            .map { it.dtoId }
-
         val groupedIds = shortCollections.groupBy({ it.blockchain }, { it.id.collectionId })
 
         val unionCollections = groupedIds.flatMap {
             collectionServiceRouter.getService(it.key).getCollectionsByIds(it.value)
         }
 
+        return enrichCollections(shortCollectionsById, unionCollections)
+    }
+
+    suspend fun enrichUnionCollections(unionCollections: List<UnionCollection>): List<CollectionDto> {
+        if (unionCollections.isEmpty()) {
+            return emptyList()
+        }
+        val shortCollections: Map<CollectionIdDto, ShortCollection> =
+            collectionRepository.getAll(unionCollections.map { ShortCollectionId(it.id) })
+            .associateBy { it.id.toDto() }
+
+        return enrichCollections(shortCollections, unionCollections)
+    }
+
+    private suspend fun enrichCollections(
+        shortCollections: Map<CollectionIdDto, ShortCollection>,
+        unionCollections: List<UnionCollection>,
+    ): List<CollectionDto> {
+        val shortOrderIds = shortCollections.values
+            .map { it.getAllBestOrders() }
+            .flatten()
+            .map { it.dtoId }
+
         val orders = orderApiService.getByIds(shortOrderIds)
             .associateBy { it.id }
+
         return unionCollections.map {
             EnrichedCollectionConverter.convert(
                 collection = it,
                 // replacing inner IPFS urls with public urls
                 meta = contentMetaService.exposePublicUrls(it.meta, it.id),
-                shortCollection = shortCollectionsById[it.id],
+                shortCollection = shortCollections[it.id],
                 orders = orders
             )
         }

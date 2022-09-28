@@ -1,13 +1,10 @@
 package com.rarible.protocol.union.enrichment.service.query.collection
 
-import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.continuation.UnionCollectionContinuation
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgPage
@@ -18,10 +15,7 @@ import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.model.ShortCollection
-import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
-import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -31,10 +25,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class CollectionApiMergeService(
-    private val orderApiService: OrderApiMergeService,
     private val router: BlockchainRouter<CollectionService>,
     private val enrichmentCollectionService: EnrichmentCollectionService
-): CollectionQueryService {
+) : CollectionQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -48,7 +41,7 @@ class CollectionApiMergeService(
         val arg = ArgPaging(UnionCollectionContinuation.ById, slices.map { it.toSlice() }).getSlice(safeSize)
         val total = slices.sumOf { it.page.total }
         logger.info("Response for getAllCollections(blockchains={}, continuation={}, size={}):" +
-                " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
+            " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
             blockchains, continuation, size, arg.entities.size, total,
             arg.continuation, slices.map { it.page.entities.size }
         )
@@ -77,7 +70,7 @@ class CollectionApiMergeService(
 
         logger.info(
             "Response for getCollectionsByOwner(owner={}, continuation={}, size={}):" +
-                    " Page(size={}, total={}, continuation={})",
+                " Page(size={}, total={}, continuation={})",
             owner, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation
         )
 
@@ -126,7 +119,7 @@ class CollectionApiMergeService(
         return CollectionsDto(
             total = unionCollectionsPage.total,
             continuation = unionCollectionsPage.continuation,
-            collections = enrich(unionCollectionsPage.entities)
+            collections = enrichmentCollectionService.enrichUnionCollections(unionCollectionsPage.entities)
         )
     }
 
@@ -134,35 +127,7 @@ class CollectionApiMergeService(
         return CollectionsDto(
             total = total,
             continuation = unionCollectionsSlice.continuation,
-            collections = enrich(unionCollectionsSlice.entities)
+            collections = enrichmentCollectionService.enrichUnionCollections(unionCollectionsSlice.entities)
         )
-    }
-
-
-    private suspend fun enrich(unionCollections: List<UnionCollection>): List<CollectionDto> {
-        if (unionCollections.isEmpty()) {
-            return emptyList()
-        }
-        val now = nowMillis()
-        val shortCollections: Map<CollectionIdDto, ShortCollection> = enrichmentCollectionService
-            .findAll(unionCollections.map { ShortCollectionId(it.id) })
-            .associateBy { it.id.toDto() }
-
-        val shortOrderIds = shortCollections.values
-            .map { it.getAllBestOrders() }
-            .flatten()
-            .map { it.dtoId }
-
-        val orders = orderApiService.getByIds(shortOrderIds)
-            .associateBy { it.id }
-
-        return unionCollections.map {
-            val shortCollection = shortCollections[it.id]
-            enrichmentCollectionService.enrichCollection(
-                shortCollection = shortCollection,
-                collection = it,
-                orders = orders
-            )
-        }
     }
 }
