@@ -8,7 +8,6 @@ import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupActivity
 import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrderListActivity
-import com.rarible.dipdup.client.core.model.EventType
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.listener.model.DipDupCollectionEvent
 import com.rarible.tzkt.model.ActivityType
@@ -18,7 +17,6 @@ import com.rarible.tzkt.model.TokenInfo
 import com.rarible.tzkt.model.TypedTokenActivity
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -102,8 +100,7 @@ fun randomDipDupCollectionEvent(collectionId: String): DipDupCollectionEvent {
             name = randomString(),
             minters = emptyList(),
             standard = "fa2",
-            symbol = null,
-            updated = Instant.now()
+            symbol = null
         ),
         type = "UPDATE"
     )
