@@ -112,11 +112,13 @@ fun randomImxOrderBuySide(
     quantity: BigInteger = BigInteger("10000"),
     quantityWithFees: BigInteger = BigInteger("10000"),
     decimals: Int = 0,
-    type: String = "ETH"
+    type: String = "ERC20"
 ): ImmutablexOrderSide {
     return ImmutablexOrderSide(
         data = randomImxOrderSideData(
-            decimals = decimals, quantity = quantity.toString(), quantityWithFees = quantityWithFees
+            decimals = decimals,
+            quantity = quantity.toString(),
+            quantityWithFees = quantityWithFees
         ),
         type = type
     )
