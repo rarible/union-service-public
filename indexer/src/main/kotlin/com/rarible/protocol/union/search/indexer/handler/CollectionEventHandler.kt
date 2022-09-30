@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.converter.EsCollectionConverter
 import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
@@ -34,26 +35,34 @@ class CollectionEventHandler(
         logger.info("Handling ${event.size} CollectionEventDto events")
         val startTime = nowMillis()
 
-        val convertedEvents = event.map {
-            it as CollectionUpdateEventDto
-            logger.debug("Converting CollectionDto id = ${it.collection.id.fullId()}")
-            EsCollectionConverter.convert(it.collection)
-        }
-        logger.debug("Saving ${convertedEvents.size} CollectionEventDto events to ElasticSearch")
-        val refreshPolicy =
-            if (featureFlagsProperties.enableCollectionSaveImmediateToElasticSearch) {
-                WriteRequest.RefreshPolicy.IMMEDIATE
-            } else {
-                if (convertedEvents.any { it.self == true })
-                    WriteRequest.RefreshPolicy.IMMEDIATE
-                else
-                    WriteRequest.RefreshPolicy.NONE
-            }
+        val collectionsToSave = mutableListOf<EsCollection>()
+        val idsToDelete = mutableListOf<String>()
 
-        repository.bulk(convertedEvents, idsToDelete = emptyList(), refreshPolicy = refreshPolicy)
-        countSaves(convertedEvents)
+        event.forEach {
+            it as CollectionUpdateEventDto
+            if (it.collection.status == CollectionDto.Status.ERROR) {
+                idsToDelete.add(it.collection.id.fullId())
+            } else {
+                collectionsToSave.add(EsCollectionConverter.convert(it.collection))
+            }
+        }
+
+        val refreshPolicy = if (featureFlagsProperties.enableCollectionSaveImmediateToElasticSearch) {
+            WriteRequest.RefreshPolicy.IMMEDIATE
+        } else {
+            if (collectionsToSave.any { it.self == true })
+                WriteRequest.RefreshPolicy.IMMEDIATE
+            else
+                WriteRequest.RefreshPolicy.NONE
+        }
+
+        repository.bulk(collectionsToSave, idsToDelete, refreshPolicy = refreshPolicy)
+        countSaves(collectionsToSave)
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
-        logger.info("Handling of ${event.size} CollectionEventDto events completed in $elapsedTime ms")
+        logger.info(
+            "Handling of ${event.size} CollectionEventDto events completed in $elapsedTime ms" +
+                    " (saved ${collectionsToSave.size}, deleted ${idsToDelete.size})"
+        )
     }
 
     private fun countSaves(collections: List<EsCollection>) {

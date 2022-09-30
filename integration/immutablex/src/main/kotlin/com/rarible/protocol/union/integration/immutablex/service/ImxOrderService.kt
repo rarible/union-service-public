@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
@@ -77,7 +78,10 @@ class ImxOrderService(
         // TODO maybe split it into 2 queries to distinguish ETH/ERC20 currencies?
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
         val orders = orderClient.getBuyOrdersByItem(token, tokenId, null, currencyProbeBatchSize)
-        return orders.result.map { ImxOrderConverter.convert(it, blockchain).make.type }.toSet().toList()
+        return orders.result.map { ImxOrderConverter.convert(it, blockchain).make.type }
+            .toSet()
+            .filter { it.ext.isCurrency }
+            .toList()
     }
 
     // IMX doesn't support floor orders
@@ -140,7 +144,10 @@ class ImxOrderService(
             token, tokenId, null, null, currencyProbeBatchSize
         ).result + activeOrder.await().result
 
-        return ordersWithAllStatuses.map { ImxOrderConverter.convert(it, blockchain).take.type }.toSet().toList()
+        return ordersWithAllStatuses.map { ImxOrderConverter.convert(it, blockchain).take.type }
+            .toSet()
+            .filter { it.ext.isCurrency }
+            .toList()
     }
 
     // IMX doesn't support floor orders

@@ -3,8 +3,8 @@ package com.rarible.protocol.union.integration.immutablex.converter
 import com.rarible.core.test.data.randomLong
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
-import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
@@ -69,7 +69,7 @@ class ImxActivityConverterTest {
         assertThat(result.buyer.value).isEqualTo(buy.creator)
 
         assertThat(result.nft.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
-        assertThat(result.payment.type).isInstanceOf(EthEthereumAssetTypeDto::class.java)
+        assertThat(result.payment.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
 
         assertThat(result.nft.value).isEqualTo(BigDecimal.ONE)
         // Considering decimals = 0

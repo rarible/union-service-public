@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 data class UnionCollection(
     val id: CollectionIdDto,
     val name: String,
+    val status: CollectionDto.Status? = null,
     val type: CollectionDto.Type,
     val minters: List<UnionAddress>? = listOf(),
     val features: List<CollectionDto.Features> = listOf(),

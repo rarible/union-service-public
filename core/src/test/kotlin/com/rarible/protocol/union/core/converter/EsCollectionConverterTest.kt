@@ -28,7 +28,6 @@ class EsCollectionConverterTest {
         unionCollection.meta?.let {
             assertThat(esCollection.meta).isNotNull
             assertThat(esCollection.meta!!.name).isEqualTo(it.name)
-            assertThat(esCollection.meta!!.description).isEqualTo(it.description)
         }
     }
 

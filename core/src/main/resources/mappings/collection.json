@@ -38,9 +38,6 @@
         "name": {
           "type": "keyword"
         },
-        "description": {
-          "type": "keyword"
-        },
         "feeRecipient": {
           "type": "keyword"
         }
