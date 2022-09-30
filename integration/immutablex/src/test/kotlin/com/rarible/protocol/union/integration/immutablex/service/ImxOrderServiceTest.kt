@@ -1,9 +1,18 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.core.test.data.randomAddress
+import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.integration.data.randomImxOrder
+import com.rarible.protocol.union.integration.data.randomImxOrderBuySide
+import com.rarible.protocol.union.integration.data.randomImxOrderSellSide
+import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrdersPage
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import io.mockk.clearMocks
+import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -16,10 +25,58 @@ class ImxOrderServiceTest {
     private val orderClient: ImxOrderClient = mockk()
 
     private val service = ImxOrderService(orderClient)
+    private val currencyProbeBatchSize = 64
 
     @BeforeEach
     fun beforeEach() {
         clearMocks(orderClient)
+    }
+
+    @Test
+    fun `get sell currencies`() = runBlocking<Unit> {
+        val token = randomAddress().prefixed()
+        val tokenId = randomBigInt().toString()
+
+        val sell = randomImxOrder()
+        val swap = randomImxOrder(buy = randomImxOrderSellSide())
+        val buy = randomImxOrder(buy = randomImxOrderSellSide(), sell = randomImxOrderBuySide())
+
+        val all = listOf(buy, sell, swap)
+        coEvery {
+            orderClient.getSellOrdersByItem(token, tokenId, OrderStatusDto.ACTIVE, null, currencyProbeBatchSize)
+        } returns ImmutablexOrdersPage.empty()
+
+        coEvery {
+            orderClient.getSellOrdersByItem(token, tokenId, null, null, currencyProbeBatchSize)
+        } returns ImmutablexOrdersPage(all)
+
+        val result = service.getSellCurrencies("$token:$tokenId")
+
+        // we are interested only in sell-orders currencies, swap/buy orders should be filtered
+        assertThat(result).hasSize(1)
+        assertThat(result[0].ext.currencyAddress()).isEqualTo(sell.buy.data.tokenAddress)
+    }
+
+    @Test
+    fun `get bid currencies`() = runBlocking<Unit> {
+        val token = randomAddress().prefixed()
+        val tokenId = randomBigInt().toString()
+
+        val sell = randomImxOrder(buy = randomImxOrderBuySide())
+        val swap = randomImxOrder(buy = randomImxOrderSellSide())
+        val buy = randomImxOrder(buy = randomImxOrderSellSide(), sell = randomImxOrderBuySide())
+
+        val all = listOf(buy, sell, swap)
+
+        coEvery {
+            orderClient.getBuyOrdersByItem(token, tokenId, null, currencyProbeBatchSize)
+        } returns ImmutablexOrdersPage(all)
+
+        val result = service.getBidCurrencies("$token:$tokenId")
+
+        // we are interested only in buy-orders currencies, swap/sell orders should be filtered
+        assertThat(result).hasSize(1)
+        assertThat(result[0].ext.currencyAddress()).isEqualTo(buy.sell.data.tokenAddress)
     }
 
     @Test

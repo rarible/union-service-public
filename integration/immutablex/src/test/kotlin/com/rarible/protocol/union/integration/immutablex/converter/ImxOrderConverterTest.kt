@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.immutablex.converter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
-import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.ImmutablexOrderDataV1Dto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -32,7 +31,7 @@ class ImxOrderConverterTest {
         assertThat(order.make.value).isEqualTo(BigDecimal.ONE)
 
         // By default we don't have decimals in DTO
-        assertThat(order.take.type).isInstanceOf(EthEthereumAssetTypeDto::class.java)
+        assertThat(order.take.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
         assertThat(order.take.value).isEqualTo(payment)
 
         assertThat(order.maker.value).isEqualTo(imxOrder.creator)
@@ -64,7 +63,7 @@ class ImxOrderConverterTest {
         assertThat(order.id.value).isEqualTo(imxOrder.orderId.toString())
 
         // By default we don't have decimals in DTO
-        assertThat(order.make.type).isInstanceOf(EthEthereumAssetTypeDto::class.java)
+        assertThat(order.make.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
         assertThat(order.make.value).isEqualTo(payment)
 
         assertThat(order.take.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
@@ -115,7 +114,7 @@ class ImxOrderConverterTest {
 
         val asset = ImxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
 
-        assertThat(asset.type).isInstanceOf(EthEthereumAssetTypeDto::class.java)
+        assertThat(asset.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
         assertThat(asset.value).isEqualTo(BigDecimal("100.0"))
     }
 
