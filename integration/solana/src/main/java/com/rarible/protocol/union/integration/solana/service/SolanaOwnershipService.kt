@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.integration.solana.service
 
 import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.common.mapAsync
 import com.rarible.protocol.solana.api.client.BalanceControllerApi
+import com.rarible.protocol.solana.dto.BalanceIdsDto
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -11,7 +11,6 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.solana.converter.SolanaOwnershipConverter
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClientResponseException
@@ -39,14 +38,11 @@ open class SolanaOwnershipService(
     }
 
     override suspend fun getOwnershipsByIds(ownershipIds: List<String>): List<UnionOwnership> {
-        val result = coroutineScope {
-            ownershipIds.chunked(16).map { chunk ->
-                chunk.mapAsync {
-                    getOwnershipById(it)
-                }
-            }.flatten()
-        }
-        return result
+        val result = balanceApi.getBalanceByMintAndOwnerBatch(BalanceIdsDto(ownershipIds)).awaitFirst()
+
+        return result.balances
+            .filter { it.isAssociatedTokenAccount == true }
+            .map { SolanaOwnershipConverter.convert(it, blockchain) }
     }
 
     override suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
