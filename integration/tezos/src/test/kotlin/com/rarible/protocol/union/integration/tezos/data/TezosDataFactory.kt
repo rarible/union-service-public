@@ -102,8 +102,7 @@ fun randomTezosDipDupItemDto(itemId: ItemIdDto): DipDupItem {
         updated = Instant.now(),
         contract = contract,
         deleted = false,
-        tzktId = BigInteger.ONE,
-        metadata = null
+        tzktId = BigInteger.ONE
     )
 }
 
