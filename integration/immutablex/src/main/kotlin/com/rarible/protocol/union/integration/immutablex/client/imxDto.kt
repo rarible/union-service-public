@@ -40,6 +40,8 @@ data class ImmutablexAsset(
     fun encodedItemId() = "$tokenAddress:${encodedTokenId()}"
 
     fun isDeleted() = status != "imx"
+
+    fun isEmpty(): Boolean = name.isNullOrEmpty() && description.isNullOrEmpty() && metadata.isNullOrEmpty()
 }
 
 data class ImmutablexCollectionShort(
