@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.continuation.UnionItemContinuation
 import com.rarible.protocol.union.core.model.UnionItem
@@ -26,6 +27,8 @@ import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectio
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionMetaSchemaRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import org.springframework.http.HttpStatus
+import org.springframework.web.reactive.function.client.WebClientResponseException
 
 class ImxItemService(
     private val assetClient: ImxAssetClient,
@@ -65,6 +68,17 @@ class ImxItemService(
         val decodedItemId = TokenIdDecoder.decodeItemId(itemId)
         val attributesDeferred = coroutineScope { async { getMetaAttributeKeys(decodedItemId) } }
         val asset = assetClient.getById(decodedItemId)
+        if (asset.isEmpty()) {
+            throw WebClientResponseProxyException(
+                WebClientResponseException(
+                    HttpStatus.NOT_FOUND.value(),
+                    HttpStatus.NOT_FOUND.reasonPhrase,
+                    null,
+                    null,
+                    null
+                )
+            )
+        }
         return ImxItemMetaConverter.convert(asset, attributesDeferred.await(), blockchain)
     }
 
@@ -101,7 +115,6 @@ class ImxItemService(
             .map { it.copy(lastUpdatedAt = mints[it.id.value]!!.timestamp) }
 
         return Paging(UnionItemContinuation.ByLastUpdatedAndId, converted).getPage(size, 0)
-
     }
 
     override suspend fun getItemsByOwner(owner: String, continuation: String?, size: Int): Page<UnionItem> {
