@@ -11,6 +11,8 @@ import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.toList
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
@@ -98,6 +100,24 @@ class ActivityController(
     ): ResponseEntity<ActivitiesDto> {
         val result = activitySourceSelector.getActivitiesByUser(
             type, user, blockchains, from, to, continuation, cursor, size, sort, searchEngine
+        )
+        return ResponseEntity.ok(result)
+    }
+
+    override suspend fun getActivitiesByUsers(
+        type: List<UserActivityTypeDto>,
+        requestBody: Flow<String>,
+        blockchains: List<BlockchainDto>?,
+        from: Instant?,
+        to: Instant?,
+        continuation: String?,
+        cursor: String?,
+        size: Int?,
+        sort: ActivitySortDto?,
+        searchEngine: SearchEngineDto?
+    ): ResponseEntity<ActivitiesDto> {
+        val result = activitySourceSelector.getActivitiesByUser(
+            type, requestBody.toList(), blockchains, from, to, continuation, cursor, size, sort, searchEngine
         )
         return ResponseEntity.ok(result)
     }

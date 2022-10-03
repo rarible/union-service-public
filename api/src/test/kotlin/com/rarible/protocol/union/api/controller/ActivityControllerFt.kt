@@ -1062,6 +1062,22 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         assertThat(activities.activities).hasSize(3)
         assertThat(activities.cursor).isNotNull()
         assertThat(activities.continuation).isNotNull()
+
+        val usersActivities = activityControllerApi.getActivitiesByUsers(
+            types,
+            listOf(userEth.fullId(), userFlow.fullId()),
+            listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW),
+            oneWeekAgo,
+            now,
+            null,
+            null, size,
+            sort,
+            null
+        ).awaitFirst()
+
+        assertThat(usersActivities.activities).hasSize(3)
+        assertThat(usersActivities.cursor).isNotNull()
+        assertThat(usersActivities.continuation).isNotNull()
     }
 
     @Test
