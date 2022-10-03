@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller.advice
 
+import com.rarible.dipdup.client.exception.DipDupNotFound
 import com.rarible.protocol.dto.EthereumApiErrorBadRequestDto
 import com.rarible.protocol.dto.EthereumApiErrorEntityNotFoundDto
 import com.rarible.protocol.dto.EthereumApiErrorServerErrorDto
@@ -26,6 +27,7 @@ object ErrorsConverter {
             is EthereumApiErrorEntityNotFoundDto -> UnionApiErrorEntityNotFoundDto(message = data.message)
             // FLOW
             // TEZOS
+            is DipDupNotFound -> UnionApiErrorEntityNotFoundDto(message = data.message ?: "")
             else -> null
         }
     }

@@ -17,6 +17,8 @@ import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupTokenActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityService
 import kotlinx.coroutines.async
@@ -29,7 +31,9 @@ import java.util.regex.Pattern
 @CaptureSpan(type = "blockchain")
 open class TezosActivityService(
     private val dipdupOrderActivityService: DipdupOrderActivityService,
-    private val tzktItemActivityService: TzktItemActivityService
+    private val dipdupTokenActivityService: DipDupTokenActivityService,
+    private val tzktItemActivityService: TzktItemActivityService,
+    private val properties: DipDupIntegrationProperties
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ActivityService {
 
     companion object {
@@ -45,6 +49,7 @@ open class TezosActivityService(
         return getDipDupAndTzktActivities(types, continuation, size, sort)
     }
 
+
     suspend fun getDipDupAndTzktActivities(
         types: List<ActivityTypeDto>,
         continuation: String?,
@@ -55,7 +60,11 @@ open class TezosActivityService(
             dipdupOrderActivityService.getAll(types, continuation, size, sort)
         }
         val itemActivitiesRequest = async {
-            tzktItemActivityService.getAll(types, continuation, size, sort)
+            if (properties.useDipDupTokens) {
+                dipdupTokenActivityService.getAll(types, continuation, size, sort)
+            } else {
+                tzktItemActivityService.getAll(types, continuation, size, sort)
+            }
         }
         val activities = (orderActivitiesRequest.await().entities + itemActivitiesRequest.await().entities)
 
@@ -117,7 +126,11 @@ open class TezosActivityService(
             dipdupOrderActivityService.getByItem(types, contract, tokenId, continuation, size, sort)
         }
         val itemActivitiesRequest = async {
-            tzktItemActivityService.getByItem(types, contract, tokenId, continuation, size, sort)
+            if (properties.useDipDupTokens) {
+                dipdupTokenActivityService.getByItem(types, contract, tokenId, continuation, size, sort)
+            } else {
+                tzktItemActivityService.getByItem(types, contract, tokenId, continuation, size, sort)
+            }
         }
         val activities = (orderActivitiesRequest.await().entities + itemActivitiesRequest.await().entities)
 
@@ -177,11 +190,15 @@ open class TezosActivityService(
         }
         val tzktItemRequest = async {
             val ids = itemActivitiesIds.filter { isValidLong(it) }
-            if (ids.isNotEmpty()) {
-                tzktItemActivityService.getByIds(ids)
-                    .also { logger.info("Total tzkt item activities returned: ${it.size}") }
+            if (properties.useDipDupTokens) {
+                dipdupTokenActivityService.getByIds(ids)
             } else {
-                emptyList()
+                if (ids.isNotEmpty()) {
+                    tzktItemActivityService.getByIds(ids)
+                        .also { logger.info("Total tzkt item activities returned: ${it.size}") }
+                } else {
+                    emptyList()
+                }
             }
         }
 

@@ -7,6 +7,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupActivity
 import com.rarible.dipdup.client.core.model.DipDupCollection
+import com.rarible.dipdup.client.core.model.DipDupMintActivity
 import com.rarible.dipdup.client.core.model.DipDupOrderListActivity
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.listener.model.DipDupCollectionEvent
@@ -41,6 +42,20 @@ fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
             assetValue = BigDecimal.ONE
         ),
         source = TezosPlatform.RARIBLE_V2
+    )
+}
+
+fun randomDipDupActivityMint(activityId: String): DipDupMintActivity {
+    return DipDupMintActivity(
+        id = activityId,
+        date = nowMillis().atOffset(ZoneOffset.UTC),
+        reverted = false,
+        transferId = randomLong().toString(),
+        contract = UUID.randomUUID().toString(),
+        tokenId = BigInteger.ONE,
+        value = BigDecimal.ONE,
+        transactionId = randomLong().toString(),
+        owner = UUID.randomUUID().toString()
     )
 }
 

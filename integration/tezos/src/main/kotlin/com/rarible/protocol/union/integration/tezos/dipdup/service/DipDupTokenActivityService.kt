@@ -1,31 +1,33 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.service
 
-import com.rarible.core.logging.Logger
-import com.rarible.dipdup.client.OrderActivityClient
+import com.rarible.dipdup.client.TokenActivityClient
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
+import org.slf4j.LoggerFactory
 import java.math.BigInteger
 
-class DipdupOrderActivityServiceImpl(
-    private val dipdupActivityClient: OrderActivityClient,
+class DipDupTokenActivityService(
+    private val dipDupTokenActivityClient: TokenActivityClient,
     private val dipDupActivityConverter: DipDupActivityConverter
-): DipdupOrderActivityService {
+) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private val blockchain = BlockchainDto.TEZOS
 
-    override suspend fun getAll(types: List<ActivityTypeDto>, continuation: String?, limit: Int, sort: ActivitySortDto?): Slice<ActivityDto> {
-        val dipdupTypes = dipDupActivityConverter.convertToDipDupOrderActivitiesTypes(types)
+    suspend fun getAll(types: List<ActivityTypeDto>, continuation: String?, limit: Int, sort: ActivitySortDto?): Slice<ActivityDto> {
+        val dipdupTypes = dipDupActivityConverter.convertToDipDupNftActivitiesTypes(types)
         val sortAsc = when (sort) {
             ActivitySortDto.EARLIEST_FIRST -> true
             else -> false
         }
         return if (dipdupTypes.size > 0) {
             logger.info("Fetch dipdup all activities: $types, $continuation, $limit, $sort")
-            val page = dipdupActivityClient.getActivitiesAll(dipdupTypes, limit, continuation, sortAsc)
+            val page = dipDupTokenActivityClient.getActivitiesAll(dipdupTypes, limit, continuation, sortAsc)
             Slice(
                 continuation = page.continuation,
                 entities = page.activities.map { dipDupActivityConverter.convert(it, blockchain) }
@@ -33,7 +35,7 @@ class DipdupOrderActivityServiceImpl(
         } else Slice.empty()
     }
 
-    override suspend fun getByItem(
+    suspend fun getByItem(
         types: List<ActivityTypeDto>,
         contract: String,
         tokenId: BigInteger,
@@ -41,14 +43,14 @@ class DipdupOrderActivityServiceImpl(
         limit: Int,
         sort: ActivitySortDto?
     ): Slice<ActivityDto> {
-        val dipdupTypes = dipDupActivityConverter.convertToDipDupOrderActivitiesTypes(types)
+        val dipdupTypes = dipDupActivityConverter.convertToDipDupNftActivitiesTypes(types)
         val sortAsc = when (sort) {
             ActivitySortDto.EARLIEST_FIRST -> true
             else -> false
         }
         return if (dipdupTypes.size > 0) {
             logger.info("Fetch dipdup activities by item: $types, $contract, $tokenId, $continuation, $limit, $sort")
-            val page = dipdupActivityClient.getActivitiesByItem(
+            val page = dipDupTokenActivityClient.getActivitiesByItem(
                 dipdupTypes,
                 contract,
                 tokenId.toString(),
@@ -65,14 +67,10 @@ class DipdupOrderActivityServiceImpl(
         }
     }
 
-    override suspend fun getByIds(ids: List<String>): List<ActivityDto> {
+    suspend fun getByIds(ids: List<String>): List<ActivityDto> {
         logger.info("Fetch dipdup activities by ids: $ids")
-        val activities = dipdupActivityClient.getActivitiesByIds(ids)
+        val activities = dipDupTokenActivityClient.getActivitiesByIds(ids)
         return activities.map { dipDupActivityConverter.convert(it, BlockchainDto.TEZOS) }
-    }
-
-    companion object {
-        private val logger by Logger()
     }
 
 }

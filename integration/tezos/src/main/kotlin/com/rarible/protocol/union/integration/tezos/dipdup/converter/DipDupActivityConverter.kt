@@ -47,15 +47,29 @@ class DipDupActivityConverter(
         }
     }
 
-    fun convertToDipDupTypes(source: List<ActivityTypeDto>): List<DipDupActivityType> {
-        return source.mapNotNull { convertToDipDupType(it) }
+    fun convertToDipDupOrderActivitiesTypes(source: List<ActivityTypeDto>): List<DipDupActivityType> {
+        return source.mapNotNull { asOrderActivityType(it) }
     }
 
-    fun convertToDipDupType(source: ActivityTypeDto) = when (source) {
+    fun convertToDipDupNftActivitiesTypes(source: List<ActivityTypeDto>): List<DipDupActivityType> {
+        return source.mapNotNull { asNftActivityType(it) }
+    }
+
+    fun asOrderActivityType(source: ActivityTypeDto) = when (source) {
         ActivityTypeDto.LIST -> DipDupActivityType.LIST
         ActivityTypeDto.SELL -> DipDupActivityType.SELL
         ActivityTypeDto.CANCEL_LIST -> DipDupActivityType.CANCEL_LIST
         else -> null
+    }
+
+
+    fun asNftActivityType(source: ActivityTypeDto): DipDupActivityType? {
+        return when (source) {
+            ActivityTypeDto.TRANSFER -> DipDupActivityType.TRANSFER
+            ActivityTypeDto.MINT -> DipDupActivityType.MINT
+            ActivityTypeDto.BURN -> DipDupActivityType.BURN
+            else -> null
+        }
     }
 
     fun price(value: BigDecimal, makeValue: BigDecimal, platform: TezosPlatform) =

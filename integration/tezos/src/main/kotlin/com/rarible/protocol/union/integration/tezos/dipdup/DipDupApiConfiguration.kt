@@ -11,6 +11,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupCollect
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupOwnershipService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupRoyaltyService
+import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupTokenActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityServiceImpl
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
@@ -71,6 +72,9 @@ class DipDupApiConfiguration(
 
     @Bean
     fun dipdupOrderActivityApi() = OrderActivityClient(apolloClient)
+
+    @Bean
+    fun dipdupTokenActivityApi() = com.rarible.dipdup.client.TokenActivityClient(apolloClient)
 
     @Bean
     fun dipdupTokenApi() = com.rarible.dipdup.client.TokenClient(apolloClient)
@@ -135,6 +139,14 @@ class DipDupApiConfiguration(
         dipDupActivityConverter: DipDupActivityConverter
     ): DipdupOrderActivityService {
         return DipdupOrderActivityServiceImpl(orderActivityClient, dipDupActivityConverter)
+    }
+
+    @Bean
+    fun dipdupTokenActivitiesService(
+        dipDupTokenActivityClient: com.rarible.dipdup.client.TokenActivityClient,
+        dipDupActivityConverter: DipDupActivityConverter
+    ): DipDupTokenActivityService {
+        return DipDupTokenActivityService(dipDupTokenActivityClient, dipDupActivityConverter)
     }
 
     @Bean
