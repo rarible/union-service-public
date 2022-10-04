@@ -11,6 +11,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.listener.config.PlatformBestSellCleanUpProperties
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.protocol.union.listener.test.data.defaultUnionListenerProperties
 import io.mockk.coEvery
@@ -23,24 +24,24 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @IntegrationTest
-class OpenSeaOrderOwnershipCleanupJobIt {
+class PlatformBestSellOrderOwnershipCleanupJobIt {
 
     @Autowired
     lateinit var ownershipRepository: OwnershipRepository
 
     val ownershipService: EnrichmentOwnershipService = mockk()
     val listener: OutgoingOwnershipEventListener = mockk()
-    val filter: OpenSeaCleanupOrderFilter = mockk()
+    val properties = defaultUnionListenerProperties()
+        .copy(platformBestSellCleanup = PlatformBestSellCleanUpProperties(enabled = true))
 
-    lateinit var job: OpenSeaOrderOwnershipCleanupJob
+    lateinit var job: PlatformBestSellOrderOwnershipCleanupJob
 
     @BeforeEach
     fun beforeEach() {
-        job = OpenSeaOrderOwnershipCleanupJob(
-            ownershipRepository, ownershipService, listOf(listener), filter, defaultUnionListenerProperties()
+        job = PlatformBestSellOrderOwnershipCleanupJob(
+            ownershipRepository, ownershipService, listOf(listener), properties
         )
         coEvery { listener.onEvent(any()) } returns Unit
-        coEvery { filter.isOld(any(), any(), any()) } returns false
         coEvery { ownershipService.enrichOwnership(any()) } answers {
             val shortOwnership = it.invocation.args[0] as ShortOwnership
             EnrichedOwnershipConverter.convert(randomUnionOwnership(shortOwnership.id.toDto()), shortOwnership)
@@ -64,7 +65,7 @@ class OpenSeaOrderOwnershipCleanupJobIt {
         ownershipRepository.save(withOpenSea)
         ownershipRepository.save(withoutOpenSea)
 
-        job.execute(null).collect()
+        job.execute(PlatformDto.OPEN_SEA, null).collect()
 
         val updatedOpenSea = ownershipRepository.get(withOpenSea.id)
 

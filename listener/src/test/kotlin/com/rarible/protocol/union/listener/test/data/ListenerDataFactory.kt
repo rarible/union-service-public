@@ -9,12 +9,11 @@ import com.rarible.protocol.union.listener.config.CollectionStatisticsResyncProp
 import com.rarible.protocol.union.listener.config.InternalConsumerProperties
 import com.rarible.protocol.union.listener.config.MetaSchedulingProperties
 import com.rarible.protocol.union.listener.config.MetricsProperties
-import com.rarible.protocol.union.listener.config.OpenSeaCleanUpProperties
+import com.rarible.protocol.union.listener.config.PlatformBestSellCleanUpProperties
 import com.rarible.protocol.union.listener.config.PriceUpdateProperties
 import com.rarible.protocol.union.listener.config.ReconcileMarksProperties
 import com.rarible.protocol.union.listener.config.ReconciliationProperties
 import com.rarible.protocol.union.listener.config.UnionListenerProperties
-import java.time.temporal.ChronoUnit
 
 fun defaultUnionListenerProperties(): UnionListenerProperties {
     return UnionListenerProperties(
@@ -22,9 +21,7 @@ fun defaultUnionListenerProperties(): UnionListenerProperties {
         priceUpdate = PriceUpdateProperties(),
         reconcileMarks = ReconcileMarksProperties(),
         consumer = InternalConsumerProperties("doesn't matter", mapOf()),
-        openSeaCleanup = OpenSeaCleanUpProperties(
-            sellOrderFrom = nowMillis().minus(10, ChronoUnit.DAYS)
-        ),
+        platformBestSellCleanup = PlatformBestSellCleanUpProperties(enabled = false),
         collectionStatisticsResync = CollectionStatisticsResyncProperties(),
         metrics = MetricsProperties(),
         metaScheduling = MetaSchedulingProperties()
