@@ -31,7 +31,9 @@ class OwnershipReconciliationController(
         if (ids.isEmpty()) {
             return OwnershipsDto()
         }
+
         val ownerships = ownershipSourceSelectService.getOwnershipsByIds(ids)
+
         return OwnershipsDto(
             total = 0,
             ownerships = ownerships,

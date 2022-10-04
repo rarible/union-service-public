@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.core.service.CollectionService
-import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
@@ -15,7 +13,6 @@ import java.time.Instant
 
 @RestController
 class CollectionReconciliationController(
-    private val router: BlockchainRouter<CollectionService>,
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val collectionRepository: CollectionRepository,
 ) {
