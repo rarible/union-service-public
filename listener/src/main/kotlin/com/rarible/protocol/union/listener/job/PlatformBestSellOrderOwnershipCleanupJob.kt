@@ -21,28 +21,26 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class OpenSeaOrderOwnershipCleanupJob(
+class PlatformBestSellOrderOwnershipCleanupJob(
     private val ownershipRepository: OwnershipRepository,
     private val ownershipService: EnrichmentOwnershipService,
     private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
-    private val orderFilter: OpenSeaCleanupOrderFilter,
-    private val properties: UnionListenerProperties
+    properties: UnionListenerProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val batchSize = properties.openSeaCleanup.itemBatchSize
-    private val from = properties.openSeaCleanup.sellOrderFrom
-    private val enabled = properties.openSeaCleanup.enabled
+    private val batchSize = properties.platformBestSellCleanup.itemBatchSize
+    private val enabled = properties.platformBestSellCleanup.enabled
 
-    fun execute(fromShortOwnershipId: ShortOwnershipId?): Flow<ShortOwnershipId> {
+    fun execute(platform: PlatformDto, fromShortOwnershipId: ShortOwnershipId?): Flow<ShortOwnershipId> {
         if (!enabled) {
             return emptyFlow()
         }
         return flow {
             var next = fromShortOwnershipId
             do {
-                next = cleanup(next)
+                next = cleanup(platform, next)
                 if (next != null) {
                     emit(next)
                 }
@@ -50,8 +48,8 @@ class OpenSeaOrderOwnershipCleanupJob(
         }
     }
 
-    suspend fun cleanup(fromShortOwnershipId: ShortOwnershipId?): ShortOwnershipId? {
-        val batch = ownershipRepository.findByPlatformWithSell(PlatformDto.OPEN_SEA, fromShortOwnershipId, batchSize)
+    suspend fun cleanup(platform: PlatformDto, fromShortOwnershipId: ShortOwnershipId?): ShortOwnershipId? {
+        val batch = ownershipRepository.findByPlatformWithSell(platform, fromShortOwnershipId, batchSize)
             .toList()
 
         coroutineScope {
@@ -65,15 +63,11 @@ class OpenSeaOrderOwnershipCleanupJob(
     }
 
     private suspend fun cleanup(ownership: ShortOwnership) {
-        val openSeaOrder = ownership.bestSellOrder ?: return
-
-        if (orderFilter.isOld(ownership.blockchain, openSeaOrder.id, from)) {
-            return
-        }
+        val order = ownership.bestSellOrder ?: return
 
         val updated = ownership.copy(bestSellOrder = null, bestSellOrders = emptyMap())
 
-        logger.info("Updated ownership [{}], OpenSea order removed: [{}]", updated, openSeaOrder.id)
+        logger.info("Updated ownership [{}], OpenSea order removed: [{}]", updated, order.id)
         ownershipRepository.save(updated.withCalculatedFields())
 
         ignoreApi404 {

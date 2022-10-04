@@ -187,11 +187,10 @@ listener:
     activityBatchSize: 100
     threadCount: 2
     notificationEnabled: false
-  openSeaCleanup:
+  platformBestSellCleanup:
     enabled: true
-    #sellOrderFrom: "2022-02-06T00:00:00.000Z"
     itemBatchSize: 100
-    ownershipBatchSize: 50
+    ownershipBatchSize: 100
   collection-statistics-resync:
     enabled: false
     rate: PT12H

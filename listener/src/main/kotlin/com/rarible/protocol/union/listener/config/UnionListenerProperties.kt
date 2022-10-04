@@ -4,7 +4,6 @@ import com.rarible.core.daemon.DaemonWorkerProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import java.time.Duration
-import java.time.Instant
 
 @ConstructorBinding
 @ConfigurationProperties("listener")
@@ -12,7 +11,7 @@ data class UnionListenerProperties(
     val consumer: InternalConsumerProperties,
     val monitoringWorker: DaemonWorkerProperties = DaemonWorkerProperties(),
     val reconciliation: ReconciliationProperties,
-    val openSeaCleanup: OpenSeaCleanUpProperties,
+    val platformBestSellCleanup: PlatformBestSellCleanUpProperties = PlatformBestSellCleanUpProperties(),
     val collectionStatisticsResync: CollectionStatisticsResyncProperties,
     val priceUpdate: PriceUpdateProperties,
     val reconcileMarks: ReconcileMarksProperties,
@@ -51,9 +50,8 @@ class CollectionStatisticsResyncProperties(
     val limit: Int = 50
 )
 
-data class OpenSeaCleanUpProperties(
+data class PlatformBestSellCleanUpProperties(
     val enabled: Boolean = true,
-    val sellOrderFrom: Instant?,
     val itemBatchSize: Int = 100,
     val ownershipBatchSize: Int = 100
 )
