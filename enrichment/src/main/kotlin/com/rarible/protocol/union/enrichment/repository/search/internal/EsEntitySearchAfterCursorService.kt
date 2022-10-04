@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 class EsEntitySearchAfterCursorService {
 
     fun buildSearchAfterClause(cursorAsString: String?): List<Any>? {
-        if (cursorAsString.isNullOrEmpty()) return null
+        if (cursorAsString.isNullOrEmpty() || cursorAsString.lowercase() == "null") return null
         return cursorAsString.split("_")
     }
 
