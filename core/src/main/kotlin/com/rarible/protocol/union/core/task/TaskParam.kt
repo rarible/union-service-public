@@ -33,6 +33,7 @@ data class ActivityTaskParam(
     override val index: String,
     val from: Long? = null,
     val to: Long? = null,
+    val tags: List<String>? = null,
 ) : TaskParam()
 
 data class RemoveRevertedActivityTaskParam(
