@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
 import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
 import com.rarible.protocol.union.dto.BlockchainDto
+import kotlinx.coroutines.flow.collect
 
 abstract class IncomingBlockchainEventHandler<T>(
     private val eventProducer: UnionInternalBlockchainEventProducer
@@ -18,7 +19,7 @@ abstract class IncomingBlockchainEventHandler<T>(
     override suspend fun onEvents(events: Collection<T>) {
         events.groupBy { getBlockchain(it) }.forEach { blockchainBatch ->
             val messages = blockchainBatch.value.map { toMessage(it) }
-            eventProducer.getProducer(blockchainBatch.key).send(messages)
+            eventProducer.getProducer(blockchainBatch.key).send(messages).collect()
         }
     }
 
