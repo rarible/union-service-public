@@ -112,6 +112,7 @@ integration:
         bidou24x24: ${consul.tezos.dipdup.knownAddresses.bidou24x24:}
         dogami: ${consul.tezos.dipdup.knownAddresses.dogami:}
         dogamiGap: ${consul.tezos.dipdup.knownAddresses.dogamiGap:}
+        dogamiStar: ${consul.tezos.dipdup.knownAddresses.dogamiStar:}
     client:
       url: ${consul.tezos.api.baseUrl}
     consumer:

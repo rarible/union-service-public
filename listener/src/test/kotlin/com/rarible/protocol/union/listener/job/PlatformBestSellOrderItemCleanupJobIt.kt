@@ -12,6 +12,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.listener.config.PlatformBestSellCleanUpProperties
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.protocol.union.listener.test.data.defaultUnionListenerProperties
 import io.mockk.coEvery
@@ -24,24 +25,24 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 @IntegrationTest
-class OpenSeaOrderItemCleanupJobIt {
+class PlatformBestSellOrderItemCleanupJobIt {
 
     @Autowired
     lateinit var itemRepository: ItemRepository
 
     val itemService: EnrichmentItemService = mockk()
     val listener: OutgoingItemEventListener = mockk()
-    val filter: OpenSeaCleanupOrderFilter = mockk()
+    val properties = defaultUnionListenerProperties()
+        .copy(platformBestSellCleanup = PlatformBestSellCleanUpProperties(enabled = true))
 
-    lateinit var job: OpenSeaOrderItemCleanupJob
+    lateinit var job: PlatformBestSellOrderItemCleanupJob
 
     @BeforeEach
     fun beforeEach() {
-        job = OpenSeaOrderItemCleanupJob(
-            itemRepository, itemService, listOf(listener), filter, defaultUnionListenerProperties()
+        job = PlatformBestSellOrderItemCleanupJob(
+            itemRepository, itemService, listOf(listener), properties
         )
         coEvery { listener.onEvent(any()) } returns Unit
-        coEvery { filter.isOld(any(), any(), any()) } returns false
         coEvery { itemService.enrichItem(shortItem = any(), metaPipeline = any()) } answers {
             val shortItem = it.invocation.args[0] as ShortItem
             EnrichedItemConverter.convert(randomUnionItem(shortItem.id.toDto()), shortItem)
@@ -81,7 +82,7 @@ class OpenSeaOrderItemCleanupJobIt {
         itemRepository.save(withoutOpenSea)
         itemRepository.save(withOpenSeaEmpty)
 
-        job.execute(null).collect()
+        job.execute(PlatformDto.OPEN_SEA, null).collect()
 
         val updatedOpenSea = itemRepository.get(withOpenSea.id)!!
 

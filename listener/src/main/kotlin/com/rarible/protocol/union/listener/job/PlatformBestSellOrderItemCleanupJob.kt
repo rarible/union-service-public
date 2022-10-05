@@ -22,28 +22,26 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class OpenSeaOrderItemCleanupJob(
+class PlatformBestSellOrderItemCleanupJob(
     private val itemRepository: ItemRepository,
     private val itemService: EnrichmentItemService,
     private val itemEventListeners: List<OutgoingItemEventListener>,
-    private val orderFilter: OpenSeaCleanupOrderFilter,
-    private val properties: UnionListenerProperties
+    properties: UnionListenerProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val batchSize = properties.openSeaCleanup.itemBatchSize
-    private val from = properties.openSeaCleanup.sellOrderFrom
-    private val enabled = properties.openSeaCleanup.enabled
+    private val batchSize = properties.platformBestSellCleanup.itemBatchSize
+    private val enabled = properties.platformBestSellCleanup.enabled
 
-    fun execute(fromShortItemId: ShortItemId?): Flow<ShortItemId> {
+    fun execute(platform: PlatformDto, fromShortItemId: ShortItemId?): Flow<ShortItemId> {
         if (!enabled) {
             return emptyFlow()
         }
         return flow {
             var next = fromShortItemId
             do {
-                next = cleanup(next)
+                next = cleanup(platform, next)
                 if (next != null) {
                     emit(next)
                 }
@@ -51,8 +49,8 @@ class OpenSeaOrderItemCleanupJob(
         }
     }
 
-    suspend fun cleanup(fromShortItemId: ShortItemId?): ShortItemId? {
-        val batch = itemRepository.findByPlatformWithSell(PlatformDto.OPEN_SEA, fromShortItemId, batchSize)
+    suspend fun cleanup(platform: PlatformDto, fromShortItemId: ShortItemId?): ShortItemId? {
+        val batch = itemRepository.findByPlatformWithSell(platform, fromShortItemId, batchSize)
             .toList()
 
         coroutineScope {
@@ -66,15 +64,11 @@ class OpenSeaOrderItemCleanupJob(
     }
 
     private suspend fun cleanup(item: ShortItem) {
-        val openSeaOrder = item.bestSellOrder ?: return
-
-        if (orderFilter.isOld(item.blockchain, openSeaOrder.id, from)) {
-            return
-        }
+        val order = item.bestSellOrder ?: return
 
         val updated = item.copy(bestSellOrder = null, bestSellOrders = emptyMap())
 
-        logger.info("Updated item [{}], OpenSea order removed: [{}]", updated, openSeaOrder.id)
+        logger.info("Updated item [{}], OpenSea order removed: [{}]", updated, order.id)
         itemRepository.save(updated)
 
         val dto = itemService.enrichItem(

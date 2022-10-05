@@ -123,6 +123,7 @@ integration:
         bidou24x24: ${consul.tezos.dipdup.knownAddresses.bidou24x24:}
         dogami: ${consul.tezos.dipdup.knownAddresses.dogami:}
         dogamiGap: ${consul.tezos.dipdup.knownAddresses.dogamiGap:}
+        dogamiStar: ${consul.tezos.dipdup.knownAddresses.dogamiStar:}
       marketplaces:
         hen: ${consul.tezos.dipdup.marketplaces.hen:false}
         objkt: ${consul.tezos.dipdup.marketplaces.objkt:false}
@@ -186,11 +187,10 @@ listener:
     activityBatchSize: 100
     threadCount: 2
     notificationEnabled: false
-  openSeaCleanup:
+  platformBestSellCleanup:
     enabled: true
-    #sellOrderFrom: "2022-02-06T00:00:00.000Z"
     itemBatchSize: 100
-    ownershipBatchSize: 50
+    ownershipBatchSize: 100
   collection-statistics-resync:
     enabled: false
     rate: PT12H
