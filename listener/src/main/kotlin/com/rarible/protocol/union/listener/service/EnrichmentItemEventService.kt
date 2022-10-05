@@ -30,7 +30,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class EnrichmentItemEventService(
@@ -170,10 +170,9 @@ class EnrichmentItemEventService(
             // If item excluded from the pool, we can consider this order as FILLED to recalculate actual best sell
             PoolItemAction.EXCLUDED -> order.copy(status = OrderStatusDto.FILLED)
         }
-        logger.info("Updating hacked pool order: $order for Item $itemId")
+
         updateOrder(itemId, hackedOrder, notificationEnabled) { item ->
             val updated = OrderPoolEvaluator.updatePoolOrderSet(item, hackedOrder, action)
-            logger.info("Updated Item: $updated")
             // Origins might be ignored for such orders
             bestOrderService.updateBestSellOrder(updated, hackedOrder, emptyList())
         }

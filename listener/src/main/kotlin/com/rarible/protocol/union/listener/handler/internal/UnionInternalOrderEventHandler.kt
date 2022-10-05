@@ -37,7 +37,6 @@ class UnionInternalOrderEventHandler(
     @CaptureTransaction("UnionOrderEvent")
     suspend fun onEvent(event: UnionOrderEvent) {
         try {
-            logger.info("Received Union Order event: $event")
             when (event) {
                 is UnionOrderUpdateEvent -> {
                     when (event.order.isPoolOrder) {
@@ -76,7 +75,6 @@ class UnionInternalOrderEventHandler(
         if (!ff.enablePoolOrders) {
             return
         }
-        logger.info("Updating pool order ${event.order.id} for Item ${event.itemId} with action: ${event.action}")
         // for synthetic updates it might be costly to fetch order - so use received one
         orderEventService.updatePoolOrder(event.order, event.itemId, event.action)
     }
