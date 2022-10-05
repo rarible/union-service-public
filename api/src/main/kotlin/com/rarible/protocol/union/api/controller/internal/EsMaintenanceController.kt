@@ -4,6 +4,7 @@ import com.rarible.protocol.union.api.model.internal.EsMaintenanceReindexActivit
 import com.rarible.protocol.union.api.service.elastic.ElasticMaintenanceService
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -18,7 +19,7 @@ class EsMaintenanceController(
         value = ["/maintenance/es/reindex/activity"],
         consumes = ["application/json"]
     )
-    suspend fun reindexActivities(payload: EsMaintenanceReindexActivityDto) {
+    suspend fun reindexActivities(@RequestBody payload: EsMaintenanceReindexActivityDto) {
         logger.info("Got request to reindex activities: $payload")
         elasticMaintenanceService.scheduleReindexActivitiesTasks(
             blockchains = payload.blockchains,
