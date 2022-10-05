@@ -59,7 +59,10 @@ class ReconciliationCorruptedItemJob(
         bestOrders.forEach {
             val itemId = orderToItem.remove(it.id)!!
             if (!BestOrderValidator.isValid(it)) {
-                logger.info("Found best Order with incorrect state: {}, Item: {}", it.id, itemId)
+                logger.info(
+                    "Found best Order with incorrect state: {} (platform={}, updatedAt={}), Item: {}",
+                    it.id, it.platform, it.lastUpdatedAt, itemId
+                )
                 corruptedItems.add(itemId)
             }
         }
