@@ -27,6 +27,6 @@ class EsMaintenanceController(
             to = payload.to,
             esIndex = payload.esIndex,
         )
-        logger.info("Reindex activities tasks scheduled")
+        logger.info("Reindex activities tasks scheduled: $payload")
     }
 }
