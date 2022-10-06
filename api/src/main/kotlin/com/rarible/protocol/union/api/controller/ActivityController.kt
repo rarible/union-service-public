@@ -24,6 +24,7 @@ class ActivityController(
 
     companion object {
         private val logger by Logger()
+        private const val MAX_USERS_COUNT = 2000
     }
 
     override suspend fun getAllActivities(
@@ -117,7 +118,7 @@ class ActivityController(
         searchEngine: SearchEngineDto?
     ): ResponseEntity<ActivitiesDto> {
         val result = activitySourceSelector.getActivitiesByUser(
-            type, requestBody.toList(), blockchains, from, to, continuation, cursor, size, sort, searchEngine
+            type, requestBody.toList().take(MAX_USERS_COUNT), blockchains, from, to, continuation, cursor, size, sort, searchEngine
         )
         return ResponseEntity.ok(result)
     }
