@@ -11,7 +11,7 @@ import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.worker.task.search.ChangeAliasTaskParam
-import com.rarible.protocol.union.worker.task.search.ItemTaskParam
+import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import io.mockk.coEvery
 import io.mockk.coVerify

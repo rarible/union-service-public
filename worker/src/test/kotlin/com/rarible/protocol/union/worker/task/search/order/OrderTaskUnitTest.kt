@@ -6,7 +6,7 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.OrderReindexProperties
-import com.rarible.protocol.union.worker.task.search.OrderTaskParam
+import com.rarible.protocol.union.core.task.OrderTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import io.mockk.coEvery
 import io.mockk.coVerify

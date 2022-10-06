@@ -4,7 +4,7 @@ import com.rarible.core.task.TaskHandler
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.worker.config.CollectionReindexProperties
-import com.rarible.protocol.union.worker.task.search.CollectionTaskParam
+import com.rarible.protocol.union.core.task.CollectionTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow

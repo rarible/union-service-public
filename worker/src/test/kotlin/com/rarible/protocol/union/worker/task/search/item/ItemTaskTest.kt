@@ -18,7 +18,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
-import com.rarible.protocol.union.worker.task.search.ItemTaskParam
+import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.RateLimiter
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
