@@ -20,6 +20,7 @@ import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
 import com.rarible.protocol.union.dto.FakeSubscriptionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.SubscriptionEventDto
 import com.rarible.protocol.union.dto.SubscriptionRequestDto
@@ -165,6 +166,13 @@ class MockContext : ApplicationListener<WebServerInitializedEvent> {
     fun unionItemEventProducer(): RaribleKafkaProducer<ItemEventDto> {
         val itemTopic = UnionEventTopicProvider.getItemTopic("test")
         return createUnionProducer("item", itemTopic, ItemEventDto::class.java)
+    }
+
+    @Bean
+    @Qualifier("order.producer.api")
+    fun unionOrderEventProducer(): RaribleKafkaProducer<OrderUpdateEventDto> {
+        val orderTopic = UnionEventTopicProvider.getOrderTopic("test")
+        return createUnionProducer("order", orderTopic, OrderUpdateEventDto::class.java)
     }
 
     private fun <T> createUnionProducer(clientSuffix: String, topic: String, type: Class<T>): RaribleKafkaProducer<T> {

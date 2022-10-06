@@ -21,6 +21,7 @@ import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.protocol.union.integration.ethereum.mock.EthActivityControllerApiMock
@@ -234,6 +235,10 @@ abstract class AbstractIntegrationTest {
     @Autowired
     @Qualifier("item.producer.api")
     lateinit var itemProducer: RaribleKafkaProducer<ItemEventDto>
+
+    @Autowired
+    @Qualifier("order.producer.api")
+    lateinit var orderProducer: RaribleKafkaProducer<OrderUpdateEventDto>
 
     @Autowired
     lateinit var ethOwnershipProducer: RaribleKafkaProducer<ItemEventDto>
