@@ -6,7 +6,8 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.worker.task.search.ActivityTaskParam
+import com.rarible.protocol.union.core.task.ActivityTaskParam
+import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
@@ -75,10 +76,66 @@ class ElasticMaintenanceServiceIt {
         assertThat(allParams).allMatch { it.index == index }
         assertThat(allParams).allMatch { it.from == from }
         assertThat(allParams).allMatch { it.to == to }
+        assertThat(allParams).allMatch { it.tags?.contains("MAINTENANCE") ?: false }
         assertThat(allParams.filter { it.blockchain == BlockchainDto.POLYGON }).hasSize(2)
         assertThat(allParams.filter { it.blockchain == BlockchainDto.FLOW }).hasSize(2)
         assertThat(allParams.filter { it.type == ActivityTypeDto.LIST }).hasSize(2)
         assertThat(allParams.filter { it.type == ActivityTypeDto.MINT }).hasSize(2)
+
+        assertThat(taskRepository.findById(saved[0].id.toString()).awaitFirstOrNull()).isNull()
+        assertThat(taskRepository.findById(saved[1].id.toString()).awaitFirstOrNull()).isNotNull()
+    }
+
+    @Test
+    fun `should schedule reindex ownership tasks`() = runBlocking<Unit> {
+        // given
+        val previousTaskToDelete = Task(
+            type = "OWNERSHIP_REINDEX",
+            param = """
+                {
+                    "otherData": 42,
+                    "tags": ["MAINTENANCE"]
+                }
+            """.trimIndent(),
+            running = false,
+        )
+        val otherTask = Task(
+            type = "OWNERSHIP_REINDEX",
+            param = """
+                {
+                    "otherData": "Something else with MAINTENANCE keyword",
+                    "tags": []
+                }
+            """.trimIndent(),
+            running = false,
+        )
+        val saved = taskRepository.saveAll(listOf(previousTaskToDelete, otherTask))
+            .collectList().awaitFirst()
+        val index = "some_ownership_index"
+        val blockchains = listOf(BlockchainDto.POLYGON, BlockchainDto.FLOW)
+        val from = 100L
+        val to = 200L
+
+        // when
+        service.scheduleReindexOwnershipsTasks(
+            blockchains = blockchains,
+            esIndex = index,
+            from = from,
+            to = to,
+        )
+        val actual = taskRepository.findByTypeAndParamRegex("OWNERSHIP_REINDEX", ".*$index.*")
+            .collectList().awaitFirst()
+
+        // then
+        assertThat(actual).hasSize(2)
+        val allParams = actual.map { objectMapper.readValue(it.param, OwnershipTaskParam::class.java) }
+        assertThat(allParams).allMatch { it.index == index }
+        assertThat(allParams).allMatch { it.from == from }
+        assertThat(allParams).allMatch { it.to == to }
+        assertThat(allParams).allMatch { it.target == OwnershipTaskParam.Target.OWNERSHIP }
+        assertThat(allParams).allMatch { it.tags?.contains("MAINTENANCE") ?: false }
+        assertThat(allParams.filter { it.blockchain == BlockchainDto.POLYGON }).hasSize(1)
+        assertThat(allParams.filter { it.blockchain == BlockchainDto.FLOW }).hasSize(1)
 
         assertThat(taskRepository.findById(saved[0].id.toString()).awaitFirstOrNull()).isNull()
         assertThat(taskRepository.findById(saved[1].id.toString()).awaitFirstOrNull()).isNotNull()

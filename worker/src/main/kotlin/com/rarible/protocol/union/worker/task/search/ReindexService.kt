@@ -13,6 +13,12 @@ import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.core.task.ActivityTaskParam
+import com.rarible.protocol.union.core.task.CollectionTaskParam
+import com.rarible.protocol.union.core.task.ItemTaskParam
+import com.rarible.protocol.union.core.task.OrderTaskParam
+import com.rarible.protocol.union.core.task.OwnershipTaskParam
+import com.rarible.protocol.union.core.task.RawTaskParam
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import com.rarible.protocol.union.worker.task.search.ChangeEsAliasTask.Companion.getChangeAliasTaskName

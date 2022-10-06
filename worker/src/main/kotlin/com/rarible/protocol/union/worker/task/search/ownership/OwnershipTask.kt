@@ -3,8 +3,8 @@ package com.rarible.protocol.union.worker.task.search.ownership
 import com.rarible.core.task.TaskHandler
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.model.EsOwnership
+import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import com.rarible.protocol.union.worker.config.OwnershipReindexProperties
-import com.rarible.protocol.union.worker.task.search.OwnershipTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -37,6 +37,8 @@ class OwnershipTask(
                 target = taskParam.target,
                 index = taskParam.index,
                 cursor = from,
+                from = taskParam.from,
+                to = taskParam.to,
             )
                 .takeWhile { taskRepository.findByTypeAndParam(type, param).awaitSingleOrNull()?.running ?: false }
         }
