@@ -41,10 +41,11 @@ internal class OwnershipReconciliationControllerFt : AbstractIntegrationTest() {
         } returns NftOwnershipsDto(ownerships = listOf(ownership1Dto, ownership2Dto)).toMono()
 
         val result = testRestTemplate.getForObject(
-            "$baseUri/reconciliation/ownerships?lastUpdatedFrom={from}&lastUpdatedTo={to}",
+            "$baseUri/reconciliation/ownerships?lastUpdatedFrom={from}&lastUpdatedTo={to}&size={size}",
             OwnershipsDto::class.java,
             Instant.ofEpochMilli(1000),
-            Instant.ofEpochMilli(4000)
+            Instant.ofEpochMilli(4000),
+            20
         )!!
 
         assertThat(result.ownerships.map { it.id.fullId() }).containsExactly(

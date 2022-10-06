@@ -27,6 +27,7 @@ import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
+import org.springframework.data.mongodb.core.query.and
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lte
@@ -144,6 +145,33 @@ class ItemRepository(
         return date
     }
 
+    suspend fun findIdsByLastUpdatedAt(
+        lastUpdatedFrom: Instant,
+        lastUpdatedTo: Instant,
+        continuation: ShortItemId?,
+        size: Int = 20
+    ): List<ShortItemId> {
+        return template.find(
+            Query(where(ShortItem::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)
+                .apply {
+                    if (continuation != null) {
+                        and(ShortItem::id).gt(continuation)
+                    }
+                })
+                .with(Sort.by(ShortItem::id.name))
+                .limit(size),
+            IdObject::class.java,
+            ShortItem.COLLECTION
+        )
+            .map { it.id }
+            .collectList()
+            .awaitFirst()
+    }
+
+    private data class IdObject(
+        val id: ShortItemId
+    )
+
     companion object {
 
         // Not really sure why, but Mongo saves id field of SHortOrder as _id
@@ -175,12 +203,18 @@ class ItemRepository(
             .sparse()
             .background()
 
+        private val LAST_UPDATED_AT_ID: Index = Index()
+            .on(ShortItem::lastUpdatedAt.name, Sort.Direction.ASC)
+            .on("_id", Sort.Direction.ASC)
+            .background()
+
         private val ALL_INDEXES = listOf(
             BLOCKCHAIN_DEFINITION,
             MULTI_CURRENCY_DEFINITION,
             BY_BEST_SELL_PLATFORM_DEFINITION,
             AUCTION_DEFINITION,
-            POOL_ORDER_DEFINITION
+            POOL_ORDER_DEFINITION,
+            LAST_UPDATED_AT_ID
         )
     }
 }

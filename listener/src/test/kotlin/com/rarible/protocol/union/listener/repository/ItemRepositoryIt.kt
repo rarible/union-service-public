@@ -106,4 +106,35 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
 
         assertThat(itemRepository.get(itemId)).isNull()
     }
+
+    @Test
+    fun findIdsByLastUpdatedAt() = runBlocking<Unit> {
+        val item1 = itemRepository.save(randomShortItem().copy(lastUpdatedAt = Instant.ofEpochMilli(1000)))
+        val item2 = itemRepository.save(randomShortItem().copy(lastUpdatedAt = Instant.ofEpochMilli(2000)))
+        val item3 = itemRepository.save(randomShortItem().copy(lastUpdatedAt = Instant.ofEpochMilli(3000)))
+        val item4 = itemRepository.save(randomShortItem().copy(lastUpdatedAt = Instant.ofEpochMilli(4000)))
+        val item5 = itemRepository.save(randomShortItem().copy(lastUpdatedAt = Instant.ofEpochMilli(5000)))
+
+        val result = itemRepository.findIdsByLastUpdatedAt(
+            lastUpdatedFrom = Instant.ofEpochMilli(1500),
+            lastUpdatedTo = Instant.ofEpochMilli(4500),
+            continuation = null
+        )
+        assertThat(result).containsExactlyInAnyOrder(item2.id, item3.id, item4.id)
+
+        val resultWithContinuation = itemRepository.findIdsByLastUpdatedAt(
+            lastUpdatedFrom = Instant.ofEpochMilli(1500),
+            lastUpdatedTo = Instant.ofEpochMilli(4500),
+            continuation = result[0]
+        )
+        assertThat(resultWithContinuation).containsExactly(result[1], result[2])
+
+        val resultWithContinuationAndSize = itemRepository.findIdsByLastUpdatedAt(
+            lastUpdatedFrom = Instant.ofEpochMilli(1500),
+            lastUpdatedTo = Instant.ofEpochMilli(4500),
+            continuation = result[0],
+            size = 1
+        )
+        assertThat(resultWithContinuationAndSize).containsExactly(result[1])
+    }
 }

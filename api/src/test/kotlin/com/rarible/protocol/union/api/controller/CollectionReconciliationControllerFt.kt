@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.test.data.randomAddress
-import com.rarible.protocol.dto.CollectionsByIdRequestDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -66,10 +65,11 @@ internal class CollectionReconciliationControllerFt : AbstractIntegrationTest() 
         } returns NftCollectionsDto(total = 0, collections = listOf(collectionDto1, collectionDto2)).toMono()
 
         val result = testRestTemplate.getForObject(
-            "$baseUri/reconciliation/collections?lastUpdatedFrom={from}&lastUpdatedTo={to}",
+            "$baseUri/reconciliation/collections?lastUpdatedFrom={from}&lastUpdatedTo={to}&size={size}",
             CollectionsDto::class.java,
             Instant.ofEpochMilli(1000),
-            Instant.ofEpochMilli(4000)
+            Instant.ofEpochMilli(4000),
+            20
         )
 
         assertThat(result.collections.map { it.id.fullId() }).containsExactlyInAnyOrder(

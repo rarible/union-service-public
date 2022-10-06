@@ -126,7 +126,7 @@ class OwnershipRepository(
         lastUpdatedFrom: Instant,
         lastUpdatedTo: Instant,
         continuation: ShortOwnershipId?,
-        size: Int = 1000
+        size: Int = 20
     ): List<ShortOwnershipId> =
         template.find(
             Query(where(ShortOwnership::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)
