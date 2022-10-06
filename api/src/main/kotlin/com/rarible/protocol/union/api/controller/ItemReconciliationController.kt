@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -22,7 +23,10 @@ class ItemReconciliationController(
         @RequestParam lastUpdatedFrom: Instant,
         @RequestParam lastUpdatedTo: Instant,
         @RequestParam(required = false) continuation: String? = null,
+        @RequestParam(required = false, defaultValue = "20") size: Int,
     ): ItemsDto {
+        if (size !in 1..200) throw UnionException("Size param must be between 1 and 200")
+
         val ids = itemRepository.findIdsByLastUpdatedAt(
             lastUpdatedFrom = lastUpdatedFrom,
             lastUpdatedTo = lastUpdatedTo,

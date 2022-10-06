@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
@@ -22,11 +23,15 @@ class CollectionReconciliationController(
         @RequestParam lastUpdatedFrom: Instant,
         @RequestParam lastUpdatedTo: Instant,
         @RequestParam(required = false) continuation: String? = null,
+        @RequestParam(required = false, defaultValue = "20") size: Int,
     ): CollectionsDto {
+        if (size !in 1..200) throw UnionException("Size param must be between 1 and 200")
+
         val shortCollections = collectionRepository.findIdsByLastUpdatedAt(
             lastUpdatedFrom = lastUpdatedFrom,
             lastUpdatedTo = lastUpdatedTo,
-            continuation = continuation?.let { ShortCollectionId(IdParser.parseCollectionId(continuation)) }
+            continuation = continuation?.let { ShortCollectionId(IdParser.parseCollectionId(continuation)) },
+            size = size
         )
         if (shortCollections.isEmpty()) {
             return CollectionsDto()

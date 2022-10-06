@@ -149,7 +149,7 @@ class ItemRepository(
         lastUpdatedFrom: Instant,
         lastUpdatedTo: Instant,
         continuation: ShortItemId?,
-        size: Int = 1000
+        size: Int = 20
     ): List<ShortItemId> {
         return template.find(
             Query(where(ShortItem::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)

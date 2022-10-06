@@ -40,10 +40,11 @@ internal class ItemReconciliationControllerFt : AbstractIntegrationTest() {
         } returns listOf(item1Dto, item2Dto).toFlux()
 
         val result = testRestTemplate.getForObject(
-            "$baseUri/reconciliation/items?lastUpdatedFrom={from}&lastUpdatedTo={to}",
+            "$baseUri/reconciliation/items?lastUpdatedFrom={from}&lastUpdatedTo={to}&size={size}",
             ItemsDto::class.java,
             Instant.ofEpochMilli(1000),
-            Instant.ofEpochMilli(4000)
+            Instant.ofEpochMilli(4000),
+            20
         )!!
 
         assertThat(result.items.map { it.id.fullId() }).containsExactly(

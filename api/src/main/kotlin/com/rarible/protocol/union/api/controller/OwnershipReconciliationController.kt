@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.select.OwnershipSourceSelectService
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -22,11 +23,15 @@ class OwnershipReconciliationController(
         @RequestParam lastUpdatedFrom: Instant,
         @RequestParam lastUpdatedTo: Instant,
         @RequestParam(required = false) continuation: String? = null,
+        @RequestParam(required = false, defaultValue = "20") size: Int,
     ): OwnershipsDto {
+        if (size !in 1..200) throw UnionException("Size param must be between 1 and 200")
+
         val ids = ownershipRepository.findIdsByLastUpdatedAt(
             lastUpdatedFrom = lastUpdatedFrom,
             lastUpdatedTo = lastUpdatedTo,
-            continuation = continuation?.let { ShortOwnershipId(OwnershipIdParser.parseFull(continuation)) }
+            continuation = continuation?.let { ShortOwnershipId(OwnershipIdParser.parseFull(continuation)) },
+            size = size
         ).map { it.toDto() }
         if (ids.isEmpty()) {
             return OwnershipsDto()
