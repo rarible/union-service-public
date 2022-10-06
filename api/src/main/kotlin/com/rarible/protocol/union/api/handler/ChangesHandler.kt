@@ -18,21 +18,14 @@ class ChangesHandler(
     private val subscriptionHandler: SubscriptionHandler,
 ) : WebSocketHandler {
 
-    private val fake = objectMapper.writeValueAsString(FakeSubscriptionEventDto())
+    private val heartbeat = Flux.just(0L)
+        .mergeWith(Flux.interval(Duration.ofSeconds(50)))
+        .map { FakeSubscriptionEventDto() }
 
     override fun handle(session: WebSocketSession): Mono<Void> {
         return subscriptionHandler.handle(
             { session.receive().map { objectMapper.readValue<List<SubscriptionRequestDto>>(it.payloadAsText) } },
-            {
-                session.send(
-                    Flux.merge(
-                        Flux.just(0L)
-                            .mergeWith(Flux.interval(Duration.ofSeconds(50)))
-                            .map { fake },
-                        it
-                    ).map { msg -> toMessage(session, msg) }
-                )
-            }
+            { session.send(it.mergeWith(heartbeat).map { msg -> toMessage(session, msg) }) }
         )
     }
 

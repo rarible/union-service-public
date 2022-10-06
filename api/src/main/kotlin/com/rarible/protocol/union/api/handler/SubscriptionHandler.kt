@@ -131,7 +131,6 @@ class SubscriptionHandler(
                             }
                         }
                         .map { OrderSubscriptionEventDto(it) },
-
                     )
             )
         )
