@@ -9,7 +9,8 @@ interface TzktItemService {
 
     suspend fun getAllItems(
         continuation: String?,
-        size: Int
+        size: Int,
+        checkBalance: Boolean
     ): Page<UnionItem> {
         TODO("Not implemented")
     }
@@ -28,7 +29,7 @@ interface TzktItemService {
         TODO("Not implemented")
     }
 
-    suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
+    suspend fun getItemsByIds(itemIds: List<String>, checkBalance: Boolean): List<UnionItem> {
         TODO("Not implemented")
     }
 

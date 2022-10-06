@@ -110,6 +110,8 @@ integration:
         tokenBatch: ${consul.tezos.dipdup.tzktProperties.tokenBatch:false}
         ownershipBatch: ${consul.tezos.dipdup.tzktProperties.ownershipBatch:false}
         collectionBatch: ${consul.tezos.dipdup.tzktProperties.collectionBatch:false}
+        wrapActivityHashes: ${consul.tezos.dipdup.tzktProperties.wrapActivityHashes:false}
+        checkTokenBalance: ${consul.tezos.dipdup.tzktProperties.checkTokenBalance:false}
       knownAddresses:
         hen: ${consul.tezos.dipdup.knownAddresses.hen:}
         henRoyalties: ${consul.tezos.dipdup.knownAddresses.henRoyalties:}

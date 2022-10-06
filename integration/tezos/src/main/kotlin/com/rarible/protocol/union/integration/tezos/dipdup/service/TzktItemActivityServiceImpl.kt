@@ -66,8 +66,8 @@ class TzktItemActivityServiceImpl(
         }
     }
 
-    override suspend fun getByIds(ids: List<String>): List<ActivityDto> {
-        return tzktTokenClient.getActivitiesByIds(ids).map { TzktActivityConverter.convert(it, blockchain) }
+    override suspend fun getByIds(ids: List<String>, wrapHash: Boolean): List<ActivityDto> {
+        return tzktTokenClient.getActivitiesByIds(ids, wrapHash).map { TzktActivityConverter.convert(it, blockchain) }
     }
 
 }

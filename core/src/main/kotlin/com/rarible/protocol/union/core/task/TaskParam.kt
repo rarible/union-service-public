@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.worker.task.search
+package com.rarible.protocol.union.core.task
 
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -9,13 +9,19 @@ sealed class TaskParam {
     abstract val settingsHash: String?
     abstract val index: String
     abstract val blockchain: BlockchainDto
+    abstract val from: Long?
+    abstract val to: Long?
+    abstract val tags: List<String>?
 }
 
 data class RawTaskParam(
     override val versionData: Int?,
     override val settingsHash: String?,
     override val blockchain: BlockchainDto,
-    override val index: String
+    override val index: String,
+    override val from: Long? = null,
+    override val to: Long? = null,
+    override val tags: List<String>? = null,
 ) : TaskParam()
 
 /**
@@ -31,8 +37,9 @@ data class ActivityTaskParam(
     override val blockchain: BlockchainDto,
     val type: ActivityTypeDto,
     override val index: String,
-    val from: Long? = null,
-    val to: Long? = null,
+    override val from: Long? = null,
+    override val to: Long? = null,
+    override val tags: List<String>? = null,
 ) : TaskParam()
 
 data class RemoveRevertedActivityTaskParam(
@@ -44,21 +51,30 @@ data class OrderTaskParam(
     override val versionData: Int?,
     override val settingsHash: String?,
     override val blockchain: BlockchainDto,
-    override val index: String
+    override val index: String,
+    override val from: Long? = null,
+    override val to: Long? = null,
+    override val tags: List<String>? = null,
 ) : TaskParam()
 
 data class ItemTaskParam(
     override val versionData: Int?,
     override val settingsHash: String?,
     override val blockchain: BlockchainDto,
-    override val index: String
+    override val index: String,
+    override val from: Long? = null,
+    override val to: Long? = null,
+    override val tags: List<String>? = null,
 ) : TaskParam()
 
 data class CollectionTaskParam(
     override val versionData: Int?,
     override val settingsHash: String?,
     override val blockchain: BlockchainDto,
-    override val index: String
+    override val index: String,
+    override val from: Long? = null,
+    override val to: Long? = null,
+    override val tags: List<String>? = null,
 ) : TaskParam()
 
 /**
@@ -73,6 +89,9 @@ data class OwnershipTaskParam(
     override val blockchain: BlockchainDto,
     val target: Target,
     override val index: String,
+    override val from: Long? = null,
+    override val to: Long? = null,
+    override val tags: List<String>? = null,
 ) : TaskParam() {
     enum class Target {
         OWNERSHIP,

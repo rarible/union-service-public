@@ -31,7 +31,7 @@ open class TezosItemService(
         return if (properties.useDipDupTokens) {
             dipDupItemService.getAllItems(continuation, size)
         } else {
-            tzktItemService.getAllItems(continuation, size)
+            tzktItemService.getAllItems(continuation, size, properties.tzktProperties.checkTokenBalance)
         }
     }
 
@@ -94,7 +94,7 @@ open class TezosItemService(
         return if (properties.useDipDupTokens) {
             dipDupItemService.getItemsByIds(itemIds)
         } else {
-            tzktItemService.getItemsByIds(itemIds)
+            tzktItemService.getItemsByIds(itemIds, properties.tzktProperties.checkTokenBalance)
         }
     }
 

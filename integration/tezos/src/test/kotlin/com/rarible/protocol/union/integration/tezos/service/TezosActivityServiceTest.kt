@@ -23,9 +23,11 @@ import com.rarible.protocol.union.test.mock.CurrencyMock
 import com.rarible.tzkt.model.ActivityType
 import com.rarible.tzkt.model.Page
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class TezosActivityServiceTest {
@@ -42,18 +44,25 @@ class TezosActivityServiceTest {
     )
     private val tzktTokenClient: com.rarible.tzkt.client.TokenActivityClient = mockk()
     private val tzktItemActivityService: TzktItemActivityService = TzktItemActivityServiceImpl(tzktTokenClient)
-    private val properties: DipDupIntegrationProperties = mockk()
+    private val dipdupProps: DipDupIntegrationProperties = mockk()
+    private val tzktProps: DipDupIntegrationProperties.TzktProperties = mockk()
 
     private val service = TezosActivityService(
         dipdupOrderActivityService,
         dipDupTokenActivityService,
         tzktItemActivityService,
-        properties
+        dipdupProps
     )
+
+    @BeforeEach
+    fun beforeEach() {
+        every { dipdupProps.tzktProperties } returns tzktProps
+        every { tzktProps.wrapActivityHashes } returns false
+    }
 
     @Test
     fun `should return all dipdup, tzkt activities`() = runBlocking<Unit> {
-        coEvery { properties.useDipDupTokens } returns false
+        coEvery { dipdupProps.useDipDupTokens } returns false
         coEvery {
             testDipDupOrderActivityClient.getActivitiesAll(
                 listOf(DipDupActivityType.LIST),
@@ -76,7 +85,7 @@ class TezosActivityServiceTest {
 
     @Test
     fun `should return only dipdup activities`() = runBlocking<Unit> {
-        coEvery { properties.useDipDupTokens } returns true
+        coEvery { dipdupProps.useDipDupTokens } returns true
         coEvery {
             testDipDupOrderActivityClient.getActivitiesAll(
                 listOf(DipDupActivityType.LIST),

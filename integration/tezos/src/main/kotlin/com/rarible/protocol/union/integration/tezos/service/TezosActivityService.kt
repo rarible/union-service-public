@@ -194,7 +194,7 @@ open class TezosActivityService(
                 dipdupTokenActivityService.getByIds(ids)
             } else {
                 if (ids.isNotEmpty()) {
-                    tzktItemActivityService.getByIds(ids)
+                    tzktItemActivityService.getByIds(ids, properties.tzktProperties.wrapActivityHashes)
                         .also { logger.info("Total tzkt item activities returned: ${it.size}") }
                 } else {
                     emptyList()
