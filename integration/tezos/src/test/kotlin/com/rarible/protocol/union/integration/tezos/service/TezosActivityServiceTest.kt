@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.integration.tezos.data.randomDipDupActivityOrderListEvent
 import com.rarible.protocol.union.integration.tezos.data.randomTzktItemMintActivity
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityServiceImpl
@@ -19,9 +20,11 @@ import com.rarible.tzkt.client.TokenActivityClient
 import com.rarible.tzkt.model.ActivityType
 import com.rarible.tzkt.model.Page
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class TezosActivityServiceTest {
@@ -33,11 +36,20 @@ class TezosActivityServiceTest {
     )
     private val tzktTokenClient: TokenActivityClient = mockk()
     private val tzktItemActivityService: TzktItemActivityService = TzktItemActivityServiceImpl(tzktTokenClient)
+    private val dipdupProps: DipDupIntegrationProperties = mockk()
+    private val tzktProps: DipDupIntegrationProperties.TzktProperties = mockk()
 
     private val service = TezosActivityService(
         dipdupOrderActivityService,
-        tzktItemActivityService
+        tzktItemActivityService,
+        dipdupProps
     )
+
+    @BeforeEach
+    fun beforeEach() {
+        every { dipdupProps.tzktProperties } returns tzktProps
+        every { tzktProps.wrapActivityHashes } returns false
+    }
 
     @Test
     fun `should return all dipdup,tzkt activities`() = runBlocking<Unit> {

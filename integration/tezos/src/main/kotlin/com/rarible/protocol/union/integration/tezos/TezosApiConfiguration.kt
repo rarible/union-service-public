@@ -103,11 +103,13 @@ class TezosApiConfiguration {
     @Bean
     fun tezosActivityService(
         dipdupOrderActivityService: DipdupOrderActivityService,
-        tzktItemActivityService: TzktItemActivityService
+        tzktItemActivityService: TzktItemActivityService,
+        properties: DipDupIntegrationProperties
     ): TezosActivityService {
         return TezosActivityService(
             dipdupOrderActivityService,
-            tzktItemActivityService
+            tzktItemActivityService,
+            properties
         )
     }
 }

@@ -25,7 +25,7 @@ interface TzktItemActivityService {
         TODO("Not implemented")
     }
 
-    suspend fun getByIds(ids: List<String>): List<ActivityDto> {
+    suspend fun getByIds(ids: List<String>, wrapHash: Boolean): List<ActivityDto> {
         TODO("Not implemented")
     }
 

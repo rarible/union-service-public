@@ -35,7 +35,9 @@ data class DipDupIntegrationProperties(
         val tokenBatch: Boolean = false,
         val ownershipBatch: Boolean = false,
         val collectionBatch: Boolean = false,
-        val requestedCollectionMeta: Boolean = false
+        val requestedCollectionMeta: Boolean = false,
+        val wrapActivityHashes: Boolean = false,
+        val checkTokenBalance: Boolean = false
     )
 
     data class Marketplaces(

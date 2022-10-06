@@ -17,6 +17,7 @@ import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityService
 import kotlinx.coroutines.async
@@ -29,7 +30,8 @@ import java.util.regex.Pattern
 @CaptureSpan(type = "blockchain")
 open class TezosActivityService(
     private val dipdupOrderActivityService: DipdupOrderActivityService,
-    private val tzktItemActivityService: TzktItemActivityService
+    private val tzktItemActivityService: TzktItemActivityService,
+    private val properties: DipDupIntegrationProperties
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ActivityService {
 
     companion object {
@@ -178,7 +180,7 @@ open class TezosActivityService(
         val tzktItemRequest = async {
             val ids = itemActivitiesIds.filter { isValidLong(it) }
             if (ids.isNotEmpty()) {
-                tzktItemActivityService.getByIds(ids)
+                tzktItemActivityService.getByIds(ids, properties.tzktProperties.wrapActivityHashes)
                     .also { logger.info("Total tzkt item activities returned: ${it.size}") }
             } else {
                 emptyList()

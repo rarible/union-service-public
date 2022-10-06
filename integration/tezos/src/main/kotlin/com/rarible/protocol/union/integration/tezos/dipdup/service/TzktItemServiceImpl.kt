@@ -26,12 +26,13 @@ class TzktItemServiceImpl(val tzktTokenClient: TokenClient, val properties: DipD
     private val logger = LoggerFactory.getLogger(javaClass)
     private val blockchain = BlockchainDto.TEZOS
 
-    override suspend fun getAllItems(continuation: String?, size: Int): Page<UnionItem> {
+    override suspend fun getAllItems(continuation: String?, size: Int, checkBalance: Boolean): Page<UnionItem> {
         val tzktPage = tzktTokenClient.allTokensByLastUpdate(
             size = size,
             continuation = continuation,
             sortAsc = false,
-            loadMeta = false
+            loadMeta = false,
+            checkBalance = checkBalance
         )
         return TzktItemConverter.convert(tzktPage, blockchain)
     }
@@ -41,8 +42,8 @@ class TzktItemServiceImpl(val tzktTokenClient: TokenClient, val properties: DipD
         return TzktItemConverter.convert(token, blockchain).copy(creators = creators(itemId))
     }
 
-    override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
-        val tokens = safeApiCall { tzktTokenClient.tokens(itemIds) }
+    override suspend fun getItemsByIds(itemIds: List<String>, checkBalance: Boolean): List<UnionItem> {
+        val tokens = safeApiCall { tzktTokenClient.tokens(itemIds, false, checkBalance) }
         return tokens.map { TzktItemConverter.convert(it, blockchain) }
     }
 

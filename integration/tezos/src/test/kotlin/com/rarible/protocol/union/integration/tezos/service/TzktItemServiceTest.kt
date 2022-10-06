@@ -28,6 +28,7 @@ class TzktItemServiceTest {
 
     private val tokenClient: TokenClient = mockk()
     private val dipdupProps: DipDupIntegrationProperties = mockk()
+    private val tzktProps: DipDupIntegrationProperties.TzktProperties = mockk()
 
     private val tzktItemService = TzktItemServiceImpl(tokenClient, dipdupProps)
     private val service = TezosItemService(tzktItemService, mockk(), dipdupProps)
@@ -35,6 +36,8 @@ class TzktItemServiceTest {
     @BeforeEach
     fun beforeEach() {
         every { dipdupProps.useDipDupTokens } returns false
+        every { dipdupProps.tzktProperties } returns tzktProps
+        every { tzktProps.checkTokenBalance } returns false
         clearMocks(tokenClient)
     }
 
@@ -53,7 +56,7 @@ class TzktItemServiceTest {
     fun `get tzkt items by ids`() = runBlocking<Unit> {
         val itemId = "test:123"
         val tzktToken = tzktToken(itemId)
-        coEvery { tokenClient.tokens(listOf(itemId)) } returns listOf(tzktToken)
+        coEvery { tokenClient.tokens(listOf(itemId), false, false) } returns listOf(tzktToken)
 
         val items = service.getItemsByIds(listOf(itemId))
         assertThat(items).hasSize(1)
@@ -64,7 +67,7 @@ class TzktItemServiceTest {
         val itemId = "test:123"
         val tzktToken = tzktToken(itemId)
         val continuation = "continuation"
-        coEvery { tokenClient.allTokensByLastUpdate(100, null, false, false) } returns Page(listOf(tzktToken), continuation)
+        coEvery { tokenClient.allTokensByLastUpdate(100, null, false, false, false) } returns Page(listOf(tzktToken), continuation)
 
         val page = service.getAllItems(
             continuation = null,
