@@ -103,7 +103,7 @@ fun randomTezosDipDupItemDto(itemId: ItemIdDto): DipDupItem {
         contract = contract,
         deleted = false,
         tzktId = BigInteger.ONE,
-        creator = randomString()
+        creators = listOf(Part(randomString(), 10000))
     )
 }
 
