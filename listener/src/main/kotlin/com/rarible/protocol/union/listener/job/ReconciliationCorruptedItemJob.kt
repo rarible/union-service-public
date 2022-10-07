@@ -3,6 +3,7 @@ package com.rarible.protocol.union.listener.job
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -61,6 +62,13 @@ class ReconciliationCorruptedItemJob(
             if (!BestOrderValidator.isValid(it)) {
                 logger.info(
                     "Found best Order with incorrect state: {} (platform={}, updatedAt={}), Item: {}",
+                    it.id, it.platform, it.lastUpdatedAt, itemId
+                )
+                corruptedItems.add(itemId)
+            } else if (it.take.type is EthCollectionAssetTypeDto) {
+                // TODO remove later, we need it only to cleanup legacy floor bids once
+                logger.info(
+                    "Found best Floor Bid Order attached to the item: {} (platform={}, updatedAt={}), Item: {}",
                     it.id, it.platform, it.lastUpdatedAt, itemId
                 )
                 corruptedItems.add(itemId)
