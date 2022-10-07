@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller.internal
 
 import com.rarible.protocol.union.api.model.internal.EsMaintenanceReindexActivityDto
+import com.rarible.protocol.union.api.model.internal.EsMaintenanceReindexItemDto
 import com.rarible.protocol.union.api.model.internal.EsMaintenanceReindexOwnershipDto
 import com.rarible.protocol.union.api.service.elastic.ElasticMaintenanceService
 import org.slf4j.LoggerFactory
@@ -45,5 +46,20 @@ class EsMaintenanceController(
             esIndex = payload.esIndex,
         )
         logger.info("Reindex ownerships tasks scheduled: $payload")
+    }
+
+    @PostMapping(
+        value = ["/maintenance/es/reindex/item"],
+        consumes = ["application/json"]
+    )
+    suspend fun reindexItems(@RequestBody payload: EsMaintenanceReindexItemDto) {
+        logger.info("Got request to reindex items: $payload")
+        elasticMaintenanceService.scheduleReindexItemsTasks(
+            blockchains = payload.blockchains,
+            from = payload.from,
+            to = payload.to,
+            esIndex = payload.esIndex,
+        )
+        logger.info("Reindex items tasks scheduled: $payload")
     }
 }
