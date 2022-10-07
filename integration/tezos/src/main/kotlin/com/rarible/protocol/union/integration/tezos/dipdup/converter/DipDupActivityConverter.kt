@@ -139,7 +139,7 @@ class DipDupActivityConverter(
                 )
             }
             is DipDupMintActivity -> {
-                val id = ActivityIdDto(blockchain, activity.transferId)
+                val id = ActivityIdDto(blockchain, activity.id)
                 MintActivityDto(
                     id = id,
                     date = date,
@@ -153,7 +153,7 @@ class DipDupActivityConverter(
                 )
             }
             is DipDupTransferActivity -> {
-                val id = ActivityIdDto(blockchain, activity.transferId)
+                val id = ActivityIdDto(blockchain, activity.id)
 
                 // Workaround for non-formal burn
                 if (Tezos.NULL_ADDRESSES.contains(activity.owner)) {
@@ -184,7 +184,7 @@ class DipDupActivityConverter(
                 }
             }
             is DipDupBurnActivity -> {
-                val id = ActivityIdDto(blockchain, activity.transferId)
+                val id = ActivityIdDto(blockchain, activity.id)
                 BurnActivityDto(
                     id = id,
                     date = date,
