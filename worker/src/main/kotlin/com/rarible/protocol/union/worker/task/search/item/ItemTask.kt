@@ -16,6 +16,7 @@ import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.RateLimiter
+import com.rarible.protocol.union.worker.task.search.activity.TimePeriodContinuationHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
@@ -45,7 +46,10 @@ class ItemTask(
     }
 
     override fun runLongTask(from: String?, param: String): Flow<String> {
-        val blockchain = paramFactory.parse<ItemTaskParam>(param).blockchain
+        val taskParam = paramFactory.parse<ItemTaskParam>(param)
+        val blockchain = taskParam.blockchain
+        val timeFrom = taskParam.from
+        val timeTo = taskParam.to
         val counter = searchTaskMetricFactory.createReindexItemCounter(blockchain)
         val itemService = itemServiceRouter.getService(blockchain)
         // TODO read values from config
@@ -80,8 +84,9 @@ class ItemTask(
                         )
                         counter.increment(enrichedItems.size)
                     }
-                    emit(res.continuation.orEmpty())
-                    continuation = res.continuation
+
+                    continuation = TimePeriodContinuationHelper.adjustContinuation(res.continuation, timeFrom, timeTo)
+                    emit(continuation.orEmpty())
                 } while (!continuation.isNullOrBlank())
             }
                 .takeWhile { taskRepository.findByTypeAndParam(type, param).awaitSingleOrNull()?.running ?: false }
