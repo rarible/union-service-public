@@ -127,7 +127,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val auctionOwnership = randomEthOwnershipDto(auctionOwnershipId)
 
         // Free ownership - should be reconciled in regular way
-        val ethFreeOwnershipId = itemId.toOwnership(auction.seller.value)
+        val ethFreeOwnershipId = itemId.toOwnership(ethAmmOrder.maker.prefixed())
         val ethOwnership = randomEthOwnershipDto(ethFreeOwnershipId)
         val unionOwnership = EthOwnershipConverter.convert(ethOwnership, ethFreeOwnershipId.blockchain)
         val shortOwnership = ShortOwnershipConverter.convert(unionOwnership)
@@ -195,8 +195,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(itemOriginOrders.bestBidOrder!!.id).isEqualTo(shortOriginBestBid.id)
 
         assertThat(savedShortOwnership.source).isEqualTo(OwnershipSourceDto.MINT)
-        assertThat(savedShortOwnership.bestSellOrder!!.id).isEqualTo(shortBestSell.id)
-        assertThat(savedShortOwnership.bestSellOrders[unionBestSell.sellCurrencyId]!!.id).isEqualTo(shortBestSell.id)
+        assertThat(savedShortOwnership.bestSellOrder!!.id).isEqualTo(shortAmmOrder.id)
+        assertThat(savedShortOwnership.bestSellOrders[unionBestSell.sellCurrencyId]!!.id).isEqualTo(shortAmmOrder.id)
 
         assertThat(ownershipOriginOrders.bestSellOrder!!.id).isEqualTo(shortOriginBestSell.id)
 
@@ -213,7 +213,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         coVerify(exactly = 1) {
             testOwnershipEventProducer.send(match<KafkaMessage<OwnershipEventDto>> { message ->
                 val ownership = (message.value as OwnershipUpdateEventDto).ownership
-                ownership.id == ethAuctionedOwnershipId && ownership.bestSellOrder!!.id == unionBestSell.id
+                ownership.id == ethFreeOwnershipId && ownership.bestSellOrder!!.id == unionAmmOrder.id
             })
         }
         coVerify(exactly = 1) {
@@ -262,6 +262,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             ActivitySortDto.LATEST_FIRST,
             mintActivity
         )
+
+        ethereumOrderControllerApiMock.mockGetAmmOrdersByItem(ethItemId)
 
         val uri = "$baseUri/v0.1/refresh/ownership/${ethOwnershipId.fullId()}/reconcile"
         val result = testRestTemplate.postForEntity(uri, null, OwnershipEventDto::class.java).body!!

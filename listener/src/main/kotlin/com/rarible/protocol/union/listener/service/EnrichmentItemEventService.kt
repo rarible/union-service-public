@@ -15,7 +15,6 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.evaluator.OrderPoolEvaluator
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
@@ -27,10 +26,11 @@ import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.util.setStatusByAction
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 @Component
 class EnrichmentItemEventService(
@@ -165,11 +165,7 @@ class EnrichmentItemEventService(
         action: PoolItemAction,
         notificationEnabled: Boolean = true
     ) {
-        val hackedOrder = when (action) {
-            PoolItemAction.INCLUDED -> order
-            // If item excluded from the pool, we can consider this order as FILLED to recalculate actual best sell
-            PoolItemAction.EXCLUDED -> order.copy(status = OrderStatusDto.FILLED)
-        }
+        val hackedOrder = order.setStatusByAction(action)
 
         updateOrder(itemId, hackedOrder, notificationEnabled) { item ->
             val updated = OrderPoolEvaluator.updatePoolOrderSet(item, hackedOrder, action)
