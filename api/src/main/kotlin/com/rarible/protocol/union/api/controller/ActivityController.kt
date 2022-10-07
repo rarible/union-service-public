@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.select.ActivitySourceSelectService
 import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.dto.ActivitiesByUsersRequestDto
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -11,9 +12,6 @@ import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
@@ -105,29 +103,18 @@ class ActivityController(
         return ResponseEntity.ok(result)
     }
 
-    override suspend fun getActivitiesByUsers(
-        type: List<UserActivityTypeDto>,
-        requestBody: Flow<String>,
-        blockchains: List<BlockchainDto>?,
-        from: Instant?,
-        to: Instant?,
-        continuation: String?,
-        cursor: String?,
-        size: Int?,
-        sort: ActivitySortDto?,
-        searchEngine: SearchEngineDto?
-    ): ResponseEntity<ActivitiesDto> {
+    override suspend fun getActivitiesByUsers(activitiesByUsersRequestDto: ActivitiesByUsersRequestDto): ResponseEntity<ActivitiesDto> {
         val result = activitySourceSelector.getActivitiesByUser(
-            type,
-            requestBody.take(MAX_USERS_COUNT).toList(),
-            blockchains,
-            from,
-            to,
-            continuation,
-            cursor,
-            size,
-            sort,
-            searchEngine
+            activitiesByUsersRequestDto.types,
+            activitiesByUsersRequestDto.users.map { it.fullId() }.take(MAX_USERS_COUNT),
+            activitiesByUsersRequestDto.blockchains,
+            activitiesByUsersRequestDto.from,
+            activitiesByUsersRequestDto.to,
+            activitiesByUsersRequestDto.continuation,
+            activitiesByUsersRequestDto.cursor,
+            activitiesByUsersRequestDto.size,
+            activitiesByUsersRequestDto.sort,
+            activitiesByUsersRequestDto.searchEngine
         )
         return ResponseEntity.ok(result)
     }

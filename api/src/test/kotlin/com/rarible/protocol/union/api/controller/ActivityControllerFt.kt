@@ -26,6 +26,7 @@ import com.rarible.protocol.union.api.data.randomTzktItemMintActivity
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
+import com.rarible.protocol.union.dto.ActivitiesByUsersRequestDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -496,7 +497,6 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             )
             itemActivities.add(randomEthItemMintActivity().copy(lastUpdatedAt = startDate.plusMillis(randomLong())))
         }
-
     }
 
     private fun mockEthereumActivitiesSync(
@@ -1064,15 +1064,18 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         assertThat(activities.continuation).isNotNull()
 
         val usersActivities = activityControllerApi.getActivitiesByUsers(
-            types,
-            listOf(userEth.fullId(), userFlow.fullId()),
-            listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW),
-            oneWeekAgo,
-            now,
-            null,
-            null, size,
-            sort,
-            null
+            ActivitiesByUsersRequestDto(
+                types = types,
+                users = listOf(userEth, userFlow),
+                blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW),
+                from = oneWeekAgo,
+                to = now,
+                continuation = null,
+                cursor = null,
+                size = size,
+                sort = sort,
+                searchEngine = null
+            )
         ).awaitFirst()
 
         assertThat(usersActivities.activities).hasSize(3)
@@ -1200,5 +1203,4 @@ class ActivityControllerFt : AbstractIntegrationTest() {
         assertThat(activities.cursor).isNotNull()
         assertThat(activities.continuation).isNotNull()
     }
-
 }
