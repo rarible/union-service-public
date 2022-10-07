@@ -6,6 +6,7 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.core.task.ActivityTaskParam
+import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -23,6 +24,7 @@ class ElasticMaintenanceService(
     companion object {
         private const val ACTIVITY_REINDEX_TASK_TYPE = "ACTIVITY_REINDEX"
         private const val OWNERSHIP_REINDEX_TASK_TYPE = "OWNERSHIP_REINDEX"
+        private const val ITEM_REINDEX_TASK_TYPE = "ITEM_REINDEX"
         private const val MAINTENANCE_TAG = "MAINTENANCE"
     }
 
@@ -112,6 +114,45 @@ class ElasticMaintenanceService(
         }
 
         logger.info("Scheduling ${tasks.size} maintenance tasks for reindexing ownerships")
+        taskRepository.saveAll(tasks).collectList().awaitFirst()
+    }
+
+    suspend fun scheduleReindexItemsTasks(
+        blockchains: List<BlockchainDto> = emptyList(),
+        from: Long? = null,
+        to: Long? = null,
+        esIndex: String,
+        deletePreviousTasks: Boolean = true,
+    ) {
+        if (deletePreviousTasks) {
+            deletePreviousTasks(ITEM_REINDEX_TASK_TYPE)
+        }
+
+        val tasks = mutableListOf<Task>()
+
+        val actualBlockchains = blockchains.ifEmpty {
+            BlockchainDto.values().toList()
+        }
+
+        actualBlockchains.forEach { blockchain ->
+            val param = ItemTaskParam(
+                blockchain = blockchain,
+                from = from,
+                to = to,
+                index = esIndex,
+                settingsHash = null,
+                versionData = null,
+                tags = listOf(MAINTENANCE_TAG)
+            )
+            val task = Task(
+                type = ITEM_REINDEX_TASK_TYPE,
+                param = objectMapper.writeValueAsString(param),
+                running = false,
+            )
+            tasks.add(task)
+        }
+
+        logger.info("Scheduling ${tasks.size} maintenance tasks for reindexing items")
         taskRepository.saveAll(tasks).collectList().awaitFirst()
     }
 
