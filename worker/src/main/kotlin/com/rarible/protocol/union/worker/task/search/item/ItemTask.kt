@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.elasticsearch.action.support.WriteRequest
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -36,6 +37,8 @@ class ItemTask(
     private val taskRepository: TaskRepository,
     private val rateLimiter: RateLimiter,
 ) : TaskHandler<String> {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override val type: String
         get() = EsItem.ENTITY_DEFINITION.reindexTask
@@ -71,11 +74,14 @@ class ItemTask(
                         lastUpdatedFrom = null,
                         lastUpdatedTo = null
                     )
+                    logger.info("Got ${res.entities} items, continuation ${res.continuation}")
 
                     val enrichedItems = enrichmentItemService.enrichItems(
                         res.entities,
                         ItemMetaPipeline.SYNC
                     )
+
+                    logger.info("Enriched items: ${enrichedItems.size}")
 
                     if (enrichedItems.isNotEmpty()) {
                         repository.saveAll(
@@ -85,7 +91,12 @@ class ItemTask(
                         counter.increment(enrichedItems.size)
                     }
 
-                    continuation = TimePeriodContinuationHelper.adjustContinuation(res.continuation, timeFrom, timeTo)
+                    continuation = TimePeriodContinuationHelper.adjustContinuation(
+                        res.continuation,
+                        timeFrom,
+                        timeTo,
+                        hasPrefix = false
+                    )
                     emit(continuation.orEmpty())
                 } while (!continuation.isNullOrBlank())
             }
