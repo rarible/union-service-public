@@ -17,6 +17,9 @@ data class EsCollectionCursor(
         fun fromString(value: String): EsCollectionCursor? {
             return try {
                 val split = value.split('_')
+                if (split[0] == "null") {
+                    return null
+                }
                 EsCollectionCursor(
                     date = Instant.ofEpochMilli(split[0].toLong()),
                     salt = split[1].toLong()
