@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.util
 
+import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.dto.EthLooksRareOrderDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
@@ -13,6 +14,7 @@ import com.rarible.protocol.union.dto.EthX2Y2OrderDataV1Dto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.ImmutablexOrderDataV1Dto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.SolanaAuctionHouseDataV1Dto
 import com.rarible.protocol.union.dto.TezosOrderDataFxhashV1Dto
 import com.rarible.protocol.union.dto.TezosOrderDataFxhashV2Dto
@@ -70,3 +72,11 @@ val OrderDto.isPoolOrder: Boolean
             else -> false
         }
     }
+
+fun OrderDto.setStatusByAction(action: PoolItemAction): OrderDto {
+    return when (action) {
+        PoolItemAction.INCLUDED -> this
+        // If item excluded from the pool, we can consider this order as FILLED to recalculate actual best sell
+        PoolItemAction.EXCLUDED -> this.copy(status = OrderStatusDto.FILLED)
+    }
+}

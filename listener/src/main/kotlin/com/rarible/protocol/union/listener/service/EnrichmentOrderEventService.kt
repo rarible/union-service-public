@@ -37,9 +37,10 @@ class EnrichmentOrderEventService(
         // ATM we support only sell-orders for AMM
         // Order event should not be sent here
         // Ownership updates doesn't seem reasonable here too
-        ignoreApi404 {
-            enrichmentItemEventService.onPoolOrderUpdated(ShortItemId(itemId), order, action, notificationEnabled)
-        }
+
+        val shortItemId = ShortItemId(itemId)
+        onItemPoolOrder(order, shortItemId, action, notificationEnabled)
+        onOwnershipPoolOrder(order, shortItemId, action, notificationEnabled)
     }
 
     suspend fun updateOrder(order: OrderDto, notificationEnabled: Boolean = true) {
@@ -87,6 +88,15 @@ class EnrichmentOrderEventService(
         enrichmentItemEventService.onItemBestSellOrderUpdated(itemId, order, notificationEnabled)
     }
 
+    private suspend fun onItemPoolOrder(
+        order: OrderDto,
+        itemId: ShortItemId,
+        action: PoolItemAction,
+        notificationEnabled: Boolean
+    ) = ignoreApi404 {
+        enrichmentItemEventService.onPoolOrderUpdated(itemId, order, action, notificationEnabled)
+    }
+
     private suspend fun onOwnershipSellOrder(
         order: OrderDto,
         itemId: ShortItemId,
@@ -94,6 +104,16 @@ class EnrichmentOrderEventService(
     ) = ignoreApi404 {
         val ownershipId = ShortOwnershipId(itemId.blockchain, itemId.itemId, order.maker.value)
         enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(ownershipId, order, notificationEnabled)
+    }
+
+    private suspend fun onOwnershipPoolOrder(
+        order: OrderDto,
+        itemId: ShortItemId,
+        action: PoolItemAction,
+        notificationEnabled: Boolean
+    ) = ignoreApi404 {
+        val ownershipId = ShortOwnershipId(itemId.blockchain, itemId.itemId, order.maker.value)
+        enrichmentOwnershipEventService.onPoolOrderUpdated(ownershipId, order, action, notificationEnabled)
     }
 
     private suspend fun onItemBidOrder(
