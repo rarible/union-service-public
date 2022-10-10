@@ -25,7 +25,7 @@ open class DipDupActivityEventHandler(
     override suspend fun handle(event: DipDupActivity) {
         logger.info("Received DipDup activity event: {}", mapper.writeValueAsString(event))
         try {
-            if (skip(event) || skipByType(event)) {
+            if (!properties.useDipDupTokens && skip(event) || skipByType(event)) {
                 logger.warn("Activity event was skipped")
             } else {
                 val unionEvent = dipDupOrderConverter.convert(event, blockchain)
