@@ -21,7 +21,7 @@ class TezosActivityConverterTest {
         val actType = dto as DipDupMintActivity
         val converted = dipdupActivityConverter.convert(dto, BlockchainDto.TEZOS) as MintActivityDto
 
-        assertThat(converted.id.value).isEqualTo(actType.transferId)
+        assertThat(converted.id.value).isEqualTo(actType.id)
         assertThat(converted.date).isEqualTo(actType.date.toInstant())
 
         assertThat(converted.owner.value).isEqualTo(actType.owner)
