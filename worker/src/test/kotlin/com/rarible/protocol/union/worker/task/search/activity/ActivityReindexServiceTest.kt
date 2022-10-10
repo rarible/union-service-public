@@ -6,7 +6,6 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivityIdDto
-import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.SyncTypeDto
@@ -64,7 +63,7 @@ internal class ActivityReindexServiceTest {
         val service = ActivityReindexService(
             mockk {
                 coEvery {
-                    getAllActivities(any(), any(), any(), any(), any(), any())
+                    getAllActivitiesSync(any(), any(), any(), any(), any())
                 } returns ActivitiesDto(
                     null, null, emptyList()
                 )
@@ -78,7 +77,7 @@ internal class ActivityReindexServiceTest {
 
         assertThat(
             service
-                .reindex(BlockchainDto.FLOW, ActivityTypeDto.CANCEL_LIST, "test_index")
+                .reindex(BlockchainDto.FLOW, SyncTypeDto.ORDER, "test_index")
                 .toList()
         ).containsExactly("")
 
@@ -93,7 +92,7 @@ internal class ActivityReindexServiceTest {
         val service = ActivityReindexService(
             mockk {
                 coEvery {
-                    getAllActivities(listOf(ActivityTypeDto.CANCEL_LIST), listOf(BlockchainDto.ETHEREUM), eq("step_1"), eq("step_1"), any(), any())
+                    getAllActivitiesSync(BlockchainDto.ETHEREUM, eq("step_1"), any(), any(), SyncTypeDto.ORDER)
                 } returns ActivitiesDto(
                     null, null, listOf(
                         randomActivityDto()
@@ -101,7 +100,7 @@ internal class ActivityReindexServiceTest {
                 )
 
                 coEvery {
-                    getAllActivities(listOf(ActivityTypeDto.CANCEL_LIST), listOf(BlockchainDto.ETHEREUM), null, null, any(), any())
+                    getAllActivitiesSync(BlockchainDto.ETHEREUM, null, any(), any(), SyncTypeDto.ORDER)
                 } returns ActivitiesDto(
                     "step_1", "step_1", listOf(
                         randomActivityDto()
@@ -116,7 +115,7 @@ internal class ActivityReindexServiceTest {
 
         assertThat(
             service
-                .reindex(BlockchainDto.ETHEREUM, ActivityTypeDto.CANCEL_LIST, "test_index")
+                .reindex(BlockchainDto.ETHEREUM, SyncTypeDto.ORDER, "test_index")
                 .toList()
         ).containsExactly("step_1", "") // an empty string is always emitted in the end of loop
 
@@ -164,5 +163,4 @@ internal class ActivityReindexServiceTest {
             transactionHash = randomString()
         )
     }
-
 }
