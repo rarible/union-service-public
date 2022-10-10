@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.handler.BatchedConsumerWorker
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.BlockchainEventHandlerWrapper
 import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
@@ -43,6 +44,7 @@ class ConsumerFactory(
     val activityGroup = consumerGroup(ACTIVITY)
     val unionSubscribeItemGroup = subscribeConsumerGroup(ITEM)
     val unionSubscribeOwnershipGroup = subscribeConsumerGroup(OWNERSHIP)
+    val unionSubscribeOrderGroup = subscribeConsumerGroup(ORDER)
 
     fun <T> createItemConsumer(
         consumer: RaribleKafkaConsumer<T>,
@@ -136,6 +138,16 @@ class ConsumerFactory(
         type: String
     ): BatchedConsumerWorker<ItemEventDto> {
         return createUnionBatchedConsumerWorker(consumer, handler, daemonWorkerProperties, workers, type, ITEM)
+    }
+
+    fun createUnionOrderBatchedConsumerWorker(
+        consumer: RaribleKafkaConsumer<OrderEventDto>,
+        handler: ConsumerEventHandler<OrderEventDto>,
+        daemonWorkerProperties: DaemonWorkerProperties,
+        workers: Map<String, Int>,
+        type: String
+    ): BatchedConsumerWorker<OrderEventDto> {
+        return createUnionBatchedConsumerWorker(consumer, handler, daemonWorkerProperties, workers, type, ORDER)
     }
 
     fun createUnionOwnershipBatchedConsumerWorker(

@@ -12,7 +12,7 @@ object TimePeriodContinuationHelper {
     // From - the earliest time
     // To - the latest time
     // However, reindexing goes from the latest time to the earliest time, i.e. from "to" to "from"
-    fun adjustContinuation(continuation: String?, from: Long?, to: Long?): String? {
+    fun adjustContinuation(continuation: String?, from: Long?, to: Long?, hasPrefix: Boolean = true): String? {
         if (from == null && to == null) {
             return continuation
         }
@@ -22,7 +22,7 @@ object TimePeriodContinuationHelper {
             return continuation
         }
 
-        val parts = ContinuationParts.parse(continuation)
+        val parts = ContinuationParts.parse(continuation, hasPrefix)
 
         if (from != null && parts.timestamp < from) {
             logger.info("Continuation is below range end, stop reindexing")
@@ -39,21 +39,28 @@ object TimePeriodContinuationHelper {
 
 
     data class ContinuationParts(
-        val prefix: String,
+        val prefix: String?,
         var timestamp: Long,
-        val suffix: String
+        val suffix: String,
+        val hasPrefix : Boolean = true,
     ) {
         companion object {
-            fun parse(continuation: String): ContinuationParts {
-                val prefix = continuation.substringBefore(':')
+            fun parse(continuation: String, hasPrefix: Boolean = true): ContinuationParts {
+                val prefix = if (hasPrefix) continuation.substringBefore(':') else null
                 val suffix = continuation.substringAfter('_')
-                val timestamp = continuation.substringAfter(':').substringBefore('_')
-                return ContinuationParts(prefix, timestamp.toLong(), suffix)
+                val timestamp = if (hasPrefix) {
+                    continuation.substringAfter(':').substringBefore('_')
+                } else {
+                    continuation.substringBefore('_')
+                }
+
+                return ContinuationParts(prefix, timestamp.toLong(), suffix, hasPrefix)
             }
         }
 
         fun build(): String {
-            return "$prefix:${timestamp}_$suffix"
+            val prefixString = if (hasPrefix) "$prefix:" else ""
+            return "${prefixString}${timestamp}_$suffix"
         }
     }
 }

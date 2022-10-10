@@ -44,6 +44,7 @@ class ActivityReindexService(
             var continuation = cursor
             do {
                 rateLimiter.waitIfNecessary(size)
+                // TODO consider calling specific blockchain ActivityService.getAllActivities(), will be slightly faster
                 val res = activityApiMergeService.getAllActivities(
                     listOf(type),
                     listOf(blockchain),
