@@ -59,7 +59,8 @@ class EsItemQueryBuilderService(
 
         builder.withQuery(query)
         val resultQuery = builder.build()
-        resultQuery.searchAfter = cursorService.buildSearchAfterClause(filter.cursor)
+        val cursor = cursorService.tryFixLegacyCursor(filter.cursor)
+        resultQuery.searchAfter = cursorService.buildSearchAfterClause(cursor)
         return resultQuery
     }
 

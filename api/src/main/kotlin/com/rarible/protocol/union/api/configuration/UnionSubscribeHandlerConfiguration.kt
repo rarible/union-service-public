@@ -1,10 +1,12 @@
 package com.rarible.protocol.union.api.configuration
 
 import com.rarible.protocol.union.api.handler.UnionSubscribeItemEventHandler
+import com.rarible.protocol.union.api.handler.UnionSubscribeOrderEventHandler
 import com.rarible.protocol.union.api.handler.UnionSubscribeOwnershipEventHandler
 import com.rarible.protocol.union.core.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BatchedConsumerWorker
 import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.subscriber.UnionEventsConsumerFactory
 import org.springframework.boot.CommandLineRunner
@@ -53,10 +55,32 @@ class UnionSubscribeHandlerConfiguration(
     }
 
     @Bean
+    fun unionSubscribeOrderWorker(
+        handler: UnionSubscribeOrderEventHandler
+    ): BatchedConsumerWorker<OrderEventDto> {
+        val group = "${consumerFactory.unionSubscribeOrderGroup}.${UUID.randomUUID()}"
+        val consumer = unionEventsConsumerFactory.createOrderConsumer(group)
+        return consumerFactory.createUnionOrderBatchedConsumerWorker(
+            consumer = consumer,
+            handler = handler,
+            daemonWorkerProperties = properties.daemon,
+            workers = properties.workers,
+            type = unionWorkerType
+        )
+    }
+
+    @Bean
     fun unionSubscriberItemWorkerStartup(
         unionSubscribeItemWorker: BatchedConsumerWorker<ItemEventDto>
     ): CommandLineRunner = CommandLineRunner {
         unionSubscribeItemWorker.start()
+    }
+
+    @Bean
+    fun unionSubscriberOrderWorkerStartup(
+        unionSubscribeOrderWorker: BatchedConsumerWorker<OrderEventDto>
+    ): CommandLineRunner = CommandLineRunner {
+        unionSubscribeOrderWorker.start()
     }
 
     @Bean

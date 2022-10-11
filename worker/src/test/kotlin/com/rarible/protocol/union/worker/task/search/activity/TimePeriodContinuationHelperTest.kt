@@ -88,4 +88,18 @@ class TimePeriodContinuationHelperTest {
         // then
         assertThat(actual).isNull()
     }
+
+    @Test
+    fun `should parse and adjust continuation when there is no prefix like in ownerships`() {
+        // given
+        val from = 222L
+        val to = 444L
+        val initial = "555_ABCPDF:123:456"
+
+        // when
+        val actual = TimePeriodContinuationHelper.adjustContinuation(initial, from, to, hasPrefix = false)
+
+        // then
+        assertThat(actual).isEqualTo("445_ABCPDF:123:456")
+    }
 }

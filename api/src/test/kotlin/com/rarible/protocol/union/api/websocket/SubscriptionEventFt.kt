@@ -8,14 +8,20 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemSubscriptionEventDto
 import com.rarible.protocol.union.dto.ItemSubscriptionRequestDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
+import com.rarible.protocol.union.dto.OrderSubscriptionEventDto
+import com.rarible.protocol.union.dto.OrderUpdateEventDto
+import com.rarible.protocol.union.dto.OrdersByItemSubscriptionRequestDto
 import com.rarible.protocol.union.dto.SubscriptionActionDto
 import com.rarible.protocol.union.dto.SubscriptionEventDto
 import com.rarible.protocol.union.dto.SubscriptionRequestDto
+import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -26,7 +32,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ContextConfiguration
 import reactor.core.publisher.Sinks
 import java.math.BigInteger
-import java.util.Queue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
@@ -45,26 +50,16 @@ import java.util.concurrent.TimeUnit
 
 @IntegrationTest
 @ContextConfiguration
-internal class ItemEventFt : AbstractIntegrationTest() {
+internal class SubscriptionEventFt : AbstractIntegrationTest() {
+
+    @Autowired
+    lateinit var ethOrderConverter: EthOrderConverter
 
     @Autowired
     protected lateinit var webSocketEventsQueue: LinkedBlockingQueue<SubscriptionEventDto>
 
     @Autowired
     protected lateinit var webSocketRequests: Sinks.Many<List<SubscriptionRequestDto>>
-
-    private fun <T> filterByValueType(messages: Queue<KafkaMessage<Any>>, type: Class<T>): Collection<KafkaMessage<T>> {
-        return messages.filter {
-            type.isInstance(it.value)
-        }.map {
-            it as KafkaMessage<T>
-        }
-    }
-
-    fun findItemUpdates(itemId: String): List<KafkaMessage<ItemUpdateEventDto>> {
-        return filterByValueType(itemEvents as Queue<KafkaMessage<Any>>, ItemUpdateEventDto::class.java)
-            .filter { it.value.itemId.value == itemId }
-    }
 
     @Test
     fun `item event websocket test`() = runWithKafka {
@@ -105,6 +100,36 @@ internal class ItemEventFt : AbstractIntegrationTest() {
             }
             assertThat(event).isNotNull
             assertThat(event).isInstanceOf(ItemSubscriptionEventDto::class.java)
+        }
+    }
+
+    @Test
+    fun `order event websocket test by itemId`() = runWithKafka {
+        val order = ethOrderConverter.convert(randomEthV2OrderDto(), BlockchainDto.ETHEREUM)
+        val type = (order.make.type as EthErc721AssetTypeDto)
+        val itemId = ItemIdDto(BlockchainDto.ETHEREUM, type.contract.value, type.tokenId)
+        println("order is $order")
+        println("itemId is $itemId")
+
+        val orderEventDto = OrderUpdateEventDto(order.id, "eventId", order)
+
+        webSocketRequests.tryEmitNext(listOf(OrdersByItemSubscriptionRequestDto(SubscriptionActionDto.SUBSCRIBE, itemId)))
+
+        delay(1000)
+        webSocketEventsQueue.clear()
+
+        val kafkaMessage = KafkaMessage(
+            key = itemId.value,
+            value = orderEventDto
+        )
+        orderProducer.send(kafkaMessage).ensureSuccess()
+
+        WaitAssert.wait {
+            val event = withContext(Dispatchers.IO) {
+                webSocketEventsQueue.poll(5, TimeUnit.SECONDS)
+            }
+            assertThat(event).isNotNull
+            assertThat(event).isInstanceOf(OrderSubscriptionEventDto::class.java)
         }
     }
 }

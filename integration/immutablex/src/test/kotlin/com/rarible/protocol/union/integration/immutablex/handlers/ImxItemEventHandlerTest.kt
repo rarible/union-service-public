@@ -90,10 +90,10 @@ class ImxItemEventHandlerTest {
 
         itemEventHandler.handle(listOf(asset))
 
-        // Meta saved, but there is no refresh event
+        // In such case logic is the same as for case when meta has changed
         coVerify(exactly = 1) { itemHandler.onEvent(UnionItemUpdateEvent(item)) }
         coVerify(exactly = 1) { itemMetaRepository.save(ImxItemMeta(asset.itemId, meta)) }
-        coVerify(exactly = 0) { itemMetaHandler.onEvent(any()) }
+        coVerify(exactly = 1) { itemMetaHandler.onEvent(any()) }
     }
 
     @Test

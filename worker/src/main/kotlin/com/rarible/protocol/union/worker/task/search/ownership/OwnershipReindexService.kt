@@ -89,7 +89,7 @@ class OwnershipReindexService(
         var current: String? = cursor
         do {
             val result = job(current)
-            current = TimePeriodContinuationHelper.adjustContinuation(result.continuation, from, to)
+            current = TimePeriodContinuationHelper.adjustContinuation(result.continuation, from, to, hasPrefix = false)
 
             val ownerships = result.entities.map { convert(it) }
             val saved = repository.saveAll(ownerships, index, WriteRequest.RefreshPolicy.NONE)
