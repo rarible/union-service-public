@@ -21,6 +21,7 @@ import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.TezosOrderDataFxhashV1Dto
 import com.rarible.protocol.union.dto.TezosOrderDataFxhashV2Dto
 import com.rarible.protocol.union.dto.TezosOrderDataHenDto
+import com.rarible.protocol.union.dto.TezosOrderDataLegacyDto
 import com.rarible.protocol.union.dto.TezosOrderDataObjktV1Dto
 import com.rarible.protocol.union.dto.TezosOrderDataObjktV2Dto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
@@ -105,7 +106,7 @@ class DipDupOrderConverter(
 
     fun orderData(order: DipDupOrder, blockchain: BlockchainDto): OrderDataDto {
         return when (order.platform) {
-            TezosPlatform.RARIBLE_V1 -> TezosOrderDataRaribleV2DataV2Dto(
+            TezosPlatform.RARIBLE_V1 -> TezosOrderDataLegacyDto(
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
