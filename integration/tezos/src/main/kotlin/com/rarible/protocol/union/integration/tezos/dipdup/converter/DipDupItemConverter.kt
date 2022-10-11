@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
@@ -65,6 +66,10 @@ object DipDupItemConverter {
         )
     }
 
+    private fun toCreators(source: List<Part>, blockchain: BlockchainDto): List<CreatorDto> {
+        return source.map { CreatorDto(UnionAddressConverter.convert(blockchain, it.account), it.value) }
+    }
+
     private fun convertInternal(meta: TokenMeta): UnionMeta {
         return UnionMeta(
             name = meta.name,
@@ -109,7 +114,7 @@ object DipDupItemConverter {
                 blockchain,
                 item.contract
             ), // For TEZOS collection is a contract value
-            creators = emptyList(),
+            creators = toCreators(item.creators, blockchain),
             deleted = item.deleted,
             lastUpdatedAt = item.updated,
             lazySupply = BigInteger.ZERO,

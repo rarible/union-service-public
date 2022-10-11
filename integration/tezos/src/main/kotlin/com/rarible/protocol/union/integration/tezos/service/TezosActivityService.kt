@@ -192,6 +192,7 @@ open class TezosActivityService(
             val ids = itemActivitiesIds.filter { isValidLong(it) }
             if (properties.useDipDupTokens) {
                 dipdupTokenActivityService.getByIds(ids)
+                    .also { logger.info("Total dipdup item activities returned: ${it.size}") }
             } else {
                 if (ids.isNotEmpty()) {
                     tzktItemActivityService.getByIds(ids, properties.tzktProperties.wrapActivityHashes)
