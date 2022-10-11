@@ -6,9 +6,9 @@ import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.core.model.DipDupActivity
-import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.listener.model.DipDupCollectionEvent
+import com.rarible.dipdup.listener.model.DipDupItemMetaEvent
 import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -69,6 +69,9 @@ abstract class AbstractDipDupIntegrationTest {
 
     @Autowired
     lateinit var dipDupCollectionProducer: RaribleKafkaProducer<DipDupCollectionEvent>
+
+    @Autowired
+    lateinit var dipDupItemMetaProducer: RaribleKafkaProducer<DipDupItemMetaEvent>
 
     @Autowired
     lateinit var collectionConsumer: RaribleKafkaConsumer<CollectionEventDto>

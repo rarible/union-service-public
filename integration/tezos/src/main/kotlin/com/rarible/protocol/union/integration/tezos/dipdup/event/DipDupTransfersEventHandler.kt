@@ -27,6 +27,7 @@ import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
 
+@Deprecated("Replaced by item/ownership/activity handlers")
 open class DipDupTransfersEventHandler(
     private val ownershipHandler: IncomingEventHandler<UnionOwnershipEvent>,
     private val ownershipService: TzktOwnershipService,
