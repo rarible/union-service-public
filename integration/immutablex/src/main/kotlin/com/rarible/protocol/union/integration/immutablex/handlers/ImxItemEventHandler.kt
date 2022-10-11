@@ -55,11 +55,6 @@ class ImxItemEventHandler(
 
                 if (oldMeta == null || metaChanged) {
                     itemMetaRepository.save(ImxItemMeta(assetId, newMeta))
-                }
-
-                // Send refresh task ONLY if there is old meta, and it has been changed
-                // Otherwise, listener should trigger update itself
-                if (oldMeta != null && metaChanged) {
                     itemMetaHandler.onEvent(UnionItemMetaRefreshEvent(item.id))
                 }
                 itemHandler.onEvent(UnionItemUpdateEvent(item))
