@@ -18,7 +18,7 @@ class EsEntitySearchAfterCursorService {
             cursor
         }
         if (!fixed.contains('_')) {
-            fixed += "_0"
+            fixed += "_A"
         }
         return fixed
     }
