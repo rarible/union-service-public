@@ -11,12 +11,16 @@ class EsEntitySearchAfterCursorService {
 
     fun tryFixLegacyCursor(cursor: String?): String? {
         if (cursor.isNullOrBlank()) return cursor
-        return if (cursor.first().isLetter()) {
+        var fixed = if (cursor.first().isLetter()) {
             logger.info("Attempt to fix legacy cursor $cursor")
             cursor.substringAfter(":")
         } else {
             cursor
         }
+        if (!fixed.contains('_')) {
+            fixed += "_0"
+        }
+        return fixed
     }
 
     fun buildSearchAfterClause(cursorAsString: String?): List<Any>? {

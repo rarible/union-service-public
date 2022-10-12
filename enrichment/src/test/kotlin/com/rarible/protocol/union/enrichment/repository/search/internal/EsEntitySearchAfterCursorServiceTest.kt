@@ -17,6 +17,15 @@ class EsEntitySearchAfterCursorServiceTest {
     }
 
     @Test
+    fun `should fix legacy cursor without second part`() {
+        // when
+        val actual = service.tryFixLegacyCursor("POLYGON:1657495888423")
+
+        // then
+        assertThat(actual).isEqualTo("1657495888423_0")
+    }
+
+    @Test
     fun `should not fix cursor`() {
         // when
         val actual = service.tryFixLegacyCursor("1657495888423_123456")
