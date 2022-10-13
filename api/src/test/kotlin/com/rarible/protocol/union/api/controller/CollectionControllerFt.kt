@@ -102,7 +102,8 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         assertThat(unionCollection.id.value).isEqualTo(collectionIdFull.value)
         assertThat(unionCollection.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
         assertThat(unionCollection.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
-        assertThat(unionCollection.statistics?.itemCount).isEqualTo(statistics.itemCount)
+        assertThat(unionCollection.statistics?.itemCount).isEqualTo(statistics.itemCount.toLong())
+        assertThat(unionCollection.statistics?.itemCountTotal).isEqualTo(statistics.itemCount)
     }
 
     @Test
