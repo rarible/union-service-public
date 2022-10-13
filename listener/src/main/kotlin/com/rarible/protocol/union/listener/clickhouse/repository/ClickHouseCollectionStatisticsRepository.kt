@@ -2,8 +2,6 @@ package com.rarible.protocol.union.listener.clickhouse.repository
 
 import com.clickhouse.client.ClickHouseRecord
 import com.clickhouse.client.ClickHouseValue
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.dto.StatisticsPeriodDto
 import com.rarible.protocol.union.dto.parser.IdParser
@@ -14,8 +12,10 @@ import com.rarible.protocol.union.enrichment.model.StatisticsValue
 import com.rarible.protocol.union.listener.clickhouse.client.ClickHouseSimpleClient
 import java.math.BigDecimal
 
-@CaptureSpan(type = SpanType.DB)
-open class ClickHouseCollectionStatisticsRepository(
+// TODO Из-за аннотации @CaptureSpan поле clickHouseSimpleClient считывается не верно и в рантайме
+//  определяется как null. Видимо проблема в создаваемой CGLib прокси-обертке над данным классом.
+//@CaptureSpan(type = SpanType.DB)
+class ClickHouseCollectionStatisticsRepository(
     private val clickHouseSimpleClient: ClickHouseSimpleClient
 ) {
 
