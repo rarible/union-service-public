@@ -10,8 +10,10 @@ object CollectionStatisticsConverter {
     fun convert(collectionStatistics: CollectionStatistics): CollectionStatisticsDto {
         return with(collectionStatistics) {
             CollectionStatisticsDto(
-                itemCount = itemCount,
-                ownerCount = ownerCount,
+                itemCount = itemCount.toLong(),
+                ownerCount = itemCount.toLong(),
+                itemCountTotal = itemCount,
+                ownerCountTotal = ownerCount,
                 volumes = volumes.map {
                     StatisticsPeriodDto(
                         period = it.period,
