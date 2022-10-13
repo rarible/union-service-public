@@ -98,6 +98,8 @@ class EthOrderConverter(
         val signature = order.signature?.let { EthConverter.convert(it) }
         val pending = order.pending?.map { convert(it, blockchain) }
         val status = convert(order.status!!) // TODO ETHEREUM should be required
+        // By default, we need pay royalties
+        val optionalRoyalties = order.optionalRoyalties ?: false
         return when (order) {
             is LegacyOrderDto -> {
                 OrderDto(
@@ -125,7 +127,8 @@ class EthOrderConverter(
                     takePriceUsd = takePriceUsd,
                     data = EthOrderDataLegacyDto(
                         fee = order.data.fee.toBigInteger()
-                    )
+                    ),
+                    optionalRoyalties = optionalRoyalties,
                 )
             }
             is RaribleV2OrderDto -> {
@@ -152,7 +155,8 @@ class EthOrderConverter(
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
                     takePriceUsd = takePriceUsd,
-                    data = convert(order.data, blockchain)
+                    data = convert(order.data, blockchain),
+                    optionalRoyalties = optionalRoyalties,
                 )
             }
             is OpenSeaV1OrderDto -> {
@@ -195,7 +199,8 @@ class EthOrderConverter(
                         staticTarget = EthConverter.convert(order.data.staticTarget, blockchain),
                         staticExtraData = EthConverter.convert(order.data.staticExtraData),
                         extra = order.data.extra
-                    )
+                    ),
+                    optionalRoyalties = optionalRoyalties,
                 )
             }
             is CryptoPunkOrderDto -> {
@@ -222,7 +227,8 @@ class EthOrderConverter(
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
                     takePriceUsd = takePriceUsd,
-                    data = EthOrderCryptoPunksDataDto()
+                    data = EthOrderCryptoPunksDataDto(),
+                    optionalRoyalties = optionalRoyalties,
                 )
             }
             is SeaportV1OrderDto -> {
@@ -260,7 +266,8 @@ class EthOrderConverter(
                             conduitKey = EthConverter.convert(data.conduitKey),
                             counter = data.counter
                         )
-                    }
+                    },
+                    optionalRoyalties = optionalRoyalties,
                 )
             }
             is X2Y2OrderDto -> {
@@ -293,7 +300,8 @@ class EthOrderConverter(
                         isCollectionOffer = order.data.isCollectionOffer,
                         isBundle = order.data.isBundle,
                         side = order.data.side
-                    )
+                    ),
+                    optionalRoyalties = optionalRoyalties,
                 )
             }
             is LooksRareOrderDto -> {
@@ -325,7 +333,8 @@ class EthOrderConverter(
                         nonce = order.data.nonce,
                         strategy = EthConverter.convert(order.data.strategy, blockchain),
                         params = order.data.params?.let { EthConverter.convert(it) }
-                    )
+                    ),
+                    optionalRoyalties = optionalRoyalties,
                 )
             }
             is AmmOrderDto -> {
@@ -366,7 +375,8 @@ class EthOrderConverter(
                     takePrice = takePrice,
                     makePriceUsd = makePriceUsd,
                     takePriceUsd = takePriceUsd,
-                    data = data
+                    data = data,
+                    optionalRoyalties = optionalRoyalties,
                 )
             }
         }
