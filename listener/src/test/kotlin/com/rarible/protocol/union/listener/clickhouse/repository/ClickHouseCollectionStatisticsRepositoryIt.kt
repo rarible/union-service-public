@@ -38,7 +38,7 @@ internal class ClickHouseCollectionStatisticsRepositoryIt : AbstractIntegrationT
         assertThat(lastKey.toString()).isEqualTo(COLLECTION_ID)
 
         val lastValue = resultMap.values.last()
-        assertThat(lastValue.itemCount).isEqualTo(51L)
+        assertThat(lastValue.itemCount).isEqualTo(MAX_INT_256.toBigInteger())
         assertThat(lastValue.ownerCount).isEqualTo(100500L)
         assertThat(lastValue.volumes.map { it.period })
             .containsExactlyInAnyOrder(
@@ -70,5 +70,6 @@ internal class ClickHouseCollectionStatisticsRepositoryIt : AbstractIntegrationT
     companion object {
         private const val COLLECTION_ID = "ETHEREUM:0x472cc4402f4819354da3334e66b02072ae2cd3bh"
         private const val LIMIT = 5
+        private const val MAX_INT_256 = "57896044618658097711785492504343953926634992332820282019728792003956564819967"
     }
 }
