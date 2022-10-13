@@ -24,7 +24,8 @@ data class DipDupIntegrationProperties(
     val daemon: DaemonWorkerProperties = DaemonWorkerProperties(),
 
     // This enables query directly to dipdup indexer
-    val useDipDupTokens: Boolean = false
+    val useDipDupTokens: Boolean = false,
+    val useDipDupRoyalty: Boolean = false
 ) {
 
     data class TzktProperties(
