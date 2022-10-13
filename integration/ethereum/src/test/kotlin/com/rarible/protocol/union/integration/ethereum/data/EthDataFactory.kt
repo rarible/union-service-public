@@ -5,6 +5,7 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomBinary
+import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
@@ -279,7 +280,8 @@ private fun randomEthLegacyOrderDto(
         takePriceUsd = randomBigInt().toBigDecimal(),
         start = randomInt().toLong(),
         end = randomInt().toLong(),
-        priceHistory = listOf()
+        priceHistory = listOf(),
+        optionalRoyalties = randomBoolean()
     )
 }
 
@@ -316,7 +318,8 @@ fun randomEthV2OrderDto(make: AssetDto, maker: Address, take: AssetDto): Rarible
         takePriceUsd = randomBigInt().toBigDecimal(),
         start = randomInt().toLong(),
         end = randomInt().toLong(),
-        priceHistory = listOf()
+        priceHistory = listOf(),
+        optionalRoyalties = randomBoolean()
     )
 }
 
