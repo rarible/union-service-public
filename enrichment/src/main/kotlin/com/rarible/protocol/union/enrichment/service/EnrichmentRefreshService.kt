@@ -95,18 +95,20 @@ class EnrichmentRefreshService(
         val auctions = enrichmentAuctionService.findByItem(shortItemId)
         val sellCurrencies = sellCurrenciesDeferred.await()
         val bidCurrencies = bidCurrenciesDeferred.await()
+        val ammOrders = getAmmOrders(itemId)
 
         if (full) {
-            reconcileItemOwnerships(itemId, sellCurrencies, auctions)
+            reconcileItemOwnerships(itemId, sellCurrencies, auctions, ammOrders)
         }
 
-        reconcileItem(itemId, sellCurrencies, bidCurrencies, auctions)
+        reconcileItem(itemId, sellCurrencies, bidCurrencies, auctions, ammOrders)
     }
 
     private suspend fun reconcileItemOwnerships(
         itemId: ItemIdDto,
         sellCurrencies: List<String>,
-        itemAuctions: Collection<AuctionDto>
+        itemAuctions: Collection<AuctionDto>,
+        ammOrders: List<OrderDto>
     ) {
         // Skipping ownerships of Auctions
         val shortItemId = ShortItemId(itemId)
@@ -115,11 +117,16 @@ class EnrichmentRefreshService(
 
         val auctions = itemAuctions.associateBy { it.getSellerOwnershipId() }
         val origins = enrichmentItemService.getItemOrigins(shortItemId)
+        val ammOrdersByUser = ammOrders.associateBy { it.maker }
 
         // Checking free or partially auctioned ownerships
         logger.info("Reconciling {} Ownerships for Item [{}]", ownerships.size, itemId)
         coroutineScope {
-            ownerships.map { async { reconcileOwnership(it, sellCurrencies, auctions, origins) } }
+            ownerships.map {
+                async {
+                    reconcileOwnership(it, sellCurrencies, auctions, ammOrdersByUser[it.id.owner], origins)
+                }
+            }
         }.awaitAll()
 
         // Checking full auctions and send notifications with disguised ownerships
@@ -133,10 +140,10 @@ class EnrichmentRefreshService(
             throw UnionException("Reconciliation for Auction Ownerships is forbidden: $ownershipId")
         }
         // We don't have specific query for ownership, so will use currencies for item
-        val itemIdDto = ownershipId.getItemId()
+        val itemId = ownershipId.getItemId()
         val shortOwnershipId = ShortOwnershipId(ownershipId)
 
-        val sellCurrencies = async { getSellCurrencies(itemIdDto) }
+        val sellCurrencies = async { getSellCurrencies(itemId) }
         val unionOwnershipDeferred = async { ownershipService.fetchOrNull(shortOwnershipId) }
         val auction = enrichmentAuctionService.fetchOwnershipAuction(shortOwnershipId)
 
@@ -144,9 +151,10 @@ class EnrichmentRefreshService(
 
         if (unionOwnership != null) {
             // Free or partially auctioned ownership
+            val ammOrder = getAmmOrders(itemId).firstOrNull { it.maker == ownershipId.owner }
             val auctions = auction?.let { mapOf(ownershipId to it) } ?: emptyMap()
             val origins = enrichmentItemService.getItemOrigins(shortOwnershipId.getItemId())
-            reconcileOwnership(unionOwnership, sellCurrencies.await(), auctions, origins)
+            reconcileOwnership(unionOwnership, sellCurrencies.await(), auctions, ammOrder, origins)
         } else if (auction != null) {
             // Fully auctioned ownerships - just send disguised ownership event, no enrichment data available here
             notifyUpdate(auction)
@@ -201,7 +209,8 @@ class EnrichmentRefreshService(
         itemId: ItemIdDto,
         sellCurrencies: List<String>,
         bidCurrencies: List<String>,
-        auctions: Collection<AuctionDto>
+        auctions: Collection<AuctionDto>,
+        ammOrders: List<OrderDto>
     ) = coroutineScope {
         val shortItemId = ShortItemId(itemId)
 
@@ -211,7 +220,6 @@ class EnrichmentRefreshService(
         }
         val itemDtoDeferred = async { itemService.fetch(shortItemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
-        val ammOrders = getAmmOrders(itemId)
         val poolSellOrders = ammOrders.map { ShortPoolOrder(it.sellCurrencyId, ShortOrderConverter.convert(it)) }
 
         // Reset pool sell orders before recalculations in order to avoid unnecessary getOrder() calls
@@ -276,6 +284,7 @@ class EnrichmentRefreshService(
         ownership: UnionOwnership,
         currencies: List<String>,
         auctions: Map<OwnershipIdDto, AuctionDto>,
+        ammOrders: OrderDto?,
         origins: List<String>
     ) = coroutineScope {
         val shortOwnershipId = ShortOwnershipId(ownership.id)
@@ -288,7 +297,7 @@ class EnrichmentRefreshService(
         val bestBidProviderFactory = OwnershipBestBidOrderProvider.Factory(shortOwnershipId, enrichmentOrderService)
 
         val bestOrders = getOriginBestOrders(
-            origins, currencies, emptyList(), bestSellProviderFactory, bestBidProviderFactory, emptyList()
+            origins, currencies, emptyList(), bestSellProviderFactory, bestBidProviderFactory, listOfNotNull(ammOrders)
         )
 
         val updatedOwnership = optimisticLock {

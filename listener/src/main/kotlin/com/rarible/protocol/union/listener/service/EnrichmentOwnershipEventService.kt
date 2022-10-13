@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
+import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.model.ownershipId
@@ -25,12 +26,13 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.util.setStatusByAction
 import com.rarible.protocol.union.enrichment.validator.OwnershipValidator
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 @Component
 class EnrichmentOwnershipEventService(
@@ -66,6 +68,16 @@ class EnrichmentOwnershipEventService(
             return true
         }
         return false
+    }
+
+    suspend fun onPoolOrderUpdated(
+        ownershipId: ShortOwnershipId,
+        order: OrderDto,
+        action: PoolItemAction,
+        notificationEnabled: Boolean = true
+    ) {
+        val hackedOrder = order.setStatusByAction(action)
+        return onOwnershipBestSellOrderUpdated(ownershipId, hackedOrder, notificationEnabled)
     }
 
     suspend fun onOwnershipBestSellOrderUpdated(
