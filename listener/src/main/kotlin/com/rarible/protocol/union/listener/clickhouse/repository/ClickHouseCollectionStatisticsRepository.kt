@@ -11,6 +11,7 @@ import com.rarible.protocol.union.enrichment.model.StatisticsPeriod
 import com.rarible.protocol.union.enrichment.model.StatisticsValue
 import com.rarible.protocol.union.listener.clickhouse.client.ClickHouseSimpleClient
 import java.math.BigDecimal
+import java.math.BigInteger
 
 // TODO Из-за аннотации @CaptureSpan поле clickHouseSimpleClient считывается не верно и в рантайме
 //  определяется как null. Видимо проблема в создаваемой CGLib прокси-обертке над данным классом.
@@ -73,8 +74,8 @@ class ClickHouseCollectionStatisticsRepository(
         val floorPriceUsd = getBigDecimalOrNull(STATISTICS_FLOOR_PRICE_VALUE_USD)
 
         return CollectionStatistics(
-            itemCount = getLong(STATISTICS_ITEM_COUNT),
-            ownerCount = getLong(STATISTICS_OWNER_COUNT),
+            itemCount = getBigInteger(STATISTICS_ITEM_COUNT),
+            ownerCount = getBigInteger(STATISTICS_OWNER_COUNT),
             volumes = listOf(
                 StatisticsPeriod(
                     period = StatisticsPeriodDto.Period.DAY,
@@ -142,8 +143,8 @@ class ClickHouseCollectionStatisticsRepository(
         return get(name) { it.asDouble().toBigDecimal() }
     }
 
-    private fun ClickHouseRecord.getLong(name: String): Long {
-        return get(name) { it.asLong() }
+    private fun ClickHouseRecord.getBigInteger(name: String): BigInteger {
+        return get(name) { it.asBigInteger() }
     }
 
     companion object {
