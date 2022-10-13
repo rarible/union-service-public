@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.enrichment.test.data
 
 import com.rarible.core.test.data.randomBigDecimal
-import com.rarible.core.test.data.randomLong
+import com.rarible.core.test.data.randomBigInt
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -24,8 +24,8 @@ fun randomShortCollection(id: CollectionIdDto = randomEthCollectionId()) = Short
 )
 
 fun randomCollectionStatistics() = CollectionStatistics(
-    itemCount = randomLong(),
-    ownerCount = randomLong(),
+    itemCount = randomBigInt(),
+    ownerCount = randomBigInt(),
     volumes = listOf(
         randomStatisticsPeriod(StatisticsPeriodDto.Period.DAY),
         randomStatisticsPeriod(StatisticsPeriodDto.Period.WEEK),

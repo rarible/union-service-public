@@ -2,9 +2,11 @@ package com.rarible.protocol.union.listener.service
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
+import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.core.model.ownershipId
 import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OwnershipSourceDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -160,6 +162,42 @@ class EnrichmentOwnershipEventServiceTest {
         coVerify(exactly = 1) { eventListener.onEvent(any()) }
         coVerify(exactly = 1) { ownershipService.save(expectedShortOwnership) }
         coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, order) }
+        coVerify(exactly = 0) { ownershipService.delete(shortOwnership.id) }
+        coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
+    }
+
+    @Test
+    fun `on ownership pool order updated - excluded`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val currentShortOrder = ShortOrderConverter.convert(randomUnionSellOrderDto())
+        val shortOwnership = randomShortOwnership(itemId).copy(bestSellOrder = currentShortOrder)
+        val order = randomUnionSellOrderDto(itemId, shortOwnership.id.owner)
+        val hackedOrder = order.copy(status = OrderStatusDto.FILLED)
+
+        val expectedShortOwnership = shortOwnership.copy(bestSellOrder = null)
+
+        // Ownership exists, best Order is filled (since item removed from the pool)
+        coEvery { ownershipService.get(shortOwnership.id) } returns shortOwnership
+        // Means order is cancelled
+        coEvery {
+            bestOrderService.updateBestSellOrder(shortOwnership, hackedOrder, emptyList())
+        } returns expectedShortOwnership
+
+        coEvery { ownershipService.save(expectedShortOwnership) } returns expectedShortOwnership
+
+        coEvery {
+            ownershipService.enrichOwnership(
+                expectedShortOwnership,
+                null,
+                listOf(hackedOrder).associateBy { it.id })
+        } returns EnrichedOwnershipConverter.convert(randomUnionOwnership(), shortOwnership)
+
+        ownershipEventService.onPoolOrderUpdated(shortOwnership.id, order, PoolItemAction.EXCLUDED)
+
+        // Listener should be notified, Ownership - updated and Item data should be recalculated
+        coVerify(exactly = 1) { eventListener.onEvent(any()) }
+        coVerify(exactly = 1) { ownershipService.save(expectedShortOwnership) }
+        coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, hackedOrder) }
         coVerify(exactly = 0) { ownershipService.delete(shortOwnership.id) }
         coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }

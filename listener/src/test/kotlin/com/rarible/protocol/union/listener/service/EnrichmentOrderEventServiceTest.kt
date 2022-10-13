@@ -3,6 +3,7 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
+import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -40,8 +41,10 @@ class EnrichmentOrderEventServiceTest {
     @BeforeEach
     fun beforeEach() {
         clearMocks(enrichmentItemEventService, enrichmentOwnershipEventService)
+        coEvery { enrichmentItemEventService.onPoolOrderUpdated(any(), any(), any()) } returns Unit
         coEvery { enrichmentItemEventService.onItemBestSellOrderUpdated(any(), any()) } returns Unit
         coEvery { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) } returns Unit
+        coEvery { enrichmentOwnershipEventService.onPoolOrderUpdated(any(), any(), any()) } returns Unit
         coEvery { enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(any(), any()) } returns Unit
         coEvery { enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(any(), any(), any()) } returns Unit
         coEvery { enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(any(), any(), any()) } returns Unit
@@ -66,6 +69,29 @@ class EnrichmentOrderEventServiceTest {
         coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) }
         coVerify(exactly = 1) {
             enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(shortOwnershipId, order)
+        }
+    }
+
+    @Test
+    fun `pool order update`() = runBlocking {
+        val itemId = randomEthItemId()
+        val ownershipId = randomEthOwnershipId(itemId)
+
+        val shortItemId = ShortItemId(itemId)
+        val shortOwnershipId = ShortOwnershipId(ownershipId)
+
+        val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value).copy(
+            make = EthConverter.convert(randomEthAssetErc1155(itemId), itemId.blockchain),
+            take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
+        )
+
+        orderEventService.updatePoolOrder(order, itemId, PoolItemAction.INCLUDED)
+
+        coVerify(exactly = 1) {
+            enrichmentItemEventService.onPoolOrderUpdated(shortItemId, order, PoolItemAction.INCLUDED)
+        }
+        coVerify(exactly = 1) {
+            enrichmentOwnershipEventService.onPoolOrderUpdated(shortOwnershipId, order, PoolItemAction.INCLUDED)
         }
     }
 
