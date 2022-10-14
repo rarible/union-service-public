@@ -80,6 +80,7 @@ class EthOrderConverterTest {
             dto.take.valueDecimal!!.setScale(18) / dto.make.valueDecimal!!.setScale(18)
         )
         assertThat(converted.takePriceUsd).isNull()
+        assertThat(converted.optionalRoyalties).isEqualTo(converted.optionalRoyalties)
     }
 
     @Test
@@ -179,6 +180,7 @@ class EthOrderConverterTest {
             dto.take.valueDecimal!!.setScale(18) / dto.make.valueDecimal!!.setScale(18)
         )
         assertThat(converted.takePriceUsd).isNull()
+        assertThat(converted.optionalRoyalties).isEqualTo(converted.optionalRoyalties)
 
         val data = converted.data as EthOrderDataRaribleV2DataV1Dto
         assertThat(data.payouts[0].account.value).isEqualTo((dto.data as OrderRaribleV2DataV1Dto).payouts[0].account.prefixed())
