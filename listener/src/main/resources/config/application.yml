@@ -104,6 +104,7 @@ integration:
       tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
       ipfsUrl: ${consul.tezos.dipdup.ipfsUrl:"https://ipfs.io"}
       useDipDupTokens: ${consul.tezos.dipdup.useDipDupTokens:false}
+      useDipDupRoyalty: ${consul.tezos.dipdup.useDipDupRoyalty:false}
       tzktProperties:
         retryAttempts: ${consul.tezos.dipdup.tzktProperties.retryAttempts:2}
         retryDelay: ${consul.tezos.dipdup.tzktProperties.retryDelay:15000}

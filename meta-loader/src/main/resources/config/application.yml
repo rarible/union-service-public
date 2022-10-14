@@ -99,6 +99,8 @@ integration:
       sigChecker: ${consul.tezos.dipdup.sigChecker:}
       tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
       ipfsUrl: ${consul.tezos.dipdup.ipfsUrl:"https://ipfs.io"}
+      useDipDupTokens: ${consul.tezos.dipdup.useDipDupTokens:false}
+      useDipDupRoyalty: ${consul.tezos.dipdup.useDipDupRoyalty:false}
       knownAddresses:
         hen: ${consul.tezos.dipdup.knownAddresses.hen:}
         henRoyalties: ${consul.tezos.dipdup.knownAddresses.henRoyalties:}

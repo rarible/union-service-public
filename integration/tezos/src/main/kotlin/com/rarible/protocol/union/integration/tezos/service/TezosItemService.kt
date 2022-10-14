@@ -46,7 +46,7 @@ open class TezosItemService(
     }
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
-        return if (properties.useDipDupTokens) {
+        return if (properties.useDipDupRoyalty) {
             dipDupRoyaltyService.getItemRoyaltiesById(itemId)
         } else {
             tzktItemService.getItemRoyaltiesById(itemId)
