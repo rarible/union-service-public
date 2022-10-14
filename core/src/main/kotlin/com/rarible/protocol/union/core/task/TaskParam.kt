@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.task
 
-import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 
@@ -35,7 +34,7 @@ data class ActivityTaskParam(
     override val versionData: Int?,
     override val settingsHash: String?,
     override val blockchain: BlockchainDto,
-    val type: ActivityTypeDto,
+    val type: SyncTypeDto,
     override val index: String,
     override val from: Long? = null,
     override val to: Long? = null,

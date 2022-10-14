@@ -3,8 +3,6 @@ package com.rarible.protocol.union.worker.task.search.activity
 import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.EsActivityConverter
-import com.rarible.protocol.union.dto.ActivitySortDto
-import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
@@ -32,7 +30,7 @@ class ActivityReindexService(
 
     fun reindex(
         blockchain: BlockchainDto,
-        type: ActivityTypeDto,
+        type: SyncTypeDto,
         index: String?,
         cursor: String? = null,
         from: Long? = null,
@@ -44,14 +42,14 @@ class ActivityReindexService(
             var continuation = cursor
             do {
                 rateLimiter.waitIfNecessary(size)
-                // TODO consider calling specific blockchain ActivityService.getAllActivities(), will be slightly faster
-                val res = activityApiMergeService.getAllActivities(
-                    listOf(type),
-                    listOf(blockchain),
-                    continuation,
-                    continuation,
-                    size,
-                    ActivitySortDto.LATEST_FIRST
+
+// TODO consider calling specific blockchain ActivityService.getAllActivities(), will be slightly faster
+                val res = activityApiMergeService.getAllActivitiesSync(
+                    type = type,
+                    blockchain = blockchain,
+                    continuation = continuation,
+                    size = size,
+                    sort = SyncSortDto.DB_UPDATE_DESC
                 )
 
                 val before = nowMillis()
@@ -74,7 +72,7 @@ class ActivityReindexService(
         blockchain: BlockchainDto,
         type: SyncTypeDto,
         cursor: String?,
-    ) : Flow<String> {
+    ): Flow<String> {
         val size = limit(blockchain)
         return flow {
             var continuation = cursor

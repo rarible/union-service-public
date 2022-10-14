@@ -8,10 +8,10 @@ import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.dto.ActivityTypeDto
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.core.task.ActivityTaskParam
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncTypeDto
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.task.search.ChangeAliasTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import io.mockk.coEvery
@@ -38,11 +38,11 @@ internal class ChangeEsActivityAliasTaskUnitTest {
     }
     private val reindexEthereumList = ActivityTaskParam(
         versionData = 1, settingsHash = "",
-        BlockchainDto.ETHEREUM, ActivityTypeDto.LIST, "test_activity"
+        BlockchainDto.ETHEREUM, SyncTypeDto.ORDER, "test_activity"
     )
     private val reindexFlowBid = ActivityTaskParam(
         versionData = 1, settingsHash = "",
-        BlockchainDto.FLOW, ActivityTypeDto.BID, "test_activity"
+        BlockchainDto.FLOW, SyncTypeDto.ORDER, "test_activity"
     )
 
     private val switchAlias = ChangeAliasTaskParam(

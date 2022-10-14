@@ -3,10 +3,10 @@ package com.rarible.protocol.union.worker.metrics
 import com.rarible.core.telemetry.metrics.CountingMetric
 import com.rarible.core.telemetry.metrics.RegisteredCounter
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
-import com.rarible.protocol.union.dto.ActivityTypeDto
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.worker.config.WorkerProperties
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncTypeDto
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tag
 import org.springframework.stereotype.Component
@@ -18,7 +18,7 @@ class SearchTaskMetricFactory(
 ) {
     fun createReindexActivityCounter(
         blockchain: BlockchainDto,
-        type: ActivityTypeDto
+        type: SyncTypeDto
     ): RegisteredCounter {
         return object : CountingMetric(
             name = getReindexEntityMetricName(EsEntity.ACTIVITY),

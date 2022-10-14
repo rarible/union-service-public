@@ -4,8 +4,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
-import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.worker.config.ActivityReindexProperties
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
@@ -49,11 +49,11 @@ class ActivityTaskUnitTest {
 
             task.runLongTask(
                 null,
-                """{"blockchain": "ETHEREUM", "type": "LIST", "index":"activity_test_index"}"""
+                """{"blockchain": "ETHEREUM", "type": "ORDER", "index":"activity_test_index"}"""
             ).toList()
 
             coVerify {
-                service.reindex(BlockchainDto.ETHEREUM, ActivityTypeDto.LIST, "activity_test_index", null)
+                service.reindex(BlockchainDto.ETHEREUM, SyncTypeDto.ORDER, "activity_test_index", null)
             }
         }
     }
@@ -72,11 +72,11 @@ class ActivityTaskUnitTest {
 
         task.runLongTask(
             "ETHEREUM:cursor_1",
-            """{"blockchain": "ETHEREUM", "type": "LIST", "index":"activity_test_index"}"""
+            """{"blockchain": "ETHEREUM", "type": "ORDER", "index":"activity_test_index"}"""
         ).toList()
 
         coVerify {
-            service.reindex(BlockchainDto.ETHEREUM, ActivityTypeDto.LIST, "activity_test_index", "ETHEREUM:cursor_1")
+            service.reindex(BlockchainDto.ETHEREUM, SyncTypeDto.ORDER, "activity_test_index", "ETHEREUM:cursor_1")
         }
     }
 }

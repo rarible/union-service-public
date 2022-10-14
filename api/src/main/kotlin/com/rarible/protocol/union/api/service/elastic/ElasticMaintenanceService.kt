@@ -3,11 +3,11 @@ package com.rarible.protocol.union.api.service.elastic
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
-import com.rarible.protocol.union.dto.ActivityTypeDto
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.core.task.ActivityTaskParam
 import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.slf4j.LoggerFactory
@@ -30,7 +30,7 @@ class ElasticMaintenanceService(
 
     suspend fun scheduleReindexActivitiesTasks(
         blockchains: List<BlockchainDto> = emptyList(),
-        types: List<ActivityTypeDto> = emptyList(),
+        types: List<SyncTypeDto> = emptyList(),
         from: Long? = null,
         to: Long? = null,
         esIndex: String,
@@ -46,7 +46,7 @@ class ElasticMaintenanceService(
             BlockchainDto.values().toList()
         }
         val actualTypes = types.ifEmpty {
-            ActivityTypeDto.values().toList()
+            SyncTypeDto.values().toList()
         }
 
         actualBlockchains.forEach { blockchain ->

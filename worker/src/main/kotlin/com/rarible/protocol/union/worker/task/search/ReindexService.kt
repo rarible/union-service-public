@@ -20,6 +20,7 @@ import com.rarible.protocol.union.core.task.OrderTaskParam
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import com.rarible.protocol.union.core.task.RawTaskParam
 import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import com.rarible.protocol.union.worker.task.search.ChangeEsAliasTask.Companion.getChangeAliasTaskName
 import kotlinx.coroutines.reactive.awaitFirst
@@ -88,7 +89,7 @@ class ReindexService(
 
     private suspend fun scheduleActivityReindex(indexName: String, definition: EntityDefinitionExtended) {
         val blockchains = searchReindexProperties.activity.activeBlockchains()
-        val types = ActivityTypeDto.values()
+        val types = SyncTypeDto.values()
         val taskParams = blockchains.flatMap { blockchain ->
             types.map { type ->
                 paramFactory.toString(

@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.service.query.activity
 
-import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -19,6 +18,7 @@ import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -59,7 +59,7 @@ class ActivityApiMergeService(
         }
         logger.info(
             "Response for getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
-                    " Slice(size={}, continuation={}, cursor={}) from blockchain slices {} ",
+                " Slice(size={}, continuation={}, cursor={}) from blockchain slices {} ",
             type,
             blockchains,
             continuation,
@@ -87,9 +87,9 @@ class ActivityApiMergeService(
             continuation = activitySlice.continuation
         )
         logger.info(
-            "Response for getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
-                    "Slice(size={}, continuation={}) ",
-            continuation, size, sort, dto.activities.size, dto.continuation
+            "Response for getActivitiesByCollection(type={}, continuation={}, size={}, sort={}): " +
+                "Slice(size={}, continuation={}) ",
+            type, continuation, size, sort, dto.activities.size, dto.continuation
         )
         return dto
     }
@@ -102,14 +102,15 @@ class ActivityApiMergeService(
         type: SyncTypeDto?
     ): ActivitiesDto {
         val safeSize = PageSize.ACTIVITY.limit(size)
-        val activitySlice = router.getService(blockchain).getAllRevertedActivitiesSync(continuation, safeSize, sort, type)
+        val activitySlice =
+            router.getService(blockchain).getAllRevertedActivitiesSync(continuation, safeSize, sort, type)
         val dto = ActivitiesDto(
             activities = activitySlice.entities,
             continuation = activitySlice.continuation
         )
         logger.info(
             "Response for getRevertedActivitiesSync(continuation={}, size={}, ty[e={}, sort={}): " +
-                    "Slice(size={}, continuation={}) ",
+                "Slice(size={}, continuation={}) ",
             continuation, size, type, sort, dto.activities.size, dto.continuation
         )
         return dto
@@ -132,7 +133,7 @@ class ActivityApiMergeService(
         }
         logger.info(
             "Response for getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
-                    "Slice(size={}, continuation={}) ",
+                "Slice(size={}, continuation={}) ",
             type, collectionValue, continuation, size, sort, dto.activities.size, dto.continuation
         )
         return dto
@@ -159,7 +160,7 @@ class ActivityApiMergeService(
         }
         logger.info(
             "Response for getActivitiesByItem(type={}, itemId={} continuation={}, size={}, sort={}): " +
-                    "Slice(size={}, continuation={}) ",
+                "Slice(size={}, continuation={}) ",
             type, fullItemId.fullId(), continuation, size, sort, dto.activities.size, dto.continuation
         )
         return dto
@@ -203,7 +204,7 @@ class ActivityApiMergeService(
         }
         logger.info(
             "Response for getActivitiesByUser(type={}, users={}, continuation={}, size={}, sort={}):" +
-                    " Slice(size={}, continuation={}, cursor={}) from user slices {} ",
+                " Slice(size={}, continuation={}, cursor={}) from user slices {} ",
             type, user, continuation, size, sort,
             result.activities.size, result.continuation, result.cursor, slicesCounter
         )

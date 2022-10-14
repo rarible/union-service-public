@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.dto.ActivityTypeDto
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.core.task.ActivityTaskParam
 import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
@@ -56,7 +56,7 @@ class ElasticMaintenanceServiceIt {
             .collectList().awaitFirst()
         val index = "some_activity_index"
         val blockchains = listOf(BlockchainDto.POLYGON, BlockchainDto.FLOW)
-        val types = listOf(ActivityTypeDto.LIST, ActivityTypeDto.MINT)
+        val types = listOf(SyncTypeDto.NFT, SyncTypeDto.ORDER)
         val from = 100L
         val to = 200L
 
@@ -80,8 +80,8 @@ class ElasticMaintenanceServiceIt {
         assertThat(allParams).allMatch { it.tags?.contains("MAINTENANCE") ?: false }
         assertThat(allParams.filter { it.blockchain == BlockchainDto.POLYGON }).hasSize(2)
         assertThat(allParams.filter { it.blockchain == BlockchainDto.FLOW }).hasSize(2)
-        assertThat(allParams.filter { it.type == ActivityTypeDto.LIST }).hasSize(2)
-        assertThat(allParams.filter { it.type == ActivityTypeDto.MINT }).hasSize(2)
+        assertThat(allParams.filter { it.type == SyncTypeDto.NFT }).hasSize(2)
+        assertThat(allParams.filter { it.type == SyncTypeDto.ORDER }).hasSize(2)
 
         assertThat(taskRepository.findById(saved[0].id.toString()).awaitFirstOrNull()).isNull()
         assertThat(taskRepository.findById(saved[1].id.toString()).awaitFirstOrNull()).isNotNull()
