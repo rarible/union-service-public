@@ -79,7 +79,7 @@ internal class ReindexServiceIt {
         reindexService.scheduleReindex("test_activity_index", esActivityRepository.entityDefinition)
 
         val tasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        Assertions.assertThat(tasks).hasSize(71) //all blockchains * all activities + index switch (minus immutablex)
+        Assertions.assertThat(tasks).hasSize(16) //all blockchains * all activities + index switch (minus immutablex)
     }
 
     @Test

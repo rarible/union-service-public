@@ -7,11 +7,12 @@ import com.rarible.protocol.union.enrichment.repository.search.EsActivityReposit
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactor.awaitSingle
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 
 @Component
 class RemoveRightSellActivityTask(
-    private val orderActivityControllerApi: OrderActivityControllerApi,
+    @Qualifier("ethereum.activity.api.order") private val orderActivityApi: OrderActivityControllerApi,
     private val esActivityRepository: EsActivityRepository,
 ) : TaskHandler<String> {
 
@@ -25,7 +26,7 @@ class RemoveRightSellActivityTask(
         var continuation = from
         do {
             val orderSellRightActivities =
-                orderActivityControllerApi.getOrderSellRightActivities(continuation, size).awaitSingle()
+                orderActivityApi.getOrderSellRightActivities(continuation, size).awaitSingle()
 
             val ids = orderSellRightActivities.items.map { it.id }
             logger.info("Remove activities $ids")
