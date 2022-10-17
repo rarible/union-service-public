@@ -2,7 +2,6 @@ package com.rarible.protocol.union.listener.clickhouse.repository
 
 import com.clickhouse.client.ClickHouseRecord
 import com.clickhouse.client.ClickHouseValue
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.dto.StatisticsPeriodDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.CollectionStatistics
@@ -10,6 +9,7 @@ import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.model.StatisticsPeriod
 import com.rarible.protocol.union.enrichment.model.StatisticsValue
 import com.rarible.protocol.union.listener.clickhouse.client.ClickHouseSimpleClient
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -19,6 +19,8 @@ import java.math.BigInteger
 class ClickHouseCollectionStatisticsRepository(
     private val clickHouseSimpleClient: ClickHouseSimpleClient
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun getCollectionStatistics(collectionId: String): CollectionStatistics? {
         return try {
@@ -37,7 +39,7 @@ class ClickHouseCollectionStatisticsRepository(
                 recordToObject = { it.toCollectionStatistics() }
             )
         } catch (e: Exception) {
-            logger.warn("Can't get collection statistics for collectionId={}", collectionId)
+            logger.error("Can't get collection statistics for collectionId={}", collectionId)
             throw e
         }
     }
@@ -64,7 +66,7 @@ class ClickHouseCollectionStatisticsRepository(
                 recordToObject = { it.toCollectionId() to it.toCollectionStatistics() }
             ).toMap()
         } catch (e: Exception) {
-            logger.warn("Can't get all statistics for fromIdExcluded={} and limit={}", fromIdExcluded, limit)
+            logger.error("Can't get all statistics for fromIdExcluded={} and limit={}", fromIdExcluded, limit)
             throw e
         }
     }
@@ -148,7 +150,6 @@ class ClickHouseCollectionStatisticsRepository(
     }
 
     companion object {
-        private val logger by Logger()
         private const val ALL_STATS_TABLE_NAME = "marketplace_all_stats"
         private const val COLLECTION_ID = "collectionId"
         private const val STATISTICS_ITEM_COUNT = "totalItemSupply"

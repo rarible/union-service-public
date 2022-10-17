@@ -15,7 +15,9 @@ import kotlinx.coroutines.future.await
 class DefaultClickHouseSimpleClient(
     private val clickHouseNode: ClickHouseNode,
     private val clickHouseClientBuilder: ClickHouseClientBuilder
-) : ClickHouseSimpleClient {
+) : ClickHouseSimpleClient, AutoCloseable {
+
+    private val clickHouseClient = clickHouseClientBuilder.build()
 
     /**
      * Execute SQL query operation with entered arguments and map single result row to result object.
@@ -56,27 +58,25 @@ class DefaultClickHouseSimpleClient(
     ): List<T> {
         val nativeArguments = arguments.mapValues { ClickHouseValues.convertToSqlExpression(it.value) }
 
-        return clickHouseClientBuilder.build()
-            .use { client ->
-                val request = client.connect(clickHouseNode)
-                    .query(query)
-                    .params(nativeArguments)
+        val request = clickHouseClient.connect(clickHouseNode)
+            .query(query)
+            .params(nativeArguments)
 
-                request.execute()
-                    .await()
-                    .use { response ->
-                        response.records().map(recordToObject)
-                    }
+        return request.execute()
+            .await()
+            .use { response ->
+                response.records().map(recordToObject)
             }
     }
 
     override suspend fun execute(query: String) {
-        return clickHouseClientBuilder.build()
-            .use { client ->
-                client.connect(clickHouseNode)
-                    .query(query)
-                    .execute()
-                    .await()
-            }
+        clickHouseClient.connect(clickHouseNode)
+            .query(query)
+            .execute()
+            .await()
+    }
+
+    override fun close() {
+        clickHouseClient.close()
     }
 }
