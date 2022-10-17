@@ -91,6 +91,7 @@ open class TezosItemService(
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
+        if (itemIds.isEmpty()) return emptyList()
         return if (properties.useDipDupTokens) {
             dipDupItemService.getItemsByIds(itemIds)
         } else {
