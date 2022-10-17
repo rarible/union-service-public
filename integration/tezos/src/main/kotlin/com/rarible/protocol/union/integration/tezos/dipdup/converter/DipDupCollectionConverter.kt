@@ -26,7 +26,7 @@ object DipDupCollectionConverter {
     private fun convertInternal(collection: DipDupCollection): UnionCollection {
         return UnionCollection(
             id = CollectionIdDto(blockchain, collection.id),
-            name = collection.name,
+            name = collection.name ?: UNTITLED,
             type = CollectionDto.Type.TEZOS_MT,
             owner = UnionAddress(blockchain.group(), collection.owner),
             minters = minters(collection),
@@ -42,4 +42,6 @@ object DipDupCollectionConverter {
         // When dipdup indexer sends the correct event with minters we can remove this fix
         return minters.ifEmpty { listOf(UnionAddress(blockchain.group(), source.owner)) }
     }
+
+    private const val UNTITLED = "Unnamed Collection"
 }
