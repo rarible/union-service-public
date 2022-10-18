@@ -15,6 +15,7 @@ class BlockchainEventHandlerWrapper<B, U>(
             blockchainHandler.handle(event)
         } catch (ex: Exception) {
             logger.error("Unexpected exception during handling event [{}]", event, ex)
+            throw ex
         }
     }
 
