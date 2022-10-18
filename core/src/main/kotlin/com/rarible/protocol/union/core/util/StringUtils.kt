@@ -5,7 +5,7 @@ fun safeSplit(str: String?): List<String> {
 }
 
 fun trimToLength(str: String?, maxLength: Int, suffix: String? = null): String? {
-    if (str == null || str.length < maxLength) {
+    if (str == null || str.length <= maxLength) {
         return str
     }
     val safeSuffix = suffix ?: ""
