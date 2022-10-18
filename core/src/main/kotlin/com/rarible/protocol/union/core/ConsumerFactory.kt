@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.daemon.DaemonWorkerProperties
+import com.rarible.core.daemon.RetryProperties
 import com.rarible.core.daemon.sequential.ConsumerEventHandler
 import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
@@ -13,6 +14,7 @@ import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
+import java.time.Duration
 
 @Component
 class ConsumerFactory(
@@ -124,7 +126,8 @@ class ConsumerFactory(
                 properties = daemonWorkerProperties,
                 eventHandler = BlockchainEventHandlerWrapper(handler),
                 meterRegistry = meterRegistry,
-                workerName = "${blockchain.name.lowercase()}-${entityType}-$it"
+                workerName = "${blockchain.name.lowercase()}-${entityType}-$it",
+                retryProperties = RetryProperties(attempts = Integer.MAX_VALUE, delay = Duration.ofSeconds(1))
             )
         }
         return BatchedConsumerWorker(workerSet)
