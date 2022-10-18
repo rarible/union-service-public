@@ -20,6 +20,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaTrimmer
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -42,6 +43,7 @@ class EnrichmentItemService(
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
     private val itemMetaService: ItemMetaService,
+    private val itemMetaTrimmer: ItemMetaTrimmer,
     private val contentMetaService: ContentMetaService,
     private val originService: OriginService
 ) {
@@ -141,11 +143,13 @@ class EnrichmentItemService(
 
         val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
 
+        val trimmedMeta = itemMetaTrimmer.trim(itemMeta.await())
+
         EnrichedItemConverter.convert(
             item = fetchedItem.await(),
             shortItem = shortItem,
             // replacing inner IPFS urls with public urls
-            meta = contentMetaService.exposePublicUrls(itemMeta.await(), itemId),
+            meta = contentMetaService.exposePublicUrls(trimmedMeta, itemId),
             orders = bestOrders,
             auctions = auctionsData.await()
         )
