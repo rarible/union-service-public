@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.listener.job.task
 
-import com.rarible.core.logging.Logger
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.enrichment.model.CollectionStatistics
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
@@ -9,6 +8,7 @@ import com.rarible.protocol.union.listener.clickhouse.repository.ClickHouseColle
 import com.rarible.protocol.union.listener.service.EnrichmentCollectionEventService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
@@ -19,6 +19,8 @@ class CollectionStatisticsResyncTask(
     private val clickHouseCollectionStatisticsRepository: ClickHouseCollectionStatisticsRepository,
     private val enrichmentCollectionEventService: EnrichmentCollectionEventService
 ) : TaskHandler<String> {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override val type: String = TYPE
 
@@ -42,8 +44,9 @@ class CollectionStatisticsResyncTask(
 
             statisticsMap.keys.lastOrNull()?.let {
                 logger.info(
-                    "Processed {} collections  with from={} and param={}",
+                    "Processed {} collections, last processed collectionId={} with from={} and param={}",
                     counter.addAndGet(statisticsMap.size.toLong()),
+                    it.collectionId,
                     from,
                     param
                 )
@@ -56,7 +59,6 @@ class CollectionStatisticsResyncTask(
     }
 
     companion object {
-        private val logger by Logger()
         const val TYPE = "COLLECTION_STATISTICS_RESYNC_TASK"
     }
 }

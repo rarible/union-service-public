@@ -11,7 +11,6 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.model.CollectionStatistics
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
-import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
@@ -117,7 +116,6 @@ class EnrichmentCollectionEventService(
         if (collection.statistics != statistics) {
             try {
                 saveAndNotify(collection.copy(statistics = statistics), notificationEnabled)
-                logger.info("Updated collection [{}] with new statistics [{}]", collection, statistics)
             } catch (e: Exception) {
                 logger.error("Failed to update collection [$collection] with new statistics [$statistics]", e)
             }
