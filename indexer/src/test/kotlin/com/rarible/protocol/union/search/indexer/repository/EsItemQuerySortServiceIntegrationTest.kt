@@ -44,12 +44,14 @@ class EsItemQuerySortServiceIntegrationTest {
         // given
         elasticsearchTestBootstrapper.bootstrap()
         val builder = NativeSearchQueryBuilder()
+
         val sort = if (descending) EsItemSort.LATEST_FIRST else EsItemSort.EARLIEST_FIRST
-        val first = randomEsItem().copy(lastUpdatedAt = nowMillis().plusSeconds(100), itemId = "A")
-        val second = randomEsItem().copy(lastUpdatedAt = nowMillis().plusSeconds(100), itemId = "B")
-        val third = randomEsItem().copy(lastUpdatedAt = nowMillis().plusSeconds(50), itemId = "C")
-        val fourth = randomEsItem().copy(lastUpdatedAt = nowMillis().plusSeconds(25), itemId = "D")
-        val fifth = randomEsItem().copy(lastUpdatedAt = nowMillis().plusSeconds(25), itemId = "E")
+        val now = nowMillis()
+        val first = randomEsItem().copy(lastUpdatedAt = now.plusSeconds(100), itemId = "A")
+        val second = randomEsItem().copy(lastUpdatedAt = now.plusSeconds(100), itemId = "B")
+        val third = randomEsItem().copy(lastUpdatedAt = now.plusSeconds(50), itemId = "C")
+        val fourth = randomEsItem().copy(lastUpdatedAt = now.plusSeconds(25), itemId = "D")
+        val fifth = randomEsItem().copy(lastUpdatedAt = now.plusSeconds(25), itemId = "E")
         repository.saveAll(listOf(first, second, third, fourth, fifth).shuffled())
         val expected = if (descending) {
             listOf(first, second, third, fourth, fifth)
