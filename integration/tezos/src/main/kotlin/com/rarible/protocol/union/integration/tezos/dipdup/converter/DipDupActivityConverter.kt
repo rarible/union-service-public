@@ -47,6 +47,15 @@ class DipDupActivityConverter(
         }
     }
 
+    suspend fun convertLegacy(source: DipDupActivity, blockchain: BlockchainDto): ActivityDto {
+        try {
+            return convertInternalLegacy(source, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert {} Legacy activity: {} \n{}", blockchain, e.message, source)
+            throw e
+        }
+    }
+
     fun convertToDipDupOrderActivitiesTypes(source: List<ActivityTypeDto>): List<DipDupActivityType> {
         return source.mapNotNull { asOrderActivityType(it) }
     }
@@ -185,6 +194,126 @@ class DipDupActivityConverter(
             }
             is DipDupBurnActivity -> {
                 val id = ActivityIdDto(blockchain, activity.id)
+                BurnActivityDto(
+                    id = id,
+                    date = date,
+                    reverted = activity.reverted,
+                    owner = UnionAddressConverter.convert(blockchain, activity.owner),
+                    transactionHash = activity.transactionId,
+                    value = convertValue(activity.value, id),
+                    tokenId = activity.tokenId,
+                    itemId = ItemIdDto(blockchain, activity.contract, activity.tokenId),
+                    contract = ContractAddress(blockchain, activity.contract)
+                )
+            }
+        }
+    }
+
+    private suspend fun convertInternalLegacy(activity: DipDupActivity, blockchain: BlockchainDto): ActivityDto {
+        val activityId = ActivityIdDto(blockchain, activity.id)
+        val date = activity.date.toInstant()
+
+        return when(activity) {
+            is DipDupOrderListActivity -> {
+                val make = DipDupConverter.convert(activity.make, blockchain)
+                val take = DipDupConverter.convert(activity.take, blockchain)
+                val price = price(activity.take.assetValue, activity.make.assetValue, activity.source)
+
+                OrderListActivityDto(
+                    id = activityId,
+                    date = date,
+                    price = price,
+                    priceUsd = currencyService.toUsd(blockchain, take.type, make.value),
+                    source = convert(activity.source),
+                    hash = activity.hash,
+                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
+                    make = make,
+                    take = take,
+                    reverted = activity.reverted
+                )
+            }
+            is DipDupOrderCancelActivity -> {
+                val make = DipDupConverter.convert(activity.make.assetType, blockchain)
+                val take = DipDupConverter.convert(activity.take.assetType, blockchain)
+
+                OrderCancelListActivityDto(
+                    id = activityId,
+                    date = date,
+                    source = convert(activity.source),
+                    hash = activity.hash,
+                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
+                    reverted = false,
+                    make = make,
+                    take = take,
+                    transactionHash = activity.hash
+                )
+            }
+            is DipDupOrderSellActivity -> {
+                val nft = DipDupConverter.convert(activity.nft, blockchain)
+                val payment = DipDupConverter.convert(activity.payment, blockchain)
+
+                OrderMatchSellDto(
+                    id = activityId,
+                    date = date,
+                    source = convert(activity.source),
+                    reverted = false,
+                    transactionHash = activity.hash,
+                    seller = UnionAddressConverter.convert(blockchain, activity.seller),
+                    nft = nft,
+                    payment = payment,
+                    buyer = UnionAddressConverter.convert(blockchain, activity.buyer),
+                    price = price(payment.value, nft.value, activity.source),
+                    priceUsd = currencyService.toUsd(blockchain, payment.type, payment.value),
+                    type = OrderMatchSellDto.Type.SELL
+                )
+            }
+            is DipDupMintActivity -> {
+                val id = ActivityIdDto(blockchain, activity.transferId)
+                MintActivityDto(
+                    id = id,
+                    date = date,
+                    reverted = activity.reverted,
+                    owner = UnionAddressConverter.convert(blockchain, activity.owner),
+                    transactionHash = activity.transactionId,
+                    value = convertValue(activity.value, id),
+                    tokenId = activity.tokenId,
+                    itemId = ItemIdDto(blockchain, activity.contract, activity.tokenId),
+                    contract = ContractAddress(blockchain, activity.contract)
+                )
+            }
+            is DipDupTransferActivity -> {
+                val id = ActivityIdDto(blockchain, activity.transferId)
+
+                // Workaround for non-formal burn
+                if (Tezos.NULL_ADDRESSES.contains(activity.owner)) {
+                    BurnActivityDto(
+                        id = id,
+                        date = date,
+                        reverted = activity.reverted,
+                        owner = UnionAddressConverter.convert(blockchain, activity.owner),
+                        transactionHash = activity.transactionId,
+                        value = convertValue(activity.value, id),
+                        tokenId = activity.tokenId,
+                        itemId = ItemIdDto(blockchain, activity.contract, activity.tokenId),
+                        contract = ContractAddress(blockchain, activity.contract)
+                    )
+                } else {
+                    TransferActivityDto(
+                        id = id,
+                        date = date,
+                        reverted = activity.reverted,
+                        from = UnionAddressConverter.convert(blockchain, activity.from),
+                        owner = UnionAddressConverter.convert(blockchain, activity.owner),
+                        transactionHash = activity.transactionId,
+                        value = convertValue(activity.value, id),
+                        tokenId = activity.tokenId,
+                        itemId = ItemIdDto(blockchain, activity.contract, activity.tokenId),
+                        contract = ContractAddress(blockchain, activity.contract)
+                    )
+                }
+            }
+            is DipDupBurnActivity -> {
+                val id = ActivityIdDto(blockchain, activity.transferId)
                 BurnActivityDto(
                     id = id,
                     date = date,

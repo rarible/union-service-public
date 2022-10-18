@@ -44,6 +44,11 @@ class UnionMetaConfiguration(
     }
 
     @Bean
+    fun itemMetaTrimmingProperties(): ItemMetaTrimmingProperties {
+        return unionMetaProperties.trimming
+    }
+
+    @Bean
     fun contentDetector() = ContentDetector()
 
     @Bean

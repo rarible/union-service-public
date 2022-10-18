@@ -13,6 +13,7 @@ data class UnionMetaProperties(
     val mediaFetchMaxSize: Long,
     val openSeaProxyUrl: String,
     val embedded: EmbeddedContentProperties,
+    val trimming: ItemMetaTrimmingProperties = ItemMetaTrimmingProperties(),
     val httpClient: HttpClient = HttpClient(),
     private val retries: String = "" //  TODO not sure it should be here
 ) {
@@ -49,4 +50,13 @@ data class EmbeddedContentProperties(
     val publicUrl: String,
     @Deprecated("Should be removed after migration")
     val legacyUrls: String = ""
+)
+
+data class ItemMetaTrimmingProperties(
+    val suffix: String = "...",
+    val nameLength: Int = 10000,
+    val descriptionLength: Int = 50000,
+    val attributesSize: Int = 200,
+    val attributeNameLength: Int = 500,
+    val attributeValueLength: Int = 2000
 )
