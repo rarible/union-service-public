@@ -143,7 +143,11 @@ class EnrichmentItemService(
 
         val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
 
-        val trimmedMeta = itemMetaTrimmer.trim(itemMeta.await())
+        val receivedMeta = itemMeta.await()
+        val trimmedMeta = itemMetaTrimmer.trim(receivedMeta)
+        if (receivedMeta != trimmedMeta) {
+            logger.info("Received Item with large meta: $itemId")
+        }
 
         EnrichedItemConverter.convert(
             item = fetchedItem.await(),
