@@ -18,7 +18,7 @@ internal class RemoveRightSellActivityTaskTest {
     private val activityId = "123"
     private val orderActivityMatch = randomEthOrderActivityMatch().copy(id = activityId)
 
-    private val activityOrderControllerApi = mockk<OrderActivityControllerApi>() {
+    private val ethereumActivityOrderControllerApi = mockk<OrderActivityControllerApi> {
         coEvery {
             getOrderSellRightActivities(isNull(), any())
         } returns Mono.just(
@@ -33,15 +33,22 @@ internal class RemoveRightSellActivityTaskTest {
             )
         )
     }
+    private val polygonActivityOrderControllerApi = mockk<OrderActivityControllerApi>()
 
-    private val esActivityRepository = mockk<EsActivityRepository>() {
-        coEvery { deleteAll(any()) } returns 1
+    private val esActivityRepository = mockk<EsActivityRepository> {
+        coEvery {
+            deleteAll(any())
+        } returns 1
     }
 
     @Test
     fun `should launch first run of the task`(): Unit {
         runBlocking {
-            val task = RemoveRightSellActivityTask(activityOrderControllerApi, esActivityRepository)
+            val task = RemoveRightSellActivityTask(
+                ethereumActivityOrderControllerApi,
+                polygonActivityOrderControllerApi,
+                esActivityRepository
+            )
 
             task.runLongTask(
                 null,
@@ -49,8 +56,8 @@ internal class RemoveRightSellActivityTaskTest {
             ).toList()
 
             coVerify {
-                activityOrderControllerApi.getOrderSellRightActivities(isNull(), any())
-                activityOrderControllerApi.getOrderSellRightActivities(eq(continuation), any())
+                ethereumActivityOrderControllerApi.getOrderSellRightActivities(isNull(), any())
+                ethereumActivityOrderControllerApi.getOrderSellRightActivities(eq(continuation), any())
                 esActivityRepository.deleteAll(eq(listOf(activityId)))
             }
         }
@@ -58,7 +65,11 @@ internal class RemoveRightSellActivityTaskTest {
 
     @Test
     fun `should launch next run of the task`(): Unit = runBlocking {
-        val task = RemoveRightSellActivityTask(activityOrderControllerApi, esActivityRepository)
+        val task = RemoveRightSellActivityTask(
+            ethereumActivityOrderControllerApi,
+            polygonActivityOrderControllerApi,
+            esActivityRepository
+        )
 
         task.runLongTask(
             continuation,
@@ -66,7 +77,7 @@ internal class RemoveRightSellActivityTaskTest {
         ).toList()
 
         coVerify {
-            activityOrderControllerApi.getOrderSellRightActivities(eq(continuation), any())
+            ethereumActivityOrderControllerApi.getOrderSellRightActivities(eq(continuation), any())
         }
     }
 }

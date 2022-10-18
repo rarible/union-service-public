@@ -9,21 +9,18 @@ import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.action.bulk.BulkRequest
 import org.elasticsearch.action.support.WriteRequest
 import org.elasticsearch.client.Requests
 import org.elasticsearch.common.xcontent.XContentType
-import org.springframework.data.elasticsearch.BulkFailureException
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.data.elasticsearch.core.query.Criteria
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery
-import org.springframework.data.elasticsearch.core.query.Query
 import java.io.IOException
 import javax.annotation.PostConstruct
 
@@ -35,7 +32,7 @@ abstract class ElasticSearchRepository<T>(
     private val elasticsearchConverter: ElasticsearchConverter,
     private val elasticClient: ReactiveElasticsearchClient,
     private val entityType: Class<T>,
-    private val idFieldName: String
+    private val idFieldName: String = "_id"
 ) : EsRepository {
 
     protected val logger by Logger()

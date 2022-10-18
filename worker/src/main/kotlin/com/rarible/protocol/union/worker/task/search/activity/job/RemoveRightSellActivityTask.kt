@@ -3,6 +3,7 @@ package com.rarible.protocol.union.worker.task.search.activity.job
 import com.rarible.core.logging.Logger
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class RemoveRightSellActivityTask(
-    @Qualifier("ethereum.activity.api.order") private val orderActivityApi: OrderActivityControllerApi,
+    @Qualifier("ethereum.activity.api.order") private val ethereumOrderActivityApi: OrderActivityControllerApi,
+    @Qualifier("polygon.activity.api.order") private val polygonOrderActivityApi: OrderActivityControllerApi,
     private val esActivityRepository: EsActivityRepository,
 ) : TaskHandler<String> {
 
@@ -24,9 +26,10 @@ class RemoveRightSellActivityTask(
 
         val size = 200
         var continuation = from
+        var blockchainDto = if (param.isNullOrBlank()) BlockchainDto.ETHEREUM else BlockchainDto.valueOf(param)
         do {
-            val orderSellRightActivities =
-                orderActivityApi.getOrderSellRightActivities(continuation, size).awaitSingle()
+            val orderSellRightActivities = getClient(blockchainDto).getOrderSellRightActivities(continuation, size)
+                .awaitSingle()
 
             val ids = orderSellRightActivities.items.map { it.id }
             logger.info("Remove activities $ids")
@@ -40,6 +43,12 @@ class RemoveRightSellActivityTask(
         logger.info("Finish REMOVE_RIGHT_SELL_ACTIVITY_TASK")
     }
 
+    private fun getClient(blockchainDto: BlockchainDto): OrderActivityControllerApi =
+        if (blockchainDto == BlockchainDto.POLYGON) {
+            polygonOrderActivityApi
+        } else {
+            ethereumOrderActivityApi
+        }
     companion object {
         const val REMOVE_RIGHT_SELL_ACTIVITY_TASK = "REMOVE_RIGHT_SELL_ACTIVITY_TASK"
         val logger by Logger()
