@@ -25,14 +25,22 @@ open class DipDupActivityEventHandler(
     override suspend fun handle(event: DipDupActivity) {
         logger.info("Received DipDup activity event: {}", mapper.writeValueAsString(event))
         try {
-            if (!properties.useDipDupTokens && skip(event) || skipByType(event)) {
-                logger.warn("Activity event was skipped")
-            } else {
+            if (properties.useDipDupTokens) {
                 val unionEvent = dipDupOrderConverter.convert(event, blockchain)
-                handler.onEvent(unionEvent)
-
-                if (!properties.useDipDupTokens && dipDupTransfersEventHandler.isTransfersEvent(unionEvent)) {
-                    dipDupTransfersEventHandler.handle(unionEvent)
+                if (skipByType(event)) {
+                    logger.warn("Activity event was skipped by type")
+                } else {
+                    handler.onEvent(unionEvent)
+                }
+            } else {
+                val unionEvent = dipDupOrderConverter.convertLegacy(event, blockchain)
+                if (skip(event) || skipByType(event)) {
+                    logger.warn("Activity event was skipped")
+                } else {
+                    handler.onEvent(unionEvent)
+                    if (dipDupTransfersEventHandler.isTransfersEvent(unionEvent)) {
+                        dipDupTransfersEventHandler.handle(unionEvent)
+                    }
                 }
             }
         } catch (e: UnionDataFormatException) {
