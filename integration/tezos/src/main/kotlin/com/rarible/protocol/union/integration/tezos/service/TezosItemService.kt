@@ -47,7 +47,14 @@ open class TezosItemService(
 
     override suspend fun getItemRoyaltiesById(itemId: String): List<RoyaltyDto> {
         return if (properties.useDipDupRoyalty) {
-            dipDupRoyaltyService.getItemRoyaltiesById(itemId)
+            var royalty = dipDupRoyaltyService.getItemRoyaltiesById(itemId)
+            if (properties.saveDipDupRoyalty && royalty.isEmpty()) {
+                royalty = tzktItemService.getItemRoyaltiesById(itemId)
+                if (royalty.isNotEmpty()) {
+                    dipDupRoyaltyService.saveRoyalty(itemId, royalty)
+                }
+            }
+            royalty
         } else {
             tzktItemService.getItemRoyaltiesById(itemId)
         }
@@ -62,7 +69,7 @@ open class TezosItemService(
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        // We can reset meta only for legacy backend
+        dipDupItemService.resetMetaById(itemId)
     }
 
     override suspend fun getItemsByCollection(
@@ -71,7 +78,11 @@ open class TezosItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItem> {
-        return tzktItemService.getItemsByCollection(collection, continuation, size)
+        return if (properties.useDipDupTokens) {
+            dipDupItemService.getItemsByCollection(collection, size, continuation)
+        } else {
+            tzktItemService.getItemsByCollection(collection, continuation, size)
+        }
     }
 
     override suspend fun getItemsByCreator(
@@ -79,7 +90,11 @@ open class TezosItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItem> {
-        return tzktItemService.getItemsByCreator(creator, continuation, size)
+        return if (properties.useDipDupTokens) {
+            dipDupItemService.getItemsByCollection(creator, size, continuation)
+        } else {
+            tzktItemService.getItemsByCreator(creator, continuation, size)
+        }
     }
 
     override suspend fun getItemsByOwner(
@@ -87,7 +102,11 @@ open class TezosItemService(
         continuation: String?,
         size: Int
     ): Page<UnionItem> {
-        return tzktItemService.getItemsByOwner(owner, continuation, size)
+        return if (properties.useDipDupTokens) {
+            dipDupItemService.getItemsByOwner(owner, size, continuation)
+        } else {
+            tzktItemService.getItemsByOwner(owner, continuation, size)
+        }
     }
 
     override suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {

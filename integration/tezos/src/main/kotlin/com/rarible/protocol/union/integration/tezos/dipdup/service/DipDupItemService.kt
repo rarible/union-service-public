@@ -29,6 +29,45 @@ class DipDupItemService(
         )
     }
 
+    suspend fun getItemsByOwner(
+        address: String,
+        size: Int,
+        continuation: String?
+    ): Page<UnionItem> {
+        val page = dipdupTokenClient.getTokensByOwner(address, size, continuation)
+        return Page(
+            total = page.items.size.toLong(),
+            continuation = page.continuation,
+            entities = page.items.map { DipDupItemConverter.convert(it) }
+        )
+    }
+
+    suspend fun getItemsByCreator(
+        address: String,
+        size: Int,
+        continuation: String?
+    ): Page<UnionItem> {
+        val page = dipdupTokenClient.getTokensByCreator(address, size, continuation)
+        return Page(
+            total = page.items.size.toLong(),
+            continuation = page.continuation,
+            entities = page.items.map { DipDupItemConverter.convert(it) }
+        )
+    }
+
+    suspend fun getItemsByCollection(
+        address: String,
+        size: Int,
+        continuation: String?
+    ): Page<UnionItem> {
+        val page = dipdupTokenClient.getTokensByCollection(address, size, continuation)
+        return Page(
+            total = page.items.size.toLong(),
+            continuation = page.continuation,
+            entities = page.items.map { DipDupItemConverter.convert(it) }
+        )
+    }
+
     suspend fun getItemById(
         itemId: String
     ): UnionItem {
@@ -45,6 +84,10 @@ class DipDupItemService(
         } catch (ex: DipDupNotFound) {
             throw UnionNotFoundException("Meta not found for: $itemId")
         }
+    }
+
+    suspend fun resetMetaById(itemId: String) {
+        dipdupTokenClient.removeTokenMetaById(itemId)
     }
 
     suspend fun getItemsByIds(itemIds: List<String>): List<UnionItem> {
