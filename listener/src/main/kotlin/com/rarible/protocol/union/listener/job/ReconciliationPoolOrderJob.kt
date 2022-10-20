@@ -52,7 +52,7 @@ class ReconciliationPoolOrderJob(
             val itemIds = orderServiceRouter.fetchAllBySlices(order.id.blockchain) { service, continuation ->
                 service.getAmmOrderItemIds(order.id.value, continuation, 1000)
             }
-            logger.info("Found {} Items for pool Order")
+            logger.info("Found {} Items for pool Order", itemIds.size)
             itemIds.chunked(config.threadCount).forEach { chunk ->
                 chunk.mapAsync { itemId -> safeUpdate(order, itemId) }
             }
