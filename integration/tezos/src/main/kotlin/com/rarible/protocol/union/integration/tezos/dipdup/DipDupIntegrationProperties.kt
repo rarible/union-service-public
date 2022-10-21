@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties(prefix = "integration.tezos.dipdup")
 data class DipDupIntegrationProperties(
     val dipdupUrl: String,
+    val dipdupToken: String?,
     val tzktUrl: String,
     val tzktProperties: TzktProperties = TzktProperties(),
     val ipfsUrl: String,
@@ -25,7 +26,8 @@ data class DipDupIntegrationProperties(
 
     // This enables query directly to dipdup indexer
     val useDipDupTokens: Boolean = false,
-    val useDipDupRoyalty: Boolean = false
+    val useDipDupRoyalty: Boolean = false,
+    val saveDipDupRoyalty: Boolean = false
 ) {
 
     data class TzktProperties(

@@ -68,12 +68,14 @@ integration:
     dipdup:
       network: ${consul.tezos.dipdup.network:}
       dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
+      dipdupToken: ${consul.tezos.dipdup.dipdupToken:}
       nodeAddress: ${consul.tezos.dipdup.nodeAddress:}
       chainId: ${consul.tezos.dipdup.chainId:}
       sigChecker: ${consul.tezos.dipdup.sigChecker:}
       tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
       useDipDupTokens: ${consul.tezos.dipdup.useDipDupTokens:false}
       useDipDupRoyalty: ${consul.tezos.dipdup.useDipDupRoyalty:false}
+      saveDipDupRoyalty: ${consul.tezos.dipdup.saveDipDupRoyalty:false}
       tzktProperties:
         tokenBatch: ${consul.tezos.dipdup.tzktProperties.tokenBatch:false}
         ownershipBatch: ${consul.tezos.dipdup.tzktProperties.ownershipBatch:false}

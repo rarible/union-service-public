@@ -4,6 +4,7 @@ import com.apollographql.apollo3.ApolloClient
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.dipdup.client.OrderActivityClient
 import com.rarible.dipdup.client.OrderClient
+import com.rarible.dipdup.client.client.AuthorizationInterceptor
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
@@ -54,7 +55,11 @@ class DipDupApiConfiguration(
     private val properties: DipDupIntegrationProperties
 ) {
 
-    val apolloClient = runBlocking { ApolloClient.Builder().serverUrl(properties.dipdupUrl).build() }
+    val apolloClient = runBlocking {
+        val builder = ApolloClient.Builder().serverUrl(properties.dipdupUrl)
+        properties.dipdupToken?.let { builder.addHttpInterceptor(AuthorizationInterceptor(it)) }
+        builder.build()
+    }
 
     val tzktWebClient = webClient(properties.tzktUrl)
     val ipfsWebClient = webClient(properties.ipfsUrl)
