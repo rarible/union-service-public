@@ -69,7 +69,9 @@ open class TezosItemService(
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-        dipDupItemService.resetMetaById(itemId)
+        if (properties.useDipDupTokens) {
+            dipDupItemService.resetMetaById(itemId)
+        }
     }
 
     override suspend fun getItemsByCollection(
