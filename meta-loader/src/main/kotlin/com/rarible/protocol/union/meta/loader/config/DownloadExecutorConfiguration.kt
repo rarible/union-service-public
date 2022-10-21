@@ -17,7 +17,9 @@ import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutor
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutorHandler
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutorManager
+import com.rarible.protocol.union.meta.loader.executor.DownloadMetrics
 import com.rarible.protocol.union.meta.loader.executor.DownloadPool
+import com.rarible.protocol.union.meta.loader.executor.ItemDownloadExecutor
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import io.micrometer.core.instrument.MeterRegistry
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
@@ -27,7 +29,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import java.util.UUID
+import java.util.*
 
 @Configuration
 @ConditionalOnProperty("common.feature-flags.enabledMetaPipeline", havingValue = "true", matchIfMissing = false)
@@ -53,19 +55,20 @@ class DownloadExecutorConfiguration(
         itemMetaRepository: ItemMetaRepository,
         itemMetaDownloader: ItemMetaDownloader,
         itemMetaNotifier: ItemMetaNotifier,
+        metrics: DownloadMetrics
     ): DownloadExecutorManager {
         val maxRetries = metaProperties.retryIntervals.size
         val executors = HashMap<String, DownloadExecutor<UnionMeta>>()
         ItemMetaPipeline.values().map { it.name.lowercase() }.forEach { pipeline ->
             val conf = getItemPipelineConfiguration(pipeline)
             val pool = DownloadPool(conf.poolSize, "item-meta-task-executor")
-            val executor = DownloadExecutor(
+            val executor = ItemDownloadExecutor(
                 itemMetaRepository,
                 itemMetaDownloader,
                 itemMetaNotifier,
                 pool,
-                maxRetries,
-                meterRegistry
+                metrics,
+                maxRetries
             )
             executors[pipeline] = executor
             logger.info(
