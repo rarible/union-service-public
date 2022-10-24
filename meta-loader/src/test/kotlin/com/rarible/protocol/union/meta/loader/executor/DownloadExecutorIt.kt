@@ -38,6 +38,9 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var itemRepository: ItemRepository
 
+    @Autowired
+    lateinit var metrics: DownloadMetrics
+
     val downloader: ItemMetaDownloader = mockk()
     val notifier: DownloadNotifier<UnionMeta> = mockk { coEvery { notify(any()) } returns Unit }
     val pool = DownloadPool(2, "item-meta-test")
@@ -53,13 +56,13 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
     @BeforeEach
     fun beforeEach() {
-        downloadExecutor = DownloadExecutor(
+        downloadExecutor = ItemDownloadExecutor(
             repository,
             downloader,
             notifier,
             pool,
+            metrics,
             maxRetries,
-            meterRegistry
         )
         now = nowMillis()
         itemId = randomEthItemId()
