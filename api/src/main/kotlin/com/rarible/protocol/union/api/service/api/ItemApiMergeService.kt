@@ -184,7 +184,7 @@ class ItemApiMergeService(
                     .getItemsByCollection(collectionId.value, null, continuation, pageSize)
                 page.entities.forEach { emit(it.id) }
                 continuation = page.continuation
-                if (continuation == null || page.total == 0) break
+                if (continuation == null || page.total == 0L) break
                 returned += page.total
                 check(returned < 1_000_000) { "Cyclic continuation $continuation for collection $collectionId" }
             }
