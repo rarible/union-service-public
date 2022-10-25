@@ -4,6 +4,7 @@ import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.model.TokenId
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
@@ -11,6 +12,7 @@ import com.rarible.protocol.union.integration.tezos.data.randomTzktContract
 import com.rarible.protocol.union.integration.tezos.entity.TezosCollection
 import com.rarible.protocol.union.integration.tezos.entity.TezosCollectionRepository
 import com.rarible.tzkt.model.CollectionType
+import com.rarible.tzkt.model.TzktBadRequest
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactor.awaitSingle
@@ -22,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import java.math.BigInteger
 
 @FlowPreview
@@ -87,6 +90,22 @@ class TezosCollectionControllerFt : AbstractIntegrationTest() {
         assertThrows<HttpClientErrorException.BadRequest> {
             runBlocking {
                 testTemplate.getForEntity(url, TokenId::class.java)
+            }
+        }
+    }
+
+    @Test
+    fun `should return 400 on user address`() = runBlocking<Unit> {
+        val userAddress = randomTezosAddress()
+        val url = "${baseUrl()}/collections/${userAddress.value}"
+
+        coEvery {
+            tzktCollectionClient.collection(userAddress.value)
+        } throws TzktBadRequest(WebClientResponseException(400, "", null, null, null))
+
+        assertThrows<HttpClientErrorException.BadRequest> {
+            runBlocking {
+                testTemplate.getForEntity(url, UnionCollection::class.java)
             }
         }
     }
