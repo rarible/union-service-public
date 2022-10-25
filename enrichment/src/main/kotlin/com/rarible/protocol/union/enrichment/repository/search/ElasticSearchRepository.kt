@@ -14,13 +14,11 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.action.bulk.BulkRequest
 import org.elasticsearch.action.support.WriteRequest
 import org.elasticsearch.client.Requests
-import org.elasticsearch.common.xcontent.XContentType
+import org.elasticsearch.xcontent.XContentType
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
-import org.springframework.data.elasticsearch.core.query.Criteria
-import org.springframework.data.elasticsearch.core.query.CriteriaQuery
 import java.io.IOException
 import javax.annotation.PostConstruct
 
@@ -54,12 +52,14 @@ abstract class ElasticSearchRepository<T>(
         return esOperations.get(id, entityType, entityDefinition.searchIndexCoordinates).awaitFirstOrNull()
     }
 
+    // TODO used in tests only
+    @Deprecated("Use bulk() instead")
     suspend fun save(entity: T): T {
         if (brokenEsState) {
             throw IllegalStateException("No indexes to save")
         }
 
-        return esOperations.save(entity, entityDefinition.writeIndexCoordinates).awaitFirst()
+        return saveAll(listOf(entity))[0]
     }
 
     @Deprecated("Use bulk() instead")
@@ -159,11 +159,13 @@ abstract class ElasticSearchRepository<T>(
         }
     }
 
-    suspend fun deleteAll(ids: List<String>): Long? {
-        val query = CriteriaQuery(Criteria(idFieldName).`in`(ids))
+    suspend fun deleteAll(ids: List<String>) {
+        bulk(emptyList(), ids, refreshPolicy = WriteRequest.RefreshPolicy.IMMEDIATE)
+        /*val query = CriteriaQuery(Criteria(idFieldName).`in`(ids))
+
         return esOperations.delete(
             query, entityType, entityDefinition.writeIndexCoordinates
-        ).awaitFirstOrNull()?.deleted
+        ).awaitFirstOrNull()?.deleted*/
     }
 
     override suspend fun refresh() {

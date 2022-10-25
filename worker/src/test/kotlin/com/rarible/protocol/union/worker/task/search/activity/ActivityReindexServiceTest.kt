@@ -47,7 +47,7 @@ internal class ActivityReindexServiceTest {
 
         coEvery {
             deleteAll(any())
-        } returns 1
+        } returns Unit
     }
 
     private val converter = mockk<EsActivityConverter> {

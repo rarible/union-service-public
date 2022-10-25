@@ -30,7 +30,6 @@ class OrderElasticService(
     private val esOrderRepository: EsOrderRepository
 ) : OrderQueryService {
 
-    @ExperimentalStdlibApi
     override suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
         continuation: String?,

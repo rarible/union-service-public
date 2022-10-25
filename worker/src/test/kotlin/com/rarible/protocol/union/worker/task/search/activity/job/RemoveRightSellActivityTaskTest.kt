@@ -38,7 +38,7 @@ internal class RemoveRightSellActivityTaskTest {
     private val esActivityRepository = mockk<EsActivityRepository> {
         coEvery {
             deleteAll(any())
-        } returns 1
+        } returns Unit
     }
 
     @Test

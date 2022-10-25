@@ -86,8 +86,8 @@ class ActivityReindexService(
                 )
                 logger.info("Delete reverted ${result.activities.size} activities, continuation: $continuation")
                 if (result.activities.isNotEmpty()) {
-                    val deleted = esActivityRepository.deleteAll(result.activities.map { it.id.toString() })
-                    logger.info("Deleted $deleted reverted activities")
+                    esActivityRepository.deleteAll(result.activities.map { it.id.toString() })
+                    logger.info("Deleted ${result.activities.size} reverted activities")
                 }
                 continuation = result.continuation
                 emit(continuation ?: "")

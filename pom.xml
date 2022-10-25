@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.rarible</groupId>
         <artifactId>rarible-parent-pom</artifactId>
-        <version>2.0.4</version>
+        <version>2.7.5</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -46,16 +46,16 @@
         <postgresql.version>42.3.4</postgresql.version>
         <okhttp.version>4.9.3</okhttp.version>
 
-        <rarible.core.version>2.4.29</rarible.core.version>
-        <rarible.ethereum.version>1.6.1</rarible.ethereum.version>
+        <rarible.core.version>2.5.0</rarible.core.version>
+        <rarible.ethereum.version>1.7.0</rarible.ethereum.version>
 
-        <rarible.protocol.currency.version>1.35.0</rarible.protocol.currency.version>
-        <rarible.protocol.ethereum.version>1.38.2</rarible.protocol.ethereum.version>
-        <rarible.protocol.flow.version>3.1.14</rarible.protocol.flow.version>
-        <rarible.protocol.solana.version>0.1.51</rarible.protocol.solana.version>
+        <rarible.protocol.currency.version>1.38.0</rarible.protocol.currency.version>
+        <rarible.protocol.ethereum.version>1.38.3</rarible.protocol.ethereum.version>
+        <rarible.protocol.flow.version>3.2.0</rarible.protocol.flow.version>
+        <rarible.protocol.solana.version>0.1.6</rarible.protocol.solana.version>
         <rarible.protocol.tezos.api.version>1.38.11</rarible.protocol.tezos.api.version>
 
-        <rarible.protocol.union.version>1.38.5</rarible.protocol.union.version>
+        <rarible.protocol.union.version>1.38.7</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>

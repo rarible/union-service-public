@@ -74,13 +74,12 @@ internal class EsActivityRepositoryFt {
         val ids = activities.map { it.activityId }
 
         // when
-        val deleted = repository.deleteAll(ids)
+        repository.deleteAll(ids)
         val query = NativeSearchQuery(BoolQueryBuilder())
         query.maxResults = 100
         val actual = repository.search(query)
 
         // then
-        assertThat(deleted).isEqualTo(30)
         assertThat(actual.activities).hasSize(0)
     }
 }
