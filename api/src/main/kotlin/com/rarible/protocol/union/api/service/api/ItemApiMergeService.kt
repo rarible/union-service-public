@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemDto
@@ -18,7 +19,7 @@ import com.rarible.protocol.union.dto.continuation.page.ArgPage
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.protocol.union.dto.continuation.page.PageSize
+
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
@@ -184,7 +185,7 @@ class ItemApiMergeService(
                     .getItemsByCollection(collectionId.value, null, continuation, pageSize)
                 page.entities.forEach { emit(it.id) }
                 continuation = page.continuation
-                if (continuation == null || page.total == 0) break
+                if (continuation == null || page.total == 0L) break
                 returned += page.total
                 check(returned < 1_000_000) { "Cyclic continuation $continuation for collection $collectionId" }
             }

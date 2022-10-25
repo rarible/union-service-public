@@ -3,9 +3,9 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.client.OwnershipControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -26,8 +26,8 @@ import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
 import com.rarible.protocol.union.integration.flow.data.randomFlowNftOwnershipDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowV1OrderDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
-import com.rarible.protocol.union.integration.tezos.data.randomTezosTzktOwnershipDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOwnershipId
+import com.rarible.protocol.union.integration.tezos.data.randomTezosTzktOwnershipDto
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktOwnershipConverter
 import convertUnionOwnershipToEsOwnership
 import kotlinx.coroutines.reactive.awaitFirst
