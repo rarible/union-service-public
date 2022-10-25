@@ -52,11 +52,11 @@ class TezosDipDupOrdersControllerFt : AbstractIntegrationTest() {
         val dipdupOrder = dipDupOrder(UUID.randomUUID().toString())
 
         coEvery {
-            testDipDupOrderClient.getOrdersByItem(contract, tokenId.toString(), any(), "XTZ", any(), any(), any(), any())
+            testDipDupOrderClient.getOrdersByItem(contract, tokenId.toString(), any(), "XTZ", any(), any(), any(), any(), any())
         } returns DipDupOrdersPage(listOf(dipdupOrder))
 
         coEvery {
-            testDipDupOrderClient.getOrdersCurrenciesByItem(contract, tokenId.toString())
+            testDipDupOrderClient.getSellOrdersCurrenciesByItem(contract, tokenId.toString())
         } returns listOf(Asset.XTZ())
 
         val orders = orderControllerClient.getSellOrdersByItem(
