@@ -19,7 +19,6 @@ import com.rarible.protocol.union.dto.continuation.page.ArgPage
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.Page
-
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
@@ -165,14 +164,11 @@ class ItemApiMergeService(
         )
 
         val groupedIds = ids.groupBy({ it.blockchain }, { it.value })
+        val items = groupedIds.map {
+            async { router.getService(it.key).getItemsByIds(it.value) }
+        }.awaitAll().flatten()
 
-        groupedIds.flatMap {
-            router.getService(it.key).getItemsByIds(it.value)
-        }.map {
-            async {
-                itemEnrichService.enrich(it)
-            }
-        }.awaitAll()
+        itemEnrichService.enrich(items)
     }
 
     override suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto> {
@@ -225,26 +221,23 @@ class ItemApiMergeService(
         val safeSize = PageSize.ITEM.limit(size)
         val ownerAddress = IdParser.parseAddress(owner)
         val page = ownershipApiService.getOwnershipByOwner(ownerAddress, continuation, safeSize)
-        val ids = page.entities.map { it.id.getItemId() }
-        val items = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
-            it.getItemsByIds(ids.map { id -> id.value })
-        }.flatten().associateBy { it.id }
 
-        val wrapped = page.entities.map {
-            val item = items[it.id.getItemId()]
-            coroutineScope {
-                async {
-                    if (null != item) {
-                        ItemWithOwnershipDto(
-                            itemEnrichService.enrich(item), ItemOwnershipConverter.convert(it)
-                        )
-                    } else {
-                        logger.warn("Item for ${it.id} ownership wasn't found")
-                        null
-                    }
-                }
+        val ids = page.entities.map { it.id.getItemId().value }
+        val items = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
+            it.getItemsByIds(ids)
+        }.flatten()
+
+        val enrichedItems = itemEnrichService.enrich(items).associateBy { it.id }
+
+        val wrapped = page.entities.mapNotNull {
+            val item = enrichedItems[it.id.getItemId()]
+            if (null != item) {
+                ItemWithOwnershipDto(item, ItemOwnershipConverter.convert(it))
+            } else {
+                logger.warn("Item for ${it.id} ownership wasn't found")
+                null
             }
-        }.awaitAll().filterNotNull()
+        }
 
         return ItemsWithOwnershipDto(wrapped.size.toLong(), page.continuation, wrapped)
     }

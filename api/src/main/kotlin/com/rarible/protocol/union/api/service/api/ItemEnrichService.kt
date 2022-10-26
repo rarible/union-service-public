@@ -6,7 +6,6 @@ import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
-import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import org.springframework.stereotype.Service
 
@@ -30,16 +29,6 @@ class ItemEnrichService(
             total = total,
             continuation = unionItemsSlice.continuation,
             items = enrich(unionItemsSlice.entities)
-        )
-    }
-
-    suspend fun enrich(unionItem: UnionItem): ItemDto {
-        val shortId = ShortItemId(unionItem.id)
-        val shortItem = enrichmentItemService.get(shortId)
-        return enrichmentItemService.enrichItem(
-            shortItem = shortItem,
-            item = unionItem,
-            metaPipeline = metaPipeline
         )
     }
 
