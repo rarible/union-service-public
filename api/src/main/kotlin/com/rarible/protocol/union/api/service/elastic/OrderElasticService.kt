@@ -11,6 +11,7 @@ import com.rarible.protocol.union.core.model.EsOrderSort
 import com.rarible.protocol.union.core.model.EsOrdersByMakers
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -18,7 +19,6 @@ import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
-import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderQueryService
@@ -30,7 +30,6 @@ class OrderElasticService(
     private val esOrderRepository: EsOrderRepository
 ) : OrderQueryService {
 
-    @ExperimentalStdlibApi
     override suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
         continuation: String?,

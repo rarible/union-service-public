@@ -27,7 +27,7 @@ open class TezosOrderService(
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
     ): Slice<OrderDto> {
-        return dipdupOrderService.getOrdersAll(sort, status, continuation, size)
+        return dipdupOrderService.getOrdersAll(sort, status, null, continuation, size)
     }
 
     override suspend fun getAllSync(
@@ -53,11 +53,12 @@ open class TezosOrderService(
     }
 
     override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
-        return emptyList()
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        return dipdupOrderService.getBidOrderCurrenciesByItem(contract, tokenId)
     }
 
     override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
-        return emptyList()
+        return dipdupOrderService.getBidOrderCurrenciesByCollection(collectionId)
     }
 
     override suspend fun getOrderBidsByItem(
@@ -72,7 +73,16 @@ open class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        return Slice.empty()
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        return dipdupOrderService.getBidOrdersByItem(
+            contract,
+            tokenId,
+            makers?.let { it.first() },
+            currencyAddress,
+            status,
+            continuation,
+            size
+        )
     }
 
     override suspend fun getOrderBidsByMaker(
@@ -85,7 +95,12 @@ open class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        return Slice.empty()
+        return dipdupOrderService.getBidOrdersByMaker(
+            maker = maker,
+            status = status,
+            continuation = continuation,
+            size = size
+        )
     }
 
     override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
@@ -206,7 +221,6 @@ open class TezosOrderService(
     }
 
     companion object {
-
         private val UUID_REGEX_PATTERN: Pattern =
             Pattern.compile("^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$")
     }

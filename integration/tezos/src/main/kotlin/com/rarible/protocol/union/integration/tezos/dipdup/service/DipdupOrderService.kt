@@ -20,6 +20,7 @@ interface DipdupOrderService {
     suspend fun getOrdersAll(
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?,
+        isBid: Boolean? = null,
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
@@ -52,6 +53,35 @@ interface DipdupOrderService {
     }
 
     suspend fun getSellOrderCurrenciesByCollection(contract: String): List<AssetTypeDto> {
+        TODO("Not implemented")
+    }
+
+    suspend fun getBidOrdersByItem(
+        contract: String,
+        tokenId: BigInteger,
+        maker: String?,
+        currencyId: String,
+        status: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        TODO("Not implemented")
+    }
+
+    suspend fun getBidOrdersByMaker(
+        maker: List<String>,
+        status: List<OrderStatusDto>?,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        TODO("Not implemented")
+    }
+
+    suspend fun getBidOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<AssetTypeDto> {
+        TODO("Not implemented")
+    }
+
+    suspend fun getBidOrderCurrenciesByCollection(contract: String): List<AssetTypeDto> {
         TODO("Not implemented")
     }
 }

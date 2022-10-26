@@ -12,11 +12,11 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
+import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionApiErrorEntityNotFoundDto
-import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import io.mockk.coEvery
@@ -52,11 +52,11 @@ class TezosDipDupOrdersControllerFt : AbstractIntegrationTest() {
         val dipdupOrder = dipDupOrder(UUID.randomUUID().toString())
 
         coEvery {
-            testDipDupOrderClient.getOrdersByItem(contract, tokenId.toString(), any(), "XTZ", any(), any(), any(), any())
+            testDipDupOrderClient.getOrdersByItem(contract, tokenId.toString(), any(), "XTZ", any(), any(), any(), any(), any())
         } returns DipDupOrdersPage(listOf(dipdupOrder))
 
         coEvery {
-            testDipDupOrderClient.getOrdersCurrenciesByItem(contract, tokenId.toString())
+            testDipDupOrderClient.getSellOrdersCurrenciesByItem(contract, tokenId.toString())
         } returns listOf(Asset.XTZ())
 
         val orders = orderControllerClient.getSellOrdersByItem(

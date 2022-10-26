@@ -2,6 +2,12 @@ package com.rarible.protocol.union.integration.tezos.dipdup.converter
 
 import com.rarible.dipdup.client.core.model.DipDupActivity
 import com.rarible.dipdup.client.core.model.DipDupBurnActivity
+import com.rarible.dipdup.client.core.model.DipDupCancelBidActivity
+import com.rarible.dipdup.client.core.model.DipDupCancelFloorBidActivity
+import com.rarible.dipdup.client.core.model.DipDupGetBidActivity
+import com.rarible.dipdup.client.core.model.DipDupGetFloorBidActivity
+import com.rarible.dipdup.client.core.model.DipDupMakeBidActivity
+import com.rarible.dipdup.client.core.model.DipDupMakeFloorBidActivity
 import com.rarible.dipdup.client.core.model.DipDupMintActivity
 import com.rarible.dipdup.client.core.model.DipDupOrderCancelActivity
 import com.rarible.dipdup.client.core.model.DipDupOrderListActivity
@@ -20,6 +26,8 @@ import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
+import com.rarible.protocol.union.dto.OrderBidActivityDto
+import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
@@ -57,7 +65,7 @@ class DipDupActivityConverter(
     }
 
     fun convertToDipDupOrderActivitiesTypes(source: List<ActivityTypeDto>): List<DipDupActivityType> {
-        return source.mapNotNull { asOrderActivityType(it) }
+        return source.flatMap { asOrderActivityType(it) }
     }
 
     fun convertToDipDupNftActivitiesTypes(source: List<ActivityTypeDto>): List<DipDupActivityType> {
@@ -65,10 +73,12 @@ class DipDupActivityConverter(
     }
 
     fun asOrderActivityType(source: ActivityTypeDto) = when (source) {
-        ActivityTypeDto.LIST -> DipDupActivityType.LIST
-        ActivityTypeDto.SELL -> DipDupActivityType.SELL
-        ActivityTypeDto.CANCEL_LIST -> DipDupActivityType.CANCEL_LIST
-        else -> null
+        ActivityTypeDto.LIST -> listOf(DipDupActivityType.LIST)
+        ActivityTypeDto.SELL -> listOf(DipDupActivityType.SELL, DipDupActivityType.GET_BID)
+        ActivityTypeDto.CANCEL_LIST -> listOf(DipDupActivityType.CANCEL_LIST)
+        ActivityTypeDto.BID -> listOf(DipDupActivityType.MAKE_BID)
+        ActivityTypeDto.CANCEL_BID -> listOf(DipDupActivityType.CANCEL_BID)
+        else -> emptyList()
     }
 
 
@@ -206,6 +216,58 @@ class DipDupActivityConverter(
                     contract = ContractAddress(blockchain, activity.contract)
                 )
             }
+            is DipDupGetBidActivity -> {
+                val nft = DipDupConverter.convert(activity.nft, blockchain)
+                val payment = DipDupConverter.convert(activity.payment, blockchain)
+
+                OrderMatchSellDto(
+                    id = activityId,
+                    date = date,
+                    source = convert(activity.source),
+                    reverted = false,
+                    transactionHash = activity.hash,
+                    seller = UnionAddressConverter.convert(blockchain, activity.seller),
+                    nft = nft,
+                    payment = payment,
+                    buyer = UnionAddressConverter.convert(blockchain, activity.buyer),
+                    price = price(payment.value, nft.value, activity.source),
+                    priceUsd = currencyService.toUsd(blockchain, payment.type, payment.value),
+                    type = OrderMatchSellDto.Type.ACCEPT_BID
+                )
+            }
+            is DipDupMakeBidActivity -> {
+                val nft = DipDupConverter.convert(activity.take, blockchain)
+                val payment = DipDupConverter.convert(activity.make, blockchain)
+
+                OrderBidActivityDto(
+                    id = activityId,
+                    date = date,
+                    price = activity.price,
+                    priceUsd = currencyService.toUsd(blockchain, payment.type, payment.value),
+                    hash = activity.hash,
+                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
+                    make = payment,
+                    take = nft,
+                    reverted = false
+                )
+            }
+            is DipDupCancelBidActivity -> {
+                val nft = DipDupConverter.convert(activity.take, blockchain)
+                val payment = DipDupConverter.convert(activity.make, blockchain)
+
+                OrderCancelBidActivityDto(
+                    id = activityId,
+                    date = date,
+                    hash = activity.hash,
+                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
+                    make = payment.type,
+                    take = nft.type,
+                    transactionHash = activity.hash
+                )
+            }
+            is DipDupMakeFloorBidActivity -> TODO()
+            is DipDupGetFloorBidActivity -> TODO()
+            is DipDupCancelFloorBidActivity -> TODO()
         }
     }
 
@@ -267,6 +329,25 @@ class DipDupActivityConverter(
                     type = OrderMatchSellDto.Type.SELL
                 )
             }
+            is DipDupGetBidActivity -> {
+                val nft = DipDupConverter.convert(activity.nft, blockchain)
+                val payment = DipDupConverter.convert(activity.payment, blockchain)
+
+                OrderMatchSellDto(
+                    id = activityId,
+                    date = date,
+                    source = convert(activity.source),
+                    reverted = false,
+                    transactionHash = activity.hash,
+                    seller = UnionAddressConverter.convert(blockchain, activity.seller),
+                    nft = nft,
+                    payment = payment,
+                    buyer = UnionAddressConverter.convert(blockchain, activity.buyer),
+                    price = price(payment.value, nft.value, activity.source),
+                    priceUsd = currencyService.toUsd(blockchain, payment.type, payment.value),
+                    type = OrderMatchSellDto.Type.ACCEPT_BID
+                )
+            }
             is DipDupMintActivity -> {
                 val id = ActivityIdDto(blockchain, activity.transferId)
                 MintActivityDto(
@@ -326,6 +407,39 @@ class DipDupActivityConverter(
                     contract = ContractAddress(blockchain, activity.contract)
                 )
             }
+            is DipDupMakeBidActivity -> {
+                val nft = DipDupConverter.convert(activity.take, blockchain)
+                val payment = DipDupConverter.convert(activity.make, blockchain)
+
+                OrderBidActivityDto(
+                    id = activityId,
+                    date = date,
+                    price = activity.price,
+                    priceUsd = currencyService.toUsd(blockchain, payment.type, payment.value),
+                    hash = activity.hash,
+                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
+                    make = payment,
+                    take = nft,
+                    reverted = false
+                )
+            }
+            is DipDupCancelBidActivity -> {
+                val nft = DipDupConverter.convert(activity.take, blockchain)
+                val payment = DipDupConverter.convert(activity.make, blockchain)
+
+                OrderCancelBidActivityDto(
+                    id = activityId,
+                    date = date,
+                    hash = activity.hash,
+                    maker = UnionAddressConverter.convert(blockchain, activity.maker),
+                    make = payment.type,
+                    take = nft.type,
+                    transactionHash = activity.hash
+                )
+            }
+            is DipDupMakeFloorBidActivity -> TODO()
+            is DipDupGetFloorBidActivity -> TODO()
+            is DipDupCancelFloorBidActivity -> TODO()
         }
     }
 

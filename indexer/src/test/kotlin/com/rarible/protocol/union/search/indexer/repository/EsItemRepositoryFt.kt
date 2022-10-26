@@ -141,7 +141,7 @@ internal class EsItemRepositoryFt {
     fun `should search by blockchains`(): Unit = runBlocking {
 
         val esItem = randomEsItem()
-        repository.save(esItem)
+        repository.saveAll(listOf(esItem))
         val result = repository.search(
             EsItemGenericFilter(blockchains = setOf(esItem.blockchain.toString())), EsItemSort.DEFAULT, 10
         ).entities

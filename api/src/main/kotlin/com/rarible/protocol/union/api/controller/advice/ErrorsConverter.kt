@@ -7,6 +7,7 @@ import com.rarible.protocol.dto.EthereumApiErrorServerErrorDto
 import com.rarible.protocol.union.dto.UnionApiErrorBadRequestDto
 import com.rarible.protocol.union.dto.UnionApiErrorEntityNotFoundDto
 import com.rarible.protocol.union.dto.UnionApiErrorServerErrorDto
+import com.rarible.tzkt.model.TzktBadRequest
 import org.springframework.http.HttpStatus
 
 object ErrorsConverter {
@@ -28,6 +29,7 @@ object ErrorsConverter {
             // FLOW
             // TEZOS
             is DipDupNotFound -> UnionApiErrorEntityNotFoundDto(message = data.message ?: "")
+            is TzktBadRequest -> UnionApiErrorBadRequestDto(UnionApiErrorBadRequestDto.Code.BAD_REQUEST,  data.message ?: "")
             else -> null
         }
     }

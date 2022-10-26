@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigInteger
+import java.util.function.Consumer
 
 @IntegrationTest
 class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
@@ -144,10 +145,10 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
         itemEventService.onItemUpdated(unionItem)
         waitAssert {
             val events = findItemUpdates(itemId.value)
-            assertThat(events).hasSize(1).allSatisfy {
+            assertThat(events).hasSize(1).allSatisfy(Consumer {
                 assertThat(it.value.item)
                     .isEqualTo(EnrichedItemConverter.convert(unionItem, meta = meta))
-            }
+            })
         }
     }
 }

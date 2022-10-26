@@ -110,11 +110,11 @@ class TezosDipDupOwnershipsControllerFt : AbstractIntegrationTest() {
         ))
 
         coEvery {
-            testDipDupOrderClient.getOrdersCurrenciesByItem(any(), any())
+            testDipDupOrderClient.getSellOrdersCurrenciesByItem(any(), any())
         } returns listOf(Asset.XTZ())
 
         coEvery {
-            testDipDupOrderClient.getOrdersByItem(any(), any(), any(), any(), any(), any(), any(), any())
+            testDipDupOrderClient.getOrdersByItem(any(), any(), any(), any(), any(), any(), any(), any(), any())
         } returns DipDupOrdersPage(emptyList(), null)
 
         coEvery {
