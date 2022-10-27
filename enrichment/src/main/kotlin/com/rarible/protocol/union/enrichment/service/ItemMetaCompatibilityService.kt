@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 class ItemMetaCompatibilityService(
     legacy: ItemMetaLegacyService,
     modern: ItemMetaModernService,
-    ff: FeatureFlagsProperties
+    ff: FeatureFlagsProperties,
 ) : ItemMetaService {
 
     private val delegate = if (ff.enableMetaPipeline && !ff.enableMetaLegacyPipeline) modern else legacy
@@ -36,7 +36,4 @@ class ItemMetaCompatibilityService(
         return delegate.save(itemId, meta)
     }
 
-    suspend fun onLegacyMetaUpdated() {
-
-    }
 }
