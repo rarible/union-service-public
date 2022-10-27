@@ -6,6 +6,7 @@ import com.rarible.dipdup.client.OrderActivityClient
 import com.rarible.dipdup.client.OrderClient
 import com.rarible.dipdup.client.client.AuthorizationInterceptor
 import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.integration.tezos.dipdup.client.TzktWebClientFactory
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupCollectionService
@@ -44,8 +45,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
-import org.springframework.web.reactive.function.client.ExchangeStrategies
-import org.springframework.web.reactive.function.client.WebClient
 
 @DipDupConfiguration
 @Import(CoreConfiguration::class)
@@ -199,12 +198,6 @@ class DipDupApiConfiguration(
         return TzktSignatureServiceImpl(signatureClient)
     }
 
-    private fun webClient(url: String) = WebClient.builder()
-        .exchangeStrategies(
-            ExchangeStrategies.builder()
-                .codecs { it.defaultCodecs().maxInMemorySize(10_000_000) }
-                .build())
-        .baseUrl(url)
-        .build()
+    private fun webClient(url: String) = TzktWebClientFactory.createClient(url)
 
 }
