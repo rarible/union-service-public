@@ -2,10 +2,10 @@ package com.rarible.protocol.union.worker.task.search.order
 
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.EsOrderConverter
+import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory

@@ -8,7 +8,7 @@ import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActi
 import com.rarible.protocol.union.core.model.EsActivityLite
 import com.rarible.protocol.union.core.model.EsActivityQueryResult
 import com.rarible.protocol.union.core.model.EsActivitySort
-import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
