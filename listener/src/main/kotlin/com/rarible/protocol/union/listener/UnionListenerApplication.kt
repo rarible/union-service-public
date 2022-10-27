@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.listener
 
+import ch.sbb.esta.openshift.gracefullshutdown.GracefulshutdownSpringApplication
 import com.rarible.core.daemon.sequential.SequentialDaemonWorker
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
 
 @SpringBootApplication
 class UnionListenerApplication(
@@ -19,5 +19,5 @@ class UnionListenerApplication(
 }
 
 fun main(args: Array<String>) {
-    runApplication<UnionListenerApplication>(*args)
+    GracefulshutdownSpringApplication.run(UnionListenerApplication::class.java, *args)
 }

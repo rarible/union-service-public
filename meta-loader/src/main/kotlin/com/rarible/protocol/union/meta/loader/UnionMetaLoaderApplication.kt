@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.meta.loader
 
+import ch.sbb.esta.openshift.gracefullshutdown.GracefulshutdownSpringApplication
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
 
 @SpringBootApplication
 class UnionMetaLoaderApplication(
@@ -16,5 +16,5 @@ class UnionMetaLoaderApplication(
 }
 
 fun main(args: Array<String>) {
-    runApplication<UnionMetaLoaderApplication>(*args)
+    GracefulshutdownSpringApplication.run(UnionMetaLoaderApplication::class.java, *args)
 }
