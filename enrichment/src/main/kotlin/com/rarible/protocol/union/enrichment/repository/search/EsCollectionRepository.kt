@@ -1,13 +1,12 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.core.model.EsCollectionFilter
 import com.rarible.protocol.union.core.model.EsCollectionLite
-import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsCollectionQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient

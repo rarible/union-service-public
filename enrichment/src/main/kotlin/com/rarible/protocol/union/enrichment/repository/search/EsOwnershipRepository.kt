@@ -5,7 +5,7 @@ import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.EsOwnershipFilter
 import com.rarible.protocol.union.core.model.EsOwnershipSort
-import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsEntitySearchAfterCursorService
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsOwnershipQueryBuilderService

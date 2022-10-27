@@ -6,14 +6,14 @@ import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.task.ItemTaskParam
+import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.continuation.page.PageSize
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
-import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.RateLimiter
 import com.rarible.protocol.union.worker.task.search.activity.TimePeriodContinuationHelper

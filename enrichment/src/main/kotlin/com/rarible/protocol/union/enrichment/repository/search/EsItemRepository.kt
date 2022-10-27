@@ -5,10 +5,10 @@ import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemFilter
 import com.rarible.protocol.union.core.model.EsItemSort
-import com.rarible.protocol.union.dto.continuation.page.PageSize
+import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQueryBuilderService
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsEntitySearchAfterCursorService
+import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
 import org.elasticsearch.index.query.QueryBuilders.termQuery
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
