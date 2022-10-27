@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.search.indexer
 
-import ch.sbb.esta.openshift.gracefullshutdown.GracefulshutdownSpringApplication
 import com.rarible.core.daemon.sequential.ConsumerWorkerHolder
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.runApplication
 
 @SpringBootApplication
 class UnionSearchIndexerAppplication(
@@ -16,5 +16,5 @@ class UnionSearchIndexerAppplication(
 }
 
 fun main(args: Array<String>) {
-    GracefulshutdownSpringApplication.run(UnionSearchIndexerAppplication::class.java, *args)
+    runApplication<UnionSearchIndexerAppplication>(*args)
 }

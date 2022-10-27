@@ -99,10 +99,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
         </dependency>
-        <dependency>
-            <groupId>ch.sbb</groupId>
-            <artifactId>springboot-graceful-shutdown</artifactId>
-        </dependency>
 
         <!-- ================== Other ==================== -->
         <dependency>
