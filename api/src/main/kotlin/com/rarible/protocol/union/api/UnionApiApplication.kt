@@ -1,12 +1,11 @@
 package com.rarible.protocol.union.api
 
+import ch.sbb.esta.openshift.gracefullshutdown.GracefulshutdownSpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
-import org.springframework.context.annotation.ComponentScan
 
 @SpringBootApplication
 class UnionApiApplication
 
 fun main(args: Array<String>) {
-    runApplication<UnionApiApplication>(*args)
+    GracefulshutdownSpringApplication.run(UnionApiApplication::class.java, *args)
 }
