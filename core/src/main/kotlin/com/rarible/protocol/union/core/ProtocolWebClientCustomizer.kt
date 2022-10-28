@@ -19,7 +19,7 @@ class ProtocolWebClientCustomizer() : WebClientCustomizer {
             .build()
 
         //val client = HttpClient.create(provider)
-        val client = HttpClient.create()
+        val client = HttpClient.create(ConnectionProvider.newConnection())
             .responseTimeout(Duration.ofSeconds(60))
 
         val connector = ReactorClientHttpConnector(client)
