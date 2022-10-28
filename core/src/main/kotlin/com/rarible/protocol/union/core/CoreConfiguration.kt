@@ -23,7 +23,10 @@ import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.web.reactive.function.client.WebClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
@@ -58,6 +61,19 @@ class CoreConfiguration(
     @Autowired
     fun setMapKeyDotReplacement(mappingMongoConverter: MappingMongoConverter) {
         mappingMongoConverter.setMapKeyDotReplacement("__DOT__");
+    }
+
+    @Bean
+    @Qualifier("unionDefaultWebClientCustomizer")
+    fun unionDefaultWebClientCustomizer(
+        @Value("common.feature-flags.enableCustomWebClientCustomizer")
+        enableCustomWebClientCustomizer: Boolean = false
+    ): WebClientCustomizer {
+        return if (enableCustomWebClientCustomizer) {
+            ProtocolWebClientCustomizer()
+        } else {
+            DefaultUnionWebClientCustomizer("rarible-protocol")
+        }
     }
 
     @Bean

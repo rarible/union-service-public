@@ -28,6 +28,5 @@ class ProtocolWebClientCustomizer() : WebClientCustomizer {
             ?.codecs { configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) }
             ?.clientConnector(connector)
             ?.defaultHeader("x-rarible-client", "rarible-protocol")
-
     }
 }

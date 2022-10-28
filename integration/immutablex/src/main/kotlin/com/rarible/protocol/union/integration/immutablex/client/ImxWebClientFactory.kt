@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
 import com.rarible.protocol.union.api.ApiClient
-import com.rarible.protocol.union.core.ProtocolWebClientCustomizer
 import io.netty.handler.logging.LogLevel
 import org.springframework.http.MediaType
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
@@ -15,7 +14,7 @@ import reactor.netty.transport.logging.AdvancedByteBufFormat
 
 object ImxWebClientFactory {
 
-    fun createClient(baseUrl: String, apiKey: String?): WebClient {
+    fun configureClient(baseUrl: String, apiKey: String?): WebClient.Builder {
         val mapper = ApiClient.createDefaultObjectMapper()
         val httpClient = HttpClient.create().wiretap(
             "reactor.netty.http.client.HttpClient",
@@ -31,14 +30,13 @@ object ImxWebClientFactory {
             .exchangeStrategies(strategies)
             .clientConnector(ReactorClientHttpConnector(httpClient))
 
-        ProtocolWebClientCustomizer().customize(webClient)
         apiKey?.let {
             webClient.defaultHeaders {
                 it.add("x-api-key", apiKey)
             }
         }
 
-        return webClient.baseUrl(baseUrl).build()
+        return webClient.baseUrl(baseUrl)
     }
 
 }
