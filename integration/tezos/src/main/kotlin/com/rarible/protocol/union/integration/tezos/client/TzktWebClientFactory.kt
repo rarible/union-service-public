@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.client
 
 import com.rarible.protocol.union.api.ApiClient
-import com.rarible.protocol.union.api.client.DefaultUnionWebClientCustomizer
+import com.rarible.protocol.union.core.ProtocolWebClientCustomizer
 import io.netty.handler.logging.LogLevel
 import org.springframework.http.MediaType
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
@@ -31,7 +31,7 @@ object TzktWebClientFactory {
             .exchangeStrategies(strategies)
             .clientConnector(ReactorClientHttpConnector(httpClient))
 
-        DefaultUnionWebClientCustomizer("protocol-rarible").customize(webClient)
+        ProtocolWebClientCustomizer().customize(webClient)
         return webClient.baseUrl(baseUrl).build()
     }
 

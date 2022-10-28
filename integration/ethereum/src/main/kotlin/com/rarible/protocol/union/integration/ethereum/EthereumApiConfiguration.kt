@@ -11,7 +11,6 @@ import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
-import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
@@ -33,12 +32,10 @@ import com.rarible.protocol.union.integration.ethereum.service.EthereumSignature
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
 
 @EthereumConfiguration
-@Import(CoreConfiguration::class)
-@ComponentScan(basePackageClasses = [EthOrderConverter::class])
+@Import(EthApiFactoryConfiguration::class)
 @EnableConfigurationProperties(value = [EthereumIntegrationProperties::class])
 class EthereumApiConfiguration {
 
