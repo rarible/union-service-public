@@ -66,7 +66,7 @@ class CoreConfiguration(
     @Bean
     @Qualifier("unionDefaultWebClientCustomizer")
     fun unionDefaultWebClientCustomizer(
-        @Value("common.feature-flags.enableCustomWebClientCustomizer")
+        @Value("\${common.feature-flags.enableCustomWebClientCustomizer:false}")
         enableCustomWebClientCustomizer: Boolean = false
     ): WebClientCustomizer {
         return if (enableCustomWebClientCustomizer) {
