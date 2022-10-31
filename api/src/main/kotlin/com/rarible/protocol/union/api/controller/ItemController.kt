@@ -133,7 +133,7 @@ class ItemController(
         val enrichedUnionItem = enrichmentItemService.enrichItem(
             shortItem = shortItem,
             item = unionItem,
-            syncMetaDownload = true,
+            syncMetaDownload = false,
             metaPipeline = ItemMetaPipeline.API
         )
         return ResponseEntity.ok(enrichedUnionItem)

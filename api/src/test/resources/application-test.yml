@@ -32,6 +32,8 @@ integration:
   tezos:
     client:
       url: "http://localhost:8080"
+    dipdup:
+      useDipDupTokens: ${consul.tezos.dipdup.useDipDupTokens:false}
   solana:
     enabled: true
 

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.integration.immutablex.client
+package com.rarible.protocol.union.integration.tezos.dipdup.client
 
 import com.rarible.protocol.union.api.ApiClient
 import io.netty.handler.logging.LogLevel
@@ -12,9 +12,9 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
 import reactor.netty.transport.logging.AdvancedByteBufFormat
 
-object ImxWebClientFactory {
+object TzktWebClientFactory {
 
-    fun configureClient(baseUrl: String, apiKey: String?): WebClient.Builder {
+    fun createClient(baseUrl: String): WebClient.Builder {
         val mapper = ApiClient.createDefaultObjectMapper()
         val httpClient = HttpClient.create().wiretap(
             "reactor.netty.http.client.HttpClient",
@@ -29,12 +29,6 @@ object ImxWebClientFactory {
         val webClient = WebClient.builder()
             .exchangeStrategies(strategies)
             .clientConnector(ReactorClientHttpConnector(httpClient))
-
-        apiKey?.let {
-            webClient.defaultHeaders {
-                it.add("x-api-key", apiKey)
-            }
-        }
 
         return webClient.baseUrl(baseUrl)
     }
