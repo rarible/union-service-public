@@ -8,7 +8,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOwner
 
 class DipDupOwnershipService(
     private val dipdupOwnershipClient: OwnershipClient,
-) {
+): DipDupService {
 
     suspend fun getOwnershipsAll(continuation: String?, size: Int): Slice<UnionOwnership> {
         val page = dipdupOwnershipClient.getOwnershipsAll(
@@ -23,7 +23,7 @@ class DipDupOwnershipService(
     }
 
     suspend fun getOwnershipById(ownershipId: String): UnionOwnership {
-        val ownership = dipdupOwnershipClient.getOwnershipById(ownershipId)
+        val ownership = safeApiCall("Ownership $ownershipId wasn't found") { dipdupOwnershipClient.getOwnershipById(ownershipId) }
         return DipDupOwnershipConverter.convert(ownership)
     }
 
