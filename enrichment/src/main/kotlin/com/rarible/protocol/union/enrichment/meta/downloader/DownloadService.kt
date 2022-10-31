@@ -22,31 +22,6 @@ abstract class DownloadService<K, T>(
     abstract fun toId(key: K): String
 
     /**
-     * Finds all existing entries and takes data from successfully downloaded.
-     * For non-existing records download tasks will be scheduled without 'force' flag to avoid duplicated tasks
-     */
-    suspend fun get(keys: Collection<K>, pipeline: String): Map<K, T> {
-        val ids = keys.associateBy { toId(it) }
-
-        val result = LinkedHashMap<K, T>(ids.size)
-        val notFound = HashSet<String>(ids.keys)
-
-        val found = repository.getAll(ids.keys)
-        found.forEach {
-            notFound.remove(it.id)
-            if (it.isDownloaded()) {
-                result[ids[it.id]!!] = it.data!!
-            }
-        }
-
-        // TODO add metrics (hit/miss)
-
-        schedule(notFound, pipeline, false)
-
-        return result
-    }
-
-    /**
      * Get single downloaded entry or schedule download task (with 'force' or not), if there is no entry.
      * For 'sync' get data will be downloaded immediately - there are two cases:
      * 1. If data downloaded, it will be saved and notification will be sent

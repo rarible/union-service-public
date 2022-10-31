@@ -69,7 +69,7 @@ class PlatformBestSellOrderItemCleanupJob(
         val updated = item.copy(bestSellOrder = null, bestSellOrders = emptyMap())
 
         logger.info("Updated item [{}], OpenSea order removed: [{}]", updated, order.id)
-        itemRepository.save(updated)
+        itemRepository.save(updated.withCalculatedFields())
 
         val dto = itemService.enrichItem(
             shortItem = updated,

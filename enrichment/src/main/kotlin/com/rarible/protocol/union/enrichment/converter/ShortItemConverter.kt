@@ -11,6 +11,7 @@ object ShortItemConverter {
         return ShortItem(
             blockchain = item.id.blockchain,
             itemId = item.id.value,
+            collectionId = item.collection?.value,
             // Default enrichment data
             sellers = 0,
             totalStock = BigInteger.ZERO,

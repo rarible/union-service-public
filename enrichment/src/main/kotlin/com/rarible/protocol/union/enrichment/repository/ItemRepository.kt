@@ -208,13 +208,19 @@ class ItemRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
+        private val COLLECTION_DEFINITION = Index()
+            .on(ShortItem::collectionId.name, Sort.Direction.ASC)
+            .on("_id", Sort.Direction.ASC)
+            .background()
+
         private val ALL_INDEXES = listOf(
             BLOCKCHAIN_DEFINITION,
             MULTI_CURRENCY_DEFINITION,
             BY_BEST_SELL_PLATFORM_DEFINITION,
             AUCTION_DEFINITION,
             POOL_ORDER_DEFINITION,
-            LAST_UPDATED_AT_ID
+            LAST_UPDATED_AT_ID,
+            COLLECTION_DEFINITION
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -122,7 +123,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
             delay(100L)
             meta
         }
-        itemMetaService.schedule(itemId, "default", false)
+        itemMetaService.schedule(itemId, ItemMetaPipeline.EVENT, false)
         // On loading meta, send an event.
         waitAssert {
             val events = findItemUpdates(itemId.value)

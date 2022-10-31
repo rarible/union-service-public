@@ -102,10 +102,13 @@ sealed class DownloadExecutor<T>(
         when (updated.status) {
             DownloadStatus.FAILED -> metrics.onFailedTask(getBlockchain(task), type, task.pipeline)
             DownloadStatus.RETRY -> metrics.onRetriedTask(getBlockchain(task), type, task.pipeline)
-            else -> logger.warn(
-                "Incorrect status of failed {} task {} (): {}",
-                type, task.id, task.pipeline, updated.status
-            )
+            else -> {
+                logger.warn(
+                    "Incorrect status of failed {} task {} (): {}",
+                    type, task.id, task.pipeline, updated.status
+                )
+                return@optimisticLockWithInitial
+            }
         }
 
         repository.save(updated)

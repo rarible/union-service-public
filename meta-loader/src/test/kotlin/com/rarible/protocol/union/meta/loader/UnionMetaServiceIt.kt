@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.meta.loader
 
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -23,8 +24,8 @@ class UnionMetaServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val meta = randomUnionMeta()
         coEvery { testUnionMetaLoader.load(itemId) } returns meta
-        assertThat(itemMetaService.get(itemId, false, "default")).isNull()  // TODO PT-49
+        assertThat(itemMetaService.get(itemId, false, ItemMetaPipeline.EVENT)).isNull()  // TODO PT-49
         delay(500)
-        assertThat(itemMetaService.get(itemId, false, "default")).isEqualTo(meta)  // TODO PT-49
+        assertThat(itemMetaService.get(itemId, false, ItemMetaPipeline.EVENT)).isEqualTo(meta)  // TODO PT-49
     }
 }

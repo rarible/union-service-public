@@ -15,7 +15,6 @@ import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -60,7 +59,7 @@ class CollectionController(
         logger.info("Refreshing collection meta for '{}'", collection)
         router.getService(collectionId.blockchain).refreshCollectionMeta(collectionId.value)
         itemSourceSelectService.getAllItemIdsByCollection(collectionId, SearchEngineDto.LEGACY).collect {
-            itemMetaService.schedule(it, ItemMetaPipeline.REFRESH.pipeline, true)
+            itemMetaService.schedule(it, ItemMetaPipeline.REFRESH, true)
         }
         return ResponseEntity.ok().build()
     }

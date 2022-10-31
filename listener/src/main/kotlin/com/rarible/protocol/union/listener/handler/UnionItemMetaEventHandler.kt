@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaRefreshEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaUpdateEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
@@ -28,7 +29,7 @@ class UnionItemMetaEventHandler(
         return when (event) {
             is UnionItemMetaRefreshEvent -> {
                 logger.info("Refreshing meta for item {} by request of ItemMetaRefreshEvent", event.itemId)
-                itemMetaService.schedule(event.itemId, "default", true) // TODO PT-49
+                itemMetaService.schedule(event.itemId, ItemMetaPipeline.EVENT, true)
             }
             is UnionItemMetaUpdateEvent -> {
                 logger.info("Saving meta for item {} by MetaUpdateEvent", event.itemId)

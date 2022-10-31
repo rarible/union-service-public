@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import com.rarible.protocol.union.integration.immutablex.ImxConfiguration
@@ -82,7 +83,7 @@ class ImxMetaInitJob(
 
         missing.chunked(4).forEach { batch ->
             batch.mapAsync {
-                itemMetaService.schedule(IdParser.parseItemId(it), "default", true)
+                itemMetaService.schedule(IdParser.parseItemId(it), ItemMetaPipeline.SYNC, true)
             }
         }
 

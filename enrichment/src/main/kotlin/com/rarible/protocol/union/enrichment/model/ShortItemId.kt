@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.model
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.parser.IdParser
 
 data class ShortItemId(
     val blockchain: BlockchainDto,
@@ -22,6 +23,13 @@ data class ShortItemId(
             blockchain = blockchain,
             value = itemId
         )
+    }
+
+    companion object {
+
+        fun of(itemId: String): ShortItemId {
+            return ShortItemId(IdParser.parseItemId(itemId))
+        }
     }
 
 }

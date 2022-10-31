@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 
@@ -14,21 +15,21 @@ class ItemMetaCompatibilityService(
     ff: FeatureFlagsProperties,
 ) : ItemMetaService {
 
-    private val delegate = if (ff.enableMetaPipeline && !ff.enableMetaLegacyPipeline) modern else legacy
+    private val delegate = if (ff.enableMetaPipeline) modern else legacy
 
-    override suspend fun get(itemIds: List<ItemIdDto>, pipeline: String): Map<ItemIdDto, UnionMeta> {
+    override suspend fun get(itemIds: List<ItemIdDto>, pipeline: ItemMetaPipeline): Map<ItemIdDto, UnionMeta> {
         return delegate.get(itemIds, pipeline)
     }
 
-    override suspend fun get(itemId: ItemIdDto, sync: Boolean, pipeline: String): UnionMeta? {
+    override suspend fun get(itemId: ItemIdDto, sync: Boolean, pipeline: ItemMetaPipeline): UnionMeta? {
         return delegate.get(itemId, sync, pipeline)
     }
 
-    override suspend fun download(itemId: ItemIdDto, pipeline: String, force: Boolean): UnionMeta? {
+    override suspend fun download(itemId: ItemIdDto, pipeline: ItemMetaPipeline, force: Boolean): UnionMeta? {
         return delegate.download(itemId, pipeline, force)
     }
 
-    override suspend fun schedule(itemId: ItemIdDto, pipeline: String, force: Boolean) {
+    override suspend fun schedule(itemId: ItemIdDto, pipeline: ItemMetaPipeline, force: Boolean) {
         return delegate.schedule(itemId, pipeline, force)
     }
 

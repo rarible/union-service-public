@@ -1,12 +1,11 @@
 package com.rarible.protocol.union.listener.downloader
 
-import com.mongodb.DuplicateKeyException
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
+import com.rarible.protocol.union.enrichment.util.optimisticLockWithInitial
 import org.slf4j.LoggerFactory
-import org.springframework.dao.OptimisticLockingFailureException
 
 /**
  * Scheduler takes intermediate place in entire downloader pipeline.
@@ -46,8 +45,10 @@ abstract class DownloadScheduler<T>(
         val ids = tasks.map { it.id }.toSet()
         val exist = repository.getAll(ids).associateByTo(HashMap()) { it.id }
 
-        val notFound = tasks.filter { exist[it.id] == null }
-            .groupBy { it.id }
+        val notFound = tasks.filter {
+            logger.info("Entry with key {} already exists, debouncing task", it.id)
+            exist[it.id] == null
+        }.groupBy { it.id }
 
         val created = HashSet<String>()
 
@@ -61,16 +62,21 @@ abstract class DownloadScheduler<T>(
             )
             val id = initialEntry.id
 
-            try {
-                repository.save(initialEntry)
-                logger.info("Initial entry created: id={}, scheduledAt={}", id, initialEntry.scheduledAt)
-                created.add(id)
-            } catch (e: DuplicateKeyException) {
-                // If initial entry has been created somewhere else (the only case - force sync meta fetch via API),
-                // we can just skip this exception
-                logger.info("Entry with key {} already exist", id)
-            } catch (e: OptimisticLockingFailureException) {
-                logger.info("Entry with key {} already updated", id)
+            // That's a trick to execute first try without "get-for-update"
+            // (originally there is no initial value)
+            optimisticLockWithInitial(initialEntry) { initial ->
+                if (initial != null) {
+                    repository.save(initialEntry)
+                    logger.info("Initial entry created: id={}, scheduledAt={}", id, initialEntry.scheduledAt)
+                    created.add(id)
+                } else {
+                    val current = repository.get(id)
+                    if (current != null) {
+                        logger.info("Entry with key {} already updated", id)
+                    } else {
+                        repository.save(initialEntry)
+                    }
+                }
             }
         }
 
