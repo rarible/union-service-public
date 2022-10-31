@@ -19,6 +19,7 @@ import com.rarible.protocol.union.integration.immutablex.service.ImxOrderService
 import com.rarible.protocol.union.integration.immutablex.service.ImxOwnershipService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.boot.web.reactive.function.client.WebClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
@@ -41,8 +42,13 @@ class ImxApiConfiguration {
 
     @Bean
     @Qualifier("imxWebClient")
-    fun imxWebClient(props: ImxIntegrationProperties): WebClient {
-        return ImxWebClientFactory.createClient(props.client!!.url!!, props.apiKey)
+    fun imxWebClient(
+        props: ImxIntegrationProperties,
+        @Qualifier("unionDefaultWebClientCustomizer") unionDefaultWebClientCustomizer: WebClientCustomizer
+    ): WebClient {
+        val builder = ImxWebClientFactory.configureClient(props.client!!.url!!, props.apiKey)
+        unionDefaultWebClientCustomizer.customize(builder)
+        return builder.build()
     }
 
     @Bean

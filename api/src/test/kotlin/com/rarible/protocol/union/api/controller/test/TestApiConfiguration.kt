@@ -271,4 +271,8 @@ class TestApiConfiguration {
     @Primary
     fun testSignatureClient(): com.rarible.tzkt.client.SignatureClient = mockk()
 
+    @Bean
+    @Primary
+    fun testDipDupTokenClient(): com.rarible.dipdup.client.TokenClient = mockk()
+
 }

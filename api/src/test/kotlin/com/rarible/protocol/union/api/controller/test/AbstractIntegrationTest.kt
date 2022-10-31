@@ -207,6 +207,9 @@ abstract class AbstractIntegrationTest {
     lateinit var tzktTokenClient: com.rarible.tzkt.client.TokenClient
 
     @Autowired
+    lateinit var dipdupTokenClient: com.rarible.dipdup.client.TokenClient
+
+    @Autowired
     lateinit var tzktTokenActivityClient: com.rarible.tzkt.client.TokenActivityClient
 
     @Autowired

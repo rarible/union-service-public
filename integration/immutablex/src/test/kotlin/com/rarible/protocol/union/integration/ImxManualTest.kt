@@ -14,10 +14,10 @@ import java.math.BigDecimal
 
 abstract class ImxManualTest {
 
-    protected val webClient = ImxWebClientFactory.createClient(
+    protected val webClient = ImxWebClientFactory.configureClient(
         "https://api.x.immutable.com/v1",
         null
-    )
+    ).build()
 
     private val chunkSize = 16
 

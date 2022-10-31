@@ -1,8 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.service
 
 import com.rarible.dipdup.client.TokenClient
-import com.rarible.dipdup.client.exception.DipDupNotFound
-import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.continuation.page.Page
@@ -10,7 +8,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupItemC
 
 class DipDupItemService(
     private val dipdupTokenClient: TokenClient,
-) {
+) : DipDupService {
 
     suspend fun getAllItems(
         continuation: String?,
@@ -71,19 +69,15 @@ class DipDupItemService(
     suspend fun getItemById(
         itemId: String
     ): UnionItem {
-        val item = dipdupTokenClient.getTokenById(itemId)
+        val item = safeApiCall("Item $itemId wasn't found") { dipdupTokenClient.getTokenById(itemId) }
         return DipDupItemConverter.convert(item)
     }
 
     suspend fun getMetaById(
         itemId: String
     ): UnionMeta {
-        try {
-            val meta = dipdupTokenClient.getTokenMetaById(itemId)
-            return DipDupItemConverter.convertMeta(meta)
-        } catch (ex: DipDupNotFound) {
-            throw UnionNotFoundException("Meta not found for: $itemId")
-        }
+        val meta = safeApiCall("Meta wasn't found for item $itemId") { dipdupTokenClient.getTokenMetaById(itemId) }
+        return DipDupItemConverter.convertMeta(meta)
     }
 
     suspend fun resetMetaById(itemId: String) {
