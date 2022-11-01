@@ -35,7 +35,6 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -324,9 +323,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid)
 
-        // Item should be removed since it has no enrich data
-        val saved = itemService.get(shortItem.id)
-        assertThat(saved).isNull()
+        val saved = itemService.get(shortItem.id)!!
+        assertThat(saved.bestSellOrder).isNull()
+        assertThat(saved.bestBidOrder).isNull()
 
         waitAssert {
             val messages = findItemUpdates(itemId.value)
@@ -350,13 +349,14 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid)
 
-        val saved = itemService.get(shortItem.id)
-        assertThat(saved).isNull()
+        val saved = itemService.get(shortItem.id)!!
+        assertThat(saved.bestBidOrder).isNull()
 
-        // Unfortunately, there is no other way to ensure there is no messages in the Kafka
-        delay(1000)
         waitAssert {
-            assertThat(itemEvents).hasSize(0)
+            val messages = findItemUpdates(itemId.value)
+            assertThat(messages).hasSize(1)
+            assertThat(messages[0].value.itemId).isEqualTo(itemId)
+            assertThat(messages[0].value.item.bestBidOrder).isNull()
         }
     }
 
@@ -457,9 +457,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         itemEventService.onAuctionUpdated(auction)
 
-        val saved = itemService.get(shortItem.id)
-        // No enrich data, should be removed
-        assertThat(saved).isNull()
+        val saved = itemService.get(shortItem.id)!!
+        assertThat(saved.auctions).isEmpty()
 
         waitAssert {
             val messages = findItemUpdates(itemId.value)

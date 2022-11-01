@@ -30,6 +30,5 @@ class ChangeLog99999CreateIndices {
         itemRepository.createIndices()
         itemReconciliationMarkRepository.createIndices()
         collectionRepository.createIndices()
-        itemMetaRepository.createIndices()
     }
 }

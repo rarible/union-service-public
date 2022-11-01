@@ -10,6 +10,7 @@ import com.rarible.protocol.union.enrichment.meta.isMetaInitiallyLoadedOrFailed
 import com.rarible.protocol.union.enrichment.meta.isMetaInitiallyScheduledForLoading
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.dao.DuplicateKeyException
@@ -31,7 +32,7 @@ class ItemMetaLegacyService(
      * Return available meta or `null` if it hasn't been loaded, has failed, or hasn't been requested yet.
      * For missed meta no scheduling operations will be performed
      */
-    override suspend fun get(itemIds: List<ItemIdDto>, pipeline: String): Map<ItemIdDto, UnionMeta> {
+    override suspend fun get(itemIds: List<ItemIdDto>, pipeline: ItemMetaPipeline): Map<ItemIdDto, UnionMeta> {
         val keyMap = itemIds.associateBy { it.fullId() }
         val result = HashMap<ItemIdDto, UnionMeta>()
         val cached = withSpan(name = "fetchCachedMeta", type = SpanType.CACHE) {
@@ -57,7 +58,7 @@ class ItemMetaLegacyService(
     override suspend fun get(
         itemId: ItemIdDto,
         sync: Boolean,
-        pipeline: String
+        pipeline: ItemMetaPipeline
     ): UnionMeta? {
         val metaCacheEntry = unionMetaCacheLoaderService.get(itemId.fullId())
         val availableMeta = metaCacheEntry.getAvailable()
@@ -93,7 +94,7 @@ class ItemMetaLegacyService(
 
     override suspend fun download(
         itemId: ItemIdDto,
-        pipeline: String,
+        pipeline: ItemMetaPipeline,
         force: Boolean
     ): UnionMeta? {
         val itemMeta = try {
@@ -128,7 +129,7 @@ class ItemMetaLegacyService(
      */
     override suspend fun schedule(
         itemId: ItemIdDto,
-        pipeline: String,
+        pipeline: ItemMetaPipeline,
         force: Boolean
     ) {
         logger.info("Scheduling meta update for {}", itemId.fullId())

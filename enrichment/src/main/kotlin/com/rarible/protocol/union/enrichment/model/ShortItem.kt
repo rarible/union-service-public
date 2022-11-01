@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.enrichment.model
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderOwner
@@ -18,6 +20,7 @@ data class ShortItem(
 
     val blockchain: BlockchainDto,
     val itemId: String,
+    val collectionId: String? = null,
 
     val sellers: Int = 0,
     val totalStock: BigInteger,
@@ -40,53 +43,11 @@ data class ShortItem(
 
     val poolSellOrders: List<ShortPoolOrder> = emptyList(),
 
+    val metaEntry: DownloadEntry<UnionMeta>? = null,
+
     @Version
     val version: Long? = null
 ) : BestSellOrderOwner<ShortItem>, BestBidOrderOwner<ShortItem>, OriginOrdersOwner {
-
-    fun withCalculatedFields(): ShortItem {
-        return this.copy(
-            multiCurrency = bestSellOrders.size > 1 || bestBidOrders.size > 1,
-            lastUpdatedAt = nowMillis()
-        )
-    }
-
-    companion object {
-        const val COLLECTION = "enrichment_item"
-
-        fun empty(itemId: ShortItemId): ShortItem {
-            return ShortItem(
-                version = null,
-                blockchain = itemId.blockchain,
-                itemId = itemId.itemId,
-
-                sellers = 0,
-                totalStock = BigInteger.ZERO,
-
-                bestSellOrder = null,
-                bestSellOrders = emptyMap(),
-
-                bestBidOrder = null,
-                bestBidOrders = emptyMap(),
-
-                originOrders = emptySet(),
-
-                auctions = emptySet(),
-
-                lastSale = null,
-
-                lastUpdatedAt = nowMillis()
-            )
-        }
-    }
-
-    fun isNotEmpty(): Boolean {
-        return bestBidOrder != null
-            || bestSellOrder != null
-            || auctions.isNotEmpty()
-            || lastSale != null
-            || poolSellOrders.isNotEmpty()
-    }
 
     @Transient
     private val _id: ShortItemId = ShortItemId(blockchain, itemId)
@@ -115,6 +76,55 @@ data class ShortItem(
 
     override fun getAllBestOrders(): List<ShortOrder> {
         return listOfNotNull(bestSellOrder, bestBidOrder) + getAllOriginBestOrders()
+    }
+
+    fun withCalculatedFields(): ShortItem {
+        return this.copy(
+            multiCurrency = bestSellOrders.size > 1 || bestBidOrders.size > 1,
+            lastUpdatedAt = nowMillis()
+        )
+    }
+
+    fun withMeta(entry: DownloadEntry<UnionMeta>): ShortItem {
+        val metaChanged = this.metaEntry?.data != entry.data
+        return this.copy(
+            metaEntry = entry,
+            lastUpdatedAt = if (metaChanged) nowMillis() else lastUpdatedAt
+        )
+    }
+
+    fun isNotEmpty(): Boolean {
+        return true // TODO get rid of this
+    }
+
+    companion object {
+
+        const val COLLECTION = "enrichment_item"
+
+        fun empty(itemId: ShortItemId): ShortItem {
+            return ShortItem(
+                version = null,
+                blockchain = itemId.blockchain,
+                itemId = itemId.itemId,
+
+                sellers = 0,
+                totalStock = BigInteger.ZERO,
+
+                bestSellOrder = null,
+                bestSellOrders = emptyMap(),
+
+                bestBidOrder = null,
+                bestBidOrders = emptyMap(),
+
+                originOrders = emptySet(),
+
+                auctions = emptySet(),
+
+                lastSale = null,
+
+                lastUpdatedAt = nowMillis()
+            )
+        }
     }
 }
 

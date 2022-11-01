@@ -111,7 +111,7 @@ class ItemController(
                 itemMetaService.get(
                     itemId = IdParser.parseItemId(itemId),
                     sync = true,
-                    pipeline = ItemMetaPipeline.API.pipeline
+                    pipeline = ItemMetaPipeline.API
                 )
             }
         } catch (e: CancellationException) {
@@ -176,9 +176,9 @@ class ItemController(
         // TODO[meta]: when all Blockchains stop caching the meta, we can remove this endpoint call.
         router.getService(fullItemId.blockchain).resetItemMeta(fullItemId.value)
         if (safeSync) {
-            itemMetaService.download(fullItemId, ItemMetaPipeline.REFRESH.pipeline, true)
+            itemMetaService.download(fullItemId, ItemMetaPipeline.REFRESH, true)
         } else {
-            itemMetaService.schedule(fullItemId, ItemMetaPipeline.REFRESH.pipeline, true)
+            itemMetaService.schedule(fullItemId, ItemMetaPipeline.REFRESH, true)
         }
 
         return ResponseEntity.ok().build()

@@ -2,51 +2,29 @@ package com.rarible.protocol.union.enrichment.repository
 
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
-import com.rarible.protocol.union.core.model.download.DownloadStatus
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
+import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
-import kotlinx.coroutines.reactive.awaitFirst
-import org.slf4j.LoggerFactory
-import org.springframework.data.domain.Sort
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate
-import org.springframework.data.mongodb.core.index.Index
 import org.springframework.stereotype.Component
 
 @Component
-// TODO CaptureSpan breaks bean creation
-//@CaptureSpan(type = SpanType.DB)
 class ItemMetaRepository(
-    template: ReactiveMongoTemplate,
     private val itemRepository: ItemRepository,
-) : DownloadEntryRepository<UnionMeta>(
-    template,
-    "enrichment_item_meta"
-) {
-    private val logger = LoggerFactory.getLogger(ItemMetaRepository::class.java)
+) : DownloadEntryRepository<UnionMeta> {
 
-    override suspend fun onSave(entry: DownloadEntry<UnionMeta>) {
-        if (entry.status == DownloadStatus.SUCCESS) {
-            itemRepository.updateLastUpdatedAt(ShortItemId(IdParser.parseItemId(entry.id)))
-        }
+    override suspend fun save(entry: DownloadEntry<UnionMeta>): DownloadEntry<UnionMeta> {
+        val itemId = ShortItemId.of(entry.id)
+        val item = itemRepository.get(itemId) ?: ShortItem.empty(itemId)
+        itemRepository.save(item.withMeta(entry))
+        return entry
     }
 
-    suspend fun createIndices() {
-        ALL_INDEXES.forEach { index ->
-            logger.info("Ensure index '{}' for collection '{}'", index, collection)
-            template.indexOps(collection).ensureIndex(index).awaitFirst()
-        }
+    override suspend fun get(id: String): DownloadEntry<UnionMeta>? {
+        val itemId = ShortItemId.of(id)
+        return itemRepository.get(itemId)?.metaEntry
     }
 
-    companion object {
-
-        private val COLLECTION_DEFINITION = Index()
-            .on("${DownloadEntry<UnionMeta>::data.name}.${UnionMeta::collectionId.name}", Sort.Direction.ASC)
-            .on("_id", Sort.Direction.ASC)
-            .background()
-
-        private val ALL_INDEXES = listOf(
-            COLLECTION_DEFINITION
-        )
+    override suspend fun getAll(ids: Collection<String>): List<DownloadEntry<UnionMeta>> {
+        return itemRepository.getAll(ids.map { ShortItemId.of(it) }).mapNotNull { it.metaEntry }
     }
 }

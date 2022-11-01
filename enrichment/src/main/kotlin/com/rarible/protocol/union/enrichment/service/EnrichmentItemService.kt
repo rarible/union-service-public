@@ -125,15 +125,20 @@ class EnrichmentItemService(
 
         val fetchedItem = async { item ?: fetch(ShortItemId(itemId)) }
 
-        val metaHint = meta[itemId]
-        val itemMeta = if (metaHint != null) {
-            CompletableDeferred(metaHint)
+        // Event if there is no data in entry, it means it is already scheduled and will be downloaded soon/one day
+        val itemMeta = if (shortItem?.metaEntry != null) {
+            CompletableDeferred(shortItem.metaEntry.data)
+        } else if (meta[itemId] != null) {
+            // TODO remove meta hint after the migration
+            CompletableDeferred(meta[itemId])
         } else {
+            // TODO remove after migration to the meta-pipeline
             val sync = (syncMetaDownload || item?.loadMetaSynchronously == true)
             withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-                itemMetaService.get(itemId, sync, metaPipeline.pipeline)
+                itemMetaService.get(itemId, sync, metaPipeline)
             }
         }
+
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
             existing = shortItem?.getAllBestOrders() ?: emptyList(),
             orders = orders
@@ -169,12 +174,13 @@ class EnrichmentItemService(
 
         val enrichedItems = coroutineScope {
 
-            val meta = async {
-                itemMetaService.get(unionItems.map { it.id }, metaPipeline.pipeline)
-            }
-
             val shortItems: Map<ItemIdDto, ShortItem> = findAll(unionItems.map { ShortItemId(it.id) })
                 .associateBy { it.id.toDto() }
+
+            val meta = async {
+                val withoutMeta = shortItems.values.filter { it.metaEntry != null }.map { it.id.toDto() }
+                itemMetaService.get(withoutMeta, metaPipeline)
+            }
 
             // Looking for full orders for existing items in order-indexer
             val shortOrderIds = shortItems.values
