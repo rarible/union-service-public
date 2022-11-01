@@ -14,6 +14,7 @@ data class UnionListenerProperties(
     val platformBestSellCleanup: PlatformBestSellCleanUpProperties = PlatformBestSellCleanUpProperties(),
     val collectionStatisticsResync: CollectionStatisticsResyncProperties,
     val priceUpdate: PriceUpdateProperties,
+    val metaItemRetry: MetaItemRetry,
     val reconcileMarks: ReconcileMarksProperties,
     val metaScheduling: MetaSchedulingProperties,
     val metrics: MetricsProperties
@@ -37,6 +38,11 @@ class ReconciliationProperties(
 class ReconcileMarksProperties(
     val enabled: Boolean = true,
     val rate: Duration = Duration.ofSeconds(15)
+)
+
+class MetaItemRetry(
+    val enabled: Boolean = false,
+    val rate: Duration = Duration.ofMinutes(1)
 )
 
 class PriceUpdateProperties(

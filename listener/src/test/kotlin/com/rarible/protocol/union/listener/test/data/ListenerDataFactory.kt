@@ -7,6 +7,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionI
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.config.CollectionStatisticsResyncProperties
 import com.rarible.protocol.union.listener.config.InternalConsumerProperties
+import com.rarible.protocol.union.listener.config.MetaItemRetry
 import com.rarible.protocol.union.listener.config.MetaSchedulingProperties
 import com.rarible.protocol.union.listener.config.MetricsProperties
 import com.rarible.protocol.union.listener.config.PlatformBestSellCleanUpProperties
@@ -24,7 +25,8 @@ fun defaultUnionListenerProperties(): UnionListenerProperties {
         platformBestSellCleanup = PlatformBestSellCleanUpProperties(enabled = false),
         collectionStatisticsResync = CollectionStatisticsResyncProperties(),
         metrics = MetricsProperties(),
-        metaScheduling = MetaSchedulingProperties()
+        metaScheduling = MetaSchedulingProperties(),
+        metaItemRetry = MetaItemRetry()
     )
 }
 

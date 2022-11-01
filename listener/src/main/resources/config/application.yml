@@ -206,6 +206,9 @@ listener:
   reconcile-marks:
     enabled: true
     rate: PT15S
+  meta-item-retry:
+    enabled: false
+    rate: PT15M
   meta-scheduling:
     item:
       workers: 4

@@ -85,6 +85,12 @@ data class ShortItem(
         )
     }
 
+    fun withNextRetry(): ShortItem {
+        return this.copy(
+            metaEntry = metaEntry?.copy(retries = metaEntry.retries + 1, retriedAt = nowMillis())
+        )
+    }
+
     fun withMeta(entry: DownloadEntry<UnionMeta>): ShortItem {
         val metaChanged = this.metaEntry?.data != entry.data
         return this.copy(

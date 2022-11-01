@@ -17,6 +17,8 @@ data class DownloadEntry<T>(
     // When task scheduled last time,
     // should not affect updatedAt
     val scheduledAt: Instant? = null,
+    // ?
+    val retriedAt: Instant? = null,
     // When entry updated last time,
     // should be changed only on success/fail
     val updatedAt: Instant? = null,
