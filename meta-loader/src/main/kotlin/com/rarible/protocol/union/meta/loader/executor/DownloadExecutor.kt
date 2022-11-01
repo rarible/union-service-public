@@ -11,7 +11,6 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
-import com.rarible.protocol.union.enrichment.util.optimisticLockWithInitial
 import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory
 
@@ -40,7 +39,7 @@ sealed class DownloadExecutor<T>(
     }
 
     private suspend fun execute(task: DownloadTask) {
-        val current = getOrDefault(task)
+        val current = repository.get(task.id) ?: getDefault(task)
         if (current.succeedAt != null && task.scheduledAt.isBefore(current.succeedAt)) {
             metrics.onSkippedTask(getBlockchain(task), type, task.pipeline)
             return
@@ -48,82 +47,75 @@ sealed class DownloadExecutor<T>(
 
         try {
             val data = downloader.download(task.id)
-            onSuccess(current, task, data)
+            onSuccess(task, data)
         } catch (e: DownloadException) {
-            onFail(current, task, e.message)
+            onFail(task, e.message)
         } catch (e: Exception) {
             logger.error(
                 "Unexpected exception while downloading data for {} task {} ()",
                 type, task.id, task.pipeline, e
             )
-            onFail(current, task, e.message)
+            onFail(task, e.message)
         }
     }
 
-    private suspend fun onSuccess(
-        current: DownloadEntry<T>,
-        task: DownloadTask,
-        data: T
-    ) = optimisticLockWithInitial(current) { initial ->
-
+    private suspend fun onSuccess(task: DownloadTask, data: T) {
         // For successful case we should rewrite current data anyway
-        val exist = initial ?: getOrDefault(task)
-        val updated = exist.withSuccessInc(data)
-        val saved = repository.save(updated)
+        val saved = repository.update(task.id) { exist ->
+            val current = exist ?: getDefault(task)
+            current.withSuccessInc(data)
+        }
 
-        notifier.notify(saved)
+        saved?.let { notifier.notify(saved) }
+
         metrics.onSuccessfulTask(getBlockchain(task), type, task.pipeline)
         logger.info("Data download SUCCEEDED for {} task: {} ()", type, task.id, task.pipeline)
     }
 
-    private suspend fun onFail(
-        current: DownloadEntry<T>,
-        task: DownloadTask,
-        errorMessage: String?
-    ) = optimisticLockWithInitial(current) { initial ->
-        val exist = initial ?: getOrDefault(task)
+    private suspend fun onFail(task: DownloadTask, errorMessage: String?) {
+        val saved = repository.update(task.id) { exist ->
+            val current = exist ?: getDefault(task)
 
-        val failed = exist.withFailInc(errorMessage)
+            val failed = current.withFailInc(errorMessage)
 
-        val isRetryLimitExceeded = failed.retries >= maxRetries
-        val status = if (isRetryLimitExceeded) DownloadStatus.FAILED else DownloadStatus.RETRY
+            val isRetryLimitExceeded = failed.retries >= maxRetries
+            val status = if (isRetryLimitExceeded) DownloadStatus.FAILED else DownloadStatus.RETRY
 
-        val updated = when (failed.status) {
-            // Nothing to do here, we don't want to replace existing data, just update fail counters
-            DownloadStatus.SUCCESS, DownloadStatus.FAILED -> failed
-            // Failed on retry, just update status, retry counter should be managed by job
-            // Status can be changed here if retry limit exceeded
-            DownloadStatus.RETRY -> failed.copy(status = status)
-            // That was first download, set retry counter as 0 (never retried before)
-            // SCHEDULE can turn into FAILED only if we set retry policy with 0 retries
-            DownloadStatus.SCHEDULED -> failed.copy(status = status, retries = 0)
-        }
-
-        when (updated.status) {
-            DownloadStatus.FAILED -> metrics.onFailedTask(getBlockchain(task), type, task.pipeline)
-            DownloadStatus.RETRY -> metrics.onRetriedTask(getBlockchain(task), type, task.pipeline)
-            else -> {
-                logger.warn(
-                    "Incorrect status of failed {} task {} (): {}",
-                    type, task.id, task.pipeline, updated.status
-                )
-                return@optimisticLockWithInitial
+            val updated = when (failed.status) {
+                // Nothing to do here, we don't want to replace existing data, just update fail counters
+                DownloadStatus.SUCCESS, DownloadStatus.FAILED -> failed
+                // Failed on retry, just update status, retry counter should be managed by job
+                // Status can be changed here if retry limit exceeded
+                DownloadStatus.RETRY -> failed.copy(status = status)
+                // That was first download, set retry counter as 0 (never retried before)
+                // SCHEDULE can turn into FAILED only if we set retry policy with 0 retries
+                DownloadStatus.SCHEDULED -> failed.copy(status = status, retries = 0)
             }
+
+            markStatus(task, status)
+            updated
         }
 
-        repository.save(updated)
-
-        logger.warn(
-            "Data download FAILED for {} task: {} (), status = {}, retries = {}, errorMessage = {}",
-            type, failed.id, task.pipeline, failed.status, failed.retries, failed.errorMessage
-        )
+        // Never should be null
+        saved?.let {
+            logger.warn(
+                "Data download FAILED for {} task: {} (), status = {}, retries = {}, errorMessage = {}",
+                type, saved.id, task.pipeline, saved.status, saved.retries, saved.errorMessage
+            )
+        }
     }
 
-    private suspend fun getOrDefault(task: DownloadTask): DownloadEntry<T> {
-        repository.get(task.id)?.let { return it }
+    private fun markStatus(task: DownloadTask, status: DownloadStatus) {
+        when (status) {
+            DownloadStatus.FAILED -> metrics.onFailedTask(getBlockchain(task), type, task.pipeline)
+            DownloadStatus.RETRY -> metrics.onRetriedTask(getBlockchain(task), type, task.pipeline)
+            else -> logger.warn("Incorrect status of failed {} task {} (): {}", type, task.id, task.pipeline, status)
+        }
+    }
 
+    private fun getDefault(task: DownloadTask): DownloadEntry<T> {
         // This should never happen, originally, at Executor stage entry MUST always exist
-        logger.warn("{} for task {} () not found, using default state", type, task.id, task.pipeline)
+        logger.warn("{} entry for task {} () not found, using default state", type, task.id, task.pipeline)
         return DownloadEntry(
             id = task.id,
             status = DownloadStatus.SCHEDULED,
@@ -152,7 +144,7 @@ class ItemDownloadExecutor(
     maxRetries,
 ) {
 
-    override val type = "ITEM"
+    override val type = "ITEM META"
     override fun getBlockchain(task: DownloadTask) = IdParser.parseItemId(task.id).blockchain
 
 }
@@ -173,7 +165,7 @@ class CollectionDownloadExecutor(
     maxRetries,
 ) {
 
-    override val type = "COLLECTION"
+    override val type = "COLLECTION META"
     override fun getBlockchain(task: DownloadTask) = IdParser.parseCollectionId(task.id).blockchain
 
 }
