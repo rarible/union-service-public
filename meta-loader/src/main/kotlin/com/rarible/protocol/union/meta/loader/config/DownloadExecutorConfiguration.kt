@@ -32,7 +32,7 @@ import org.springframework.context.annotation.Import
 import java.util.*
 
 @Configuration
-@ConditionalOnProperty("common.feature-flags.enabledMetaPipeline", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty("common.feature-flags.enableMetaPipeline", havingValue = "true", matchIfMissing = false)
 @Import(value = [UnionMetaLoaderConfiguration::class])
 @EnableConfigurationProperties(value = [UnionMetaLoaderProperties::class])
 class DownloadExecutorConfiguration(
