@@ -4,7 +4,6 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
-import com.rarible.protocol.union.enrichment.util.optimisticLockWithInitial
 import org.slf4j.LoggerFactory
 
 /**
@@ -62,22 +61,17 @@ abstract class DownloadScheduler<T>(
             )
             val id = initialEntry.id
 
-            // That's a trick to execute first try without "get-for-update"
-            // (originally there is no initial value)
-            optimisticLockWithInitial(initialEntry) { initial ->
-                if (initial != null) {
-                    repository.save(initialEntry)
-                    logger.info("Initial entry created: id={}, scheduledAt={}", id, initialEntry.scheduledAt)
-                    created.add(id)
-                } else {
-                    val current = repository.get(id)
-                    if (current != null) {
-                        logger.info("Entry with key {} already updated", id)
-                    } else {
-                        repository.save(initialEntry)
-                    }
-                }
-            }
+            val updated = repository.update(initialEntry.id, {
+                val alreadyExist = it != null
+                if (alreadyExist) logger.info("Entry with key {} already updated", id)
+                // Entry should be created ONLY if there is no existing entry
+                !alreadyExist
+            }, {
+                logger.info("Initial entry created: id={}, scheduledAt={}", id, initialEntry.scheduledAt)
+                initialEntry
+            })
+
+            updated?.let { created.add(id) }
         }
 
         return created

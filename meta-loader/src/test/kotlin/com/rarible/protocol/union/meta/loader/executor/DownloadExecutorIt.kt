@@ -2,6 +2,7 @@ package com.rarible.protocol.union.meta.loader.executor
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
@@ -67,14 +68,12 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         itemId = randomEthItemId()
         fullItemId = itemId.fullId()
         meta = randomUnionMeta()
-        runBlocking {
-            createItem(itemId)
-        }
     }
 
     @Test
     fun `initial task - success`() = runBlocking<Unit> {
         val task = randomTask(fullItemId)
+        createItem(itemId, null)
         val savedItem = itemRepository.get(ShortItemId(itemId))!!
 
         mockGetMeta(fullItemId, meta)
@@ -98,30 +97,10 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         verifyItemUpdated(itemId, savedItem)
     }
 
-    private suspend fun verifyItemUpdated(itemId: ItemIdDto, savedItem: ShortItem) {
-        val updatedItem = itemRepository.get(ShortItemId(itemId))!!
-        assertThat(updatedItem.version!! - savedItem.version!!).isEqualTo(1)
-        assertThat(updatedItem.lastUpdatedAt.toEpochMilli() - nowMillis().toEpochMilli()).isLessThan(100)
-    }
-
-    private suspend fun createItem(itemId: ItemIdDto): ShortItem =
-        itemRepository.save(
-            ShortItem(
-                itemId = itemId.value,
-                blockchain = itemId.blockchain,
-                bestBidOrder = null,
-                bestBidOrders = emptyMap(),
-                bestSellOrder = null,
-                bestSellOrders = emptyMap(),
-                lastSale = null,
-                lastUpdatedAt = Instant.ofEpochMilli(0),
-                totalStock = BigInteger.ZERO
-            )
-        )
-
     @Test
     fun `initial task - failed`() = runBlocking<Unit> {
         val task = randomTask(fullItemId)
+        createItem(itemId, null)
         val savedItem = itemRepository.get(ShortItemId(itemId))!!
 
         mockGetMetaFailed(fullItemId, "failed")
@@ -145,14 +124,11 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         verifyItemNotChanged(itemId, savedItem)
     }
 
-    private suspend fun verifyItemNotChanged(itemId: ItemIdDto, savedItem: ShortItem) {
-        val updatedItem = itemRepository.get(ShortItemId(itemId))!!
-        assertThat(updatedItem.lastUpdatedAt).isEqualTo(savedItem.lastUpdatedAt)
-    }
-
     @Test
     fun `initial task - scheduled to succeeded`() = runBlocking<Unit> {
-        val entry = repository.save(randomRetryMetaEntry(fullItemId).copy(status = DownloadStatus.SCHEDULED))
+        val entry = randomRetryMetaEntry(fullItemId).copy(status = DownloadStatus.SCHEDULED)
+        createItem(itemId, entry)
+
         val savedItem = itemRepository.get(ShortItemId(itemId))!!
         mockGetMeta(fullItemId, meta)
 
@@ -170,7 +146,8 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
     @Test
     fun `forced task - retry to succeeded`() = runBlocking<Unit> {
-        val entry = repository.save(randomRetryMetaEntry(fullItemId))
+        val entry = randomFailedMetaEntry(fullItemId)
+        createItem(itemId, entry)
         val savedItem = itemRepository.get(ShortItemId(itemId))!!
         mockGetMeta(fullItemId, meta)
 
@@ -188,7 +165,8 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
     @Test
     fun `forced task - failed to succeeded`() = runBlocking<Unit> {
-        val entry = repository.save(randomFailedMetaEntry(fullItemId))
+        val entry = randomFailedMetaEntry(fullItemId)
+        createItem(itemId, entry)
         val savedItem = itemRepository.get(ShortItemId(itemId))!!
 
         mockGetMeta(fullItemId, meta)
@@ -207,7 +185,8 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
     @Test
     fun `forced task - retry increased`() = runBlocking<Unit> {
-        val entry = repository.save(randomRetryMetaEntry(fullItemId).copy(retries = 0))
+        val entry = randomMetaEntry(fullItemId).copy(retries = 0, status = DownloadStatus.RETRY)
+        createItem(itemId, entry)
         val savedItem = itemRepository.get(ShortItemId(itemId))!!
         mockGetMetaFailed(fullItemId, "error")
 
@@ -225,7 +204,12 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
     @Test
     fun `forced task - retries exhausted`() = runBlocking<Unit> {
-        val entry = repository.save(randomRetryMetaEntry(fullItemId).copy(retries = maxRetries))
+        val entry = randomMetaEntry(fullItemId).copy(
+            retries = maxRetries,
+            status = DownloadStatus.RETRY,
+            data = null
+        )
+        createItem(itemId, entry)
         val savedItem = itemRepository.get(ShortItemId(itemId))!!
         mockGetMetaFailed(fullItemId, "error")
 
@@ -243,7 +227,8 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
     @Test
     fun `forced task - sill fails`() = runBlocking<Unit> {
-        val entry = repository.save(randomFailedMetaEntry(fullItemId).copy(retries = maxRetries + 1))
+        val entry = randomMetaEntry(fullItemId).copy(retries = maxRetries + 1, status = DownloadStatus.FAILED)
+        createItem(itemId, entry)
         mockGetMetaFailed(fullItemId, "error")
 
         downloadExecutor.execute(listOf(randomTask(fullItemId)))
@@ -261,10 +246,37 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
     @Test
     fun `forced task - debounce`() = runBlocking {
-        repository.save(randomMetaEntry(fullItemId))
+        createItem(itemId, randomMetaEntry(fullItemId))
         downloadExecutor.execute(listOf(randomTask(fullItemId).copy(scheduledAt = Instant.now().minusSeconds(1))))
 
         coVerify(exactly = 0) { downloader.download(any()) }
+    }
+
+    private suspend fun createItem(itemId: ItemIdDto, metaEntry: DownloadEntry<UnionMeta>?): ShortItem =
+        itemRepository.save(
+            ShortItem(
+                itemId = itemId.value,
+                blockchain = itemId.blockchain,
+                bestBidOrder = null,
+                bestBidOrders = emptyMap(),
+                bestSellOrder = null,
+                bestSellOrders = emptyMap(),
+                lastSale = null,
+                lastUpdatedAt = Instant.ofEpochMilli(0),
+                totalStock = BigInteger.ZERO,
+                metaEntry = metaEntry
+            )
+        )
+
+    private suspend fun verifyItemUpdated(itemId: ItemIdDto, savedItem: ShortItem) {
+        val updatedItem = itemRepository.get(ShortItemId(itemId))!!
+        assertThat(updatedItem.version!! - savedItem.version!!).isEqualTo(1)
+        assertThat(updatedItem.lastUpdatedAt.toEpochMilli() - nowMillis().toEpochMilli()).isLessThan(100)
+    }
+
+    private suspend fun verifyItemNotChanged(itemId: ItemIdDto, savedItem: ShortItem) {
+        val updatedItem = itemRepository.get(ShortItemId(itemId))!!
+        assertThat(updatedItem.lastUpdatedAt).isEqualTo(savedItem.lastUpdatedAt)
     }
 
     private fun mockGetMeta(itemId: String, meta: UnionMeta) {

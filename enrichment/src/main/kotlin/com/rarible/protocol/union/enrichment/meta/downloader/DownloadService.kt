@@ -5,7 +5,7 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
-import com.rarible.protocol.union.enrichment.util.optimisticLockWithInitial
+import org.slf4j.LoggerFactory
 
 /**
  * Service for direct operations with downloaded data - get/schedule/download etc.
@@ -19,6 +19,9 @@ abstract class DownloadService<K, T>(
     // TODO metrics class need here
 ) {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+    abstract val type: String
+
     abstract fun toId(key: K): String
 
     /**
@@ -27,6 +30,7 @@ abstract class DownloadService<K, T>(
      * 1. If data downloaded, it will be saved and notification will be sent
      * 2. If data download failed, download task will be scheduled (with 'force' or not) if there is no entry in DB
      */
+    // TODO should be removed after migration, when old meta classes won't be needed anymore
     suspend fun get(key: K, sync: Boolean, pipeline: String): T? {
         val id = toId(key)
         val current = repository.get(id)
@@ -35,7 +39,6 @@ abstract class DownloadService<K, T>(
         if (current != null && current.isDownloaded()) {
             return current.data!!
         }
-        // TODO add metrics (hit/miss)
 
         // If data isn't downloaded and sync download required, downloading it right here
         if (sync) {
@@ -62,15 +65,24 @@ abstract class DownloadService<K, T>(
             val current = repository.get(id)
             if (current != null) {
                 // If there is existing entry, we need to update only counters
-                updateFailed(id, e.message, null)
+                logger.warn(
+                    "Direct download of {} with ID [{}] failed, failed counters incremented: {}",
+                    type, id, e.message
+                )
+                updateFailed(id, e.message)
             } else {
                 // Otherwise, schedule async download
+                logger.warn(
+                    "Direct download of {} with ID [{}] failed, scheduling download: {}",
+                    type, id, e.message
+                )
                 schedule(key, pipeline, force)
             }
             return null
         }
 
-        updateSuccessful(id, data, null)
+        logger.warn("Direct download of {} with ID [{}] succeeded, saving entry", type, id)
+        updateSuccessful(id, data)
         return data
     }
 
@@ -87,7 +99,7 @@ abstract class DownloadService<K, T>(
      * so counters in entry will be updated and notification will be sent.
      */
     suspend fun save(key: K, data: T) {
-        updateSuccessful(toId(key), data, null)
+        updateSuccessful(toId(key), data)
     }
 
     private suspend fun schedule(ids: Collection<String>, pipeline: String, force: Boolean) {
@@ -100,34 +112,27 @@ abstract class DownloadService<K, T>(
             )
         }
         if (tasks.isNotEmpty()) {
+            logger.info("Scheduling {} {} tasks with IDs (first 100): {}", tasks.size, type, tasks.take(100))
             publisher.publish(tasks)
         }
     }
 
-    private suspend fun updateSuccessful(
-        id: String,
-        data: T,
-        current: DownloadEntry<T>?
-    ) = optimisticLockWithInitial(current) { initial ->
-        val exist = initial ?: getOrDefault(id)
-        val updated = exist.withSuccessInc(data)
-        repository.save(updated)
-        notifier.notify(updated)
+    private suspend fun updateSuccessful(id: String, data: T) {
+        val updated = repository.update(id) { exist ->
+            val current = (exist ?: getDefault(id))
+            current.withSuccessInc(data)
+        }
+        updated?.let { notifier.notify(it) }
     }
 
-    private suspend fun updateFailed(
-        id: String,
-        errorMessage: String?,
-        current: DownloadEntry<T>?
-    ) = optimisticLockWithInitial(current) { initial ->
-        val exist = initial ?: getOrDefault(id)
-        val failed = exist.withFailInc(errorMessage)
-        repository.save(failed)
+    private suspend fun updateFailed(id: String, errorMessage: String?) {
+        repository.update(id) { exist ->
+            val current = (exist ?: getDefault(id))
+            current.withFailInc(errorMessage)
+        }
     }
 
-    private suspend fun getOrDefault(id: String): DownloadEntry<T> {
-        repository.get(id)?.let { return it }
-
+    private fun getDefault(id: String): DownloadEntry<T> {
         return DownloadEntry(
             id = id,
             status = DownloadStatus.SCHEDULED,

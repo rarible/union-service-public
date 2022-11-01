@@ -1,9 +1,14 @@
 package com.rarible.protocol.union.listener.downloader.item
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
+import com.rarible.protocol.union.enrichment.model.ShortItem
+import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
+import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.downloader.ItemMetaTaskRouter
@@ -25,6 +30,9 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var repository: ItemMetaRepository
+
+    @Autowired
+    lateinit var itemRepository: ItemRepository
 
     private val router: ItemMetaTaskRouter = mockk()
 
@@ -56,7 +64,7 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
 
     @Test
     fun `not forced task - entry exists`() = runBlocking {
-        val exist = repository.save(randomItemMetaDownloadEntry())
+        val exist = save(randomItemMetaDownloadEntry())
         val task = DownloadTask(exist.id, "api", false, nowMillis())
 
         scheduler.schedule(task)
@@ -88,7 +96,7 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
 
     @Test
     fun `forced task - entry exists`() = runBlocking {
-        val exist = repository.save(randomItemMetaDownloadEntry())
+        val exist = save(randomItemMetaDownloadEntry())
         val task = DownloadTask(exist.id, "api", true, nowMillis())
 
         scheduler.schedule(task)
@@ -103,7 +111,7 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
 
     @Test
     fun `mixed tasks - entry exists`() = runBlocking {
-        val exist = repository.save(randomItemMetaDownloadEntry())
+        val exist = save(randomItemMetaDownloadEntry())
         val task1 = DownloadTask(exist.id, "api", true, nowMillis())
         val task2 = DownloadTask(exist.id, "listener", false, nowMillis())
 
@@ -114,4 +122,8 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
         coVerify(exactly = 0) { router.send(listOf(task2), task2.pipeline) }
     }
 
+    private suspend fun save(entry: DownloadEntry<UnionMeta>): DownloadEntry<UnionMeta> {
+        itemRepository.save(ShortItem.empty(ShortItemId.of(entry.id)).withMeta(entry))
+        return entry
+    }
 }

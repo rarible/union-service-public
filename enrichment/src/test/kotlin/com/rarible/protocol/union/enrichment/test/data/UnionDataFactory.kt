@@ -331,7 +331,6 @@ private val mockedEthActivityConverter = EthActivityConverter(
 
 fun randomItemMetaDownloadEntry(
     id: String = randomEthItemId().fullId(),
-    version: Int? = null,
     status: DownloadStatus = DownloadStatus.SUCCESS,
     data: UnionMeta? = randomUnionMeta(),
     downloads: Int = 1,
@@ -345,7 +344,6 @@ fun randomItemMetaDownloadEntry(
 ): DownloadEntry<UnionMeta> {
     return DownloadEntry(
         id = id,
-        version = version,
         status = status,
         data = data,
         downloads = downloads,

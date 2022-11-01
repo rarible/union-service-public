@@ -1,12 +1,9 @@
 package com.rarible.protocol.union.core.model.download
 
 import com.rarible.core.common.nowMillis
-import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.Version
 import java.time.Instant
 
 data class DownloadEntry<T>(
-    @Id
     val id: String,
     val status: DownloadStatus,
 
@@ -28,10 +25,7 @@ data class DownloadEntry<T>(
     // When was the last fail
     val failedAt: Instant? = null,
     // Error message
-    val errorMessage: String? = null,
-
-    @Version
-    val version: Int? = null,
+    val errorMessage: String? = null
 ) {
 
     fun withFailInc(errorMessage: String?): DownloadEntry<T> {
