@@ -5,6 +5,8 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.nowMillis
 import com.rarible.core.mongo.util.div
+import com.rarible.protocol.union.core.model.download.DownloadEntry
+import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -24,15 +26,18 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
+import org.springframework.data.mongodb.core.index.PartialIndexFilter
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.and
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.data.mongodb.core.query.lt
 import org.springframework.data.mongodb.core.query.lte
 import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
+import java.time.Duration
 import java.time.Instant
 
 @Component
@@ -63,6 +68,18 @@ class ItemRepository(
     suspend fun getAll(ids: List<ShortItemId>): List<ShortItem> {
         val criteria = Criteria("_id").inValues(ids)
         return template.find<ShortItem>(Query(criteria)).collectList().awaitFirst()
+    }
+
+    fun getItemForMetaRetry(now: Instant, retryPeriod: Duration, attempt: Int): Flow<ShortItem> {
+        val query = Query(
+            Criteria().andOperator(
+                ShortItem::metaEntry / DownloadEntry<*>::status isEqualTo DownloadStatus.RETRY,
+                ShortItem::metaEntry / DownloadEntry<*>::retries isEqualTo attempt,
+                ShortItem::metaEntry / DownloadEntry<*>::retriedAt lt now.minus(retryPeriod)
+            )
+        )
+
+        return template.find(query, ShortItem::class.java).asFlow()
     }
 
     fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortItem> {
@@ -177,6 +194,12 @@ class ItemRepository(
         // Not really sure why, but Mongo saves id field of SHortOrder as _id
         private const val POOL_ORDER_ID_FIELD = "poolSellOrders.order._id"
 
+        private val STATUS_RETRIES_FAILED_AT_DEFINITION = Index()
+            .partial(PartialIndexFilter.of(ShortItem::metaEntry / DownloadEntry<*>::status isEqualTo DownloadStatus.RETRY))
+            .on("${ShortItem::metaEntry.name}.${DownloadEntry<*>::retries.name}", Sort.Direction.ASC)
+            .on("${ShortItem::metaEntry.name}.${DownloadEntry<*>::retriedAt.name}", Sort.Direction.ASC)
+            .background()
+
         private val BLOCKCHAIN_DEFINITION = Index()
             .on(ShortItem::blockchain.name, Sort.Direction.ASC)
             .on("_id", Sort.Direction.ASC)
@@ -214,6 +237,7 @@ class ItemRepository(
             .background()
 
         private val ALL_INDEXES = listOf(
+            STATUS_RETRIES_FAILED_AT_DEFINITION,
             BLOCKCHAIN_DEFINITION,
             MULTI_CURRENCY_DEFINITION,
             BY_BEST_SELL_PLATFORM_DEFINITION,

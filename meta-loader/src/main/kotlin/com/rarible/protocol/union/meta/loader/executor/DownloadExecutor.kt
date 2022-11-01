@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.meta.loader.executor
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
@@ -89,7 +90,7 @@ sealed class DownloadExecutor<T>(
                 DownloadStatus.RETRY -> failed.copy(status = status)
                 // That was first download, set retry counter as 0 (never retried before)
                 // SCHEDULE can turn into FAILED only if we set retry policy with 0 retries
-                DownloadStatus.SCHEDULED -> failed.copy(status = status, retries = 0)
+                DownloadStatus.SCHEDULED -> failed.copy(status = status, retries = 0, retriedAt = nowMillis())
             }
 
             markStatus(task, status)
