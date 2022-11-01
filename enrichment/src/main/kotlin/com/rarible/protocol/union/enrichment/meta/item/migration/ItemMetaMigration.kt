@@ -4,7 +4,9 @@ import com.rarible.core.loader.internal.common.LoadTask
 import com.rarible.loader.cache.internal.MongoCacheEntry
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
+import com.rarible.protocol.union.core.model.download.DownloadEntry.Companion.MAX_ERROR_MESSAGE_LENGTH
 import com.rarible.protocol.union.core.model.download.DownloadStatus
+import com.rarible.protocol.union.core.util.trimToLength
 
 @Deprecated("Should be removed after meta-pipeline migration")
 sealed class ItemMetaMigration(
@@ -23,6 +25,7 @@ sealed class ItemMetaMigration(
 
 }
 
+@Deprecated("Should be removed after meta-pipeline migration")
 class DownloadedMetaMigration(
     task: LoadTask,
     modernMeta: DownloadEntry<UnionMeta>?,
@@ -74,6 +77,7 @@ class DownloadedMetaMigration(
     }
 }
 
+@Deprecated("Should be removed after meta-pipeline migration")
 class FailedMetaMigration(
     task: LoadTask,
     modernMeta: DownloadEntry<UnionMeta>?
@@ -109,7 +113,7 @@ class FailedMetaMigration(
         return toUpdate.copy(
             failedAt = status.failedAt,
             updatedAt = status.failedAt,
-            errorMessage = status.errorMessage
+            errorMessage = trimToLength(status.errorMessage, MAX_ERROR_MESSAGE_LENGTH)
         )
     }
 
@@ -124,7 +128,7 @@ class FailedMetaMigration(
             scheduledAt = task.status.scheduledAt,
             succeedAt = null,
             updatedAt = status.failedAt,
-            errorMessage = status.errorMessage,
+            errorMessage = trimToLength(status.errorMessage, MAX_ERROR_MESSAGE_LENGTH),
             failedAt = status.failedAt
         )
     }

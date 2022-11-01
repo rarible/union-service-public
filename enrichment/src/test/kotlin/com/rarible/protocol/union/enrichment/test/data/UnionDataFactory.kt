@@ -340,7 +340,7 @@ fun randomItemMetaDownloadEntry(
     updatedAt: Instant? = nowMillis().minusSeconds(20),
     succeedAt: Instant? = nowMillis().minusSeconds(20),
     failedAt: Instant? = nowMillis().minusSeconds(40),
-    errorMessage: String? = "Error: ${randomString()}",
+    errorMessage: String? = "Error: ${randomString()}"
 ): DownloadEntry<UnionMeta> {
     return DownloadEntry(
         id = id,

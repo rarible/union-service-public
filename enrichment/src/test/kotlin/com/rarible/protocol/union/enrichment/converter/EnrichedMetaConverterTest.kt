@@ -6,10 +6,12 @@ import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
+import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.AudioContentDto
 import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.Model3dContentDto
 import com.rarible.protocol.union.dto.VideoContentDto
+import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.enrichment.test.data.randomUnionCollectionMeta
 import com.rarible.protocol.union.enrichment.test.data.randomUnionContent
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
@@ -20,13 +22,14 @@ class EnrichedMetaConverterTest {
 
     @Test
     fun `convert item meta`() {
-        val meta = randomUnionMeta()
-
-        val converted = EnrichedMetaConverter.convert(meta)
+        val entry = randomItemMetaDownloadEntry()
+        val meta = entry.data!!
+        val converted = EnrichedMetaConverter.convert(entry)!!
 
         assertThat(converted.name).isEqualTo(meta.name)
         assertThat(converted.description).isEqualTo(meta.description)
         assertThat(converted.createdAt).isEqualTo(meta.createdAt)
+        assertThat(converted.updatedAt).isEqualTo(entry.succeedAt)
         assertThat(converted.tags).isEqualTo(meta.tags)
         assertThat(converted.genres).isEqualTo(meta.genres)
         assertThat(converted.language).isEqualTo(meta.language)
@@ -36,6 +39,13 @@ class EnrichedMetaConverterTest {
         assertThat(converted.originalMetaUri).isEqualTo(meta.originalMetaUri)
         assertThat(converted.attributes).isEqualTo(meta.attributes)
         assertThat(converted.restrictions).isEqualTo(meta.restrictions.map { it.type })
+    }
+
+    @Test
+    fun `convert item meta - failed entry`() {
+        val entry = randomItemMetaDownloadEntry(data = null, status = DownloadStatus.FAILED)
+        val converted = EnrichedMetaConverter.convert(entry)
+        assertThat(converted).isNull()
     }
 
     @Test
