@@ -25,7 +25,7 @@ class ItemMetaRepository(
         val item = itemRepository.get(itemId) ?: ShortItem.empty(itemId)
         if (isUpdateRequired(item.metaEntry)) {
             val updated = updateEntry(item.metaEntry)
-            logger.info("Updating ITEM META [{}] with entry having status {}", entryId, updated.status)
+            logger.info("Updating ITEM [{}] with meta entry having status {}", entryId, updated.status)
             itemRepository.save(item.withMeta(updated))
             updated
         } else {

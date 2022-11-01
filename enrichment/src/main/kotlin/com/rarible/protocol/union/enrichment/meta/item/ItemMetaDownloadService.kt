@@ -14,7 +14,7 @@ class ItemMetaDownloadService(
     notifier: ItemMetaNotifier
 ) : DownloadService<ItemIdDto, UnionMeta>(repository, publisher, downloader, notifier) {
 
-    override val type = "ITEM META"
+    override val type = "ITEM"
 
     override fun toId(key: ItemIdDto): String {
         return key.fullId()

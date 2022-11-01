@@ -144,7 +144,7 @@ class ItemDownloadExecutor(
     maxRetries,
 ) {
 
-    override val type = "ITEM META"
+    override val type = "ITEM"
     override fun getBlockchain(task: DownloadTask) = IdParser.parseItemId(task.id).blockchain
 
 }
@@ -165,7 +165,7 @@ class CollectionDownloadExecutor(
     maxRetries,
 ) {
 
-    override val type = "COLLECTION META"
+    override val type = "COLLECTION"
     override fun getBlockchain(task: DownloadTask) = IdParser.parseCollectionId(task.id).blockchain
 
 }
