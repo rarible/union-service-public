@@ -180,7 +180,7 @@ class UnionListenerConfiguration(
 
     // --------------- Meta 3.0 beans START
     @Bean
-    @ConditionalOnProperty("common.feature-flags.enabledMetaPipeline", havingValue = "true", matchIfMissing = false)
+    @ConditionalOnProperty("common.feature-flags.enableMetaPipeline", havingValue = "true", matchIfMissing = false)
     fun itemMetaDownloadScheduleWorker(
         handler: ItemMetaTaskSchedulerHandler
     ): BatchedConsumerWorker<DownloadTask> {
