@@ -17,7 +17,7 @@ import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutor
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutorHandler
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutorManager
-import com.rarible.protocol.union.meta.loader.executor.DownloadMetrics
+import com.rarible.protocol.union.meta.loader.executor.DownloadExecutorMetrics
 import com.rarible.protocol.union.meta.loader.executor.DownloadPool
 import com.rarible.protocol.union.meta.loader.executor.ItemDownloadExecutor
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
@@ -55,7 +55,7 @@ class DownloadExecutorConfiguration(
         itemMetaRepository: ItemMetaRepository,
         itemMetaDownloader: ItemMetaDownloader,
         itemMetaNotifier: ItemMetaNotifier,
-        metrics: DownloadMetrics
+        metrics: DownloadExecutorMetrics
     ): DownloadExecutorManager {
         val maxRetries = metaProperties.retryIntervals.size
         val executors = HashMap<String, DownloadExecutor<UnionMeta>>()

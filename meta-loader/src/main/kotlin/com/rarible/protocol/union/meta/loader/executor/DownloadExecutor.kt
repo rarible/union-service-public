@@ -23,14 +23,13 @@ sealed class DownloadExecutor<T>(
     private val downloader: Downloader<T>,
     private val notifier: DownloadNotifier<T>,
     private val pool: DownloadPool,
-    private val metrics: DownloadMetrics,
+    private val metrics: DownloadExecutorMetrics,
     private val maxRetries: Int,
 ) : AutoCloseable {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     abstract val type: String
-
     abstract fun getBlockchain(task: DownloadTask): BlockchainDto
 
     suspend fun execute(tasks: List<DownloadTask>) {
@@ -42,7 +41,7 @@ sealed class DownloadExecutor<T>(
     private suspend fun execute(task: DownloadTask) {
         val current = repository.get(task.id) ?: getDefault(task)
         if (current.succeedAt != null && task.scheduledAt.isBefore(current.succeedAt)) {
-            metrics.onSkippedTask(getBlockchain(task), type, task.pipeline)
+            metrics.onSkippedTask(getBlockchain(task), type, task.pipeline, task.force)
             return
         }
 
@@ -69,7 +68,7 @@ sealed class DownloadExecutor<T>(
 
         saved?.let { notifier.notify(saved) }
 
-        metrics.onSuccessfulTask(getBlockchain(task), type, task.pipeline)
+        metrics.onSuccessfulTask(getBlockchain(task), type, task.pipeline, task.force)
         logger.info("Data download SUCCEEDED for {} task: {} ()", type, task.id, task.pipeline)
     }
 
@@ -108,8 +107,8 @@ sealed class DownloadExecutor<T>(
 
     private fun markStatus(task: DownloadTask, status: DownloadStatus) {
         when (status) {
-            DownloadStatus.FAILED -> metrics.onFailedTask(getBlockchain(task), type, task.pipeline)
-            DownloadStatus.RETRY -> metrics.onRetriedTask(getBlockchain(task), type, task.pipeline)
+            DownloadStatus.FAILED -> metrics.onFailedTask(getBlockchain(task), type, task.pipeline, task.force)
+            DownloadStatus.RETRY -> metrics.onRetriedTask(getBlockchain(task), type, task.pipeline, task.force)
             else -> logger.warn("Incorrect status of failed {} task {} (): {}", type, task.id, task.pipeline, status)
         }
     }
@@ -134,7 +133,7 @@ class ItemDownloadExecutor(
     downloader: Downloader<UnionMeta>,
     notifier: DownloadNotifier<UnionMeta>,
     pool: DownloadPool,
-    metrics: DownloadMetrics,
+    metrics: DownloadExecutorMetrics,
     maxRetries: Int,
 ) : DownloadExecutor<UnionMeta>(
     repository,
@@ -155,7 +154,7 @@ class CollectionDownloadExecutor(
     downloader: Downloader<UnionCollectionMeta>,
     notifier: DownloadNotifier<UnionCollectionMeta>,
     pool: DownloadPool,
-    metrics: DownloadMetrics,
+    metrics: DownloadExecutorMetrics,
     maxRetries: Int,
 ) : DownloadExecutor<UnionCollectionMeta>(
     repository,

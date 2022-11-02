@@ -3,6 +3,7 @@ package com.rarible.protocol.union.listener.downloader
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import org.slf4j.LoggerFactory
 
@@ -14,10 +15,14 @@ import org.slf4j.LoggerFactory
  */
 abstract class DownloadScheduler<T>(
     private val router: DownloadTaskRouter,
-    private val repository: DownloadEntryRepository<T>
+    private val repository: DownloadEntryRepository<T>,
+    private val metrics: DownloadSchedulerMetrics
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    abstract val type: String
+    abstract fun getBlockchain(task: DownloadTask): BlockchainDto
 
     suspend fun schedule(task: DownloadTask) {
         schedule(listOf(task))
@@ -30,11 +35,17 @@ abstract class DownloadScheduler<T>(
         // Here we pass only forced tasks or just created. Duplicated tasks can be here
         // as a result of multiple simultaneous requests from API
         val deduplicated = tasks.filter {
-            it.force || created.contains(it.id)
+            val shouldBeExecuted = it.force || created.contains(it.id)
+            if (shouldBeExecuted) {
+                metrics.onScheduledTask(getBlockchain(it), type, it.pipeline, it.force)
+            } else {
+                metrics.onSkippedTask(getBlockchain(it), type, it.pipeline, it.force)
+            }
+            shouldBeExecuted
         }
 
-        deduplicated.groupBy { it.pipeline }.forEach {
-            router.send(it.value, it.key)
+        deduplicated.groupBy { it.pipeline }.forEach { (pipeline, tasks) ->
+            router.send(tasks, pipeline)
         }
     }
 
@@ -54,26 +65,26 @@ abstract class DownloadScheduler<T>(
         // Potentially there could be several tasks for same entry
         notFound.forEach { group ->
             val earliest = group.value.minByOrNull { it.scheduledAt }!!
-            val initialEntry = DownloadEntry<T>(
-                id = earliest.id,
-                status = DownloadStatus.SCHEDULED,
-                scheduledAt = earliest.scheduledAt
-            )
-            val id = initialEntry.id
-
-            val updated = repository.update(initialEntry.id, {
-                val alreadyExist = it != null
-                if (alreadyExist) logger.info("Entry with key {} already updated", id)
-                // Entry should be created ONLY if there is no existing entry
-                !alreadyExist
-            }, {
-                logger.info("Initial entry created: id={}, scheduledAt={}", id, initialEntry.scheduledAt)
-                initialEntry
-            })
-
+            val id = earliest.id
+            val updated = repository.update(id, this::isSchedulingRequired) { createInitialEntry(earliest) }
             updated?.let { created.add(id) }
         }
 
         return created
+    }
+
+    private fun isSchedulingRequired(current: DownloadEntry<T>?): Boolean {
+        // Entry should be created ONLY if there is no existing entry
+        current?.let { logger.info("Entry with key {} already updated", current.id) }
+        return current == null
+    }
+
+    private fun createInitialEntry(task: DownloadTask): DownloadEntry<T> {
+        logger.info("Initial entry created: id={}, scheduledAt={}", task.id, task.scheduledAt)
+        return DownloadEntry<T>(
+            id = task.id,
+            status = DownloadStatus.SCHEDULED,
+            scheduledAt = task.scheduledAt
+        )
     }
 }

@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.meta.downloader
 
-import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 
 interface DownloadEntryRepository<T> {
@@ -12,7 +11,7 @@ interface DownloadEntryRepository<T> {
      */
     suspend fun update(
         entryId: String,
-        isUpdateRequired: (current: DownloadEntry<UnionMeta>?) -> Boolean,
+        isUpdateRequired: (current: DownloadEntry<T>?) -> Boolean,
         updateEntry: (current: DownloadEntry<T>?) -> DownloadEntry<T>
     ): DownloadEntry<T>?
 

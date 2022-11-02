@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
+import com.rarible.protocol.union.dto.BlockchainDto
 import org.slf4j.LoggerFactory
 
 /**
@@ -16,13 +17,15 @@ abstract class DownloadService<K, T>(
     private val publisher: DownloadTaskPublisher,
     private val downloader: Downloader<T>,
     private val notifier: DownloadNotifier<T>,
-    // TODO metrics class need here
+    private val metrics: DownloadMetrics
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     abstract val type: String
 
     abstract fun toId(key: K): String
+
+    abstract fun getBlockchain(key: K): BlockchainDto
 
     /**
      * Get single downloaded entry or schedule download task (with 'force' or not), if there is no entry.
@@ -59,6 +62,7 @@ abstract class DownloadService<K, T>(
      */
     suspend fun download(key: K, pipeline: String, force: Boolean): T? {
         val id = toId(key)
+        val blockchain = getBlockchain(key)
         val data = try {
             downloader.download(id)
         } catch (e: DownloadException) {
@@ -69,7 +73,7 @@ abstract class DownloadService<K, T>(
                     "Direct download of {} with ID [{}] failed, failed counters incremented: {}",
                     type, id, e.message
                 )
-                updateFailed(id, e.message)
+                updateFailed(id, blockchain, e.message)
             } else {
                 // Otherwise, schedule async download
                 logger.warn(
@@ -82,7 +86,7 @@ abstract class DownloadService<K, T>(
         }
 
         logger.warn("Direct download of {} with ID [{}] succeeded, saving entry", type, id)
-        updateSuccessful(id, data)
+        updateSuccessful(id, blockchain, data)
         return data
     }
 
@@ -91,21 +95,23 @@ abstract class DownloadService<K, T>(
      * Otherwise, task will be executed only if there is no entry in DB (with any status)
      */
     suspend fun schedule(key: K, pipeline: String, force: Boolean) {
-        schedule(listOf(toId(key)), pipeline, force)
+        schedule(listOf(key), pipeline, force)
     }
 
     /**
      * Replace current data with new one. This operation is considered as successful download,
      * so counters in entry will be updated and notification will be sent.
      */
+    // TODO also should be removed
     suspend fun save(key: K, data: T) {
-        updateSuccessful(toId(key), data)
+        updateSuccessful(toId(key), getBlockchain(key), data)
     }
 
-    private suspend fun schedule(ids: Collection<String>, pipeline: String, force: Boolean) {
-        val tasks = ids.map {
+    private suspend fun schedule(ids: Collection<K>, pipeline: String, force: Boolean) {
+        val tasks = ids.map { key ->
+            metrics.onTaskScheduled(getBlockchain(key), type, pipeline, force)
             DownloadTask(
-                id = it,
+                id = toId(key),
                 pipeline = pipeline,
                 force = force,
                 scheduledAt = nowMillis()
@@ -117,7 +123,8 @@ abstract class DownloadService<K, T>(
         }
     }
 
-    private suspend fun updateSuccessful(id: String, data: T) {
+    private suspend fun updateSuccessful(id: String, blockchain: BlockchainDto, data: T) {
+        metrics.onRequestSucceed(blockchain, type)
         val updated = repository.update(id) { exist ->
             val current = (exist ?: getDefault(id))
             current.withSuccessInc(data)
@@ -125,7 +132,8 @@ abstract class DownloadService<K, T>(
         updated?.let { notifier.notify(it) }
     }
 
-    private suspend fun updateFailed(id: String, errorMessage: String?) {
+    private suspend fun updateFailed(id: String, blockchain: BlockchainDto, errorMessage: String?) {
+        metrics.onRequestFailed(blockchain, type)
         repository.update(id) { exist ->
             val current = (exist ?: getDefault(id))
             current.withFailInc(errorMessage)
