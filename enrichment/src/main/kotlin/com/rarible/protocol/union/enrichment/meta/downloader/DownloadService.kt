@@ -85,7 +85,7 @@ abstract class DownloadService<K, T>(
             return null
         }
 
-        logger.warn("Direct download of {} with ID [{}] succeeded, saving entry", type, id)
+        logger.info("Direct download of {} with ID [{}] succeeded, saving entry", type, id)
         updateSuccessful(id, blockchain, data)
         return data
     }
