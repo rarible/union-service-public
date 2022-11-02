@@ -40,7 +40,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     lateinit var itemRepository: ItemRepository
 
     @Autowired
-    lateinit var metrics: DownloadMetrics
+    lateinit var metrics: DownloadExecutorMetrics
 
     val downloader: ItemMetaDownloader = mockk()
     val notifier: DownloadNotifier<UnionMeta> = mockk { coEvery { notify(any()) } returns Unit }

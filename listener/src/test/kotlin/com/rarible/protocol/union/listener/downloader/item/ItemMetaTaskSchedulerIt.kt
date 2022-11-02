@@ -11,6 +11,7 @@ import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.listener.downloader.DownloadSchedulerMetrics
 import com.rarible.protocol.union.listener.downloader.ItemMetaTaskRouter
 import com.rarible.protocol.union.listener.downloader.ItemMetaTaskScheduler
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
@@ -34,6 +35,9 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var itemRepository: ItemRepository
 
+    @Autowired
+    lateinit var metrics: DownloadSchedulerMetrics
+
     private val router: ItemMetaTaskRouter = mockk()
 
     lateinit var scheduler: ItemMetaTaskScheduler
@@ -42,7 +46,7 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     fun beforeEach() {
         clearMocks(router)
         coEvery { router.send(any(), any()) } returns Unit
-        scheduler = ItemMetaTaskScheduler(router, repository)
+        scheduler = ItemMetaTaskScheduler(router, repository, metrics)
     }
 
     @Test

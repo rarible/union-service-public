@@ -31,6 +31,7 @@ class UnionItemMetaEventHandler(
                 logger.info("Refreshing meta for item {} by request of ItemMetaRefreshEvent", event.itemId)
                 itemMetaService.schedule(event.itemId, ItemMetaPipeline.EVENT, true)
             }
+            // TODO not used, should be removed
             is UnionItemMetaUpdateEvent -> {
                 logger.info("Saving meta for item {} by MetaUpdateEvent", event.itemId)
                 itemMetaService.save(event.itemId, event.unionMeta)
