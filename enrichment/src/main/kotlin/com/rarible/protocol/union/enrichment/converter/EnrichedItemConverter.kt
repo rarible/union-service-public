@@ -30,6 +30,13 @@ object EnrichedItemConverter {
         } else {
             null
         }
+        val metaDto = when {
+            (shortItem?.metaEntry != null) -> EnrichedMetaConverter.convert(shortItem.metaEntry)
+            meta != null -> EnrichedMetaConverter.convert(meta) // TODO remove later
+            (item.meta != null) -> EnrichedMetaConverter.convert(item.meta!!) // TODO remove later
+            else -> null
+        }
+
         return ItemDto(
             id = item.id,
             blockchain = item.id.blockchain,
@@ -44,9 +51,7 @@ object EnrichedItemConverter {
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
-            // TODO: see CHARLIE-158: we will ignore meta from blockhain Item DTOs' soon and only load metadata on union.
-            //  This fallback is needed to guarantee that the first event for a just minted item contains meta.
-            meta = (meta ?: item.meta)?.let { EnrichedMetaConverter.convert(it) },
+            meta = metaDto,
             deleted = item.deleted,
 
             // Enrichment data

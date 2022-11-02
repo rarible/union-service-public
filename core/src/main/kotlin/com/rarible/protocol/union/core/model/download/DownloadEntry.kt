@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.core.model.download
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.util.trimToLength
 import java.time.Instant
 
 data class DownloadEntry<T>(
@@ -36,7 +37,7 @@ data class DownloadEntry<T>(
             failedAt = now,
             updatedAt = now,
             fails = fails.inc(),
-            errorMessage = errorMessage
+            errorMessage = trimToLength(errorMessage, MAX_ERROR_MESSAGE_LENGTH)
         )
     }
 
@@ -54,6 +55,11 @@ data class DownloadEntry<T>(
 
     fun isDownloaded(): Boolean {
         return status == DownloadStatus.SUCCESS && data != null
+    }
+
+    companion object {
+
+        const val MAX_ERROR_MESSAGE_LENGTH = 250
     }
 }
 

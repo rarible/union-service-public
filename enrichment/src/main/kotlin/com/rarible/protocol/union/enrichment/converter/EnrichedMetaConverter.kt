@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
+import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.dto.AudioContentDto
 import com.rarible.protocol.union.dto.CollectionMetaDto
 import com.rarible.protocol.union.dto.HtmlContentDto
@@ -37,11 +38,32 @@ object EnrichedMetaConverter {
         )
     }
 
+    @Deprecated("Should be converted from DownloadEntry<UnionMeta>")
     fun convert(meta: UnionMeta): MetaDto {
         return MetaDto(
             name = meta.name,
             description = meta.description,
             createdAt = meta.createdAt,
+            tags = meta.tags,
+            genres = meta.genres,
+            language = meta.language,
+            rights = meta.rights,
+            rightsUri = meta.rightsUri,
+            externalUri = meta.externalUri,
+            originalMetaUri = meta.originalMetaUri,
+            attributes = meta.attributes,
+            content = meta.content.map { convert(it) },
+            restrictions = meta.restrictions.map { it.type }.distinct()
+        )
+    }
+
+    fun convert(metaEntry: DownloadEntry<UnionMeta>): MetaDto? {
+        val meta = metaEntry.data ?: return null
+        return MetaDto(
+            name = meta.name,
+            description = meta.description,
+            createdAt = meta.createdAt,
+            updatedAt = metaEntry.succeedAt,
             tags = meta.tags,
             genres = meta.genres,
             language = meta.language,
