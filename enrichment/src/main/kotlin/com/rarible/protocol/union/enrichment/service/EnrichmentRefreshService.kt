@@ -253,13 +253,9 @@ class EnrichmentRefreshService(
                 poolSellOrders = poolSellOrders
             )
 
-            if (currentItem.isNotEmpty()) {
-                logger.info("Saving refreshed Item [{}] with gathered enrichment data [{}]", itemId, currentItem)
-                itemService.save(currentItem)
-            } else {
-                logger.info("Item [{}] has no enrichment data, will be deleted", itemId)
-                itemService.delete(shortItemId)
-            }
+            logger.info("Saving refreshed Item [{}] with gathered enrichment data [{}]", itemId, currentItem)
+            itemService.save(currentItem)
+
             currentItem
         }
 

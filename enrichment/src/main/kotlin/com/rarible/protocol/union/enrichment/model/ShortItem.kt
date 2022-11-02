@@ -99,10 +99,6 @@ data class ShortItem(
         )
     }
 
-    fun isNotEmpty(): Boolean {
-        return true // TODO get rid of this
-    }
-
     companion object {
 
         const val COLLECTION = "enrichment_item"

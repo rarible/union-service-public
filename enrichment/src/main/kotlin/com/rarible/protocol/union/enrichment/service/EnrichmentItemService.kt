@@ -1,9 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
-import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
-import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.loadMetaSynchronously
@@ -24,7 +22,6 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaTrimmer
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
-import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -76,13 +73,6 @@ class EnrichmentItemService(
 
     suspend fun save(item: ShortItem): ShortItem {
         return itemRepository.save(item.withCalculatedFields())
-    }
-
-    suspend fun delete(itemId: ShortItemId): DeleteResult? {
-        val now = nowMillis()
-        val result = itemRepository.delete(itemId)
-        logger.info("Deleting Item [{}], deleted: {} ({}ms)", itemId.toDto().fullId(), result?.deletedCount, spent(now))
-        return result
     }
 
     suspend fun findByPoolOrder(orderId: OrderIdDto): Set<ShortItemId> {

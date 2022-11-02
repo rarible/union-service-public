@@ -35,6 +35,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -363,12 +364,15 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Test
     fun `delete event - existing item deleted`() = runWithKafka {
         val item = itemService.save(randomShortItem())
+        delay(10) // To ensure updatedAt is changed
         val itemId = item.id.toDto()
         assertThat(itemService.get(item.id)).isNotNull()
 
         itemEventService.onItemDeleted(itemId)
 
-        assertThat(itemService.get(item.id)).isNull()
+        // Item should still exist, we don't want to delete items - but updatedAt should be changed
+        val updated = itemService.get(item.id)!!
+        assertThat(updated.lastUpdatedAt).isAfter(item.lastUpdatedAt)
         waitAssert {
             val messages = findItemDeletions(itemId.value)
             assertThat(messages).hasSize(1)
@@ -385,7 +389,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         itemEventService.onItemDeleted(itemId)
 
-        assertThat(itemService.get(shortItemId)).isNull()
+        // We want to have updatedAt in items
+        assertThat(itemService.get(shortItemId)).isNotNull()
         waitAssert {
             val messages = findItemDeletions(itemId.value)
             assertThat(messages).hasSize(1)
