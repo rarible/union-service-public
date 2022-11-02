@@ -57,10 +57,10 @@ import com.rarible.protocol.union.dto.SudoSwapCurveTypeDto
 import com.rarible.protocol.union.dto.SudoSwapPoolTypeDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import java.time.Instant
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import scalether.domain.Address
+import java.time.Instant
 
 @Component
 class EthOrderConverter(
@@ -79,7 +79,7 @@ class EthOrderConverter(
     }
 
     private suspend fun convertInternal(order: com.rarible.protocol.dto.OrderDto, blockchain: BlockchainDto): OrderDto {
-        val orderId = OrderIdDto(blockchain, EthConverter.convert(order.hash))
+        val orderId = OrderIdDto(blockchain, order.id ?: EthConverter.convert(order.hash))
         val maker = EthConverter.convert(order.maker, blockchain)
         val ethTaker = if (order.taker != null && order.taker != Address.ZERO()) order.taker else null
         val taker = ethTaker?.let { EthConverter.convert(it, blockchain) }
