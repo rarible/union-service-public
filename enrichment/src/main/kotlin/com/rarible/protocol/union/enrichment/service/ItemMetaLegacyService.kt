@@ -33,6 +33,7 @@ class ItemMetaLegacyService(
      * For missed meta no scheduling operations will be performed
      */
     override suspend fun get(itemIds: List<ItemIdDto>, pipeline: ItemMetaPipeline): Map<ItemIdDto, UnionMeta> {
+        if (itemIds.isEmpty()) return emptyMap()
         val keyMap = itemIds.associateBy { it.fullId() }
         val result = HashMap<ItemIdDto, UnionMeta>()
         val cached = withSpan(name = "fetchCachedMeta", type = SpanType.CACHE) {
