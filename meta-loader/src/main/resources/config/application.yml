@@ -147,6 +147,31 @@ common:
   producer:
     broker-replica-set: ${kafka.hosts}
 
+meta-loader:
+  brokerReplicaSet: ${kafka.hosts}
+  downloader:
+    item:
+      event:
+        workers: 3
+        batchSize: 16
+        poolSize: 4
+      api:
+        workers: 3
+        batchSize: 16
+        poolSize: 4
+      refresh:
+        workers: 3
+        batchSize: 8
+        poolSize: 2
+      retry:
+        workers: 3
+        batchSize: 8
+        poolSize: 2
+      sync:
+        workers: 3
+        batchSize: 8
+        poolSize: 2
+
 # Disable verbose logs of Apache HTTP client used to load content media metadata.
 logging:
   level:

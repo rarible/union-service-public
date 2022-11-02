@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component
 class ItemMetaLegacyService(
     @Qualifier("union.meta.cache.loader.service")
     private val unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>,
+    private val itemMetaModernService: ItemMetaModernService,
     private val metrics: ItemMetaMetrics,
     private val itemMetaLoader: ItemMetaLoader
 ) : ItemMetaService {
@@ -107,7 +108,7 @@ class ItemMetaLegacyService(
         if (itemMeta != null) {
             logger.info("Saving synchronously loaded meta to cache for ${itemId.fullId()}")
             try {
-                unionMetaCacheLoaderService.save(itemId.fullId(), itemMeta)
+                save(itemId, itemMeta)
             } catch (e: Exception) {
                 if (e !is OptimisticLockingFailureException && e !is DuplicateKeyException) {
                     logger.error("Failed to save synchronously loaded meta to cache for ${itemId.fullId()}")
@@ -123,6 +124,7 @@ class ItemMetaLegacyService(
      */
     override suspend fun save(itemId: ItemIdDto, meta: UnionMeta) {
         unionMetaCacheLoaderService.save(itemId.fullId(), meta)
+        itemMetaModernService.save(itemId, meta)
     }
 
     /**

@@ -95,10 +95,9 @@ class DownloadExecutorConfiguration(
     }
 
     private fun getItemPipelineConfiguration(pipeline: String): ExecutorPipelineProperties {
-        return metaLoaderProperties.downloader.item[pipeline]
-            ?: throw IllegalArgumentException(
-                "Properties for Item download executor of pipeline $pipeline are not specified"
-            )
+        val result = metaLoaderProperties.downloader.item[pipeline] ?: ExecutorPipelineProperties()
+        logger.info("Settings for ITEM downloader pipeline: {}", result)
+        return result
     }
 
     private fun createMetaDownloaderBatchConsumer(

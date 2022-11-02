@@ -18,5 +18,5 @@ class DownloaderProperties(
 class ExecutorPipelineProperties(
     val workers: Int = 3,
     val batchSize: Int = 64,
-    val poolSize: Int = 16
+    val poolSize: Int = 4
 )
