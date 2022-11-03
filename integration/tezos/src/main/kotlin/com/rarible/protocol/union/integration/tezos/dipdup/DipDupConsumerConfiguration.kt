@@ -111,9 +111,10 @@ class DipDupConsumerConfiguration(
     fun dipDupCollectionEventHandler(
         handler: IncomingEventHandler<UnionCollectionEvent>,
         mapper: ObjectMapper,
-        tzktCollectionService: TzktCollectionService
+        tzktCollectionService: TzktCollectionService,
+        properties: DipDupIntegrationProperties
     ): DipDupCollectionEventHandler {
-        return DipDupCollectionEventHandler(handler, tzktCollectionService, mapper)
+        return DipDupCollectionEventHandler(handler, tzktCollectionService, mapper, properties)
     }
 
     @Bean
