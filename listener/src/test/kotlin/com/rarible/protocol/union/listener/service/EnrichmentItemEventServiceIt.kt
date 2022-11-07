@@ -198,7 +198,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         assertThat(saved.totalStock).isEqualTo(30.toBigInteger())
 
         // In result event for item we expect updated totalStock/sellers
-        val expected = EnrichedItemConverter.convert(unionItem, meta = unionMeta).copy(
+        val expected = EnrichedItemConverter.convert(unionItem, saved, meta = unionMeta).copy(
             sellers = 2,
             totalStock = 30.toBigInteger()
         )

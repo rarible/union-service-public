@@ -14,6 +14,7 @@ import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
 import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory
+import java.time.Instant
 
 /**
  * Async data download executor, end point of entire download pipeline.
@@ -39,27 +40,28 @@ sealed class DownloadExecutor<T>(
     }
 
     private suspend fun execute(task: DownloadTask) {
+        val started = Instant.now()
         val current = repository.get(task.id) ?: getDefault(task)
         if (current.succeedAt != null && task.scheduledAt.isBefore(current.succeedAt)) {
-            metrics.onSkippedTask(getBlockchain(task), type, task.pipeline, task.force)
+            metrics.onSkippedTask(started, getBlockchain(task), type, task.pipeline, task.force)
             return
         }
 
         try {
             val data = downloader.download(task.id)
-            onSuccess(task, data)
+            onSuccess(started, task, data)
         } catch (e: DownloadException) {
-            onFail(task, e.message)
+            onFail(started, task, e.message)
         } catch (e: Exception) {
             logger.error(
                 "Unexpected exception while downloading data for {} task {} ()",
                 type, task.id, task.pipeline, e
             )
-            onFail(task, e.message)
+            onFail(started, task, e.message)
         }
     }
 
-    private suspend fun onSuccess(task: DownloadTask, data: T) {
+    private suspend fun onSuccess(started: Instant, task: DownloadTask, data: T) {
         // For successful case we should rewrite current data anyway
         val saved = repository.update(task.id) { exist ->
             val current = exist ?: getDefault(task)
@@ -68,11 +70,11 @@ sealed class DownloadExecutor<T>(
 
         saved?.let { notifier.notify(saved) }
 
-        metrics.onSuccessfulTask(getBlockchain(task), type, task.pipeline, task.force)
+        metrics.onSuccessfulTask(started, getBlockchain(task), type, task.pipeline, task.force)
         logger.info("Data download SUCCEEDED for {} task: {} ()", type, task.id, task.pipeline)
     }
 
-    private suspend fun onFail(task: DownloadTask, errorMessage: String?) {
+    private suspend fun onFail(started: Instant, task: DownloadTask, errorMessage: String?) {
         val saved = repository.update(task.id) { exist ->
             val current = exist ?: getDefault(task)
 
@@ -92,7 +94,7 @@ sealed class DownloadExecutor<T>(
                 DownloadStatus.SCHEDULED -> failed.copy(status = status, retries = 0, retriedAt = nowMillis())
             }
 
-            markStatus(task, status)
+            markStatus(started, task, status)
             updated
         }
 
@@ -105,10 +107,10 @@ sealed class DownloadExecutor<T>(
         }
     }
 
-    private fun markStatus(task: DownloadTask, status: DownloadStatus) {
+    private fun markStatus(started: Instant, task: DownloadTask, status: DownloadStatus) {
         when (status) {
-            DownloadStatus.FAILED -> metrics.onFailedTask(getBlockchain(task), type, task.pipeline, task.force)
-            DownloadStatus.RETRY -> metrics.onRetriedTask(getBlockchain(task), type, task.pipeline, task.force)
+            DownloadStatus.FAILED -> metrics.onFailedTask(started, getBlockchain(task), type, task.pipeline, task.force)
+            DownloadStatus.RETRY -> metrics.onRetriedTask(started, getBlockchain(task), type, task.pipeline, task.force)
             else -> logger.warn("Incorrect status of failed {} task {} (): {}", type, task.id, task.pipeline, status)
         }
     }

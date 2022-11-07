@@ -4,6 +4,7 @@ import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.loadMetaSynchronously
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.OriginService
@@ -17,6 +18,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaTrimmer
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -42,7 +44,8 @@ class EnrichmentItemService(
     private val itemMetaService: ItemMetaService,
     private val itemMetaTrimmer: ItemMetaTrimmer,
     private val contentMetaService: ContentMetaService,
-    private val originService: OriginService
+    private val originService: OriginService,
+    private val metrics: ItemMetaMetrics,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -117,6 +120,12 @@ class EnrichmentItemService(
 
         // Event if there is no data in entry, it means it is already scheduled and will be downloaded soon/one day
         val itemMeta = if (shortItem?.metaEntry != null) {
+            val entry = shortItem.metaEntry
+            if (entry.status == DownloadStatus.SUCCESS) {
+                metrics.onMetaCacheHit(itemId.blockchain)
+            } else {
+                metrics.onMetaCacheEmpty(itemId.blockchain)
+            }
             CompletableDeferred(shortItem.metaEntry.data)
         } else if (meta[itemId] != null) {
             // TODO remove meta hint after the migration
@@ -124,9 +133,7 @@ class EnrichmentItemService(
         } else {
             // TODO remove after migration to the meta-pipeline
             val sync = (syncMetaDownload || item?.loadMetaSynchronously == true)
-            withSpanAsync("fetchMeta", spanType = SpanType.CACHE) {
-                itemMetaService.get(itemId, sync, metaPipeline)
-            }
+            async { itemMetaService.get(itemId, sync, metaPipeline) }
         }
 
         val bestOrders = enrichmentOrderService.fetchMissingOrders(

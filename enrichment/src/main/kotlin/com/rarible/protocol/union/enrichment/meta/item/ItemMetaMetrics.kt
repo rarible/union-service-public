@@ -39,17 +39,23 @@ class ItemMetaMetrics(
     }
 
     //--------------------- Meta cache ----------------------//
-    // Meta cache usage statistics
-
+    // Cached and contains meta
     fun onMetaCacheHit(blockchain: BlockchainDto) {
         increment(META_CACHE, tag(blockchain), status("hit"))
     }
 
+    // Means cached with status != OK
+    fun onMetaCacheEmpty(blockchain: BlockchainDto) {
+        increment(META_CACHE, tag(blockchain), status("empty"))
+    }
+
+    // Not found in cache at all
     fun onMetaCacheMiss(blockchain: BlockchainDto) {
         increment(META_CACHE, tag(blockchain), status("miss"))
     }
 
     private companion object {
+
         const val META_FETCH = "meta_fetch"
         const val META_CACHE = "meta_cache"
     }

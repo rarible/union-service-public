@@ -34,7 +34,7 @@ class ItemMetaCompatibilityService(
     }
 
     override suspend fun save(itemId: ItemIdDto, meta: UnionMeta) {
-        return delegate.save(itemId, meta)
+        delegate.save(itemId, meta)
     }
 
 }
