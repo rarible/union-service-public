@@ -20,7 +20,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 @IntegrationTest
-class MetaRetryJobTest {
+class ItemMetaRetryJobIt {
 
     @Autowired
     lateinit var metaProperties: UnionMetaProperties
@@ -84,10 +84,10 @@ class MetaRetryJobTest {
 
         handler.handle()
 
-        coVerify(exactly = 0) { metaService.schedule(idNow, ItemMetaPipeline.RETRY, false) }
-        coVerify(exactly = 0) { metaService.schedule(id6m, ItemMetaPipeline.RETRY, false) }
-        coVerify(exactly = 1) { metaService.schedule(id2h, ItemMetaPipeline.RETRY, false) }
-        coVerify(exactly = 0) { metaService.schedule(id25h, ItemMetaPipeline.RETRY, false) }
+        coVerify(exactly = 0) { metaService.schedule(idNow, ItemMetaPipeline.RETRY, true) }
+        coVerify(exactly = 0) { metaService.schedule(id6m, ItemMetaPipeline.RETRY, true) }
+        coVerify(exactly = 1) { metaService.schedule(id2h, ItemMetaPipeline.RETRY, true) }
+        coVerify(exactly = 0) { metaService.schedule(id25h, ItemMetaPipeline.RETRY, true) }
 
         assertEquals(0, itemRepository.get(ShortItemId(idNow))?.metaEntry?.retries)
         assertEquals(1, itemRepository.get(ShortItemId(id6m))?.metaEntry?.retries)

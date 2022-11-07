@@ -48,7 +48,7 @@ class ItemMetaRetryJobHandler(
             val itemFlow = repository.getItemForMetaRetry(now, retryIntervals[i], i)
 
             itemFlow.collect {
-                metaService.schedule(it.id.toDto(), ItemMetaPipeline.RETRY, false)
+                metaService.schedule(it.id.toDto(), ItemMetaPipeline.RETRY, true)
                 repository.save(it.withNextRetry())
             }
         }
