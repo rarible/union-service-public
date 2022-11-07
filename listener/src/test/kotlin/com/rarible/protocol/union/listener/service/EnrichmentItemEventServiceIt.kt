@@ -16,6 +16,7 @@ import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
@@ -172,13 +173,16 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     @Test
     fun `on ownership updated`() = runWithKafka {
         val itemId = randomEthItemId()
-        val shortItem = randomShortItem(itemId).copy(sellers = 3, totalStock = 20.toBigInteger())
         val ethItem = randomEthNftItemDto(itemId)
         val ethMeta = randomEthItemMeta()
         val unionMeta = EthMetaConverter.convert(ethMeta, itemId.value)
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
+        val shortItem = randomShortItem(itemId).copy(
+            sellers = 3,
+            totalStock = 20.toBigInteger(),
+            metaEntry = randomItemMetaDownloadEntry(data = unionMeta)
+        )
         itemService.save(shortItem)
-        itemMetaService.save(itemId, unionMeta)
 
         val bestSellOrder1 = randomUnionSellOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
         val ownership1 = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder1))
