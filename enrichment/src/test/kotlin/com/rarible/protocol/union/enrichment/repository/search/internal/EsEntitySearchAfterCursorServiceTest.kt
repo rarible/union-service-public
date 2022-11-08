@@ -2,6 +2,8 @@ package com.rarible.protocol.union.enrichment.repository.search.internal
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 
 class EsEntitySearchAfterCursorServiceTest {
 
@@ -36,7 +38,21 @@ class EsEntitySearchAfterCursorServiceTest {
 
     @Test
     fun `should build search after clause`() {
-        val actual = service.buildSearchAfterClause("123_456")
+        val actual = service.buildSearchAfterClause("123_456", 2)
         assertThat(actual).containsExactly("123", "456")
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["", "null", "undefined"])
+    fun `should build search after, special words as null`(cursor: String) {
+        val actual = service.buildSearchAfterClause(cursor, 1)
+        assertThat(actual).isNull()
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["123", "123_456_789", "123_456_789_1011"])
+    fun `should build search after, incorrect size as null`(cursor: String) {
+        val actual = service.buildSearchAfterClause(cursor, 2)
+        assertThat(actual).isNull()
     }
 }

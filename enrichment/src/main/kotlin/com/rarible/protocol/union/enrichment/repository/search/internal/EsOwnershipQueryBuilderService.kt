@@ -60,7 +60,7 @@ class EsOwnershipQueryBuilderService(
 
         builder.withQuery(query)
         val resultQuery = builder.build()
-        resultQuery.searchAfter = cursorService.buildSearchAfterClause(filter.cursor)
+        resultQuery.searchAfter = cursorService.buildSearchAfterClause(filter.cursor, 2)
         return resultQuery
     }
 

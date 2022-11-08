@@ -3,6 +3,7 @@ package com.rarible.protocol.union.core.model
 import com.rarible.core.logging.Logger
 import java.time.Instant
 
+// TODO: migrate to EsEntitySearchAfterCursorService
 data class EsCollectionCursor(
     val date: Instant,
     val salt: Long,
@@ -17,7 +18,7 @@ data class EsCollectionCursor(
         fun fromString(value: String): EsCollectionCursor? {
             return try {
                 val split = value.split('_')
-                if (split[0] == "null") {
+                if (split[0] == "null" || split[0] == "undefined") {
                     return null
                 }
                 EsCollectionCursor(
