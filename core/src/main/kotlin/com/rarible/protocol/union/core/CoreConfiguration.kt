@@ -4,7 +4,6 @@ import com.rarible.protocol.currency.api.client.CurrencyApiClientFactory
 import com.rarible.protocol.currency.api.client.CurrencyApiServiceUriProvider
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.union.api.ApiClient
-import com.rarible.protocol.union.core.client.customizer.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.CollectionService

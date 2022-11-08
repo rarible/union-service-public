@@ -10,7 +10,7 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerAp
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.core.client.customizer.UnionWebClientCustomizer
+import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.OrderProxyService

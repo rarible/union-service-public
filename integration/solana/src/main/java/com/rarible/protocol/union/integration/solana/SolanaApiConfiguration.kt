@@ -9,7 +9,7 @@ import com.rarible.protocol.solana.api.client.SolanaApiServiceUriProvider
 import com.rarible.protocol.solana.api.client.SolanaNftIndexerApiClientFactory
 import com.rarible.protocol.solana.api.client.TokenControllerApi
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.core.client.customizer.UnionWebClientCustomizer
+import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.OrderProxyService
 import com.rarible.protocol.union.dto.BlockchainDto

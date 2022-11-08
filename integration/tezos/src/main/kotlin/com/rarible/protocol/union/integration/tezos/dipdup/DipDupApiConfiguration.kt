@@ -6,7 +6,7 @@ import com.rarible.dipdup.client.OrderActivityClient
 import com.rarible.dipdup.client.OrderClient
 import com.rarible.dipdup.client.client.AuthorizationInterceptor
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.core.client.customizer.UnionWebClientCustomizer
+import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.integration.tezos.dipdup.client.TzktWebClientFactory
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter

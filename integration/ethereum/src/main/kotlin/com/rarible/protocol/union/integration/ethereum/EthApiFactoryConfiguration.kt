@@ -5,7 +5,7 @@ import com.rarible.protocol.nft.api.client.NftIndexerApiServiceUriProvider
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
 import com.rarible.protocol.order.api.client.OrderIndexerApiServiceUriProvider
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.core.client.customizer.UnionWebClientCustomizer
+import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan

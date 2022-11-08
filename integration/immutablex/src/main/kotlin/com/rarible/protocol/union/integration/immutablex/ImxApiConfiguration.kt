@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex
 
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.core.client.customizer.UnionWebClientCustomizer
+import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
