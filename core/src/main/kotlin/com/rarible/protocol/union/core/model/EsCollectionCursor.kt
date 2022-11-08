@@ -3,7 +3,7 @@ package com.rarible.protocol.union.core.model
 import com.rarible.core.logging.Logger
 import java.time.Instant
 
-// TODO: migrate to EsEntitySearchAfterCursorService
+// TODO: migrate to EsEntitySearchAfterCursorService: (PT-1200)
 data class EsCollectionCursor(
     val date: Instant,
     val salt: Long,
