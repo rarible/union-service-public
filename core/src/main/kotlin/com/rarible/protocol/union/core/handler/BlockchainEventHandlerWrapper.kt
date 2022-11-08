@@ -17,15 +17,7 @@ class BlockchainEventHandlerWrapper<B, U>(
             blockchainHandler.handle(event)
         } catch (ex: Exception) {
             logger.error("Unexpected exception during handling event [{}]", event, ex)
-
-            // TODO: remove
-            if (ex is InvalidFormatException) {
-                logger.error("Skip invalid format")
-            } else if (ex is ClassCastException) {
-                logger.error("Skip ClassCastException")
-            } else {
-                throw ex
-            }
+            throw ex
         }
     }
 
