@@ -43,7 +43,7 @@ class EsEntitySearchAfterCursorServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = ["", "null", "undefined"])
+    @ValueSource(strings = ["", "null", "undefined", "null_A", "undefined_B"])
     fun `should build search after, special words as null`(cursor: String) {
         val actual = service.buildSearchAfterClause(cursor, 1)
         assertThat(actual).isNull()
