@@ -81,14 +81,10 @@ open class TezosActivityService(
         sort: SyncSortDto?,
         type: SyncTypeDto?
     ): Slice<ActivityDto> {
-        return if (properties.useDipDupTokens) {
-            when (type) {
-                SyncTypeDto.NFT -> dipdupTokenActivityService.getSync(continuation, size, sort)
-                SyncTypeDto.ORDER -> dipdupOrderActivityService.getSync(continuation, size, sort)
-                else -> Slice.empty()
-            }
-        } else {
-            Slice.empty()
+        return when (type) {
+            SyncTypeDto.NFT -> dipdupTokenActivityService.getSync(continuation, size, sort)
+            SyncTypeDto.ORDER -> dipdupOrderActivityService.getSync(continuation, size, sort)
+            else -> Slice.empty()
         }
     }
 
