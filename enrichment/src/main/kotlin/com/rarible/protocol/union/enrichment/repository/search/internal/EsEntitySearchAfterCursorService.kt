@@ -23,9 +23,16 @@ class EsEntitySearchAfterCursorService {
         return fixed
     }
 
-    fun buildSearchAfterClause(cursorAsString: String?): List<Any>? {
-        if (cursorAsString.isNullOrEmpty() || cursorAsString.lowercase() == "null") return null
-        return cursorAsString.split("_")
+    fun buildSearchAfterClause(cursorAsString: String?, expectedSize: Int): List<Any>? {
+        if (cursorAsString.isNullOrEmpty()) return null
+        val lower = cursorAsString.lowercase()
+        if (lower == "null" || lower == "undefined") return null
+        val result = cursorAsString.split("_")
+        if (result.size != expectedSize) {
+            logger.warn("Invalid cursor: $cursorAsString")
+            return null
+        }
+        return result
     }
 
     fun buildCursor(lastSearchHit: SearchHit<*>?): String? {
