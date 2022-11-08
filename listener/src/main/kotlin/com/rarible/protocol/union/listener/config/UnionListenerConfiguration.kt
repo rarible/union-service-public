@@ -75,22 +75,6 @@ class UnionListenerConfiguration(
         )
     }
 
-    @Bean
-    @Deprecated("Replaced by blockchain topics")
-    fun unionWrappedEventWorker(
-        handler: InternalEventHandler<UnionInternalBlockchainEvent>
-    ): KafkaConsumerWorker<UnionInternalBlockchainEvent> {
-        // Allow to disable this consumers batch
-        if (!ff.enableLegacyWrappedEventTopic) return BatchedConsumerWorker(emptyList())
-
-        return consumerFactory.createWrappedEventConsumer(
-            consumer = { index -> createUnionWrappedEventConsumer(index) },
-            handler = handler,
-            daemon = listenerProperties.monitoringWorker,
-            workers = properties.workers["wrapped"] ?: 1
-        )
-    }
-
     private fun createUnionBlockchainEventConsumer(
         index: Int, blockchain: BlockchainDto
     ): RaribleKafkaConsumer<UnionInternalBlockchainEvent> {

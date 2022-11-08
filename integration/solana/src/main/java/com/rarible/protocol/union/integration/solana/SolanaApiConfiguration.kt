@@ -9,8 +9,7 @@ import com.rarible.protocol.solana.api.client.SolanaApiServiceUriProvider
 import com.rarible.protocol.solana.api.client.SolanaNftIndexerApiClientFactory
 import com.rarible.protocol.solana.api.client.TokenControllerApi
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.core.ProtocolWebClientCustomizer
-import com.rarible.protocol.union.core.UnionWebClientCustomizerEnabled
+import com.rarible.protocol.union.core.client.customizer.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.OrderProxyService
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -41,9 +40,11 @@ class SolanaApiConfiguration {
     //-------------------- API --------------------//
 
     @Bean
-    @UnionWebClientCustomizerEnabled
-    fun solanaNftIndexerApiClientFactory(uriProvider: SolanaApiServiceUriProvider): SolanaNftIndexerApiClientFactory {
-        return SolanaNftIndexerApiClientFactory(uriProvider, ProtocolWebClientCustomizer())
+    fun solanaNftIndexerApiClientFactory(
+        uriProvider: SolanaApiServiceUriProvider,
+        webClientCustomizer: UnionWebClientCustomizer
+    ): SolanaNftIndexerApiClientFactory {
+        return SolanaNftIndexerApiClientFactory(uriProvider, webClientCustomizer)
     }
 
     @Bean

@@ -6,6 +6,7 @@ import com.rarible.dipdup.client.OrderActivityClient
 import com.rarible.dipdup.client.OrderClient
 import com.rarible.dipdup.client.client.AuthorizationInterceptor
 import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.core.client.customizer.UnionWebClientCustomizer
 import com.rarible.protocol.union.integration.tezos.dipdup.client.TzktWebClientFactory
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
@@ -41,9 +42,7 @@ import com.rarible.tzkt.meta.MetaCollectionService
 import com.rarible.tzkt.meta.MetaService
 import com.rarible.tzkt.royalties.RoyaltiesHandler
 import kotlinx.coroutines.runBlocking
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.web.reactive.function.client.WebClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
@@ -55,8 +54,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @EnableConfigurationProperties(value = [DipDupIntegrationProperties::class])
 class DipDupApiConfiguration(
     private val properties: DipDupIntegrationProperties,
-    @Qualifier("unionDefaultWebClientCustomizer")
-    private val unionDefaultWebClientCustomizer: WebClientCustomizer
+    private val webClientCustomizer: UnionWebClientCustomizer
 ) {
 
     val apolloClient = runBlocking {
@@ -205,7 +203,7 @@ class DipDupApiConfiguration(
 
     private fun webClient(url: String): WebClient {
         val builder = TzktWebClientFactory.createClient(url)
-        unionDefaultWebClientCustomizer.customize(builder)
+        webClientCustomizer.customize(builder)
         return builder.build()
     }
 
