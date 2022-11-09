@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupCollectionConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import org.slf4j.LoggerFactory
@@ -14,7 +15,8 @@ import org.slf4j.LoggerFactory
 open class DipDupCollectionEventHandler(
     override val handler: IncomingEventHandler<UnionCollectionEvent>,
     private val tzktCollectionService: TzktCollectionService,
-    private val mapper: ObjectMapper
+    private val mapper: ObjectMapper,
+    private val properties: DipDupIntegrationProperties
 ) : AbstractBlockchainEventHandler<DipDupCollectionEvent, UnionCollectionEvent>(com.rarible.protocol.union.dto.BlockchainDto.TEZOS) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -24,11 +26,15 @@ open class DipDupCollectionEventHandler(
         try {
             val collection = DipDupCollectionConverter.convert(event.collection)
 
-            // Enrich by meta fields, lately it's better to move it to the indexer
-            val tzktCollection = tzktCollectionService.getCollectionById(event.collection.id, true)
-            val unionCollectionEvent = UnionCollectionUpdateEvent(
-                collection.copy(name = tzktCollection.name, symbol = tzktCollection.symbol)
-            )
+            val unionCollectionEvent = if (properties.enrichDipDupCollection) {
+                // Enrich by meta fields, lately it's better to move it to the indexer
+                val tzktCollection = tzktCollectionService.getCollectionById(event.collection.id, true)
+                UnionCollectionUpdateEvent(
+                    collection.copy(name = tzktCollection.name, symbol = tzktCollection.symbol)
+                )
+            } else {
+                UnionCollectionUpdateEvent(collection)
+            }
 
             handler.onEvent(unionCollectionEvent)
         } catch (e: UnionDataFormatException) {

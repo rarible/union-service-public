@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionsDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgPage
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
@@ -14,7 +15,6 @@ import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import kotlinx.coroutines.async
@@ -41,24 +41,22 @@ class CollectionApiMergeService(
         val arg = ArgPaging(UnionCollectionContinuation.ById, slices.map { it.toSlice() }).getSlice(safeSize)
         val total = slices.sumOf { it.page.total }
         logger.info("Response for getAllCollections(blockchains={}, continuation={}, size={}):" +
-            " Page(size={}, total={}, continuation={}) from blockchain pages {} ",
-            blockchains, continuation, size, arg.entities.size, total,
-            arg.continuation, slices.map { it.page.entities.size }
+            " Slice(size={}, continuation={}) from blockchain pages {} ",
+            blockchains, continuation, size, arg.entities.size, arg.continuation, slices.map { it.page.entities.size }
         )
         return enrich(arg, total)
     }
 
     override suspend fun getCollectionsByOwner(
-        owner: String,
+        owner: UnionAddress,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?,
     ): CollectionsDto {
         val safeSize = PageSize.COLLECTION.limit(size)
-        val ownerAddress = IdParser.parseAddress(owner)
         val filter = BlockchainFilter(blockchains)
-        val blockchainPages = router.executeForAll(filter.exclude(ownerAddress.blockchainGroup)) {
-            it.getCollectionsByOwner(ownerAddress.value, continuation, safeSize)
+        val blockchainPages = router.executeForAll(filter.exclude(owner.blockchainGroup)) {
+            it.getCollectionsByOwner(owner.value, continuation, safeSize)
         }
 
         val total = blockchainPages.sumOf { it.total }
@@ -69,9 +67,8 @@ class CollectionApiMergeService(
         ).getPage(safeSize, total)
 
         logger.info(
-            "Response for getCollectionsByOwner(owner={}, continuation={}, size={}):" +
-                " Page(size={}, total={}, continuation={})",
-            owner, continuation, size, combinedPage.entities.size, combinedPage.total, combinedPage.continuation
+            "Response for getCollectionsByOwner(owner={}, continuation={}, size={}): Slice(size={}, continuation={})",
+            owner.fullId(), continuation, size, combinedPage.entities.size, combinedPage.continuation
         )
 
         return enrich(combinedPage)

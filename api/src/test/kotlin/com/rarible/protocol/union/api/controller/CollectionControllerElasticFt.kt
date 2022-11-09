@@ -7,10 +7,12 @@ import com.rarible.protocol.solana.dto.CollectionsDto
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.test.data.randomEsCollection
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
 import com.rarible.protocol.union.integration.solana.data.randomSolanaCollectionDto
@@ -20,7 +22,6 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -158,16 +159,17 @@ class CollectionControllerElasticFt : AbstractIntegrationTest() {
         val polygonDto1 = randomEthCollectionDto()
         val flowDto1 = randomFlowCollectionDto()
         val tezosDto1 = randomTezosCollectionDto()
+        val owner = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
 
         val esEth1 = randomEsCollection().copy(
             collectionId = "${BlockchainDto.ETHEREUM}:${ethDto1.id}",
             blockchain = BlockchainDto.ETHEREUM,
-            owner = "0x12345",
+            owner = owner.fullId(),
         )
         val esPolygon1 = randomEsCollection().copy(
             collectionId = "${BlockchainDto.POLYGON}:${polygonDto1.id}",
             blockchain = BlockchainDto.POLYGON,
-            owner = "0x12345",
+            owner = owner.fullId(),
         )
         val esFlow1 = randomEsCollection().copy(
             collectionId = "${BlockchainDto.FLOW}:${flowDto1.id}",
@@ -205,7 +207,7 @@ class CollectionControllerElasticFt : AbstractIntegrationTest() {
 
         // when
         val unionCollections = collectionControllerApi.getCollectionsByOwner(
-            "0x12345",
+            owner.fullId(),
             blockchains, null, size
         ).awaitFirst()
 

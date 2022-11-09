@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
@@ -36,6 +37,7 @@ class OrderApiMergeService(
 ) : OrderQueryService {
 
     companion object {
+
         private val logger by Logger()
         private val empty = OrdersDto(null, emptyList())
     }
@@ -65,35 +67,33 @@ class OrderApiMergeService(
     }
 
     override suspend fun getSellOrdersByItem(
-        itemId: String,
+        itemId: ItemIdDto,
         platform: PlatformDto?,
-        maker: String?,
+        maker: UnionAddress?,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int?
     ): OrdersDto {
         val safeSize = PageSize.ORDER.limit(size)
-        val fullItemId = IdParser.parseItemId(itemId)
-        val blockchain = fullItemId.blockchain
+        val blockchain = itemId.blockchain
 
         val originAddress = safeAddress(origin)
-        val makerAddress = safeAddress(maker)
         if (!ensureSameBlockchain(
-                fullItemId.blockchain.group(),
+                itemId.blockchain.group(),
                 originAddress?.blockchainGroup,
-                makerAddress?.blockchainGroup
+                maker?.blockchainGroup
             )
         ) {
             logger.warn(
                 "Incompatible blockchain groups specified in getSellOrdersByItem: itemId={}, origin={}, maker={}",
-                fullItemId.fullId(), origin, maker
+                itemId.fullId(), origin, maker
             )
             return empty
         }
 
         val currencyAssetTypes = router.getService(blockchain)
-            .getSellCurrencies(fullItemId.value)
+            .getSellCurrencies(itemId.value)
             .map { it.ext.currencyAddress() }
 
         if (currencyAssetTypes.isEmpty()) {
@@ -105,8 +105,8 @@ class OrderApiMergeService(
         ) { currency, currencyContinuation ->
             router.getService(blockchain).getSellOrdersByItem(
                 platform,
-                fullItemId.value,
-                makerAddress?.value,
+                itemId.value,
+                maker?.value,
                 originAddress?.value,
                 status,
                 currency,
@@ -140,8 +140,8 @@ class OrderApiMergeService(
         val slice = ArgPaging(continuationFactory(sort), slices).getSlice(safeSize)
         logger.info(
             "Response for getOrdersAll" +
-                    "(blockchains={}, continuation={}, size={}): " +
-                    "Slice(size={}, continuation={})",
+                "(blockchains={}, continuation={}, size={}): " +
+                "Slice(size={}, continuation={})",
             blockchains, continuation, size, slice.entities.size, slice.continuation
         )
         return toDto(slice)
@@ -157,17 +157,17 @@ class OrderApiMergeService(
         val result = router.getService(blockchain).getAllSync(continuation, safeSize, sort)
         logger.info(
             "Response for getAllSync" +
-                    "(blockchains={}, continuation={}, size={}): " +
-                    "Slice(size={}, continuation={})",
+                "(blockchains={}, continuation={}, size={}): " +
+                "Slice(size={}, continuation={})",
             blockchain, continuation, size, result.entities.size, result.continuation
         )
         return toDto(result)
     }
 
     override suspend fun getOrderBidsByItem(
-        itemId: String,
+        itemId: ItemIdDto,
         platform: PlatformDto?,
-        maker: List<String>?,
+        maker: List<UnionAddress>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -176,30 +176,27 @@ class OrderApiMergeService(
         size: Int?
     ): OrdersDto {
         val safeSize = PageSize.ORDER.limit(size)
-        val fullItemId = IdParser.parseItemId(itemId)
 
-        val makerAddresses = if (maker.isNullOrEmpty()) null else maker.map { IdParser.parseAddress(it) }
-        val makerBlockchainGroups = makerAddresses?.let { list -> list.map { it.blockchainGroup } } ?: emptyList()
+        val makerBlockchainGroups = maker?.let { list -> list.map { it.blockchainGroup } } ?: emptyList()
         val originAddress = safeAddress(origin)
-        val blockchain = fullItemId.blockchain
-        val makers = makerAddresses?.map { it.value }
+        val blockchain = itemId.blockchain
         if (!ensureSameBlockchain(
                 makerBlockchainGroups +
-                        listOf(
-                            fullItemId.blockchain.group(),
-                            originAddress?.blockchainGroup
-                        ),
+                    listOf(
+                        itemId.blockchain.group(),
+                        originAddress?.blockchainGroup
+                    ),
             )
         ) {
             logger.warn(
-                "Incompatible blockchain groups specified in getOrderBidsByItem: itemId={}, origin={}, maker={}",
-                fullItemId.fullId(), origin, makers
+                "Incompatible blockchain groups specified in getOrderBidsByItem: itemId={}, origin={}, makers={}",
+                itemId.fullId(), origin, maker?.map { it.fullId() }
             )
             return empty
         }
 
         val currencyContracts = router.getService(blockchain)
-            .getBidCurrencies(fullItemId.value)
+            .getBidCurrencies(itemId.value)
             .map { it.ext.currencyAddress() }
 
         if (currencyContracts.isEmpty()) {
@@ -210,7 +207,16 @@ class OrderApiMergeService(
             continuation, currencyContracts
         ) { currency, currencyContinuation ->
             router.getService(blockchain).getOrderBidsByItem(
-                platform, fullItemId.value, makers, originAddress?.value, status, start, end, currency, currencyContinuation, safeSize
+                platform,
+                itemId.value,
+                maker?.map { it.value },
+                originAddress?.value,
+                status,
+                start,
+                end,
+                currency,
+                currencyContinuation,
+                safeSize
             )
         }
 
@@ -226,7 +232,7 @@ class OrderApiMergeService(
     override suspend fun getOrderBidsByMaker(
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
-        maker: List<String>,
+        makers: List<UnionAddress>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -235,14 +241,13 @@ class OrderApiMergeService(
         size: Int?
     ): OrdersDto {
         val safeSize = PageSize.ORDER.limit(size)
-        val makerAddresses = maker.map { IdParser.parseAddress(it) }
-        val makerBlockchainGroups = makerAddresses.map { it.blockchainGroup }.toSet()
+        val makerBlockchainGroups = makers.map { it.blockchainGroup }.toSet()
         val originAddress = safeAddress(origin)
         val filter = BlockchainFilter(blockchains)
         if (originAddress != null && !ensureSameBlockchain(makerBlockchainGroups + originAddress.blockchainGroup)) {
             logger.warn(
                 "Incompatible blockchain groups specified in getOrderBidsByMaker: origin={}, maker={}",
-                origin, maker
+                origin, makers.map { it.fullId() }
             )
             return empty
         }
@@ -250,7 +255,7 @@ class OrderApiMergeService(
         val blockchainSlices = router.executeForAll(filter.exclude(makerBlockchainGroups)) {
             it.getOrderBidsByMaker(
                 platform,
-                makerAddresses.filter { address -> address.blockchainGroup.subchains().contains(it.blockchain) }
+                makers.filter { address -> address.blockchainGroup.subchains().contains(it.blockchain) }
                     .map { address -> address.value },
                 originAddress?.value,
                 status,
@@ -268,9 +273,9 @@ class OrderApiMergeService(
 
         logger.info(
             "Response for getOrderBidsByMaker" +
-                    "(maker={}, platform={}, origin={}, status={}, start={}, end={}, continuation={}, size={}): " +
-                    "Slice(size={}, continuation={})",
-            maker, platform, origin, status, start, end, continuation, size,
+                "(maker={}, platform={}, origin={}, status={}, start={}, end={}, continuation={}, size={}): " +
+                "Slice(size={}, continuation={})",
+            makers.map { it.fullId() }, platform, origin, status, start, end, continuation, size,
             combinedSlice.entities.size, combinedSlice.continuation
         )
 
@@ -300,7 +305,7 @@ class OrderApiMergeService(
         ).getSlice(safeSize)
 
         logger.info("Response for getSellOrders(blockchains={}, platform={}, origin={}, continuation={}, size={}):" +
-                " Slice(size={}, continuation={}) from blockchain slices {} ",
+            " Slice(size={}, continuation={}) from blockchain slices {} ",
             evaluatedBlockchains, platform, origin, continuation, size,
             combinedSlice.entities.size, combinedSlice.continuation, blockchainPages.map { it.entities.size }
         )
@@ -309,7 +314,7 @@ class OrderApiMergeService(
     }
 
     override suspend fun getSellOrdersByMaker(
-        maker: List<String>,
+        makers: List<UnionAddress>,
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,
@@ -318,15 +323,14 @@ class OrderApiMergeService(
         status: List<OrderStatusDto>?
     ): OrdersDto {
         val safeSize = PageSize.ORDER.limit(size)
-        val makerAddresses = maker.map { IdParser.parseAddress(it) }
-        val makerBlockchainGroups = makerAddresses.map { it.blockchainGroup }.toSet()
+        val makerBlockchainGroups = makers.map { it.blockchainGroup }.toSet()
         val originAddress = safeAddress(origin)
         val filter = BlockchainFilter(blockchains)
 
         if (originAddress != null && !ensureSameBlockchain(makerBlockchainGroups + originAddress.blockchainGroup)) {
             logger.warn(
-                "Incompatible blockchain groups specified in getSellOrdersByMaker: origin={}, maker={}",
-                origin, maker
+                "Incompatible blockchain groups specified in getSellOrdersByMaker: origin={}, makers={}",
+                origin, makers.map { it.fullId() }
             )
             return empty
         }
@@ -334,7 +338,7 @@ class OrderApiMergeService(
         val blockchainSlices = router.executeForAll(filter.exclude(makerBlockchainGroups)) {
             it.getSellOrdersByMaker(
                 platform,
-                makerAddresses.filter { address -> address.blockchainGroup.subchains().contains(it.blockchain) }
+                makers.filter { address -> address.blockchainGroup.subchains().contains(it.blockchain) }
                     .map { address -> address.value },
                 originAddress?.value,
                 status,
@@ -350,11 +354,10 @@ class OrderApiMergeService(
 
         logger.info(
             "Response for getSellOrdersByMaker" +
-                    "(maker={}, platform={}, maker={}, origin={}, status={}, continuation={}, size={}): " +
-                    "Slice(size={}, continuation={})",
-            maker,
+                "(maker={}, platform={}, origin={}, status={}, continuation={}, size={}): " +
+                "Slice(size={}, continuation={})",
+            makers.map { it.fullId() },
             platform,
-            maker,
             origin,
             status,
             continuation,

@@ -4,8 +4,11 @@ import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import java.time.Instant
 
@@ -38,7 +41,7 @@ interface ActivityQueryService {
 
     suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
-        collection: List<String>,
+        collection: List<CollectionIdDto>,
         continuation: String?,
         cursor: String?,
         size: Int?,
@@ -47,7 +50,7 @@ interface ActivityQueryService {
 
     suspend fun getActivitiesByItem(
         type: List<ActivityTypeDto>,
-        itemId: String,
+        itemId: ItemIdDto,
         continuation: String?,
         cursor: String?,
         size: Int?,
@@ -56,7 +59,7 @@ interface ActivityQueryService {
 
     suspend fun getActivitiesByUser(
         type: List<UserActivityTypeDto>,
-        user: List<String>,
+        user: List<UnionAddress>,
         blockchains: List<BlockchainDto>?,
         from: Instant?,
         to: Instant?,

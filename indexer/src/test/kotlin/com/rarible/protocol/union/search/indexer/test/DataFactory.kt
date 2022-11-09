@@ -2,6 +2,7 @@ package com.rarible.protocol.union.search.indexer.test
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomString
+import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
@@ -20,7 +21,7 @@ import java.math.BigInteger
 fun orderEth() = OrderDto(
     id = OrderIdDto(
         BlockchainDto.ETHEREUM,
-        randomString()
+        randomWord()
     ),
     fill = BigDecimal.ZERO,
     platform = PlatformDto.RARIBLE,

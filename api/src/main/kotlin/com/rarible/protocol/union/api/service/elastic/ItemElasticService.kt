@@ -26,6 +26,7 @@ import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsSearchSortDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
@@ -77,13 +78,13 @@ class ItemElasticService(
     }
 
     override suspend fun getItemsByCollection(
-        collection: String,
+        collection: CollectionIdDto,
         continuation: String?,
         size: Int?
     ): ItemsDto {
         val safeSize = PageSize.ITEM.limit(size)
 
-        val filter = itemFilterConverter.getItemsByCollection(collection, continuation)
+        val filter = itemFilterConverter.getItemsByCollection(collection.fullId(), continuation)
         logger.info("Built filter: $filter")
         val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, safeSize)
         val items = getItems(queryResult.entities)
@@ -125,15 +126,14 @@ class ItemElasticService(
     }
 
     override suspend fun getItemsByCreator(
-        creator: String,
+        creator: UnionAddress,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?
     ): ItemsDto {
         val safeSize = PageSize.ITEM.limit(size)
-        val creatorAddress = IdParser.parseAddress(creator)
 
-        val filter = itemFilterConverter.getItemsByCreator(creatorAddress.fullId(), continuation)
+        val filter = itemFilterConverter.getItemsByCreator(creator.fullId(), continuation)
         logger.info("Built filter: $filter")
         val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, safeSize)
         val cursor = queryResult.continuation
@@ -154,16 +154,15 @@ class ItemElasticService(
     }
 
     override suspend fun getItemsByOwner(
-        owner: String,
+        owner: UnionAddress,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?
     ): ItemsDto {
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains)
-        val ownerAddress = IdParser.parseAddress(owner)
         val ownerships = esOwnershipRepository.search(
             EsOwnershipByOwnerFilter(
-                owner = ownerAddress,
+                owner = owner,
                 blockchains = evaluatedBlockchains.toSet(),
                 cursor = continuation,
             ),
@@ -178,7 +177,7 @@ class ItemElasticService(
 
         logger.info(
             "Response for ES getItemsByOwner(creator={}, continuation={}, size={}): Page(size={}, continuation={})",
-            ownerAddress, continuation, size, items.size, cursor
+            owner.fullId(), continuation, size, items.size, cursor
         )
 
         return ItemsDto(
@@ -188,14 +187,13 @@ class ItemElasticService(
     }
 
     override suspend fun getItemsByOwnerWithOwnership(
-        owner: String,
+        owner: UnionAddress,
         continuation: String?,
         size: Int?
     ): ItemsWithOwnershipDto {
-        val ownerAddress = IdParser.parseAddress(owner)
         val safeSize = PageSize.OWNERSHIP.limit(size)
         val (cursor, ownerships) = ownershipElasticHelper.getRawOwnershipsByOwner(
-            owner = ownerAddress,
+            owner = owner,
             continuation = continuation,
             size = safeSize,
         )

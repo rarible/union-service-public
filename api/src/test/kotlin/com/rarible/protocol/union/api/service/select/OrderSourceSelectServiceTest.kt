@@ -3,13 +3,17 @@ package com.rarible.protocol.union.api.service.select
 import com.rarible.protocol.union.api.service.elastic.OrderElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
@@ -42,11 +46,11 @@ class OrderSourceSelectServiceTest {
     private val size = 42
     private val sort = OrderSortDto.LAST_UPDATE_ASC
     private val status = listOf(mockk<OrderStatusDto>())
-    private val itemId = "some item id"
+    private val itemId = randomEthItemId()
     private val platform = mockk<PlatformDto>()
-    private val maker = "some maker"
+    private val maker = UnionAddress(BlockchainGroupDto.ETHEREUM, randomEthAddress())
     private val origin = "some origin"
-    private val makers = listOf("another maker")
+    private val makers = listOf(UnionAddress(BlockchainGroupDto.ETHEREUM, randomEthAddress()))
     private val start = 500L
     private val end = 1000L
 

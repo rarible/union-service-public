@@ -9,15 +9,17 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -84,10 +86,11 @@ class ActivityApiMergeService(
         val activitySlice = router.getService(blockchain).getAllActivitiesSync(continuation, safeSize, sort, type)
         val dto = ActivitiesDto(
             activities = activitySlice.entities,
-            continuation = activitySlice.continuation
+            continuation = activitySlice.continuation,
+            cursor = activitySlice.continuation
         )
         logger.info(
-            "Response for getActivitiesByCollection(type={}, continuation={}, size={}, sort={}): " +
+            "Response for getAllActivitiesSync(type={}, continuation={}, size={}, sort={}): " +
                 "Slice(size={}, continuation={}) ",
             type, continuation, size, sort, dto.activities.size, dto.continuation
         )
@@ -106,7 +109,8 @@ class ActivityApiMergeService(
             router.getService(blockchain).getAllRevertedActivitiesSync(continuation, safeSize, sort, type)
         val dto = ActivitiesDto(
             activities = activitySlice.entities,
-            continuation = activitySlice.continuation
+            continuation = activitySlice.continuation,
+            cursor = activitySlice.continuation
         )
         logger.info(
             "Response for getRevertedActivitiesSync(continuation={}, size={}, ty[e={}, sort={}): " +
@@ -118,14 +122,13 @@ class ActivityApiMergeService(
 
     override suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
-        collection: List<String>,
+        collection: List<CollectionIdDto>,
         continuation: String?,
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
-        val collectionValue = collection.first() // fallback for API variant
-        val collectionId = IdParser.parseCollectionId(collectionValue)
+        val collectionId = collection.first() // fallback for API variant
         val blockchain = collectionId.blockchain
         val dto = withCursor(continuation, cursor, blockchain, size, sort) { cont, safeSize ->
             router.getService(collectionId.blockchain)
@@ -134,25 +137,24 @@ class ActivityApiMergeService(
         logger.info(
             "Response for getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
                 "Slice(size={}, continuation={}) ",
-            type, collectionValue, continuation, size, sort, dto.activities.size, dto.continuation
+            type, collectionId.fullId(), continuation, size, sort, dto.activities.size, dto.continuation
         )
         return dto
     }
 
     override suspend fun getActivitiesByItem(
         type: List<ActivityTypeDto>,
-        itemId: String,
+        itemId: ItemIdDto,
         continuation: String?,
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
-        val fullItemId = IdParser.parseItemId(itemId)
-        val dto = withCursor(continuation, cursor, fullItemId.blockchain, size, sort) { cont, safeSize ->
-            router.getService(fullItemId.blockchain)
+        val dto = withCursor(continuation, cursor, itemId.blockchain, size, sort) { cont, safeSize ->
+            router.getService(itemId.blockchain)
                 .getActivitiesByItem(
                     type,
-                    fullItemId.value,
+                    itemId.value,
                     cont,
                     safeSize,
                     sort
@@ -161,14 +163,14 @@ class ActivityApiMergeService(
         logger.info(
             "Response for getActivitiesByItem(type={}, itemId={} continuation={}, size={}, sort={}): " +
                 "Slice(size={}, continuation={}) ",
-            type, fullItemId.fullId(), continuation, size, sort, dto.activities.size, dto.continuation
+            type, itemId.fullId(), continuation, size, sort, dto.activities.size, dto.continuation
         )
         return dto
     }
 
     override suspend fun getActivitiesByUser(
         type: List<UserActivityTypeDto>,
-        user: List<String>,
+        user: List<UnionAddress>,
         blockchains: List<BlockchainDto>?,
         from: Instant?,
         to: Instant?,
@@ -179,7 +181,7 @@ class ActivityApiMergeService(
     ): ActivitiesDto {
         val safeSize = PageSize.ACTIVITY.limit(size)
         val filter = BlockchainFilter(blockchains)
-        val groupedByBlockchain = user.map { IdParser.parseAddress(it) }
+        val groupedByBlockchain = user
             // Since user specified here with blockchain group, we need to route request to all subchains
             .flatMap { address -> filter.exclude(address.blockchainGroup).map { it to address.value } }
             .groupBy({ it.first }, { it.second })

@@ -5,6 +5,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import org.slf4j.LoggerFactory
@@ -26,13 +27,26 @@ class DipDupTokenActivityService(
             else -> false
         }
         return if (dipdupTypes.size > 0) {
-            logger.info("Fetch dipdup all activities: $types, $continuation, $limit, $sort")
+            logger.info("Fetch dipdup all token activities: $types, $continuation, $limit, $sort")
             val page = dipDupTokenActivityClient.getActivitiesAll(dipdupTypes, limit, continuation, sortAsc)
             Slice(
                 continuation = page.continuation,
                 entities = page.activities.map { dipDupActivityConverter.convert(it, blockchain) }
             )
         } else Slice.empty()
+    }
+
+    suspend fun getSync(continuation: String?, limit: Int, sort: SyncSortDto?): Slice<ActivityDto> {
+        val sortAsc = when (sort) {
+            SyncSortDto.DB_UPDATE_ASC -> true
+            else -> false
+        }
+        logger.info("Fetch dipdup all token activities sync: $continuation, $limit, $sort")
+        val page = dipDupTokenActivityClient.getActivitySync(limit, continuation, sortAsc)
+        return Slice(
+            continuation = page.continuation,
+            entities = page.activities.map { dipDupActivityConverter.convert(it, blockchain) }
+        )
     }
 
     suspend fun getByItem(

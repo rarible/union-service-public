@@ -1,11 +1,13 @@
 package com.rarible.protocol.union.enrichment.service.query.order
 
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.UnionAddress
 
 interface OrderQueryService {
 
@@ -25,9 +27,9 @@ interface OrderQueryService {
     ): OrdersDto
 
     suspend fun getSellOrdersByItem(
-        itemId: String,
+        itemId: ItemIdDto,
         platform: PlatformDto?,
-        maker: String?,
+        maker: UnionAddress?,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
@@ -35,9 +37,9 @@ interface OrderQueryService {
     ): OrdersDto
 
     suspend fun getOrderBidsByItem(
-        itemId: String,
+        itemId: ItemIdDto,
         platform: PlatformDto?,
-        maker: List<String>?,
+        makers: List<UnionAddress>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -49,7 +51,7 @@ interface OrderQueryService {
     suspend fun getOrderBidsByMaker(
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
-        maker: List<String>,
+        makers: List<UnionAddress>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -67,7 +69,7 @@ interface OrderQueryService {
     ): OrdersDto
 
     suspend fun getSellOrdersByMaker(
-        maker: List<String>,
+        makers: List<UnionAddress>,
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,

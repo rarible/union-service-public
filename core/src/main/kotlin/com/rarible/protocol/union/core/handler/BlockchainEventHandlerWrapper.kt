@@ -1,8 +1,10 @@
 package com.rarible.protocol.union.core.handler
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.rarible.core.daemon.sequential.ConsumerEventHandler
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.slf4j.LoggerFactory
+import java.lang.ClassCastException
 
 class BlockchainEventHandlerWrapper<B, U>(
     private val blockchainHandler: BlockchainEventHandler<B, U>
