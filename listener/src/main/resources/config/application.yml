@@ -107,6 +107,7 @@ integration:
       useDipDupTokens: ${consul.tezos.dipdup.useDipDupTokens:false}
       useDipDupRoyalty: ${consul.tezos.dipdup.useDipDupRoyalty:false}
       saveDipDupRoyalty: ${consul.tezos.dipdup.saveDipDupRoyalty:false}
+      enrichDipDupCollection: ${consul.tezos.dipdup.enrichDipDupCollection:true}
       tzktProperties:
         retryAttempts: ${consul.tezos.dipdup.tzktProperties.retryAttempts:2}
         retryDelay: ${consul.tezos.dipdup.tzktProperties.retryDelay:15000}

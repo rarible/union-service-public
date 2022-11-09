@@ -94,6 +94,7 @@ integration:
     dipdup:
       network: ${consul.tezos.dipdup.network:}
       dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
+      dipdupToken: ${consul.tezos.dipdup.dipdupToken:}
       nodeAddress: ${consul.tezos.dipdup.nodeAddress:}
       chainId: ${consul.tezos.dipdup.chainId:}
       sigChecker: ${consul.tezos.dipdup.sigChecker:}
@@ -101,6 +102,8 @@ integration:
       ipfsUrl: ${consul.tezos.dipdup.ipfsUrl:"https://ipfs.io"}
       useDipDupTokens: ${consul.tezos.dipdup.useDipDupTokens:false}
       useDipDupRoyalty: ${consul.tezos.dipdup.useDipDupRoyalty:false}
+      saveDipDupRoyalty: ${consul.tezos.dipdup.saveDipDupRoyalty:false}
+      enrichDipDupCollection: ${consul.tezos.dipdup.enrichDipDupCollection:true}
       knownAddresses:
         hen: ${consul.tezos.dipdup.knownAddresses.hen:}
         henRoyalties: ${consul.tezos.dipdup.knownAddresses.henRoyalties:}

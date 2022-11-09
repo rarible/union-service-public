@@ -49,7 +49,6 @@ open class TezosActivityService(
         return getDipDupAndTzktActivities(types, continuation, size, sort)
     }
 
-
     suspend fun getDipDupAndTzktActivities(
         types: List<ActivityTypeDto>,
         continuation: String?,
@@ -81,7 +80,13 @@ open class TezosActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<ActivityDto> = Slice.empty()
+    ): Slice<ActivityDto> {
+        return when (type) {
+            SyncTypeDto.NFT -> dipdupTokenActivityService.getSync(continuation, size, sort)
+            SyncTypeDto.ORDER -> dipdupOrderActivityService.getSync(continuation, size, sort)
+            else -> Slice.empty()
+        }
+    }
 
     override suspend fun getAllRevertedActivitiesSync(
         continuation: String?,

@@ -64,8 +64,16 @@ integration:
   tezos:
     enabled: ${consul.tezos.enabled:true}
     dipdup:
+      network: ${consul.tezos.dipdup.network:}
       dipdupUrl: ${consul.tezos.dipdup.dipdupUrl:}
+      dipdupToken: ${consul.tezos.dipdup.dipdupToken:}
+      nodeAddress: ${consul.tezos.dipdup.nodeAddress:}
+      chainId: ${consul.tezos.dipdup.chainId:}
       tzktUrl: ${consul.tezos.dipdup.tzktUrl:}
+      useDipDupTokens: ${consul.tezos.dipdup.useDipDupTokens:false}
+      useDipDupRoyalty: ${consul.tezos.dipdup.useDipDupRoyalty:false}
+      saveDipDupRoyalty: ${consul.tezos.dipdup.saveDipDupRoyalty:false}
+      enrichDipDupCollection: ${consul.tezos.dipdup.enrichDipDupCollection:true}
     client:
       url: ${consul.tezos.api.baseUrl:}
     auctionContracts: ${consul.tezos.auctionContracts:}

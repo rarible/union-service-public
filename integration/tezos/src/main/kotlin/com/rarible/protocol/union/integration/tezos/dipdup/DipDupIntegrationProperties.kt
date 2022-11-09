@@ -27,7 +27,8 @@ data class DipDupIntegrationProperties(
     // This enables query directly to dipdup indexer
     val useDipDupTokens: Boolean = false,
     val useDipDupRoyalty: Boolean = false,
-    val saveDipDupRoyalty: Boolean = false
+    val saveDipDupRoyalty: Boolean = false,
+    val enrichDipDupCollection: Boolean = true
 ) {
 
     data class TzktProperties(
