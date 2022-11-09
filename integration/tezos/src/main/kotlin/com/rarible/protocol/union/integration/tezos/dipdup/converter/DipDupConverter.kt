@@ -51,4 +51,16 @@ object DipDupConverter {
             else -> throw RuntimeException("Not implemented for ${source} platform")
         }
     }
+
+    fun convert(source: PlatformDto?): List<TezosPlatform> {
+        return when(source) {
+            PlatformDto.HEN -> listOf(TezosPlatform.HEN)
+            PlatformDto.VERSUM -> listOf(TezosPlatform.VERSUM_V1)
+            PlatformDto.TEIA -> listOf(TezosPlatform.TEIA_V1)
+            PlatformDto.OBJKT -> listOf(TezosPlatform.OBJKT_V1, TezosPlatform.OBJKT_V2)
+            PlatformDto.RARIBLE -> listOf(TezosPlatform.RARIBLE_V1, TezosPlatform.RARIBLE_V2)
+            PlatformDto.FXHASH -> listOf(TezosPlatform.FXHASH_V1, TezosPlatform.FXHASH_V2)
+            else -> emptyList()
+        }
+    }
 }

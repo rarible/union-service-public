@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
 import java.util.regex.Pattern
 
@@ -78,6 +79,7 @@ open class TezosOrderService(
             contract,
             tokenId,
             makers?.let { it.first() },
+            DipDupConverter.convert(platform),
             currencyAddress,
             status,
             continuation,
@@ -97,6 +99,7 @@ open class TezosOrderService(
     ): Slice<OrderDto> {
         return dipdupOrderService.getBidOrdersByMaker(
             maker = maker,
+            platforms = DipDupConverter.convert(platform),
             status = status,
             continuation = continuation,
             size = size
@@ -170,7 +173,7 @@ open class TezosOrderService(
         size: Int
     ): Slice<OrderDto> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
-        val slice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, currencyId, status, continuation, size)
+        val slice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, DipDupConverter.convert(platform), currencyId, status, continuation, size)
         return slice
     }
 
@@ -184,6 +187,7 @@ open class TezosOrderService(
     ): Slice<OrderDto> {
         return dipdupOrderService.getSellOrdersByMaker(
             maker = maker,
+            platforms = DipDupConverter.convert(platform),
             status = status,
             continuation = continuation,
             size = size
