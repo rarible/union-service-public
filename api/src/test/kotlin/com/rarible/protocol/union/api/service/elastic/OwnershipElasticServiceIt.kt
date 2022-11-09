@@ -9,15 +9,12 @@ import com.rarible.protocol.currency.dto.CurrenciesDto
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.test.nativeTestCurrencies
-import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
-import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipSearchFilterDto
 import com.rarible.protocol.union.dto.OwnershipSearchRequestDto
@@ -26,6 +23,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
+import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
@@ -79,7 +77,7 @@ class OwnershipElasticServiceIt {
                 val currency = nativeTestCurrencies().find { it.currencyId == "ethereum" }!!
                 val oid = randomOwnershipId(
                     blockchain = BlockchainDto.ETHEREUM,
-                    itemIdValue = "${randomString().lowercase()}:${randomLong()}",
+                    itemIdValue = "${randomAddressString()}:${randomLong()}",
                 )
                 ownerships.add(
                     EsOwnership(

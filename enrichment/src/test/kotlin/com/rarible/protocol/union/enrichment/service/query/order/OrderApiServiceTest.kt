@@ -8,7 +8,6 @@ import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
@@ -83,7 +82,7 @@ class OrderApiServiceTest {
 
     private suspend fun getOrderBidsByItem(itemId: ItemIdDto, continuation: String?, size: Int): OrdersDto {
         return orderApiService.getOrderBidsByItem(
-            itemId = itemId.fullId(),
+            itemId = itemId,
             platform = PlatformDto.RARIBLE,
             maker = null,
             origin = null,
@@ -97,7 +96,7 @@ class OrderApiServiceTest {
 
     private suspend fun getSellOrdersByItem(itemId: ItemIdDto, continuation: String?, size: Int): OrdersDto {
         return orderApiService.getSellOrdersByItem(
-            itemId = itemId.fullId(),
+            itemId = itemId,
             platform = PlatformDto.RARIBLE,
             maker = null,
             origin = null,

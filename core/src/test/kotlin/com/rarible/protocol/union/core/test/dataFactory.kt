@@ -44,8 +44,8 @@ import java.time.temporal.ChronoUnit
 
 fun randomOwnershipId(
     blockchain: BlockchainDto = BlockchainDto.values().random(),
-    itemIdValue: String = "${randomString()}:${randomLong()}",
-    owner: UnionAddress = randomUnionAddress(blockchain, randomString()),
+    itemIdValue: String = "${randomString().lowercase()}:${randomLong()}",
+    owner: UnionAddress = randomUnionAddress(blockchain, randomString().lowercase()),
 ) = OwnershipIdDto(
     blockchain = blockchain,
     itemIdValue = itemIdValue,

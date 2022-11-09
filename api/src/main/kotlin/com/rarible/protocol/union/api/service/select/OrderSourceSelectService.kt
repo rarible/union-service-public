@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.service.select
 import com.rarible.protocol.union.api.service.elastic.OrderElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
@@ -11,6 +12,7 @@ import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.service.query.order.OrderQueryService
 import org.springframework.stereotype.Component
@@ -57,9 +59,9 @@ class OrderSourceSelectService(
     }
 
     suspend fun getSellOrdersByItem(
-        itemId: String,
+        itemId: ItemIdDto,
         platform: PlatformDto?,
-        maker: String?,
+        maker: UnionAddress?,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
@@ -72,9 +74,9 @@ class OrderSourceSelectService(
     }
 
     suspend fun getOrderBidsByItem(
-        itemId: String,
+        itemId: ItemIdDto,
         platform: PlatformDto?,
-        maker: List<String>?,
+        maker: List<UnionAddress>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -99,7 +101,7 @@ class OrderSourceSelectService(
     suspend fun getOrderBidsByMaker(
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
-        maker: List<String>,
+        maker: List<UnionAddress>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -133,7 +135,7 @@ class OrderSourceSelectService(
     }
 
     suspend fun getSellOrdersByMaker(
-        maker: List<String>,
+        maker: List<UnionAddress>,
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,

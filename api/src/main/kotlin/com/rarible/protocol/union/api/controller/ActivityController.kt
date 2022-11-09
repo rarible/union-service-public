@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.dto.parser.IdParser
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
@@ -64,8 +65,9 @@ class ActivityController(
         searchEngine: SearchEngineDto?
     ): ResponseEntity<ActivitiesDto> {
         if (collection.isEmpty()) throw UnionException("No any collection param in query")
+        val collectionIds = collection.map(IdParser::parseCollectionId)
         val result = activitySourceSelector.getActivitiesByCollection(
-            type, collection, continuation, cursor, size, sort, searchEngine
+            type, collectionIds, continuation, cursor, size, sort, searchEngine
         )
         return ResponseEntity.ok(result)
     }
@@ -80,7 +82,7 @@ class ActivityController(
         searchEngine: SearchEngineDto?
     ): ResponseEntity<ActivitiesDto> {
         val result = activitySourceSelector.getActivitiesByItem(
-            type, itemId, continuation, cursor, size, sort, searchEngine
+            type, IdParser.parseItemId(itemId), continuation, cursor, size, sort, searchEngine
         )
         return ResponseEntity.ok(result)
     }
@@ -97,8 +99,9 @@ class ActivityController(
         sort: ActivitySortDto?,
         searchEngine: SearchEngineDto?
     ): ResponseEntity<ActivitiesDto> {
+        val userAddresses = user.map(IdParser::parseAddress)
         val result = activitySourceSelector.getActivitiesByUser(
-            type, user, blockchains, from, to, continuation, cursor, size, sort, searchEngine
+            type, userAddresses, blockchains, from, to, continuation, cursor, size, sort, searchEngine
         )
         return ResponseEntity.ok(result)
     }
@@ -106,7 +109,7 @@ class ActivityController(
     override suspend fun getActivitiesByUsers(activitiesByUsersRequestDto: ActivitiesByUsersRequestDto): ResponseEntity<ActivitiesDto> {
         val result = activitySourceSelector.getActivitiesByUser(
             activitiesByUsersRequestDto.types,
-            activitiesByUsersRequestDto.users.map { it.fullId() }.take(MAX_USERS_COUNT),
+            activitiesByUsersRequestDto.users.take(MAX_USERS_COUNT),
             activitiesByUsersRequestDto.blockchains,
             activitiesByUsersRequestDto.from,
             activitiesByUsersRequestDto.to,

@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
+import com.rarible.protocol.union.dto.UnionAddress
 import kotlinx.coroutines.flow.Flow
 
 interface ItemQueryService {
@@ -21,23 +22,23 @@ interface ItemQueryService {
 
     suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto>
     suspend fun getItemsByIds(ids: List<ItemIdDto>): List<ItemDto>
-    suspend fun getItemsByCollection(collection: String, continuation: String?, size: Int?): ItemsDto
+    suspend fun getItemsByCollection(collection: CollectionIdDto, continuation: String?, size: Int?): ItemsDto
     suspend fun getItemsByCreator(
-        creator: String,
+        creator: UnionAddress,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?
     ): ItemsDto
 
     suspend fun getItemsByOwner(
-        owner: String,
+        owner: UnionAddress,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?
     ): ItemsDto
 
     suspend fun getItemsByOwnerWithOwnership(
-        owner: String,
+        owner: UnionAddress,
         continuation: String?,
         size: Int?
     ): ItemsWithOwnershipDto

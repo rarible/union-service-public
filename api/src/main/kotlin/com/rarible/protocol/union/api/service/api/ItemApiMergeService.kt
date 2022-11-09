@@ -14,13 +14,13 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemWithOwnershipDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgPage
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Paging
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.service.query.ownership.OwnershipApiService
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
@@ -78,14 +78,13 @@ class ItemApiMergeService(
     }
 
     override suspend fun getItemsByCollection(
-        collection: String,
+        collection: CollectionIdDto,
         continuation: String?,
         size: Int?
     ): ItemsDto {
         val safeSize = PageSize.ITEM.limit(size)
-        val collectionId = IdParser.parseCollectionId(collection)
-        val result = router.getService(collectionId.blockchain)
-            .getItemsByCollection(collectionId.value, null, continuation, safeSize)
+        val result = router.getService(collection.blockchain)
+            .getItemsByCollection(collection.value, null, continuation, safeSize)
 
         logger.info(
             "Response for getItemsByCollection(collection={}, continuation={}, size={}):" +
@@ -97,17 +96,16 @@ class ItemApiMergeService(
     }
 
     override suspend fun getItemsByCreator(
-        creator: String,
+        creator: UnionAddress,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?
     ): ItemsDto {
         val safeSize = PageSize.ITEM.limit(size)
-        val creatorAddress = IdParser.parseAddress(creator)
         val filter = BlockchainFilter(blockchains)
 
-        val blockchainPages = router.executeForAll(filter.exclude(creatorAddress.blockchainGroup)) {
-            it.getItemsByCreator(creatorAddress.value, continuation, safeSize)
+        val blockchainPages = router.executeForAll(filter.exclude(creator.blockchainGroup)) {
+            it.getItemsByCreator(creator.value, continuation, safeSize)
         }
 
         val total = blockchainPages.sumOf { it.total }
@@ -128,16 +126,15 @@ class ItemApiMergeService(
     }
 
     override suspend fun getItemsByOwner(
-        owner: String,
+        owner: UnionAddress,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?
     ): ItemsDto {
         val safeSize = PageSize.ITEM.limit(size)
-        val ownerAddress = IdParser.parseAddress(owner)
         val filter = BlockchainFilter(blockchains)
-        val blockchainPages = router.executeForAll(filter.exclude(ownerAddress.blockchainGroup)) {
-            it.getItemsByOwner(ownerAddress.value, continuation, safeSize)
+        val blockchainPages = router.executeForAll(filter.exclude(owner.blockchainGroup)) {
+            it.getItemsByOwner(owner.value, continuation, safeSize)
         }
 
         val total = blockchainPages.sumOf { it.total }
@@ -214,16 +211,15 @@ class ItemApiMergeService(
     }
 
     override suspend fun getItemsByOwnerWithOwnership(
-        owner: String,
+        owner: UnionAddress,
         continuation: String?,
         size: Int?
     ): ItemsWithOwnershipDto {
         val safeSize = PageSize.ITEM.limit(size)
-        val ownerAddress = IdParser.parseAddress(owner)
-        val page = ownershipApiService.getOwnershipByOwner(ownerAddress, continuation, safeSize)
+        val page = ownershipApiService.getOwnershipByOwner(owner, continuation, safeSize)
 
         val ids = page.entities.map { it.id.getItemId().value }
-        val items = router.executeForAll(ownerAddress.blockchainGroup.subchains()) {
+        val items = router.executeForAll(owner.blockchainGroup.subchains()) {
             it.getItemsByIds(ids)
         }.flatten()
 
