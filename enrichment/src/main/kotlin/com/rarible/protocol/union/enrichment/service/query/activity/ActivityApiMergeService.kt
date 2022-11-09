@@ -86,10 +86,11 @@ class ActivityApiMergeService(
         val activitySlice = router.getService(blockchain).getAllActivitiesSync(continuation, safeSize, sort, type)
         val dto = ActivitiesDto(
             activities = activitySlice.entities,
-            continuation = activitySlice.continuation
+            continuation = activitySlice.continuation,
+            cursor = activitySlice.continuation
         )
         logger.info(
-            "Response for getActivitiesByCollection(type={}, continuation={}, size={}, sort={}): " +
+            "Response for getAllActivitiesSync(type={}, continuation={}, size={}, sort={}): " +
                 "Slice(size={}, continuation={}) ",
             type, continuation, size, sort, dto.activities.size, dto.continuation
         )
@@ -108,7 +109,8 @@ class ActivityApiMergeService(
             router.getService(blockchain).getAllRevertedActivitiesSync(continuation, safeSize, sort, type)
         val dto = ActivitiesDto(
             activities = activitySlice.entities,
-            continuation = activitySlice.continuation
+            continuation = activitySlice.continuation,
+            cursor = activitySlice.continuation
         )
         logger.info(
             "Response for getRevertedActivitiesSync(continuation={}, size={}, ty[e={}, sort={}): " +
