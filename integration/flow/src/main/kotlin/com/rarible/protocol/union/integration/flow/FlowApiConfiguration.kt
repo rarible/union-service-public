@@ -10,8 +10,7 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerAp
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.core.ProtocolWebClientCustomizer
-import com.rarible.protocol.union.core.UnionWebClientCustomizerEnabled
+import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.OrderProxyService
@@ -49,9 +48,11 @@ class FlowApiConfiguration(
     //-------------------- API --------------------//
 
     @Bean
-    @UnionWebClientCustomizerEnabled
-    fun flowNftIndexerApiClientFactory(uriProvider: FlowApiServiceUriProvider): FlowNftIndexerApiClientFactory {
-        return FlowNftIndexerApiClientFactory(uriProvider, ProtocolWebClientCustomizer())
+    fun flowNftIndexerApiClientFactory(
+        uriProvider: FlowApiServiceUriProvider,
+        webClientCustomizer: UnionWebClientCustomizer
+    ): FlowNftIndexerApiClientFactory {
+        return FlowNftIndexerApiClientFactory(uriProvider, webClientCustomizer)
     }
 
     @Bean

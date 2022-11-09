@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.core
 
 import com.rarible.protocol.currency.api.client.CurrencyApiClientFactory
+import com.rarible.protocol.currency.api.client.CurrencyApiServiceUriProvider
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.union.api.ApiClient
-import com.rarible.protocol.union.api.client.DefaultUnionWebClientCustomizer
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.CollectionService
@@ -23,10 +23,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.web.reactive.function.client.WebClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
@@ -64,20 +61,7 @@ class CoreConfiguration(
     }
 
     @Bean
-    @Qualifier("unionDefaultWebClientCustomizer")
-    fun unionDefaultWebClientCustomizer(
-        @Value("\${common.feature-flags.enableCustomWebClientCustomizer:false}")
-        enableCustomWebClientCustomizer: Boolean = false
-    ): WebClientCustomizer {
-        return if (enableCustomWebClientCustomizer) {
-            ProtocolWebClientCustomizer()
-        } else {
-            DefaultUnionWebClientCustomizer("rarible-protocol")
-        }
-    }
-
-    @Bean
-    fun webClient(): WebClient {
+    fun webClient(webClientCustomizer: UnionWebClientCustomizer): WebClient {
         val mapper = ApiClient.createDefaultObjectMapper()
         val strategies = ExchangeStrategies
             .builder()
@@ -85,11 +69,9 @@ class CoreConfiguration(
                 configurer.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(mapper, MediaType.APPLICATION_JSON))
                 configurer.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(mapper, MediaType.APPLICATION_JSON))
             }.build()
+
         val webClient = WebClient.builder().exchangeStrategies(strategies)
-
-        //TODO: Get client name from config
-        DefaultUnionWebClientCustomizer("protocol-rarible").customize(webClient)
-
+        webClientCustomizer.customize(webClient)
         return webClient.build()
     }
 
@@ -169,6 +151,14 @@ class CoreConfiguration(
             logger.info("SignatureService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
         return BlockchainRouter(result, enabledBlockchains)
+    }
+
+    @Bean
+    fun currencyApiFactory(
+        currencyApiServiceUriProvider: CurrencyApiServiceUriProvider,
+        webClientCustomizer: UnionWebClientCustomizer
+    ): CurrencyApiClientFactory {
+        return CurrencyApiClientFactory(currencyApiServiceUriProvider, webClientCustomizer)
     }
 
     @Bean

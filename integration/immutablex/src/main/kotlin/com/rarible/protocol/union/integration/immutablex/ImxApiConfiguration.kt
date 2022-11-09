@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex
 
 import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
@@ -19,7 +20,6 @@ import com.rarible.protocol.union.integration.immutablex.service.ImxOrderService
 import com.rarible.protocol.union.integration.immutablex.service.ImxOwnershipService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
-import org.springframework.boot.web.reactive.function.client.WebClientCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Import
@@ -44,10 +44,10 @@ class ImxApiConfiguration {
     @Qualifier("imxWebClient")
     fun imxWebClient(
         props: ImxIntegrationProperties,
-        @Qualifier("unionDefaultWebClientCustomizer") unionDefaultWebClientCustomizer: WebClientCustomizer
+        webClientCustomizer: UnionWebClientCustomizer
     ): WebClient {
         val builder = ImxWebClientFactory.configureClient(props.client!!.url!!, props.apiKey)
-        unionDefaultWebClientCustomizer.customize(builder)
+        webClientCustomizer.customize(builder)
         return builder.build()
     }
 
