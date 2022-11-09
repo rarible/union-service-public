@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiMergeService
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -46,15 +47,15 @@ class ActivitySourceSelectServiceTest {
     private val continuation = "some continuation"
     private val cursor = "some cursor"
     private val size = 42
-    private val collection = "some collection"
-    private val itemId = "some item id"
+    private val collection = IdParser.parseCollectionId("ETHEREUM:some collection")
+    private val itemId = IdParser.parseItemId("ETHEREUM:some item id")
     private val userType = listOf(mockk<UserActivityTypeDto>())
-    private val user = listOf("some user")
+    private val user = listOf(IdParser.parseAddress("ETHEREUM:some user"))
     private val from = Instant.ofEpochSecond(12345)
     private val to = Instant.ofEpochSecond(23456)
 
-
     companion object {
+
         private val apiMergeResponse = mockk<ActivitiesDto>()
         private val elasticResponse = mockk<ActivitiesDto>()
 

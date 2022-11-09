@@ -658,7 +658,7 @@ fun randomEthAuctionBidsDto(): AuctionBidsPaginationDto {
 
 fun randomEthOrderActivityMatch(): OrderActivityMatchDto {
     return OrderActivityMatchDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         source = OrderActivityDto.Source.RARIBLE,
         left = randomEthOrderActivityMatchSide(),
@@ -679,7 +679,7 @@ fun randomEthOrderActivityMatch(): OrderActivityMatchDto {
 
 fun randomEthOrderBidActivity(): OrderActivityBidDto {
     return OrderActivityBidDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         source = OrderActivityDto.Source.RARIBLE,
         hash = Word.apply(randomWord()),
@@ -695,7 +695,7 @@ fun randomEthOrderBidActivity(): OrderActivityBidDto {
 
 fun randomEthAuctionOpenActivity(): AuctionActivityOpenDto {
     return AuctionActivityOpenDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
         auction = randomEthAuctionDto(),
@@ -710,7 +710,7 @@ fun randomEthAuctionOpenActivity(): AuctionActivityOpenDto {
 
 fun randomEthAuctionCancelActivity(): AuctionActivityCancelDto {
     return AuctionActivityCancelDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
         auction = randomEthAuctionDto(),
@@ -725,7 +725,7 @@ fun randomEthAuctionCancelActivity(): AuctionActivityCancelDto {
 
 fun randomEthAuctionFinishActivity(): AuctionActivityFinishDto {
     return AuctionActivityFinishDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
         auction = randomEthAuctionDto(),
@@ -740,7 +740,7 @@ fun randomEthAuctionFinishActivity(): AuctionActivityFinishDto {
 
 fun randomEthAuctionBidActivity(): AuctionActivityBidDto {
     return AuctionActivityBidDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
         auction = randomEthAuctionDto(),
@@ -762,7 +762,7 @@ fun randomEthAuctionBidActivity(): AuctionActivityBidDto {
 
 fun randomEthAuctionStartActivity(): AuctionActivityStartDto {
     return AuctionActivityStartDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
         auction = randomEthAuctionDto(),
@@ -773,7 +773,7 @@ fun randomEthAuctionStartActivity(): AuctionActivityStartDto {
 
 fun randomEthAuctionEndActivity(): AuctionActivityEndDto {
     return AuctionActivityEndDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         source = AuctionActivityDto.Source.RARIBLE,
         auction = randomEthAuctionDto(),
@@ -784,7 +784,7 @@ fun randomEthAuctionEndActivity(): AuctionActivityEndDto {
 
 fun randomEthOrderListActivity(): OrderActivityListDto {
     return OrderActivityListDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         source = OrderActivityDto.Source.OPEN_SEA,
         hash = Word.apply(randomWord()),
@@ -800,7 +800,7 @@ fun randomEthOrderListActivity(): OrderActivityListDto {
 
 fun randomEthOrderActivityCancelBid(): OrderActivityCancelBidDto {
     return OrderActivityCancelBidDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         source = OrderActivityDto.Source.RARIBLE,
         transactionHash = Word.apply(randomWord()),
@@ -818,7 +818,7 @@ fun randomEthOrderActivityCancelBid(): OrderActivityCancelBidDto {
 
 fun randomEthOrderActivityCancelList(): OrderActivityCancelListDto {
     return OrderActivityCancelListDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         source = OrderActivityDto.Source.RARIBLE,
         transactionHash = Word.apply(randomWord()),
@@ -836,7 +836,7 @@ fun randomEthOrderActivityCancelList(): OrderActivityCancelListDto {
 
 fun randomEthItemMintActivity(): MintDto {
     return MintDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         owner = randomAddress(),
         contract = randomAddress(),
@@ -853,7 +853,7 @@ fun randomEthItemMintActivity(): MintDto {
 
 fun randomEthItemBurnActivity(): BurnDto {
     return BurnDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         owner = randomAddress(),
         contract = randomAddress(),
@@ -870,7 +870,7 @@ fun randomEthItemBurnActivity(): BurnDto {
 
 fun randomEthItemTransferActivity(): TransferDto {
     return TransferDto(
-        id = randomString(),
+        id = randomString().lowercase(),
         date = nowMillis(),
         owner = randomAddress(),
         contract = randomAddress(),

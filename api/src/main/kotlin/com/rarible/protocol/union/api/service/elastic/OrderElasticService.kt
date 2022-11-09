@@ -13,11 +13,13 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
@@ -60,9 +62,9 @@ class OrderElasticService(
     }
 
     override suspend fun getSellOrdersByItem(
-        itemId: String,
+        itemId: ItemIdDto,
         platform: PlatformDto?,
-        maker: String?,
+        maker: UnionAddress?,
         origin: String?,
         status: List<OrderStatusDto>?,
         continuation: String?,
@@ -71,9 +73,9 @@ class OrderElasticService(
         val safeSize = PageSize.ORDER.limit(size)
 
         val orderFilter = EsOrderSellOrdersByItem(
-            itemId = itemId,
+            itemId = itemId.fullId(),
             platform = platform,
-            maker = maker,
+            maker = maker?.fullId(),
             origin = origin,
             status = status,
             continuation = DateIdContinuation.parse(continuation),
@@ -83,9 +85,9 @@ class OrderElasticService(
     }
 
     override suspend fun getOrderBidsByItem(
-        itemId: String,
+        itemId: ItemIdDto,
         platform: PlatformDto?,
-        maker: List<String>?,
+        makers: List<UnionAddress>?,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -96,9 +98,9 @@ class OrderElasticService(
         val safeSize = PageSize.ORDER.limit(size)
 
         val orderFilter = EsOrderBidOrdersByItem(
-            itemId = itemId,
+            itemId = itemId.fullId(),
             platform = platform,
-            maker = maker,
+            maker = makers?.map { it.fullId() },
             origin = origin,
             status = status,
             continuation = DateIdContinuation.parse(continuation),
@@ -110,7 +112,7 @@ class OrderElasticService(
     override suspend fun getOrderBidsByMaker(
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
-        maker: List<String>,
+        makers: List<UnionAddress>,
         origin: String?,
         status: List<OrderStatusDto>?,
         start: Long?,
@@ -122,7 +124,7 @@ class OrderElasticService(
 
         val orderFilter = EsOrdersByMakers(
             platform = platform,
-            maker = maker,
+            maker = makers.map { it.fullId() },
             origin = origin,
             status = status,
             continuation = DateIdContinuation.parse(continuation),
@@ -154,7 +156,7 @@ class OrderElasticService(
     }
 
     override suspend fun getSellOrdersByMaker(
-        maker: List<String>,
+        makers: List<UnionAddress>,
         blockchains: List<BlockchainDto>?,
         platform: PlatformDto?,
         origin: String?,
@@ -166,7 +168,7 @@ class OrderElasticService(
 
         val orderFilter = EsOrdersByMakers(
             platform = platform,
-            maker = maker,
+            maker = makers.map { it.fullId() },
             origin = origin,
             status = status,
             continuation = DateIdContinuation.parse(continuation),

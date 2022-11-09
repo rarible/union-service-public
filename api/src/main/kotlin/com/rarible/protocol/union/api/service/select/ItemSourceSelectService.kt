@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import com.rarible.protocol.union.dto.SearchEngineDto
+import com.rarible.protocol.union.dto.UnionAddress
 import kotlinx.coroutines.flow.Flow
 import org.springframework.stereotype.Service
 
@@ -54,7 +55,7 @@ class ItemSourceSelectService(
     }
 
     suspend fun getItemsByCollection(
-        collection: String,
+        collection: CollectionIdDto,
         continuation: String?,
         size: Int?,
         searchEngine: SearchEngineDto?
@@ -67,7 +68,7 @@ class ItemSourceSelectService(
     }
 
     suspend fun getItemsByCreator(
-        creator: String,
+        creator: UnionAddress,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?,
@@ -82,7 +83,7 @@ class ItemSourceSelectService(
     }
 
     suspend fun getItemsByOwner(
-        owner: String,
+        owner: UnionAddress,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?,
@@ -98,7 +99,7 @@ class ItemSourceSelectService(
     }
 
     suspend fun getItemsByOwnerWithOwnership(
-        owner: String,
+        owner: UnionAddress,
         continuation: String?,
         size: Int?,
         searchEngine: SearchEngineDto?

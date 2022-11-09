@@ -394,13 +394,13 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val size = 3
 
         val ethItemActivity = randomEthItemMintActivity()
-            .copy(date = nowMillis().minusSeconds(5), id = "ethItemActivity")
+            .copy(date = nowMillis().minusSeconds(5), id = "ethitemactivity")
         val ethItemActivity2 = randomEthOrderActivityMatch()
-            .copy(date = nowMillis().minusSeconds(6), id = "ethItemActivity2")
+            .copy(date = nowMillis().minusSeconds(6), id = "ethitemactivity2")
         val polygonItemActivity = randomEthItemMintActivity()
-            .copy(date = nowMillis().minusSeconds(7), id = "polygonItemActivity")
+            .copy(date = nowMillis().minusSeconds(7), id = "polygonitemactivity")
         val sameTypeDifferentRole = randomEthOrderActivityMatch()
-            .copy(date = Instant.now().minusSeconds(6), id = "sameTypeDifferentRole")
+            .copy(date = Instant.now().minusSeconds(6), id = "sametypedifferentrole")
 
         val elasticEthItemActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity.id}",

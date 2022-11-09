@@ -196,7 +196,7 @@ class ItemController(
         searchEngine: SearchEngineDto?
     ): ResponseEntity<ItemsDto> {
         val result = itemSourceSelectService.getItemsByCollection(
-            collection = collection,
+            collection = IdParser.parseCollectionId(collection),
             continuation = continuation,
             size = size,
             searchEngine = searchEngine
@@ -212,7 +212,7 @@ class ItemController(
         searchEngine: SearchEngineDto?
     ): ResponseEntity<ItemsDto> {
         val result = itemSourceSelectService.getItemsByCreator(
-            creator = creator,
+            creator = IdParser.parseAddress(creator),
             blockchains = blockchains,
             continuation = continuation,
             size = size,
@@ -229,7 +229,7 @@ class ItemController(
         searchEngine: SearchEngineDto?
     ): ResponseEntity<ItemsDto> {
         val result = itemSourceSelectService.getItemsByOwner(
-            owner = owner,
+            owner = IdParser.parseAddress(owner),
             blockchains = blockchains,
             continuation = continuation,
             size = size,
@@ -251,7 +251,7 @@ class ItemController(
         searchEngine: SearchEngineDto?
     ): ResponseEntity<ItemsWithOwnershipDto> {
         val result = itemSourceSelectService.getItemsByOwnerWithOwnership(
-            owner = owner,
+            owner = IdParser.parseAddress(owner),
             continuation = continuation,
             size = size,
             searchEngine = searchEngine

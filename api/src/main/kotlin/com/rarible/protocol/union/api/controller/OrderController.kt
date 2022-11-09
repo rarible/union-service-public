@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.parser.IdParser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
@@ -56,10 +57,11 @@ class OrderController(
         size: Int?,
         searchEngine: SearchEngineDto?
     ): ResponseEntity<OrdersDto> {
+        val makers = maker?.map(IdParser::parseAddress)
         val result = orderSourceSelector.getOrderBidsByItem(
-            itemId,
+            IdParser.parseItemId(itemId),
             platform,
-            maker,
+            makers,
             origin,
             status,
             start,
@@ -83,10 +85,11 @@ class OrderController(
         size: Int?,
         searchEngine: SearchEngineDto?
     ): ResponseEntity<OrdersDto> {
+        val makers = maker.map(IdParser::parseAddress)
         val result = orderSourceSelector.getOrderBidsByMaker(
             blockchains,
             platform,
-            maker,
+            makers,
             origin,
             status,
             start,
@@ -134,8 +137,9 @@ class OrderController(
         size: Int?,
         searchEngine: SearchEngineDto?
     ): ResponseEntity<OrdersDto> {
+        val makerAddress = maker?.let(IdParser::parseAddress)
         val result = orderSourceSelector.getSellOrdersByItem(
-            itemId, platform, maker, origin, status, continuation, size, searchEngine
+            IdParser.parseItemId(itemId), platform, makerAddress, origin, status, continuation, size, searchEngine
         )
         return ResponseEntity.ok(result)
     }
@@ -150,8 +154,9 @@ class OrderController(
         status: List<OrderStatusDto>?,
         searchEngine: SearchEngineDto?
     ): ResponseEntity<OrdersDto> {
+        val makers = maker.map(IdParser::parseAddress)
         val result = orderSourceSelector.getSellOrdersByMaker(
-            maker, blockchains, platform, origin, continuation, size, status, searchEngine
+            makers, blockchains, platform, origin, continuation, size, status, searchEngine
         )
         return ResponseEntity.ok(result)
     }

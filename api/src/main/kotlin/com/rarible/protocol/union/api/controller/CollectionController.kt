@@ -70,7 +70,8 @@ class CollectionController(
         continuation: String?,
         size: Int?
     ): ResponseEntity<CollectionsDto> {
-        val result = collectionSourceSelector.getCollectionsByOwner(owner, blockchains, continuation, size)
+        val ownerAddress = IdParser.parseAddress(owner)
+        val result = collectionSourceSelector.getCollectionsByOwner(ownerAddress, blockchains, continuation, size)
         return ResponseEntity.ok(result)
     }
 

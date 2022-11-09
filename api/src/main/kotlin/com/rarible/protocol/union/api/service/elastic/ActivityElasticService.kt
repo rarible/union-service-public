@@ -3,7 +3,6 @@ package com.rarible.protocol.union.api.service.elastic
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.flatMapAsync
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActivityLite
 import com.rarible.protocol.union.core.model.EsActivityLite
 import com.rarible.protocol.union.core.model.EsActivitySort
@@ -22,6 +21,8 @@ import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.L2DepositActivityDto
 import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
 import com.rarible.protocol.union.dto.MintActivityDto
@@ -34,10 +35,12 @@ import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.TransferActivityDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.service.query.activity.ActivityQueryService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -49,9 +52,7 @@ class ActivityElasticService(
     private val router: BlockchainRouter<ActivityService>,
 ) : ActivityQueryService {
 
-    companion object {
-        private val logger by Logger()
-    }
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
@@ -110,14 +111,18 @@ class ActivityElasticService(
 
     override suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
-        collection: List<String>,
+        collection: List<CollectionIdDto>,
         continuation: String?,
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
-        val filter = filterConverter.convertGetActivitiesByCollection(type, collection, effectiveCursor)
+        val filter = filterConverter.convertGetActivitiesByCollection(
+            type,
+            collection.map { it.fullId() },
+            effectiveCursor
+        )
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
 
         val activities = getActivities(queryResult.activities)
@@ -139,14 +144,14 @@ class ActivityElasticService(
 
     override suspend fun getActivitiesByItem(
         type: List<ActivityTypeDto>,
-        itemId: String,
+        itemId: ItemIdDto,
         continuation: String?,
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
-        val filter = filterConverter.convertGetActivitiesByItem(type, itemId, effectiveCursor)
+        val filter = filterConverter.convertGetActivitiesByItem(type, itemId.fullId(), effectiveCursor)
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
 
@@ -166,7 +171,7 @@ class ActivityElasticService(
 
     override suspend fun getActivitiesByUser(
         type: List<UserActivityTypeDto>,
-        user: List<String>,
+        user: List<UnionAddress>,
         blockchains: List<BlockchainDto>?,
         from: Instant?,
         to: Instant?,
@@ -176,7 +181,14 @@ class ActivityElasticService(
         sort: ActivitySortDto?
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
-        val filter = filterConverter.convertGetActivitiesByUser(type, user, blockchains, from, to, effectiveCursor)
+        val filter = filterConverter.convertGetActivitiesByUser(
+            type,
+            user.map { it.fullId() },
+            blockchains,
+            from,
+            to,
+            effectiveCursor
+        )
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
 

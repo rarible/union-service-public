@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.service.query.collection
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionsDto
+import com.rarible.protocol.union.dto.UnionAddress
 
 interface CollectionQueryService {
 
@@ -12,7 +13,7 @@ interface CollectionQueryService {
     ): CollectionsDto
 
     suspend fun getCollectionsByOwner(
-        owner: String,
+        owner: UnionAddress,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?

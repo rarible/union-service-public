@@ -5,7 +5,6 @@ import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.EsCollectionCursor.Companion.fromCollectionLite
-import com.rarible.protocol.union.enrichment.service.query.collection.CollectionQueryService
 import com.rarible.protocol.union.core.model.EsCollectionGenericFilter
 import com.rarible.protocol.union.core.model.EsCollectionLite
 import com.rarible.protocol.union.core.model.UnionCollection
@@ -14,11 +13,13 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionsDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
+import com.rarible.protocol.union.enrichment.service.query.collection.CollectionQueryService
 import org.springframework.stereotype.Service
 import kotlin.system.measureTimeMillis
 
@@ -29,6 +30,7 @@ class CollectionElasticService(
     private val router: BlockchainRouter<CollectionService>,
     private val enrichmentCollectionService: EnrichmentCollectionService
 ): CollectionQueryService {
+
     override suspend fun getAllCollections(
         blockchains: List<BlockchainDto>?,
         continuation: String?,
@@ -44,14 +46,14 @@ class CollectionElasticService(
     }
 
     override suspend fun getCollectionsByOwner(
-        owner: String,
+        owner: UnionAddress,
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?,
     ): CollectionsDto {
         val filter = EsCollectionGenericFilter(
             blockchains = blockchains?.toSet().orEmpty(),
-            owners = setOf(owner),
+            owners = setOf(owner.fullId()),
             cursor = continuation,
         )
         val result = repository.search(filter, size)
