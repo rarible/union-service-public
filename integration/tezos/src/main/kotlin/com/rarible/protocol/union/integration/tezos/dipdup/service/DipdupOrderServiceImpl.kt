@@ -23,18 +23,6 @@ class DipdupOrderServiceImpl(
 
     private val blockchain = BlockchainDto.TEZOS
 
-    fun enabledPlatforms(): List<TezosPlatform> {
-        val platforms = listOf(TezosPlatform.RARIBLE_V2, TezosPlatform.RARIBLE_V1).toMutableList()
-        if (marketplaces.hen) platforms.add(TezosPlatform.HEN)
-        if (marketplaces.objkt) platforms.add(TezosPlatform.OBJKT_V1)
-        if (marketplaces.objktV2) platforms.add(TezosPlatform.OBJKT_V2)
-        if (marketplaces.versum) platforms.add(TezosPlatform.VERSUM_V1)
-        if (marketplaces.teia) platforms.add(TezosPlatform.TEIA_V1)
-        if (marketplaces.fxhashV1) platforms.add(TezosPlatform.FXHASH_V1)
-        if (marketplaces.fxhashV2) platforms.add(TezosPlatform.FXHASH_V2)
-        return platforms
-    }
-
     override suspend fun getOrderById(id: String): OrderDto {
         logger.info("Fetch dipdup order by id: $id")
         val order = safeApiCall { dipdupOrderClient.getOrderById(id) }
@@ -73,6 +61,7 @@ class DipdupOrderServiceImpl(
         contract: String,
         tokenId: BigInteger,
         maker: String?,
+        platforms: List<TezosPlatform>,
         currencyId: String,
         statuses: List<OrderStatusDto>?,
         continuation: String?,
@@ -85,7 +74,7 @@ class DipdupOrderServiceImpl(
             maker = maker,
             currencyId = currencyId,
             statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
-            platforms = enabledPlatforms(),
+            platforms = platforms(platforms),
             isBid = false,
             size = size,
             continuation = continuation
@@ -98,6 +87,7 @@ class DipdupOrderServiceImpl(
 
     override suspend fun getSellOrdersByMaker(
         maker: List<String>,
+        platforms: List<TezosPlatform>,
         statuses: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
@@ -105,7 +95,7 @@ class DipdupOrderServiceImpl(
         val page = dipdupOrderClient.getOrdersByMakers(
             makers = maker,
             statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
-            platforms = enabledPlatforms(),
+            platforms = platforms(platforms),
             isBid = false,
             size = size,
             continuation = continuation
@@ -136,6 +126,7 @@ class DipdupOrderServiceImpl(
         contract: String,
         tokenId: BigInteger,
         maker: String?,
+        platforms: List<TezosPlatform>,
         currencyId: String,
         statuses: List<OrderStatusDto>?,
         continuation: String?,
@@ -148,7 +139,7 @@ class DipdupOrderServiceImpl(
             maker = maker,
             currencyId = currencyId,
             statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
-            platforms = enabledPlatforms(),
+            platforms = platforms(platforms),
             isBid = true,
             size = size,
             continuation = continuation
@@ -161,6 +152,7 @@ class DipdupOrderServiceImpl(
 
     override suspend fun getBidOrdersByMaker(
         maker: List<String>,
+        platforms: List<TezosPlatform>,
         statuses: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
@@ -168,7 +160,7 @@ class DipdupOrderServiceImpl(
         val page = dipdupOrderClient.getOrdersByMakers(
             makers = maker,
             statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
-            platforms = enabledPlatforms(),
+            platforms = platforms(platforms),
             isBid = true,
             size = size,
             continuation = continuation
@@ -201,6 +193,26 @@ class DipdupOrderServiceImpl(
         } catch (e: DipDupNotFound) {
             throw UnionNotFoundException(message = e.message ?: "")
         }
+    }
+
+    private fun enabledPlatforms(): List<TezosPlatform> {
+        val platforms = mutableListOf<TezosPlatform>()
+        platforms.add(TezosPlatform.RARIBLE_V1)
+        platforms.add(TezosPlatform.RARIBLE_V2)
+        if (marketplaces.hen) platforms.add(TezosPlatform.HEN)
+        if (marketplaces.objkt) platforms.add(TezosPlatform.OBJKT_V1)
+        if (marketplaces.objktV2) platforms.add(TezosPlatform.OBJKT_V2)
+        if (marketplaces.versum) platforms.add(TezosPlatform.VERSUM_V1)
+        if (marketplaces.teia) platforms.add(TezosPlatform.TEIA_V1)
+        if (marketplaces.fxhashV1) platforms.add(TezosPlatform.FXHASH_V1)
+        if (marketplaces.fxhashV2) platforms.add(TezosPlatform.FXHASH_V2)
+        return platforms
+    }
+
+    private fun platforms(requested: List<TezosPlatform>) = if (requested.isEmpty()) {
+        enabledPlatforms()
+    } else {
+        enabledPlatforms().toSet().intersect(requested.toSet()).toList()
     }
 
     companion object {

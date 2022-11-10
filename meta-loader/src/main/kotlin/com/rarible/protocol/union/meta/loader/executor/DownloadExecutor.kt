@@ -54,7 +54,7 @@ sealed class DownloadExecutor<T>(
             onFail(started, task, e.message)
         } catch (e: Exception) {
             logger.error(
-                "Unexpected exception while downloading data for {} task {} ()",
+                "Unexpected exception while downloading data for {} task {} ({})",
                 type, task.id, task.pipeline, e
             )
             onFail(started, task, e.message)
@@ -71,7 +71,7 @@ sealed class DownloadExecutor<T>(
         saved?.let { notifier.notify(saved) }
 
         metrics.onSuccessfulTask(started, getBlockchain(task), type, task.pipeline, task.force)
-        logger.info("Data download SUCCEEDED for {} task: {} ()", type, task.id, task.pipeline)
+        logger.info("Data download SUCCEEDED for {} task: {} ({})", type, task.id, task.pipeline)
     }
 
     private suspend fun onFail(started: Instant, task: DownloadTask, errorMessage: String?) {
@@ -101,7 +101,7 @@ sealed class DownloadExecutor<T>(
         // Never should be null
         saved?.let {
             logger.warn(
-                "Data download FAILED for {} task: {} (), status = {}, retries = {}, errorMessage = {}",
+                "Data download FAILED for {} task: {} ({}), status = {}, retries = {}, errorMessage = {}",
                 type, saved.id, task.pipeline, saved.status, saved.retries, saved.errorMessage
             )
         }
@@ -111,13 +111,13 @@ sealed class DownloadExecutor<T>(
         when (status) {
             DownloadStatus.FAILED -> metrics.onFailedTask(started, getBlockchain(task), type, task.pipeline, task.force)
             DownloadStatus.RETRY -> metrics.onRetriedTask(started, getBlockchain(task), type, task.pipeline, task.force)
-            else -> logger.warn("Incorrect status of failed {} task {} (): {}", type, task.id, task.pipeline, status)
+            else -> logger.warn("Incorrect status of failed {} task {} ({}): {}", type, task.id, task.pipeline, status)
         }
     }
 
     private fun getDefault(task: DownloadTask): DownloadEntry<T> {
         // This should never happen, originally, at Executor stage entry MUST always exist
-        logger.warn("{} entry for task {} () not found, using default state", type, task.id, task.pipeline)
+        logger.warn("{} entry for task {} ({}) not found, using default state", type, task.id, task.pipeline)
         return DownloadEntry(
             id = task.id,
             status = DownloadStatus.SCHEDULED,

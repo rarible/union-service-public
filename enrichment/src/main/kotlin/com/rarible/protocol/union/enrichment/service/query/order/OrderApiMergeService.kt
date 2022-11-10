@@ -267,7 +267,7 @@ class OrderApiMergeService(
         }
 
         val combinedSlice = Paging(
-            OrderContinuation.ByLastUpdatedAndIdAsc,
+            OrderContinuation.ByLastUpdatedAndIdDesc,
             blockchainSlices.flatMap { it.entities }
         ).getSlice(safeSize)
 

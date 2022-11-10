@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.service
 
+import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
@@ -31,6 +32,7 @@ interface DipdupOrderService {
         contract: String,
         tokenId: BigInteger,
         maker: String?,
+        platforms: List<TezosPlatform>,
         currencyId: String,
         status: List<OrderStatusDto>?,
         continuation: String?,
@@ -41,6 +43,7 @@ interface DipdupOrderService {
 
     suspend fun getSellOrdersByMaker(
         maker: List<String>,
+        platforms: List<TezosPlatform>,
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
@@ -60,6 +63,7 @@ interface DipdupOrderService {
         contract: String,
         tokenId: BigInteger,
         maker: String?,
+        platforms: List<TezosPlatform>,
         currencyId: String,
         status: List<OrderStatusDto>?,
         continuation: String?,
@@ -70,6 +74,7 @@ interface DipdupOrderService {
 
     suspend fun getBidOrdersByMaker(
         maker: List<String>,
+        platforms: List<TezosPlatform>,
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
