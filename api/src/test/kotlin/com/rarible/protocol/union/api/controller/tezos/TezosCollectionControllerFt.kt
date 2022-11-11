@@ -53,7 +53,7 @@ class TezosCollectionControllerFt : AbstractIntegrationTest() {
         val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id"
 
         coEvery {
-            tzktTokenClient.tokenCount(collectionId.value)
+            dipdupTokenClient.getLastTokenId(collectionId.value)
         } returns BigInteger.ZERO
 
         testTemplate.getForEntity(url, TokenId::class.java).body.apply {
@@ -70,7 +70,7 @@ class TezosCollectionControllerFt : AbstractIntegrationTest() {
         val url = "${baseUrl()}/collections/${collectionId.fullId()}/generate_token_id"
 
         coEvery {
-            tzktTokenClient.tokenCount(collectionId.value)
+            dipdupTokenClient.getLastTokenId(collectionId.value)
         } returns BigInteger.ONE
 
         testTemplate.getForEntity(url, TokenId::class.java).body.apply {

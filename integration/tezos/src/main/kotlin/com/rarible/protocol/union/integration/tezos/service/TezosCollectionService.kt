@@ -12,6 +12,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProp
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.entity.TezosCollectionRepository
+import org.slf4j.LoggerFactory
 import java.math.BigInteger
 
 @CaptureSpan(type = "blockchain")
@@ -21,6 +22,8 @@ open class TezosCollectionService(
     private val tezosCollectionRepository: TezosCollectionRepository,
     private val properties: DipDupIntegrationProperties
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), CollectionService {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun getAllCollections(
         continuation: String?,
@@ -55,10 +58,11 @@ open class TezosCollectionService(
 
     override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
         val tokenId: BigInteger = try { // Adjust to existed count
-            val actualCount = tzktCollectionService.tokenCount(collectionId)
+            val actualCount = dipdupCollectionService.getTokenLastId(collectionId)
             tezosCollectionRepository.adjustTokenCount(collectionId, actualCount)
             tezosCollectionRepository.generateTokenId(collectionId)
         } catch (ex: Exception) {
+            logger.error("Error generating new tokenId: ${ex.message}", ex)
             throw UnionException("Collection wasn't found")
         }
         return TokenId(tokenId.toString())

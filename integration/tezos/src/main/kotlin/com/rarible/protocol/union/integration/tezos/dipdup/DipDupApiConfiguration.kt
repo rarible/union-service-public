@@ -172,8 +172,8 @@ class DipDupApiConfiguration(
     }
 
     @Bean
-    fun dipdupCollectionService(collectionClient: com.rarible.dipdup.client.CollectionClient): DipDupCollectionService {
-        return DipDupCollectionService(collectionClient)
+    fun dipdupCollectionService(collectionClient: com.rarible.dipdup.client.CollectionClient, tokenClient: com.rarible.dipdup.client.TokenClient): DipDupCollectionService {
+        return DipDupCollectionService(collectionClient, tokenClient)
     }
 
     @Bean
