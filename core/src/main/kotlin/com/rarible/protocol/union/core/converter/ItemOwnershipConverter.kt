@@ -13,7 +13,7 @@ object ItemOwnershipConverter {
             return ItemOwnershipDto(
                 id = ownership.id,
                 blockchain = ownership.id.blockchain,
-                collection = ownership.collection!!,
+                collection = ownership.collection,
                 owner = ownership.id.owner,
                 creators = ownership.creators,
                 value = ownership.value,
