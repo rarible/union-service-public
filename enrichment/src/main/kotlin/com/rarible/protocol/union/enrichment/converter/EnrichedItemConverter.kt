@@ -30,12 +30,6 @@ object EnrichedItemConverter {
         } else {
             null
         }
-        val metaDto = when {
-            (shortItem?.metaEntry != null) -> EnrichedMetaConverter.convert(shortItem.metaEntry)
-            meta != null -> EnrichedMetaConverter.convert(meta) // TODO remove later
-            (item.meta != null) -> EnrichedMetaConverter.convert(item.meta!!) // TODO remove later
-            else -> null
-        }
 
         return ItemDto(
             id = item.id,
@@ -51,7 +45,7 @@ object EnrichedItemConverter {
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
-            meta = metaDto,
+            meta = meta?.let { EnrichedMetaConverter.convert(it) },
             deleted = item.deleted,
 
             // Enrichment data
