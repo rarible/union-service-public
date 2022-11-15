@@ -58,7 +58,9 @@ class OwnershipController(
         return ResponseEntity.ok(result)
     }
 
-    override suspend fun search(ownershipSearchRequestDto: OwnershipSearchRequestDto): ResponseEntity<OwnershipsDto> {
+    override suspend fun searchOwnerships(
+        ownershipSearchRequestDto: OwnershipSearchRequestDto
+    ): ResponseEntity<OwnershipsDto> {
         return ResponseEntity.ok(ownershipSourceSelectService.search(ownershipSearchRequestDto))
     }
 }
