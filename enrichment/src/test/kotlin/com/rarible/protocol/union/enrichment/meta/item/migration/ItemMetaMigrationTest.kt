@@ -148,7 +148,7 @@ class ItemMetaMigrationTest {
             retriedAt = nowMillis().minusSeconds(15)
         )
 
-        val migration = DownloadedMetaMigration(task, modernEntry, legacyEntry)
+        val migration = FailedMetaMigration(task, modernEntry)
 
         assertThat(migration.isMigrationRequired()).isEqualTo(false)
     }
