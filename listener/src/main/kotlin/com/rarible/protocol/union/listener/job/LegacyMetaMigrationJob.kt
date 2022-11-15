@@ -6,6 +6,7 @@ import com.rarible.core.loader.internal.common.MongoLoadTaskRepository
 import com.rarible.protocol.union.enrichment.meta.item.migration.ItemMetaMigrator
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.reactive.asFlow
+import org.bson.types.ObjectId
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
@@ -15,6 +16,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
 
 @Component
+@Deprecated("Should be removed after migration")
 class LegacyMetaMigrationJob(
     private val mongo: ReactiveMongoOperations,
     private val itemMetaMigrator: ItemMetaMigrator
@@ -23,7 +25,7 @@ class LegacyMetaMigrationJob(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     fun migrate(fromTask: String?, chunkSize: Int) = flow {
-        val criteria = fromTask?.let { Criteria("_id").gt(it) } ?: Criteria()
+        val criteria = fromTask?.let { Criteria("_id").gt(ObjectId(it)) } ?: Criteria()
         val query = Query(criteria)
         query.with(Sort.by(Sort.Direction.ASC, "_id"))
         mongo.find<LoadTask>(query, MongoLoadTaskRepository.COLLECTION)

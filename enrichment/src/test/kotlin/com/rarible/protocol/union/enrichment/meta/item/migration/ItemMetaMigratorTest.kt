@@ -44,11 +44,9 @@ class ItemMetaMigratorTest {
     }
 
     @Test
-    fun `skipped - retry or scheduled statuses`() = runBlocking<Unit> {
-        val retry = LoadTask.Status.WaitsForRetry(nowMillis(), randomInt(), nowMillis(), nowMillis(), "", false)
+    fun `skipped - scheduled status`() = runBlocking<Unit> {
         val scheduled = LoadTask.Status.Scheduled(nowMillis())
 
-        migrator.migrate(createTask(itemId, retry))
         migrator.migrate(createTask(itemId, scheduled))
 
         coVerify(exactly = 0) { modernRepository.update(any(), any(), any()) }
@@ -71,6 +69,26 @@ class ItemMetaMigratorTest {
     @Test
     fun `migrated - failed`() = runBlocking<Unit> {
         val status = LoadTask.Status.Failed(nowMillis().minusSeconds(1), randomInt(), nowMillis(), randomString())
+        val task = createTask(itemId, status)
+
+        coEvery { modernRepository.get(itemId.fullId()) } returns null
+        coEvery { legacyRepository.get<UnionMeta>(ItemMetaDownloader.TYPE, itemId.fullId()) } returns legacyEntry
+
+        migrator.migrate(task)
+
+        coVerify(exactly = 1) { modernRepository.update(any(), any(), any()) }
+    }
+
+    @Test
+    fun `migrated - retry`() = runBlocking<Unit> {
+        val status = LoadTask.Status.WaitsForRetry(
+            nowMillis().minusSeconds(2),
+            randomInt(),
+            nowMillis().minusSeconds(1),
+            nowMillis(),
+            randomString(),
+            true
+        );
         val task = createTask(itemId, status)
 
         coEvery { modernRepository.get(itemId.fullId()) } returns null

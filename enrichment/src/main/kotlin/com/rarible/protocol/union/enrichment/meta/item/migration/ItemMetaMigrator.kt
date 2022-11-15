@@ -41,6 +41,10 @@ class ItemMetaMigrator(
                 val modern = modernRepository.get(task.key)
                 getFailedMigration(task, modern)
             }
+            is LoadTask.Status.WaitsForRetry -> {
+                val modern = modernRepository.get(task.key)
+                getRetryMigration(task, modern)
+            }
             else -> null // Other statuses are not needed
         }
         migration?.let { migrate(migration) }
@@ -50,7 +54,7 @@ class ItemMetaMigrator(
      * Batch migration, should be used in background job
      */
     suspend fun migrate(tasks: List<LoadTask>, asyncTaskCount: Int) = coroutineScope {
-        val filtered = tasks.filter { it.status is LoadTask.Status.Loaded || it.status is LoadTask.Status.Failed }
+        val filtered = tasks.filter { it.status !is LoadTask.Status.Scheduled }
         val groupedByItem = filtered.groupBy { it.key }
 
         // We need legacy meta only for successful tasks
@@ -69,6 +73,7 @@ class ItemMetaMigrator(
             when (task.status) {
                 is LoadTask.Status.Loaded -> getDownloadedMigration(task, modern, legacy)
                 is LoadTask.Status.Failed -> getFailedMigration(task, modern)
+                is LoadTask.Status.WaitsForRetry -> getRetryMigration(task, modern)
                 else -> null
             }
         }.filter { it.isMigrationRequired() }
@@ -93,6 +98,13 @@ class ItemMetaMigrator(
         modern: DownloadEntry<UnionMeta>?
     ): FailedMetaMigration {
         return FailedMetaMigration(task, modern)
+    }
+
+    private fun getRetryMigration(
+        task: LoadTask,
+        modern: DownloadEntry<UnionMeta>?
+    ): RetryMetaMigration {
+        return RetryMetaMigration(task, modern)
     }
 
     suspend fun migrate(migration: ItemMetaMigration) {
