@@ -3,12 +3,10 @@ package com.rarible.protocol.union.api.controller.tezos
 import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTzktToken
 import com.rarible.tzkt.model.Page
-import com.rarible.tzkt.model.TokenMeta
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactor.awaitSingle
@@ -60,25 +58,13 @@ class TezosItemControllerFt : AbstractIntegrationTest() {
     @Test
     fun `should return item with tags and attributes`() = runBlocking<Unit> {
         val itemId = randomTezosItemId()
-        val item = randomTzktToken(itemId.value).copy(
-            meta = TokenMeta(
-                name = "test",
-                tags = listOf("tag1"),
-                attributes = listOf(
-                    TokenMeta.Attribute(
-                        "key1",
-                        "val1"
-                    )
-                )
-            )
-        )
+        val item = randomTzktToken(itemId.value)
         coEvery {
             tzktTokenClient.token(itemId.value)
         } returns item
 
         val itemDto = itemControllerClient.getItemById(itemId.fullId()).awaitSingle()
-        assertThat(itemDto.meta?.tags).isEqualTo(listOf("tag1"))
-        assertThat(itemDto.meta?.attributes).isEqualTo(listOf(MetaAttributeDto("key1", "val1")))
+        assertThat(itemDto.id.value).isEqualTo(item.contract!!.address + ":" + item.tokenId)
     }
 
 }
