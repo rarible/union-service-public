@@ -144,10 +144,11 @@ class ItemMetaMigrationTest {
 
         val modernEntry = randomItemMetaDownloadEntry(
             status = DownloadStatus.FAILED,
-            failedAt = status.failedAt.plusSeconds(1)
+            failedAt = status.failedAt.plusSeconds(1),
+            retriedAt = nowMillis().minusSeconds(15)
         )
 
-        val migration = DownloadedMetaMigration(task, modernEntry, legacyEntry)
+        val migration = FailedMetaMigration(task, modernEntry)
 
         assertThat(migration.isMigrationRequired()).isEqualTo(false)
     }
