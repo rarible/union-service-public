@@ -72,7 +72,8 @@ class DownloadedMetaMigration(
             succeedAt = legacyMeta.cachedAt,
             updatedAt = legacyMeta.cachedAt,
             // Not a real date, but let it be consistent
-            failedAt = if (task.status.retryAttempts == 0) null else task.status.scheduledAt
+            failedAt = if (task.status.retryAttempts == 0) null else task.status.scheduledAt,
+            retriedAt = if (task.status.retryAttempts == 0) null else task.status.scheduledAt.plusSeconds(15),
         )
     }
 }
@@ -94,14 +95,13 @@ class FailedMetaMigration(
             return true
         }
 
-        // If modern record is not FAILED for some reason - skip update
-        if (modern.status != DownloadStatus.FAILED) {
+        // If modern record is not FAILED or RETRY - skip update (SCHEDULED or SUCCESS should not be updated in such case)
+        if (modern.status != DownloadStatus.FAILED && modern.status != DownloadStatus.RETRY) {
             return false
         }
 
         // If fail date not specified or outdated - also should be updated
-        val failedStatus = task.status as LoadTask.Status.Failed
-        if (modern.failedAt == null || modern.failedAt!!.isBefore(failedStatus.failedAt)) {
+        if (modern.failedAt == null || modern.retriedAt == null || modern.failedAt!!.isBefore(status.failedAt)) {
             return true
         }
         return false
@@ -111,6 +111,7 @@ class FailedMetaMigration(
         val toUpdate = modern ?: createDefaultEntry()
 
         return toUpdate.copy(
+            fails = status.retryAttempts,
             failedAt = status.failedAt,
             updatedAt = status.failedAt,
             errorMessage = trimToLength(status.errorMessage, MAX_ERROR_MESSAGE_LENGTH)
@@ -123,13 +124,70 @@ class FailedMetaMigration(
             status = DownloadStatus.FAILED,
             data = null,
             downloads = 0,
-            fails = task.status.retryAttempts,
-            retries = task.status.retryAttempts,
-            scheduledAt = task.status.scheduledAt,
+            fails = status.retryAttempts,
+            retries = status.retryAttempts,
+            scheduledAt = status.scheduledAt,
+            retriedAt = status.scheduledAt.plusSeconds(10),
             succeedAt = null,
             updatedAt = status.failedAt,
             errorMessage = trimToLength(status.errorMessage, MAX_ERROR_MESSAGE_LENGTH),
             failedAt = status.failedAt
         )
     }
+}
+
+@Deprecated("Should be removed after meta-pipeline migration")
+class RetryMetaMigration(
+    task: LoadTask,
+    modernMeta: DownloadEntry<UnionMeta>?
+) : ItemMetaMigration(
+    task,
+    modernMeta
+) {
+
+    private val status = task.status as LoadTask.Status.WaitsForRetry
+
+    override fun isMigrationRequired(modern: DownloadEntry<UnionMeta>?): Boolean {
+        // No record - let's create it
+        if (modern == null) {
+            return true
+        }
+
+        // We can update only RETRY entries here, no status transition allowed
+        if (modern.data != null || modern.status != DownloadStatus.RETRY) {
+            return false
+        }
+
+        return true
+    }
+
+    override fun update(modern: DownloadEntry<UnionMeta>?): DownloadEntry<UnionMeta> {
+        val toUpdate = modern ?: createDefaultEntry()
+
+        return toUpdate.copy(
+            retries = status.retryAttempts,
+            fails = status.retryAttempts,
+            failedAt = status.failedAt,
+            updatedAt = status.failedAt,
+            errorMessage = trimToLength(status.errorMessage, MAX_ERROR_MESSAGE_LENGTH)
+        )
+    }
+
+    private fun createDefaultEntry(): DownloadEntry<UnionMeta> {
+        return DownloadEntry(
+            id = task.key,
+            status = DownloadStatus.RETRY,
+            data = null,
+            downloads = 0,
+            fails = status.retryAttempts,
+            retries = status.retryAttempts,
+            scheduledAt = status.scheduledAt,
+            retriedAt = status.scheduledAt.plusSeconds(10),
+            succeedAt = null,
+            updatedAt = status.failedAt,
+            errorMessage = trimToLength(status.errorMessage, MAX_ERROR_MESSAGE_LENGTH),
+            failedAt = status.failedAt
+        )
+    }
+
 }

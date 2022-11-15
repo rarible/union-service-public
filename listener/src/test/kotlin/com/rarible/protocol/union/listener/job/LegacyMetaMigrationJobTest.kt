@@ -16,9 +16,9 @@ import com.rarible.protocol.union.listener.test.IntegrationTest
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.bson.types.ObjectId
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.math.BigInteger
 
 @IntegrationTest
 class LegacyMetaMigrationJobIt {
@@ -46,32 +46,36 @@ class LegacyMetaMigrationJobIt {
     fun execute() = runBlocking<Unit> {
         val scheduled = LoadTask.Status.Scheduled(ago3m)
         val scheduledItemId = randomEthItemId()
-        taskRepository.save(LoadTask(ObjectId().toHexString(), loadType, scheduledItemId.fullId(), scheduled))
+        taskRepository.save(LoadTask("636e13bf1e067c64c83b8950", loadType, scheduledItemId.fullId(), scheduled))
 
         val retry = LoadTask.Status.WaitsForRetry(ago3m, randomInt(), ago2m, ago1m, "", false)
         val retryItemId = randomEthItemId()
-        taskRepository.save(LoadTask(ObjectId().toHexString(), loadType, retryItemId.fullId(), retry))
+        taskRepository.save(LoadTask("636e13bf888b825c98f7f91c", loadType, retryItemId.fullId(), retry))
+        val retryItem = itemRepository.save(randomShortItem(retryItemId).copy(totalStock = BigInteger.TEN))
 
         // Item should be updated with failed meta
         val failed = LoadTask.Status.Failed(ago3m, randomInt(), ago2m, "")
         val failedItemId = randomEthItemId()
-        taskRepository.save(LoadTask(ObjectId().toHexString(), loadType, failedItemId.fullId(), failed))
+        taskRepository.save(LoadTask("636e13bf888b825c98f7f91e", loadType, failedItemId.fullId(), failed))
         val failedItem = itemRepository.save(randomShortItem(failedItemId).copy(sellers = 2))
 
         // Item should be created with migrated meta
         val loaded = LoadTask.Status.Loaded(ago3m, randomInt(), ago2m)
         val loadedItemId = randomEthItemId()
-        taskRepository.save(LoadTask(ObjectId().toHexString(), loadType, loadedItemId.fullId(), loaded))
+        taskRepository.save(LoadTask("636e13bf888b825c98f7f920", loadType, loadedItemId.fullId(), loaded))
         val loadedMeta = randomUnionMeta()
         legacyRepository.save(ItemMetaDownloader.TYPE, loadedItemId.fullId(), loadedMeta, now)
 
-        val updated = job.migrate(null, 2).toList()
+        val updated = job.migrate("636e13bf1e067c64c83b894f", 2).toList()
         val migratedLoadedItem = itemRepository.get(ShortItemId(loadedItemId))!!
         val migratedFailedItem = itemRepository.get(failedItem.id)!!
+        val migratedRetryItem = itemRepository.get(retryItem.id)!!
 
         assertThat(updated).hasSize(2)
         assertThat(migratedLoadedItem.metaEntry!!.data).isEqualTo(loadedMeta)
         assertThat(migratedFailedItem.metaEntry!!.status).isEqualTo(DownloadStatus.FAILED)
+        assertThat(migratedRetryItem.metaEntry!!.status).isEqualTo(DownloadStatus.RETRY)
+        assertThat(migratedRetryItem.metaEntry!!.retries).isEqualTo(retry.retryAttempts)
 
         val migratedFailedMetaToCompare = migratedFailedItem.copy(
             lastUpdatedAt = failedItem.lastUpdatedAt,
