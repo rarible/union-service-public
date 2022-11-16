@@ -48,9 +48,9 @@ import scalether.domain.Address
 
 object EthConverter {
 
-    fun convert(address: Address) = address.prefixed()!!
-    fun convert(word: Word) = word.prefixed()!!
-    fun convert(binary: Binary) = binary.prefixed()!!
+    fun convert(address: Address): String = address.prefixed()!!
+    fun convert(word: Word): String = word.prefixed()!!
+    fun convert(binary: Binary): String = binary.prefixed()!!
 
     fun convertToWord(value: String): Word {
         try {
