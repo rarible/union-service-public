@@ -2,6 +2,8 @@ package com.rarible.protocol.union.listener.job
 
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -10,7 +12,9 @@ import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,11 +32,17 @@ class ItemMetaRetryJobIt {
     @Autowired
     lateinit var itemRepository: ItemRepository
 
+    private val blockchainRouter: BlockchainRouter<ItemService> = mockk {
+        every { getService(any()) } returns mockk {
+            coEvery { getItemCollectionId(any()) } returns null
+        }
+    }
+
     private val metaService = mockk<ItemMetaService>(relaxed = true)
 
     @Test
     fun execute() = runBlocking {
-        val handler = ItemMetaRetryJobHandler(itemRepository, metaProperties, metaService)
+        val handler = ItemMetaRetryJobHandler(itemRepository, metaProperties, metaService, blockchainRouter)
         val now = Instant.now()
         val idNow = randomEthItemId()
         val id6m = randomEthItemId()

@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionMetaDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
@@ -30,7 +31,6 @@ object LogUtils {
         return addToMdc(values.toList(), block)
     }
 
-    @ExperimentalCoroutinesApi
     suspend fun <T> addToMdc(values: List<Pair<String, String>>, block: suspend CoroutineScope.() -> T): T {
         val current = MDC.getCopyOfContextMap()
         val newValues = values.associateBy({ it.first }, { it.second })
@@ -40,13 +40,21 @@ object LogUtils {
         return withContext(RaribleMDCContext(resultMap), block)
     }
 
-    @ExperimentalCoroutinesApi
     suspend fun <T> addToMdc(
         itemId: ItemIdDto,
         router: BlockchainRouter<ItemService>,
         block: suspend CoroutineScope.() -> T
     ): T {
-        val collection = try {
+        return addToMdc(itemId, collectionId = null, router, block)
+    }
+
+    suspend fun <T> addToMdc(
+        itemId: ItemIdDto,
+        collectionId: CollectionIdDto?,
+        router: BlockchainRouter<ItemService>,
+        block: suspend CoroutineScope.() -> T
+    ): T {
+        val collection = collectionId?.fullId() ?: try {
             router.getService(itemId.blockchain).getItemCollectionId(itemId.value) ?: ""
         } catch (e: Exception) {
             logger.info("Unable to get collection for Item {}: {}", itemId, e.message)
