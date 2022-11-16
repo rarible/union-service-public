@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.solana.converter
 
 import com.rarible.protocol.solana.api.client.TokenControllerApi
-import com.rarible.protocol.solana.dto.SolanaApiMetaErrorDto
+import com.rarible.protocol.solana.dto.TokenMetaDto
 import com.rarible.protocol.union.core.exception.UnionMetaException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.integration.solana.service.SolanaItemService
@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.web.reactive.function.client.WebClientResponseException
+import reactor.core.publisher.Mono
 
 class SolanaItemServiceTest {
     private val tokenApi = mockk<TokenControllerApi>()
@@ -26,14 +27,12 @@ class SolanaItemServiceTest {
 
     @Test
     fun `Meta unparseable link`() = runBlocking {
-        coEvery { tokenApi.getTokenMetaByAddress(any()) } throws TokenControllerApi.ErrorGetTokenMetaByAddress(
-            WebClientResponseException(500, "", null, null, null)
-        ).apply {
-            on500 = SolanaApiMetaErrorDto(
-                code = SolanaApiMetaErrorDto.Code.UNPARSEABLE_LINK,
-                message = "Unparseable link"
+        coEvery { tokenApi.getTokenMetaByAddress(any()) } returns Mono.just(
+            TokenMetaDto(
+                name = "",
+                status = TokenMetaDto.Status.UNPARSEABLE_LINK
             )
-        }
+        )
 
         val exception = assertThrows<UnionMetaException> {
             solanaItemService.getItemMetaById("")
@@ -44,14 +43,12 @@ class SolanaItemServiceTest {
 
     @Test
     fun `Meta unparseable json`() = runBlocking {
-        coEvery { tokenApi.getTokenMetaByAddress(any()) } throws TokenControllerApi.ErrorGetTokenMetaByAddress(
-            WebClientResponseException(500, "", null, null, null)
-        ).apply {
-            on500 = SolanaApiMetaErrorDto(
-                code = SolanaApiMetaErrorDto.Code.UNPARSEABLE_JSON,
-                message = "Unparseable json"
+        coEvery { tokenApi.getTokenMetaByAddress(any()) } returns Mono.just(
+            TokenMetaDto(
+                name = "",
+                status = TokenMetaDto.Status.UNPARSEABLE_JSON
             )
-        }
+        )
 
         val exception = assertThrows<UnionMetaException> {
             solanaItemService.getItemMetaById("")
@@ -62,14 +59,12 @@ class SolanaItemServiceTest {
 
     @Test
     fun `Meta timeout`() = runBlocking {
-        coEvery { tokenApi.getTokenMetaByAddress(any()) } throws TokenControllerApi.ErrorGetTokenMetaByAddress(
-            WebClientResponseException(500, "", null, null, null)
-        ).apply {
-            on500 = SolanaApiMetaErrorDto(
-                code = SolanaApiMetaErrorDto.Code.TIMEOUT,
-                message = "Timeout"
+        coEvery { tokenApi.getTokenMetaByAddress(any()) } returns Mono.just(
+            TokenMetaDto(
+                name = "",
+                status = TokenMetaDto.Status.TIMEOUT
             )
-        }
+        )
 
         val exception = assertThrows<UnionMetaException> {
             solanaItemService.getItemMetaById("")
@@ -91,14 +86,12 @@ class SolanaItemServiceTest {
 
     @Test
     fun `Meta unknown error`() = runBlocking<Unit> {
-        coEvery { tokenApi.getTokenMetaByAddress(any()) } throws TokenControllerApi.ErrorGetTokenMetaByAddress(
-            WebClientResponseException(500, "", null, null, null)
-        ).apply {
-            on500 = SolanaApiMetaErrorDto(
-                code = SolanaApiMetaErrorDto.Code.ERROR,
-                message = "Timeout"
+        coEvery { tokenApi.getTokenMetaByAddress(any()) } returns Mono.just(
+            TokenMetaDto(
+                name = "",
+                status = TokenMetaDto.Status.ERROR
             )
-        }
+        )
 
         val exception = assertThrows<UnionMetaException> {
             solanaItemService.getItemMetaById("")
