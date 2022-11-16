@@ -22,7 +22,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.Instant
 
 fun randomSolanaTokenDto(itemId: ItemIdDto) = TokenDto(
     address = itemId.value,
@@ -51,7 +50,8 @@ fun randomTokenMeta() = TokenMetaDto(
     },
     content = (1..(randomInt(1, 3))).map {
         randomTokenMetaContentDto()
-    }
+    },
+    status = TokenMetaDto.Status.OK
 )
 
 fun randomUrl(): String =
