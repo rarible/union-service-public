@@ -22,13 +22,16 @@ abstract class EthItemEventHandler(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun handleInternal(event: NftItemEventDto) {
+    suspend fun handleInternal(event: NftItemEventDto) = handler.onEvent(convert(event))
+    suspend fun handleInternal(events: List<NftItemEventDto>) = handler.onEvents(events.map(this::convert))
+
+    private fun convert(event: NftItemEventDto): UnionItemEvent {
         logger.info("Received {} Item event {}", blockchain, event)
 
         when (event) {
             is NftItemUpdateEventDto -> {
                 val item = EthItemConverter.convert(event.item, blockchain)
-                handler.onEvent(UnionItemUpdateEvent(item))
+                return UnionItemUpdateEvent(item)
             }
             is NftItemDeleteEventDto -> {
                 val itemId = ItemIdDto(
@@ -36,7 +39,7 @@ abstract class EthItemEventHandler(
                     contract = EthConverter.convert(event.item.token),
                     tokenId = event.item.tokenId
                 )
-                handler.onEvent(UnionItemDeleteEvent(itemId))
+                return UnionItemDeleteEvent(itemId)
             }
         }
     }
@@ -45,13 +48,21 @@ abstract class EthItemEventHandler(
 open class EthereumItemEventHandler(
     handler: IncomingEventHandler<UnionItemEvent>
 ) : EthItemEventHandler(BlockchainDto.ETHEREUM, handler) {
+
     @CaptureTransaction("ItemEvent#ETHEREUM")
     override suspend fun handle(event: NftItemEventDto) = handleInternal(event)
+
+    @CaptureTransaction("ItemEvents#ETHEREUM")
+    override suspend fun handle(events: List<NftItemEventDto>) = handleInternal(events)
 }
 
 open class PolygonItemEventHandler(
     handler: IncomingEventHandler<UnionItemEvent>
 ) : EthItemEventHandler(BlockchainDto.POLYGON, handler) {
+
     @CaptureTransaction("ItemEvent#POLYGON")
     override suspend fun handle(event: NftItemEventDto) = handleInternal(event)
+
+    @CaptureTransaction("ItemEvents#POLYGON")
+    override suspend fun handle(events: List<NftItemEventDto>) = handleInternal(events)
 }

@@ -23,13 +23,16 @@ abstract class EthOwnershipEventHandler(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun handleInternal(event: NftOwnershipEventDto) {
+    suspend fun handleInternal(event: NftOwnershipEventDto) = handler.onEvent(convert(event))
+    suspend fun handleInternal(events: List<NftOwnershipEventDto>) = handler.onEvents(events.map(this::convert))
+
+    private fun convert(event: NftOwnershipEventDto): UnionOwnershipEvent {
         logger.info("Received {} Ownership event: {}", blockchain, event)
 
         when (event) {
             is NftOwnershipUpdateEventDto -> {
                 val ownership = EthOwnershipConverter.convert(event.ownership, blockchain)
-                handler.onEvent(UnionOwnershipUpdateEvent(ownership))
+                return UnionOwnershipUpdateEvent(ownership)
             }
             is NftOwnershipDeleteEventDto -> {
                 val deletedOwnership = event.ownership!!
@@ -39,7 +42,7 @@ abstract class EthOwnershipEventHandler(
                     tokenId = deletedOwnership.tokenId,
                     owner = UnionAddressConverter.convert(blockchain, EthConverter.convert(deletedOwnership.owner))
                 )
-                handler.onEvent(UnionOwnershipDeleteEvent(ownershipId))
+                return UnionOwnershipDeleteEvent(ownershipId)
             }
         }
     }
@@ -48,13 +51,21 @@ abstract class EthOwnershipEventHandler(
 open class EthereumOwnershipEventHandler(
     handler: IncomingEventHandler<UnionOwnershipEvent>
 ) : EthOwnershipEventHandler(BlockchainDto.ETHEREUM, handler) {
+
     @CaptureTransaction("OwnershipEvent#ETHEREUM")
     override suspend fun handle(event: NftOwnershipEventDto) = handleInternal(event)
+
+    @CaptureTransaction("OwnershipsEvent#ETHEREUM")
+    override suspend fun handle(events: List<NftOwnershipEventDto>) = handleInternal(events)
 }
 
 open class PolygonOwnershipEventHandler(
     handler: IncomingEventHandler<UnionOwnershipEvent>
 ) : EthOwnershipEventHandler(BlockchainDto.POLYGON, handler) {
+
     @CaptureTransaction("OwnershipEvent#POLYGON")
     override suspend fun handle(event: NftOwnershipEventDto) = handleInternal(event)
+
+    @CaptureTransaction("OwnershipsEvent#POLYGON")
+    override suspend fun handle(events: List<NftOwnershipEventDto>) = handleInternal(events)
 }
