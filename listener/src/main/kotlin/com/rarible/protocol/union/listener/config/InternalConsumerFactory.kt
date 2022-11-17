@@ -4,7 +4,7 @@ import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.daemon.sequential.ConsumerBatchWorker
 import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
-import com.rarible.protocol.union.core.handler.BatchedConsumerWorker
+import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.core.handler.InternalBatchEventHandler
 import com.rarible.protocol.union.core.handler.InternalBatchEventHandlerWrapper
 import com.rarible.protocol.union.core.handler.InternalEventHandler
@@ -32,7 +32,7 @@ class InternalConsumerFactory(
         handler: InternalEventHandler<T>,
         daemon: DaemonWorkerProperties,
         workers: Int
-    ): BatchedConsumerWorker<T> {
+    ): ConsumerWorkerGroup<T> {
         logger.info("Creating {} reconciliation mark consumers", workers)
         return createInternalBatchedConsumerWorker(consumer, handler, daemon, workers, RECONCILIATION)
     }
@@ -43,7 +43,7 @@ class InternalConsumerFactory(
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>,
         blockchain: BlockchainDto
-    ): BatchedConsumerWorker<T> {
+    ): ConsumerWorkerGroup<T> {
         val type = blockchain.name.lowercase()
         val workerCount = workers[type] ?: DEFAULT_BLOCKCHAIN_WORKER_COUNT
 
@@ -57,7 +57,7 @@ class InternalConsumerFactory(
         handler: InternalEventHandler<T>,
         daemon: DaemonWorkerProperties,
         workers: Int
-    ): BatchedConsumerWorker<T> {
+    ): ConsumerWorkerGroup<T> {
         logger.info("Creating {} wrapped event consumers (SHOULD BE REMOVED)", workers)
         return createInternalBatchedConsumerWorker(consumer, handler, daemon, workers, "wrapped")
     }
@@ -68,7 +68,7 @@ class InternalConsumerFactory(
         daemonWorkerProperties: DaemonWorkerProperties,
         workers: Int,
         type: String
-    ): BatchedConsumerWorker<T> {
+    ): ConsumerWorkerGroup<T> {
         val workerSet = (1..workers).map {
             ConsumerWorker(
                 consumer = consumer(it),
@@ -78,7 +78,7 @@ class InternalConsumerFactory(
                 workerName = "internal-${type}-$it"
             )
         }
-        return BatchedConsumerWorker(workerSet)
+        return ConsumerWorkerGroup(workerSet)
     }
 
     fun <T> createInternalBatchedConsumerWorker(
@@ -87,7 +87,7 @@ class InternalConsumerFactory(
         daemonWorkerProperties: DaemonWorkerProperties,
         workers: Int,
         type: String
-    ): BatchedConsumerWorker<T> {
+    ): ConsumerWorkerGroup<T> {
         val workerSet = (1..workers).map {
             ConsumerBatchWorker(
                 consumer = consumer(it),
@@ -97,6 +97,6 @@ class InternalConsumerFactory(
                 workerName = "internal-${type}-$it"
             )
         }
-        return BatchedConsumerWorker(workerSet)
+        return ConsumerWorkerGroup(workerSet)
     }
 }

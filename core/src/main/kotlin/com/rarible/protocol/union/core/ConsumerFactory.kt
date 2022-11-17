@@ -6,9 +6,9 @@ import com.rarible.core.daemon.RetryProperties
 import com.rarible.core.daemon.sequential.ConsumerEventHandler
 import com.rarible.core.daemon.sequential.ConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
-import com.rarible.protocol.union.core.handler.BatchedConsumerWorker
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.BlockchainEventHandlerWrapper
+import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
@@ -53,8 +53,8 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
-    ): BatchedConsumerWorker<T> {
-        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, ITEM)
+    ): ConsumerWorkerGroup<T> {
+        return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, ITEM)
     }
 
     fun <T> createItemMetaConsumer(
@@ -62,8 +62,8 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
-    ): BatchedConsumerWorker<T> {
-        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, ITEM_META)
+    ): ConsumerWorkerGroup<T> {
+        return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, ITEM_META)
     }
 
     fun <T> createOwnershipConsumer(
@@ -71,8 +71,8 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
-    ): BatchedConsumerWorker<T> {
-        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, OWNERSHIP)
+    ): ConsumerWorkerGroup<T> {
+        return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, OWNERSHIP)
     }
 
     fun <T> createOrderConsumer(
@@ -80,8 +80,8 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
-    ): BatchedConsumerWorker<T> {
-        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, ORDER)
+    ): ConsumerWorkerGroup<T> {
+        return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, ORDER)
     }
 
     fun <T> createAuctionConsumer(
@@ -89,8 +89,8 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
-    ): BatchedConsumerWorker<T> {
-        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, AUCTION)
+    ): ConsumerWorkerGroup<T> {
+        return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, AUCTION)
     }
 
     fun <T> createActivityConsumer(
@@ -98,8 +98,8 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
-    ): BatchedConsumerWorker<T> {
-        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, ACTIVITY)
+    ): ConsumerWorkerGroup<T> {
+        return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, ACTIVITY)
     }
 
     fun <T> createCollectionConsumer(
@@ -107,17 +107,17 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>
-    ): BatchedConsumerWorker<T> {
-        return createBlockchainBatchedConsumerWorker(consumer, handler, daemon, workers, COLLECTION)
+    ): ConsumerWorkerGroup<T> {
+        return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, COLLECTION)
     }
 
-    fun <T> createBlockchainBatchedConsumerWorker(
+    private fun <T> createBlockchainConsumerWorkerGroup(
         consumer: RaribleKafkaConsumer<T>,
         handler: BlockchainEventHandler<T, *>,
         daemonWorkerProperties: DaemonWorkerProperties,
         workers: Map<String, Int>,
         entityType: String
-    ): BatchedConsumerWorker<T> {
+    ): ConsumerWorkerGroup<T> {
         val blockchain = handler.blockchain
         val workerCount = workers.getOrDefault(entityType, 1)
         val workerSet = (1..workerCount).map {
@@ -130,47 +130,47 @@ class ConsumerFactory(
                 retryProperties = RetryProperties(attempts = Integer.MAX_VALUE, delay = Duration.ofSeconds(1))
             )
         }
-        return BatchedConsumerWorker(workerSet)
+        return ConsumerWorkerGroup(workerSet)
     }
 
-    fun createUnionItemBatchedConsumerWorker(
+    fun createUnionItemConsumerWorkerGroup(
         consumer: RaribleKafkaConsumer<ItemEventDto>,
         handler: ConsumerEventHandler<ItemEventDto>,
         daemonWorkerProperties: DaemonWorkerProperties,
         workers: Map<String, Int>,
         type: String
-    ): BatchedConsumerWorker<ItemEventDto> {
-        return createUnionBatchedConsumerWorker(consumer, handler, daemonWorkerProperties, workers, type, ITEM)
+    ): ConsumerWorkerGroup<ItemEventDto> {
+        return createUnionConsumerWorkerGroup(consumer, handler, daemonWorkerProperties, workers, type, ITEM)
     }
 
-    fun createUnionOrderBatchedConsumerWorker(
+    fun createUnionOrderConsumerWorkerGroup(
         consumer: RaribleKafkaConsumer<OrderEventDto>,
         handler: ConsumerEventHandler<OrderEventDto>,
         daemonWorkerProperties: DaemonWorkerProperties,
         workers: Map<String, Int>,
         type: String
-    ): BatchedConsumerWorker<OrderEventDto> {
-        return createUnionBatchedConsumerWorker(consumer, handler, daemonWorkerProperties, workers, type, ORDER)
+    ): ConsumerWorkerGroup<OrderEventDto> {
+        return createUnionConsumerWorkerGroup(consumer, handler, daemonWorkerProperties, workers, type, ORDER)
     }
 
-    fun createUnionOwnershipBatchedConsumerWorker(
+    fun createUnionOwnershipConsumerWorkerGroup(
         consumer: RaribleKafkaConsumer<OwnershipEventDto>,
         handler: ConsumerEventHandler<OwnershipEventDto>,
         daemonWorkerProperties: DaemonWorkerProperties,
         workers: Map<String, Int>,
         type: String
-    ): BatchedConsumerWorker<OwnershipEventDto> {
-        return createUnionBatchedConsumerWorker(consumer, handler, daemonWorkerProperties, workers, type, OWNERSHIP)
+    ): ConsumerWorkerGroup<OwnershipEventDto> {
+        return createUnionConsumerWorkerGroup(consumer, handler, daemonWorkerProperties, workers, type, OWNERSHIP)
     }
 
-    private fun <T> createUnionBatchedConsumerWorker(
+    private fun <T> createUnionConsumerWorkerGroup(
         consumer: RaribleKafkaConsumer<T>,
         handler: ConsumerEventHandler<T>,
         daemonWorkerProperties: DaemonWorkerProperties,
         workers: Map<String, Int>,
         type: String,
         entityType: String
-    ): BatchedConsumerWorker<T> {
+    ): ConsumerWorkerGroup<T> {
         val workerCount = workers.getOrDefault(entityType, 1)
         val workerSet = (1..workerCount).map {
             ConsumerWorker(
@@ -181,7 +181,7 @@ class ConsumerFactory(
                 workerName = "union-$type-${entityType}-$it"
             )
         }
-        return BatchedConsumerWorker(workerSet)
+        return ConsumerWorkerGroup(workerSet)
     }
 
     private fun consumerGroup(suffix: String): String {
