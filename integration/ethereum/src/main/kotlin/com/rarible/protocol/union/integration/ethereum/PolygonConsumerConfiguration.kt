@@ -49,6 +49,8 @@ class PolygonConsumerConfiguration(
 
     private val daemon = properties.daemon
 
+    private val batchSize = 32
+
     //-------------------- Handlers -------------------//
 
     @Bean
@@ -116,7 +118,7 @@ class PolygonConsumerConfiguration(
         @Qualifier("polygon.item.handler") handler: BlockchainEventHandler<NftItemEventDto, UnionItemEvent>
     ): KafkaConsumerWorker<NftItemEventDto> {
         val consumer = factory.createItemEventsConsumer(consumerFactory.itemGroup, Blockchain.POLYGON)
-        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -125,7 +127,7 @@ class PolygonConsumerConfiguration(
         @Qualifier("polygon.ownership.handler") handler: BlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>
     ): KafkaConsumerWorker<NftOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerFactory.ownershipGroup, Blockchain.POLYGON)
-        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
 
@@ -153,6 +155,6 @@ class PolygonConsumerConfiguration(
         @Qualifier("polygon.activity.handler") handler: BlockchainEventHandler<com.rarible.protocol.dto.ActivityDto, ActivityDto>
     ): KafkaConsumerWorker<com.rarible.protocol.dto.ActivityDto> {
         val consumer = factory.createActivityConsumer(consumerFactory.activityGroup, Blockchain.POLYGON)
-        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers, batchSize)
     }
 }

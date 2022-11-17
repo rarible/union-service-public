@@ -1,18 +1,26 @@
 package com.rarible.protocol.union.core.handler
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException
+import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.daemon.sequential.ConsumerEventHandler
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.slf4j.LoggerFactory
-import java.lang.ClassCastException
 
 class BlockchainEventHandlerWrapper<B, U>(
     private val blockchainHandler: BlockchainEventHandler<B, U>
-) : BlockchainEventHandler<B, U>, ConsumerEventHandler<B> {
+) : BlockchainEventHandler<B, U>, ConsumerEventHandler<B>, ConsumerBatchEventHandler<B> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun handle(event: B) {
+        try {
+            blockchainHandler.handle(event)
+        } catch (ex: Exception) {
+            logger.error("Unexpected exception during handling event [{}]", event, ex)
+            throw ex
+        }
+    }
+
+    override suspend fun handle(event: List<B>) {
         try {
             blockchainHandler.handle(event)
         } catch (ex: Exception) {
