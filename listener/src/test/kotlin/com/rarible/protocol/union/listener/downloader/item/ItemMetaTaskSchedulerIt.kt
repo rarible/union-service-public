@@ -5,6 +5,8 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
@@ -38,6 +40,9 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var metrics: DownloadSchedulerMetrics
 
+    @Autowired
+    lateinit var blockchainRouter: BlockchainRouter<ItemService>
+
     private val router: ItemMetaTaskRouter = mockk()
 
     lateinit var scheduler: ItemMetaTaskScheduler
@@ -46,7 +51,7 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     fun beforeEach() {
         clearMocks(router)
         coEvery { router.send(any(), any()) } returns Unit
-        scheduler = ItemMetaTaskScheduler(router, repository, metrics)
+        scheduler = ItemMetaTaskScheduler(router, repository, metrics, blockchainRouter)
     }
 
     @Test

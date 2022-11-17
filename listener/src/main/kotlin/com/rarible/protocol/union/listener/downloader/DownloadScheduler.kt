@@ -23,6 +23,7 @@ abstract class DownloadScheduler<T>(
 
     abstract val type: String
     abstract fun getBlockchain(task: DownloadTask): BlockchainDto
+    abstract suspend fun logScheduledTask(task: DownloadTask)
 
     suspend fun schedule(task: DownloadTask) {
         schedule(listOf(task))
@@ -46,6 +47,7 @@ abstract class DownloadScheduler<T>(
 
         deduplicated.groupBy { it.pipeline }.forEach { (pipeline, tasks) ->
             router.send(tasks, pipeline)
+            tasks.forEach { logScheduledTask(it) }
         }
     }
 

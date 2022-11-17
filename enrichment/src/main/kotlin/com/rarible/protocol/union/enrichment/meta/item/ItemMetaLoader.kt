@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.meta.item
 import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.protocol.solana.dto.TokenMetaDto
 import com.rarible.protocol.union.core.exception.UnionMetaException
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
@@ -48,31 +49,40 @@ class ItemMetaLoader(
     }
 
     private suspend fun getItemMeta(itemId: ItemIdDto): UnionMeta? {
-        return try {
-            val result = router.getService(itemId.blockchain).getItemMetaById(itemId.value)
-            metrics.onMetaFetched(itemId.blockchain)
-            result
-        } catch (e: UnionMetaException) {
-            when (e.code) {
-                UnionMetaException.ErrorCode.UNPARSEABLE_JSON -> metrics.onMetaParseJsonError(itemId.blockchain)
-                UnionMetaException.ErrorCode.UNPARSEABLE_LINK -> metrics.onMetaParseLinkError(itemId.blockchain)
-                UnionMetaException.ErrorCode.TIMEOUT -> metrics.onMetaFetchTimeout(itemId.blockchain)
-                UnionMetaException.ErrorCode.UNKNOWN -> metrics.onMetaFetchError(itemId.blockchain)
-            }
-            throw e
-        } catch (e: WebClientResponseProxyException) {
-            if (e.statusCode == HttpStatus.NOT_FOUND) {
-                // this log tagged by itemId, used in Kibana in analytics dashboards
-                logger.warn("Meta not found in blockchain for Item {}", itemId)
-                metrics.onMetaFetchNotFound(itemId.blockchain)
-                null
-            } else {
+        return LogUtils.addToMdc(
+            itemId,
+            router
+        ) {
+            try {
+                val result = router.getService(itemId.blockchain).getItemMetaById(itemId.value)
+                metrics.onMetaFetched(itemId.blockchain)
+                result
+            } catch (e: UnionMetaException) {
+                logger.error("Meta fetching failed with code: {} for Item {}", e.code.name, itemId)
+
+                when (e.code) {
+                    UnionMetaException.ErrorCode.UNPARSEABLE_JSON -> metrics.onMetaParseJsonError(itemId.blockchain)
+                    UnionMetaException.ErrorCode.UNPARSEABLE_LINK -> metrics.onMetaParseLinkError(itemId.blockchain)
+                    UnionMetaException.ErrorCode.TIMEOUT -> metrics.onMetaFetchTimeout(itemId.blockchain)
+                    UnionMetaException.ErrorCode.UNKNOWN -> metrics.onMetaFetchError(itemId.blockchain)
+                }
+                throw e
+            } catch (e: WebClientResponseProxyException) {
+                if (e.statusCode == HttpStatus.NOT_FOUND) {
+                    // this log tagged by itemId, used in Kibana in analytics dashboards
+                    logger.warn("Meta fetching failed with code: NOT_FOUND for Item {}", itemId)
+                    metrics.onMetaFetchNotFound(itemId.blockchain)
+                    null
+                } else {
+                    logger.error("Meta fetching failed with code: {} for Item {}", TokenMetaDto.Status.ERROR, itemId)
+                    metrics.onMetaFetchError(itemId.blockchain)
+                    throw e
+                }
+            } catch (e: Exception) {
+                logger.error("Meta fetching failed with code: {} for Item {}", TokenMetaDto.Status.ERROR, itemId)
                 metrics.onMetaFetchError(itemId.blockchain)
                 throw e
             }
-        } catch (e: Exception) {
-            metrics.onMetaFetchError(itemId.blockchain)
-            throw e
         }
     }
 
