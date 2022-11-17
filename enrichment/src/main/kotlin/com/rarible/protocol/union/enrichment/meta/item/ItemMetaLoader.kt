@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.meta.item
 import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.core.client.WebClientResponseProxyException
+import com.rarible.protocol.solana.dto.TokenMetaDto
 import com.rarible.protocol.union.core.exception.UnionMetaException
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
@@ -69,14 +70,16 @@ class ItemMetaLoader(
             } catch (e: WebClientResponseProxyException) {
                 if (e.statusCode == HttpStatus.NOT_FOUND) {
                     // this log tagged by itemId, used in Kibana in analytics dashboards
-                    logger.warn("Meta not found in blockchain for Item {}", itemId)
+                    logger.warn("Meta fetching failed with code: NOT_FOUND for Item {}", itemId)
                     metrics.onMetaFetchNotFound(itemId.blockchain)
                     null
                 } else {
+                    logger.error("Meta fetching failed with code: {} for Item {}", TokenMetaDto.Status.ERROR, itemId)
                     metrics.onMetaFetchError(itemId.blockchain)
                     throw e
                 }
             } catch (e: Exception) {
+                logger.error("Meta fetching failed with code: {} for Item {}", TokenMetaDto.Status.ERROR, itemId)
                 metrics.onMetaFetchError(itemId.blockchain)
                 throw e
             }
