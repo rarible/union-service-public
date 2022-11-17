@@ -37,7 +37,8 @@ fun randomDipDupListActivity(activityId: String, date: Instant): DipDupActivity 
             assetType = Asset.XTZ(),
             assetValue = BigDecimal.ONE
         ),
-        source = TezosPlatform.RARIBLE_V2
+        source = TezosPlatform.RARIBLE_V2,
+        dbUpdatedAt = null
     )
 }
 

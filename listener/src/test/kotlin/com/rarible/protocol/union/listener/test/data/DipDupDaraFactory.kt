@@ -41,7 +41,8 @@ fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
             assetValue = BigDecimal.ONE
         ),
         operationCounter = randomInt(),
-        source = TezosPlatform.RARIBLE_V2
+        source = TezosPlatform.RARIBLE_V2,
+        dbUpdatedAt = null
     )
 }
 
@@ -56,6 +57,7 @@ fun randomDipDupActivityMintEvent(): DipDupMintActivity {
         date = OffsetDateTime.now(),
         reverted = false,
         transactionId = randomString(),
+        dbUpdatedAt = null
     )
 }
 
@@ -71,6 +73,7 @@ fun randomDipDupActivityTransferEvent(): DipDupTransferActivity {
         date = OffsetDateTime.now(),
         reverted = false,
         transactionId = randomString(),
+        dbUpdatedAt = null
     )
 }
 
@@ -85,6 +88,7 @@ fun randomDipDupActivityBurnEvent(): DipDupBurnActivity {
         date = OffsetDateTime.now(),
         reverted = false,
         transactionId = randomString(),
+        dbUpdatedAt = null
     )
 }
 

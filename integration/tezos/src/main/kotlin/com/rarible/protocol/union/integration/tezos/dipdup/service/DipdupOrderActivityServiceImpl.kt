@@ -39,12 +39,9 @@ class DipdupOrderActivityServiceImpl(
         limit: Int,
         sort: SyncSortDto?
     ): Slice<ActivityDto> {
-        val sortAsc = when (sort) {
-            SyncSortDto.DB_UPDATE_ASC -> true
-            else -> false
-        }
+        val sortTezos = sort?.let { DipDupActivityConverter.convert(it) }
         logger.info("Fetch dipdup all order activities sync: $continuation, $limit, $sort")
-        val page = dipdupActivityClient.getActivitiesSync(limit, continuation, sortAsc)
+        val page = dipdupActivityClient.getActivitiesSync(limit, continuation, sortTezos)
         return Slice(
             continuation = page.continuation,
             entities = page.activities.map { dipDupActivityConverter.convert(it, blockchain) }

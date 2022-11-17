@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.service
 
 import com.rarible.dipdup.client.TokenActivityClient
+import com.rarible.dipdup.client.model.DipDupSyncSort
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -37,12 +38,9 @@ class DipDupTokenActivityService(
     }
 
     suspend fun getSync(continuation: String?, limit: Int, sort: SyncSortDto?): Slice<ActivityDto> {
-        val sortAsc = when (sort) {
-            SyncSortDto.DB_UPDATE_ASC -> true
-            else -> false
-        }
+        val sortInternal = sort?.let { DipDupActivityConverter.convert(it) } ?: DipDupSyncSort.DB_UPDATE_DESC
         logger.info("Fetch dipdup all token activities sync: $continuation, $limit, $sort")
-        val page = dipDupTokenActivityClient.getActivitySync(limit, continuation, sortAsc)
+        val page = dipDupTokenActivityClient.getActivitiesSync(limit, continuation, sortInternal)
         return Slice(
             continuation = page.continuation,
             entities = page.activities.map { dipDupActivityConverter.convert(it, blockchain) }

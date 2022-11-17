@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.tezos
 
+import com.rarible.dipdup.client.OrderActivityClient
+import com.rarible.dipdup.client.TokenActivityClient
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.OrderService
@@ -8,6 +10,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupApiConfiguration
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
+import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupOwnershipService
@@ -105,15 +108,21 @@ class TezosApiConfiguration {
 
     @Bean
     fun tezosActivityService(
+        orderActivityClient: OrderActivityClient,
         dipdupOrderActivityService: DipdupOrderActivityService,
+        tokenActivityClient: TokenActivityClient,
         dipdupTokenActivityService: DipDupTokenActivityService,
+        dipDupActivityConverter: DipDupActivityConverter,
         tzktItemActivityService: TzktItemActivityService,
         properties: DipDupIntegrationProperties
     ): TezosActivityService {
         return TezosActivityService(
+            orderActivityClient,
             dipdupOrderActivityService,
+            tokenActivityClient,
             dipdupTokenActivityService,
             tzktItemActivityService,
+            dipDupActivityConverter,
             properties
         )
     }
