@@ -21,7 +21,6 @@ import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -41,11 +40,8 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var metrics: DownloadSchedulerMetrics
 
-    private val blockchainRouter: BlockchainRouter<ItemService> = mockk {
-        every { getService(any()) } returns mockk {
-            coEvery { getItemCollectionId(any()) } returns null
-        }
-    }
+    @Autowired
+    lateinit var blockchainRouter: BlockchainRouter<ItemService>
 
     private val router: ItemMetaTaskRouter = mockk()
 

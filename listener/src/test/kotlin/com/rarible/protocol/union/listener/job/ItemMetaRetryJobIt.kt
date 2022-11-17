@@ -12,9 +12,7 @@ import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -32,11 +30,8 @@ class ItemMetaRetryJobIt {
     @Autowired
     lateinit var itemRepository: ItemRepository
 
-    private val blockchainRouter: BlockchainRouter<ItemService> = mockk {
-        every { getService(any()) } returns mockk {
-            coEvery { getItemCollectionId(any()) } returns null
-        }
-    }
+    @Autowired
+    lateinit var blockchainRouter: BlockchainRouter<ItemService>
 
     private val metaService = mockk<ItemMetaService>(relaxed = true)
 
