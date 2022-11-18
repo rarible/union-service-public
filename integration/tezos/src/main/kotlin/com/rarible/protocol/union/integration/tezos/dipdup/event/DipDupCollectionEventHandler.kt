@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupCollectionConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
@@ -17,7 +18,9 @@ open class DipDupCollectionEventHandler(
     private val tzktCollectionService: TzktCollectionService,
     private val mapper: ObjectMapper,
     private val properties: DipDupIntegrationProperties
-) : AbstractBlockchainEventHandler<DipDupCollectionEvent, UnionCollectionEvent>(com.rarible.protocol.union.dto.BlockchainDto.TEZOS) {
+) : AbstractBlockchainEventHandler<DipDupCollectionEvent, UnionCollectionEvent>(
+    BlockchainDto.TEZOS
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

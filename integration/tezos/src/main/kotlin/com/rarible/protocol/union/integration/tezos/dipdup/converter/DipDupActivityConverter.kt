@@ -15,6 +15,8 @@ import com.rarible.dipdup.client.core.model.DipDupOrderSellActivity
 import com.rarible.dipdup.client.core.model.DipDupTransferActivity
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.client.model.DipDupActivityType
+import com.rarible.dipdup.client.model.DipDupSyncSort
+import com.rarible.dipdup.client.model.DipDupSyncType
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityDto
@@ -31,6 +33,8 @@ import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
+import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.tzkt.utils.Tezos
 import org.slf4j.LoggerFactory
@@ -460,6 +464,21 @@ class DipDupActivityConverter(
             TezosPlatform.FXHASH_V1, TezosPlatform.FXHASH_V2 -> OrderActivitySourceDto.FXHASH
             else -> throw RuntimeException("Not implemented for ${source} platform")
         }
+    }
+
+    companion object {
+        fun convert(source: SyncSortDto): DipDupSyncSort =
+            when (source) {
+                SyncSortDto.DB_UPDATE_ASC -> DipDupSyncSort.DB_UPDATE_ASC
+                SyncSortDto.DB_UPDATE_DESC -> DipDupSyncSort.DB_UPDATE_DESC
+            }
+
+        fun convert(source: SyncTypeDto): DipDupSyncType =
+            when (source) {
+                SyncTypeDto.ORDER -> DipDupSyncType.ORDER
+                SyncTypeDto.NFT -> DipDupSyncType.NFT
+                SyncTypeDto.AUCTION -> DipDupSyncType.AUCTION
+            }
     }
 }
 

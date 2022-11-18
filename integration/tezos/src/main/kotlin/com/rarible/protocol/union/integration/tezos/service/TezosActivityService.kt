@@ -2,6 +2,10 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.logging.Logger
+import com.rarible.dipdup.client.ActivityClient
+import com.rarible.dipdup.client.OrderActivityClient
+import com.rarible.dipdup.client.TokenActivityClient
+import com.rarible.dipdup.client.model.DipDupSyncSort
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.service.ActivityService
@@ -18,6 +22,7 @@ import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
+import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupTokenActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderActivityService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemActivityService
@@ -30,11 +35,16 @@ import java.util.regex.Pattern
 // TODO UNION add tests when tezos add sorting
 @CaptureSpan(type = "blockchain")
 open class TezosActivityService(
+    private val orderActivityClient: OrderActivityClient,
     private val dipdupOrderActivityService: DipdupOrderActivityService,
+    private val tokenActivityClient: TokenActivityClient,
     private val dipdupTokenActivityService: DipDupTokenActivityService,
     private val tzktItemActivityService: TzktItemActivityService,
+    private val dipDupActivityConverter: DipDupActivityConverter,
     private val properties: DipDupIntegrationProperties
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), ActivityService {
+
+    private val activityClient = ActivityClient(tokenActivityClient, orderActivityClient)
 
     companion object {
         private val logger by Logger()
@@ -81,11 +91,13 @@ open class TezosActivityService(
         sort: SyncSortDto?,
         type: SyncTypeDto?
     ): Slice<ActivityDto> {
-        return when (type) {
-            SyncTypeDto.NFT -> dipdupTokenActivityService.getSync(continuation, size, sort)
-            SyncTypeDto.ORDER -> dipdupOrderActivityService.getSync(continuation, size, sort)
-            else -> Slice.empty()
-        }
+        val tezosSort = sort?.let { DipDupActivityConverter.convert(it) } ?: DipDupSyncSort.DB_UPDATE_DESC
+        val tezosType = type?.let { DipDupActivityConverter.convert(it) }
+        val page = activityClient.getActivitiesSync(tezosType, tezosSort, size, continuation)
+        return Slice(
+            continuation = page.continuation,
+            entities = page.activities.map { dipDupActivityConverter.convert(it, blockchain) }
+        )
     }
 
     override suspend fun getAllRevertedActivitiesSync(

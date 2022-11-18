@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.dipdup
 
 import com.rarible.core.daemon.DaemonWorkerProperties
+import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.protocol.union.core.DefaultConsumerProperties
 import com.rarible.tzkt.config.KnownAddresses
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -52,6 +53,21 @@ data class DipDupIntegrationProperties(
         val teia: Boolean = false,
         val fxhashV1: Boolean = false,
         val fxhashV2: Boolean = false
-    )
+    ) {
+
+        fun getEnabledMarketplaces(): Set<TezosPlatform> {
+            val result = HashSet<TezosPlatform>()
+            result.add(TezosPlatform.RARIBLE_V1)
+            result.add(TezosPlatform.RARIBLE_V2)
+            if (hen) result.add(TezosPlatform.HEN)
+            if (objkt) result.add(TezosPlatform.OBJKT_V1)
+            if (objktV2) result.add(TezosPlatform.OBJKT_V2)
+            if (versum) result.add(TezosPlatform.VERSUM_V1)
+            if (teia) result.add(TezosPlatform.TEIA_V1)
+            if (fxhashV1) result.add(TezosPlatform.FXHASH_V1)
+            if (fxhashV2) result.add(TezosPlatform.FXHASH_V2)
+            return result
+        }
+    }
 
 }

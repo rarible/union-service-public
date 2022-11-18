@@ -19,13 +19,18 @@ open class SolanaOrderEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CaptureTransaction("OrderEvent#SOLANA")
-    override suspend fun handle(event: OrderEventDto) {
+    override suspend fun handle(event: OrderEventDto) = handler.onEvent(convert(event))
+
+    @CaptureTransaction("OrderEvents#SOLANA")
+    override suspend fun handle(events: List<OrderEventDto>) = handler.onEvents(events.map { convert(it) })
+
+    private suspend fun convert(event: OrderEventDto): UnionOrderEvent {
         logger.info("Received {} Order event: {}", blockchain, event)
 
-        when (event) {
+        return when (event) {
             is OrderUpdateEventDto -> {
                 val unionOrder = solanaOrderConverter.convert(event.order, blockchain)
-                handler.onEvent(UnionOrderUpdateEvent(unionOrder))
+                UnionOrderUpdateEvent(unionOrder)
             }
         }
     }

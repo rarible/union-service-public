@@ -48,9 +48,12 @@ class TezosActivityServiceTest {
     private val tzktProps: DipDupIntegrationProperties.TzktProperties = mockk()
 
     private val service = TezosActivityService(
+        mockk(),
         dipdupOrderActivityService,
+        mockk(),
         dipDupTokenActivityService,
         tzktItemActivityService,
+        mockk(),
         dipdupProps
     )
 

@@ -18,14 +18,16 @@ abstract class EthCollectionEventHandler(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun handleInternal(event: NftCollectionEventDto) {
+    suspend fun handleInternal(event: NftCollectionEventDto) = handler.onEvent(convert(event))
+    suspend fun handleInternal(events: List<NftCollectionEventDto>) = handler.onEvents(events.map(::convert))
+
+    private fun convert(event: NftCollectionEventDto): UnionCollectionEvent {
         logger.info("Received {} collection event: {}", blockchain, event)
 
-        when (event) {
+        return when (event) {
             is NftCollectionUpdateEventDto -> {
                 val collection = EthCollectionConverter.convert(event.collection, blockchain)
-                val unionCollectionEvent = UnionCollectionUpdateEvent(collection)
-                handler.onEvent(unionCollectionEvent)
+                UnionCollectionUpdateEvent(collection)
             }
         }
     }
@@ -34,13 +36,21 @@ abstract class EthCollectionEventHandler(
 open class EthereumCollectionEventHandler(
     handler: IncomingEventHandler<UnionCollectionEvent>
 ) : EthCollectionEventHandler(BlockchainDto.ETHEREUM, handler) {
+
     @CaptureTransaction("CollectionEvent#ETHEREUM")
     override suspend fun handle(event: NftCollectionEventDto) = handleInternal(event)
+
+    @CaptureTransaction("CollectionEvents#ETHEREUM")
+    override suspend fun handle(events: List<NftCollectionEventDto>) = handleInternal(events)
 }
 
 open class PolygonCollectionEventHandler(
     handler: IncomingEventHandler<UnionCollectionEvent>
 ) : EthCollectionEventHandler(BlockchainDto.POLYGON, handler) {
+
     @CaptureTransaction("CollectionEvent#POLYGON")
     override suspend fun handle(event: NftCollectionEventDto) = handleInternal(event)
+
+    @CaptureTransaction("CollectionEvents#POLYGON")
+    override suspend fun handle(events: List<NftCollectionEventDto>) = handleInternal(events)
 }

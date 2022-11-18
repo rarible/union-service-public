@@ -9,7 +9,7 @@ import com.rarible.core.task.EnableRaribleTask
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
-import com.rarible.protocol.union.core.handler.BatchedConsumerWorker
+import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.core.handler.InternalEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.CompositeRegisteredTimer
@@ -103,7 +103,7 @@ class UnionListenerConfiguration(
             )
         }
         val workers = consumers.flatMap { it.workers }
-        return BatchedConsumerWorker(workers)
+        return ConsumerWorkerGroup(workers)
     }
 
     @Bean
@@ -167,7 +167,7 @@ class UnionListenerConfiguration(
     @ConditionalOnProperty("common.feature-flags.enableMetaPipeline", havingValue = "true", matchIfMissing = false)
     fun itemMetaDownloadScheduleWorker(
         handler: ItemMetaTaskSchedulerHandler
-    ): BatchedConsumerWorker<DownloadTask> {
+    ): ConsumerWorkerGroup<DownloadTask> {
         val properties = listenerProperties.metaScheduling.item
         val consumerGroupSuffix = "meta.item"
         val clientIdSuffix = "item-meta-task-scheduler"

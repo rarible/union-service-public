@@ -10,4 +10,6 @@ interface BlockchainEventHandler<B, U> {
 
     suspend fun handle(event: B)
 
+    suspend fun handle(events: List<B>) = events.forEach { handle(it) }
+
 }

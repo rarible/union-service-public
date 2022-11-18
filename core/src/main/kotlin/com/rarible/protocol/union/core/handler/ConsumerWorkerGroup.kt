@@ -2,7 +2,7 @@ package com.rarible.protocol.union.core.handler
 
 import com.rarible.core.daemon.sequential.SequentialDaemonWorker
 
-class BatchedConsumerWorker<T>(
+class ConsumerWorkerGroup<T>(
     val workers: List<SequentialDaemonWorker>
 ) : KafkaConsumerWorker<T> {
 

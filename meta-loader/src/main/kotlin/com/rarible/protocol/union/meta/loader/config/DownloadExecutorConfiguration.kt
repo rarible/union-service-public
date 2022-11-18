@@ -6,7 +6,7 @@ import com.rarible.core.daemon.sequential.ConsumerBatchWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
-import com.rarible.protocol.union.core.handler.BatchedConsumerWorker
+import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
@@ -82,7 +82,7 @@ class DownloadExecutorConfiguration(
     fun itemMetaDownloadTaskConsumer(
         @Qualifier("item.meta.download.executor.manager")
         executorManager: DownloadExecutorManager
-    ): BatchedConsumerWorker<DownloadTask> {
+    ): ConsumerWorkerGroup<DownloadTask> {
         val type = "item"
         val workers = ItemMetaPipeline.values().map { it.name.lowercase() }.map { pipeline ->
             val conf = getItemPipelineConfiguration(pipeline)
@@ -91,7 +91,7 @@ class DownloadExecutorConfiguration(
         }.map { it.workers }.flatten()
 
         // Just join all pipeline workers into single list
-        return BatchedConsumerWorker(workers)
+        return ConsumerWorkerGroup(workers)
     }
 
     private fun getItemPipelineConfiguration(pipeline: String): ExecutorPipelineProperties {
@@ -106,7 +106,7 @@ class DownloadExecutorConfiguration(
         batchSize: Int,
         type: String,
         handler: DownloadExecutorHandler
-    ): BatchedConsumerWorker<UnionMeta> {
+    ): ConsumerWorkerGroup<UnionMeta> {
         val consumerGroupSuffix = "meta.$type"
         val clientIdSuffix = "$type-meta-task-executor"
         val workerSet = (1..workers).map {
@@ -121,7 +121,7 @@ class DownloadExecutorConfiguration(
         logger.info(
             "Created $workers consumers for $type-download-executor (pipeline: $pipeline, batchSize: $batchSize)"
         )
-        return BatchedConsumerWorker(workerSet)
+        return ConsumerWorkerGroup(workerSet)
     }
 
     private fun createDownloadExecutorConsumer(

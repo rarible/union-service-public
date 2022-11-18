@@ -20,9 +20,9 @@ import com.rarible.protocol.union.integration.solana.converter.SolanaOrderConver
 import com.rarible.protocol.union.integration.solana.event.SolanaActivityEventHandler
 import com.rarible.protocol.union.integration.solana.event.SolanaCollectionEventHandler
 import com.rarible.protocol.union.integration.solana.event.SolanaItemEventHandler
+import com.rarible.protocol.union.integration.solana.event.SolanaItemMetaEventHandler
 import com.rarible.protocol.union.integration.solana.event.SolanaOrderEventHandler
 import com.rarible.protocol.union.integration.solana.event.SolanaOwnershipEventHandler
-import com.rarible.protocol.union.integration.solana.event.SolanaItemMetaEventHandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 
@@ -38,9 +38,10 @@ class SolanaConsumerConfiguration(
     private val host = applicationEnvironmentInfo.host
 
     private val consumer = properties.consumer!!
-    private val workers = properties.consumer!!.workers
-
     private val daemon = properties.daemon
+
+    private val workers = consumer.workers
+    private val batchSize = consumer.batchSize
 
     //-------------------- Handlers -------------------//
 
@@ -94,7 +95,7 @@ class SolanaConsumerConfiguration(
         handler: BlockchainEventHandler<TokenEventDto, UnionItemEvent>
     ): KafkaConsumerWorker<TokenEventDto> {
         val consumer = factory.createTokenEventConsumer(consumerFactory.itemGroup)
-        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -112,7 +113,7 @@ class SolanaConsumerConfiguration(
         handler: BlockchainEventHandler<BalanceEventDto, UnionOwnershipEvent>
     ): KafkaConsumerWorker<BalanceEventDto> {
         val consumer = factory.createBalanceEventConsumer(consumerFactory.ownershipGroup)
-        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -121,7 +122,7 @@ class SolanaConsumerConfiguration(
         handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.CollectionEventDto, UnionCollectionEvent>
     ): KafkaConsumerWorker<com.rarible.protocol.solana.dto.CollectionEventDto> {
         val consumer = factory.createCollectionEventConsumer(consumerFactory.collectionGroup)
-        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -130,7 +131,7 @@ class SolanaConsumerConfiguration(
         handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.OrderEventDto, UnionOrderEvent>
     ): KafkaConsumerWorker<com.rarible.protocol.solana.dto.OrderEventDto> {
         val consumer = factory.createOrderEventConsumer(consumerFactory.orderGroup)
-        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -139,7 +140,7 @@ class SolanaConsumerConfiguration(
         handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.ActivityDto, ActivityDto>
     ): KafkaConsumerWorker<com.rarible.protocol.solana.dto.ActivityDto> {
         val consumer = factory.createActivityEventConsumer(consumerFactory.activityGroup)
-        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
 }

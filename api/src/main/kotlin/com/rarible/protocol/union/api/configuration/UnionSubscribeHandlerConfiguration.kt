@@ -4,7 +4,7 @@ import com.rarible.protocol.union.api.handler.UnionSubscribeItemEventHandler
 import com.rarible.protocol.union.api.handler.UnionSubscribeOrderEventHandler
 import com.rarible.protocol.union.api.handler.UnionSubscribeOwnershipEventHandler
 import com.rarible.protocol.union.core.ConsumerFactory
-import com.rarible.protocol.union.core.handler.BatchedConsumerWorker
+import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
@@ -27,10 +27,10 @@ class UnionSubscribeHandlerConfiguration(
     @Bean
     fun unionSubscribeItemWorker(
         unionItemEventHandler: UnionSubscribeItemEventHandler
-    ): BatchedConsumerWorker<ItemEventDto> {
+    ): ConsumerWorkerGroup<ItemEventDto> {
         val group = "${consumerFactory.unionSubscribeItemGroup}.${UUID.randomUUID()}"
         val consumer = unionEventsConsumerFactory.createItemConsumer(group)
-        return consumerFactory.createUnionItemBatchedConsumerWorker(
+        return consumerFactory.createUnionItemConsumerWorkerGroup(
             consumer = consumer,
             handler = unionItemEventHandler,
             daemonWorkerProperties = properties.daemon,
@@ -42,10 +42,10 @@ class UnionSubscribeHandlerConfiguration(
     @Bean
     fun unionSubscribeOwnershipWorker(
         unionOwnershipEventHandler: UnionSubscribeOwnershipEventHandler
-    ): BatchedConsumerWorker<OwnershipEventDto> {
+    ): ConsumerWorkerGroup<OwnershipEventDto> {
         val group = "${consumerFactory.unionSubscribeOwnershipGroup}.${UUID.randomUUID()}"
         val consumer = unionEventsConsumerFactory.createOwnershipConsumer(group)
-        return consumerFactory.createUnionOwnershipBatchedConsumerWorker(
+        return consumerFactory.createUnionOwnershipConsumerWorkerGroup(
             consumer = consumer,
             handler = unionOwnershipEventHandler,
             daemonWorkerProperties = properties.daemon,
@@ -57,10 +57,10 @@ class UnionSubscribeHandlerConfiguration(
     @Bean
     fun unionSubscribeOrderWorker(
         handler: UnionSubscribeOrderEventHandler
-    ): BatchedConsumerWorker<OrderEventDto> {
+    ): ConsumerWorkerGroup<OrderEventDto> {
         val group = "${consumerFactory.unionSubscribeOrderGroup}.${UUID.randomUUID()}"
         val consumer = unionEventsConsumerFactory.createOrderConsumer(group)
-        return consumerFactory.createUnionOrderBatchedConsumerWorker(
+        return consumerFactory.createUnionOrderConsumerWorkerGroup(
             consumer = consumer,
             handler = handler,
             daemonWorkerProperties = properties.daemon,
@@ -71,21 +71,21 @@ class UnionSubscribeHandlerConfiguration(
 
     @Bean
     fun unionSubscriberItemWorkerStartup(
-        unionSubscribeItemWorker: BatchedConsumerWorker<ItemEventDto>
+        unionSubscribeItemWorker: ConsumerWorkerGroup<ItemEventDto>
     ): CommandLineRunner = CommandLineRunner {
         unionSubscribeItemWorker.start()
     }
 
     @Bean
     fun unionSubscriberOrderWorkerStartup(
-        unionSubscribeOrderWorker: BatchedConsumerWorker<OrderEventDto>
+        unionSubscribeOrderWorker: ConsumerWorkerGroup<OrderEventDto>
     ): CommandLineRunner = CommandLineRunner {
         unionSubscribeOrderWorker.start()
     }
 
     @Bean
     fun unionSubscriberOwnershipWorkerStartup(
-        unionSubscribeOwnershipWorker: BatchedConsumerWorker<OwnershipEventDto>
+        unionSubscribeOwnershipWorker: ConsumerWorkerGroup<OwnershipEventDto>
     ): CommandLineRunner = CommandLineRunner {
         unionSubscribeOwnershipWorker.start()
     }
