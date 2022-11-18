@@ -17,18 +17,29 @@ import org.slf4j.LoggerFactory
 
 open class FlowOwnershipEventHandler(
     override val handler: IncomingEventHandler<UnionOwnershipEvent>
-) : AbstractBlockchainEventHandler<FlowOwnershipEventDto, UnionOwnershipEvent>(BlockchainDto.FLOW) {
+) : AbstractBlockchainEventHandler<FlowOwnershipEventDto, UnionOwnershipEvent>(
+    BlockchainDto.FLOW
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CaptureTransaction("OwnershipEvent#FLOW")
     override suspend fun handle(event: FlowOwnershipEventDto) {
+        convert(event)?.let { handler.onEvent(it) }
+    }
+
+    @CaptureTransaction("OwnershipEvents#FLOW")
+    override suspend fun handle(events: List<FlowOwnershipEventDto>) {
+        handler.onEvents(events.mapNotNull { convert(it) })
+    }
+
+    private fun convert(event: FlowOwnershipEventDto): UnionOwnershipEvent? {
         logger.info("Received {} Ownership event: {}", blockchain, event)
 
-        when (event) {
+        return when (event) {
             is FlowNftOwnershipUpdateEventDto -> {
                 val unionOwnership = FlowOwnershipConverter.convert(event.ownership, blockchain)
-                handler.onEvent(UnionOwnershipUpdateEvent(unionOwnership))
+                UnionOwnershipUpdateEvent(unionOwnership)
             }
             is FlowNftOwnershipDeleteEventDto -> {
                 val ownershipId = OwnershipIdDto(
@@ -37,7 +48,7 @@ open class FlowOwnershipEventHandler(
                     tokenId = event.ownership.tokenId,
                     owner = UnionAddressConverter.convert(blockchain, event.ownership.owner)
                 )
-                handler.onEvent(UnionOwnershipDeleteEvent(ownershipId))
+                UnionOwnershipDeleteEvent(ownershipId)
             }
         }
     }

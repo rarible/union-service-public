@@ -28,10 +28,10 @@ abstract class EthItemEventHandler(
     private fun convert(event: NftItemEventDto): UnionItemEvent {
         logger.info("Received {} Item event {}", blockchain, event)
 
-        when (event) {
+        return when (event) {
             is NftItemUpdateEventDto -> {
                 val item = EthItemConverter.convert(event.item, blockchain)
-                return UnionItemUpdateEvent(item)
+                UnionItemUpdateEvent(item)
             }
             is NftItemDeleteEventDto -> {
                 val itemId = ItemIdDto(
@@ -39,7 +39,7 @@ abstract class EthItemEventHandler(
                     contract = EthConverter.convert(event.item.token),
                     tokenId = event.item.tokenId
                 )
-                return UnionItemDeleteEvent(itemId)
+                UnionItemDeleteEvent(itemId)
             }
         }
     }

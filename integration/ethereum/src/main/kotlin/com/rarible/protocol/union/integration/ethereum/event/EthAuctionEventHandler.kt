@@ -19,17 +19,20 @@ abstract class EthAuctionEventHandler(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun handleInternal(event: AuctionEventDto) {
+    suspend fun handleInternal(event: AuctionEventDto) = handler.onEvent(convert(event))
+    suspend fun handleInternal(events: List<AuctionEventDto>) = handler.onEvents(events.map { convert(it) })
+
+    suspend fun convert(event: AuctionEventDto): UnionAuctionEvent {
         logger.info("Received {} Auction event: {}", blockchain, event)
 
-        when (event) {
+        return when (event) {
             is com.rarible.protocol.dto.AuctionUpdateEventDto -> {
                 val auction = ethActionConverter.convert(event.auction, blockchain)
-                handler.onEvent(UnionAuctionUpdateEvent(auction))
+                UnionAuctionUpdateEvent(auction)
             }
             is com.rarible.protocol.dto.AuctionDeleteEventDto -> {
                 val auction = ethActionConverter.convert(event.auction, blockchain)
-                handler.onEvent(UnionAuctionDeleteEvent(auction))
+                UnionAuctionDeleteEvent(auction)
             }
         }
     }
@@ -38,6 +41,10 @@ abstract class EthAuctionEventHandler(
 open class EthereumAuctionEventHandler(
     handler: IncomingEventHandler<UnionAuctionEvent>, ethActionConverter: EthAuctionConverter
 ) : EthAuctionEventHandler(BlockchainDto.ETHEREUM, handler, ethActionConverter) {
+
     @CaptureTransaction("AuctionEvent#ETHEREUM")
     override suspend fun handle(event: AuctionEventDto) = handleInternal(event)
+
+    @CaptureTransaction("AuctionEvents#ETHEREUM")
+    override suspend fun handle(events: List<AuctionEventDto>) = handleInternal(events)
 }

@@ -12,7 +12,9 @@ import org.slf4j.LoggerFactory
 
 open class DipDupItemMetaEventHandler(
     override val handler: IncomingEventHandler<UnionItemMetaEvent>
-) : AbstractBlockchainEventHandler<DipDupItemMetaEvent, UnionItemMetaEvent>(BlockchainDto.TEZOS) {
+) : AbstractBlockchainEventHandler<DipDupItemMetaEvent, UnionItemMetaEvent>(
+    BlockchainDto.TEZOS
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

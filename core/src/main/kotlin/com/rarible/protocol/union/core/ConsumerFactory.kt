@@ -54,7 +54,7 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>,
-        batchSize: Int = 1
+        batchSize: Int
     ): ConsumerWorkerGroup<T> {
         return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, ITEM, batchSize)
     }
@@ -73,7 +73,7 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>,
-        batchSize: Int = 1
+        batchSize: Int
     ): ConsumerWorkerGroup<T> {
         return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, OWNERSHIP, batchSize)
     }
@@ -83,7 +83,7 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>,
-        batchSize: Int = 1
+        batchSize: Int
     ): ConsumerWorkerGroup<T> {
         return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, ORDER, batchSize)
     }
@@ -93,7 +93,7 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>,
-        batchSize: Int = 1
+        batchSize: Int
     ): ConsumerWorkerGroup<T> {
         return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, AUCTION, batchSize)
     }
@@ -103,7 +103,7 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>,
-        batchSize: Int = 1
+        batchSize: Int
     ): ConsumerWorkerGroup<T> {
         return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, ACTIVITY, batchSize)
     }
@@ -113,7 +113,7 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         daemon: DaemonWorkerProperties,
         workers: Map<String, Int>,
-        batchSize: Int = 1
+        batchSize: Int
     ): ConsumerWorkerGroup<T> {
         return createBlockchainConsumerWorkerGroup(consumer, handler, daemon, workers, COLLECTION, batchSize)
     }

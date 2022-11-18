@@ -12,16 +12,22 @@ import org.slf4j.LoggerFactory
 open class FlowActivityEventHandler(
     override val handler: IncomingEventHandler<ActivityDto>,
     private val flowActivityConverter: FlowActivityConverter
-) : AbstractBlockchainEventHandler<FlowActivityDto, ActivityDto>(BlockchainDto.FLOW) {
+) : AbstractBlockchainEventHandler<FlowActivityDto, ActivityDto>(
+    BlockchainDto.FLOW
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CaptureTransaction("ActivityEvent#FLOW")
-    override suspend fun handle(event: FlowActivityDto) {
+    override suspend fun handle(event: FlowActivityDto) = handler.onEvent(convert(event))
+
+    @CaptureTransaction("ActivityEvents#FLOW")
+    override suspend fun handle(events: List<FlowActivityDto>) = handler.onEvents(
+        events.map { convert(it) }
+    )
+
+    suspend fun convert(event: FlowActivityDto): ActivityDto {
         logger.debug("Received Flow ({}) Activity event: type={}", event::class.java.simpleName)
-
-        val unionEventDto = flowActivityConverter.convert(event)
-
-        handler.onEvent(unionEventDto)
+        return flowActivityConverter.convert(event)
     }
 }

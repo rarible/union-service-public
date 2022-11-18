@@ -29,10 +29,10 @@ abstract class EthOwnershipEventHandler(
     private fun convert(event: NftOwnershipEventDto): UnionOwnershipEvent {
         logger.info("Received {} Ownership event: {}", blockchain, event)
 
-        when (event) {
+        return when (event) {
             is NftOwnershipUpdateEventDto -> {
                 val ownership = EthOwnershipConverter.convert(event.ownership, blockchain)
-                return UnionOwnershipUpdateEvent(ownership)
+                UnionOwnershipUpdateEvent(ownership)
             }
             is NftOwnershipDeleteEventDto -> {
                 val deletedOwnership = event.ownership!!
@@ -42,7 +42,7 @@ abstract class EthOwnershipEventHandler(
                     tokenId = deletedOwnership.tokenId,
                     owner = UnionAddressConverter.convert(blockchain, EthConverter.convert(deletedOwnership.owner))
                 )
-                return UnionOwnershipDeleteEvent(ownershipId)
+                UnionOwnershipDeleteEvent(ownershipId)
             }
         }
     }
@@ -55,7 +55,7 @@ open class EthereumOwnershipEventHandler(
     @CaptureTransaction("OwnershipEvent#ETHEREUM")
     override suspend fun handle(event: NftOwnershipEventDto) = handleInternal(event)
 
-    @CaptureTransaction("OwnershipsEvent#ETHEREUM")
+    @CaptureTransaction("OwnershipsEvents#ETHEREUM")
     override suspend fun handle(events: List<NftOwnershipEventDto>) = handleInternal(events)
 }
 
@@ -66,6 +66,6 @@ open class PolygonOwnershipEventHandler(
     @CaptureTransaction("OwnershipEvent#POLYGON")
     override suspend fun handle(event: NftOwnershipEventDto) = handleInternal(event)
 
-    @CaptureTransaction("OwnershipsEvent#POLYGON")
+    @CaptureTransaction("OwnershipEvents#POLYGON")
     override suspend fun handle(events: List<NftOwnershipEventDto>) = handleInternal(events)
 }

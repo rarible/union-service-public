@@ -22,6 +22,7 @@ class DipdupOrderServiceImpl(
 ) : DipdupOrderService {
 
     private val blockchain = BlockchainDto.TEZOS
+    private val enabledPlatforms = marketplaces.getEnabledMarketplaces().toList()
 
     override suspend fun getOrderById(id: String): OrderDto {
         logger.info("Fetch dipdup order by id: $id")
@@ -46,7 +47,7 @@ class DipdupOrderServiceImpl(
         val page = dipdupOrderClient.getOrdersAll(
             sort = sort?.let { dipDupOrderConverter.convert(it) },
             statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
-            platforms = enabledPlatforms(),
+            platforms = enabledPlatforms,
             isBid = isBid,
             size = size,
             continuation = continuation
@@ -195,27 +196,14 @@ class DipdupOrderServiceImpl(
         }
     }
 
-    private fun enabledPlatforms(): List<TezosPlatform> {
-        val platforms = mutableListOf<TezosPlatform>()
-        platforms.add(TezosPlatform.RARIBLE_V1)
-        platforms.add(TezosPlatform.RARIBLE_V2)
-        if (marketplaces.hen) platforms.add(TezosPlatform.HEN)
-        if (marketplaces.objkt) platforms.add(TezosPlatform.OBJKT_V1)
-        if (marketplaces.objktV2) platforms.add(TezosPlatform.OBJKT_V2)
-        if (marketplaces.versum) platforms.add(TezosPlatform.VERSUM_V1)
-        if (marketplaces.teia) platforms.add(TezosPlatform.TEIA_V1)
-        if (marketplaces.fxhashV1) platforms.add(TezosPlatform.FXHASH_V1)
-        if (marketplaces.fxhashV2) platforms.add(TezosPlatform.FXHASH_V2)
-        return platforms
-    }
-
-    private fun platforms(requested: List<TezosPlatform>) = if (requested.isEmpty()) {
-        enabledPlatforms()
+    private fun platforms(requested: Collection<TezosPlatform>) = if (requested.isEmpty()) {
+        enabledPlatforms
     } else {
-        enabledPlatforms().toSet().intersect(requested.toSet()).toList()
+        enabledPlatforms.intersect(requested.toSet()).toList()
     }
 
     companion object {
+
         private val logger by Logger()
     }
 }

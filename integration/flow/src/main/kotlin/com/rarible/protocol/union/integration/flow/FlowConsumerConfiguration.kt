@@ -35,9 +35,10 @@ class FlowConsumerConfiguration(
     private val host = applicationEnvironmentInfo.host
 
     private val consumer = properties.consumer!!
-    private val workers = properties.consumer!!.workers
-
     private val daemon = properties.daemon
+
+    private val workers = consumer.workers
+    private val batchSize = consumer.batchSize
 
     //-------------------- Handlers -------------------//
 
@@ -89,7 +90,7 @@ class FlowConsumerConfiguration(
         handler: BlockchainEventHandler<FlowNftItemEventDto, UnionItemEvent>
     ): KafkaConsumerWorker<FlowNftItemEventDto> {
         val consumer = factory.createItemEventsConsumer(consumerFactory.itemGroup)
-        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     // TODO: Flow will support events on collections => create a worker here.
@@ -100,7 +101,7 @@ class FlowConsumerConfiguration(
         handler: BlockchainEventHandler<FlowOwnershipEventDto, UnionOwnershipEvent>
     ): KafkaConsumerWorker<FlowOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerFactory.ownershipGroup)
-        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -109,7 +110,7 @@ class FlowConsumerConfiguration(
         handler: BlockchainEventHandler<FlowOrderEventDto, UnionOrderEvent>
     ): KafkaConsumerWorker<FlowOrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerFactory.orderGroup)
-        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -118,6 +119,6 @@ class FlowConsumerConfiguration(
         handler: BlockchainEventHandler<FlowActivityDto, ActivityDto>
     ): KafkaConsumerWorker<FlowActivityDto> {
         val consumer = factory.createAcitivityEventsConsumer(consumerFactory.activityGroup)
-        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers, batchSize)
     }
 }
