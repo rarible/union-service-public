@@ -68,7 +68,7 @@ class DipdupOrderServiceImpl(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        logger.info("Fetch dipdup sell orders by item: $contract, $tokenId, $maker, $currencyId, $statuses, $continuation, $size")
+        logger.info("Fetch dipdup sell orders by item: $contract:$tokenId, maker=$maker, platforms=$platforms, currency=$currencyId, status=$statuses, continuation=$continuation, size=$size")
         val page = dipdupOrderClient.getOrdersByItem(
             contract = contract,
             tokenId = tokenId.toString(),

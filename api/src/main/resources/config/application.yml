@@ -103,6 +103,8 @@ integration:
         objktV2: ${consul.tezos.dipdup.marketplaces.objktV2:false}
         versum: ${consul.tezos.dipdup.marketplaces.versum:false}
         teia: ${consul.tezos.dipdup.marketplaces.teia:false}
+        fxhashV1: ${consul.tezos.dipdup.marketplaces.fxhashV1:false}
+        fxhashV2: ${consul.tezos.dipdup.marketplaces.fxhashV2:false}
     client:
       url: ${consul.tezos.api.baseUrl:}
     auctionContracts: ${consul.tezos.auctionContracts:}

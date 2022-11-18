@@ -10,6 +10,8 @@ import com.rarible.dipdup.client.model.DipDupOrdersPage
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderServiceImpl
@@ -32,12 +34,18 @@ class TezosOrderServiceTest {
     private val dipdupOrderClient: OrderClient = mockk()
 
     private val dipdupOrderConverter = DipDupOrderConverter(currencyService)
-    private val dipdupOrderService = DipdupOrderServiceImpl(dipdupOrderClient, dipdupOrderConverter, DipDupIntegrationProperties.Marketplaces())
-    private val service = TezosOrderService(dipdupOrderService)
+
+    private var marketplaces = DipDupIntegrationProperties.Marketplaces()
+    private var dipdupOrderService = DipdupOrderServiceImpl(dipdupOrderClient, dipdupOrderConverter, marketplaces)
+    private var service = TezosOrderService(dipdupOrderService)
 
     @BeforeEach
     fun beforeEach() {
         clearMocks(dipdupOrderClient)
+    }
+
+    fun change(markets: DipDupIntegrationProperties.Marketplaces): DipdupOrderServiceImpl {
+        return DipdupOrderServiceImpl(dipdupOrderClient, dipdupOrderConverter, markets)
     }
 
     @Test
@@ -88,6 +96,72 @@ class TezosOrderServiceTest {
         assertThat(orders.entities).hasSize(1)
         assertThat(orders.entities.first().id.value).isEqualTo(dipDupOrder.id)
         assertThat(orders.continuation).isEqualTo(continuation)
+    }
+
+    @Test
+    fun `get orders by items, objkt on - has order`() = runBlocking<Unit> {
+        val itemId = randomTezosItemId()
+        val orderId = "ca5418bd-92aa-529c-91fa-c670a2d2d878"
+        service = TezosOrderService(change(DipDupIntegrationProperties.Marketplaces(objkt = true, objktV2 = true)))
+
+        val dipDupOrder = dipDupOrder(orderId)
+        coEvery {
+            dipdupOrderClient.getOrdersByItem(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                eq(listOf(TezosPlatform.OBJKT_V1, TezosPlatform.OBJKT_V2)),
+                any(),
+                any(),
+                any()
+            )
+        } returns DipDupOrdersPage(orders = listOf(dipDupOrder))
+
+        val orders = service.getSellOrdersByItem(
+            platform = PlatformDto.OBJKT,
+            itemId = itemId.value,
+            currencyId = "",
+            maker = null,
+            origin = null,
+            continuation = null,
+            status = null,
+            size = 1
+        )
+        assertThat(orders.entities).hasSize(1)
+        assertThat(orders.entities.first().id.value).isEqualTo(dipDupOrder.id)
+    }
+
+    @Test
+    fun `get orders by items, objkt off - empty response`() = runBlocking<Unit> {
+        val itemId = randomTezosItemId()
+
+        coEvery {
+            dipdupOrderClient.getOrdersByItem(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                eq(emptyList()),
+                any(),
+                any(),
+                any()
+            )
+        } returns DipDupOrdersPage(orders = emptyList(), continuation = null)
+
+        val orders = service.getSellOrdersByItem(
+            platform = PlatformDto.OBJKT,
+            itemId = itemId.value,
+            currencyId = "",
+            maker = null,
+            origin = null,
+            continuation = null,
+            status = null,
+            size = 1
+        )
+        assertThat(orders.entities).isEmpty()
     }
 
     @Test
