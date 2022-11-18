@@ -3,16 +3,13 @@ package com.rarible.protocol.union.integration.tezos.event
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UnionModelJacksonModule
-import com.rarible.protocol.union.dto.UnionPrimitivesJacksonModule
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAssetNFT
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
+import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupOrderEventHandler
 import com.rarible.protocol.union.test.mock.CurrencyMock
@@ -29,7 +26,12 @@ class TezosOrderEventHandlerTest {
     private val mapper = JsonMapper.builder().addModule(KotlinModule()).addModule(JavaTimeModule()).build()
     private val incomingEventHandler: IncomingEventHandler<UnionOrderEvent> = mockk()
     private val converter = DipDupOrderConverter(CurrencyMock.currencyServiceMock)
-    private val handler = DipDupOrderEventHandler(incomingEventHandler, converter, mapper, mockk())
+    private val handler = DipDupOrderEventHandler(
+        incomingEventHandler,
+        converter,
+        mapper,
+        DipDupIntegrationProperties.Marketplaces()
+    )
 
     @BeforeEach
     fun beforeEach() {

@@ -14,18 +14,25 @@ import org.slf4j.LoggerFactory
 open class FlowOrderEventHandler(
     override val handler: IncomingEventHandler<UnionOrderEvent>,
     private val flowOrderConverter: FlowOrderConverter
-) : AbstractBlockchainEventHandler<FlowOrderEventDto, UnionOrderEvent>(BlockchainDto.FLOW) {
+) : AbstractBlockchainEventHandler<FlowOrderEventDto, UnionOrderEvent>(
+    BlockchainDto.FLOW
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CaptureTransaction("OrderEvent#FLOW")
-    override suspend fun handle(event: FlowOrderEventDto) {
+    override suspend fun handle(event: FlowOrderEventDto) = handler.onEvent(convert(event))
+
+    @CaptureTransaction("OrderEvents#FLOW")
+    override suspend fun handle(events: List<FlowOrderEventDto>) = handler.onEvents(events.map { convert(it) })
+
+    private suspend fun convert(event: FlowOrderEventDto): UnionOrderEvent {
         logger.info("Received {} Order event: {}", blockchain, event)
 
         when (event) {
             is FlowOrderUpdateEventDto -> {
                 val unionOrder = flowOrderConverter.convert(event.order, blockchain)
-                handler.onEvent(UnionOrderUpdateEvent(unionOrder))
+                return UnionOrderUpdateEvent(unionOrder)
             }
         }
     }

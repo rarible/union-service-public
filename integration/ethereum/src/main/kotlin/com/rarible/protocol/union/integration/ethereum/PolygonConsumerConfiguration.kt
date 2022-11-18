@@ -45,11 +45,10 @@ class PolygonConsumerConfiguration(
     private val host = applicationEnvironmentInfo.host
 
     private val consumer = properties.consumer!!
-    private val workers = properties.consumer!!.workers
-
     private val daemon = properties.daemon
 
-    private val batchSize = 32
+    private val workers = consumer.workers
+    private val batchSize = consumer.batchSize
 
     //-------------------- Handlers -------------------//
 
@@ -137,7 +136,7 @@ class PolygonConsumerConfiguration(
         @Qualifier("polygon.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>
     ): KafkaConsumerWorker<NftCollectionEventDto> {
         val consumer = factory.createCollectionEventsConsumer(consumerFactory.collectionGroup, Blockchain.POLYGON)
-        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -146,7 +145,7 @@ class PolygonConsumerConfiguration(
         @Qualifier("polygon.order.handler") handler: BlockchainEventHandler<OrderEventDto, UnionOrderEvent>
     ): KafkaConsumerWorker<OrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerFactory.orderGroup, Blockchain.POLYGON)
-        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean

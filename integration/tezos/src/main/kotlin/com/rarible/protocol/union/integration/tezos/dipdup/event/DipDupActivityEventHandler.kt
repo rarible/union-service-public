@@ -1,11 +1,16 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.event
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rarible.dipdup.client.core.model.*
+import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.dipdup.client.core.model.DipDupOrderCancelActivity
+import com.rarible.dipdup.client.core.model.DipDupOrderListActivity
+import com.rarible.dipdup.client.core.model.DipDupOrderSellActivity
+import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import org.slf4j.LoggerFactory
@@ -18,7 +23,9 @@ open class DipDupActivityEventHandler(
     private val dipDupTransfersEventHandler: DipDupTransfersEventHandler,
     private val properties: DipDupIntegrationProperties,
     private val mapper: ObjectMapper
-) : AbstractBlockchainEventHandler<DipDupActivity, ActivityDto>(com.rarible.protocol.union.dto.BlockchainDto.TEZOS) {
+) : AbstractBlockchainEventHandler<DipDupActivity, ActivityDto>(
+    BlockchainDto.TEZOS
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

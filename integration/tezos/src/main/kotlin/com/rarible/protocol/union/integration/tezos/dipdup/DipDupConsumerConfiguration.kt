@@ -39,20 +39,23 @@ import org.springframework.context.annotation.Import
 @Import(DipDupApiConfiguration::class)
 class DipDupConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-    private val dipDupProperties: DipDupIntegrationProperties,
+    private val properties: DipDupIntegrationProperties,
     private val consumerFactory: ConsumerFactory
 ) {
 
     private val env = applicationEnvironmentInfo.name
     private val host = applicationEnvironmentInfo.host
-    private val workers = dipDupProperties.consumer!!.workers
 
-    private val daemon = dipDupProperties.daemon
+    private val consumer = properties.consumer!!
+    private val daemon = properties.daemon
+
+    private val workers = consumer.workers
+    private val batchSize = consumer.batchSize
 
     @Bean
     fun dipDupConsumerFactory(): DipDupEventsConsumerFactory {
         return DipDupEventsConsumerFactory(
-            dipDupProperties.consumer!!.brokerReplicaSet!!,
+            properties.consumer!!.brokerReplicaSet!!,
             host,
             env
         )
@@ -64,7 +67,7 @@ class DipDupConsumerConfiguration(
         converter: DipDupOrderConverter,
         mapper: ObjectMapper
     ): DipDupOrderEventHandler {
-        return DipDupOrderEventHandler(handler, converter, mapper, dipDupProperties.marketplaces)
+        return DipDupOrderEventHandler(handler, converter, mapper, properties.marketplaces)
     }
 
     @Bean
@@ -73,7 +76,7 @@ class DipDupConsumerConfiguration(
         handler: DipDupOrderEventHandler
     ): KafkaConsumerWorker<DipDupOrder> {
         val consumer = factory.createOrderConsumer(consumerFactory.orderGroup)
-        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -104,7 +107,7 @@ class DipDupConsumerConfiguration(
     ): KafkaConsumerWorker<DipDupActivity> {
         val consumer = factory.createActivityConsumer(consumerFactory.activityGroup)
         logger.info("Use ${workers} worker config for listening dipdup events")
-        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -123,7 +126,7 @@ class DipDupConsumerConfiguration(
         handler: DipDupCollectionEventHandler
     ): KafkaConsumerWorker<DipDupCollectionEvent> {
         val consumer = factory.createCollectionConsumer(consumerFactory.collectionGroup)
-        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -140,7 +143,7 @@ class DipDupConsumerConfiguration(
         handler: DipDupItemEventHandler
     ): KafkaConsumerWorker<DipDupItemEvent> {
         val consumer = factory.createItemConsumer(consumerFactory.itemGroup)
-        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -171,7 +174,7 @@ class DipDupConsumerConfiguration(
         handler: DipDupOwnershipEventHandler
     ): KafkaConsumerWorker<DipDupOwnershipEvent> {
         val consumer = factory.createOwnershipConsumer(consumerFactory.itemGroup)
-        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     companion object {

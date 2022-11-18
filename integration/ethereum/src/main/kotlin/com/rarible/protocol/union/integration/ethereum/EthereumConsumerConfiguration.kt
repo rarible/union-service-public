@@ -50,9 +50,10 @@ class EthereumConsumerConfiguration(
     private val host = applicationEnvironmentInfo.host
 
     private val consumer = properties.consumer!!
-    private val workers = properties.consumer!!.workers
-
     private val daemon = properties.daemon
+
+    private val workers = consumer.workers
+    private val batchSize = consumer.batchSize
 
     //-------------------- Handlers -------------------//
 
@@ -130,7 +131,7 @@ class EthereumConsumerConfiguration(
         @Qualifier("ethereum.item.handler") handler: BlockchainEventHandler<NftItemEventDto, UnionItemEvent>
     ): KafkaConsumerWorker<NftItemEventDto> {
         val consumer = factory.createItemEventsConsumer(consumerFactory.itemGroup, Blockchain.ETHEREUM)
-        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -139,7 +140,7 @@ class EthereumConsumerConfiguration(
         @Qualifier("ethereum.ownership.handler") handler: BlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>
     ): KafkaConsumerWorker<NftOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerFactory.ownershipGroup, Blockchain.ETHEREUM)
-        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -148,7 +149,7 @@ class EthereumConsumerConfiguration(
         @Qualifier("ethereum.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>
     ): KafkaConsumerWorker<NftCollectionEventDto> {
         val consumer = factory.createCollectionEventsConsumer(consumerFactory.collectionGroup, Blockchain.ETHEREUM)
-        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -157,7 +158,7 @@ class EthereumConsumerConfiguration(
         @Qualifier("ethereum.order.handler") handler: BlockchainEventHandler<OrderEventDto, UnionOrderEvent>
     ): KafkaConsumerWorker<OrderEventDto> {
         val consumer = factory.createOrderEventsConsumer(consumerFactory.orderGroup, Blockchain.ETHEREUM)
-        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -166,7 +167,7 @@ class EthereumConsumerConfiguration(
         @Qualifier("ethereum.auction.handler") handler: BlockchainEventHandler<AuctionEventDto, UnionAuctionEvent>
     ): KafkaConsumerWorker<AuctionEventDto> {
         val consumer = factory.createAuctionEventsConsumer(consumerFactory.auctionGroup, Blockchain.ETHEREUM)
-        return consumerFactory.createAuctionConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createAuctionConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
@@ -175,6 +176,6 @@ class EthereumConsumerConfiguration(
         @Qualifier("ethereum.activity.handler") handler: BlockchainEventHandler<com.rarible.protocol.dto.ActivityDto, ActivityDto>
     ): KafkaConsumerWorker<com.rarible.protocol.dto.ActivityDto> {
         val consumer = factory.createActivityConsumer(consumerFactory.activityGroup, Blockchain.ETHEREUM)
-        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers)
+        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers, batchSize)
     }
 }

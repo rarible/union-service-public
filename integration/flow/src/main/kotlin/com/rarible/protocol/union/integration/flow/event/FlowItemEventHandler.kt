@@ -16,18 +16,25 @@ import org.slf4j.LoggerFactory
 
 open class FlowItemEventHandler(
     override val handler: IncomingEventHandler<UnionItemEvent>
-) : AbstractBlockchainEventHandler<FlowNftItemEventDto, UnionItemEvent>(BlockchainDto.FLOW) {
+) : AbstractBlockchainEventHandler<FlowNftItemEventDto, UnionItemEvent>(
+    BlockchainDto.FLOW
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @CaptureTransaction("ItemEvent#FLOW")
-    override suspend fun handle(event: FlowNftItemEventDto) {
+    override suspend fun handle(event: FlowNftItemEventDto) = handler.onEvent(convert(event))
+
+    @CaptureTransaction("ItemEvents#FLOW")
+    override suspend fun handle(events: List<FlowNftItemEventDto>) = handler.onEvents(events.map { convert(it) })
+
+    private fun convert(event: FlowNftItemEventDto): UnionItemEvent {
         logger.info("Received {} Item event: {}", blockchain, event)
 
-        when (event) {
+        return when (event) {
             is FlowNftItemUpdateEventDto -> {
                 val item = FlowItemConverter.convert(event.item, blockchain)
-                handler.onEvent(UnionItemUpdateEvent(item))
+                UnionItemUpdateEvent(item)
             }
             is FlowNftItemDeleteEventDto -> {
                 val itemId = ItemIdDto(
@@ -35,7 +42,7 @@ open class FlowItemEventHandler(
                     contract = event.item.token,
                     tokenId = event.item.tokenId.toBigInteger()
                 )
-                handler.onEvent(UnionItemDeleteEvent(itemId))
+                UnionItemDeleteEvent(itemId)
             }
         }
     }
