@@ -46,7 +46,8 @@ class EthMetaConverterTest {
                 NftItemAttributeDto("key1", "value1"),
                 NftItemAttributeDto("key2", "value2")
             ),
-            content = listOf()
+            content = listOf(),
+            status = NftItemMetaDto.Status.OK
         )
 
         val itemId = randomEthItemId()
@@ -207,6 +208,7 @@ class EthMetaConverterTest {
             content = listOf(imageContent),
             tags = emptyList(),
             genres = emptyList(),
+            status = NftItemMetaDto.Status.OK
         )
 
         val itemId = randomEthItemId()

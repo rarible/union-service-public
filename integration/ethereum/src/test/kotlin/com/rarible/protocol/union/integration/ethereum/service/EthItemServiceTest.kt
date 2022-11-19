@@ -4,7 +4,7 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.dto.EthereumApiMetaErrorDto
+import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.NftItemRoyaltyListDto
 import com.rarible.protocol.dto.NftItemsDto
@@ -106,14 +106,12 @@ class EthItemServiceTest {
 
     @Test
     fun `ethereum meta unparseable link`() = runBlocking {
-        coEvery { itemControllerApi.getNftItemMetaById(any()) } throws NftItemControllerApi.ErrorGetNftItemMetaById(
-            WebClientResponseException(500, "", null, null, null)
-        ).apply {
-            on500 = EthereumApiMetaErrorDto(
-                code = EthereumApiMetaErrorDto.Code.UNPARSEABLE_LINK,
-                message = "Unparseable link"
+        coEvery { itemControllerApi.getNftItemMetaById(any()) } returns Mono.just(
+            NftItemMetaDto(
+                name = "",
+                status = NftItemMetaDto.Status.UNPARSEABLE_LINK
             )
-        }
+        )
 
         val exception = assertThrows<UnionMetaException> {
             service.getItemMetaById("")
@@ -124,14 +122,12 @@ class EthItemServiceTest {
 
     @Test
     fun `ethereum meta unparseable json`() = runBlocking {
-        coEvery { itemControllerApi.getNftItemMetaById(any()) } throws NftItemControllerApi.ErrorGetNftItemMetaById(
-            WebClientResponseException(500, "", null, null, null)
-        ).apply {
-            on500 = EthereumApiMetaErrorDto(
-                code = EthereumApiMetaErrorDto.Code.UNPARSEABLE_JSON,
-                message = "Unparseable json"
+        coEvery { itemControllerApi.getNftItemMetaById(any()) } returns Mono.just(
+            NftItemMetaDto(
+                name = "",
+                status = NftItemMetaDto.Status.UNPARSEABLE_JSON
             )
-        }
+        )
 
         val exception = assertThrows<UnionMetaException> {
             service.getItemMetaById("")
@@ -142,14 +138,12 @@ class EthItemServiceTest {
 
     @Test
     fun `ethereum meta timeout`() = runBlocking {
-        coEvery { itemControllerApi.getNftItemMetaById(any()) } throws NftItemControllerApi.ErrorGetNftItemMetaById(
-            WebClientResponseException(500, "", null, null, null)
-        ).apply {
-            on500 = EthereumApiMetaErrorDto(
-                code = EthereumApiMetaErrorDto.Code.TIMEOUT,
-                message = "Timeout"
+        coEvery { itemControllerApi.getNftItemMetaById(any()) } returns Mono.just(
+            NftItemMetaDto(
+                name = "",
+                status = NftItemMetaDto.Status.TIMEOUT
             )
-        }
+        )
 
         val exception = assertThrows<UnionMetaException> {
             service.getItemMetaById("")
@@ -171,14 +165,12 @@ class EthItemServiceTest {
 
     @Test
     fun `ethereum meta unknown error`() = runBlocking<Unit> {
-        coEvery { itemControllerApi.getNftItemMetaById(any()) } throws NftItemControllerApi.ErrorGetNftItemMetaById(
-            WebClientResponseException(500, "", null, null, null)
-        ).apply {
-            on500 = EthereumApiMetaErrorDto(
-                code = EthereumApiMetaErrorDto.Code.ERROR,
-                message = "Timeout"
+        coEvery { itemControllerApi.getNftItemMetaById(any()) } returns Mono.just(
+            NftItemMetaDto(
+                name = "",
+                status = NftItemMetaDto.Status.ERROR
             )
-        }
+        )
 
         val exception = assertThrows<UnionMetaException> {
             service.getItemMetaById("")

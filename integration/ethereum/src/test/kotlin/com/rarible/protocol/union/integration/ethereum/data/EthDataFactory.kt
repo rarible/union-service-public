@@ -153,6 +153,7 @@ fun randomEthItemMeta(): NftItemMetaDto {
         tags = emptyList(),
         genres = emptyList(),
         content = randomMetaContentDtoList(),
+        status = NftItemMetaDto.Status.OK
     )
 }
 
