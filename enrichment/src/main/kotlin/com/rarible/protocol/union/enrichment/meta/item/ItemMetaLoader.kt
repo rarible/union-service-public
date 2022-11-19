@@ -3,8 +3,8 @@ package com.rarible.protocol.union.enrichment.meta.item
 import com.rarible.core.apm.SpanType
 import com.rarible.core.apm.withSpan
 import com.rarible.core.client.WebClientResponseProxyException
-import com.rarible.protocol.solana.dto.TokenMetaDto
 import com.rarible.protocol.union.core.exception.UnionMetaException
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.service.ItemService
@@ -67,23 +67,32 @@ class ItemMetaLoader(
                     UnionMetaException.ErrorCode.UNKNOWN -> metrics.onMetaFetchError(itemId.blockchain)
                 }
                 throw e
+            } catch (e: UnionNotFoundException) {
+                onMetaNotFound(itemId)
             } catch (e: WebClientResponseProxyException) {
                 if (e.statusCode == HttpStatus.NOT_FOUND) {
                     // this log tagged by itemId, used in Kibana in analytics dashboards
-                    logger.warn("Meta fetching failed with code: NOT_FOUND for Item {}", itemId)
-                    metrics.onMetaFetchNotFound(itemId.blockchain)
-                    null
+                    onMetaNotFound(itemId)
                 } else {
-                    logger.error("Meta fetching failed with code: {} for Item {}", TokenMetaDto.Status.ERROR, itemId)
-                    metrics.onMetaFetchError(itemId.blockchain)
-                    throw e
+                    onMetaUnknownError(itemId, e)
                 }
             } catch (e: Exception) {
-                logger.error("Meta fetching failed with code: {} for Item {}", TokenMetaDto.Status.ERROR, itemId)
-                metrics.onMetaFetchError(itemId.blockchain)
-                throw e
+                onMetaUnknownError(itemId, e)
             }
         }
+    }
+
+    private fun onMetaUnknownError(itemId: ItemIdDto, exception: Exception): Nothing {
+        logger.error("Meta fetching failed with code: UNKNOWN for Item {}", itemId)
+        metrics.onMetaFetchError(itemId.blockchain)
+
+        throw exception
+    }
+    private fun onMetaNotFound(itemId: ItemIdDto) : UnionMeta? {
+        logger.warn("Meta fetching failed with code: NOT_FOUND for Item {}", itemId)
+        metrics.onMetaFetchNotFound(itemId.blockchain)
+
+        return null
     }
 
     private fun sanitizeContent(content: List<UnionMetaContent>): List<UnionMetaContent> {
