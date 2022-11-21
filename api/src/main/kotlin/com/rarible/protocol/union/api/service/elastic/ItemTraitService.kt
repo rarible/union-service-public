@@ -92,14 +92,14 @@ class ItemTraitService(
         collectionId: String,
         properties: Set<TraitProperty>
     ): List<ExtendedTraitProperty> {
-        val itemsCount = esItemRepository.countItemsInCollection(collectionId).toBigDecimal()
-        if (itemsCount.equals(0)) return properties.map { it.toExtended() }
+        val itemsCount = esItemRepository.countItemsInCollection(collectionId)
+        if (itemsCount == 0L) return properties.map { it.toExtended() }
 
         val traits = getTraitsDistinct(collectionId, properties)
 
         return traits.map { trait ->
             trait.values.map { value ->
-                value.toExtendedTraitProperty(key = trait.key.value, itemsCount = itemsCount)
+                value.toExtendedTraitProperty(key = trait.key.value, itemsCount = itemsCount.toBigDecimal())
             }
         }.flatten()
     }
@@ -108,7 +108,7 @@ class ItemTraitService(
         ExtendedTraitProperty(
             key = key,
             value = value,
-            rarity = count.toBigDecimal().divide(itemsCount).multiply(100.toBigDecimal())
+            rarity = count.toBigDecimal().multiply(100.toBigDecimal()).divide(itemsCount)
         )
 
     suspend fun getTraitsDistinct(collectionId: String, properties: Set<TraitProperty>): List<Trait> {
