@@ -12,9 +12,7 @@ object OrderPoolEvaluator {
     fun updatePoolOrderSet(item: ShortItem, order: OrderDto, action: PoolItemAction): ShortItem {
         val updatedOrder = ShortPoolOrder(order.sellCurrencyId, ShortOrderConverter.convert(order))
         val poolSellOrders = item.poolSellOrders
-        val currentOrder = poolSellOrders.find {
-            updatedOrder.currency == it.currency && updatedOrder.order.id == it.order.id
-        }
+        val currentOrder = poolSellOrders.find { match(updatedOrder, it) }
         return when (action) {
             PoolItemAction.INCLUDED -> {
                 val updatedPoolOrders = currentOrder?.let { poolSellOrders - currentOrder } ?: poolSellOrders
@@ -30,4 +28,13 @@ object OrderPoolEvaluator {
         }
     }
 
+    fun hasPoolOrder(item: ShortItem, order: OrderDto): Boolean {
+        val shortOrder = ShortPoolOrder(order.sellCurrencyId, ShortOrderConverter.convert(order))
+        val poolSellOrders = item.poolSellOrders
+        return poolSellOrders.any { match(shortOrder, it) }
+    }
+
+    private fun match(order: ShortPoolOrder, other: ShortPoolOrder): Boolean {
+        return order.currency == other.currency && order.order.id == other.order.id
+    }
 }
