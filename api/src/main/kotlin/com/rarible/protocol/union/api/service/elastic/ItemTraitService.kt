@@ -34,6 +34,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Service
 class ItemTraitService(
@@ -108,7 +109,7 @@ class ItemTraitService(
         ExtendedTraitProperty(
             key = key,
             value = value,
-            rarity = count.toBigDecimal().multiply(100.toBigDecimal()).divide(itemsCount)
+            rarity = count.toBigDecimal().multiply(100.toBigDecimal()).divide(itemsCount, 7, RoundingMode.HALF_UP)
         )
 
     suspend fun getTraitsDistinct(collectionId: String, properties: Set<TraitProperty>): List<Trait> {
