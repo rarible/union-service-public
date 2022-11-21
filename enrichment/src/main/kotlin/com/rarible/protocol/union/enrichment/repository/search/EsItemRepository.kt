@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemFilter
+import com.rarible.protocol.union.core.model.EsItemLite
 import com.rarible.protocol.union.core.model.EsItemSort
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
@@ -41,7 +42,7 @@ class EsItemRepository(
         return entity.id
     }
 
-    suspend fun search(filter: EsItemFilter, sort: EsItemSort, limit: Int?): Slice<EsItem> {
+    suspend fun search(filter: EsItemFilter, sort: EsItemSort, limit: Int?): Slice<EsItemLite> {
         val query = queryBuilderService.build(filter, sort)
 
         query.maxResults = PageSize.ITEM.limit(limit)
@@ -56,9 +57,8 @@ class EsItemRepository(
         )
     }
 
-    // TODO: return lightweight EsItem type (similarly to EsActivityLite)
-    suspend fun search(query: NativeSearchQuery): List<SearchHit<EsItem>> {
-        return esOperations.search(query, EsItem::class.java, entityDefinition.searchIndexCoordinates)
+    suspend fun search(query: NativeSearchQuery): List<SearchHit<EsItemLite>> {
+        return esOperations.search(query, EsItemLite::class.java, entityDefinition.searchIndexCoordinates)
             .collectList()
             .awaitFirst()
             //.apply { logger.debug(this.map { it.score }.joinToString()) }

@@ -8,7 +8,7 @@ import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.api.ItemEnrichService
 import com.rarible.protocol.union.api.service.api.ItemQueryService
 import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
-import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.core.model.EsItemLite
 import com.rarible.protocol.union.core.model.EsItemSort
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
@@ -241,7 +241,7 @@ class ItemElasticService(
         )
     }
 
-    private suspend fun getItems(esItems: List<EsItem>): List<UnionItem> {
+    private suspend fun getItems(esItems: List<EsItemLite>): List<UnionItem> {
         val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
 
         esItems.forEach { item ->

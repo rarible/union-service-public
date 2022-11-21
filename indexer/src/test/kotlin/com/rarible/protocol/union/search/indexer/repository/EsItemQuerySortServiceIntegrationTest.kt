@@ -54,15 +54,15 @@ class EsItemQuerySortServiceIntegrationTest {
         val fifth = randomEsItem().copy(lastUpdatedAt = now.plusSeconds(25), itemId = "E")
         repository.saveAll(listOf(first, second, third, fourth, fifth).shuffled())
         val expected = if (descending) {
-            listOf(first, second, third, fourth, fifth)
+            listOf(first, second, third, fourth, fifth).map { it.itemId }
         } else {
-            listOf(fourth, fifth, third, first, second)
+            listOf(fourth, fifth, third, first, second).map { it.itemId }
         }
 
         // when
         service.applySort(builder, sort)
         val actual = repository.search(builder.build())
-            .map { it.content }
+            .map { it.content.itemId }
 
         // then
         assertThat(actual).isEqualTo(expected)
