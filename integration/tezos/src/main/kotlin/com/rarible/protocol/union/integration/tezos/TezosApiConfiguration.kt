@@ -88,10 +88,7 @@ class TezosApiConfiguration {
         dipdupOrderService: DipdupOrderService,
         tezosIntegrationProperties: TezosIntegrationProperties
     ): OrderService {
-        return OrderProxyService(
-            TezosOrderService(dipdupOrderService),
-            setOf(PlatformDto.RARIBLE)
-        )
+        return TezosOrderService(dipdupOrderService)
     }
 
     @Bean
