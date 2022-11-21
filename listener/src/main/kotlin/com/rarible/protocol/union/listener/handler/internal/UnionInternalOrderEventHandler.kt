@@ -97,7 +97,8 @@ class UnionInternalOrderEventHandler(
         exist.forEach {
             val itemId = it.toDto()
             if (!excluded.contains(itemId) && !included.contains(itemId)) {
-                messages.add(UnionPoolOrderUpdateEvent(order, itemId, PoolItemAction.INCLUDED))
+                // For existed short items we should generate event to update best sell orders
+                messages.add(UnionPoolOrderUpdateEvent(order, itemId, PoolItemAction.UPDATED))
             }
         }
         included.forEach { messages.add(UnionPoolOrderUpdateEvent(order, it, PoolItemAction.INCLUDED)) }

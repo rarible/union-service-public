@@ -169,8 +169,12 @@ class EnrichmentItemEventService(
 
         updateOrder(itemId, hackedOrder, notificationEnabled) { item ->
             val updated = OrderPoolEvaluator.updatePoolOrderSet(item, hackedOrder, action)
-            // Origins might be ignored for such orders
-            bestOrderService.updateBestSellOrder(updated, hackedOrder, emptyList())
+            if (OrderPoolEvaluator.needUpdateOrder(updated, hackedOrder, action)) {
+                // Origins might be ignored for such orders
+                bestOrderService.updateBestSellOrder(updated, hackedOrder, emptyList())
+            } else {
+                item
+            }
         }
     }
 
