@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
+import java.math.BigDecimal
 
 @IntegrationTest
 @TestPropertySource(properties = [
@@ -176,6 +177,20 @@ internal class ItemTraitServiceTest {
             TraitEntry("black", 1),
             TraitEntry("purple", 0),
         )
+    }
+
+    @Test
+    fun `get empty Traits` (): Unit = runBlocking {
+
+        val result = itemTraitService.getTraitsWithRarity(
+            randomString(), setOf(
+                TraitProperty("eyes", "green")
+            )
+        )
+        assertThat(result.size).isEqualTo(1)
+
+        assertThat(result.first { it.key == "eyes" }
+            .rarity).isEqualTo(BigDecimal.ZERO)
     }
 
     @Test
