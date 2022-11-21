@@ -311,6 +311,28 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `on best sell order updated - item has no pool order`() = runBlocking<Unit> {
+        val bestSellOrder = randomUnionSellOrderDto().copy(platform = PlatformDto.SUDOSWAP)
+        val shortOrder = ShortOrderConverter.convert(bestSellOrder)
+
+        val itemId = randomEthItemId()
+        val shortItem = randomShortItem(itemId).copy(
+            bestSellOrder = null,
+            poolSellOrders = emptyList()
+        )
+        itemService.save(shortItem)
+
+        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.sellCurrencyId)
+
+        itemEventService.onPoolOrderUpdated(shortItem.id, bestSellOrder, PoolItemAction.UPDATED, false)
+
+        val saved = itemService.get(shortItem.id)!!
+
+        assertThat(saved.bestSellOrder).isNull()
+        assertThat(saved.poolSellOrders).hasSize(0)
+    }
+
+    @Test
     fun `on best bid order updated - item exists with same order, order cancelled`() = runWithKafka {
         val itemId = randomEthItemId()
 
