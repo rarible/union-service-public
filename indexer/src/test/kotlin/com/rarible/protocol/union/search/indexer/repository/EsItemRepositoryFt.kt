@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.EsItemSort
 import com.rarible.protocol.union.core.model.EsTrait
+import com.rarible.protocol.union.core.model.TraitFilter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -149,6 +150,42 @@ internal class EsItemRepositoryFt {
         assertThat(result.size).isEqualTo(1)
 
         assertThat(result[0].itemId).isEqualTo(esItem.itemId)
+    }
+
+    @Test
+    fun `should search by traits`(): Unit = runBlocking {
+
+        val key = randomString()
+        val value = randomString()
+        val esItem1 = randomEsItem().copy(
+            traits = listOf(
+                EsTrait(key, value),
+                EsTrait(randomString(), randomString()),
+                EsTrait(randomString(), randomString()),
+            ),
+        )
+        val esItem2 = randomEsItem().copy(
+            traits = listOf(
+                EsTrait(key, randomString()),
+                EsTrait(randomString(), randomString()),
+                EsTrait(randomString(), randomString()),
+            ),
+        )
+        val esItem3 = randomEsItem().copy(
+            traits = listOf(
+                EsTrait(randomString(), value),
+                EsTrait(randomString(), randomString()),
+                EsTrait(randomString(), randomString()),
+            ),
+        )
+        repository.saveAll(listOf(esItem1, esItem2, esItem3))
+        val result = repository.search(
+            EsItemGenericFilter(traits = listOf(TraitFilter(key, value))), EsItemSort.DEFAULT, 10
+        ).entities
+
+        assertThat(result.size).isEqualTo(1)
+
+        assertThat(result[0].itemId).isEqualTo(esItem1.itemId)
     }
 
     @Test
