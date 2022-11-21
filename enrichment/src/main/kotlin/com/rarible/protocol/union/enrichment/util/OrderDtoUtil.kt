@@ -75,7 +75,7 @@ val OrderDto.isPoolOrder: Boolean
 
 fun OrderDto.setStatusByAction(action: PoolItemAction): OrderDto {
     return when (action) {
-        PoolItemAction.INCLUDED -> this
+        PoolItemAction.INCLUDED, PoolItemAction.UPDATED -> this
         // If item excluded from the pool, we can consider this order as FILLED to recalculate actual best sell
         PoolItemAction.EXCLUDED -> this.copy(status = OrderStatusDto.FILLED)
     }

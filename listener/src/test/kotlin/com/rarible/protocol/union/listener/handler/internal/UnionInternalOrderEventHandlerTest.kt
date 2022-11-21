@@ -120,8 +120,8 @@ class UnionInternalOrderEventHandlerTest {
         handler.onEvent(UnionOrderUpdateEvent(order))
 
         val expected = listOf(
-            UnionPoolOrderUpdateEvent(order, itemId1.toDto(), PoolItemAction.INCLUDED),
-            UnionPoolOrderUpdateEvent(order, itemId2.toDto(), PoolItemAction.INCLUDED),
+            UnionPoolOrderUpdateEvent(order, itemId1.toDto(), PoolItemAction.UPDATED),
+            UnionPoolOrderUpdateEvent(order, itemId2.toDto(), PoolItemAction.UPDATED),
         )
         // 2 events sent for items from this pool
         coVerify(exactly = 1) { incomingEventHandler.onEvents(expected) }
@@ -149,7 +149,7 @@ class UnionInternalOrderEventHandlerTest {
 
         val expected = listOf(
             // Not specified in in/out, will be the first in list
-            UnionPoolOrderUpdateEvent(order, itemId3.toDto(), PoolItemAction.INCLUDED),
+            UnionPoolOrderUpdateEvent(order, itemId3.toDto(), PoolItemAction.UPDATED),
             // Specified as included, will be 2nd and 3rd
             UnionPoolOrderUpdateEvent(order, itemId1.toDto(), PoolItemAction.INCLUDED),
             UnionPoolOrderUpdateEvent(order, itemId4.toDto(), PoolItemAction.INCLUDED),

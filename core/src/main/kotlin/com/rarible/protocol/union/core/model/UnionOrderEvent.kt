@@ -45,5 +45,6 @@ data class UnionPoolOrderUpdateEvent(
 
 enum class PoolItemAction {
     INCLUDED,
-    EXCLUDED
+    EXCLUDED,
+    UPDATED
 }

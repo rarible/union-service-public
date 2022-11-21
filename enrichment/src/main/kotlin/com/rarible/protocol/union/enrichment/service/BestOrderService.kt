@@ -83,7 +83,8 @@ class BestOrderService(
 
     //------------------------- Item ------------------------//
     suspend fun updateBestSellOrder(
-        item: ShortItem, order: OrderDto,
+        item: ShortItem,
+        order: OrderDto,
         origins: List<String>
     ): ShortItem {
         val providerFactory = ItemBestSellOrderProvider.Factory(item, enrichmentOrderService, ff.enablePoolOrders)

@@ -15,13 +15,18 @@ object OrderPoolEvaluator {
         val currentOrder = poolSellOrders.find {
             updatedOrder.currency == it.currency && updatedOrder.order.id == it.order.id
         }
-
-        return if (action == PoolItemAction.INCLUDED) {
-            val updatedPoolOrders = currentOrder?.let { poolSellOrders - currentOrder } ?: poolSellOrders
-            item.copy(poolSellOrders = updatedPoolOrders + updatedOrder)
-        } else {
-            val updatedPoolOrders = currentOrder?.let { poolSellOrders - currentOrder } ?: poolSellOrders
-            item.copy(poolSellOrders = updatedPoolOrders)
+        return when (action) {
+            PoolItemAction.INCLUDED -> {
+                val updatedPoolOrders = currentOrder?.let { poolSellOrders - currentOrder } ?: poolSellOrders
+                item.copy(poolSellOrders = updatedPoolOrders + updatedOrder)
+            }
+            PoolItemAction.EXCLUDED -> {
+                val updatedPoolOrders = currentOrder?.let { poolSellOrders - currentOrder } ?: poolSellOrders
+                item.copy(poolSellOrders = updatedPoolOrders)
+            }
+            PoolItemAction.UPDATED -> {
+                item
+            }
         }
     }
 
