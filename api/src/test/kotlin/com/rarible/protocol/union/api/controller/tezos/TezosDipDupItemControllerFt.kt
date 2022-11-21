@@ -27,7 +27,7 @@ import org.springframework.web.client.RestTemplate
         "spring.cloud.service-registry.auto-registration.enabled = false",
         "spring.cloud.discovery.enabled = false",
         "logging.logstash.tcp-socket.enabled = false",
-        "logging.logfmt.enabled = false",
+        "logging.logjson.enabled = false",
         "integration.tezos.dipdup.useDipDupTokens = true"
     ]
 )

@@ -7,14 +7,8 @@ import io.mockk.clearMocks
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.test.context.TestPropertySource
 
 @Suppress("UNCHECKED_CAST")
-@TestPropertySource(
-    properties = [
-        "logging.logfmt.enabled = false",
-    ]
-)
 abstract class AbstractIntegrationTest {
 
     @Autowired
