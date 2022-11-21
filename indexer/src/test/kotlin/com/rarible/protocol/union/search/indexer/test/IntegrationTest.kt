@@ -18,20 +18,23 @@ import org.springframework.test.context.ContextConfiguration
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = [
-        "application.environment = test",
-        "spring.cloud.consul.config.enabled = false",
-        "spring.cloud.service-registry.auto-registration.enabled = false",
-        "spring.cloud.discovery.enabled = false",
-        "logging.logstash.tcp-socket.enabled = false",
-        "listener.consumer.workerCount = 1",
-        "handler.activity.enabled = true",
-        "handler.order.enabled = true",
-        "handler.collection.enabled = true",
-        "handler.ownership.enabled = true",
-        "handler.item.enabled = true",
+            "application.environment = test",
+            "spring.cloud.consul.config.enabled = false",
+            "spring.cloud.service-registry.auto-registration.enabled = false",
+            "spring.cloud.discovery.enabled = false",
+            "logging.logjson.enabled = false",
+            "logging.logstash.tcp-socket.enabled = false",
+            "listener.consumer.workerCount = 1",
+            "handler.activity.enabled = true",
+            "handler.order.enabled = true",
+            "handler.collection.enabled = true",
+            "handler.ownership.enabled = true",
+            "handler.item.enabled = true",
     ]
 )
 @ActiveProfiles("test")
-@Import(value = [ElasticsearchBootstrapperTestConfig::class, TestIndexerConfiguration::class, UnionIndexerConfiguration::class, TestUnionSearchConfiguration::class])
+@Import(
+    value = [ElasticsearchBootstrapperTestConfig::class, TestIndexerConfiguration::class, UnionIndexerConfiguration::class, TestUnionSearchConfiguration::class]
+)
 @ContextConfiguration(classes = [SearchConfiguration::class, KafkaConsumerConfiguration::class])
 annotation class IntegrationTest

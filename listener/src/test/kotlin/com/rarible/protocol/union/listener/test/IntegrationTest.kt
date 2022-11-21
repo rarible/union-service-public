@@ -17,12 +17,12 @@ import org.springframework.test.context.ActiveProfiles
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.MOCK,
     properties = [
-        "application.environment = test",
-        "spring.cloud.consul.config.enabled = false",
-        "spring.cloud.service-registry.auto-registration.enabled = false",
-        "spring.cloud.discovery.enabled = false",
-        "logging.logstash.tcp-socket.enabled = false",
-        "logging.logfmt.enabled = false",
+            "application.environment = test",
+            "spring.cloud.consul.config.enabled = false",
+            "spring.cloud.service-registry.auto-registration.enabled = false",
+            "spring.cloud.discovery.enabled = false",
+            "logging.logstash.tcp-socket.enabled = false",
+            "logging.logjson.enabled = false",
     ]
 )
 @Import(value = [TestListenerConfiguration::class])
