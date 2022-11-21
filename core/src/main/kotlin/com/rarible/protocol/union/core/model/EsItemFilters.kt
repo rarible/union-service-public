@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.model
 
-import com.rarible.protocol.union.dto.BlockchainDto
 import java.time.Instant
 
 sealed class EsItemFilter {
@@ -20,8 +19,7 @@ data class EsItemGenericFilter(
     val updatedTo: Instant? = null,
     val deleted: Boolean? = null,
     val text: String? = null,
-    val traitsKeys: Set<String>? = null,
-    val traitsValues: Set<String>? = null,
+    val traits: List<TraitFilter>? = null,
     val descriptions: Set<String>? = null,
     val sellPlatforms: Set<String>? = null,
     val bidPlatforms: Set<String>? = null,
@@ -33,3 +31,6 @@ data class EsItemGenericFilter(
     val bidPriceTo: Double? = null,
     override val cursor: String? = null,
 ) : EsItemFilter()
+
+
+data class TraitFilter(val key: String, val value: String)

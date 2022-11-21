@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsItemFilter
 import com.rarible.protocol.union.core.model.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.EsItemSort
+import com.rarible.protocol.union.core.model.TraitFilter
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.index.query.BoolQueryBuilder
@@ -74,8 +75,7 @@ class EsItemQueryBuilderService(
         mustMatchRange(filter.mintedFrom, filter.mintedTo, EsItem::mintedAt.name)
         mustMatchRange(filter.updatedFrom, filter.updatedTo, EsItem::lastUpdatedAt.name)
         applyTextFilter(filter.text)
-        applyTraitsKeysFilter(filter.traitsKeys)
-        applyTraitsValuesFilter(filter.traitsValues)
+        applyTraitsFilter(filter.traits)
     }
 
     private fun BoolQueryBuilder.applyTextFilter(text: String?) {
@@ -116,24 +116,14 @@ class EsItemQueryBuilderService(
         }
     }
 
-    private fun BoolQueryBuilder.applyTraitsKeysFilter(traitsKeys: Set<String>?) {
-        if (traitsKeys != null) {
-            should(
-                QueryBuilders.nestedQuery(
-                    "traits",
-                    QueryBuilders.boolQuery().must(termsQuery("traits.key.raw", traitsKeys)),
-                    ScoreMode.None
-                )
-            )
-        }
-    }
+    private fun BoolQueryBuilder.applyTraitsFilter(traits: List<TraitFilter>?) {
+        traits?.forEach {
 
-    private fun BoolQueryBuilder.applyTraitsValuesFilter(traitsValues: Set<String>?) {
-        if (traitsValues != null) {
             should(
                 QueryBuilders.nestedQuery(
                     "traits",
-                    QueryBuilders.boolQuery().must(termsQuery("traits.value.raw", traitsValues)),
+                    QueryBuilders.boolQuery().must(termsQuery("traits.key.raw", it.key))
+                        .must(termsQuery("traits.value.raw", it.value)),
                     ScoreMode.None
                 )
             )
