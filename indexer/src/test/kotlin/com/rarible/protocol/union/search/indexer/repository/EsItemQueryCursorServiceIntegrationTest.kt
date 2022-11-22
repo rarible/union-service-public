@@ -91,13 +91,13 @@ class EsItemQueryCursorServiceIntegrationTest {
 
         // then
         if (descending) {
-            assertThat(result1.entities).containsExactly(first, second, third)
-            assertThat(result2.entities).containsExactly(fourth, fifth)
+            assertThat(result1.entities.map { it.itemId }).containsExactly(first.itemId, second.itemId, third.itemId)
+            assertThat(result2.entities.map { it.itemId }).containsExactly(fourth.itemId, fifth.itemId)
             assertThat(result3.entities).isEmpty()
         } else {
-            assertThat(result1.entities).containsExactly(fourth, fifth, third)
-            assertThat(result2.entities).containsExactly(first, second)
-            assertThat(result3.entities).isEmpty()
+            assertThat(result1.entities.map { it.itemId }).containsExactly(fourth.itemId, fifth.itemId, third.itemId)
+            assertThat(result2.entities.map { it.itemId }).containsExactly(first.itemId, second.itemId)
+            assertThat(result3.entities.map { it.itemId }).isEmpty()
         }
         assertThat(cursor3).isNullOrEmpty()
     }
@@ -157,13 +157,13 @@ class EsItemQueryCursorServiceIntegrationTest {
 
         // then
         if (descending) {
-            assertThat(result1.entities).containsExactly(first, second, third)
-            assertThat(result2.entities).containsExactly(fourth, fifth)
-            assertThat(result3.entities).isEmpty()
+            assertThat(result1.entities.map { it.itemId }).containsExactly(first.itemId, second.itemId, third.itemId)
+            assertThat(result2.entities.map { it.itemId }).containsExactly(fourth.itemId, fifth.itemId)
+            assertThat(result3.entities.map { it.itemId }).isEmpty()
         } else {
-            assertThat(result1.entities).containsExactly(fourth, fifth, third)
-            assertThat(result2.entities).containsExactly(first, second)
-            assertThat(result3.entities).isEmpty()
+            assertThat(result1.entities.map { it.itemId }).containsExactly(fourth.itemId, fifth.itemId, third.itemId)
+            assertThat(result2.entities.map { it.itemId }).containsExactly(first.itemId, second.itemId)
+            assertThat(result3.entities.map { it.itemId }).isEmpty()
         }
         assertThat(cursor3).isNullOrEmpty()
     }
