@@ -16,6 +16,7 @@ import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsea
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.SearchHit
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
+import org.springframework.data.elasticsearch.core.query.FetchSourceFilter
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.stereotype.Component
 
@@ -48,6 +49,7 @@ class EsItemRepository(
         query.maxResults = PageSize.ITEM.limit(limit)
         query.trackTotalHits = false
 
+        query.addSourceFilter(FetchSourceFilter(EsItemLite.FIELDS, null))
         val searchHits = search(query)
         val cursor = queryCursorService.buildCursor(searchHits.lastOrNull())
 
