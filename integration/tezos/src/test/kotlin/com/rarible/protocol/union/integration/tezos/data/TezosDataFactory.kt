@@ -191,6 +191,7 @@ fun randomTezosAssetNFT(itemId: ItemIdDto): Asset {
 fun randomTezosOrderDto(make: Asset, maker: String, take: Asset): DipDupOrder {
     return DipDupOrder(
         id = UUID.randomUUID().toString(),
+        internalOrderId = UUID.randomUUID().toString(),
         fill = BigDecimal.ZERO,
         platform = TezosPlatform.RARIBLE_V2,
         payouts = emptyList(),
