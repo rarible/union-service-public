@@ -10,8 +10,10 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
+import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
 import java.math.BigInteger
 
@@ -52,6 +54,16 @@ class DipdupOrderServiceImpl(
             size = size,
             continuation = continuation
         )
+        return Slice(
+            continuation = page.continuation,
+            entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
+        )
+    }
+
+    override suspend fun getOrdersAllSync(continuation: String?, limit: Int, sort: SyncSortDto?): Slice<OrderDto> {
+        val sortTezos = sort?.let { DipDupActivityConverter.convert(it) }
+        logger.info("Fetch dipdup all order sync: $continuation, $limit, $sort")
+        val page = dipdupOrderClient.getOrdersSync(limit, continuation, sortTezos)
         return Slice(
             continuation = page.continuation,
             entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
