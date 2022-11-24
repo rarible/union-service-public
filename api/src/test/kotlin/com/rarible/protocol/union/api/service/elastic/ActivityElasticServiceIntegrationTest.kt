@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.ninjasquad.springmockk.MockkBean
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.api.metrics.ElasticMetricsFactory
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.EsActivity
 import com.rarible.protocol.union.core.model.EsActivityCursor
@@ -49,6 +50,9 @@ internal class ActivityElasticServiceIntegrationTest {
     private lateinit var repository: EsActivityRepository
 
     @Autowired
+    private lateinit var metricsFactory: ElasticMetricsFactory
+
+    @Autowired
     private lateinit var service: ActivityElasticService
 
     private lateinit var one: EsActivity
@@ -58,6 +62,8 @@ internal class ActivityElasticServiceIntegrationTest {
     private lateinit var five: EsActivity
     private lateinit var six: EsActivity
     private lateinit var seven: EsActivity
+
+    private lateinit var missingBefore: Map<BlockchainDto, Double>
 
     @Autowired
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
@@ -70,6 +76,8 @@ internal class ActivityElasticServiceIntegrationTest {
         every { router.getService(BlockchainDto.ETHEREUM) } returns ethereumService
         every { router.getService(BlockchainDto.FLOW) } returns flowService
         every { router.getService(BlockchainDto.SOLANA) } returns solanaService
+
+        missingBefore = metricsFactory.missingActivitiesCounters.map { (k,v) -> k to v.count() }.toMap()
 
         elasticsearchTestBootstrapper.bootstrap()
         // save some elastic activities
@@ -172,6 +180,48 @@ internal class ActivityElasticServiceIntegrationTest {
             // then
             assertThat(actual.activities).containsExactly(eth1, eth2, flow1)
             assertThat(actual.cursor).startsWith("4800_")
+            assertCounterChanges()
+        }
+
+        @Test
+        fun `get all activities, some are missing in blockchains - counters inc`() = runBlocking<Unit> {
+            // given
+            val types = listOf(ActivityTypeDto.MINT, ActivityTypeDto.LIST)
+            val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
+            val size = 3
+            val sort = ActivitySortDto.LATEST_FIRST
+            val cursor2 = buildCursor(two)
+
+            val eth2 = randomUnionActivityOrderList(BlockchainDto.ETHEREUM).copy(
+                id = ActivityIdDto(BlockchainDto.ETHEREUM, "2"),
+                cursor = cursor2,
+            )
+
+            coEvery {
+                ethereumService.getActivitiesByIds(
+                    listOf(
+                        TypedActivityId("1", ActivityTypeDto.MINT),
+                        TypedActivityId("2", ActivityTypeDto.LIST),
+                    )
+                )
+            } returns listOf(eth2)
+            coEvery {
+                flowService.getActivitiesByIds(
+                    listOf(
+                        TypedActivityId("3", ActivityTypeDto.MINT),
+                    )
+                )
+            } returns emptyList()
+
+            // when
+            val actual = service.getAllActivities(types, blockchains, null, null, size, sort)
+
+            // then
+            assertThat(actual.activities).containsExactly(eth2)
+            assertCounterChanges(
+                BlockchainDto.ETHEREUM to 1,
+                BlockchainDto.FLOW to 1,
+            )
         }
     }
 
@@ -203,6 +253,7 @@ internal class ActivityElasticServiceIntegrationTest {
             // then
             assertThat(actual.activities).containsExactly(eth2)
             assertThat(actual.cursor).startsWith("4900_")
+            assertCounterChanges()
         }
     }
 
@@ -235,6 +286,7 @@ internal class ActivityElasticServiceIntegrationTest {
             // then
             assertThat(actual.activities).containsExactly(eth7)
             assertThat(actual.cursor).startsWith("4700_")
+            assertCounterChanges()
         }
     }
 
@@ -287,6 +339,7 @@ internal class ActivityElasticServiceIntegrationTest {
             // then
             assertThat(actual.activities).containsExactly(eth1, eth7)
             assertThat(actual.cursor).startsWith("4700_")
+            assertCounterChanges()
         }
     }
 
@@ -294,5 +347,13 @@ internal class ActivityElasticServiceIntegrationTest {
         return EsActivityCursor(
             esActivity.date, esActivity.blockNumber!!, esActivity.logIndex!!, esActivity.salt
         ).toString()
+    }
+
+    private fun assertCounterChanges(vararg change: Pair<BlockchainDto, Int>) {
+        missingBefore.forEach { (blockchain, before) ->
+            val after = metricsFactory.missingActivitiesCounters[blockchain]!!.count()
+            val diff = change.find { it.first == blockchain }?.second ?: 0
+            assertThat(diff).isEqualTo((after - before).toInt())
+        }
     }
 }
