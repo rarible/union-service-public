@@ -3,6 +3,8 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.OutgoingActivityEventListener
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
 import org.springframework.stereotype.Component
 
 @Component

@@ -12,6 +12,7 @@ import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionAuctionDto

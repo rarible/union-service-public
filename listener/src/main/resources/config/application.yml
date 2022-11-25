@@ -191,12 +191,6 @@ listener:
     broker-replica-set: ${kafka.hosts}
     workers:
       wrapped: 10
-  reconciliation:
-    orderBatchSize: 50
-    auctionBatchSize: 50
-    activityBatchSize: 100
-    threadCount: 2
-    notificationEnabled: false
   platformBestSellCleanup:
     enabled: true
     itemBatchSize: 100

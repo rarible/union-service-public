@@ -14,7 +14,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.test.data.randomSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify

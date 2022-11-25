@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomShortCollection

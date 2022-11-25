@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.service
+package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingCollectionEventListener
@@ -11,8 +11,6 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.model.CollectionStatistics
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
-import com.rarible.protocol.union.enrichment.service.BestOrderService
-import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory

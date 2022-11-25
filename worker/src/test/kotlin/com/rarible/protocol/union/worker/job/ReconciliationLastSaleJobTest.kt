@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -13,11 +13,13 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityBurn
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivitySale
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
-import com.rarible.protocol.union.listener.test.data.defaultUnionListenerProperties
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
+import com.rarible.protocol.union.worker.config.ReconciliationProperties
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -37,7 +39,9 @@ class ReconciliationLastSaleJobTest {
         orderServiceRouter,
         itemEventService,
         itemService,
-        defaultUnionListenerProperties()
+        mockk<WorkerProperties>() {
+            every { reconciliation } returns ReconciliationProperties()
+        }
     )
 
     @BeforeEach

@@ -13,12 +13,10 @@ import com.rarible.protocol.union.listener.config.MetricsProperties
 import com.rarible.protocol.union.listener.config.PlatformBestSellCleanUpProperties
 import com.rarible.protocol.union.listener.config.PriceUpdateProperties
 import com.rarible.protocol.union.listener.config.ReconcileMarksProperties
-import com.rarible.protocol.union.listener.config.ReconciliationProperties
 import com.rarible.protocol.union.listener.config.UnionListenerProperties
 
 fun defaultUnionListenerProperties(): UnionListenerProperties {
     return UnionListenerProperties(
-        reconciliation = ReconciliationProperties(),
         priceUpdate = PriceUpdateProperties(),
         reconcileMarks = ReconcileMarksProperties(),
         consumer = InternalConsumerProperties("doesn't matter", mapOf()),

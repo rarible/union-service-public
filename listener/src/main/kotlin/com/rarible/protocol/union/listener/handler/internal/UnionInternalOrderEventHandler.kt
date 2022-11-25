@@ -16,7 +16,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.util.isPoolOrder
-import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory

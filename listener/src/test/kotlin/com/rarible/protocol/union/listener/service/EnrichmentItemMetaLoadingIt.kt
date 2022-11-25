@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
