@@ -207,6 +207,7 @@ class TezosOrderServiceTest {
     private fun dipDupOrder(orderId: String): DipDupOrder {
         return DipDupOrder(
             id = orderId,
+            internalOrderId = "0",
             fill = BigDecimal.ZERO,
             platform = TezosPlatform.HEN,
             payouts = emptyList(),
