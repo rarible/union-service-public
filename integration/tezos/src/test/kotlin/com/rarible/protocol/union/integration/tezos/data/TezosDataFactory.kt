@@ -191,7 +191,7 @@ fun randomTezosAssetNFT(itemId: ItemIdDto): Asset {
 fun randomTezosOrderDto(make: Asset, maker: String, take: Asset): DipDupOrder {
     return DipDupOrder(
         id = UUID.randomUUID().toString(),
-        internalOrderId = UUID.randomUUID().toString(),
+        internalOrderId = "0",
         fill = BigDecimal.ZERO,
         platform = TezosPlatform.RARIBLE_V2,
         payouts = emptyList(),
@@ -216,6 +216,7 @@ fun randomTezosOrderDto(make: Asset, maker: String, take: Asset): DipDupOrder {
 fun randomTezosOrderListActivity(): DipDupActivity {
     return DipDupOrderListActivity(
         id = randomString(),
+        orderId = "0",
         date = nowMillis().atOffset(ZoneOffset.UTC),
         reverted = false,
         operationCounter = 1,
@@ -240,6 +241,7 @@ fun randomTezosOrderListActivity(): DipDupActivity {
 fun randomTezosOrderActivityCancelList(): DipDupOrderCancelActivity {
     return DipDupOrderCancelActivity(
         id = randomString(),
+        orderId = "0",
         date = nowMillis().atOffset(ZoneOffset.UTC),
         reverted = false,
         operationCounter = 1,

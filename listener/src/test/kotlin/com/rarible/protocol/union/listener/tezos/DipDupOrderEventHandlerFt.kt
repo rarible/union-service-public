@@ -105,7 +105,7 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
     private fun orderEvent(orderId: String): DipDupOrder {
         return DipDupOrder(
             id = orderId,
-            internalOrderId = UUID.randomUUID().toString(),
+            internalOrderId = "0",
             fill = BigDecimal.ZERO,
             platform = TezosPlatform.RARIBLE_V2,
             payouts = emptyList(),
