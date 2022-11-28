@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.service
+package com.rarible.protocol.union.enrichment.service
 
 import com.mongodb.client.result.DeleteResult
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
@@ -12,13 +12,6 @@ import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverte
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.service.BestOrderService
-import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
-import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
-import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
-import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
-import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityBurn
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
