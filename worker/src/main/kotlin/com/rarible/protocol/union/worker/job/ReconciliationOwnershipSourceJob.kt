@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.model.ownershipId
 import com.rarible.protocol.union.core.model.source
@@ -10,8 +10,8 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
-import com.rarible.protocol.union.listener.config.UnionListenerProperties
-import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.asFlow
@@ -26,7 +26,7 @@ class ReconciliationOwnershipSourceJob(
     private val activityServiceRouter: BlockchainRouter<ActivityService>,
     private val ownershipEventService: EnrichmentOwnershipEventService,
     private val ownershipService: EnrichmentOwnershipService,
-    properties: UnionListenerProperties
+    properties: WorkerProperties,
 ) : AbstractReconciliationJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)

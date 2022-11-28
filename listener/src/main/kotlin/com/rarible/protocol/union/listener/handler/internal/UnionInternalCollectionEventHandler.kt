@@ -4,7 +4,7 @@ import com.rarible.core.apm.CaptureTransaction
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.core.service.ReconciliationEventService
-import com.rarible.protocol.union.listener.service.EnrichmentCollectionEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import org.springframework.stereotype.Component
 
 @Component

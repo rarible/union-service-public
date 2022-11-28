@@ -1,15 +1,17 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.listener.service.EnrichmentAuctionEventService
-import com.rarible.protocol.union.listener.test.data.defaultUnionListenerProperties
+import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionEventService
+import com.rarible.protocol.union.worker.config.ReconciliationProperties
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -29,7 +31,9 @@ class ReconciliationAuctionTest {
     private val auctionReconciliationService = ReconciliationAuctionsJob(
         auctionServiceRouter,
         auctionEventService,
-        defaultUnionListenerProperties()
+        mockk<WorkerProperties>() {
+            every { reconciliation } returns ReconciliationProperties()
+        }
     )
 
     @BeforeEach

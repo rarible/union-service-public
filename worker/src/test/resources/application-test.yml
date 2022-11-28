@@ -33,6 +33,11 @@ logging:
     org.springframework.context.annotation: "DEBUG"
 
 worker:
+  reconciliation:
+    orderBatchSize: 50
+    auctionBatchSize: 50
+    threadCount: 2
+    notificationEnabled: false
   search-reindex:
     activity:
       enabled: true
