@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -6,8 +6,8 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.listener.config.UnionListenerProperties
-import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.asFlow
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component
 class ReconciliationOrderJob(
     private val orderServiceRouter: BlockchainRouter<OrderService>,
     private val orderEventService: EnrichmentOrderEventService,
-    properties: UnionListenerProperties
+    properties: WorkerProperties,
 ) : AbstractReconciliationJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)

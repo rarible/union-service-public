@@ -4,7 +4,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.test.data.randomCollectionStatistics
 import com.rarible.protocol.union.listener.clickhouse.repository.ClickHouseCollectionStatisticsRepository
-import com.rarible.protocol.union.listener.service.EnrichmentCollectionEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.impl.annotations.InjectMockKs

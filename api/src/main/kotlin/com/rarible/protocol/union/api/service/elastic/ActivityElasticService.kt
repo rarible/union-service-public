@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.service.elastic
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.flatMapAsync
+import com.rarible.protocol.union.api.metrics.ElasticMetricsFactory
 import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActivityLite
 import com.rarible.protocol.union.core.model.EsActivityLite
 import com.rarible.protocol.union.core.model.EsActivitySort
@@ -50,9 +51,12 @@ class ActivityElasticService(
     private val filterConverter: ActivityFilterConverter,
     private val esActivityRepository: EsActivityRepository,
     private val router: BlockchainRouter<ActivityService>,
+    elasticMetricsFactory: ElasticMetricsFactory,
 ) : ActivityQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    private val missingIdsMetrics = elasticMetricsFactory.missingActivitiesCounters
 
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
@@ -219,7 +223,11 @@ class ActivityElasticService(
         }
         val activities = mapping.flatMapAsync { (blockchain, ids) ->
             val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
-            if (isBlockchainEnabled) router.getService(blockchain).getActivitiesByIds(ids) else emptyList()
+            if (isBlockchainEnabled) {
+                val response = router.getService(blockchain).getActivitiesByIds(ids)
+                checkMissingIds(blockchain, ids, response)
+                response
+            } else emptyList()
         }
 
         val activitiesIdMapping = activities.associateBy { it.id.fullId() }
@@ -256,6 +264,21 @@ class ActivityElasticService(
             is AuctionEndActivityDto -> activityDto.copy(cursor = cursor)
             is L2DepositActivityDto -> activityDto.copy(cursor = cursor)
             is L2WithdrawalActivityDto -> activityDto.copy(cursor = cursor)
+        }
+    }
+
+    private fun checkMissingIds(blockchain: BlockchainDto, ids: List<TypedActivityId>, response: List<ActivityDto>) {
+        val foundIds = mutableSetOf<String>()
+        response.mapTo(foundIds) { it.id.value }
+        val missingIds = mutableListOf<String>()
+        for (id in ids) {
+            if (!foundIds.contains(id.id)) {
+                missingIds.add(id.id)
+            }
+        }
+        if (missingIds.isNotEmpty()) {
+            logger.error("Ids found in ES missing in $blockchain: $missingIds")
+            missingIdsMetrics[blockchain]!!.increment(missingIds.size.toDouble())
         }
     }
 }

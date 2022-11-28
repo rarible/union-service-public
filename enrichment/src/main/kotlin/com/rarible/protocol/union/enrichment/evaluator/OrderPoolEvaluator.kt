@@ -12,17 +12,32 @@ object OrderPoolEvaluator {
     fun updatePoolOrderSet(item: ShortItem, order: OrderDto, action: PoolItemAction): ShortItem {
         val updatedOrder = ShortPoolOrder(order.sellCurrencyId, ShortOrderConverter.convert(order))
         val poolSellOrders = item.poolSellOrders
-        val currentOrder = poolSellOrders.find {
-            updatedOrder.currency == it.currency && updatedOrder.order.id == it.order.id
-        }
-
-        return if (action == PoolItemAction.INCLUDED) {
-            val updatedPoolOrders = currentOrder?.let { poolSellOrders - currentOrder } ?: poolSellOrders
-            item.copy(poolSellOrders = updatedPoolOrders + updatedOrder)
-        } else {
-            val updatedPoolOrders = currentOrder?.let { poolSellOrders - currentOrder } ?: poolSellOrders
-            item.copy(poolSellOrders = updatedPoolOrders)
+        val currentOrder = poolSellOrders.find { match(updatedOrder, it) }
+        return when (action) {
+            PoolItemAction.INCLUDED -> {
+                val updatedPoolOrders = currentOrder?.let { poolSellOrders - currentOrder } ?: poolSellOrders
+                item.copy(poolSellOrders = updatedPoolOrders + updatedOrder)
+            }
+            PoolItemAction.EXCLUDED -> {
+                val updatedPoolOrders = currentOrder?.let { poolSellOrders - currentOrder } ?: poolSellOrders
+                item.copy(poolSellOrders = updatedPoolOrders)
+            }
+            PoolItemAction.UPDATED -> {
+                item
+            }
         }
     }
 
+    fun needUpdateOrder(item: ShortItem, order: OrderDto, action: PoolItemAction): Boolean {
+        val shortOrder = ShortPoolOrder(order.sellCurrencyId, ShortOrderConverter.convert(order))
+        val poolSellOrders = item.poolSellOrders
+        return when (action) {
+            PoolItemAction.INCLUDED, PoolItemAction.EXCLUDED -> true
+            PoolItemAction.UPDATED -> poolSellOrders.any { match(shortOrder, it) }
+        }
+    }
+
+    private fun match(order: ShortPoolOrder, other: ShortPoolOrder): Boolean {
+        return order.currency == other.currency && order.order.id == other.order.id
+    }
 }

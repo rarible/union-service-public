@@ -5,6 +5,7 @@ import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import java.math.BigInteger
 
@@ -24,6 +25,14 @@ interface DipdupOrderService {
         isBid: Boolean? = null,
         continuation: String?,
         size: Int
+    ): Slice<OrderDto> {
+        TODO("Not implemented")
+    }
+
+    suspend fun getOrdersAllSync(
+        continuation: String?,
+        limit: Int,
+        sort: SyncSortDto?
     ): Slice<OrderDto> {
         TODO("Not implemented")
     }

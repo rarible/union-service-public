@@ -98,7 +98,7 @@ class EsItemQueryScoreServiceIntegrationTest {
             bestSellCurrency = "SOLANA:So11111111111111111111111111111111111111112",
             lastUpdatedAt = nowMillis().minusSeconds(35),
         )
-        var expected = listOf(first, second, third, fourth)
+        var expected = listOf(first, second, third, fourth).map { it.itemId }
         if (!descending) expected = expected.reversed()
 
         repository.saveAll(listOf(first, second, third, fourth, skipFirst, skipSecond))
@@ -119,7 +119,7 @@ class EsItemQueryScoreServiceIntegrationTest {
         builder.withQuery(service.buildQuery(boolQueryBuilder, sort, blockchains))
         sortService.applySort(builder, sort)
         val actual = repository.search(builder.build())
-            .map { it.content }
+            .map { it.content.itemId }
 
 
         // then
@@ -168,7 +168,7 @@ class EsItemQueryScoreServiceIntegrationTest {
             bestBidCurrency = "SOLANA:So11111111111111111111111111111111111111112",
             lastUpdatedAt = nowMillis().minusSeconds(35),
         )
-        var expected = listOf(first, second, third, fourth)
+        var expected = listOf(first, second, third, fourth).map { it.itemId }
         if (!descending) expected = expected.reversed()
 
         repository.saveAll(listOf(first, second, third, fourth, skipFirst, skipSecond))
@@ -189,7 +189,7 @@ class EsItemQueryScoreServiceIntegrationTest {
         builder.withQuery(service.buildQuery(boolQueryBuilder, sort, blockchains))
         sortService.applySort(builder, sort)
         val actual = repository.search(builder.build())
-            .map { it.content }
+            .map { it.content.itemId }
 
         // then
         assertThat(actual).isEqualTo(expected)

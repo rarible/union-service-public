@@ -36,7 +36,7 @@ open class TezosOrderService(
         size: Int,
         sort: SyncSortDto?
     ): Slice<OrderDto> {
-        return Slice.empty()
+        return dipdupOrderService.getOrdersAllSync(continuation, size, sort)
     }
 
     override suspend fun getOrderById(id: String): OrderDto {

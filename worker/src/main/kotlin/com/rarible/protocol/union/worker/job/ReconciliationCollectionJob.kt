@@ -1,10 +1,11 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.*
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
-import com.rarible.protocol.union.listener.config.UnionListenerProperties
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component
 class ReconciliationCollectionJob (
     private val collectionServiceRouter: BlockchainRouter<CollectionService>,
     private val enrichmentRefreshService: EnrichmentRefreshService,
-    properties: UnionListenerProperties
+    properties: WorkerProperties
 ) : AbstractReconciliationJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)

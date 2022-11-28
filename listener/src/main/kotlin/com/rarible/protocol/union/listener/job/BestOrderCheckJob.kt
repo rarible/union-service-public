@@ -9,9 +9,9 @@ import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
 import com.rarible.protocol.union.listener.config.UnionListenerProperties
-import com.rarible.protocol.union.listener.service.EnrichmentCollectionEventService
-import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
-import com.rarible.protocol.union.listener.service.EnrichmentOwnershipEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import io.micrometer.core.instrument.MeterRegistry

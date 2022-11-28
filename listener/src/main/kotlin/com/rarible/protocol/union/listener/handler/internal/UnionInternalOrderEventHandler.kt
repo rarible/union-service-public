@@ -16,7 +16,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.util.isPoolOrder
-import com.rarible.protocol.union.listener.service.EnrichmentOrderEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -97,7 +97,8 @@ class UnionInternalOrderEventHandler(
         exist.forEach {
             val itemId = it.toDto()
             if (!excluded.contains(itemId) && !included.contains(itemId)) {
-                messages.add(UnionPoolOrderUpdateEvent(order, itemId, PoolItemAction.INCLUDED))
+                // For existed short items we should generate event to update best sell orders
+                messages.add(UnionPoolOrderUpdateEvent(order, itemId, PoolItemAction.UPDATED))
             }
         }
         included.forEach { messages.add(UnionPoolOrderUpdateEvent(order, it, PoolItemAction.INCLUDED)) }

@@ -142,6 +142,7 @@ integration:
         broker-replica-set: ${consul.tezos.dipdup.consumer.hosts:}
         username: ${consul.tezos.dipdup.consumer.username:}
         password: ${consul.tezos.dipdup.consumer.password:}
+        batchSize: ${consul.tezos.dipdup.consumer.batch:1}
         workers:
           order: ${consul.tezos.dipdup.consumer.workers.order:1}
           activity: ${consul.tezos.dipdup.consumer.workers.activity:4}
@@ -151,6 +152,7 @@ integration:
       broker-replica-set: ${consul.tezos.kafka.hosts}
       username: ${consul.tezos.kafka.username}
       password: ${consul.tezos.kafka.password}
+      batchSize: ${consul.tezos.kafka.batch:1}
       workers:
         item: 1
         ownership: 1
@@ -189,12 +191,6 @@ listener:
     broker-replica-set: ${kafka.hosts}
     workers:
       wrapped: 10
-  reconciliation:
-    orderBatchSize: 50
-    auctionBatchSize: 50
-    activityBatchSize: 100
-    threadCount: 2
-    notificationEnabled: false
   platformBestSellCleanup:
     enabled: true
     itemBatchSize: 100

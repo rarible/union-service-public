@@ -10,7 +10,6 @@ import java.time.Duration
 data class UnionListenerProperties(
     val consumer: InternalConsumerProperties,
     val monitoringWorker: DaemonWorkerProperties = DaemonWorkerProperties(),
-    val reconciliation: ReconciliationProperties,
     val platformBestSellCleanup: PlatformBestSellCleanUpProperties = PlatformBestSellCleanUpProperties(),
     val collectionStatisticsResync: CollectionStatisticsResyncProperties,
     val priceUpdate: PriceUpdateProperties,
@@ -24,15 +23,6 @@ class InternalConsumerProperties(
     val brokerReplicaSet: String,
     val workers: Map<String, Int>,
     val blockchainWorkers: Map<String, Int> = emptyMap()
-)
-
-class ReconciliationProperties(
-    val collectionBatchSize: Int = 50,
-    val orderBatchSize: Int = 50,
-    val auctionBatchSize: Int = 50,
-    val activityBatchSize: Int = 100,
-    val threadCount: Int = 4,
-    val notificationEnabled: Boolean = true
 )
 
 class ReconcileMarksProperties(

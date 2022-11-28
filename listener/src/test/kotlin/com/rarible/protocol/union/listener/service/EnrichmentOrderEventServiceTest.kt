@@ -8,6 +8,10 @@ import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155

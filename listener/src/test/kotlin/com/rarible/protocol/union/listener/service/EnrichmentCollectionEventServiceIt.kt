@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomShortCollection
@@ -15,7 +16,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDt
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
@@ -58,18 +59,18 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
             .copy(bestSellOrder = unionBestSell)
 
         val saved = collectionService.get(shortCollection.id)!!
-        assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
+        Assertions.assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
 
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
-            assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
-            assertThat(messages[0].value.collection.id).isEqualTo(expected.id)
-            assertThat(messages[0].value.collection.status).isEqualTo(expected.status)
-            assertThat(messages[0].value.collection.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
-            assertThat(messages[0].value.collection.bestBidOrder).isNull()
-            assertThat(messages[0].value.collection.statistics?.itemCount).isEqualTo(expected.statistics?.itemCount)
-            assertThat(messages[0].value.collection.statistics?.itemCountTotal).isEqualTo(expected.statistics?.itemCountTotal)
+            Assertions.assertThat(messages).hasSize(1)
+            Assertions.assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
+            Assertions.assertThat(messages[0].value.collection.id).isEqualTo(expected.id)
+            Assertions.assertThat(messages[0].value.collection.status).isEqualTo(expected.status)
+            Assertions.assertThat(messages[0].value.collection.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
+            Assertions.assertThat(messages[0].value.collection.bestBidOrder).isNull()
+            Assertions.assertThat(messages[0].value.collection.statistics?.itemCount).isEqualTo(expected.statistics?.itemCount)
+            Assertions.assertThat(messages[0].value.collection.statistics?.itemCountTotal).isEqualTo(expected.statistics?.itemCountTotal)
         }
     }
 
@@ -94,15 +95,15 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         val expected = EnrichedCollectionConverter.convert(unionCollection).copy(bestBidOrder = unionBestBid)
 
         val saved = collectionService.get(shortCollection.id)!!
-        assertThat(saved.bestBidOrder).isEqualTo(ShortOrderConverter.convert(unionBestBid))
+        Assertions.assertThat(saved.bestBidOrder).isEqualTo(ShortOrderConverter.convert(unionBestBid))
 
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
-            assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
-            assertThat(messages[0].value.collection.id).isEqualTo(expected.id)
-            assertThat(messages[0].value.collection.bestBidOrder!!.id).isEqualTo(expected.bestBidOrder!!.id)
-            assertThat(messages[0].value.collection.bestSellOrder).isNull()
+            Assertions.assertThat(messages).hasSize(1)
+            Assertions.assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
+            Assertions.assertThat(messages[0].value.collection.id).isEqualTo(expected.id)
+            Assertions.assertThat(messages[0].value.collection.bestBidOrder!!.id).isEqualTo(expected.bestBidOrder!!.id)
+            Assertions.assertThat(messages[0].value.collection.bestSellOrder).isNull()
         }
     }
 }

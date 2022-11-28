@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.service
+package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
@@ -21,11 +21,6 @@ import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipSourceComparator
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.service.BestOrderService
-import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
-import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
-import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.util.setStatusByAction
 import com.rarible.protocol.union.enrichment.validator.OwnershipValidator
 import kotlinx.coroutines.async

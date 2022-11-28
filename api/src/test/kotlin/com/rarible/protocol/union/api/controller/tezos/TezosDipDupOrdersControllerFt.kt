@@ -93,6 +93,7 @@ class TezosDipDupOrdersControllerFt : AbstractIntegrationTest() {
     private fun dipDupOrder(orderId: String): DipDupOrder {
         return DipDupOrder(
             id = orderId,
+            internalOrderId = UUID.randomUUID().toString(),
             fill = BigDecimal.ZERO,
             platform = TezosPlatform.HEN,
             payouts = emptyList(),

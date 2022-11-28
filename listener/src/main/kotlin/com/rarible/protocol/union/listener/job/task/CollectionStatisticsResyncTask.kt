@@ -5,7 +5,7 @@ import com.rarible.protocol.union.enrichment.model.CollectionStatistics
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.listener.clickhouse.configuration.ConditionalOnClickhouseEnabled
 import com.rarible.protocol.union.listener.clickhouse.repository.ClickHouseCollectionStatisticsRepository
-import com.rarible.protocol.union.listener.service.EnrichmentCollectionEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory

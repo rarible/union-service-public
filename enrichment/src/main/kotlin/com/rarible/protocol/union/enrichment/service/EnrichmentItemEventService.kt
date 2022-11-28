@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.service
+package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
@@ -22,10 +22,6 @@ import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.service.BestOrderService
-import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
-import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.util.setStatusByAction
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
@@ -169,8 +165,12 @@ class EnrichmentItemEventService(
 
         updateOrder(itemId, hackedOrder, notificationEnabled) { item ->
             val updated = OrderPoolEvaluator.updatePoolOrderSet(item, hackedOrder, action)
-            // Origins might be ignored for such orders
-            bestOrderService.updateBestSellOrder(updated, hackedOrder, emptyList())
+            if (OrderPoolEvaluator.needUpdateOrder(updated, hackedOrder, action)) {
+                // Origins might be ignored for such orders
+                bestOrderService.updateBestSellOrder(updated, hackedOrder, emptyList())
+            } else {
+                item
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.service.ActivityService
@@ -10,8 +10,8 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.listener.config.UnionListenerProperties
-import com.rarible.protocol.union.listener.service.EnrichmentItemEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.asFlow
@@ -26,7 +26,7 @@ class ReconciliationLastSaleJob(
     private val activityServiceRouter: BlockchainRouter<ActivityService>,
     private val itemEventService: EnrichmentItemEventService,
     private val itemService: EnrichmentItemService,
-    properties: UnionListenerProperties
+    properties: WorkerProperties
 ) : AbstractReconciliationJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)

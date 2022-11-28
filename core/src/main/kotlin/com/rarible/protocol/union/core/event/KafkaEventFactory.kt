@@ -129,26 +129,25 @@ object KafkaEventFactory {
     }
 
     fun internalOrderEvent(event: UnionOrderEvent): KafkaMessage<UnionInternalBlockchainEvent> {
-        val order = when (event) {
-            is UnionOrderUpdateEvent -> event.order
-            is UnionPoolOrderUpdateEvent -> event.order
-            else -> null
-        }
-        val key = if (order == null) {
-            event.orderId.fullId()
-        } else {
-            val makeAssetExt = order.make.type.ext
-            val takeAssetExt = order.take.type.ext
+        val key = when (event) {
+            is UnionOrderUpdateEvent -> {
+                val order = event.order
+                val makeAssetExt = order.make.type.ext
+                val takeAssetExt = order.take.type.ext
 
-            when {
-                makeAssetExt.isCollection -> makeAssetExt.collectionId!!.fullId()
-                takeAssetExt.isCollection -> takeAssetExt.collectionId!!.fullId()
-                makeAssetExt.itemId != null -> makeAssetExt.itemId!!.fullId()
-                takeAssetExt.itemId != null -> takeAssetExt.itemId!!.fullId()
-                else -> event.orderId.fullId()
+                when {
+                    makeAssetExt.isCollection -> makeAssetExt.collectionId!!.fullId()
+                    takeAssetExt.isCollection -> takeAssetExt.collectionId!!.fullId()
+                    makeAssetExt.itemId != null -> makeAssetExt.itemId!!.fullId()
+                    takeAssetExt.itemId != null -> takeAssetExt.itemId!!.fullId()
+                    else -> event.orderId.fullId()
+                }
             }
+            is UnionPoolOrderUpdateEvent -> {
+                event.itemId.fullId()
+            }
+            else -> event.orderId.fullId()
         }
-
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = key,

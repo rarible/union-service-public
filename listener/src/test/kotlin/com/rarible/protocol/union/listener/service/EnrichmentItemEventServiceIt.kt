@@ -14,6 +14,7 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
@@ -303,6 +304,28 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.sellCurrencyId)
 
         itemEventService.onPoolOrderUpdated(shortItem.id, bestSellOrder, PoolItemAction.EXCLUDED, false)
+
+        val saved = itemService.get(shortItem.id)!!
+
+        assertThat(saved.bestSellOrder).isNull()
+        assertThat(saved.poolSellOrders).hasSize(0)
+    }
+
+    @Test
+    fun `on best sell order updated - item has no pool order`() = runBlocking<Unit> {
+        val bestSellOrder = randomUnionSellOrderDto().copy(platform = PlatformDto.SUDOSWAP)
+        val shortOrder = ShortOrderConverter.convert(bestSellOrder)
+
+        val itemId = randomEthItemId()
+        val shortItem = randomShortItem(itemId).copy(
+            bestSellOrder = null,
+            poolSellOrders = emptyList()
+        )
+        itemService.save(shortItem)
+
+        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.sellCurrencyId)
+
+        itemEventService.onPoolOrderUpdated(shortItem.id, bestSellOrder, PoolItemAction.UPDATED, false)
 
         val saved = itemService.get(shortItem.id)!!
 

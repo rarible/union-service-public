@@ -115,30 +115,37 @@ class DipDupOrderConverter(
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
             TezosPlatform.HEN -> TezosOrderDataHenDto(
+                internalOrderId = order.internalOrderId,
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
             TezosPlatform.VERSUM_V1 -> TezosOrderDataVersumV1Dto(
+                internalOrderId = order.internalOrderId,
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
             TezosPlatform.TEIA_V1 -> TezosOrderDataTeiaV1Dto(
+                internalOrderId = order.internalOrderId,
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
             TezosPlatform.OBJKT_V1 -> TezosOrderDataObjktV1Dto(
+                internalOrderId = order.internalOrderId,
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
             TezosPlatform.OBJKT_V2 -> TezosOrderDataObjktV2Dto(
+                internalOrderId = order.internalOrderId,
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
             TezosPlatform.FXHASH_V1 -> TezosOrderDataFxhashV1Dto(
+                internalOrderId = order.internalOrderId,
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
             TezosPlatform.FXHASH_V2 -> TezosOrderDataFxhashV2Dto(
+                internalOrderId = order.internalOrderId,
                 payouts = order.payouts.map { convert(it, blockchain) },
                 originFees = order.originFees.map { convert(it, blockchain) }
             )
