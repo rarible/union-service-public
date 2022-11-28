@@ -25,6 +25,7 @@ import java.util.*
 fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
     return DipDupOrderListActivity(
         id = activityId,
+        orderId = "0",
         operationCounter = randomInt(),
         date = nowMillis().atOffset(ZoneOffset.UTC),
         reverted = false,
