@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.service
+package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.dto.OrderStatusDto
@@ -14,6 +14,9 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership

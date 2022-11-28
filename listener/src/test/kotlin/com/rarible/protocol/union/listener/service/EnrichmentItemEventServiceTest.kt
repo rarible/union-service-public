@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.service
+package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener

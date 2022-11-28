@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.service
+package com.rarible.protocol.union.listener.service
 
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
@@ -12,6 +12,8 @@ import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionAuctionDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
