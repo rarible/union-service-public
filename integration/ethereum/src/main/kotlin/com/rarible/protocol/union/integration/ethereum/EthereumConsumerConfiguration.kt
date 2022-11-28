@@ -9,7 +9,7 @@ import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.OrderEventDto
 import com.rarible.protocol.nft.api.subscriber.NftIndexerEventsConsumerFactory
 import com.rarible.protocol.order.api.subscriber.OrderIndexerEventsConsumerFactory
-import com.rarible.protocol.union.core.ConsumerFactory
+import com.rarible.protocol.union.core.event.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker

@@ -10,7 +10,7 @@ import com.rarible.dipdup.listener.model.DipDupCollectionEvent
 import com.rarible.dipdup.listener.model.DipDupItemEvent
 import com.rarible.dipdup.listener.model.DipDupItemMetaEvent
 import com.rarible.dipdup.listener.model.DipDupOwnershipEvent
-import com.rarible.protocol.union.core.ConsumerFactory
+import com.rarible.protocol.union.core.event.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker

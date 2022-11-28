@@ -3,7 +3,7 @@ package com.rarible.protocol.union.api.configuration
 import com.rarible.protocol.union.api.handler.UnionSubscribeItemEventHandler
 import com.rarible.protocol.union.api.handler.UnionSubscribeOrderEventHandler
 import com.rarible.protocol.union.api.handler.UnionSubscribeOwnershipEventHandler
-import com.rarible.protocol.union.core.ConsumerFactory
+import com.rarible.protocol.union.core.event.ConsumerFactory
 import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto

@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.tezos.dipdup.event
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.dipdup.client.core.model.DipDupActivity
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
@@ -19,26 +20,28 @@ open class DipDupActivityEventHandler(
     private val properties: DipDupIntegrationProperties,
     private val mapper: ObjectMapper
 ) : AbstractBlockchainEventHandler<DipDupActivity, ActivityDto>(
-    BlockchainDto.TEZOS
+    BlockchainDto.TEZOS,
+    EventType.ACTIVITY
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override suspend fun handle(event: DipDupActivity) {
+    override suspend fun convert(event: DipDupActivity): ActivityDto? {
         logger.info("Received DipDup activity event: {}", mapper.writeValueAsString(event))
-        try {
+        return try {
             if (properties.useDipDupTokens) {
                 val unionEvent = dipDupOrderConverter.convert(event, blockchain)
-                handler.onEvent(unionEvent)
+                unionEvent
             } else {
                 val unionEvent = dipDupOrderConverter.convertLegacy(event, blockchain)
-                handler.onEvent(unionEvent)
                 if (dipDupTransfersEventHandler.isTransfersEvent(unionEvent)) {
                     dipDupTransfersEventHandler.handle(unionEvent)
                 }
+                unionEvent
             }
         } catch (e: UnionDataFormatException) {
             logger.warn("Activity event was skipped because wrong data format", e)
+            null
         }
     }
 }

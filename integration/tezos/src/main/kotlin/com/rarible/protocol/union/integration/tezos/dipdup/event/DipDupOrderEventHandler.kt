@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.event
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rarible.core.apm.CaptureTransaction
 import com.rarible.dipdup.client.core.model.DipDupOrder
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
@@ -18,24 +18,15 @@ open class DipDupOrderEventHandler(
     private val mapper: ObjectMapper,
     marketplaces: DipDupIntegrationProperties.Marketplaces
 ) : AbstractBlockchainEventHandler<DipDupOrder, UnionOrderEvent>(
-    BlockchainDto.TEZOS
+    BlockchainDto.TEZOS,
+    EventType.ORDER
 ) {
 
     private val enabledPlatforms = marketplaces.getEnabledMarketplaces()
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @CaptureTransaction("OrderEvent#TEZOS")
-    override suspend fun handle(event: DipDupOrder) {
-        convert(event)?.let { handler.onEvent(it) }
-    }
-
-    @CaptureTransaction("OrderEvents#TEZOS")
-    override suspend fun handle(events: List<DipDupOrder>) {
-        handler.onEvents(events.mapNotNull { convert(it) })
-    }
-
-    private suspend fun convert(event: DipDupOrder): UnionOrderEvent? {
+    override suspend fun convert(event: DipDupOrder): UnionOrderEvent? {
         logger.info("Received DipDup order event: {}", mapper.writeValueAsString(event))
         return if (enabledPlatforms.contains(event.platform)) {
             val unionOrder = dipDupOrderConverter.convert(event, blockchain)

@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.event
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rarible.core.apm.CaptureTransaction
 import com.rarible.dipdup.listener.model.DipDupDeleteItemEvent
 import com.rarible.dipdup.listener.model.DipDupItemEvent
 import com.rarible.dipdup.listener.model.DipDupUpdateItemEvent
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
@@ -19,18 +19,13 @@ open class DipDupItemEventHandler(
     override val handler: IncomingEventHandler<UnionItemEvent>,
     private val mapper: ObjectMapper
 ) : AbstractBlockchainEventHandler<DipDupItemEvent, UnionItemEvent>(
-    BlockchainDto.TEZOS
+    BlockchainDto.TEZOS,
+    EventType.ITEM
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @CaptureTransaction("ItemEvent#TEZOS")
-    override suspend fun handle(event: DipDupItemEvent) = handler.onEvent(convert(event))
-
-    @CaptureTransaction("ItemEvents#TEZOS")
-    override suspend fun handle(events: List<DipDupItemEvent>) = handler.onEvents(events.map { convert(it) })
-
-    private fun convert(event: DipDupItemEvent): UnionItemEvent {
+    override suspend fun convert(event: DipDupItemEvent): UnionItemEvent {
         logger.info("Received DipDup item event: {}", mapper.writeValueAsString(event))
         return when (event) {
             is DipDupUpdateItemEvent -> {

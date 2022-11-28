@@ -5,7 +5,7 @@ import com.rarible.protocol.solana.dto.BalanceEventDto
 import com.rarible.protocol.solana.dto.TokenEventDto
 import com.rarible.protocol.solana.dto.TokenMetaEventDto
 import com.rarible.protocol.solana.subscriber.SolanaEventsConsumerFactory
-import com.rarible.protocol.union.core.ConsumerFactory
+import com.rarible.protocol.union.core.event.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker

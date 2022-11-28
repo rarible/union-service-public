@@ -15,3 +15,7 @@ fun trimToLength(str: String?, maxLength: Int, suffix: String? = null): String? 
 
     return trimmed.toString()
 }
+
+fun capitalise(str: String) {
+    str.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+}

@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.integration.solana.event
 
-import com.rarible.core.apm.CaptureTransaction
 import com.rarible.protocol.solana.dto.BalanceDeleteEventDto
 import com.rarible.protocol.solana.dto.BalanceEventDto
 import com.rarible.protocol.solana.dto.BalanceUpdateEventDto
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
@@ -15,21 +15,14 @@ import org.slf4j.LoggerFactory
 
 open class SolanaOwnershipEventHandler(
     override val handler: IncomingEventHandler<UnionOwnershipEvent>
-) : AbstractBlockchainEventHandler<BalanceEventDto, UnionOwnershipEvent>(BlockchainDto.SOLANA) {
+) : AbstractBlockchainEventHandler<BalanceEventDto, UnionOwnershipEvent>(
+    BlockchainDto.SOLANA,
+    EventType.OWNERSHIP
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @CaptureTransaction("OwnershipEvent#SOLANA")
-    override suspend fun handle(event: BalanceEventDto) {
-        convert(event)?.let { handler.onEvent(it) }
-    }
-
-    @CaptureTransaction("OwnershipEvents#SOLANA")
-    override suspend fun handle(events: List<BalanceEventDto>) {
-        handler.onEvents(events.mapNotNull { convert(it) })
-    }
-
-    private fun convert(event: BalanceEventDto): UnionOwnershipEvent? {
+    override suspend fun convert(event: BalanceEventDto): UnionOwnershipEvent? {
         logger.info("Received {} Ownership event: {}", blockchain, event)
 
         val isAssociatedTokenAccount = when (event) {

@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.solana.event
 
-import com.rarible.core.apm.CaptureTransaction
 import com.rarible.protocol.solana.dto.CollectionEventDto
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
@@ -13,18 +13,13 @@ import org.slf4j.LoggerFactory
 open class SolanaCollectionEventHandler(
     override val handler: IncomingEventHandler<UnionCollectionEvent>
 ) : AbstractBlockchainEventHandler<CollectionEventDto, UnionCollectionEvent>(
-    BlockchainDto.SOLANA
+    BlockchainDto.SOLANA,
+    EventType.COLLECTION
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @CaptureTransaction("CollectionEvent#SOLANA")
-    override suspend fun handle(event: CollectionEventDto) = handler.onEvent(convert(event))
-
-    @CaptureTransaction("CollectionEvents#SOLANA")
-    override suspend fun handle(events: List<CollectionEventDto>) = handler.onEvents(events.map { convert(it) })
-
-    private fun convert(event: CollectionEventDto): UnionCollectionEvent {
+    override suspend fun convert(event: CollectionEventDto): UnionCollectionEvent {
         logger.info("Received {} Collection event: {}", blockchain, event)
 
         return when (event) {
