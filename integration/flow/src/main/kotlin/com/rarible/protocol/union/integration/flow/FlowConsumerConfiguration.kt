@@ -6,7 +6,7 @@ import com.rarible.protocol.dto.FlowNftItemEventDto
 import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.flow.nft.api.subscriber.FlowNftIndexerEventsConsumerFactory
-import com.rarible.protocol.union.core.ConsumerFactory
+import com.rarible.protocol.union.core.event.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker

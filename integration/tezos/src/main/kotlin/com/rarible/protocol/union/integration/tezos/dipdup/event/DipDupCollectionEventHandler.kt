@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.tezos.dipdup.event
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.dipdup.listener.model.DipDupCollectionEvent
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
@@ -19,14 +20,15 @@ open class DipDupCollectionEventHandler(
     private val mapper: ObjectMapper,
     private val properties: DipDupIntegrationProperties
 ) : AbstractBlockchainEventHandler<DipDupCollectionEvent, UnionCollectionEvent>(
-    BlockchainDto.TEZOS
+    BlockchainDto.TEZOS,
+    EventType.COLLECTION
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override suspend fun handle(event: DipDupCollectionEvent) {
+    override suspend fun convert(event: DipDupCollectionEvent): UnionCollectionEvent? {
         logger.info("Received DipDup collection event: {}", mapper.writeValueAsString(event))
-        try {
+        return try {
             val collection = DipDupCollectionConverter.convert(event.collection)
 
             val unionCollectionEvent = if (properties.enrichDipDupCollection) {
@@ -39,9 +41,10 @@ open class DipDupCollectionEventHandler(
                 UnionCollectionUpdateEvent(collection)
             }
 
-            handler.onEvent(unionCollectionEvent)
+            unionCollectionEvent
         } catch (e: UnionDataFormatException) {
             logger.warn("DipDup collection event was skipped because wrong data format", e)
+            null
         }
     }
 

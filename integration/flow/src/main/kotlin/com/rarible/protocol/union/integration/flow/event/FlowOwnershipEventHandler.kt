@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.integration.flow.event
 
-import com.rarible.core.apm.CaptureTransaction
 import com.rarible.protocol.dto.FlowNftOwnershipDeleteEventDto
 import com.rarible.protocol.dto.FlowNftOwnershipUpdateEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
@@ -18,22 +18,13 @@ import org.slf4j.LoggerFactory
 open class FlowOwnershipEventHandler(
     override val handler: IncomingEventHandler<UnionOwnershipEvent>
 ) : AbstractBlockchainEventHandler<FlowOwnershipEventDto, UnionOwnershipEvent>(
-    BlockchainDto.FLOW
+    BlockchainDto.FLOW,
+    EventType.OWNERSHIP
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @CaptureTransaction("OwnershipEvent#FLOW")
-    override suspend fun handle(event: FlowOwnershipEventDto) {
-        convert(event)?.let { handler.onEvent(it) }
-    }
-
-    @CaptureTransaction("OwnershipEvents#FLOW")
-    override suspend fun handle(events: List<FlowOwnershipEventDto>) {
-        handler.onEvents(events.mapNotNull { convert(it) })
-    }
-
-    private fun convert(event: FlowOwnershipEventDto): UnionOwnershipEvent? {
+    override suspend fun convert(event: FlowOwnershipEventDto): UnionOwnershipEvent? {
         logger.info("Received {} Ownership event: {}", blockchain, event)
 
         return when (event) {

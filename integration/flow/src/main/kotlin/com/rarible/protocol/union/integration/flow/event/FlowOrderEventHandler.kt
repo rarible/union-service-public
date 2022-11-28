@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.integration.flow.event
 
-import com.rarible.core.apm.CaptureTransaction
 import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOrderUpdateEventDto
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
@@ -15,18 +15,13 @@ open class FlowOrderEventHandler(
     override val handler: IncomingEventHandler<UnionOrderEvent>,
     private val flowOrderConverter: FlowOrderConverter
 ) : AbstractBlockchainEventHandler<FlowOrderEventDto, UnionOrderEvent>(
-    BlockchainDto.FLOW
+    BlockchainDto.FLOW,
+    EventType.ORDER
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @CaptureTransaction("OrderEvent#FLOW")
-    override suspend fun handle(event: FlowOrderEventDto) = handler.onEvent(convert(event))
-
-    @CaptureTransaction("OrderEvents#FLOW")
-    override suspend fun handle(events: List<FlowOrderEventDto>) = handler.onEvents(events.map { convert(it) })
-
-    private suspend fun convert(event: FlowOrderEventDto): UnionOrderEvent {
+    override suspend fun convert(event: FlowOrderEventDto): UnionOrderEvent {
         logger.info("Received {} Order event: {}", blockchain, event)
 
         when (event) {

@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.event
 
-import com.rarible.core.apm.CaptureTransaction
 import com.rarible.dipdup.listener.model.DipDupItemMetaEvent
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemMetaEvent
@@ -13,15 +13,15 @@ import org.slf4j.LoggerFactory
 open class DipDupItemMetaEventHandler(
     override val handler: IncomingEventHandler<UnionItemMetaEvent>
 ) : AbstractBlockchainEventHandler<DipDupItemMetaEvent, UnionItemMetaEvent>(
-    BlockchainDto.TEZOS
+    BlockchainDto.TEZOS,
+    EventType.ITEM_META
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @CaptureTransaction("ItemMetaEvent#TEZOS")
-    override suspend fun handle(event: DipDupItemMetaEvent) {
+    override suspend fun convert(event: DipDupItemMetaEvent): UnionItemMetaEvent {
         logger.info("Received {} dipdup token meta event: {}", blockchain, event)
         val itemId = ItemIdDto(blockchain, event.itemId)
-        handler.onEvent(UnionItemMetaRefreshEvent(itemId))
+        return UnionItemMetaRefreshEvent(itemId)
     }
 }

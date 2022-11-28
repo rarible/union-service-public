@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.integration.ethereum.event
 
-import com.rarible.core.apm.CaptureTransaction
 import com.rarible.protocol.dto.AmmOrderNftUpdateEventDto
 import com.rarible.protocol.dto.OrderEventDto
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
@@ -18,14 +18,14 @@ abstract class EthOrderEventHandler(
     blockchain: BlockchainDto,
     override val handler: IncomingEventHandler<UnionOrderEvent>,
     private val ethOrderConverter: EthOrderConverter
-) : AbstractBlockchainEventHandler<OrderEventDto, UnionOrderEvent>(blockchain) {
+) : AbstractBlockchainEventHandler<OrderEventDto, UnionOrderEvent>(
+    blockchain,
+    EventType.ORDER
+) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun handleInternal(event: OrderEventDto) = handler.onEvent(convert(event))
-    suspend fun handleInternal(events: List<OrderEventDto>) = handler.onEvents(events.map { convert(it) })
-
-    private suspend fun convert(event: OrderEventDto): UnionOrderEvent {
+    override suspend fun convert(event: OrderEventDto): UnionOrderEvent {
         logger.info("Received {} Order event: {}", blockchain, event)
 
         return when (event) {
@@ -45,22 +45,8 @@ abstract class EthOrderEventHandler(
 
 open class EthereumOrderEventHandler(
     handler: IncomingEventHandler<UnionOrderEvent>, ethOrderConverter: EthOrderConverter
-) : EthOrderEventHandler(BlockchainDto.ETHEREUM, handler, ethOrderConverter) {
-
-    @CaptureTransaction("OrderEvent#ETHEREUM")
-    override suspend fun handle(event: OrderEventDto) = handleInternal(event)
-
-    @CaptureTransaction("OrderEvents#ETHEREUM")
-    override suspend fun handle(events: List<OrderEventDto>) = handleInternal(events)
-}
+) : EthOrderEventHandler(BlockchainDto.ETHEREUM, handler, ethOrderConverter)
 
 open class PolygonOrderEventHandler(
     handler: IncomingEventHandler<UnionOrderEvent>, ethOrderConverter: EthOrderConverter
-) : EthOrderEventHandler(BlockchainDto.POLYGON, handler, ethOrderConverter) {
-
-    @CaptureTransaction("OrderEvent#POLYGON")
-    override suspend fun handle(event: OrderEventDto) = handleInternal(event)
-
-    @CaptureTransaction("OrderEvents#POLYGON")
-    override suspend fun handle(events: List<OrderEventDto>) = handleInternal(events)
-}
+) : EthOrderEventHandler(BlockchainDto.POLYGON, handler, ethOrderConverter)

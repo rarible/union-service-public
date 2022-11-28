@@ -2,35 +2,45 @@ package com.rarible.protocol.union.core.handler
 
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.core.daemon.sequential.ConsumerEventHandler
-import com.rarible.protocol.union.dto.BlockchainDto
 import org.slf4j.LoggerFactory
 
 class BlockchainEventHandlerWrapper<B, U>(
     private val blockchainHandler: BlockchainEventHandler<B, U>
 ) : BlockchainEventHandler<B, U>, ConsumerEventHandler<B>, ConsumerBatchEventHandler<B> {
 
+    override val eventType = blockchainHandler.eventType
+    override val blockchain = blockchainHandler.blockchain
+    override val handler = blockchainHandler.handler
+
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun handle(event: B) {
         try {
             blockchainHandler.handle(event)
+        } catch (ex: EventConversionException) {
+            logger.error("Conversion of single event failed [{}]", ex.event, ex.cause)
+            throw ex.cause!!
         } catch (ex: Exception) {
             logger.error("Unexpected exception during handling event [{}]", event, ex)
             throw ex
         }
     }
 
-    override suspend fun handle(event: List<B>) {
+    override suspend fun handle(events: List<B>) {
         try {
-            blockchainHandler.handle(event)
+            blockchainHandler.handle(events)
+        } catch (ex: EventConversionException) {
+            logger.error(
+                "Conversion of one of ${events.size} $blockchain ${eventType.name} events failed [{}]",
+                ex.event, ex.cause
+            )
+            throw ex.cause!!
         } catch (ex: Exception) {
-            logger.error("Unexpected exception during handling event [{}]", event, ex)
+            logger.error(
+                "Unexpected exception during handling batch of ${events.size} $blockchain ${eventType.name} events", ex
+            )
             throw ex
         }
     }
-
-    override val blockchain: BlockchainDto = blockchainHandler.blockchain
-
-    override val handler: IncomingEventHandler<U> = blockchainHandler.handler
 
 }
