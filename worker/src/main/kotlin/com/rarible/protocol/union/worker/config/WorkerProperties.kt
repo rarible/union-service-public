@@ -3,6 +3,7 @@ package com.rarible.protocol.union.worker.config
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
+import java.time.Duration
 
 @ConstructorBinding
 @ConfigurationProperties(prefix = "worker")
@@ -10,6 +11,8 @@ data class WorkerProperties(
     val searchReindex: SearchReindexProperties,
     val metrics: MetricsProperties = MetricsProperties(),
     val reconciliation: ReconciliationProperties,
+    val collectionStatisticsResync: CollectionStatisticsResyncProperties,
+    val platformBestSellCleanup: PlatformBestSellCleanUpProperties = PlatformBestSellCleanUpProperties(),
 )
 
 data class SearchReindexProperties(
@@ -79,4 +82,16 @@ class ReconciliationProperties(
 
 data class MetricsProperties(
     val rootPath: String = "protocol.union.worker"
+)
+
+class CollectionStatisticsResyncProperties(
+    val enabled: Boolean = false,
+    val rate: Duration = Duration.ofHours(12),
+    val limit: Int = 50
+)
+
+data class PlatformBestSellCleanUpProperties(
+    val enabled: Boolean = true,
+    val itemBatchSize: Int = 100,
+    val ownershipBatchSize: Int = 100
 )

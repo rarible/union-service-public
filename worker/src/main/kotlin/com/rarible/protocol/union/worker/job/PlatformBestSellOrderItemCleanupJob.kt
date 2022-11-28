@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
@@ -9,7 +9,7 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.listener.config.UnionListenerProperties
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -26,7 +26,7 @@ class PlatformBestSellOrderItemCleanupJob(
     private val itemRepository: ItemRepository,
     private val itemService: EnrichmentItemService,
     private val itemEventListeners: List<OutgoingItemEventListener>,
-    properties: UnionListenerProperties
+    properties: WorkerProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)

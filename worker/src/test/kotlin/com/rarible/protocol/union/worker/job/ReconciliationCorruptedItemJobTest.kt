@@ -1,5 +1,6 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
+import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AssetDto
@@ -16,7 +17,6 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.solana.data.randomBigDecimal
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify

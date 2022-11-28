@@ -1,7 +1,8 @@
 package com.rarible.protocol.union.listener.clickhouse.repository
 
 import com.rarible.protocol.union.dto.StatisticsPeriodDto
-import com.rarible.protocol.union.listener.clickhouse.client.ClickHouseSimpleClient
+import com.rarible.protocol.union.enrichment.clickhouse.client.ClickHouseSimpleClient
+import com.rarible.protocol.union.enrichment.clickhouse.repository.ClickHouseCollectionStatisticsRepository
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import kotlinx.coroutines.runBlocking

@@ -149,6 +149,14 @@ worker:
     activityBatchSize: 100
     threadCount: 2
     notificationEnabled: false
+  collection-statistics-resync:
+    enabled: false
+    rate: PT12H
+    limit: 50
+  platformBestSellCleanup:
+    enabled: true
+    itemBatchSize: 100
+    ownershipBatchSize: 100
   search-reindex:
     activity:
       enabled: ${consul.worker.activity.enabled:true}

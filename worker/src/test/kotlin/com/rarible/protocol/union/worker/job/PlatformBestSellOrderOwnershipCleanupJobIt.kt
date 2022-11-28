@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.dto.PlatformDto
@@ -11,10 +11,11 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.listener.config.PlatformBestSellCleanUpProperties
-import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.protocol.union.listener.test.data.defaultUnionListenerProperties
+import com.rarible.protocol.union.worker.config.PlatformBestSellCleanUpProperties
+import com.rarible.protocol.union.worker.IntegrationTest
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
@@ -31,8 +32,9 @@ class PlatformBestSellOrderOwnershipCleanupJobIt {
 
     val ownershipService: EnrichmentOwnershipService = mockk()
     val listener: OutgoingOwnershipEventListener = mockk()
-    val properties = defaultUnionListenerProperties()
-        .copy(platformBestSellCleanup = PlatformBestSellCleanUpProperties(enabled = true))
+    val properties = mockk<WorkerProperties>() {
+        every { platformBestSellCleanup } returns PlatformBestSellCleanUpProperties(enabled = true)
+    }
 
     lateinit var job: PlatformBestSellOrderOwnershipCleanupJob
 

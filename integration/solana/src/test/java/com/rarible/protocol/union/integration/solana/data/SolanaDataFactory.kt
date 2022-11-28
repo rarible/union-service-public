@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.solana.data
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
@@ -155,4 +156,3 @@ fun randomAsset() = AssetDto(
     value = randomBigDecimal()
 )
 
-fun randomBigDecimal(): BigDecimal = BigDecimal.valueOf((0..100000).random().toLong())

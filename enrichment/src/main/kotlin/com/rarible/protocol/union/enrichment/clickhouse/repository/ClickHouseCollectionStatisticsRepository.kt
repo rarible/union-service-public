@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.clickhouse.repository
+package com.rarible.protocol.union.enrichment.clickhouse.repository
 
 import com.clickhouse.client.ClickHouseRecord
 import com.clickhouse.client.ClickHouseValue
@@ -8,7 +8,7 @@ import com.rarible.protocol.union.enrichment.model.CollectionStatistics
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.model.StatisticsPeriod
 import com.rarible.protocol.union.enrichment.model.StatisticsValue
-import com.rarible.protocol.union.listener.clickhouse.client.ClickHouseSimpleClient
+import com.rarible.protocol.union.enrichment.clickhouse.client.ClickHouseSimpleClient
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.BigInteger

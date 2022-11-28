@@ -10,8 +10,6 @@ import java.time.Duration
 data class UnionListenerProperties(
     val consumer: InternalConsumerProperties,
     val monitoringWorker: DaemonWorkerProperties = DaemonWorkerProperties(),
-    val platformBestSellCleanup: PlatformBestSellCleanUpProperties = PlatformBestSellCleanUpProperties(),
-    val collectionStatisticsResync: CollectionStatisticsResyncProperties,
     val priceUpdate: PriceUpdateProperties,
     val metaItemRetry: MetaItemRetry,
     val reconcileMarks: ReconcileMarksProperties,
@@ -38,18 +36,6 @@ class MetaItemRetry(
 class PriceUpdateProperties(
     val enabled: Boolean = true,
     val rate: Duration = Duration.ofMinutes(5)
-)
-
-class CollectionStatisticsResyncProperties(
-    val enabled: Boolean = false,
-    val rate: Duration = Duration.ofHours(12),
-    val limit: Int = 50
-)
-
-data class PlatformBestSellCleanUpProperties(
-    val enabled: Boolean = true,
-    val itemBatchSize: Int = 100,
-    val ownershipBatchSize: Int = 100
 )
 
 data class MetricsProperties(

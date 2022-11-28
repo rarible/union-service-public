@@ -1,10 +1,10 @@
-package com.rarible.protocol.union.listener.job.task
+package com.rarible.protocol.union.worker.task
 
 import com.rarible.core.task.TaskHandler
+import com.rarible.protocol.union.enrichment.clickhouse.repository.ClickHouseCollectionStatisticsRepository
+import com.rarible.protocol.union.enrichment.configuration.ConditionalOnClickhouseEnabled
 import com.rarible.protocol.union.enrichment.model.CollectionStatistics
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
-import com.rarible.protocol.union.listener.clickhouse.configuration.ConditionalOnClickhouseEnabled
-import com.rarible.protocol.union.listener.clickhouse.repository.ClickHouseCollectionStatisticsRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

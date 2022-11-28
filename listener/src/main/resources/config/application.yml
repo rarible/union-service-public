@@ -191,14 +191,6 @@ listener:
     broker-replica-set: ${kafka.hosts}
     workers:
       wrapped: 10
-  platformBestSellCleanup:
-    enabled: true
-    itemBatchSize: 100
-    ownershipBatchSize: 100
-  collection-statistics-resync:
-    enabled: false
-    rate: PT12H
-    limit: 50
   price-update:
     enabled: true
     rate: PT5M

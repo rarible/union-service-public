@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
@@ -8,7 +8,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
-import com.rarible.protocol.union.listener.config.UnionListenerProperties
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -25,7 +25,7 @@ class PlatformBestSellOrderOwnershipCleanupJob(
     private val ownershipRepository: OwnershipRepository,
     private val ownershipService: EnrichmentOwnershipService,
     private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
-    properties: UnionListenerProperties
+    properties: WorkerProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
