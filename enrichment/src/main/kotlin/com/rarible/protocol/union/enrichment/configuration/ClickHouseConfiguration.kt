@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.clickhouse.configuration
+package com.rarible.protocol.union.enrichment.configuration
 
 import com.clickhouse.client.ClickHouseClient
 import com.clickhouse.client.ClickHouseClientBuilder
@@ -8,9 +8,9 @@ import com.clickhouse.client.ClickHouseNode
 import com.clickhouse.client.ClickHouseNodeSelector
 import com.clickhouse.client.ClickHouseProtocol
 import com.clickhouse.client.config.ClickHouseClientOption
-import com.rarible.protocol.union.listener.clickhouse.client.ClickHouseSimpleClient
-import com.rarible.protocol.union.listener.clickhouse.client.DefaultClickHouseSimpleClient
-import com.rarible.protocol.union.listener.clickhouse.repository.ClickHouseCollectionStatisticsRepository
+import com.rarible.protocol.union.enrichment.clickhouse.client.ClickHouseSimpleClient
+import com.rarible.protocol.union.enrichment.clickhouse.client.DefaultClickHouseSimpleClient
+import com.rarible.protocol.union.enrichment.clickhouse.repository.ClickHouseCollectionStatisticsRepository
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean

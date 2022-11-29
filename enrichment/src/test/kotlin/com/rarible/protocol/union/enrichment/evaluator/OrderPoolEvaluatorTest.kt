@@ -1,12 +1,12 @@
 package com.rarible.protocol.union.enrichment.evaluator
 
+import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
-import com.rarible.protocol.union.integration.solana.data.randomBigDecimal
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

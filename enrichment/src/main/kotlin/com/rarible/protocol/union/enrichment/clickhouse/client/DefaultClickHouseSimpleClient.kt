@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.clickhouse.client
+package com.rarible.protocol.union.enrichment.clickhouse.client
 
 import com.clickhouse.client.ClickHouseClientBuilder
 import com.clickhouse.client.ClickHouseNode

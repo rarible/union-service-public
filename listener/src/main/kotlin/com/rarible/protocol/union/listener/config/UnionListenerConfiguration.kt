@@ -6,7 +6,6 @@ import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.task.EnableRaribleTask
-import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
@@ -22,12 +21,11 @@ import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
-import com.rarible.protocol.union.listener.clickhouse.configuration.ClickHouseConfiguration
+import com.rarible.protocol.union.enrichment.configuration.ClickHouseConfiguration
 import com.rarible.protocol.union.listener.downloader.ItemMetaTaskRouter
 import com.rarible.protocol.union.listener.handler.internal.ItemMetaTaskSchedulerHandler
 import com.rarible.protocol.union.listener.job.BestOrderCheckJob
 import com.rarible.protocol.union.listener.job.BestOrderCheckJobHandler
-import com.rarible.protocol.union.listener.job.CollectionStatisticsResyncJob
 import com.rarible.protocol.union.listener.job.ReconciliationMarkJob
 import com.rarible.protocol.union.listener.job.ReconciliationMarkJobHandler
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
@@ -124,16 +122,6 @@ class UnionListenerConfiguration(
         meterRegistry: MeterRegistry,
     ): ReconciliationMarkJob {
         return ReconciliationMarkJob(handler, properties, meterRegistry)
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = ["listener.collection-statistics-resync.enabled"], havingValue = "true")
-    fun collectionStatisticsResyncJob(
-        properties: UnionListenerProperties,
-        meterRegistry: MeterRegistry,
-        taskRepository: TaskRepository
-    ): CollectionStatisticsResyncJob {
-        return CollectionStatisticsResyncJob(properties, meterRegistry, taskRepository)
     }
 
     private fun createUnionReconciliationMarkEventConsumer(

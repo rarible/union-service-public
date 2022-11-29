@@ -38,6 +38,10 @@ worker:
     auctionBatchSize: 50
     threadCount: 2
     notificationEnabled: false
+  collection-statistics-resync:
+    enabled: false
+    rate: PT12H
+    limit: 50
   search-reindex:
     activity:
       enabled: true
@@ -87,3 +91,8 @@ worker:
           enabled: true
         - blockchain: IMMUTABLEX
           enabled: false
+
+clickhouse:
+  database: default
+  user: default
+  password: ""

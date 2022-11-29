@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.clickhouse.configuration
+package com.rarible.protocol.union.enrichment.configuration
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 

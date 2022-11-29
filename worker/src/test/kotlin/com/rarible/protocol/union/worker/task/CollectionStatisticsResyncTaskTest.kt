@@ -1,9 +1,9 @@
-package com.rarible.protocol.union.listener.job.task
+package com.rarible.protocol.union.worker.task
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.test.data.randomCollectionStatistics
-import com.rarible.protocol.union.listener.clickhouse.repository.ClickHouseCollectionStatisticsRepository
+import com.rarible.protocol.union.enrichment.clickhouse.repository.ClickHouseCollectionStatisticsRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import io.mockk.coEvery
 import io.mockk.coVerify

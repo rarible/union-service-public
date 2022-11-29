@@ -1,17 +1,22 @@
 package com.rarible.protocol.union.worker.config
 
 import com.rarible.core.task.EnableRaribleTask
+import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
+import com.rarible.protocol.union.enrichment.configuration.ClickHouseConfiguration
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
+import com.rarible.protocol.union.worker.job.CollectionStatisticsResyncJob
 import com.rarible.protocol.union.worker.task.search.ReindexService
+import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import org.elasticsearch.client.RestHighLevelClient
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -23,7 +28,8 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 @Import(
     value = [
         EnrichmentApiConfiguration::class,
-        SearchConfiguration::class
+        SearchConfiguration::class,
+        ClickHouseConfiguration::class,
     ]
 )
 @EnableRaribleTask
@@ -77,5 +83,15 @@ class WorkerConfiguration(
             repositories = esRepositories,
             restHighLevelClient = highLevelClient,
         )
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = ["listener.collection-statistics-resync.enabled"], havingValue = "true")
+    fun collectionStatisticsResyncJob(
+        properties: WorkerProperties,
+        meterRegistry: MeterRegistry,
+        taskRepository: TaskRepository
+    ): CollectionStatisticsResyncJob {
+        return CollectionStatisticsResyncJob(properties, meterRegistry, taskRepository)
     }
 }
