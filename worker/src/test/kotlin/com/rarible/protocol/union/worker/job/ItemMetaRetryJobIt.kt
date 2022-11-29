@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
@@ -11,7 +11,8 @@ import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.listener.test.IntegrationTest
+import com.rarible.protocol.union.listener.job.ItemMetaRetryJobHandler
+import com.rarible.protocol.union.worker.IntegrationTest
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking

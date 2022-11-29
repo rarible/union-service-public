@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.DaemonWorkerProperties
@@ -8,10 +8,10 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
-import com.rarible.protocol.union.listener.config.UnionListenerProperties
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import io.micrometer.core.instrument.MeterRegistry
@@ -24,7 +24,7 @@ import kotlinx.coroutines.time.delay
 
 class BestOrderCheckJob(
     private val handler: BestOrderCheckJobHandler,
-    properties: UnionListenerProperties,
+    properties: WorkerProperties,
     meterRegistry: MeterRegistry,
 ): SequentialDaemonWorker(
     meterRegistry = meterRegistry,
@@ -49,7 +49,7 @@ class BestOrderCheckJobHandler(
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
     private val enrichmentCollectionEventService: EnrichmentCollectionEventService,
     blockchains: List<BlockchainDto>,
-    properties: UnionListenerProperties
+    properties: WorkerProperties,
 ) : JobHandler {
 
     private val logger = LoggerFactory.getLogger(javaClass)

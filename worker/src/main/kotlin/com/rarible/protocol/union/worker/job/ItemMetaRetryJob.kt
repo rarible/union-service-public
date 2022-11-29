@@ -12,7 +12,7 @@ import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.ItemMetaService
-import com.rarible.protocol.union.listener.config.UnionListenerProperties
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.time.delay
 import org.slf4j.LoggerFactory
@@ -23,13 +23,13 @@ import org.springframework.stereotype.Component
 @ConditionalOnProperty(name = ["common.feature-flags.enableMetaPipeline"], havingValue = "true")
 class ItemMetaRetryJob(
     private val handler: ItemMetaRetryJobHandler,
-    listenerProperties: UnionListenerProperties,
+    properties: WorkerProperties,
     meterRegistry: MeterRegistry,
 ) : SequentialDaemonWorker(
     meterRegistry = meterRegistry,
     properties = DaemonWorkerProperties().copy(
-        pollingPeriod = listenerProperties.metaItemRetry.rate,
-        errorDelay = listenerProperties.metaItemRetry.rate
+        pollingPeriod = properties.metaItemRetry.rate,
+        errorDelay = properties.metaItemRetry.rate
     ),
     workerName = "item-meta-retry-job"
 ) {

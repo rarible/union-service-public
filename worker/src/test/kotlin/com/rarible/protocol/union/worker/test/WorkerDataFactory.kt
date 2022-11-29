@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.test.data
+package com.rarible.protocol.union.worker.test
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.ReconciliationMarkType

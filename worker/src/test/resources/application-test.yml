@@ -42,6 +42,14 @@ worker:
     enabled: false
     rate: PT12H
     limit: 50
+  price-update:
+    enabled: false
+    rate: PT5M
+    delay: PT60M
+  reconcile-marks:
+    enabled: false
+    rate: PT1M
+    delay: PT60M
   search-reindex:
     activity:
       enabled: true

@@ -97,16 +97,6 @@ meta:
   embedded:
     publicUrl: "http://localhost:8080/content/embedded"
 
-listener:
-  price-update:
-    enabled: false
-    rate: PT5M
-    delay: PT60M
-  reconcile-marks:
-    enabled: false
-    rate: PT1M
-    delay: PT60M
-
 clickhouse:
   database: default
   user: default

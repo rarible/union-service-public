@@ -13,6 +13,9 @@ data class WorkerProperties(
     val reconciliation: ReconciliationProperties,
     val collectionStatisticsResync: CollectionStatisticsResyncProperties,
     val platformBestSellCleanup: PlatformBestSellCleanUpProperties = PlatformBestSellCleanUpProperties(),
+    val priceUpdate: PriceUpdateProperties,
+    val reconcileMarks: ReconcileMarksProperties,
+    val metaItemRetry: MetaItemRetry,
 )
 
 data class SearchReindexProperties(
@@ -94,4 +97,19 @@ data class PlatformBestSellCleanUpProperties(
     val enabled: Boolean = true,
     val itemBatchSize: Int = 100,
     val ownershipBatchSize: Int = 100
+)
+
+class PriceUpdateProperties(
+    val enabled: Boolean = true,
+    val rate: Duration = Duration.ofMinutes(5)
+)
+
+class ReconcileMarksProperties(
+    val enabled: Boolean = true,
+    val rate: Duration = Duration.ofSeconds(15)
+)
+
+class MetaItemRetry(
+    val enabled: Boolean = false,
+    val rate: Duration = Duration.ofMinutes(1)
 )
