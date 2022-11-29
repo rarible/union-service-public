@@ -41,7 +41,8 @@ class PlatformBestSellOrderItemCleanupJobIt {
     lateinit var job: PlatformBestSellOrderItemCleanupJob
 
     @BeforeEach
-    fun beforeEach() {
+    fun beforeEach() = runBlocking<Unit> {
+        itemRepository.createIndices()
         job = PlatformBestSellOrderItemCleanupJob(
             itemRepository, itemService, listOf(listener), properties
         )
