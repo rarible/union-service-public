@@ -23,6 +23,7 @@ import com.rarible.protocol.union.worker.AbstractIntegrationTest
 import com.rarible.protocol.union.worker.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
@@ -47,6 +48,12 @@ internal class PriceUpdateJobTest: AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var priceUpdateJob: BestOrderCheckJobHandler
+
+    @BeforeEach
+    fun setUp() = runBlocking<Unit> {
+        itemRepository.createIndices()
+        ownershipRepository.createIndices()
+    }
 
     @Test
     fun `should update best order for multi orders items`() = runBlocking<Unit> {
