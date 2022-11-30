@@ -157,6 +157,15 @@ worker:
     enabled: true
     itemBatchSize: 100
     ownershipBatchSize: 100
+  price-update:
+    enabled: true
+    rate: PT5M
+  reconcile-marks:
+    enabled: true
+    rate: PT15S
+  meta-item-retry:
+    enabled: false
+    rate: PT15M
   search-reindex:
     activity:
       enabled: ${consul.worker.activity.enabled:true}

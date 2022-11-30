@@ -191,15 +191,6 @@ listener:
     broker-replica-set: ${kafka.hosts}
     workers:
       wrapped: 10
-  price-update:
-    enabled: true
-    rate: PT5M
-  reconcile-marks:
-    enabled: true
-    rate: PT15S
-  meta-item-retry:
-    enabled: false
-    rate: PT15M
   meta-scheduling:
     item:
       workers: 4

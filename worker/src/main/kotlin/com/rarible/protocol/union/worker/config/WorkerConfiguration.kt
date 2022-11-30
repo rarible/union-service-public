@@ -10,7 +10,11 @@ import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
 import com.rarible.protocol.union.enrichment.configuration.ClickHouseConfiguration
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
+import com.rarible.protocol.union.worker.job.BestOrderCheckJob
+import com.rarible.protocol.union.worker.job.BestOrderCheckJobHandler
 import com.rarible.protocol.union.worker.job.CollectionStatisticsResyncJob
+import com.rarible.protocol.union.worker.job.ReconciliationMarkJob
+import com.rarible.protocol.union.worker.job.ReconciliationMarkJobHandler
 import com.rarible.protocol.union.worker.task.search.ReindexService
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -86,12 +90,32 @@ class WorkerConfiguration(
     }
 
     @Bean
-    @ConditionalOnProperty(name = ["listener.collection-statistics-resync.enabled"], havingValue = "true")
+    @ConditionalOnProperty(name = ["worker.collection-statistics-resync.enabled"], havingValue = "true")
     fun collectionStatisticsResyncJob(
         properties: WorkerProperties,
         meterRegistry: MeterRegistry,
         taskRepository: TaskRepository
     ): CollectionStatisticsResyncJob {
         return CollectionStatisticsResyncJob(properties, meterRegistry, taskRepository)
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = ["worker.price-update.enabled"], havingValue = "true")
+    fun bestOrderCheckJob(
+        handler: BestOrderCheckJobHandler,
+        properties: WorkerProperties,
+        meterRegistry: MeterRegistry,
+    ): BestOrderCheckJob {
+        return BestOrderCheckJob(handler, properties, meterRegistry)
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = ["worker.reconcile-marks.enabled"], havingValue = "true")
+    fun reconciliationMarkJob(
+        handler: ReconciliationMarkJobHandler,
+        properties: WorkerProperties,
+        meterRegistry: MeterRegistry,
+    ): ReconciliationMarkJob {
+        return ReconciliationMarkJob(handler, properties, meterRegistry)
     }
 }

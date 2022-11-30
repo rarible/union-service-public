@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.nowMillis
@@ -12,7 +12,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
-import com.rarible.protocol.union.listener.config.UnionListenerProperties
+import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.time.delay
 import org.slf4j.LoggerFactory
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component
 
 class ReconciliationMarkJob(
     private val handler: ReconciliationMarkJobHandler,
-    properties: UnionListenerProperties,
+    properties: WorkerProperties,
     meterRegistry: MeterRegistry,
 ): SequentialDaemonWorker(
     meterRegistry = meterRegistry,

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -19,8 +19,8 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
-import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
-import com.rarible.protocol.union.listener.test.IntegrationTest
+import com.rarible.protocol.union.worker.AbstractIntegrationTest
+import com.rarible.protocol.union.worker.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -29,7 +29,7 @@ import java.math.BigDecimal
 import java.time.Instant
 
 @IntegrationTest
-internal class PriceUpdateJobTest : AbstractIntegrationTest() {
+internal class PriceUpdateJobTest: AbstractIntegrationTest() {
     @Autowired
     private lateinit var ethereumOrderConverter: EthOrderConverter
 
@@ -111,10 +111,6 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
             multiCurrency = true,
             lastUpdatedAt = Instant.EPOCH
         )
-
-        ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, randomEthOwnershipDto())
-        ethereumOrderControllerApiMock.mockGetByIds(randomEthSellOrderDto())
-        ethereumAuctionControllerApiMock.mockGetAuctionsByItem(shortOwnership.id.toDto().getItemId(), emptyList())
 
         ownershipRepository.save(shortOwnership)
         priceUpdateJob.handle()

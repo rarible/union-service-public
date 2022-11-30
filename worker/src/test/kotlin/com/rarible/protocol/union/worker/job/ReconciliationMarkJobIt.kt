@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.listener.job
+package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -7,10 +7,10 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
-import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
-import com.rarible.protocol.union.listener.test.IntegrationTest
-import com.rarible.protocol.union.listener.test.data.randomCollectionMark
-import com.rarible.protocol.union.listener.test.data.randomItemMark
+import com.rarible.protocol.union.worker.AbstractIntegrationTest
+import com.rarible.protocol.union.worker.IntegrationTest
+import com.rarible.protocol.union.worker.test.randomCollectionMark
+import com.rarible.protocol.union.worker.test.randomItemMark
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify

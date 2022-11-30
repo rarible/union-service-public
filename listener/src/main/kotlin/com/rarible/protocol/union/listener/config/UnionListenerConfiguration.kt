@@ -24,10 +24,6 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.configuration.ClickHouseConfiguration
 import com.rarible.protocol.union.listener.downloader.ItemMetaTaskRouter
 import com.rarible.protocol.union.listener.handler.internal.ItemMetaTaskSchedulerHandler
-import com.rarible.protocol.union.listener.job.BestOrderCheckJob
-import com.rarible.protocol.union.listener.job.BestOrderCheckJobHandler
-import com.rarible.protocol.union.listener.job.ReconciliationMarkJob
-import com.rarible.protocol.union.listener.job.ReconciliationMarkJobHandler
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
@@ -102,26 +98,6 @@ class UnionListenerConfiguration(
         }
         val workers = consumers.flatMap { it.workers }
         return ConsumerWorkerGroup(workers)
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = ["listener.price-update.enabled"], havingValue = "true")
-    fun bestOrderCheckJob(
-        handler: BestOrderCheckJobHandler,
-        properties: UnionListenerProperties,
-        meterRegistry: MeterRegistry,
-    ): BestOrderCheckJob {
-        return BestOrderCheckJob(handler, properties, meterRegistry)
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = ["listener.reconcile-marks.enabled"], havingValue = "true")
-    fun reconciliationMarkJob(
-        handler: ReconciliationMarkJobHandler,
-        properties: UnionListenerProperties,
-        meterRegistry: MeterRegistry,
-    ): ReconciliationMarkJob {
-        return ReconciliationMarkJob(handler, properties, meterRegistry)
     }
 
     private fun createUnionReconciliationMarkEventConsumer(
