@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.converter
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.client.core.model.OrderStatus
@@ -37,6 +38,7 @@ class DipDupOrderConverter(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val mapper = ObjectMapper()
 
     suspend fun convert(order: DipDupOrder, blockchain: BlockchainDto): OrderDto {
         try {
@@ -108,7 +110,8 @@ class DipDupOrderConverter(
         return when (order.platform) {
             TezosPlatform.RARIBLE_V1 -> TezosOrderDataLegacyDto(
                 payouts = order.payouts.map { convert(it, blockchain) },
-                originFees = order.originFees.map { convert(it, blockchain) }
+                originFees = order.originFees.map { convert(it, blockchain) },
+                legacyData = order.legacyData?.let { mapper.writeValueAsString(it) }
             )
             TezosPlatform.RARIBLE_V2 -> TezosOrderDataRaribleV2DataV2Dto(
                 payouts = order.payouts.map { convert(it, blockchain) },
