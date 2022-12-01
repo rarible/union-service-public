@@ -18,19 +18,6 @@ protocol-union-meta-loader:
   resources:
     jvm:
       xmx_megabytes: 2048
-
-protocol-union-indexer:
-  replicas: 3
-  resources:
-    jvm:
-      xmx_megabytes: 1280
-      max_direct_memory_megabytes: 256
-
-protocol-union-worker:
-  resources:
-    jvm:
-      xmx_megabytes: 1024
-      max_direct_memory_megabytes: 256
   environments:
     # The most sensitive pipeline, should be handled ASAP without delay
     META_LOADER_DOWNLOADER_ITEM_EVENT_WORKERS: 6
@@ -52,3 +39,16 @@ protocol-union-worker:
     META_LOADER_DOWNLOADER_ITEM_SYNC_WORKERS: 1
     META_LOADER_DOWNLOADER_ITEM_SYNC_BATCHSIZE: 4
     META_LOADER_DOWNLOADER_ITEM_SYNC_POOLSIZE: 1
+
+protocol-union-indexer:
+  replicas: 3
+  resources:
+    jvm:
+      xmx_megabytes: 1280
+      max_direct_memory_megabytes: 256
+
+protocol-union-worker:
+  resources:
+    jvm:
+      xmx_megabytes: 1024
+      max_direct_memory_megabytes: 256
