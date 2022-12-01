@@ -120,7 +120,8 @@ class TezosDipDupOrdersControllerFt : AbstractIntegrationTest() {
             ),
             takePrice = null,
             cancelled = false,
-            salt = BigInteger.ONE
+            salt = BigInteger.ONE,
+            legacyData = null
         )
     }
 }

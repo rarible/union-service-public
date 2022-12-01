@@ -129,13 +129,9 @@ class ItemController(
         val fullItemId = IdParser.parseItemId(itemId)
         val shortItemId = ShortItemId(fullItemId)
         val unionItem = enrichmentItemService.fetch(shortItemId)
-        val shortItem = enrichmentItemService.get(shortItemId)
-        val enrichedUnionItem = enrichmentItemService.enrichItem(
-            shortItem = shortItem,
-            item = unionItem,
-            syncMetaDownload = false,
-            metaPipeline = ItemMetaPipeline.API
-        )
+        val enrichedUnionItem = enrichmentItemService.enrichItems(listOf(unionItem), ItemMetaPipeline.API)
+            .firstOrNull()
+
         return ResponseEntity.ok(enrichedUnionItem)
     }
 
