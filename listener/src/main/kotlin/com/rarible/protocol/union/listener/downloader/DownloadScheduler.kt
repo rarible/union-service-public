@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.downloader
 
+import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
@@ -60,16 +61,16 @@ abstract class DownloadScheduler<T>(
             exist[it.id] == null
         }.groupBy { it.id }
 
-        val created = HashSet<String>()
-
         // Potentially there could be several tasks for same entry
-        // TODO make it chunked-async?
-        notFound.forEach { group ->
-            val earliest = group.value.minByOrNull { it.scheduledAt }!!
-            val id = earliest.id
-            val updated = repository.update(id, this::isSchedulingRequired) { createInitialEntry(earliest) }
-            updated?.let { created.add(id) }
-        }
+        val created = notFound.map { group ->
+            group.value.minByOrNull { it.scheduledAt }!!
+        }.chunked(50).map { chunk ->
+            chunk.mapAsync { task ->
+                val id = task.id
+                val updated = repository.update(id, this::isSchedulingRequired) { createInitialEntry(task) }
+                updated?.let { id }
+            }.filterNotNull()
+        }.flatten().toSet()
 
         return created
     }
