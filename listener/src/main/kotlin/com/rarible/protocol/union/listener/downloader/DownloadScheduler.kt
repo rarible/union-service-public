@@ -63,6 +63,7 @@ abstract class DownloadScheduler<T>(
         val created = HashSet<String>()
 
         // Potentially there could be several tasks for same entry
+        // TODO make it chunked-async?
         notFound.forEach { group ->
             val earliest = group.value.minByOrNull { it.scheduledAt }!!
             val id = earliest.id

@@ -24,9 +24,9 @@ protocol-union-meta-loader:
     META_LOADER_DOWNLOADER_ITEM_EVENT_BATCHSIZE: 64
     META_LOADER_DOWNLOADER_ITEM_EVENT_POOLSIZE: 32
     # Less sensitive pipeline since most of new items should be handled in EVENT pipeline, but has hihh priority too
-    META_LOADER_DOWNLOADER_ITEM_API_WORKERS: 3
+    META_LOADER_DOWNLOADER_ITEM_API_WORKERS: 6
     META_LOADER_DOWNLOADER_ITEM_API_BATCHSIZE: 64
-    META_LOADER_DOWNLOADER_ITEM_API_POOLSIZE: 16
+    META_LOADER_DOWNLOADER_ITEM_API_POOLSIZE: 32
     # Manual refreshes, average throughput required, but delay is not super-important
     META_LOADER_DOWNLOADER_ITEM_REFRESH_WORKERS: 6
     META_LOADER_DOWNLOADER_ITEM_REFRESH_BATCHSIZE: 64
