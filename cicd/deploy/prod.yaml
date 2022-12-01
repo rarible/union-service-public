@@ -14,7 +14,7 @@ protocol-union-listener:
       max_direct_memory_megabytes: 1024
 
 protocol-union-meta-loader:
-  replicas: 3
+  replicas: 4
   resources:
     jvm:
       xmx_megabytes: 2048
@@ -34,15 +34,15 @@ protocol-union-worker:
   environments:
     # The most sensitive pipeline, should be handled ASAP without delay
     META_LOADER_DOWNLOADER_ITEM_EVENT_WORKERS: 6
-    META_LOADER_DOWNLOADER_ITEM_EVENT_BATCHSIZE: 32
+    META_LOADER_DOWNLOADER_ITEM_EVENT_BATCHSIZE: 64
     META_LOADER_DOWNLOADER_ITEM_EVENT_POOLSIZE: 32
     # Less sensitive pipeline since most of new items should be handled in EVENT pipeline, but has hihh priority too
-    META_LOADER_DOWNLOADER_ITEM_API_WORKERS: 2
-    META_LOADER_DOWNLOADER_ITEM_API_BATCHSIZE: 16
-    META_LOADER_DOWNLOADER_ITEM_API_POOLSIZE: 8
+    META_LOADER_DOWNLOADER_ITEM_API_WORKERS: 3
+    META_LOADER_DOWNLOADER_ITEM_API_BATCHSIZE: 64
+    META_LOADER_DOWNLOADER_ITEM_API_POOLSIZE: 16
     # Manual refreshes, average throughput required, but delay is not super-important
     META_LOADER_DOWNLOADER_ITEM_REFRESH_WORKERS: 6
-    META_LOADER_DOWNLOADER_ITEM_REFRESH_BATCHSIZE: 32
+    META_LOADER_DOWNLOADER_ITEM_REFRESH_BATCHSIZE: 64
     META_LOADER_DOWNLOADER_ITEM_REFRESH_POOLSIZE: 8
     # Background job retries download data failed previously, low priority
     META_LOADER_DOWNLOADER_ITEM_RETRY_WORKERS: 6
