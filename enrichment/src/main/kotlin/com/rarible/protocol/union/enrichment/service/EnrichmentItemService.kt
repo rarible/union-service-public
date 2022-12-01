@@ -175,7 +175,7 @@ class EnrichmentItemService(
                 .associateBy { it.id.toDto() }
 
             val meta = async {
-                val withoutMeta = shortItems.values.filter { it.metaEntry != null }.map { it.id.toDto() }
+                val withoutMeta = shortItems.values.filter { it.metaEntry == null }.map { it.id.toDto() }
                 itemMetaService.get(withoutMeta, metaPipeline)
             }
 
