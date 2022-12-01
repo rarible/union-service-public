@@ -133,7 +133,13 @@ class EnrichmentItemService(
         } else {
             // TODO remove after migration to the meta-pipeline
             val sync = (syncMetaDownload || item?.loadMetaSynchronously == true)
-            async { itemMetaService.get(itemId, sync, metaPipeline) }
+            async {
+                // TODO Temporal hack to exclude unnecessary event triggering
+                if (sync || metaPipeline != ItemMetaPipeline.API && metaPipeline != ItemMetaPipeline.SYNC)
+                    itemMetaService.get(itemId, sync, metaPipeline)
+                else
+                    null
+            }
         }
 
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
@@ -175,7 +181,7 @@ class EnrichmentItemService(
                 .associateBy { it.id.toDto() }
 
             val meta = async {
-                val withoutMeta = shortItems.values.filter { it.metaEntry != null }.map { it.id.toDto() }
+                val withoutMeta = shortItems.values.filter { it.metaEntry == null }.map { it.id.toDto() }
                 itemMetaService.get(withoutMeta, metaPipeline)
             }
 

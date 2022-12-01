@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.meta.loader.executor
 
 import com.rarible.core.common.nowMillis
+import com.rarible.loader.cache.internal.CacheRepository
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
@@ -42,6 +43,9 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var metrics: DownloadExecutorMetrics
 
+    @Autowired
+    lateinit var legacyRepository: CacheRepository
+
     val downloader: ItemMetaDownloader = mockk()
     val notifier: DownloadNotifier<UnionMeta> = mockk { coEvery { notify(any()) } returns Unit }
     val pool = DownloadPool(2, "item-meta-test")
@@ -57,6 +61,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     @BeforeEach
     fun beforeEach() {
         downloadExecutor = ItemDownloadExecutor(
+            legacyRepository,
             repository,
             downloader,
             notifier,

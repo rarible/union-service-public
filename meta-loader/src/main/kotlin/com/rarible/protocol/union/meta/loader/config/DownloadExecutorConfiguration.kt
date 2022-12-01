@@ -5,6 +5,7 @@ import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.daemon.sequential.ConsumerBatchWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.core.logging.Logger
+import com.rarible.loader.cache.internal.CacheRepository
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -55,6 +56,7 @@ class DownloadExecutorConfiguration(
         itemMetaRepository: ItemMetaRepository,
         itemMetaDownloader: ItemMetaDownloader,
         itemMetaNotifier: ItemMetaNotifier,
+        legacyRepository: CacheRepository,
         metrics: DownloadExecutorMetrics
     ): DownloadExecutorManager {
         val maxRetries = metaProperties.retryIntervals.size
@@ -63,6 +65,7 @@ class DownloadExecutorConfiguration(
             val conf = getItemPipelineConfiguration(pipeline)
             val pool = DownloadPool(conf.poolSize, "item-meta-task-executor")
             val executor = ItemDownloadExecutor(
+                legacyRepository,
                 itemMetaRepository,
                 itemMetaDownloader,
                 itemMetaNotifier,
