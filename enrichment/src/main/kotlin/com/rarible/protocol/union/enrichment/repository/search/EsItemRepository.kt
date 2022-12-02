@@ -49,7 +49,7 @@ class EsItemRepository(
         query.maxResults = PageSize.ITEM.limit(limit)
         query.trackTotalHits = false
 
-        query.addSourceFilter(FetchSourceFilter(EsItemLite.FIELDS, null))
+        //query.addSourceFilter(FetchSourceFilter(EsItemLite.FIELDS, null))
         val searchHits = search(query)
         val cursor = queryCursorService.buildCursor(searchHits.lastOrNull())
 
