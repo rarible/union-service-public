@@ -13,9 +13,9 @@ protocol-union-listener:
       xmx_megabytes: 6144
       max_direct_memory_megabytes: 1024
     limits:
-      cpu: '5'
+      cpu: '6'
     requests:
-      cpu: '5'
+      cpu: '6'
 
 protocol-union-meta-loader:
   replicas: 4
