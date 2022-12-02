@@ -42,7 +42,7 @@ class UnionMetaCacheLoaderListener(
     ) {
         val meta = when (val cacheEntry = cacheLoaderEvent.cacheEntry) {
             is CacheEntry.Loaded -> {
-                logger.info("Loaded meta for ${itemId.fullId()}")
+                logger.info("Loaded meta for {}", itemId.fullId())
                 cacheEntry.data
             }
             is CacheEntry.LoadedAndUpdateFailed -> {
