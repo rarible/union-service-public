@@ -1,9 +1,8 @@
 package com.rarible.protocol.union.worker.task.search.activity.job
 
-import com.rarible.protocol.dto.OrderActivitiesDto
+import com.rarible.protocol.dto.IdsDto
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -16,19 +15,19 @@ internal class RemoveRightSellActivityTaskTest {
 
     private val continuation = "345"
     private val activityId = "123"
-    private val orderActivityMatch = randomEthOrderActivityMatch().copy(id = activityId)
+    private val orderActivityMatch = listOf(activityId)
 
     private val ethereumActivityOrderControllerApi = mockk<OrderActivityControllerApi> {
         coEvery {
             getOrderSellRightActivities(isNull(), any())
         } returns Mono.just(
-            OrderActivitiesDto(continuation, listOf(orderActivityMatch))
+            IdsDto(continuation, orderActivityMatch)
         )
 
         coEvery {
             getOrderSellRightActivities(eq(continuation), any())
         } returns Mono.just(
-            OrderActivitiesDto(
+            IdsDto(
                 null, emptyList()
             )
         )
