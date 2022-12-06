@@ -88,6 +88,13 @@ class OwnershipElasticService(
     }
 
     override suspend fun search(request: OwnershipSearchRequestDto): OwnershipsDto {
+        val blockchains = request.filter.blockchains
+        if (blockchains != null && blockchains.isNotEmpty()) {
+            if (blockchains.none { router.isBlockchainEnabled(it) }) {
+                logger.info("Unable to find enabled blockchains for Ownership's search(), request={}", request)
+                return OwnershipsDto()
+            }
+        }
         val auctions = coroutineScope {
             listOf(
                 async {
