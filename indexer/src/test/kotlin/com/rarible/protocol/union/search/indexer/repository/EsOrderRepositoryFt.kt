@@ -278,6 +278,7 @@ internal class EsOrderRepositoryFt {
         val o1 = orders.first()
         val o2 = orders.last()
         val exampleFilter = EsOrdersByMakers(
+            blockchains = null,
             platform = null,
             maker = listOf(o1.maker, o2.maker),
             origin = null,
@@ -309,6 +310,7 @@ internal class EsOrderRepositoryFt {
         val o1 = orders.first()
         val o2 = orders.last()
         val exampleFilter = EsOrdersByMakers(
+            blockchains = null,
             platform = null,
             maker = listOf(o1.maker, o2.maker),
             origin = o1.origins.first(),

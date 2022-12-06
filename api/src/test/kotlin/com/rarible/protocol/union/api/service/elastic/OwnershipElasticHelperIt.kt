@@ -48,7 +48,7 @@ internal class OwnershipElasticHelperIt {
         every { router.getService(BlockchainDto.ETHEREUM) } returns ownershipService
 
         // when
-        val actual = helper.getRawOwnershipsByOwner(owner, continuation, size)
+        val actual = helper.getRawOwnershipsByOwner(owner, setOf(BlockchainDto.ETHEREUM), continuation, size)
 
         // then
         assertThat(actual.entities).isEqualTo(listOf(expected))

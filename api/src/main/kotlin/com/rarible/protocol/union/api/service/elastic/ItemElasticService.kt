@@ -4,7 +4,6 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.common.nowMillis
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.api.ItemEnrichService
 import com.rarible.protocol.union.api.service.api.ItemQueryService
 import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
@@ -29,10 +28,13 @@ import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import kotlin.random.Random
 
@@ -47,10 +49,7 @@ class ItemElasticService(
     private val itemEnrichService: ItemEnrichService,
 ) : ItemQueryService {
 
-    companion object {
-
-        private val logger by Logger()
-    }
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun getAllItems(
         blockchains: List<BlockchainDto>?,
@@ -64,10 +63,14 @@ class ItemElasticService(
         log("Called getAllItems($blockchains, $continuation, $size)", requestId)
 
         val safeSize = PageSize.ITEM.limit(size)
-        val slice = getAllItemsInner(blockchains, showDeleted, lastUpdatedFrom, lastUpdatedTo, continuation, safeSize, requestId)
+        val slice = getAllItemsInner(
+            blockchains, showDeleted, lastUpdatedFrom, lastUpdatedTo, continuation, safeSize, requestId
+        )
 
-        log("Response for getAllItemsInner(): " +
-                "slice size=${slice.entities.size}, continuation=${slice.continuation}", requestId)
+        log(
+            "Response for getAllItemsInner(): " +
+                "slice size=${slice.entities.size}, continuation=${slice.continuation}", requestId
+        )
 
         val before = nowMillis().toEpochMilli()
         val enriched = itemEnrichService.enrich(slice.entities)
@@ -85,6 +88,10 @@ class ItemElasticService(
         size: Int?
     ): ItemsDto {
         val safeSize = PageSize.ITEM.limit(size)
+        if (!router.isBlockchainEnabled(collection.blockchain)) {
+            logger.info("Unable to find enabled blockchains for getItemsByCollection() where collection={}", collection)
+            return ItemsDto()
+        }
 
         val filter = itemFilterConverter.getItemsByCollection(collection.fullId(), continuation)
         logger.info("Built filter: $filter")
@@ -106,6 +113,10 @@ class ItemElasticService(
     }
 
     override suspend fun getAllItemIdsByCollection(collectionId: CollectionIdDto): Flow<ItemIdDto> {
+        if (!router.isBlockchainEnabled(collectionId.blockchain)) {
+            return emptyFlow()
+        }
+
         val pageSize = PageSize.ITEM.max
         var cursor: String? = null
         var returned = 0L
@@ -134,8 +145,16 @@ class ItemElasticService(
         size: Int?
     ): ItemsDto {
         val safeSize = PageSize.ITEM.limit(size)
+        val enabledBlockchains = router.getEnabledBlockchains(blockchains).map { it.name }.toSet()
+        if (enabledBlockchains.isEmpty()) {
+            logger.info(
+                "Unable to find enabled blockchains for getItemsByCreator() where creator={} and blockchains={}",
+                creator, blockchains
+            )
+            return ItemsDto()
+        }
 
-        val filter = itemFilterConverter.getItemsByCreator(creator.fullId(), continuation)
+        val filter = itemFilterConverter.getItemsByCreator(creator.fullId(), enabledBlockchains, continuation)
         logger.info("Built filter: $filter")
         val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, safeSize)
         val cursor = queryResult.continuation
@@ -162,6 +181,14 @@ class ItemElasticService(
         size: Int?
     ): ItemsDto {
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains)
+        if (evaluatedBlockchains.isEmpty()) {
+            logger.info(
+                "Unable to find enabled blockchains for getItemsByOwner() where owner={} and blockchains={}",
+                owner, blockchains
+            )
+            return ItemsDto()
+        }
+
         val ownerships = esOwnershipRepository.search(
             EsOwnershipByOwnerFilter(
                 owner = owner,
@@ -193,8 +220,14 @@ class ItemElasticService(
         continuation: String?,
         size: Int?
     ): ItemsWithOwnershipDto {
+        val enabledBlockchains = router.getEnabledBlockchains(owner.blockchainGroup.subchains()).toSet()
+        if (enabledBlockchains.isEmpty()) {
+            logger.info("Unable to find enabled blockchains for getItemsByOwnerWithOwnership() where owner={}", owner)
+            return ItemsWithOwnershipDto()
+        }
         val safeSize = PageSize.OWNERSHIP.limit(size)
         val (cursor, ownerships) = ownershipElasticHelper.getRawOwnershipsByOwner(
+            blockchains = enabledBlockchains,
             owner = owner,
             continuation = continuation,
             size = safeSize,
@@ -293,6 +326,9 @@ class ItemElasticService(
         requestId: Long,
     ): Slice<UnionItem> {
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map { it.name }.toSet()
+        if (evaluatedBlockchains.isEmpty()) {
+            return Slice.empty()
+        }
 
         val filter = itemFilterConverter.convertGetAllItems(
             evaluatedBlockchains, showDeleted, lastUpdatedFrom, lastUpdatedTo, continuation
@@ -318,7 +354,7 @@ class ItemElasticService(
             val ids = element.value
             val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
             if (isBlockchainEnabled) {
-                    log("Requested ${ids.size} items from $blockchain", requestId)
+                log("Requested ${ids.size} items from $blockchain", requestId)
                 router.getService(blockchain).getItemsByIds(ids)
                     .also { log("Returned ${it.size} of ${ids.size} items from $blockchain", requestId) }
             } else emptyList()
