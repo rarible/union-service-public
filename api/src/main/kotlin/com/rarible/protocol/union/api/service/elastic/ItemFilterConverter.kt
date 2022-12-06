@@ -44,11 +44,12 @@ class ItemFilterConverter(
         )
     }
 
-    fun getItemsByCreator(creator: String, cursor: String?): EsItemFilter {
+    fun getItemsByCreator(creator: String, blockchains: Set<String>?, cursor: String?): EsItemFilter {
 
         return EsItemGenericFilter(
             cursor = cursor,
-            creators = setOf(creator)
+            creators = setOf(creator),
+            blockchains = blockchains
         )
     }
 

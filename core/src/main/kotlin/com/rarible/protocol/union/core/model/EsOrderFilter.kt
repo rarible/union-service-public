@@ -257,6 +257,7 @@ data class EsOrderBidOrdersByItem(
 }
 
 data class EsOrdersByMakers(
+    val blockchains: List<BlockchainDto>?,
     val platform: PlatformDto?,
     val maker: List<String>?,
     val origin: String?,
@@ -274,6 +275,10 @@ data class EsOrdersByMakers(
                     type.name
                 )
             )
+
+            if (blockchains != null) {
+                add(termsQuery(EsOrder::blockchain.name, blockchains.map { it.name }))
+            }
 
             if (platform != null) {
                 add(termsQuery(EsOrder::platform.name, platform.name))

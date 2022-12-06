@@ -67,7 +67,12 @@ class ActivityElasticService(
         sort: ActivitySortDto?
     ): ActivitiesDto {
         val effectiveCursor = cursor ?: continuation
-        val filter = filterConverter.convertGetAllActivities(type, blockchains, effectiveCursor)
+        val enabledBlockchains = router.getEnabledBlockchains(blockchains).toList()
+        if (enabledBlockchains.isEmpty()) {
+            logger.info("Unable to find enabled blockchains for getAllActivities(), blockchains={}", blockchains)
+            return ActivitiesDto()
+        }
+        val filter = filterConverter.convertGetAllActivities(type, enabledBlockchains, effectiveCursor)
         logger.info("Built filter: $filter")
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
 
@@ -121,10 +126,15 @@ class ActivityElasticService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        val filteredCollections = collection.filter { router.isBlockchainEnabled(it.blockchain) }
+        if (filteredCollections.isEmpty()) {
+            logger.info("Unable to find enabled blockchains for getActivitiesByCollection(), collection={}", collection)
+            return ActivitiesDto()
+        }
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByCollection(
             type,
-            collection.map { it.fullId() },
+            filteredCollections.map { it.fullId() },
             effectiveCursor
         )
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
@@ -154,6 +164,10 @@ class ActivityElasticService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        if (!router.isBlockchainEnabled(itemId.blockchain)) {
+            logger.info("Unable to find enabled blockchains for getActivitiesByItem(), item={}", itemId)
+            return ActivitiesDto()
+        }
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByItem(type, itemId.fullId(), effectiveCursor)
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
@@ -184,11 +198,20 @@ class ActivityElasticService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        val enabledBlockchains = router.getEnabledBlockchains(blockchains).toList()
+        if (enabledBlockchains.isEmpty()) {
+            logger.info(
+                "Unable to find enabled blockchains for getActivitiesByUser() where user={} and blockchains={}",
+                user, blockchains
+            )
+            return ActivitiesDto()
+        }
+
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByUser(
             type,
             user.map { it.fullId() },
-            blockchains,
+            enabledBlockchains,
             from,
             to,
             effectiveCursor
