@@ -9,7 +9,7 @@ spring:
           endpoints:  ${elasticsearch.api-nodes}
           max-in-memory-size: 4194304
           socket-timeout: 60000
-          connection-timeout: 60000
+          connection-timeout: ${elasticsearch.timeout:120000}
 
   elasticsearch:
     rest:
