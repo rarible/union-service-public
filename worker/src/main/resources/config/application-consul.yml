@@ -11,12 +11,14 @@ spring:
         reactive:
           endpoints:  ${elasticsearch.api-nodes}
           max-in-memory-size: 4194304
-          socket-timeout: 30000
-          connection-timeout: ${elasticsearch.timeout:120000}
+          socket-timeout: ${elasticsearch.socket-timeout:120000}
+          connection-timeout: ${elasticsearch.connection-timeout:120000}
 
   elasticsearch:
     rest:
       uris: ${elasticsearch.api-nodes}
+    socket-timeout: ${elasticsearch.socket-timeout:120000}
+    connection-timeout: ${elasticsearch.connection-timeout:120000}
 
   config:
     use-legacy-processing: true
