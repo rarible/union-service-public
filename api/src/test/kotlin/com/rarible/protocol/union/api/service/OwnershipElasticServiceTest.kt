@@ -8,11 +8,13 @@ import com.rarible.protocol.union.core.DefaultBlockchainProperties
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.service.AuctionContractService
+import com.rarible.protocol.union.core.service.OwnershipService
+import com.rarible.protocol.union.core.service.dummy.DummyOwnershipService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
@@ -23,7 +25,6 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
-import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
@@ -65,10 +66,16 @@ class OwnershipElasticServiceTest {
         mockk(),
     )
 
+    private val router = BlockchainRouter<OwnershipService>(
+        listOf(DummyOwnershipService(BlockchainDto.ETHEREUM)),
+        listOf(BlockchainDto.ETHEREUM)
+    )
+
     private val ownershipElasticService = OwnershipElasticService(
         enrichmentAuctionService,
         apiHelper,
         elasticHelper,
+        router
     )
 
     @BeforeEach

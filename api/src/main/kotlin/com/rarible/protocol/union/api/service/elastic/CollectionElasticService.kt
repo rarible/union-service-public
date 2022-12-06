@@ -3,7 +3,6 @@ package com.rarible.protocol.union.api.service.elastic
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.EsCollectionCursor.Companion.fromCollectionLite
 import com.rarible.protocol.union.core.model.EsCollectionGenericFilter
 import com.rarible.protocol.union.core.model.EsCollectionLite
@@ -20,6 +19,7 @@ import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.service.query.collection.CollectionQueryService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import kotlin.system.measureTimeMillis
 
@@ -31,13 +31,20 @@ class CollectionElasticService(
     private val enrichmentCollectionService: EnrichmentCollectionService
 ): CollectionQueryService {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     override suspend fun getAllCollections(
         blockchains: List<BlockchainDto>?,
         continuation: String?,
         size: Int?,
     ): CollectionsDto {
+        val enabledBlockchains = router.getEnabledBlockchains(blockchains).toList()
+        if (enabledBlockchains.isEmpty()) {
+            logger.info("Unable to find enabled blockchains for getAllCollections(), blockchains={}", blockchains)
+            return CollectionsDto()
+        }
         val filter = EsCollectionGenericFilter(
-            blockchains = blockchains?.toSet().orEmpty(),
+            blockchains = enabledBlockchains.toSet(),
             cursor = continuation,
         )
         val result = repository.search(filter, size)
@@ -51,8 +58,16 @@ class CollectionElasticService(
         continuation: String?,
         size: Int?,
     ): CollectionsDto {
+        val enabledBlockchains = router.getEnabledBlockchains(blockchains).toList()
+        if (enabledBlockchains.isEmpty()) {
+            logger.info(
+                "Unable to find enabled blockchains for getCollectionsByOwner(), owner={}, blockchains={}",
+                owner, blockchains
+            )
+            return CollectionsDto()
+        }
         val filter = EsCollectionGenericFilter(
-            blockchains = blockchains?.toSet().orEmpty(),
+            blockchains = enabledBlockchains.toSet(),
             owners = setOf(owner.fullId()),
             cursor = continuation,
         )
@@ -96,9 +111,5 @@ class CollectionElasticService(
                 enrichmentCollectionService.enrichCollection(shortCollection, it)
             }
         )
-    }
-
-    companion object {
-        val logger by Logger()
     }
 }
