@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.ninjasquad.springmockk.MockkBean
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.api.metrics.ElasticMetricsFactory
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
@@ -22,7 +21,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityOrderL
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -34,17 +33,16 @@ import java.time.Instant
 @IntegrationTest
 internal class ActivityElasticServiceIntegrationTest {
 
-    @MockkBean
-    private lateinit var router: BlockchainRouter<ActivityService>
+    private val ethereumService: ActivityService = mockk { every { blockchain } returns BlockchainDto.ETHEREUM }
+    private val flowService: ActivityService = mockk { every { blockchain } returns BlockchainDto.FLOW }
+    private val solanaService: ActivityService = mockk { every { blockchain } returns BlockchainDto.SOLANA }
+    private val router = BlockchainRouter(
+        listOf(ethereumService, flowService, solanaService),
+        listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW, BlockchainDto.SOLANA)
+    )
 
-    @MockK
-    private lateinit var ethereumService: ActivityService
-
-    @MockK
-    private lateinit var flowService: ActivityService
-
-    @MockK
-    private lateinit var solanaService: ActivityService
+    @Autowired
+    private lateinit var filterConverter: ActivityFilterConverter
 
     @Autowired
     private lateinit var repository: EsActivityRepository
@@ -52,7 +50,6 @@ internal class ActivityElasticServiceIntegrationTest {
     @Autowired
     private lateinit var metricsFactory: ElasticMetricsFactory
 
-    @Autowired
     private lateinit var service: ActivityElasticService
 
     private lateinit var one: EsActivity
@@ -70,14 +67,14 @@ internal class ActivityElasticServiceIntegrationTest {
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
-        every { router.isBlockchainEnabled(BlockchainDto.ETHEREUM) } returns true
-        every { router.isBlockchainEnabled(BlockchainDto.FLOW) } returns true
-        every { router.isBlockchainEnabled(BlockchainDto.SOLANA) } returns true
-        every { router.getService(BlockchainDto.ETHEREUM) } returns ethereumService
-        every { router.getService(BlockchainDto.FLOW) } returns flowService
-        every { router.getService(BlockchainDto.SOLANA) } returns solanaService
+        service = ActivityElasticService(
+            filterConverter,
+            repository,
+            router,
+            metricsFactory
+        )
 
-        missingBefore = metricsFactory.missingActivitiesCounters.map { (k,v) -> k to v.count() }.toMap()
+        missingBefore = metricsFactory.missingActivitiesCounters.map { (k, v) -> k to v.count() }.toMap()
 
         elasticsearchTestBootstrapper.bootstrap()
         // save some elastic activities
