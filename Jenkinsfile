@@ -1,7 +1,5 @@
-@Library('shared-library') _
+@Library('shared-library@DO-330/cicd-security-check') _
 
-def pipelineConfig = [
-    "slackChannel": "#protocol-duty"
-]
+def pipelineConfig = [:]
 
 pipelineAppCI(pipelineConfig)
