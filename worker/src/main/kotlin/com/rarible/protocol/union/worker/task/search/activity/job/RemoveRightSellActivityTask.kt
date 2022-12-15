@@ -31,9 +31,9 @@ class RemoveRightSellActivityTask(
             val orderSellRightActivities = getClient(blockchainDto).getOrderSellRightActivities(continuation, size)
                 .awaitSingle()
 
-            val ids = orderSellRightActivities.items.map { it.id }
+            val ids = orderSellRightActivities.items.map { it }
             logger.info("Remove activities $ids")
-            esActivityRepository.deleteAll(orderSellRightActivities.items.map { it.id })
+            esActivityRepository.deleteAll(orderSellRightActivities.items.map { it })
             continuation = orderSellRightActivities.continuation
             if (continuation != null) {
                 emit(continuation)

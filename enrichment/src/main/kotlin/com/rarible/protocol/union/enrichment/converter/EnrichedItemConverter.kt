@@ -47,6 +47,7 @@ object EnrichedItemConverter {
             supply = item.supply,
             meta = meta?.let { EnrichedMetaConverter.convert(it) },
             deleted = item.deleted,
+            suspicious = item.suspicious,
 
             // Enrichment data
             bestSellOrder = shortItem?.bestSellOrder?.let { orders[it.dtoId] },
@@ -56,7 +57,7 @@ object EnrichedItemConverter {
             auctions = shortItem?.auctions?.mapNotNull { auctions[it] } ?: emptyList(),
             totalStock = shortItem?.totalStock ?: BigInteger.ZERO,
             sellers = shortItem?.sellers ?: 0,
-            lastSale = shortItem?.lastSale?.let { convert(it) }
+            lastSale = shortItem?.lastSale?.let { convert(it) },
         )
     }
 

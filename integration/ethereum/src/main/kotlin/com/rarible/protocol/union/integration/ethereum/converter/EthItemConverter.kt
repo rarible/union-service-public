@@ -42,7 +42,8 @@ object EthItemConverter {
             deleted = item.deleted ?: false,
             creators = item.creators.map { EthConverter.convertToCreator(it, blockchain) },
             lazySupply = item.lazySupply,
-            pending = item.pending?.map { convert(it, blockchain) } ?: listOf()
+            pending = item.pending?.map { convert(it, blockchain) } ?: listOf(),
+            suspicious = item.isSuspiciousOnOS
         )
     }
 

@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.worker.task.search.activity.job
 
-import com.rarible.protocol.dto.OrderActivitiesDto
+import com.rarible.protocol.dto.IdsDto
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
@@ -22,13 +22,13 @@ internal class RemoveRightSellActivityTaskTest {
         coEvery {
             getOrderSellRightActivities(isNull(), any())
         } returns Mono.just(
-            OrderActivitiesDto(continuation, listOf(orderActivityMatch))
+            IdsDto(continuation, listOf(orderActivityMatch.id))
         )
 
         coEvery {
             getOrderSellRightActivities(eq(continuation), any())
         } returns Mono.just(
-            OrderActivitiesDto(
+            IdsDto(
                 null, emptyList()
             )
         )
