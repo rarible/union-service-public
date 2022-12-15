@@ -26,8 +26,13 @@ class OwnershipElasticHelper(
     private val router: BlockchainRouter<OwnershipService>,
 ) {
 
-    suspend fun getRawOwnershipsByOwner(owner: UnionAddress, continuation: String?, size: Int): Slice<UnionOwnership> {
-        val filter = EsOwnershipByOwnerFilter(owner, null, cursor = continuation)
+    suspend fun getRawOwnershipsByOwner(
+        owner: UnionAddress,
+        blockchains: Set<BlockchainDto>,
+        continuation: String?,
+        size: Int
+    ): Slice<UnionOwnership> {
+        val filter = EsOwnershipByOwnerFilter(owner, blockchains, cursor = continuation)
         val ownerships = repository.search(filter, EsOwnershipSort.DEFAULT, size)
         return Slice(
             continuation = ownerships.continuation,
@@ -84,6 +89,7 @@ class OwnershipElasticHelper(
     }
 
     companion object {
+
         private val log by Logger()
     }
 }

@@ -24,6 +24,7 @@ import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderQueryService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -31,6 +32,8 @@ class OrderElasticService(
     private val router: BlockchainRouter<OrderService>,
     private val esOrderRepository: EsOrderRepository
 ) : OrderQueryService {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
@@ -40,10 +43,14 @@ class OrderElasticService(
         statuses: List<OrderStatusDto>?
     ): OrdersDto {
         val safeSize = PageSize.ORDER.limit(size)
-        val evaluatedBlockchains = router.getEnabledBlockchains(blockchains)
+        val enabledBlockchains = router.getEnabledBlockchains(blockchains)
+        if (enabledBlockchains.isEmpty()) {
+            logger.info("Unable to find enabled blockchains for getOrdersAll(), blockchains={}", blockchains)
+            return OrdersDto()
+        }
 
         val orderFilter = EsAllOrderFilter(
-            blockchains = evaluatedBlockchains,
+            blockchains = enabledBlockchains,
             cursor = DateIdContinuation.parse(continuation),
             size = safeSize,
             sort = EsOrderSort.of(sort) ?: EsOrderSort.LAST_UPDATE_DESC,
@@ -70,6 +77,10 @@ class OrderElasticService(
         continuation: String?,
         size: Int?
     ): OrdersDto {
+        if (!router.isBlockchainEnabled(itemId.blockchain)) {
+            logger.info("Unable to find enabled blockchains for getSellOrdersByItem(), item={}", itemId)
+            return OrdersDto()
+        }
         val safeSize = PageSize.ORDER.limit(size)
 
         val orderFilter = EsOrderSellOrdersByItem(
@@ -95,6 +106,10 @@ class OrderElasticService(
         continuation: String?,
         size: Int?
     ): OrdersDto {
+        if (!router.isBlockchainEnabled(itemId.blockchain)) {
+            logger.info("Unable to find enabled blockchains for getOrderBidsByItem(), item={}", itemId)
+            return OrdersDto()
+        }
         val safeSize = PageSize.ORDER.limit(size)
 
         val orderFilter = EsOrderBidOrdersByItem(
@@ -120,9 +135,19 @@ class OrderElasticService(
         continuation: String?,
         size: Int?
     ): OrdersDto {
+        val enabledBlockchains = router.getEnabledBlockchains(blockchains).toList()
+        if (enabledBlockchains.isEmpty()) {
+            logger.info(
+                "Unable to find enabled blockchains for getOrderBidsByMaker(), makers={}, blockchains={}",
+                makers, blockchains
+            )
+            return OrdersDto()
+        }
+
         val safeSize = PageSize.ORDER.limit(size)
 
         val orderFilter = EsOrdersByMakers(
+            blockchains = enabledBlockchains,
             platform = platform,
             maker = makers.map { it.fullId() },
             origin = origin,
@@ -142,10 +167,16 @@ class OrderElasticService(
         continuation: String?,
         size: Int?
     ): OrdersDto {
+        val enabledBlockchains = router.getEnabledBlockchains(blockchains).toList()
+        if (enabledBlockchains.isEmpty()) {
+            logger.info("Unable to find enabled blockchains for getSellOrders(), blockchains={}", blockchains)
+            return OrdersDto()
+        }
+
         val safeSize = PageSize.ORDER.limit(size)
 
         val orderFilter = EsOrderSellOrders(
-            blockchains = blockchains,
+            blockchains = enabledBlockchains,
             platform = platform,
             origin = origin,
             continuation = DateIdContinuation.parse(continuation),
@@ -164,9 +195,19 @@ class OrderElasticService(
         size: Int?,
         status: List<OrderStatusDto>?
     ): OrdersDto {
+        val enabledBlockchains = router.getEnabledBlockchains(blockchains).toList()
+        if (enabledBlockchains.isEmpty()) {
+            logger.info(
+                "Unable to find enabled blockchains for getSellOrdersByMaker(), makers={} blockchains={}",
+                makers, blockchains
+            )
+            return OrdersDto()
+        }
+
         val safeSize = PageSize.ORDER.limit(size)
 
         val orderFilter = EsOrdersByMakers(
+            blockchains = enabledBlockchains,
             platform = platform,
             maker = makers.map { it.fullId() },
             origin = origin,

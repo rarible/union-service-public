@@ -26,14 +26,14 @@ class RemoveRightSellActivityTask(
 
         val size = 200
         var continuation = from
-        var blockchainDto = if (param.isNullOrBlank()) BlockchainDto.ETHEREUM else BlockchainDto.valueOf(param)
+        val blockchainDto = if (param.isNullOrBlank()) BlockchainDto.ETHEREUM else BlockchainDto.valueOf(param)
         do {
             val orderSellRightActivities = getClient(blockchainDto).getOrderSellRightActivities(continuation, size)
                 .awaitSingle()
 
-            val ids = orderSellRightActivities.items.map { it }
+            val ids = orderSellRightActivities.items
             logger.info("Remove activities $ids")
-            esActivityRepository.deleteAll(orderSellRightActivities.items.map { it })
+            esActivityRepository.deleteAll(ids)
             continuation = orderSellRightActivities.continuation
             if (continuation != null) {
                 emit(continuation)

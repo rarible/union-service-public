@@ -12,6 +12,7 @@ import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.core.test.nativeTestCurrencies
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
@@ -123,7 +124,7 @@ class OwnershipElasticServiceIt {
                 )
             }
 
-            repository.saveAll(ownerships)
+            repository.bulk(ownerships, emptyList())
 
             coEvery {
                 flowService.getOwnershipsByIds(any())
@@ -395,10 +396,11 @@ class OwnershipElasticServiceIt {
         ownerships.shuffled().take(Random.nextInt(3, 6)).map { it.ownershipId.lowercase() }
 
     private suspend fun check(expectedIds: List<String>, filter: OwnershipSearchFilterDto, failMessage: String) {
-        val actual = service.search(OwnershipSearchRequestDto(filter = filter))
-        assertThat(actual.ownerships.map { it.id.fullId().lowercase() })
-            .withFailMessage(failMessage)
-            .containsAll(expectedIds)
-
+        WaitAssert.wait {
+            val actual = service.search(OwnershipSearchRequestDto(filter = filter))
+            assertThat(actual.ownerships.map { it.id.fullId().lowercase() })
+                //.withFailMessage(failMessage)
+                .containsAll(expectedIds)
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.meta.loader.executor
 
 import com.rarible.core.common.nowMillis
+import com.rarible.loader.cache.internal.CacheRepository
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
@@ -12,6 +13,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -28,7 +30,7 @@ sealed class DownloadExecutor<T>(
     private val maxRetries: Int,
 ) : AutoCloseable {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    protected val logger = LoggerFactory.getLogger(javaClass)
 
     abstract val type: String
     abstract fun getBlockchain(task: DownloadTask): BlockchainDto
@@ -48,7 +50,7 @@ sealed class DownloadExecutor<T>(
         }
 
         try {
-            val data = downloader.download(task.id)
+            val data = download(task.id, current)
             onSuccess(started, task, data)
         } catch (e: DownloadException) {
             onFail(started, task, e.message)
@@ -72,6 +74,10 @@ sealed class DownloadExecutor<T>(
 
         metrics.onSuccessfulTask(started, getBlockchain(task), type, task.pipeline, task.force)
         logger.info("Data download SUCCEEDED for {} task: {} ({})", type, task.id, task.pipeline)
+    }
+
+    protected open suspend fun download(id: String, current: DownloadEntry<T>?): T {
+        return downloader.download(id)
     }
 
     private suspend fun onFail(started: Instant, task: DownloadTask, errorMessage: String?) {
@@ -131,6 +137,7 @@ sealed class DownloadExecutor<T>(
 }
 
 class ItemDownloadExecutor(
+    private val legacyRepository: CacheRepository,
     repository: DownloadEntryRepository<UnionMeta>,
     downloader: Downloader<UnionMeta>,
     notifier: DownloadNotifier<UnionMeta>,
@@ -148,6 +155,18 @@ class ItemDownloadExecutor(
 
     override val type = "ITEM"
     override fun getBlockchain(task: DownloadTask) = IdParser.parseItemId(task.id).blockchain
+
+    override suspend fun download(id: String, current: DownloadEntry<UnionMeta>?): UnionMeta {
+        // TODO remove later
+        if (current == null || current.status == DownloadStatus.SCHEDULED) {
+            val meta = legacyRepository.get<UnionMeta>(ItemMetaDownloader.TYPE, id)?.data
+            if (meta != null) {
+                logger.info("Found meta in legacy repo for [{}]", id)
+                return meta
+            }
+        }
+        return super.download(id, current)
+    }
 
 }
 

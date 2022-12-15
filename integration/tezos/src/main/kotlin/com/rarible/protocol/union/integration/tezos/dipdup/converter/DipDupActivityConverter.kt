@@ -116,7 +116,7 @@ class DipDupActivityConverter(
 
                 OrderListActivityDto(
                     id = activityId,
-                    orderId = OrderIdDto(blockchain, activity.id),
+                    orderId = OrderIdDto(blockchain, activity.orderId),
                     date = date,
                     price = price,
                     priceUsd = currencyService.toUsd(blockchain, take.type, make.value),
@@ -134,7 +134,7 @@ class DipDupActivityConverter(
 
                 OrderCancelListActivityDto(
                     id = activityId,
-                    orderId = OrderIdDto(blockchain, activity.id),
+                    orderId = OrderIdDto(blockchain, activity.orderId),
                     date = date,
                     source = convert(activity.source),
                     hash = activity.hash,
@@ -151,7 +151,7 @@ class DipDupActivityConverter(
 
                 OrderMatchSellDto(
                     id = activityId,
-                    orderId = OrderIdDto(blockchain, activity.id),
+                    orderId = OrderIdDto(blockchain, activity.orderId),
                     date = date,
                     source = convert(activity.source),
                     reverted = false,
@@ -230,7 +230,7 @@ class DipDupActivityConverter(
 
                 OrderMatchSellDto(
                     id = activityId,
-                    orderId = OrderIdDto(blockchain, activity.id),
+                    orderId = OrderIdDto(blockchain, activity.orderId),
                     date = date,
                     source = convert(activity.source),
                     reverted = false,
@@ -250,7 +250,7 @@ class DipDupActivityConverter(
 
                 OrderBidActivityDto(
                     id = activityId,
-                    orderId = OrderIdDto(blockchain, activity.id),
+                    orderId = OrderIdDto(blockchain, activity.orderId),
                     date = date,
                     price = activity.price,
                     priceUsd = currencyService.toUsd(blockchain, payment.type, payment.value),
@@ -267,7 +267,7 @@ class DipDupActivityConverter(
 
                 OrderCancelBidActivityDto(
                     id = activityId,
-                    orderId = OrderIdDto(blockchain, activity.id),
+                    orderId = OrderIdDto(blockchain, activity.orderId),
                     date = date,
                     hash = activity.hash,
                     maker = UnionAddressConverter.convert(blockchain, activity.maker),
