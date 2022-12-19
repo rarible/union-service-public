@@ -19,4 +19,5 @@ data class UnionItem(
     val meta: UnionMeta? = null, // TODO should be removed
     val deleted: Boolean,
     val self: Boolean? = null,
+    val suspicious: Boolean? = null,
 )
