@@ -2,9 +2,12 @@ package com.rarible.protocol.union.integration.tezos.dipdup.converter
 
 import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
 import org.slf4j.LoggerFactory
@@ -31,8 +34,30 @@ object DipDupCollectionConverter {
             owner = UnionAddress(blockchain.group(), collection.owner),
             minters = minters(collection),
             features = listOf(CollectionDto.Features.SECONDARY_SALE_FEES, CollectionDto.Features.BURN),
-            symbol = collection.symbol
+            symbol = collection.symbol,
+            meta = collection.meta?.let { convertMeta(it) }
         )
+    }
+
+    private fun convertMeta(source: DipDupCollection.Meta): UnionCollectionMeta? {
+        return UnionCollectionMeta(
+            name = source.name ?: UNTITLED,
+            description = source.description,
+            externalUri = source.homepage,
+            content = source.content.map { convertContent(it) }
+        )
+    }
+
+    private fun convertContent(source: DipDupCollection.Content): UnionMetaContent {
+        val representation = when (source.representation) {
+            DipDupCollection.Representation.ORIGINAL -> MetaContentDto.Representation.ORIGINAL
+            DipDupCollection.Representation.BIG -> MetaContentDto.Representation.BIG
+            DipDupCollection.Representation.PREVIEW -> MetaContentDto.Representation.PREVIEW
+        }
+       return UnionMetaContent(
+           url = source.uri,
+           representation = representation
+       )
     }
 
     private fun minters(source: DipDupCollection): List<UnionAddress> {
