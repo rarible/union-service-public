@@ -67,7 +67,7 @@ class ReconciliationPoolOrderJob(
 
     private suspend fun safeUpdate(order: OrderDto, itemId: ItemIdDto) {
         try {
-            orderEventService.updatePoolOrder(order, itemId, PoolItemAction.INCLUDED, config.notificationEnabled)
+            orderEventService.updatePoolOrderPerItem(order, itemId, PoolItemAction.INCLUDED, config.notificationEnabled)
         } catch (e: Exception) {
             logger.error("Unable to reconcile pool Order {} : {}", e.message, e)
         }

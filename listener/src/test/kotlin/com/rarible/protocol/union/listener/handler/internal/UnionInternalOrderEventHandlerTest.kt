@@ -10,11 +10,11 @@ import com.rarible.protocol.union.core.model.UnionPoolOrderUpdateEvent
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.test.data.randomSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -54,6 +54,7 @@ class UnionInternalOrderEventHandlerTest {
             reconciliationEventService
         )
         coEvery { incomingEventHandler.onEvents(any()) } returns Unit
+        coEvery { orderEventService.updatePoolOrder(any()) } returns Unit
     }
 
     @Test
@@ -86,11 +87,11 @@ class UnionInternalOrderEventHandlerTest {
         val action = PoolItemAction.valueOf(actionString)
         val order = randomUnionSellOrderDto()
         val itemId = randomEthItemId()
-        coEvery { orderEventService.updatePoolOrder(order, itemId, action) } returns Unit
+        coEvery { orderEventService.updatePoolOrderPerItem(order, itemId, action) } returns Unit
 
         handler.onEvent(UnionPoolOrderUpdateEvent(order, itemId, action))
 
-        coVerify(exactly = 1) { orderEventService.updatePoolOrder(order, itemId, action) }
+        coVerify(exactly = 1) { orderEventService.updatePoolOrderPerItem(order, itemId, action) }
     }
 
     @Test
@@ -99,7 +100,7 @@ class UnionInternalOrderEventHandlerTest {
         val order = randomUnionSellOrderDto()
         val itemId = randomEthItemId()
 
-        coEvery { orderEventService.updatePoolOrder(order, itemId, action) } throws NullPointerException()
+        coEvery { orderEventService.updatePoolOrderPerItem(order, itemId, action) } throws NullPointerException()
         coEvery { reconciliationEventService.onFailedOrder(order) } returns Unit
 
         assertThrows<NullPointerException> { handler.onEvent(UnionPoolOrderUpdateEvent(order, itemId, action)) }
@@ -125,6 +126,7 @@ class UnionInternalOrderEventHandlerTest {
         )
         // 2 events sent for items from this pool
         coVerify(exactly = 1) { incomingEventHandler.onEvents(expected) }
+        coVerify(exactly = 1) { orderEventService.updatePoolOrder(order) }
     }
 
     @Test
@@ -159,6 +161,7 @@ class UnionInternalOrderEventHandlerTest {
         )
 
         coVerify(exactly = 1) { incomingEventHandler.onEvents(expected) }
+        coVerify(exactly = 1) { orderEventService.updatePoolOrder(order) }
     }
 
 }
