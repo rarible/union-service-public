@@ -30,6 +30,15 @@ class EnrichmentOrderEventService(
 
     suspend fun updatePoolOrder(
         order: OrderDto,
+        notificationEnabled: Boolean = true
+    ) {
+        // There is no actions for original pool order update event,
+        // so we just pass through original event to the event queue
+        notify(order)
+    }
+
+    suspend fun updatePoolOrderPerItem(
+        order: OrderDto,
         itemId: ItemIdDto,
         action: PoolItemAction,
         notificationEnabled: Boolean = true
@@ -41,6 +50,9 @@ class EnrichmentOrderEventService(
         val shortItemId = ShortItemId(itemId)
         onItemPoolOrder(order, shortItemId, action, notificationEnabled)
         onOwnershipPoolOrder(order, shortItemId, action, notificationEnabled)
+
+        // Order event should not be passed through here
+        // because we apply update of same order for each item in the pool
     }
 
     suspend fun updateOrder(order: OrderDto, notificationEnabled: Boolean = true) {
@@ -72,6 +84,10 @@ class EnrichmentOrderEventService(
             else -> logger.info("Unsupported Order's asset combination: $order")
         }
 
+        notify(order)
+    }
+
+    private suspend fun notify(order: OrderDto) {
         val event = OrderUpdateEventDto(
             eventId = UUID.randomUUID().toString(),
             orderId = order.id,

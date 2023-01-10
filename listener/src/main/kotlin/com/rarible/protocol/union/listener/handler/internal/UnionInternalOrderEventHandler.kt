@@ -14,9 +14,9 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.util.isPoolOrder
-import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -76,7 +76,7 @@ class UnionInternalOrderEventHandler(
             return
         }
         // for synthetic updates it might be costly to fetch order - so use received one
-        orderEventService.updatePoolOrder(event.order, event.itemId, event.action)
+        orderEventService.updatePoolOrderPerItem(event.order, event.itemId, event.action)
     }
 
     private suspend fun triggerPoolOrderUpdate(
@@ -112,6 +112,7 @@ class UnionInternalOrderEventHandler(
             "Pool Order [{}] updated, Items included: {}, Items excluded: {}, total events sent: {}",
             orderId, included, excluded, messages.size
         )
+        orderEventService.updatePoolOrder(order)
     }
 
     private suspend fun fetchOrder(orderId: OrderIdDto): OrderDto {
