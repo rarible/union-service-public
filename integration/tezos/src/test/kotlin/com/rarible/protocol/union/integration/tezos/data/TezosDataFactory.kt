@@ -8,6 +8,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupActivity
 import com.rarible.dipdup.client.core.model.DipDupBurnActivity
+import com.rarible.dipdup.client.core.model.DipDupCollection
 import com.rarible.dipdup.client.core.model.DipDupItem
 import com.rarible.dipdup.client.core.model.DipDupMintActivity
 import com.rarible.dipdup.client.core.model.DipDupOrder
@@ -61,6 +62,29 @@ fun randomTezosCollectionDto(address: String): Contract {
         numTransactions = 1,
         numReveals = 1,
         numMigrations = 1
+    )
+}
+
+fun randomDipDupCollection(address: String): DipDupCollection {
+    val name = randomString()
+    val owner = randomString()
+    return DipDupCollection(
+        id = address,
+        owner = owner,
+        name = name,
+        symbol = null,
+        standard = "FA2",
+        minters = listOf(owner),
+        meta = DipDupCollection.Meta(
+            name = name,
+            description = randomString(),
+            symbol = null,
+            content = listOf(DipDupCollection.Content(
+                uri = "http://example.png",
+                representation = DipDupCollection.Representation.ORIGINAL
+            )),
+            homepage = "http://example.com"
+        )
     )
 }
 
