@@ -8,10 +8,10 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.enrichment.test.data.randomSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.worker.config.ReconciliationProperties
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.mockk.clearMocks
@@ -47,7 +47,7 @@ class ReconciliationPoolOrderJobTest {
     @BeforeEach
     fun beforeEach() {
         clearMocks(orderEventService)
-        coEvery { orderEventService.updatePoolOrder(any(), any(), any()) } returns Unit
+        coEvery { orderEventService.updatePoolOrderPerItem(any(), any(), any()) } returns Unit
     }
 
     @Test
@@ -68,9 +68,21 @@ class ReconciliationPoolOrderJobTest {
         assertThat(result[0]).isEqualTo("1")
         assertThat(result[1]).isEqualTo("2")
 
-        coVerify(exactly = items.size) { orderEventService.updatePoolOrder(any(), any(), eq(PoolItemAction.INCLUDED)) }
+        coVerify(exactly = items.size) {
+            orderEventService.updatePoolOrderPerItem(
+                any(),
+                any(),
+                eq(PoolItemAction.INCLUDED)
+            )
+        }
         items.forEach {
-            coVerify(exactly = 1) { orderEventService.updatePoolOrder(it.value, it.key, eq(PoolItemAction.INCLUDED)) }
+            coVerify(exactly = 1) {
+                orderEventService.updatePoolOrderPerItem(
+                    it.value,
+                    it.key,
+                    eq(PoolItemAction.INCLUDED)
+                )
+            }
         }
     }
 

@@ -89,7 +89,7 @@ class EnrichmentOrderEventServiceTest {
             take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
         )
 
-        orderEventService.updatePoolOrder(order, itemId, PoolItemAction.INCLUDED)
+        orderEventService.updatePoolOrderPerItem(order, itemId, PoolItemAction.INCLUDED)
 
         coVerify(exactly = 1) {
             enrichmentItemEventService.onPoolOrderUpdated(shortItemId, order, PoolItemAction.INCLUDED)
