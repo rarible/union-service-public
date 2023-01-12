@@ -212,4 +212,36 @@ internal class EthActivityServiceTest {
         val result = service.getAllRevertedActivitiesSync(continuation, size, sort, SyncTypeDto.ORDER)
         assertThat(result.entities).containsExactlyInAnyOrderElementsOf(expectedActivity)
     }
+
+    @Test
+    @Suppress("ReactiveStreamsUnusedPublisher")
+    fun `ethereum get reverted nft activities`() = runBlocking<Unit> {
+        val continuation = randomString()
+        val size = 10
+        val sort = SyncSortDto.DB_UPDATE_DESC
+        val activities = NftActivitiesDto(
+            continuation = randomString(),
+            items = (1..size).map { randomEthItemMintActivity() }
+        )
+        val expectedActivity = activities.items.map {
+            mockk<ActivityDto> {
+                every { lastUpdatedAt } returns Instant.now()
+                every { id } returns ActivityIdDto(blockchainDto, "test")
+            }
+        }
+        coEvery {
+            activityItemControllerApi.getNftActivitiesSync(
+                true,
+                continuation,
+                size,
+                com.rarible.protocol.dto.SyncSortDto.DB_UPDATE_DESC
+            )
+        } returns Mono.just(activities)
+
+        activities.items.forEachIndexed { index, dto ->
+            coEvery { ethActivityConverter.convert(dto, blockchainDto) } returns expectedActivity[index]
+        }
+        val result = service.getAllRevertedActivitiesSync(continuation, size, sort, SyncTypeDto.NFT)
+        assertThat(result.entities).containsExactlyInAnyOrderElementsOf(expectedActivity)
+    }
 }
