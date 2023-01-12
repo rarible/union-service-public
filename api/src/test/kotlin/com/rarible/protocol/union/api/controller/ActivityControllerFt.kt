@@ -524,6 +524,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
         coEvery {
             testEthereumActivityItemApi.getNftActivitiesSync(
+                false,
                 null,
                 size,
                 sort
