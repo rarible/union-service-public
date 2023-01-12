@@ -176,10 +176,13 @@ open class EthActivityService(
         ethSort: com.rarible.protocol.dto.SyncSortDto?
     ): Deferred<List<ActivityDto>> = coroutineScope {
         async {
-            val itemsDto = activityItemControllerApi.getNftActivitiesSync(continuation, size, ethSort).awaitFirst()
-            itemsDto.items.map {
-                ethActivityConverter.convert(it, blockchain)
-            }
+            val itemsDto = activityItemControllerApi.getNftActivitiesSync(
+                false,
+                continuation,
+                size,
+                ethSort
+            ).awaitFirst()
+            itemsDto.items.map { ethActivityConverter.convert(it, blockchain) }
         }
     }
 
@@ -236,7 +239,15 @@ open class EthActivityService(
         size: Int,
         ethSort: com.rarible.protocol.dto.SyncSortDto?
     ): Deferred<List<ActivityDto>> = coroutineScope {
-        async { emptyList() }
+        async {
+            val itemsDto = activityItemControllerApi.getNftActivitiesSync(
+                true,
+                continuation,
+                size,
+                ethSort
+            ).awaitFirst()
+            itemsDto.items.map { ethActivityConverter.convert(it, blockchain) }
+        }
     }
 
     override suspend fun getActivitiesByCollection(
