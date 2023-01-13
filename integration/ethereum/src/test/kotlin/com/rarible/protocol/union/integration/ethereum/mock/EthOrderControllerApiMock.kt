@@ -30,8 +30,8 @@ class EthOrderControllerApiMock(
     fun mockGetByIds(vararg orders: OrderDto) {
         val hashes = orders.map { it.hash.toString() }
         every {
-            orderControllerApi.getOrdersByIds(OrderIdsDto(hashes))
-        } returns orders.toFlux()
+            orderControllerApi.getByIds(OrderIdsDto(hashes))
+        } returns OrdersPaginationDto(orders = orders.toList()).toMono()
     }
 
     fun mockGetSellOrdersByItemAndByStatus(

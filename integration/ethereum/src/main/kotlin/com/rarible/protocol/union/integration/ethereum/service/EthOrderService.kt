@@ -62,7 +62,7 @@ open class EthOrderService(
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
         val orderIdsDto = OrderIdsDto(orderIds)
-        val orders = orderControllerApi.getOrdersByIds(orderIdsDto).collectList().awaitFirst()
+        val orders = orderControllerApi.getByIds(orderIdsDto).awaitFirst().orders
         return orders.map { ethOrderConverter.convert(it, blockchain) }
     }
 
