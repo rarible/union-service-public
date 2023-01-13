@@ -113,7 +113,7 @@ internal class PriceUpdateJobTest : AbstractIntegrationTest() {
         )
 
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, randomEthOwnershipDto())
-        ethereumOrderControllerApiMock.mockGetByIds(randomEthSellOrderDto())
+        ethereumOrderControllerApiMock.mockGetOrdersByIds(randomEthSellOrderDto())
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(shortOwnership.id.toDto().getItemId(), emptyList())
 
         ownershipRepository.save(shortOwnership)

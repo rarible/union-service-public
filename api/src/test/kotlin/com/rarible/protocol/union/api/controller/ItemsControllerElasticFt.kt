@@ -370,7 +370,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
             )
         } returns listOf(ethItem).toFlux()
 
-        ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
+        ethereumOrderControllerApiMock.mockGetOrdersByIds(ethOrder)
         val items = itemControllerClient.getItemsByOwner(
             esOwnership.owner, listOf(BlockchainDto.ETHEREUM), continuation, size, null
         ).awaitFirst()
@@ -412,7 +412,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         } returns listOf(ethItem).toFlux()
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
 
-        // when
+        // whe
         val items = itemControllerClient.getItemsByCreator(
             creatorId.fullId(), listOf(BlockchainDto.ETHEREUM), continuation, size, null
         ).awaitFirst()
