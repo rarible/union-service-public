@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
+import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.AuctionBidActivityDto
 import com.rarible.protocol.union.dto.AuctionCancelActivityDto
@@ -194,7 +195,7 @@ class EthActivityConverterTest {
 
     @Test
     fun `eth item activity mint`() = runBlocking<Unit> {
-        val dto = randomEthItemMintActivity()
+        val dto = randomEthItemMintActivity().copy(mintPrice = randomBigDecimal())
         val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as MintActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
@@ -205,6 +206,7 @@ class EthActivityConverterTest {
         assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.ETHEREUM, dto.contract.prefixed(), dto.tokenId))
         assertThat(converted.value).isEqualTo(dto.value)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash.prefixed())
+        assertThat(converted.mintPrice).isEqualTo(dto.mintPrice)
         // TODO UNION remove in 1.19
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash.prefixed())
         assertThat(converted.blockchainInfo!!.blockHash).isEqualTo(dto.blockHash.prefixed())
