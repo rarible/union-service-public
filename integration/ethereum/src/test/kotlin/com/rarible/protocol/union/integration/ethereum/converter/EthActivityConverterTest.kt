@@ -195,7 +195,7 @@ class EthActivityConverterTest {
 
     @Test
     fun `eth item activity mint`() = runBlocking<Unit> {
-        val dto = randomEthItemMintActivity().copy(mintPrice = randomBigDecimal())
+        val dto = randomEthItemMintActivity()
         val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as MintActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)

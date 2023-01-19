@@ -848,7 +848,8 @@ fun randomEthItemMintActivity(): MintDto {
         blockNumber = randomLong(),
         logIndex = randomInt(),
         reverted = false,
-        lastUpdatedAt = nowMillis()
+        lastUpdatedAt = nowMillis(),
+        mintPrice = randomBigDecimal()
     )
 }
 
