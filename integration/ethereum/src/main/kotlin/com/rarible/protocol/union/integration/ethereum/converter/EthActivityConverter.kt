@@ -219,6 +219,7 @@ class EthActivityConverter(
                     tokenId = source.tokenId, // TODO remove later
                     itemId = ItemIdDto(blockchain, EthConverter.convert(source.contract), source.tokenId),
                     value = source.value,
+                    mintPrice = source.mintPrice,
                     transactionHash = EthConverter.convert(source.transactionHash),
                     // TODO UNION remove in 1.19
                     blockchainInfo = ActivityBlockchainInfoDto(
