@@ -176,7 +176,9 @@ class CurrencyService(
         }
 
         suspend fun refresh() {
-            currencies = currencyClient.getAllCurrencies().map { CurrencyConverter.convert(it) }
+            currencies = currencyClient.getAllCurrencies()
+                .filter { it.blockchain != com.rarible.protocol.currency.dto.BlockchainDto.OPTIMISM }
+                .map { CurrencyConverter.convert(it) }
             nativeCurrencies = BlockchainDto.values().associateWith { blockchain ->
                 val symbol = getSymbol(blockchain)
                 currencies.find { it.symbol == symbol && it.currencyId.blockchain == blockchain }
