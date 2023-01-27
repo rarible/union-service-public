@@ -1,10 +1,14 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.NftCollectionDto
+import com.rarible.protocol.dto.NftCollectionEventDto
+import com.rarible.protocol.dto.NftCollectionUpdateEventDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.dto.NftTokenIdDto
 import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionEvent
+import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -21,6 +25,17 @@ object EthCollectionConverter {
         } catch (e: Exception) {
             logger.error("Failed to convert {} Collection: {} \n{}", blockchain, e.message, source)
             throw e
+        }
+    }
+
+    fun convert(source: NftCollectionEventDto, blockchain: BlockchainDto): UnionCollectionEvent {
+        return when (source) {
+            is NftCollectionUpdateEventDto -> {
+                UnionCollectionUpdateEvent(
+                    collection = convert(source.collection, blockchain),
+                    eventTimeMarks = EthConverter.convert(source.eventTimeMarks)
+                )
+            }
         }
     }
 

@@ -3,7 +3,11 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.PoolItemAction
+import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionItemChangeEvent
+import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
+import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.service.ReconciliationEventService
@@ -12,7 +16,6 @@ import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
-import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
@@ -40,16 +43,37 @@ class EnrichmentItemEventService(
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemEventService::class.java)
 
-    suspend fun onItemChanged(itemId: ItemIdDto) {
+    suspend fun onItemChanged(event: UnionItemChangeEvent) {
+        val itemId = event.itemId
         val existing = enrichmentItemService.getOrEmpty(ShortItemId(itemId))
-        val updateEvent = buildUpdateEvent(short = existing)
+        val updateEvent = buildUpdateEvent(
+            short = existing,
+            eventTimeMarks = event.eventTimeMarks
+        )
         sendUpdate(updateEvent)
     }
 
-    suspend fun onItemUpdated(item: UnionItem) {
+    suspend fun onItemUpdated(event: UnionItemUpdateEvent) {
+        val item = event.item
         val existing = enrichmentItemService.getOrCreateWithLastUpdatedAtUpdate(ShortItemId(item.id))
-        val updateEvent = buildUpdateEvent(short = existing, item = item)
+        val updateEvent = buildUpdateEvent(
+            short = existing,
+            item = item,
+            eventTimeMarks = event.eventTimeMarks
+        )
         sendUpdate(updateEvent)
+    }
+
+    suspend fun onItemDeleted(itemDeleteEvent: UnionItemDeleteEvent) = optimisticLock {
+        val itemId = itemDeleteEvent.itemId
+        val existing = enrichmentItemService.getOrEmpty(ShortItemId(itemId))
+        enrichmentItemService.save(existing)
+        val event = ItemDeleteEventDto(
+            itemId = itemId,
+            eventId = UUID.randomUUID().toString(),
+            eventTimeMarks = itemDeleteEvent.eventTimeMarks?.addOut()?.toDto()
+        )
+        sendDelete(event)
     }
 
     // If ownership was updated, we need to recalculate totalStock/sellers for related item,
@@ -58,6 +82,7 @@ class EnrichmentItemEventService(
     suspend fun onOwnershipUpdated(
         ownershipId: ShortOwnershipId,
         order: OrderDto?,
+        eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
         val itemId = ShortItemId(ownershipId.blockchain, ownershipId.itemId)
@@ -80,7 +105,12 @@ class EnrichmentItemEventService(
                         "Updating Item [{}] with new sell stats, was [{}] , now: [{}]",
                         itemId, currentSellStats, refreshedSellStats
                     )
-                    saveAndNotify(updated = updatedItem, notificationEnabled = notificationEnabled, order = order)
+                    saveAndNotify(
+                        updated = updatedItem,
+                        notificationEnabled = notificationEnabled,
+                        order = order,
+                        eventTimeMarks = eventTimeMarks
+                    )
                 } else {
                     logger.debug(
                         "Sell stats of Item [{}] are the same as before Ownership event [{}], skipping update",
@@ -91,7 +121,11 @@ class EnrichmentItemEventService(
         }
     }
 
-    suspend fun onActivity(activity: ActivityDto, item: UnionItem? = null, notificationEnabled: Boolean = true) {
+    suspend fun onActivity(
+        activity: ActivityDto,
+        item: UnionItem? = null,
+        notificationEnabled: Boolean = true
+    ) {
         val lastSale = ItemLastSaleConverter.convert(activity) ?: return
         val itemId = activity.itemId() ?: return
 
@@ -122,12 +156,20 @@ class EnrichmentItemEventService(
                     "Item [{}] LastSale changed on Activity event [{}]: {} -> {}",
                     itemId, activity.id, currentLastSale, newLastSale
                 )
-                saveAndNotify(existing.copy(lastSale = newLastSale), notificationEnabled, item)
+                saveAndNotify(
+                    updated = existing.copy(lastSale = newLastSale),
+                    notificationEnabled = notificationEnabled,
+                    item = item,
+                    eventTimeMarks = null // TODO ideally to have marks for activity too
+                )
             }
         }
     }
 
-    suspend fun recalculateBestOrders(item: ShortItem): Boolean {
+    suspend fun recalculateBestOrders(
+        item: ShortItem,
+        eventTimeMarks: UnionEventTimeMarks
+    ): Boolean {
         val updated = bestOrderService.updateBestOrders(item)
         if (updated != item) {
             logger.info(
@@ -135,21 +177,35 @@ class EnrichmentItemEventService(
                 item.bestSellOrder?.dtoId, updated.bestSellOrder?.dtoId,
                 item.bestBidOrder?.dtoId, updated.bestBidOrder?.dtoId
             )
-            saveAndNotify(updated, true)
+            saveAndNotify(
+                updated = updated,
+                notificationEnabled = true,
+                eventTimeMarks = eventTimeMarks
+            )
             return true
         }
         return false
     }
 
-    suspend fun onItemBestSellOrderUpdated(itemId: ShortItemId, order: OrderDto, notificationEnabled: Boolean = true) {
-        updateOrder(itemId, order, notificationEnabled) { item ->
+    suspend fun onItemBestSellOrderUpdated(
+        itemId: ShortItemId,
+        order: OrderDto,
+        eventTimeMarks: UnionEventTimeMarks?,
+        notificationEnabled: Boolean = true
+    ) {
+        updateOrder(itemId, order, notificationEnabled, eventTimeMarks) { item ->
             val origins = enrichmentItemService.getItemOrigins(itemId)
             bestOrderService.updateBestSellOrder(item, order, origins)
         }
     }
 
-    suspend fun onItemBestBidOrderUpdated(itemId: ShortItemId, order: OrderDto, notificationEnabled: Boolean = true) {
-        updateOrder(itemId, order, notificationEnabled) { item ->
+    suspend fun onItemBestBidOrderUpdated(
+        itemId: ShortItemId,
+        order: OrderDto,
+        eventTimeMarks: UnionEventTimeMarks?,
+        notificationEnabled: Boolean = true
+    ) {
+        updateOrder(itemId, order, notificationEnabled, eventTimeMarks) { item ->
             val origins = enrichmentItemService.getItemOrigins(itemId)
             bestOrderService.updateBestBidOrder(item, order, origins)
         }
@@ -159,11 +215,12 @@ class EnrichmentItemEventService(
         itemId: ShortItemId,
         order: OrderDto,
         action: PoolItemAction,
+        eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
         val hackedOrder = order.setStatusByAction(action)
 
-        updateOrder(itemId, hackedOrder, notificationEnabled) { item ->
+        updateOrder(itemId, hackedOrder, notificationEnabled, eventTimeMarks) { item ->
             val updated = OrderPoolEvaluator.updatePoolOrderSet(item, hackedOrder, action)
             if (OrderPoolEvaluator.needUpdateOrder(updated, hackedOrder, action)) {
                 // Origins might be ignored for such orders
@@ -174,6 +231,7 @@ class EnrichmentItemEventService(
         }
     }
 
+    @Deprecated("Not used")
     suspend fun onAuctionUpdated(auction: AuctionDto, notificationEnabled: Boolean = true) {
         updateAuction(auction, notificationEnabled) {
             if (auction.status == AuctionStatusDto.ACTIVE) {
@@ -184,6 +242,7 @@ class EnrichmentItemEventService(
         }
     }
 
+    @Deprecated("Not used")
     suspend fun onAuctionDeleted(auction: AuctionDto, notificationEnabled: Boolean = true) {
         updateAuction(auction, notificationEnabled) { it.copy(auctions = it.auctions - auction.id) }
     }
@@ -192,17 +251,24 @@ class EnrichmentItemEventService(
         itemId: ShortItemId,
         order: OrderDto,
         notificationEnabled: Boolean,
+        eventTimeMarks: UnionEventTimeMarks?,
         orderUpdateAction: suspend (item: ShortItem) -> ShortItem
     ) = optimisticLock {
         val (short, updated) = update(itemId, orderUpdateAction)
         if (short != updated) {
-            saveAndNotify(updated = updated, notificationEnabled = notificationEnabled, order = order)
+            saveAndNotify(
+                updated = updated,
+                notificationEnabled = notificationEnabled,
+                order = order,
+                eventTimeMarks = eventTimeMarks
+            )
             logger.info("Saved Item [{}] after Order event [{}]", itemId, order.id)
         } else {
             logger.info("Item [{}] not changed after Order event [{}], event won't be published", itemId, order.id)
         }
     }
 
+    @Deprecated("Not used")
     private suspend fun updateAuction(
         auction: AuctionDto,
         notificationEnabled: Boolean,
@@ -211,18 +277,16 @@ class EnrichmentItemEventService(
         val itemId = ShortItemId(auction.getItemId())
         val (current, updated) = update(itemId, updateAction)
         if (current != updated) {
-            saveAndNotify(updated = updated, notificationEnabled = notificationEnabled, auction = auction)
+            saveAndNotify(
+                updated = updated,
+                notificationEnabled = notificationEnabled,
+                auction = auction,
+                eventTimeMarks = null
+            )
             logger.info("Saved Item [{}] after Auction event [{}]", itemId, auction.auctionId)
         } else {
             logger.info("Item [{}] not changed after Auction event [{}], event won't be published", itemId, auction.id)
         }
-    }
-
-    suspend fun onItemDeleted(itemId: ItemIdDto) = optimisticLock {
-        val shortItemId = ShortItemId(itemId)
-        val existing = enrichmentItemService.getOrEmpty(ShortItemId(itemId))
-        enrichmentItemService.save(existing)
-        sendDelete(shortItemId)
     }
 
     private suspend fun update(
@@ -241,14 +305,15 @@ class EnrichmentItemEventService(
         notificationEnabled: Boolean,
         item: UnionItem? = null,
         order: OrderDto? = null,
-        auction: AuctionDto? = null
+        auction: AuctionDto? = null,
+        eventTimeMarks: UnionEventTimeMarks?
     ) {
         if (!notificationEnabled) {
             enrichmentItemService.save(updated)
             return
         }
 
-        val event = buildUpdateEvent(updated, item, order, auction)
+        val event = buildUpdateEvent(updated, item, order, auction, eventTimeMarks)
         enrichmentItemService.save(updated)
         sendUpdate(event)
     }
@@ -257,7 +322,8 @@ class EnrichmentItemEventService(
         short: ShortItem,
         item: UnionItem? = null,
         order: OrderDto? = null,
-        auction: AuctionDto? = null
+        auction: AuctionDto? = null,
+        eventTimeMarks: UnionEventTimeMarks? = null
     ): ItemUpdateEventDto {
         val dto = enrichmentItemService.enrichItem(
             shortItem = short,
@@ -270,7 +336,8 @@ class EnrichmentItemEventService(
         return ItemUpdateEventDto(
             itemId = dto.id,
             item = dto,
-            eventId = UUID.randomUUID().toString()
+            eventId = UUID.randomUUID().toString(),
+            eventTimeMarks = eventTimeMarks?.addOut()?.toDto()
         )
     }
 
@@ -284,11 +351,7 @@ class EnrichmentItemEventService(
         }
     }
 
-    private suspend fun sendDelete(itemId: ShortItemId) {
-        val event = ItemDeleteEventDto(
-            itemId = itemId.toDto(),
-            eventId = UUID.randomUUID().toString()
-        )
+    private suspend fun sendDelete(event: ItemDeleteEventDto) {
         itemEventListeners.forEach { it.onEvent(event) }
     }
 }

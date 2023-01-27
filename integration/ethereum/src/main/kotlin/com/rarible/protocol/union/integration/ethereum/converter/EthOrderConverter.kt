@@ -1,12 +1,14 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.AmmOrderDto
+import com.rarible.protocol.dto.AmmOrderNftUpdateEventDto
 import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.LegacyOrderDto
 import com.rarible.protocol.dto.LooksRareOrderDto
 import com.rarible.protocol.dto.OpenSeaV1OrderDto
 import com.rarible.protocol.dto.OrderBasicSeaportDataV1Dto
 import com.rarible.protocol.dto.OrderCancelDto
+import com.rarible.protocol.dto.OrderEventDto
 import com.rarible.protocol.dto.OrderExchangeHistoryDto
 import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
@@ -16,6 +18,7 @@ import com.rarible.protocol.dto.OrderRaribleV2DataV3SellDto
 import com.rarible.protocol.dto.OrderSideDto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.dto.OrderSudoSwapAmmDataV1Dto
+import com.rarible.protocol.dto.OrderUpdateEventDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.dto.RaribleV2OrderDto
 import com.rarible.protocol.dto.SeaportConsiderationDto
@@ -24,6 +27,9 @@ import com.rarible.protocol.dto.SeaportOfferDto
 import com.rarible.protocol.dto.SeaportOrderTypeDto
 import com.rarible.protocol.dto.SeaportV1OrderDto
 import com.rarible.protocol.dto.X2Y2OrderDto
+import com.rarible.protocol.union.core.model.UnionOrderEvent
+import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
+import com.rarible.protocol.union.core.model.UnionPoolNftUpdateEvent
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
@@ -42,6 +48,7 @@ import com.rarible.protocol.union.dto.EthSeaportOfferDto
 import com.rarible.protocol.union.dto.EthSeaportOrderTypeDto
 import com.rarible.protocol.union.dto.EthSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.dto.EthX2Y2OrderDataV1Dto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OnChainAmmOrderDto
 import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderDataDto
@@ -75,6 +82,23 @@ class EthOrderConverter(
         } catch (e: Exception) {
             logger.error("Failed to convert {} Order: {} \n{}", blockchain, e.message, order)
             throw e
+        }
+    }
+
+    suspend fun convert(event: OrderEventDto, blockchain: BlockchainDto): UnionOrderEvent {
+        val eventTimeMarks = EthConverter.convert(event.eventTimeMarks)
+        return when (event) {
+            is OrderUpdateEventDto -> {
+                val order = convert(event.order, blockchain)
+                UnionOrderUpdateEvent(order, eventTimeMarks)
+            }
+
+            is AmmOrderNftUpdateEventDto -> {
+                val orderId = OrderIdDto(blockchain, event.orderId)
+                val include = event.inNft.map { ItemIdDto(blockchain, it) }
+                val exclude = event.outNft.map { ItemIdDto(blockchain, it) }
+                UnionPoolNftUpdateEvent(orderId, include.toSet(), exclude.toSet(), eventTimeMarks)
+            }
         }
     }
 

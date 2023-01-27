@@ -29,6 +29,8 @@ import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.Erc1155AssetTypeDto
 import com.rarible.protocol.dto.Erc20AssetTypeDto
 import com.rarible.protocol.dto.Erc721AssetTypeDto
+import com.rarible.protocol.dto.EventTimeMarkDto
+import com.rarible.protocol.dto.EventTimeMarksDto
 import com.rarible.protocol.dto.ImageContentDto
 import com.rarible.protocol.dto.ItemRoyaltyDto
 import com.rarible.protocol.dto.ItemTransferDto
@@ -895,6 +897,18 @@ fun randomEthOrderActivityMatchSide(): OrderActivityMatchSideDto {
         hash = Word.apply(randomWord()),
         asset = randomEthAssetErc20(),
         type = OrderActivityMatchSideDto.Type.values()[randomInt(OrderActivityMatchSideDto.Type.values().size)]
+    )
+}
+
+fun randomEventTimeMarks(): EventTimeMarksDto {
+    return EventTimeMarksDto(
+        source = randomString(),
+        marks = listOf(
+            EventTimeMarkDto(
+                randomString(),
+                nowMillis().minusSeconds(randomLong(1000))
+            )
+        )
     )
 }
 

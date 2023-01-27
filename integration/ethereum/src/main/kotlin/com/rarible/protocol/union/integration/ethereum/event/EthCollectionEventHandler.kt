@@ -1,12 +1,10 @@
 package com.rarible.protocol.union.integration.ethereum.event
 
 import com.rarible.protocol.dto.NftCollectionEventDto
-import com.rarible.protocol.dto.NftCollectionUpdateEventDto
 import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
-import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import org.slf4j.LoggerFactory
@@ -23,13 +21,7 @@ abstract class EthCollectionEventHandler(
 
     override suspend fun convert(event: NftCollectionEventDto): UnionCollectionEvent {
         logger.info("Received {} collection event: {}", blockchain, event)
-
-        return when (event) {
-            is NftCollectionUpdateEventDto -> {
-                val collection = EthCollectionConverter.convert(event.collection, blockchain)
-                UnionCollectionUpdateEvent(collection)
-            }
-        }
+        return EthCollectionConverter.convert(event, blockchain)
     }
 }
 

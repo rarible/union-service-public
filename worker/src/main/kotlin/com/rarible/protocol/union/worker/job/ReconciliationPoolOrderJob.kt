@@ -2,6 +2,7 @@ package com.rarible.protocol.union.worker.job
 
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.model.PoolItemAction
+import com.rarible.protocol.union.core.model.offchainEventMark
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -67,9 +68,14 @@ class ReconciliationPoolOrderJob(
 
     private suspend fun safeUpdate(order: OrderDto, itemId: ItemIdDto) {
         try {
-            orderEventService.updatePoolOrderPerItem(order, itemId, PoolItemAction.INCLUDED, config.notificationEnabled)
+            orderEventService.updatePoolOrderPerItem(
+                order, itemId,
+                PoolItemAction.INCLUDED,
+                offchainEventMark("enrichment-in"),
+                config.notificationEnabled
+            )
         } catch (e: Exception) {
-            logger.error("Unable to reconcile pool Order {} : {}", e.message, e)
+            logger.error("Unable to reconcile pool Order {} : {}", order.id, e.message, e)
         }
     }
 }

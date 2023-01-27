@@ -12,6 +12,7 @@ import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.model.ownershipId
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
@@ -66,18 +67,18 @@ open class DipDupTransfersEventHandler(
     private suspend fun sendOwnershipEvent(ownershipId: OwnershipIdDto?) {
         val ownership = getOwnership(ownershipId)
         if (ownership.value > BigInteger.ZERO) {
-            ownershipHandler.onEvent(UnionOwnershipUpdateEvent(ownership))
+            ownershipHandler.onEvent(UnionOwnershipUpdateEvent(ownership, stubEventMark()))
         } else {
-            ownershipHandler.onEvent(UnionOwnershipDeleteEvent(ownership.id))
+            ownershipHandler.onEvent(UnionOwnershipDeleteEvent(ownership.id, stubEventMark()))
         }
     }
 
     private suspend fun sendItemEvent(itemId: ItemIdDto?) {
         val token = getItem(itemId)
         if (token.supply > BigInteger.ZERO) {
-            itemHandler.onEvent(UnionItemUpdateEvent(token))
+            itemHandler.onEvent(UnionItemUpdateEvent(token, stubEventMark()))
         } else {
-            itemHandler.onEvent(UnionItemDeleteEvent(token.id))
+            itemHandler.onEvent(UnionItemDeleteEvent(token.id, stubEventMark()))
         }
     }
 

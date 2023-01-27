@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.UnionItemChangeEvent
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
+import com.rarible.protocol.union.core.model.offchainEventMark
 import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
@@ -16,7 +17,8 @@ class ItemMetaNotifier(
 
     override suspend fun notify(entry: DownloadEntry<UnionMeta>) {
         val itemId = IdParser.parseItemId(entry.id)
-        val message = KafkaEventFactory.internalItemEvent(UnionItemChangeEvent(itemId))
+        val eventTimeMarks = offchainEventMark("enrichment-in")
+        val message = KafkaEventFactory.internalItemEvent(UnionItemChangeEvent(itemId, eventTimeMarks))
         eventProducer.getProducer(itemId.blockchain).send(message).ensureSuccess()
     }
 }

@@ -15,6 +15,8 @@ import com.rarible.protocol.dto.PartDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.exception.UnionValidationException
+import com.rarible.protocol.union.core.model.UnionEventTimeMarks
+import com.rarible.protocol.union.core.model.UnionSourceEventTimeMark
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
@@ -158,14 +160,17 @@ object EthConverter {
             is Erc20AssetTypeDto -> EthErc20AssetTypeDto(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
+
             is Erc721AssetTypeDto -> EthErc721AssetTypeDto(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId
             )
+
             is Erc1155AssetTypeDto -> EthErc1155AssetTypeDto(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId
             )
+
             is Erc721LazyAssetTypeDto -> EthErc721LazyAssetTypeDto(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId,
@@ -174,6 +179,7 @@ object EthConverter {
                 royalties = source.royalties.map { convertToRoyalty(it, blockchain) },
                 signatures = source.signatures.map { convert(it) }
             )
+
             is Erc1155LazyAssetTypeDto -> EthErc1155LazyAssetTypeDto(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId,
@@ -183,16 +189,20 @@ object EthConverter {
                 royalties = source.royalties.map { convertToRoyalty(it, blockchain) },
                 signatures = source.signatures.map { convert(it) }
             )
+
             is CryptoPunksAssetTypeDto -> EthCryptoPunksAssetTypeDto(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId
             )
+
             is GenerativeArtAssetTypeDto -> EthGenerativeArtAssetTypeDto(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
+
             is CollectionAssetTypeDto -> EthCollectionAssetTypeDto(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
+
             is AmmNftAssetTypeDto -> EthAmmNftAssetTypeDto(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
@@ -224,6 +234,14 @@ object EthConverter {
                 buyOutPrice = source.buyOutPrice
             )
         }
+    }
+
+    fun convert(marks: com.rarible.protocol.dto.EventTimeMarksDto?): UnionEventTimeMarks? {
+        marks ?: return null
+        return UnionEventTimeMarks(
+            source = marks.source,
+            marks = marks.marks.map { UnionSourceEventTimeMark(it.name, it.date) }
+        )
     }
 
     fun convert(source: List<AuctionStatusDto>?): List<com.rarible.protocol.dto.AuctionStatusDto>? {

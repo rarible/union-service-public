@@ -19,10 +19,10 @@ class UnionInternalOwnershipEventHandler(
         try {
             when (event) {
                 is UnionOwnershipUpdateEvent -> {
-                    ownershipEventService.onOwnershipUpdated(event.ownership)
+                    ownershipEventService.onOwnershipUpdated(event)
                 }
                 is UnionOwnershipDeleteEvent -> {
-                    ownershipEventService.onOwnershipDeleted(event.ownershipId)
+                    ownershipEventService.onOwnershipDeleted(event)
                 }
             }
         } catch (e: Throwable) {

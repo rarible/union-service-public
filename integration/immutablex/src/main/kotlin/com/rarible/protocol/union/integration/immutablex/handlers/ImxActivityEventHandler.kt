@@ -9,6 +9,8 @@ import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
+import com.rarible.protocol.union.core.model.blockchainAndIndexerOutMarks
+import com.rarible.protocol.union.core.model.blockchainEventMark
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -63,6 +65,7 @@ class ImxActivityEventHandler(
                 is ImmutablexTrade -> itemsRequiredCreators.addAll(
                     listOfNotNull(event.make.itemId(), event.take.itemId())
                 )
+
                 else -> Unit
             }
         }
@@ -96,7 +99,8 @@ class ImxActivityEventHandler(
 
     private suspend fun onMint(mint: ImmutablexMint, creators: Map<String, String>) {
         val item = ImxItemConverter.convert(mint, creators[mint.itemId()], blockchain)
-        itemHandler.onEvent(UnionItemUpdateEvent(item))
+        val eventTimeMarks = blockchainEventMark("indexer-out", mint.timestamp)
+        itemHandler.onEvent(UnionItemUpdateEvent(item, eventTimeMarks))
 
         onItemTransferred(mint.itemId(), null, mint.user, mint.timestamp, creators)
     }
@@ -108,7 +112,8 @@ class ImxActivityEventHandler(
         onItemTransferred(itemId, transfer.user, receiver, transfer.timestamp, creators)
 
         if (transfer.isBurn) {
-            itemHandler.onEvent(UnionItemDeleteEvent(ItemIdDto(blockchain, transfer.encodedItemId())))
+            val eventTimeMarks = blockchainEventMark("indexer-out", transfer.timestamp)
+            itemHandler.onEvent(UnionItemDeleteEvent(ItemIdDto(blockchain, transfer.encodedItemId()), eventTimeMarks))
         }
     }
 
@@ -137,10 +142,11 @@ class ImxActivityEventHandler(
         if (itemId == null) {
             return
         }
+        val eventTimeMarks = blockchainAndIndexerOutMarks(date)
         if (fromUser != null) {
             val fromUserAddress = UnionAddressConverter.convert(blockchain, fromUser)
             val deletedOwnershipId = OwnershipIdDto(blockchain, TokenIdDecoder.encodeItemId(itemId), fromUserAddress)
-            ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedOwnershipId))
+            ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedOwnershipId, eventTimeMarks))
         }
         if (toUser != null) {
             val newOwnership = ImxOwnershipConverter.toOwnership(
@@ -150,7 +156,7 @@ class ImxActivityEventHandler(
                 creators[itemId],
                 date
             )
-            ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newOwnership))
+            ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newOwnership, eventTimeMarks))
         }
     }
 

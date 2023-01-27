@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.listener.service
 
+import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
@@ -40,7 +42,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
             meta
         }
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        itemEventService.onItemUpdated(unionItem)
+        itemEventService.onItemUpdated(UnionItemUpdateEvent(unionItem, stubEventMark()))
         waitAssert {
             val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(2)
@@ -65,7 +67,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
             meta
         }
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        itemEventService.onItemUpdated(unionItem)
+        itemEventService.onItemUpdated(UnionItemUpdateEvent(unionItem, stubEventMark()))
         waitAssert {
             val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(1)
@@ -90,7 +92,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
             meta
         }
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        itemEventService.onItemUpdated(unionItem)
+        itemEventService.onItemUpdated(UnionItemUpdateEvent(unionItem, stubEventMark()))
         waitAssert {
             val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(1)
@@ -112,7 +114,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
             throw RuntimeException("error")
         }
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        itemEventService.onItemUpdated(unionItem)
+        itemEventService.onItemUpdated(UnionItemUpdateEvent(unionItem, stubEventMark()))
         waitAssert {
             val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(1)
@@ -144,7 +146,7 @@ class EnrichmentItemMetaLoadingIt : AbstractIntegrationTest() {
 
         itemMetaService.save(itemId, meta)
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
-        itemEventService.onItemUpdated(unionItem)
+        itemEventService.onItemUpdated(UnionItemUpdateEvent(unionItem, stubEventMark()))
         waitAssert {
             val events = findItemUpdates(itemId.value)
             assertThat(events).hasSize(1).allSatisfy(Consumer {

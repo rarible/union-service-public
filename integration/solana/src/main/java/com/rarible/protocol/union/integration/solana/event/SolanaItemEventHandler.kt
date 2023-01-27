@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.integration.solana.converter.SolanaItemConverter
@@ -29,14 +30,14 @@ open class SolanaItemEventHandler(
         return when (event) {
             is TokenUpdateEventDto -> {
                 val item = SolanaItemConverter.convert(event.token, blockchain)
-                UnionItemUpdateEvent(item)
+                UnionItemUpdateEvent(item, stubEventMark())
             }
             is TokenDeleteEventDto -> {
                 val itemId = ItemIdDto(
                     blockchain = blockchain,
                     value = event.address
                 )
-                UnionItemDeleteEvent(itemId)
+                UnionItemDeleteEvent(itemId, stubEventMark())
             }
         }
     }

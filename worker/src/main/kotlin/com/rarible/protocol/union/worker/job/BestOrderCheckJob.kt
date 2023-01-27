@@ -4,6 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.daemon.job.JobHandler
 import com.rarible.core.daemon.sequential.SequentialDaemonWorker
+import com.rarible.protocol.union.core.model.offchainEventMark
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -12,21 +13,21 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventSe
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
 import com.rarible.protocol.union.worker.config.WorkerProperties
+import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
-import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.flow.fold
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.time.delay
 import org.slf4j.LoggerFactory
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.stereotype.Component
-import kotlinx.coroutines.time.delay
 
 class BestOrderCheckJob(
     private val handler: BestOrderCheckJobHandler,
     properties: WorkerProperties,
     meterRegistry: MeterRegistry,
-): SequentialDaemonWorker(
+) : SequentialDaemonWorker(
     meterRegistry = meterRegistry,
     properties = DaemonWorkerProperties().copy(
         pollingPeriod = properties.priceUpdate.rate,
@@ -34,6 +35,7 @@ class BestOrderCheckJob(
     ),
     workerName = "best-order-check-job"
 ) {
+
     override suspend fun handle() {
         handler.handle()
         delay(pollingPeriod)
@@ -65,7 +67,9 @@ class BestOrderCheckJobHandler(
         val itemsUpdated = itemRepository.findWithMultiCurrency(notUpdatedSince)
             .filter { enabledBlockchains.contains(it.blockchain) }
             .map {
-                withIgnoredOptimisticLock { enrichmentItemEventService.recalculateBestOrders(it) }
+                withIgnoredOptimisticLock {
+                    enrichmentItemEventService.recalculateBestOrders(it, offchainEventMark("enrichment-in"))
+                }
             }.sum()
 
         logger.info("Recalculated best Orders for {} Items", itemsUpdated)
@@ -74,7 +78,9 @@ class BestOrderCheckJobHandler(
         val collectionsUpdated = collectionRepository.findWithMultiCurrency(notUpdatedSince)
             .filter { enabledBlockchains.contains(it.blockchain) }
             .map {
-                withIgnoredOptimisticLock { enrichmentCollectionEventService.recalculateBestOrders(it) }
+                withIgnoredOptimisticLock {
+                    enrichmentCollectionEventService.recalculateBestOrders(it, offchainEventMark("enrichment-in"))
+                }
             }.sum()
 
         logger.info("Recalculated best Orders for {} Collections", collectionsUpdated)
@@ -83,7 +89,9 @@ class BestOrderCheckJobHandler(
         val ownershipsUpdated = ownershipRepository.findWithMultiCurrency(notUpdatedSince)
             .filter { enabledBlockchains.contains(it.blockchain) }
             .map {
-                withIgnoredOptimisticLock { enrichmentOwnershipEventService.recalculateBestOrders(it) }
+                withIgnoredOptimisticLock {
+                    enrichmentOwnershipEventService.recalculateBestOrders(it, offchainEventMark("enrichment-in"))
+                }
             }.sum()
 
         logger.info("Recalculated best Orders for {} Ownerships", ownershipsUpdated)

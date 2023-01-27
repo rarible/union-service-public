@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.integration.flow.converter.FlowOwnershipConverter
@@ -30,7 +31,7 @@ open class FlowOwnershipEventHandler(
         return when (event) {
             is FlowNftOwnershipUpdateEventDto -> {
                 val unionOwnership = FlowOwnershipConverter.convert(event.ownership, blockchain)
-                UnionOwnershipUpdateEvent(unionOwnership)
+                UnionOwnershipUpdateEvent(unionOwnership, stubEventMark())
             }
             is FlowNftOwnershipDeleteEventDto -> {
                 val ownershipId = OwnershipIdDto(
@@ -39,7 +40,7 @@ open class FlowOwnershipEventHandler(
                     tokenId = event.ownership.tokenId,
                     owner = UnionAddressConverter.convert(blockchain, event.ownership.owner)
                 )
-                UnionOwnershipDeleteEvent(ownershipId)
+                UnionOwnershipDeleteEvent(ownershipId, stubEventMark())
             }
         }
     }

@@ -3,7 +3,7 @@ package com.rarible.protocol.union.listener.handler.internal
 import com.rarible.core.apm.CaptureTransaction
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.listener.service.EnrichmentActivityEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentActivityEventService
 import org.springframework.stereotype.Component
 
 @Component

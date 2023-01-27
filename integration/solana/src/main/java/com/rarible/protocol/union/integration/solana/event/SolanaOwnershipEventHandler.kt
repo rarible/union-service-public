@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.solana.converter.SolanaOwnershipConverter
 import org.slf4j.LoggerFactory
@@ -38,11 +39,11 @@ open class SolanaOwnershipEventHandler(
         return when (event) {
             is BalanceUpdateEventDto -> {
                 val unionOwnership = SolanaOwnershipConverter.convert(event.balance, blockchain)
-                UnionOwnershipUpdateEvent(unionOwnership)
+                UnionOwnershipUpdateEvent(unionOwnership, stubEventMark())
             }
             is BalanceDeleteEventDto -> {
                 val unionOwnership = SolanaOwnershipConverter.convert(event.balance, blockchain)
-                UnionOwnershipDeleteEvent(unionOwnership.id)
+                UnionOwnershipDeleteEvent(unionOwnership.id, stubEventMark())
             }
         }
     }

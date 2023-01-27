@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupItemConverter
@@ -30,11 +31,11 @@ open class DipDupItemEventHandler(
         return when (event) {
             is DipDupUpdateItemEvent -> {
                 val item = DipDupItemConverter.convert(event.item)
-                UnionItemUpdateEvent(item)
+                UnionItemUpdateEvent(item, stubEventMark())
             }
             is DipDupDeleteItemEvent -> {
                 val itemId = ItemIdDto(blockchain, event.itemId)
-                UnionItemDeleteEvent(itemId)
+                UnionItemDeleteEvent(itemId, stubEventMark())
             }
         }
     }

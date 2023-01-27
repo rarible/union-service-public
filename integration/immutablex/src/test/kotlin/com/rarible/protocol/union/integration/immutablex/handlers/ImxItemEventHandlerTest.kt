@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaRefreshEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.blockchainAndIndexerOutMarks
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.data.randomImxAsset
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemConverter
@@ -74,7 +75,8 @@ class ImxItemEventHandlerTest {
         itemEventHandler.handle(listOf(asset))
 
         // Meta is the same, nothing to send
-        coVerify(exactly = 1) { itemHandler.onEvent(UnionItemUpdateEvent(item)) }
+        val marks = blockchainAndIndexerOutMarks(asset.updatedAt!!)
+        coVerify(exactly = 1) { itemHandler.onEvent(UnionItemUpdateEvent(item, marks)) }
         coVerify(exactly = 0) { itemMetaHandler.onEvent(any()) }
         coVerify(exactly = 0) { itemMetaRepository.save(any()) }
     }
@@ -91,7 +93,8 @@ class ImxItemEventHandlerTest {
         itemEventHandler.handle(listOf(asset))
 
         // In such case logic is the same as for case when meta has changed
-        coVerify(exactly = 1) { itemHandler.onEvent(UnionItemUpdateEvent(item)) }
+        val marks = blockchainAndIndexerOutMarks(asset.updatedAt!!)
+        coVerify(exactly = 1) { itemHandler.onEvent(UnionItemUpdateEvent(item, marks)) }
         coVerify(exactly = 1) { itemMetaRepository.save(ImxItemMeta(asset.itemId, meta)) }
         coVerify(exactly = 1) { itemMetaHandler.onEvent(any()) }
     }
@@ -108,7 +111,8 @@ class ImxItemEventHandlerTest {
 
         itemEventHandler.handle(listOf(asset))
 
-        coVerify(exactly = 1) { itemHandler.onEvent(UnionItemUpdateEvent(item)) }
+        val marks = blockchainAndIndexerOutMarks(asset.updatedAt!!)
+        coVerify(exactly = 1) { itemHandler.onEvent(UnionItemUpdateEvent(item, marks)) }
         coVerify(exactly = 1) { itemMetaHandler.onEvent(UnionItemMetaRefreshEvent(item.id)) }
         coVerify(exactly = 1) { itemMetaRepository.save(ImxItemMeta(asset.itemId, newMeta)) }
     }
@@ -121,7 +125,8 @@ class ImxItemEventHandlerTest {
         itemEventHandler.handle(listOf(asset))
 
         // Only delete event, nothing else
-        coVerify(exactly = 1) { itemHandler.onEvent(UnionItemDeleteEvent(item.id)) }
+        val marks = blockchainAndIndexerOutMarks(asset.updatedAt!!)
+        coVerify(exactly = 1) { itemHandler.onEvent(UnionItemDeleteEvent(item.id, marks)) }
         coVerify(exactly = 0) { itemMetaHandler.onEvent(any()) }
         coVerify(exactly = 0) { itemMetaRepository.save(any()) }
     }

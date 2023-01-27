@@ -20,13 +20,13 @@ class UnionInternalItemEventHandler(
         try {
             when (event) {
                 is UnionItemUpdateEvent -> {
-                    itemEventService.onItemUpdated(event.item)
+                    itemEventService.onItemUpdated(event)
                 }
                 is UnionItemDeleteEvent -> {
-                    itemEventService.onItemDeleted(event.itemId)
+                    itemEventService.onItemDeleted(event)
                 }
                 is UnionItemChangeEvent -> {
-                    itemEventService.onItemChanged(event.itemId)
+                    itemEventService.onItemChanged(event)
                 }
             }
         } catch (e: Throwable) {

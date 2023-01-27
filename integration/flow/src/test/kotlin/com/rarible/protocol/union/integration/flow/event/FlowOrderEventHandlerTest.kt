@@ -35,9 +35,13 @@ class FlowOrderEventHandlerTest {
 
         handler.handle(FlowOrderUpdateEventDto(randomString(), order.id.toString(), order))
 
-        val expected = UnionOrderUpdateEvent(converter.convert(order, BlockchainDto.FLOW))
+        val expected = converter.convert(order, BlockchainDto.FLOW)
 
-        coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
+        coVerify(exactly = 1) {
+            incomingEventHandler.onEvent(match {
+                (it as UnionOrderUpdateEvent).order == expected
+            })
+        }
     }
 
 }

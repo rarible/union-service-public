@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
@@ -30,7 +31,7 @@ open class DipDupOrderEventHandler(
         logger.info("Received DipDup order event: {}", mapper.writeValueAsString(event))
         return if (enabledPlatforms.contains(event.platform)) {
             val unionOrder = dipDupOrderConverter.convert(event, blockchain)
-            UnionOrderUpdateEvent(unionOrder)
+            UnionOrderUpdateEvent(unionOrder, stubEventMark())
         } else {
             null
         }
