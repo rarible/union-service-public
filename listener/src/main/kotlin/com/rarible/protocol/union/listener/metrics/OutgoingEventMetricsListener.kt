@@ -23,6 +23,14 @@ sealed class OutgoingEventMetricsListener<T>(
     abstract fun getEventTimeMarks(event: T): EventTimeMarksDto?
 
     override suspend fun onEvent(event: T) {
+        try {
+            markDelay(event)
+        } catch (e: Exception) {
+            logger.error("Failed to mark event {}", event, e)
+        }
+    }
+
+    private fun markDelay(event: T) {
         val blockchain = getBlockchain(event)
         val eventTimeMarks = getEventTimeMarks(event)
         val marks = eventTimeMarks?.marks
