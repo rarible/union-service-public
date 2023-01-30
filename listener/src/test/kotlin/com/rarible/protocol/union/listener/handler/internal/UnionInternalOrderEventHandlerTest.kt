@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.core.model.UnionPoolNftUpdateEvent
 import com.rarible.protocol.union.core.model.UnionPoolOrderUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -54,29 +55,31 @@ class UnionInternalOrderEventHandlerTest {
             reconciliationEventService
         )
         coEvery { incomingEventHandler.onEvents(any()) } returns Unit
-        coEvery { orderEventService.updatePoolOrder(any()) } returns Unit
+        coEvery { orderEventService.updatePoolOrder(any(), any()) } returns Unit
     }
 
     @Test
     fun `regular order update`() = runBlocking<Unit> {
         val order = randomUnionSellOrderDto()
+        val marks = stubEventMark()
 
         coEvery { enrichmentOrderService.getById(order.id) } returns order
-        coEvery { orderEventService.updateOrder(order, true) } returns Unit
+        coEvery { orderEventService.updateOrder(order, marks, true) } returns Unit
 
-        handler.onEvent(UnionOrderUpdateEvent(order))
+        handler.onEvent(UnionOrderUpdateEvent(order, marks))
 
-        coVerify(exactly = 1) { orderEventService.updateOrder(order, true) }
+        coVerify(exactly = 1) { orderEventService.updateOrder(order, marks, true) }
     }
 
     @Test
     fun `regular order update - failed`() = runBlocking<Unit> {
         val order = randomUnionSellOrderDto()
+        val marks = stubEventMark()
 
         coEvery { enrichmentOrderService.getById(order.id) } throws NullPointerException()
         coEvery { reconciliationEventService.onFailedOrder(order) } returns Unit
 
-        assertThrows<NullPointerException> { handler.onEvent(UnionOrderUpdateEvent(order)) }
+        assertThrows<NullPointerException> { handler.onEvent(UnionOrderUpdateEvent(order, marks)) }
 
         coVerify(exactly = 1) { reconciliationEventService.onFailedOrder(order) }
     }
@@ -87,11 +90,12 @@ class UnionInternalOrderEventHandlerTest {
         val action = PoolItemAction.valueOf(actionString)
         val order = randomUnionSellOrderDto()
         val itemId = randomEthItemId()
-        coEvery { orderEventService.updatePoolOrderPerItem(order, itemId, action) } returns Unit
+        val marks = stubEventMark()
+        coEvery { orderEventService.updatePoolOrderPerItem(order, itemId, action, marks) } returns Unit
 
-        handler.onEvent(UnionPoolOrderUpdateEvent(order, itemId, action))
+        handler.onEvent(UnionPoolOrderUpdateEvent(order, itemId, action, marks))
 
-        coVerify(exactly = 1) { orderEventService.updatePoolOrderPerItem(order, itemId, action) }
+        coVerify(exactly = 1) { orderEventService.updatePoolOrderPerItem(order, itemId, action, marks) }
     }
 
     @Test
@@ -99,11 +103,12 @@ class UnionInternalOrderEventHandlerTest {
         val action = PoolItemAction.INCLUDED
         val order = randomUnionSellOrderDto()
         val itemId = randomEthItemId()
+        val marks = stubEventMark()
 
-        coEvery { orderEventService.updatePoolOrderPerItem(order, itemId, action) } throws NullPointerException()
+        coEvery { orderEventService.updatePoolOrderPerItem(order, itemId, action, marks) } throws NullPointerException()
         coEvery { reconciliationEventService.onFailedOrder(order) } returns Unit
 
-        assertThrows<NullPointerException> { handler.onEvent(UnionPoolOrderUpdateEvent(order, itemId, action)) }
+        assertThrows<NullPointerException> { handler.onEvent(UnionPoolOrderUpdateEvent(order, itemId, action, marks)) }
 
         coVerify(exactly = 1) { reconciliationEventService.onFailedOrder(order) }
     }
@@ -111,6 +116,7 @@ class UnionInternalOrderEventHandlerTest {
     @Test
     fun `pool order update`() = runBlocking<Unit> {
         val order = randomUnionSellOrderDto().copy(data = randomSudoSwapAmmDataV1Dto())
+        val marks = stubEventMark()
 
         val itemId1 = ShortItemId(randomEthItemId())
         val itemId2 = ShortItemId(randomEthItemId())
@@ -118,20 +124,21 @@ class UnionInternalOrderEventHandlerTest {
         coEvery { enrichmentItemService.findByPoolOrder(order.id) } returns setOf(itemId1, itemId2)
         coEvery { enrichmentOrderService.getById(order.id) } returns order
 
-        handler.onEvent(UnionOrderUpdateEvent(order))
+        handler.onEvent(UnionOrderUpdateEvent(order, marks))
 
         val expected = listOf(
-            UnionPoolOrderUpdateEvent(order, itemId1.toDto(), PoolItemAction.UPDATED),
-            UnionPoolOrderUpdateEvent(order, itemId2.toDto(), PoolItemAction.UPDATED),
+            UnionPoolOrderUpdateEvent(order, itemId1.toDto(), PoolItemAction.UPDATED, marks),
+            UnionPoolOrderUpdateEvent(order, itemId2.toDto(), PoolItemAction.UPDATED, marks),
         )
         // 2 events sent for items from this pool
         coVerify(exactly = 1) { incomingEventHandler.onEvents(expected) }
-        coVerify(exactly = 1) { orderEventService.updatePoolOrder(order) }
+        coVerify(exactly = 1) { orderEventService.updatePoolOrder(order, marks) }
     }
 
     @Test
     fun `pool nft update`() = runBlocking<Unit> {
         val order = randomUnionSellOrderDto().copy(data = randomSudoSwapAmmDataV1Dto())
+        val marks = stubEventMark()
 
         val itemId1 = ShortItemId(randomEthItemId())
         val itemId2 = ShortItemId(randomEthItemId())
@@ -147,21 +154,21 @@ class UnionInternalOrderEventHandlerTest {
         coEvery { enrichmentItemService.findByPoolOrder(order.id) } returns setOf(itemId1, itemId2, itemId3)
         coEvery { enrichmentOrderService.getById(order.id) } returns order
 
-        handler.onEvent(UnionPoolNftUpdateEvent(order.id, included, excluded))
+        handler.onEvent(UnionPoolNftUpdateEvent(order.id, included, excluded, marks))
 
         val expected = listOf(
             // Not specified in in/out, will be the first in list
-            UnionPoolOrderUpdateEvent(order, itemId3.toDto(), PoolItemAction.UPDATED),
+            UnionPoolOrderUpdateEvent(order, itemId3.toDto(), PoolItemAction.UPDATED, marks),
             // Specified as included, will be 2nd and 3rd
-            UnionPoolOrderUpdateEvent(order, itemId1.toDto(), PoolItemAction.INCLUDED),
-            UnionPoolOrderUpdateEvent(order, itemId4.toDto(), PoolItemAction.INCLUDED),
+            UnionPoolOrderUpdateEvent(order, itemId1.toDto(), PoolItemAction.INCLUDED, marks),
+            UnionPoolOrderUpdateEvent(order, itemId4.toDto(), PoolItemAction.INCLUDED, marks),
             // Specified as excluded, will be 4th and 5th
-            UnionPoolOrderUpdateEvent(order, itemId2.toDto(), PoolItemAction.EXCLUDED),
-            UnionPoolOrderUpdateEvent(order, itemId5.toDto(), PoolItemAction.EXCLUDED),
+            UnionPoolOrderUpdateEvent(order, itemId2.toDto(), PoolItemAction.EXCLUDED, marks),
+            UnionPoolOrderUpdateEvent(order, itemId5.toDto(), PoolItemAction.EXCLUDED, marks),
         )
 
         coVerify(exactly = 1) { incomingEventHandler.onEvents(expected) }
-        coVerify(exactly = 1) { orderEventService.updatePoolOrder(order) }
+        coVerify(exactly = 1) { orderEventService.updatePoolOrder(order, marks) }
     }
 
 }

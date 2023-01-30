@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.worker.job
 
+import com.rarible.protocol.union.core.model.offchainEventMark
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -71,9 +72,13 @@ class ReconciliationOrderJob(
     private suspend fun safeUpdate(order: OrderDto) {
         try {
             // TODO: better to send notification if order has changes
-            orderEventService.updateOrder(order, config.notificationEnabled)
+            orderEventService.updateOrder(
+                order,
+                offchainEventMark("enrichment-in"),
+                config.notificationEnabled
+            )
         } catch (e: Exception) {
-            logger.error("Unable to reconcile order {} : {}", e.message, e)
+            logger.error("Unable to reconcile order {} : {}", order.id, e.message, e)
         }
     }
 }

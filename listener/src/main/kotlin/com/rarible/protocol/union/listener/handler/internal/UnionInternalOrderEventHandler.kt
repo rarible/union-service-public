@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.PoolItemAction
+import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.core.model.UnionPoolNftUpdateEvent
@@ -41,13 +42,19 @@ class UnionInternalOrderEventHandler(
                 is UnionOrderUpdateEvent -> {
                     when (event.order.isPoolOrder) {
                         // Trigger events to all existing items placed to the pool
-                        true -> triggerPoolOrderUpdate(event.orderId)
-                        else -> onOrderUpdate(event.order)
+                        true -> triggerPoolOrderUpdate(event.orderId, event.eventTimeMarks)
+                        else -> onOrderUpdate(event)
                     }
                 }
+
                 is UnionPoolOrderUpdateEvent -> onPoolOrderUpdate(event)
                 // Trigger events to all existing items placed to the pool with including/excluding items
-                is UnionPoolNftUpdateEvent -> triggerPoolOrderUpdate(event.orderId, event.inNft, event.outNft)
+                is UnionPoolNftUpdateEvent -> triggerPoolOrderUpdate(
+                    event.orderId,
+                    event.eventTimeMarks,
+                    event.inNft,
+                    event.outNft
+                )
             }
         } catch (e: Throwable) {
             // TODO PT-1151 not really sure how to perform reconciliation for AMM orders
@@ -62,9 +69,10 @@ class UnionInternalOrderEventHandler(
     }
 
     // Regular update event
-    private suspend fun onOrderUpdate(order: OrderDto) {
+    private suspend fun onOrderUpdate(event: UnionOrderUpdateEvent) {
+        val order = event.order
         if (order.taker == null) {
-            orderEventService.updateOrder(fetchOrder(order.id), true)
+            orderEventService.updateOrder(fetchOrder(order.id), event.eventTimeMarks, true)
         } else {
             logger.info("Ignored ${order.id} with filled taker")
         }
@@ -76,11 +84,12 @@ class UnionInternalOrderEventHandler(
             return
         }
         // for synthetic updates it might be costly to fetch order - so use received one
-        orderEventService.updatePoolOrderPerItem(event.order, event.itemId, event.action)
+        orderEventService.updatePoolOrderPerItem(event.order, event.itemId, event.action, event.eventTimeMarks)
     }
 
     private suspend fun triggerPoolOrderUpdate(
         orderId: OrderIdDto,
+        eventTimeMarks: UnionEventTimeMarks?,
         included: Set<ItemIdDto> = emptySet(),
         excluded: Set<ItemIdDto> = emptySet()
     ) {
@@ -98,11 +107,11 @@ class UnionInternalOrderEventHandler(
             val itemId = it.toDto()
             if (!excluded.contains(itemId) && !included.contains(itemId)) {
                 // For existed short items we should generate event to update best sell orders
-                messages.add(UnionPoolOrderUpdateEvent(order, itemId, PoolItemAction.UPDATED))
+                messages.add(UnionPoolOrderUpdateEvent(order, itemId, PoolItemAction.UPDATED, eventTimeMarks))
             }
         }
-        included.forEach { messages.add(UnionPoolOrderUpdateEvent(order, it, PoolItemAction.INCLUDED)) }
-        excluded.forEach { messages.add(UnionPoolOrderUpdateEvent(order, it, PoolItemAction.EXCLUDED)) }
+        included.forEach { messages.add(UnionPoolOrderUpdateEvent(order, it, PoolItemAction.INCLUDED, eventTimeMarks)) }
+        excluded.forEach { messages.add(UnionPoolOrderUpdateEvent(order, it, PoolItemAction.EXCLUDED, eventTimeMarks)) }
 
         // We should not to handle such events here directly since it could cause concurrent modification problems
         // Instead, we send such synthetic events to this internal handler in order to consequently process
@@ -112,7 +121,7 @@ class UnionInternalOrderEventHandler(
             "Pool Order [{}] updated, Items included: {}, Items excluded: {}, total events sent: {}",
             orderId, included, excluded, messages.size
         )
-        orderEventService.updatePoolOrder(order)
+        orderEventService.updatePoolOrder(order, eventTimeMarks)
     }
 
     private suspend fun fetchOrder(orderId: OrderIdDto): OrderDto {

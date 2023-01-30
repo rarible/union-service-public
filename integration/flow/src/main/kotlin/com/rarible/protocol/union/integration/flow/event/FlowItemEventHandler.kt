@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.integration.flow.converter.FlowItemConverter
@@ -29,7 +30,7 @@ open class FlowItemEventHandler(
         return when (event) {
             is FlowNftItemUpdateEventDto -> {
                 val item = FlowItemConverter.convert(event.item, blockchain)
-                UnionItemUpdateEvent(item)
+                UnionItemUpdateEvent(item, stubEventMark())
             }
             is FlowNftItemDeleteEventDto -> {
                 val itemId = ItemIdDto(
@@ -37,7 +38,7 @@ open class FlowItemEventHandler(
                     contract = event.item.token,
                     tokenId = event.item.tokenId.toBigInteger()
                 )
-                UnionItemDeleteEvent(itemId)
+                UnionItemDeleteEvent(itemId, stubEventMark())
             }
         }
     }

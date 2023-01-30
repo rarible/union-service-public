@@ -47,7 +47,7 @@ class ReconciliationPoolOrderJobTest {
     @BeforeEach
     fun beforeEach() {
         clearMocks(orderEventService)
-        coEvery { orderEventService.updatePoolOrderPerItem(any(), any(), any()) } returns Unit
+        coEvery { orderEventService.updatePoolOrderPerItem(any(), any(), any(), any()) } returns Unit
     }
 
     @Test
@@ -72,7 +72,8 @@ class ReconciliationPoolOrderJobTest {
             orderEventService.updatePoolOrderPerItem(
                 any(),
                 any(),
-                eq(PoolItemAction.INCLUDED)
+                eq(PoolItemAction.INCLUDED),
+                any()
             )
         }
         items.forEach {
@@ -80,7 +81,8 @@ class ReconciliationPoolOrderJobTest {
                 orderEventService.updatePoolOrderPerItem(
                     it.value,
                     it.key,
-                    eq(PoolItemAction.INCLUDED)
+                    eq(PoolItemAction.INCLUDED),
+                    any()
                 )
             }
         }

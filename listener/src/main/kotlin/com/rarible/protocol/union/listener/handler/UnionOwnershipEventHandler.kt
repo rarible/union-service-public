@@ -14,6 +14,8 @@ class UnionOwnershipEventHandler(
     eventProducer: UnionInternalBlockchainEventProducer
 ) : IncomingBlockchainEventHandler<UnionOwnershipEvent>(eventProducer) {
 
-    override fun toMessage(event: UnionOwnershipEvent) = KafkaEventFactory.internalOwnershipEvent(event)
     override fun getBlockchain(event: UnionOwnershipEvent) = event.ownershipId.blockchain
+    override fun toMessage(event: UnionOwnershipEvent) = KafkaEventFactory.internalOwnershipEvent(
+        event.addTimeMark("enrichment-in")
+    )
 }

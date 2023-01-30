@@ -7,8 +7,8 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.worker.config.ReconciliationProperties
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.mockk.clearMocks
@@ -43,7 +43,7 @@ class ReconciliationOrderJobTest {
     fun beforeEach() {
         clearMocks(orderServiceRouter, orderEventService)
         coEvery { orderServiceRouter.getService(BlockchainDto.ETHEREUM) } returns orderService
-        coEvery { orderEventService.updateOrder(any()) } returns Unit
+        coEvery { orderEventService.updateOrder(any(), any()) } returns Unit
     }
 
     @Test
@@ -67,7 +67,7 @@ class ReconciliationOrderJobTest {
         val result = orderReconciliationService.reconcileBatch(null, BlockchainDto.ETHEREUM)
 
         assertEquals(nextContinuation, result)
-        coVerify(exactly = testPageSize) { orderEventService.updateOrder(any()) }
+        coVerify(exactly = testPageSize) { orderEventService.updateOrder(any(), any()) }
     }
 
     @Test
@@ -79,7 +79,7 @@ class ReconciliationOrderJobTest {
         val result = orderReconciliationService.reconcileBatch(lastContinuation, BlockchainDto.ETHEREUM)
 
         assertEquals(nextContinuation, result)
-        coVerify(exactly = testPageSize) { orderEventService.updateOrder(any()) }
+        coVerify(exactly = testPageSize) { orderEventService.updateOrder(any(), any()) }
     }
 
     @Test
@@ -91,7 +91,7 @@ class ReconciliationOrderJobTest {
         val result = orderReconciliationService.reconcileBatch(lastContinuation, BlockchainDto.ETHEREUM)
 
         assertNull(result)
-        coVerify(exactly = 50) { orderEventService.updateOrder(any()) }
+        coVerify(exactly = 50) { orderEventService.updateOrder(any(), any()) }
     }
 
     @Test
@@ -101,7 +101,7 @@ class ReconciliationOrderJobTest {
         val result = orderReconciliationService.reconcileBatch(null, BlockchainDto.ETHEREUM)
 
         assertNull(result)
-        coVerify(exactly = 0) { orderEventService.updateOrder(any()) }
+        coVerify(exactly = 0) { orderEventService.updateOrder(any(), any()) }
     }
 
     private fun mockGetOrdersAll(continuation: String?, size: Int, result: Slice<OrderDto>): Unit {

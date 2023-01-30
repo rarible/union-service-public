@@ -6,6 +6,7 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
@@ -68,6 +69,7 @@ internal class SubscriptionEventFt : AbstractIntegrationTest() {
         val itemEventDto = ItemUpdateEventDto(
             itemId,
             "eventId",
+            stubEventMark().toDto(),
             ItemDto(
                 id = itemId,
                 blockchain = BlockchainDto.ETHEREUM,
@@ -79,7 +81,7 @@ internal class SubscriptionEventFt : AbstractIntegrationTest() {
                 deleted = false,
                 auctions = emptyList(),
                 sellers = 1
-            )
+            ),
         )
 
         webSocketRequests.tryEmitNext(listOf(ItemSubscriptionRequestDto(SubscriptionActionDto.SUBSCRIBE, itemId)))
@@ -111,7 +113,7 @@ internal class SubscriptionEventFt : AbstractIntegrationTest() {
         println("order is $order")
         println("itemId is $itemId")
 
-        val orderEventDto = OrderUpdateEventDto(order.id, "eventId", order)
+        val orderEventDto = OrderUpdateEventDto(order.id, "eventId", stubEventMark().toDto(), order)
 
         webSocketRequests.tryEmitNext(listOf(OrdersByItemSubscriptionRequestDto(SubscriptionActionDto.SUBSCRIBE, itemId)))
 

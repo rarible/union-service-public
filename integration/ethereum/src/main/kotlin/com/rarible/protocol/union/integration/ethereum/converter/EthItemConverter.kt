@@ -1,10 +1,16 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.dto.NftItemDeleteEventDto
 import com.rarible.protocol.dto.NftItemDto
+import com.rarible.protocol.dto.NftItemEventDto
+import com.rarible.protocol.dto.NftItemUpdateEventDto
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
+import com.rarible.protocol.union.core.model.UnionItemEvent
+import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -23,6 +29,30 @@ object EthItemConverter {
         } catch (e: Exception) {
             logger.error("Failed to convert {} Item: {} \n{}", blockchain, e.message, item)
             throw e
+        }
+    }
+
+    fun convert(event: NftItemEventDto, blockchain: BlockchainDto): UnionItemEvent {
+        val eventTimeMarks = EthConverter.convert(event.eventTimeMarks)
+        return when (event) {
+            is NftItemUpdateEventDto -> {
+                UnionItemUpdateEvent(
+                    item = convert(event.item, blockchain),
+                    eventTimeMarks = eventTimeMarks
+                )
+            }
+
+            is NftItemDeleteEventDto -> {
+                val itemId = ItemIdDto(
+                    blockchain = blockchain,
+                    contract = EthConverter.convert(event.item.token),
+                    tokenId = event.item.tokenId
+                )
+                UnionItemDeleteEvent(
+                    itemId = itemId,
+                    eventTimeMarks = eventTimeMarks
+                )
+            }
         }
     }
 

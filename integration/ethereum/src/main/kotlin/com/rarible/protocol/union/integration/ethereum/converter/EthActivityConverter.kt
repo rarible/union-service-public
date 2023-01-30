@@ -623,6 +623,7 @@ class EthActivityConverter(
             OrderActivityDto.Source.X2Y2 -> OrderActivitySourceDto.X2Y2
             OrderActivityDto.Source.LOOKSRARE -> OrderActivitySourceDto.LOOKSRARE
             OrderActivityDto.Source.SUDOSWAP -> OrderActivitySourceDto.SUDOSWAP
+            OrderActivityDto.Source.BLUR -> OrderActivitySourceDto.BLUR
         }
     }
 

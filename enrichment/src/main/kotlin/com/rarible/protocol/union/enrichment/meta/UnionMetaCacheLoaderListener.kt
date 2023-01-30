@@ -60,7 +60,7 @@ class UnionMetaCacheLoaderListener(
         logger.info("Sending meta item update event for ${itemId.fullId()}")
         val item = getItem(itemId)
         val itemWithMeta = item.copy(meta = meta)
-        val message = KafkaEventFactory.internalItemEvent(UnionItemUpdateEvent(itemWithMeta))
+        val message = KafkaEventFactory.internalItemEvent(UnionItemUpdateEvent(itemWithMeta, null))
         eventProducer.getProducer(itemId.blockchain).send(message)
     }
 

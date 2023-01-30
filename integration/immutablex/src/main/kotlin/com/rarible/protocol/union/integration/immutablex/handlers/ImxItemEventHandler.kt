@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaRefreshEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.blockchainAndIndexerOutMarks
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemConverter
@@ -46,8 +47,9 @@ class ImxItemEventHandler(
         assets.forEach { asset ->
             val assetId = asset.itemId
             val item = ImxItemConverter.convert(asset, creators[assetId], blockchain)
+            val eventTimeMarks = blockchainAndIndexerOutMarks(item.lastUpdatedAt)
             if (item.deleted) {
-                itemHandler.onEvent(UnionItemDeleteEvent(item.id))
+                itemHandler.onEvent(UnionItemDeleteEvent(item.id, eventTimeMarks))
             } else {
                 val newMeta = meta[assetId]!!
                 val oldMeta = currentMeta[assetId]
@@ -57,7 +59,7 @@ class ImxItemEventHandler(
                     itemMetaRepository.save(ImxItemMeta(assetId, newMeta))
                     itemMetaHandler.onEvent(UnionItemMetaRefreshEvent(item.id))
                 }
-                itemHandler.onEvent(UnionItemUpdateEvent(item))
+                itemHandler.onEvent(UnionItemUpdateEvent(item, eventTimeMarks))
             }
         }
     }

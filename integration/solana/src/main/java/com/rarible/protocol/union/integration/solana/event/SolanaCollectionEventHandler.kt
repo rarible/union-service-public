@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.solana.converter.SolanaCollectionConverter
 import org.slf4j.LoggerFactory
@@ -25,7 +26,7 @@ open class SolanaCollectionEventHandler(
         return when (event) {
             is com.rarible.protocol.solana.dto.CollectionUpdateEventDto -> {
                 val collection = SolanaCollectionConverter.convert(event.collection, blockchain)
-                UnionCollectionUpdateEvent(collection)
+                UnionCollectionUpdateEvent(collection, stubEventMark())
             }
         }
     }

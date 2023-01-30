@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupCollectionConverter
@@ -35,10 +36,11 @@ open class DipDupCollectionEventHandler(
                 // Enrich by meta fields, lately it's better to move it to the indexer
                 val tzktCollection = tzktCollectionService.getCollectionById(event.collection.id, true)
                 UnionCollectionUpdateEvent(
-                    collection.copy(name = tzktCollection.name, symbol = tzktCollection.symbol)
+                    collection.copy(name = tzktCollection.name, symbol = tzktCollection.symbol),
+                    stubEventMark()
                 )
             } else {
-                UnionCollectionUpdateEvent(collection)
+                UnionCollectionUpdateEvent(collection, stubEventMark())
             }
 
             unionCollectionEvent

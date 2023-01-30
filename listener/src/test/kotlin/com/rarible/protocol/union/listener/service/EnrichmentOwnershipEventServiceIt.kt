@@ -2,8 +2,11 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
+import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
+import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.core.model.getAuctionOwnershipId
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
@@ -59,7 +62,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
-        ownershipEventHandler.onOwnershipUpdated(ownershipDto)
+        ownershipEventHandler.onOwnershipUpdated(UnionOwnershipUpdateEvent(ownershipDto, stubEventMark()))
 
         val created = ownershipService.get(ShortOwnershipId(ownershipId))!!
         // Ownership should not be updated since it wasn't in DB before update
@@ -99,7 +102,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ethOwnership)
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
-        ownershipEventHandler.onOwnershipUpdated(unionOwnership)
+        ownershipEventHandler.onOwnershipUpdated(UnionOwnershipUpdateEvent(unionOwnership, stubEventMark()))
 
         val saved = ownershipService.get(shortOwnership.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(shortOwnership.bestSellOrder)
@@ -140,7 +143,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ethOwnership)
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
-        ownershipEventHandler.onOwnershipUpdated(unionOwnership)
+        ownershipEventHandler.onOwnershipUpdated(UnionOwnershipUpdateEvent(unionOwnership, stubEventMark()))
 
 
         waitAssert {
@@ -171,7 +174,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ownershipId, ethOwnership)
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
-        ownershipEventHandler.onOwnershipBestSellOrderUpdated(shortOwnership.id, unionBestSell)
+        ownershipEventHandler.onOwnershipBestSellOrderUpdated(shortOwnership.id, unionBestSell, stubEventMark())
 
         val saved = ownershipService.get(shortOwnership.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
@@ -295,7 +298,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
-        ownershipEventHandler.onOwnershipDeleted(ownershipId)
+        ownershipEventHandler.onOwnershipDeleted(UnionOwnershipDeleteEvent(ownershipId, stubEventMark()))
 
         assertThat(ownershipService.get(ownership.id)).isNull()
         waitAssert {
@@ -315,7 +318,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
-        ownershipEventHandler.onOwnershipDeleted(ownershipId)
+        ownershipEventHandler.onOwnershipDeleted(UnionOwnershipDeleteEvent(ownershipId, stubEventMark()))
 
         assertThat(ownershipService.get(shortOwnershipId)).isNull()
 
@@ -342,7 +345,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(auctionOwnershipId, auctionOwnership)
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, listOf(auction))
 
-        ownershipEventHandler.onOwnershipDeleted(ownershipId)
+        ownershipEventHandler.onOwnershipDeleted(UnionOwnershipDeleteEvent(ownershipId, stubEventMark()))
 
         assertThat(ownershipService.get(shortOwnershipId)).isNull()
 

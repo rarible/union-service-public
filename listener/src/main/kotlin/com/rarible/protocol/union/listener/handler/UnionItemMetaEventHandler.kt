@@ -26,7 +26,7 @@ class UnionItemMetaEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun onEvent(event: UnionItemMetaEvent) {
-        return when (event) {
+        when (event) {
             is UnionItemMetaRefreshEvent -> {
                 logger.info("Refreshing meta for item {} by request of ItemMetaRefreshEvent", event.itemId)
                 itemMetaService.schedule(event.itemId, ItemMetaPipeline.EVENT, true)
@@ -39,7 +39,7 @@ class UnionItemMetaEventHandler(
                 val item = event.unionItem ?: enrichmentItemService.fetchOrNull(ShortItemId(event.itemId))
                 if (item != null) {
                     logger.info("Sending item {} update event caused by meta update", event.itemId)
-                    handler.onEvent(UnionItemUpdateEvent(item))
+                    handler.onEvent(UnionItemUpdateEvent(item, null))
                 } else {
                     logger.info("Item {} is not found to send meta update event", event.itemId)
                 }

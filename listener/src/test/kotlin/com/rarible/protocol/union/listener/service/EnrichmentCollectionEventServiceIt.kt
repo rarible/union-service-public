@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.listener.service
 
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
-import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomShortCollection
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -24,9 +24,6 @@ import scalether.domain.Address
 
 @IntegrationTest
 class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
-
-    @Autowired
-    private lateinit var itemService: EnrichmentItemService
 
     @Autowired
     private lateinit var collectionService: EnrichmentCollectionService
@@ -52,7 +49,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionId.value) } returns ethItem.toMono()
 
-        collectionEventService.onCollectionBestSellOrderUpdate(collectionId, unionBestSell, true)
+        collectionEventService.onCollectionBestSellOrderUpdate(collectionId, unionBestSell, null, true)
 
         // In result event for Item we expect updated bestSellOrder
         val expected = EnrichedCollectionConverter.convert(unionCollection, shortCollection)
@@ -89,7 +86,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionId.value) } returns ethItem.toMono()
 
-        collectionEventService.onCollectionBestBidOrderUpdate(collectionId, unionBestBid, true)
+        collectionEventService.onCollectionBestBidOrderUpdate(collectionId, unionBestBid, stubEventMark(), true)
 
         // In result event for Item we expect updated bestSellOrder
         val expected = EnrichedCollectionConverter.convert(unionCollection).copy(bestBidOrder = unionBestBid)

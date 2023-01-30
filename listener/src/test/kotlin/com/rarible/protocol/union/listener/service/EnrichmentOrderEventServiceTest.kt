@@ -4,6 +4,7 @@ import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.model.PoolItemAction
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -45,13 +46,27 @@ class EnrichmentOrderEventServiceTest {
     @BeforeEach
     fun beforeEach() {
         clearMocks(enrichmentItemEventService, enrichmentOwnershipEventService)
-        coEvery { enrichmentItemEventService.onPoolOrderUpdated(any(), any(), any()) } returns Unit
-        coEvery { enrichmentItemEventService.onItemBestSellOrderUpdated(any(), any()) } returns Unit
-        coEvery { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) } returns Unit
-        coEvery { enrichmentOwnershipEventService.onPoolOrderUpdated(any(), any(), any()) } returns Unit
-        coEvery { enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(any(), any()) } returns Unit
-        coEvery { enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(any(), any(), any()) } returns Unit
-        coEvery { enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(any(), any(), any()) } returns Unit
+        coEvery {
+            enrichmentItemEventService.onPoolOrderUpdated(any(), any(), any(), any())
+        } returns Unit
+        coEvery {
+            enrichmentItemEventService.onItemBestSellOrderUpdated(any(), any(), any())
+        } returns Unit
+        coEvery {
+            enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any(), any())
+        } returns Unit
+        coEvery {
+            enrichmentOwnershipEventService.onPoolOrderUpdated(any(), any(), any(), any())
+        } returns Unit
+        coEvery {
+            enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(any(), any(), any())
+        } returns Unit
+        coEvery {
+            enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(any(), any(), any(), any())
+        } returns Unit
+        coEvery {
+            enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(any(), any(), any(), any())
+        } returns Unit
     }
 
     @Test
@@ -67,12 +82,12 @@ class EnrichmentOrderEventServiceTest {
             take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
         )
 
-        orderEventService.updateOrder(order)
+        orderEventService.updateOrder(order, stubEventMark())
 
-        coVerify(exactly = 1) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order) }
-        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) }
+        coVerify(exactly = 1) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order, any()) }
+        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any(), any()) }
         coVerify(exactly = 1) {
-            enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(shortOwnershipId, order)
+            enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(shortOwnershipId, order, any())
         }
     }
 
@@ -89,13 +104,13 @@ class EnrichmentOrderEventServiceTest {
             take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
         )
 
-        orderEventService.updatePoolOrderPerItem(order, itemId, PoolItemAction.INCLUDED)
+        orderEventService.updatePoolOrderPerItem(order, itemId, PoolItemAction.INCLUDED, stubEventMark())
 
         coVerify(exactly = 1) {
-            enrichmentItemEventService.onPoolOrderUpdated(shortItemId, order, PoolItemAction.INCLUDED)
+            enrichmentItemEventService.onPoolOrderUpdated(shortItemId, order, PoolItemAction.INCLUDED, any())
         }
         coVerify(exactly = 1) {
-            enrichmentOwnershipEventService.onPoolOrderUpdated(shortOwnershipId, order, PoolItemAction.INCLUDED)
+            enrichmentOwnershipEventService.onPoolOrderUpdated(shortOwnershipId, order, PoolItemAction.INCLUDED, any())
         }
     }
 
@@ -113,12 +128,12 @@ class EnrichmentOrderEventServiceTest {
             take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
         )
 
-        orderEventService.updateOrder(order)
+        orderEventService.updateOrder(order, stubEventMark())
 
-        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order) }
-        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) }
+        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order, any()) }
+        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any(), any()) }
         coVerify(exactly = 1) {
-            enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(collectionId, order, true)
+            enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(collectionId, order, any(), true)
         }
     }
 
@@ -136,12 +151,12 @@ class EnrichmentOrderEventServiceTest {
             take = AssetDto(EthCollectionAssetTypeDto(assetAddress), randomBigDecimal())
         )
 
-        orderEventService.updateOrder(order)
+        orderEventService.updateOrder(order, stubEventMark())
 
-        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order) }
-        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any()) }
+        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(shortItemId, order, any()) }
+        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestBidOrderUpdated(any(), any(), any()) }
         coVerify(exactly = 1) {
-            enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(collectionId, order, true)
+            enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(collectionId, order, any(), true)
         }
     }
 
@@ -157,12 +172,12 @@ class EnrichmentOrderEventServiceTest {
             take = EthConverter.convert(randomEthAssetErc721(itemId), itemId.blockchain)
         )
 
-        orderEventService.updateOrder(order)
+        orderEventService.updateOrder(order, stubEventMark())
 
-        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(any(), any()) }
-        coVerify(exactly = 1) { enrichmentItemEventService.onItemBestBidOrderUpdated(shortItemId, order) }
+        coVerify(exactly = 0) { enrichmentItemEventService.onItemBestSellOrderUpdated(any(), any(), any()) }
+        coVerify(exactly = 1) { enrichmentItemEventService.onItemBestBidOrderUpdated(shortItemId, order, any()) }
         coVerify(exactly = 0) {
-            enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(any(), any())
+            enrichmentOwnershipEventService.onOwnershipBestSellOrderUpdated(any(), any(), any())
         }
     }
 }

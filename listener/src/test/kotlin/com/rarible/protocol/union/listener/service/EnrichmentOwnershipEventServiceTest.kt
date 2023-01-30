@@ -3,7 +3,9 @@ package com.rarible.protocol.union.listener.service
 import com.mongodb.client.result.DeleteResult
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.model.PoolItemAction
+import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.ownershipId
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -71,7 +73,7 @@ class EnrichmentOwnershipEventServiceTest {
         )
         coEvery { itemService.getItemOrigins(any()) } returns emptyList()
         coEvery { eventListener.onEvent(any()) } returns Unit
-        coEvery { itemEventService.onOwnershipUpdated(any(), any()) } returns Unit
+        coEvery { itemEventService.onOwnershipUpdated(any(), any(), any()) } returns Unit
         coEvery { auctionContractService.isAuctionContract(any(), any()) } returns false
         coEvery { enrichmentAuctionService.fetchOwnershipAuction(any()) } returns null
         coEvery { ownershipService.mergeWithAuction(any(), null) } returnsArgument 0
@@ -100,12 +102,12 @@ class EnrichmentOwnershipEventServiceTest {
                 listOf(order).associateBy { it.id })
         } returns EnrichedOwnershipConverter.convert(randomUnionOwnership(), shortOwnership)
 
-        ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
+        ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order, stubEventMark())
 
         // Listener should be notified, Ownership - saved and Item data should be recalculated
         coVerify(exactly = 1) { eventListener.onEvent(any()) }
         coVerify(exactly = 1) { ownershipService.save(expectedShortOwnership) }
-        coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, order) }
+        coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, order, any()) }
         coVerify(exactly = 0) { ownershipService.delete(shortOwnership.id) }
         coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
@@ -123,12 +125,12 @@ class EnrichmentOwnershipEventServiceTest {
             bestOrderService.updateBestSellOrder(any<ShortOwnership>(), eq(order), emptyList())
         } returns shortOwnership
 
-        ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
+        ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order, stubEventMark())
 
         // Since Ownership wasn't in DB and received Order is cancelled, we should just skip such update
         coVerify(exactly = 0) { eventListener.onEvent(any()) }
         coVerify(exactly = 0) { ownershipService.save(any()) }
-        coVerify(exactly = 0) { itemEventService.onOwnershipUpdated(shortOwnership.id, order) }
+        coVerify(exactly = 0) { itemEventService.onOwnershipUpdated(shortOwnership.id, order, any()) }
         coVerify(exactly = 0) { ownershipService.delete(shortOwnership.id) }
         coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
@@ -158,12 +160,12 @@ class EnrichmentOwnershipEventServiceTest {
                 listOf(order).associateBy { it.id })
         } returns EnrichedOwnershipConverter.convert(randomUnionOwnership(), shortOwnership)
 
-        ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order)
+        ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order, stubEventMark())
 
         // Listener should be notified, Ownership - deleted and Item data should be recalculated
         coVerify(exactly = 1) { eventListener.onEvent(any()) }
         coVerify(exactly = 1) { ownershipService.save(expectedShortOwnership) }
-        coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, order) }
+        coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, order, any()) }
         coVerify(exactly = 0) { ownershipService.delete(shortOwnership.id) }
         coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
@@ -194,12 +196,12 @@ class EnrichmentOwnershipEventServiceTest {
                 listOf(hackedOrder).associateBy { it.id })
         } returns EnrichedOwnershipConverter.convert(randomUnionOwnership(), shortOwnership)
 
-        ownershipEventService.onPoolOrderUpdated(shortOwnership.id, order, PoolItemAction.EXCLUDED)
+        ownershipEventService.onPoolOrderUpdated(shortOwnership.id, order, PoolItemAction.EXCLUDED, stubEventMark())
 
         // Listener should be notified, Ownership - updated and Item data should be recalculated
         coVerify(exactly = 1) { eventListener.onEvent(any()) }
         coVerify(exactly = 1) { ownershipService.save(expectedShortOwnership) }
-        coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, hackedOrder) }
+        coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(shortOwnership.id, hackedOrder, any()) }
         coVerify(exactly = 0) { ownershipService.delete(shortOwnership.id) }
         coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
@@ -216,12 +218,12 @@ class EnrichmentOwnershipEventServiceTest {
         coEvery { ownershipService.get(ownership.id) } returns ownership
         coEvery { bestOrderService.updateBestSellOrder(ownership, order, emptyList()) } returns ownership
 
-        ownershipEventService.onOwnershipBestSellOrderUpdated(ownership.id, order)
+        ownershipEventService.onOwnershipBestSellOrderUpdated(ownership.id, order, stubEventMark())
 
         // Since nothing changed for Ownership, and it's order, we should skip such update
         coVerify(exactly = 0) { eventListener.onEvent(any()) }
         coVerify(exactly = 0) { ownershipService.save(any()) }
-        coVerify(exactly = 0) { itemEventService.onOwnershipUpdated(ownership.id, order) }
+        coVerify(exactly = 0) { itemEventService.onOwnershipUpdated(ownership.id, order, any()) }
         coVerify(exactly = 0) { ownershipService.delete(ownership.id) }
         coVerify(exactly = 0) { reconciliationEventService.onCorruptedOwnership(any()) }
     }
@@ -232,12 +234,12 @@ class EnrichmentOwnershipEventServiceTest {
 
         coEvery { ownershipService.delete(ownershipId) } returns DeleteResult.acknowledged(1)
 
-        ownershipEventService.onOwnershipDeleted(ownershipId.toDto())
+        ownershipEventService.onOwnershipDeleted(UnionOwnershipDeleteEvent(ownershipId.toDto(), stubEventMark()))
 
         // Ownership deleted, listeners notified, item recalculated
         coVerify(exactly = 1) { eventListener.onEvent(any()) }
         coVerify(exactly = 1) { ownershipService.delete(ownershipId) }
-        coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(ownershipId, null) }
+        coVerify(exactly = 1) { itemEventService.onOwnershipUpdated(ownershipId, null, any()) }
     }
 
     @Test
@@ -246,12 +248,12 @@ class EnrichmentOwnershipEventServiceTest {
 
         coEvery { ownershipService.delete(ownershipId) } returns DeleteResult.acknowledged(0)
 
-        ownershipEventService.onOwnershipDeleted(ownershipId.toDto())
+        ownershipEventService.onOwnershipDeleted(UnionOwnershipDeleteEvent(ownershipId.toDto(), stubEventMark()))
 
         // Even we don't have Ownership in DB, we need to notify listeners, but we should not recalculate Item sell stat
         coVerify(exactly = 1) { eventListener.onEvent(any()) }
         coVerify(exactly = 1) { ownershipService.delete(ownershipId) }
-        coVerify(exactly = 0) { itemEventService.onOwnershipUpdated(ownershipId, null) }
+        coVerify(exactly = 0) { itemEventService.onOwnershipUpdated(ownershipId, null, any()) }
     }
 
     @Test

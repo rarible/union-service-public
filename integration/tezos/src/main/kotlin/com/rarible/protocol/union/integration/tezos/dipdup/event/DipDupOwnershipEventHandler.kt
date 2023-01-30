@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOwnershipConverter
@@ -31,7 +32,7 @@ open class DipDupOwnershipEventHandler(
         return when (event) {
             is DipDupUpdateOwnershipEvent -> {
                 val ownership = DipDupOwnershipConverter.convert(event.ownership)
-                UnionOwnershipUpdateEvent(ownership)
+                UnionOwnershipUpdateEvent(ownership, stubEventMark())
             }
             is DipDupDeleteOwnershipEvent -> {
                 val (contract, tokenId, owner) = event.ownershipId.split(":")
@@ -41,7 +42,7 @@ open class DipDupOwnershipEventHandler(
                     tokenId = BigInteger(tokenId),
                     owner = owner
                 )
-                UnionOwnershipDeleteEvent(ownershipId)
+                UnionOwnershipDeleteEvent(ownershipId, stubEventMark())
             }
         }
     }

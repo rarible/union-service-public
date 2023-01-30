@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
+import com.rarible.protocol.union.core.model.blockchainAndIndexerOutMarks
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -101,11 +102,13 @@ class ImxActivityEventHandlerTest {
         coVerify(exactly = 1) { activityHandler.onEvent(activity) }
 
         // Item updated
+        val itemMarks = blockchainAndIndexerOutMarks(item.lastUpdatedAt)
         coVerify(exactly = 1) { itemHandler.onEvent(any()) }
-        coVerify(exactly = 1) { itemHandler.onEvent(UnionItemUpdateEvent(item)) }
+        coVerify(exactly = 1) { itemHandler.onEvent(UnionItemUpdateEvent(item, itemMarks)) }
 
         // Initial ownership created
-        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipUpdateEvent(ownership)) }
+        val ownershipMarks = blockchainAndIndexerOutMarks(mint.timestamp)
+        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipUpdateEvent(ownership, ownershipMarks)) }
     }
 
     @Test
@@ -138,13 +141,21 @@ class ImxActivityEventHandlerTest {
         coVerify(exactly = 0) { itemHandler.onEvent(any()) }
 
         // Two ownership updates - deleted/updated
+        val ownershipMarks = blockchainAndIndexerOutMarks(transfer.timestamp)
         coVerify(exactly = 2) { ownershipHandler.onEvent(any()) }
-        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedOwnershipId)) }
-        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipUpdateEvent(ownership)) }
+        coVerify(exactly = 1) {
+            ownershipHandler.onEvent(
+                UnionOwnershipDeleteEvent(
+                    deletedOwnershipId,
+                    ownershipMarks
+                )
+            )
+        }
+        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipUpdateEvent(ownership, ownershipMarks)) }
     }
 
     @Test
-    fun `on burn`() = runBlocking<Unit> {
+    fun `on burn`() = runBlocking {
         val transfer = randomImxTransfer().copy(receiver = ImmutablexTransfer.ZERO_ADDRESS)
         val user = UnionAddressConverter.convert(blockchain, transfer.user)
         val itemId = transfer.itemId()
@@ -162,11 +173,14 @@ class ImxActivityEventHandlerTest {
         coVerify(exactly = 1) { activityHandler.onEvent(activity) }
 
         // Item deleted
-        coVerify(exactly = 1) { itemHandler.onEvent(UnionItemDeleteEvent(deletedOwnershipId.getItemId())) }
+        val itemMarks = blockchainAndIndexerOutMarks(transfer.timestamp)
+        coVerify(exactly = 1) { itemHandler.onEvent(UnionItemDeleteEvent(deletedOwnershipId.getItemId(), itemMarks)) }
 
         // One ownership deleted, there is no new one ownership
+        val ownershipMarks = blockchainAndIndexerOutMarks(transfer.timestamp)
+        val ownershipDeleteEvent = UnionOwnershipDeleteEvent(deletedOwnershipId, ownershipMarks)
         coVerify(exactly = 1) { ownershipHandler.onEvent(any()) }
-        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedOwnershipId)) }
+        coVerify(exactly = 1) { ownershipHandler.onEvent(ownershipDeleteEvent) }
     }
 
     @Test
@@ -224,9 +238,10 @@ class ImxActivityEventHandlerTest {
         coVerify(exactly = 0) { itemHandler.onEvent(any()) }
 
         // 2 deletes and 2 updates on swap
-        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedSellOwnershipId)) }
-        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedBuyOwnershipId)) }
-        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newSellOwnership)) }
-        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newBuyOwnership)) }
+        val marks = blockchainAndIndexerOutMarks(trade.timestamp)
+        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedSellOwnershipId, marks)) }
+        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipDeleteEvent(deletedBuyOwnershipId, marks)) }
+        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newSellOwnership, marks)) }
+        coVerify(exactly = 1) { ownershipHandler.onEvent(UnionOwnershipUpdateEvent(newBuyOwnership, marks)) }
     }
 }

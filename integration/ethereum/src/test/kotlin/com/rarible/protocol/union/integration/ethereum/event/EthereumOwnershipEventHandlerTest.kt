@@ -5,14 +5,13 @@ import com.rarible.protocol.dto.NftDeletedOwnershipDto
 import com.rarible.protocol.dto.NftOwnershipDeleteEventDto
 import com.rarible.protocol.dto.NftOwnershipUpdateEventDto
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
-import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
-import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
+import com.rarible.protocol.union.integration.ethereum.data.randomEventTimeMarks
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -36,32 +35,41 @@ class EthereumOwnershipEventHandlerTest {
     @Test
     fun `ethereum ownership update event`() = runBlocking {
         val ownership = randomEthOwnershipDto()
-        val dto = NftOwnershipUpdateEventDto(randomString(), ownership.id, ownership)
+        val dto = NftOwnershipUpdateEventDto(
+            eventId = randomString(),
+            ownershipId = ownership.id,
+            ownership = ownership,
+            eventTimeMarks = randomEventTimeMarks()
+        )
 
         handler.handle(dto)
 
-        val expected = EthOwnershipConverter.convert(ownership, BlockchainDto.ETHEREUM)
-        coVerify(exactly = 1) { incomingEventHandler.onEvent(UnionOwnershipUpdateEvent(expected)) }
+        val expected = EthOwnershipConverter.convert(dto, BlockchainDto.ETHEREUM)
+        coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
     }
 
     @Test
     fun `ethereum ownership delete event`() = runBlocking {
-
         val ownershipId = randomEthOwnershipId()
         val (contract, tokenId) = CompositeItemIdParser.split(ownershipId.itemIdValue)
 
         val deletedDto = NftDeletedOwnershipDto(
-            ownershipId.value,
-            Address.apply(contract),
-            tokenId,
-            Address.apply(ownershipId.owner.value)
+            id = ownershipId.value,
+            token = Address.apply(contract),
+            tokenId = tokenId,
+            owner = Address.apply(ownershipId.owner.value)
         )
 
-        val dto = NftOwnershipDeleteEventDto(randomString(), ownershipId.value, deletedDto)
+        val dto = NftOwnershipDeleteEventDto(
+            eventId = randomString(),
+            ownershipId = ownershipId.value,
+            ownership = deletedDto
+        )
 
         handler.handle(dto)
 
-        coVerify(exactly = 1) { incomingEventHandler.onEvent(UnionOwnershipDeleteEvent(ownershipId)) }
+        val expected = EthOwnershipConverter.convert(dto, BlockchainDto.ETHEREUM)
+        coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
     }
 
 }

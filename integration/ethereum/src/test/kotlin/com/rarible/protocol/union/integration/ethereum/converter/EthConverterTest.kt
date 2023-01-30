@@ -10,6 +10,7 @@ import com.rarible.protocol.dto.Erc20AssetTypeDto
 import com.rarible.protocol.dto.Erc721AssetTypeDto
 import com.rarible.protocol.dto.Erc721LazyAssetTypeDto
 import com.rarible.protocol.dto.EthAssetTypeDto
+import com.rarible.protocol.dto.EventTimeMarksDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc1155LazyAssetTypeDto
@@ -19,10 +20,15 @@ import com.rarible.protocol.union.dto.EthErc721LazyAssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthPartDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEventTimeMarks
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.data.TemporalUnitLessThanOffset
 import org.junit.jupiter.api.Test
+import java.time.temporal.ChronoUnit
 
 class EthConverterTest {
+
+    private val timeDelta = TemporalUnitLessThanOffset(5, ChronoUnit.SECONDS)
 
     @Test
     fun platform() {
@@ -133,5 +139,22 @@ class EthConverterTest {
         assertThat(converted.royalties[0].value).isEqualTo(assetType.royalties[0].value)
         assertThat(converted.royalties[0].account.value).isEqualTo(assetType.royalties[0].account.prefixed())
         assertThat(converted.signatures[0]).isEqualTo(assetType.signatures[0].prefixed())
+    }
+
+    @Test
+    fun `time marks - ok`() {
+        val marks = randomEventTimeMarks()
+        val converted = EthConverter.convert(marks)!!
+
+        assertThat(converted.source).isEqualTo(marks.source)
+        assertThat(converted.marks).hasSize(marks.marks.size)
+        assertThat(converted.marks[0].name).isEqualTo(marks.marks[0].name)
+        assertThat(converted.marks[0].date).isEqualTo(marks.marks[0].date)
+    }
+
+    @Test
+    fun `time marks - null`() {
+        val marks: EventTimeMarksDto? = null
+        assertThat(EthConverter.convert(marks)).isNull()
     }
 }

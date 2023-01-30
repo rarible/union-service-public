@@ -45,9 +45,13 @@ class TezosItemEventHandlerTest {
 
         handler.handle(event)
 
-        val expected = UnionItemUpdateEvent(DipDupItemConverter.convert(item))
+        val expected = DipDupItemConverter.convert(item)
 
-        coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
+        coVerify(exactly = 1) {
+            incomingEventHandler.onEvent(match {
+                it is UnionItemUpdateEvent && it.item == expected
+            })
+        }
     }
 
     @Test
@@ -60,9 +64,11 @@ class TezosItemEventHandlerTest {
 
         handler.handle(event)
 
-        val expected = UnionItemDeleteEvent(itemId)
-
-        coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
+        coVerify(exactly = 1) {
+            incomingEventHandler.onEvent(match {
+                it is UnionItemDeleteEvent && it.itemId == itemId
+            })
+        }
     }
 
 }

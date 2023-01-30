@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import org.slf4j.LoggerFactory
@@ -27,7 +28,7 @@ open class FlowOrderEventHandler(
         when (event) {
             is FlowOrderUpdateEventDto -> {
                 val unionOrder = flowOrderConverter.convert(event.order, blockchain)
-                return UnionOrderUpdateEvent(unionOrder)
+                return UnionOrderUpdateEvent(unionOrder, stubEventMark())
             }
         }
     }

@@ -4,6 +4,9 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
+import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
+import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -70,7 +73,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val unionItem = randomUnionItem(itemId)
 
-        itemEventService.onItemUpdated(unionItem)
+        itemEventService.onItemUpdated(UnionItemUpdateEvent(unionItem, stubEventMark()))
 
         val created = itemService.get(ShortItemId(itemId))!!
 
@@ -114,7 +117,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         ethereumOrderControllerApiMock.mockGetByIds(bestSellOrder, bestBidOrder)
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
 
-        itemEventService.onItemUpdated(unionItem)
+        itemEventService.onItemUpdated(UnionItemUpdateEvent(unionItem, stubEventMark()))
 
         val expected = EnrichedItemConverter.convert(unionItem)
             .copy(
@@ -157,7 +160,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         ethereumOrderControllerApiMock.mockGetByIds(bestBidOrder)
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
 
-        itemEventService.onItemUpdated(unionItem)
+        itemEventService.onItemUpdated(UnionItemUpdateEvent(unionItem, stubEventMark()))
 
         waitAssert {
             // Event should not be sent in case of corrupted enrichment data
@@ -196,7 +199,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
         ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
 
-        itemEventService.onOwnershipUpdated(ownership1.id, bestSellOrder1)
+        itemEventService.onOwnershipUpdated(ownership1.id, bestSellOrder1, stubEventMark())
 
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.sellers).isEqualTo(2)
@@ -227,7 +230,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val ownership = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder))
         ownershipService.save(ownership)
 
-        itemEventService.onOwnershipUpdated(ownership.id, bestSellOrder)
+        itemEventService.onOwnershipUpdated(ownership.id, bestSellOrder, stubEventMark())
 
         val saved = itemService.get(expectedItem.id)!!
 
@@ -249,7 +252,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
         ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
 
-        itemEventService.onItemBestSellOrderUpdated(shortItem.id, unionBestSell)
+        itemEventService.onItemBestSellOrderUpdated(shortItem.id, unionBestSell, stubEventMark())
 
         // In result event for Item we expect updated bestSellOrder
         val expected = EnrichedItemConverter.convert(unionItem).copy(bestSellOrder = unionBestSell)
@@ -277,7 +280,13 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val shortOrder = ShortOrderConverter.convert(bestSellOrder)
         val poolShortOrder = ShortPoolOrder(bestSellOrder.sellCurrencyId, shortOrder)
 
-        itemEventService.onPoolOrderUpdated(shortItem.id, bestSellOrder, PoolItemAction.INCLUDED, false)
+        itemEventService.onPoolOrderUpdated(
+            shortItem.id,
+            bestSellOrder,
+            PoolItemAction.INCLUDED,
+            stubEventMark(),
+            false
+        )
 
         val saved = itemService.get(shortItem.id)!!
 
@@ -303,7 +312,13 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.sellCurrencyId)
 
-        itemEventService.onPoolOrderUpdated(shortItem.id, bestSellOrder, PoolItemAction.EXCLUDED, false)
+        itemEventService.onPoolOrderUpdated(
+            shortItem.id,
+            bestSellOrder,
+            PoolItemAction.EXCLUDED,
+            stubEventMark(),
+            false
+        )
 
         val saved = itemService.get(shortItem.id)!!
 
@@ -325,7 +340,13 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.sellCurrencyId)
 
-        itemEventService.onPoolOrderUpdated(shortItem.id, bestSellOrder, PoolItemAction.UPDATED, false)
+        itemEventService.onPoolOrderUpdated(
+            shortItem.id,
+            bestSellOrder,
+            PoolItemAction.UPDATED,
+            stubEventMark(),
+            false
+        )
 
         val saved = itemService.get(shortItem.id)!!
 
@@ -349,7 +370,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(itemId, unionBestBid.bidCurrencyId)
 
-        itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid)
+        itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid, stubEventMark())
 
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.bestSellOrder).isNull()
@@ -375,7 +396,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
 
-        itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid)
+        itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid, stubEventMark())
 
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.bestBidOrder).isNull()
@@ -395,7 +416,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val itemId = item.id.toDto()
         assertThat(itemService.get(item.id)).isNotNull()
 
-        itemEventService.onItemDeleted(itemId)
+        itemEventService.onItemDeleted(UnionItemDeleteEvent(itemId, stubEventMark()))
 
         // Item should still exist, we don't want to delete items - but updatedAt should be changed
         val updated = itemService.get(item.id)!!
@@ -414,7 +435,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val shortItemId = randomShortItem().id
         val itemId = shortItemId.toDto()
 
-        itemEventService.onItemDeleted(itemId)
+        itemEventService.onItemDeleted(UnionItemDeleteEvent(itemId, stubEventMark()))
 
         // We want to have updatedAt in items
         assertThat(itemService.get(shortItemId)).isNotNull()

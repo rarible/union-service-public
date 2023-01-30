@@ -17,7 +17,7 @@ class UnionInternalCollectionEventHandler(
     suspend fun onEvent(event: UnionCollectionEvent) {
         try {
             if (event is UnionCollectionUpdateEvent) {
-                collectionEventService.onCollectionUpdate(event.collection)
+                collectionEventService.onCollectionUpdate(event)
             }
         } catch (e: Throwable) {
             reconciliationEventService.onCorruptedCollection(event.collectionId)
