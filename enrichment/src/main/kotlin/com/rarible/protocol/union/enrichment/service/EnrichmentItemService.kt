@@ -1,11 +1,9 @@
 package com.rarible.protocol.union.enrichment.service
 
-import com.rarible.core.apm.SpanType
-import com.rarible.core.apm.withSpan
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
-import com.rarible.protocol.union.core.model.loadMetaSynchronously
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.OriginService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -20,13 +18,11 @@ import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaTrimmer
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.toSet
@@ -108,8 +104,6 @@ class EnrichmentItemService(
         item: UnionItem? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
-        meta: Map<ItemIdDto, UnionMeta> = emptyMap(),
-        syncMetaDownload: Boolean = false,
         metaPipeline: ItemMetaPipeline
     ) = coroutineScope {
 
@@ -118,29 +112,9 @@ class EnrichmentItemService(
 
         val fetchedItem = async { item ?: fetch(ShortItemId(itemId)) }
 
-        // Event if there is no data in entry, it means it is already scheduled and will be downloaded soon/one day
-        val itemMeta = if (shortItem?.metaEntry != null) {
-            val entry = shortItem.metaEntry
-            if (entry.status == DownloadStatus.SUCCESS) {
-                metrics.onMetaCacheHit(itemId.blockchain)
-            } else {
-                metrics.onMetaCacheEmpty(itemId.blockchain)
-            }
-            CompletableDeferred(shortItem.metaEntry.data)
-        } else if (meta[itemId] != null) {
-            // TODO remove meta hint after the migration
-            CompletableDeferred(meta[itemId])
-        } else {
-            // TODO remove after migration to the meta-pipeline
-            val sync = (syncMetaDownload || item?.loadMetaSynchronously == true)
-            async {
-                // TODO Temporal hack to exclude unnecessary event triggering
-                if (sync || metaPipeline != ItemMetaPipeline.API && metaPipeline != ItemMetaPipeline.SYNC)
-                    itemMetaService.get(itemId, sync, metaPipeline)
-                else
-                    null
-            }
-        }
+        val metaEntry = shortItem?.metaEntry
+        val meta = metaEntry?.data
+        onMetaEntry(itemId, metaPipeline, metaEntry)
 
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
             existing = shortItem?.getAllBestOrders() ?: emptyList(),
@@ -148,12 +122,10 @@ class EnrichmentItemService(
         )
 
         val auctionIds = shortItem?.auctions ?: emptySet()
-
         val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
 
-        val receivedMeta = itemMeta.await()
-        val trimmedMeta = itemMetaTrimmer.trim(receivedMeta)
-        if (receivedMeta != trimmedMeta) {
+        val trimmedMeta = itemMetaTrimmer.trim(meta)
+        if (meta != trimmedMeta) {
             logger.info("Received Item with large meta: $itemId")
         }
 
@@ -177,13 +149,9 @@ class EnrichmentItemService(
 
         val enrichedItems = coroutineScope {
 
-            val shortItems: Map<ItemIdDto, ShortItem> = findAll(unionItems.map { ShortItemId(it.id) })
+            val shortItems: Map<ItemIdDto, ShortItem> = findAll(unionItems
+                .map { ShortItemId(it.id) })
                 .associateBy { it.id.toDto() }
-
-            val meta = async {
-                val withoutMeta = shortItems.values.filter { it.metaEntry == null }.map { it.id.toDto() }
-                itemMetaService.get(withoutMeta, metaPipeline)
-            }
 
             // Looking for full orders for existing items in order-indexer
             val shortOrderIds = shortItems.values
@@ -200,7 +168,6 @@ class EnrichmentItemService(
                     shortItem = shortItem,
                     item = it,
                     orders = orders,
-                    meta = meta.await(),
                     metaPipeline = metaPipeline
                 )
             }
@@ -209,9 +176,25 @@ class EnrichmentItemService(
         return enrichedItems
     }
 
-    private fun <T> CoroutineScope.withSpanAsync(
-        spanName: String,
-        spanType: String = SpanType.APP,
-        block: suspend () -> T
-    ): Deferred<T> = async { withSpan(name = spanName, type = spanType, body = block) }
+    private suspend fun onMetaEntry(
+        itemId: ItemIdDto,
+        metaPipeline: ItemMetaPipeline,
+        entry: DownloadEntry<UnionMeta>?
+    ) {
+        when {
+            // No entry - it means we see this item/meta first time, not cached at all
+            entry == null -> {
+                itemMetaService.schedule(itemId, metaPipeline, false)
+                metrics.onMetaCacheMiss(itemId.blockchain)
+            }
+            // Downloaded - cool, we hit cache!
+            entry.status == DownloadStatus.SUCCESS -> {
+                metrics.onMetaCacheHit(itemId.blockchain)
+            }
+            // Otherwise, downloading in progress or completely failed - mark as "empty" cache
+            else -> {
+                metrics.onMetaCacheEmpty(itemId.blockchain)
+            }
+        }
+    }
 }

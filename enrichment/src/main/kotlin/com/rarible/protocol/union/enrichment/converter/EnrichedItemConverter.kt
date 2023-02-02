@@ -45,6 +45,8 @@ object EnrichedItemConverter {
             mintedAt = item.mintedAt,
             lastUpdatedAt = item.lastUpdatedAt,
             supply = item.supply,
+            // TODO here we can't use meta from shortItem since it should be trimmed and public urls set
+            // TODO maybe we can do it here?
             meta = meta?.let { EnrichedMetaConverter.convert(it) },
             deleted = item.deleted,
             suspicious = item.suspicious,

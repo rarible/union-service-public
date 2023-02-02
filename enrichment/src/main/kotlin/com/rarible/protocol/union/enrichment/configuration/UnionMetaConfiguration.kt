@@ -15,19 +15,13 @@ import com.rarible.core.meta.resource.resolver.IpfsGatewayResolver
 import com.rarible.core.meta.resource.resolver.LegacyIpfsGatewaySubstitutor
 import com.rarible.core.meta.resource.resolver.RandomGatewayProvider
 import com.rarible.core.meta.resource.resolver.UrlResolver
-import com.rarible.loader.cache.CacheLoaderService
-import com.rarible.loader.cache.configuration.EnableRaribleCacheLoader
-import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.util.safeSplit
 import com.rarible.protocol.union.enrichment.meta.UnionMetaPackage
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import io.micrometer.core.instrument.MeterRegistry
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 
-@EnableRaribleCacheLoader
 @EnableConfigurationProperties(UnionMetaProperties::class)
 @ComponentScan(
     basePackageClasses = [
@@ -119,13 +113,5 @@ class UnionMetaConfiguration(
             contentDetector = contentDetector,
         )
     }
-
-    @Bean
-    @Qualifier("union.meta.cache.loader.service")
-    fun unionMetaCacheLoaderService(
-        cacheLoaderServices: List<CacheLoaderService<*>>
-    ): CacheLoaderService<UnionMeta> =
-        @Suppress("UNCHECKED_CAST")
-        (cacheLoaderServices.find { it.type == ItemMetaDownloader.TYPE } as CacheLoaderService<UnionMeta>)
 
 }

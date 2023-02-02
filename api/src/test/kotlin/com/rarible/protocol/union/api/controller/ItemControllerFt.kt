@@ -4,7 +4,6 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
-import com.rarible.loader.cache.CacheLoaderService
 import com.rarible.protocol.dto.ImageContentDto
 import com.rarible.protocol.dto.MetaContentDto
 import com.rarible.protocol.dto.NftItemRoyaltyDto
@@ -16,7 +15,6 @@ import com.rarible.protocol.union.api.client.ItemControllerApi.ErrorSearchItems
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -28,9 +26,8 @@ import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.enrichment.meta.getAvailable
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
@@ -54,7 +51,6 @@ import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemIdFullValue
 import com.rarible.protocol.union.integration.tezos.data.randomTezosTzktItemDto
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.verify
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -64,7 +60,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestTemplate
 import reactor.core.publisher.Mono
@@ -90,10 +85,6 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var restTemplate: RestTemplate
-
-    @Autowired
-    @Qualifier("union.meta.cache.loader.service")
-    lateinit var unionMetaCacheLoaderService: CacheLoaderService<UnionMeta>
 
     @Autowired
     lateinit var itemMetaService: ItemMetaService
@@ -249,27 +240,6 @@ class ItemControllerFt : AbstractIntegrationTest() {
         itemControllerClient.resetItemMeta(itemId.fullId(), false).awaitFirstOrNull()
 
         verify(exactly = 1) { testEthereumItemApi.resetNftItemMetaById(itemId.value) }
-    }
-
-    @Test
-    fun `reset item meta by id sync`() = runBlocking<Unit> {
-        val itemId = randomEthItemId()
-        val randomMeta = randomEthItemMeta()
-        val randomUnionMeta = randomUnionMeta()
-
-        var cachedMeta = unionMetaCacheLoaderService.get(itemId.fullId())
-        assertThat(cachedMeta.getAvailable()).isNull()
-
-        coEvery { testEthereumItemApi.resetNftItemMetaById(itemId.value) } returns Mono.empty()
-        coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomMeta)
-        coEvery { testItemMetaLoader.load(itemId) } returns randomUnionMeta
-
-        itemControllerClient.resetItemMeta(itemId.fullId(), true).awaitFirstOrNull()
-
-        verify(exactly = 1) { testEthereumItemApi.resetNftItemMetaById(itemId.value) }
-        coVerify(exactly = 1) { testItemMetaLoader.load(itemId) }
-        cachedMeta = unionMetaCacheLoaderService.get(itemId.fullId())
-        assertThat(cachedMeta.getAvailable()).isEqualTo(randomUnionMeta)
     }
 
     @Test

@@ -6,9 +6,9 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
-import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.job.ItemMetaRetryJobHandler

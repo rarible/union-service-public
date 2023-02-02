@@ -19,6 +19,7 @@ import com.rarible.protocol.union.dto.Model3dContentDto
 import com.rarible.protocol.union.dto.VideoContentDto
 
 object EnrichedMetaConverter {
+
     fun convert(meta: UnionCollectionMeta): CollectionMetaDto {
         return CollectionMetaDto(
             name = meta.name,
@@ -38,7 +39,6 @@ object EnrichedMetaConverter {
         )
     }
 
-    @Deprecated("Should be converted from DownloadEntry<UnionMeta>")
     fun convert(meta: UnionMeta): MetaDto {
         return MetaDto(
             name = meta.name,

@@ -4,8 +4,6 @@ import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.daemon.sequential.ConsumerBatchWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
-import com.rarible.core.logging.Logger
-import com.rarible.loader.cache.internal.CacheRepository
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -24,6 +22,7 @@ import com.rarible.protocol.union.meta.loader.executor.ItemDownloadExecutor
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import io.micrometer.core.instrument.MeterRegistry
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -43,7 +42,7 @@ class DownloadExecutorConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo
 ) {
 
-    private val logger by Logger()
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private val env = applicationEnvironmentInfo.name
     private val host = applicationEnvironmentInfo.host
@@ -56,7 +55,6 @@ class DownloadExecutorConfiguration(
         itemMetaRepository: ItemMetaRepository,
         itemMetaDownloader: ItemMetaDownloader,
         itemMetaNotifier: ItemMetaNotifier,
-        legacyRepository: CacheRepository,
         metrics: DownloadExecutorMetrics
     ): DownloadExecutorManager {
         val maxRetries = metaProperties.retryIntervals.size
@@ -65,7 +63,6 @@ class DownloadExecutorConfiguration(
             val conf = getItemPipelineConfiguration(pipeline)
             val pool = DownloadPool(conf.poolSize, "item-meta-task-executor")
             val executor = ItemDownloadExecutor(
-                legacyRepository,
                 itemMetaRepository,
                 itemMetaDownloader,
                 itemMetaNotifier,

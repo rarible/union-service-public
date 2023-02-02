@@ -33,8 +33,7 @@ abstract class DownloadService<K, T>(
      * 1. If data downloaded, it will be saved and notification will be sent
      * 2. If data download failed, download task will be scheduled (with 'force' or not) if there is no entry in DB
      */
-    // TODO should be removed after migration, when old meta classes won't be needed anymore
-    suspend fun get(key: K, sync: Boolean, pipeline: String): T? {
+    protected suspend fun get(key: K, sync: Boolean, pipeline: String): T? {
         val id = toId(key)
         val current = repository.get(id)
 
@@ -60,7 +59,7 @@ abstract class DownloadService<K, T>(
      * 1. If data downloaded, it will be saved and notification will be sent
      * 2. If data download failed, download task will be scheduled (with 'force' or not) if there is no entry in DB
      */
-    suspend fun download(key: K, pipeline: String, force: Boolean): T? {
+    protected suspend fun download(key: K, pipeline: String, force: Boolean): T? {
         val id = toId(key)
         val blockchain = getBlockchain(key)
         val data = try {
@@ -94,7 +93,7 @@ abstract class DownloadService<K, T>(
      * Schedule async task to download data. If task is forced, it will be executed anyway.
      * Otherwise, task will be executed only if there is no entry in DB (with any status)
      */
-    suspend fun schedule(key: K, pipeline: String, force: Boolean) {
+    protected suspend fun schedule(key: K, pipeline: String, force: Boolean) {
         schedule(listOf(key), pipeline, force)
     }
 

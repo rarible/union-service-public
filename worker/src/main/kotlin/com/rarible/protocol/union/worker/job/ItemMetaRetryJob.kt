@@ -10,8 +10,8 @@ import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
-import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.time.delay
