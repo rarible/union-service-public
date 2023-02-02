@@ -2,8 +2,10 @@ package com.rarible.protocol.union.integration.tezos.dipdup.service
 
 import com.rarible.core.logging.Logger
 import com.rarible.dipdup.client.OrderClient
+import com.rarible.dipdup.client.core.model.OrderStatus
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.client.exception.DipDupNotFound
+import com.rarible.dipdup.client.model.DipDupOrderSort
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -64,6 +66,49 @@ class DipdupOrderServiceImpl(
         val sortTezos = sort?.let { DipDupActivityConverter.convert(it) }
         logger.info("Fetch dipdup all order sync: $continuation, $limit, $sort")
         val page = dipdupOrderClient.getOrdersSync(limit, continuation, sortTezos)
+        return Slice(
+            continuation = page.continuation,
+            entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
+        )
+    }
+
+    override suspend fun getSellOrders(
+        origin: String?,
+        requested: List<TezosPlatform>,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        logger.info("Fetch dipdup sell orders: $requested, $origin, $continuation, $size")
+        val page = dipdupOrderClient.getOrdersAll(
+            sort = DipDupOrderSort.LAST_UPDATE_DESC,
+            statuses = listOf(OrderStatus.ACTIVE),
+            platforms = platforms(requested),
+            isBid = false,
+            size = size,
+            continuation = continuation
+        )
+        return Slice(
+            continuation = page.continuation,
+            entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
+        )
+    }
+
+    override suspend fun getSellOrdersByCollection(
+        contract: String,
+        origin: String?,
+        platforms: List<TezosPlatform>,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        logger.info("Fetch dipdup sell orders by collection: $contract, platforms=$platforms, continuation=$continuation, size=$size")
+        val page = dipdupOrderClient.getOrdersByCollection(
+            contract = contract,
+            statuses = listOf(OrderStatus.ACTIVE),
+            platforms = platforms(platforms),
+            isBid = false,
+            size = size,
+            continuation = continuation
+        )
         return Slice(
             continuation = page.continuation,
             entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }

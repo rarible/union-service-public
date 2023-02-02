@@ -37,6 +37,25 @@ interface DipdupOrderService {
         TODO("Not implemented")
     }
 
+    suspend fun getSellOrders(
+        origin: String?,
+        platforms: List<TezosPlatform>,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        TODO("Not implemented")
+    }
+
+    suspend fun getSellOrdersByCollection(
+        contract: String,
+        origin: String?,
+        platforms: List<TezosPlatform>,
+        continuation: String?,
+        size: Int
+    ): Slice<OrderDto> {
+        TODO("Not implemented")
+    }
+
     suspend fun getSellOrdersByItem(
         contract: String,
         tokenId: BigInteger,

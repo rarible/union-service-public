@@ -121,7 +121,11 @@ open class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        return Slice.empty()
+        return dipdupOrderService.getSellOrders(
+            origin = origin,
+            platforms = DipDupConverter.convert(platform),
+            continuation = continuation,
+            size = size)
     }
 
     override suspend fun getSellOrdersByCollection(
@@ -131,7 +135,13 @@ open class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<OrderDto> {
-        return Slice.empty()
+        return dipdupOrderService.getSellOrdersByCollection(
+            contract = collection,
+            origin = origin,
+            platforms = DipDupConverter.convert(platform),
+            continuation = continuation,
+            size = size
+        )
     }
 
     override suspend fun getOrderFloorSellsByCollection(
