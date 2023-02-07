@@ -3,6 +3,7 @@ package com.rarible.protocol.union.listener.service
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.model.itemId
+import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -60,7 +61,7 @@ class EnrichmentItemEventServiceTest {
     fun `on activity - last sale not extracted`() = runBlocking<Unit> {
         val burn = randomUnionActivityBurn(randomEthItemId())
 
-        itemEventService.onActivity(burn)
+        itemEventService.onActivity(burn, null, stubEventMark())
 
         coVerify(exactly = 0) { itemService.get(any()) }
     }
@@ -76,7 +77,7 @@ class EnrichmentItemEventServiceTest {
         coEvery { itemService.getOrEmpty(ShortItemId(itemId)) } returns shortItem
         coEvery { itemService.save(any()) } returnsArgument 1
 
-        itemEventService.onActivity(sell, null, false)
+        itemEventService.onActivity(sell, null, stubEventMark(), false)
 
         coVerify(exactly = 1) { itemService.save(shortItem.copy(lastSale = lastSale)) }
     }
@@ -93,7 +94,7 @@ class EnrichmentItemEventServiceTest {
         coEvery { itemService.getOrEmpty(ShortItemId(itemId)) } returns shortItem
         coEvery { itemService.save(any()) } returnsArgument 1
 
-        itemEventService.onActivity(sell, null, false)
+        itemEventService.onActivity(sell, null, stubEventMark(), false)
 
         coVerify(exactly = 1) { itemService.save(shortItem.copy(lastSale = lastSale)) }
     }
@@ -108,7 +109,7 @@ class EnrichmentItemEventServiceTest {
 
         coEvery { itemService.getOrEmpty(ShortItemId(itemId)) } returns shortItem
 
-        itemEventService.onActivity(sell, null, false)
+        itemEventService.onActivity(sell, null, stubEventMark(), false)
 
         coVerify(exactly = 0) { itemService.save(any()) }
     }
@@ -124,7 +125,7 @@ class EnrichmentItemEventServiceTest {
 
         coEvery { itemService.getOrEmpty(ShortItemId(itemId)) } returns shortItem
 
-        itemEventService.onActivity(sell, null, false)
+        itemEventService.onActivity(sell, null, stubEventMark(), false)
 
         coVerify(exactly = 0) { itemService.save(any()) }
     }
@@ -142,7 +143,7 @@ class EnrichmentItemEventServiceTest {
         coEvery { activityService.getItemLastSale(itemId) } returns actualLastSale
         coEvery { itemService.save(any()) } returnsArgument 1
 
-        itemEventService.onActivity(sell, null, false)
+        itemEventService.onActivity(sell, null, stubEventMark(), false)
 
         coVerify(exactly = 1) { itemService.save(shortItem.copy(lastSale = actualLastSale)) }
     }
@@ -160,7 +161,7 @@ class EnrichmentItemEventServiceTest {
 
         coEvery { itemService.getOrEmpty(ShortItemId(itemId)) } returns shortItem
 
-        itemEventService.onActivity(sell, null, false)
+        itemEventService.onActivity(sell, null, stubEventMark(), false)
 
         coVerify(exactly = 0) { itemService.save(any()) }
     }

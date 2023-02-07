@@ -4,7 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
-import com.rarible.protocol.union.core.model.blockchainAndIndexerOutMarks
+import com.rarible.protocol.union.core.model.blockchainAndIndexerMarks
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollection
 import com.rarible.protocol.union.integration.immutablex.converter.ImxCollectionConverter
@@ -22,7 +22,7 @@ class ImxCollectionEventHandler(
         val creators = collections.mapNotNull { collection ->
             val unionCollection = ImxCollectionConverter.convert(collection, blockchain)
             // Potentially could make metrics not realistic
-            val eventTimeMarks = blockchainAndIndexerOutMarks(
+            val eventTimeMarks = blockchainAndIndexerMarks(
                 collection.updatedAt ?: collection.createdAt ?: nowMillis()
             )
             collectionHandler.onEvent(UnionCollectionUpdateEvent(unionCollection, eventTimeMarks))

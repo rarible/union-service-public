@@ -29,8 +29,8 @@ fun stubEventMark(): UnionEventTimeMarks {
     return UnionEventTimeMarks("stub").add("indexer-out")
 }
 
-fun offchainEventMark(markName: String): UnionEventTimeMarks {
-    return UnionEventTimeMarks("offchain").add(markName)
+fun offchainEventMark(markName: String, date: Instant? = null): UnionEventTimeMarks {
+    return UnionEventTimeMarks("offchain").add(markName, date)
 }
 
 fun blockchainEventMark(markName: String, date: Instant): UnionEventTimeMarks {
@@ -39,4 +39,9 @@ fun blockchainEventMark(markName: String, date: Instant): UnionEventTimeMarks {
         .add(markName, date)
 }
 
-fun blockchainAndIndexerOutMarks(date: Instant) = blockchainEventMark("indexer-out", date)
+// Workaround for external indexers - we can't get detailed info for it
+fun blockchainAndIndexerMarks(date: Instant) = blockchainEventMark("indexer-in", date)
+    .add("indexer-out", date)
+
+fun offchainAndIndexerMarks(date: Instant) = offchainEventMark("indexer-in", date)
+    .add("indexer-out", date)

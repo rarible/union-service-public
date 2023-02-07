@@ -9,8 +9,8 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -73,9 +73,9 @@ class ReconciliationOwnershipSourceJob(
             // If ownership doesn't exist, skip activity
             val ownership = ownershipService.fetchOrNull(ShortOwnershipId(activity.ownershipId()!!)) ?: return
 
-            ownershipEventService.onActivity(activity, ownership, config.notificationEnabled)
+            ownershipEventService.onActivity(activity, ownership, null, config.notificationEnabled)
         } catch (e: Exception) {
-            logger.error("Unable to reconcile Mint/Transfer Activity {} : {}", e.message, e)
+            logger.error("Unable to reconcile Mint/Transfer Activity {} : {}", activity, e.message, e)
         }
     }
 }

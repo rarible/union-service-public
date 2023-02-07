@@ -9,8 +9,8 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -75,9 +75,9 @@ class ReconciliationLastSaleJob(
             // If item doesn't exist, skip activity
             val item = itemService.fetchOrNull(ShortItemId(activity.itemId()!!)) ?: return
 
-            itemEventService.onActivity(activity, item, config.notificationEnabled)
+            itemEventService.onActivity(activity, item, null, config.notificationEnabled)
         } catch (e: Exception) {
-            logger.error("Unable to reconcile Sell Activity {} : {}", e.message, e)
+            logger.error("Unable to reconcile Sell Activity {} : {}", activity, e.message, e)
         }
     }
 }

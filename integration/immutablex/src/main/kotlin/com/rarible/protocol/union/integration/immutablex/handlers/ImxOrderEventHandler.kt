@@ -3,7 +3,7 @@ package com.rarible.protocol.union.integration.immutablex.handlers
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
-import com.rarible.protocol.union.core.model.blockchainAndIndexerOutMarks
+import com.rarible.protocol.union.core.model.blockchainAndIndexerMarks
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.converter.ImxDataException
@@ -32,7 +32,7 @@ class ImxOrderEventHandler(
                 imxScanMetrics.onEventError(ImxScanEntityType.ORDER.name)
                 return
             }
-            val eventTimeMarks = blockchainAndIndexerOutMarks(order.lastUpdatedAt)
+            val eventTimeMarks = blockchainAndIndexerMarks(order.lastUpdatedAt)
             handler.onEvent(UnionOrderUpdateEvent(order, eventTimeMarks))
         }
     }
