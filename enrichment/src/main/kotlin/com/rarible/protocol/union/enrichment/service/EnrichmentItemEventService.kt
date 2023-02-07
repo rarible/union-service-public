@@ -124,6 +124,7 @@ class EnrichmentItemEventService(
     suspend fun onActivity(
         activity: ActivityDto,
         item: UnionItem? = null,
+        eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
         val lastSale = ItemLastSaleConverter.convert(activity) ?: return
@@ -160,7 +161,7 @@ class EnrichmentItemEventService(
                     updated = existing.copy(lastSale = newLastSale),
                     notificationEnabled = notificationEnabled,
                     item = item,
-                    eventTimeMarks = null // TODO ideally to have marks for activity too
+                    eventTimeMarks = eventTimeMarks // TODO ideally to have marks for activity too
                 )
             }
         }

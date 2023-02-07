@@ -16,6 +16,7 @@ import com.rarible.protocol.union.dto.OrderBidActivityDto
 import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
 import com.rarible.protocol.union.dto.OrderCancelListActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
+import com.rarible.protocol.union.dto.OrderMatchActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -62,6 +63,19 @@ fun ActivityDto.source(): OwnershipSourceDto? {
         is TransferActivityDto -> this.purchase?.let {
             if (it) OwnershipSourceDto.PURCHASE else OwnershipSourceDto.TRANSFER
         }
+
         else -> null
+    }
+}
+
+fun ActivityDto.isBlockchainEvent(): Boolean {
+    return when (this) {
+        is MintActivityDto -> this.blockchainInfo != null
+        is BurnActivityDto -> this.blockchainInfo != null
+        is TransferActivityDto -> this.blockchainInfo != null
+        is OrderCancelBidActivityDto -> this.blockchainInfo != null
+        is OrderCancelListActivityDto -> this.blockchainInfo != null
+        is OrderMatchActivityDto -> this.blockchainInfo != null
+        else -> false
     }
 }

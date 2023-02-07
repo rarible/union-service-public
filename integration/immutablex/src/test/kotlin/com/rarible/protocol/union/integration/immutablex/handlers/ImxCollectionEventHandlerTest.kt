@@ -3,7 +3,7 @@ package com.rarible.protocol.union.integration.immutablex.handlers
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
-import com.rarible.protocol.union.core.model.blockchainAndIndexerOutMarks
+import com.rarible.protocol.union.core.model.blockchainAndIndexerMarks
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.data.randomImxCollection
 import com.rarible.protocol.union.integration.immutablex.converter.ImxCollectionConverter
@@ -41,7 +41,7 @@ class ImxCollectionEventHandlerTest {
 
         collectionEventHandler.handle(listOf(imxCollection))
 
-        val marks = blockchainAndIndexerOutMarks(imxCollection.updatedAt!!)
+        val marks = blockchainAndIndexerMarks(imxCollection.updatedAt!!)
         coVerify(exactly = 1) { collectionHandler.onEvent(any()) }
         coVerify(exactly = 1) { collectionHandler.onEvent(UnionCollectionUpdateEvent(collection, marks)) }
 
@@ -56,7 +56,7 @@ class ImxCollectionEventHandlerTest {
 
         collectionEventHandler.handle(listOf(imxCollection))
 
-        val marks = blockchainAndIndexerOutMarks(imxCollection.updatedAt!!)
+        val marks = blockchainAndIndexerMarks(imxCollection.updatedAt!!)
         coVerify(exactly = 1) { collectionHandler.onEvent(any()) }
         coVerify(exactly = 1) { collectionHandler.onEvent(UnionCollectionUpdateEvent(collection, marks)) }
 

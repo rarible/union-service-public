@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityBurn
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivitySale
@@ -15,7 +16,6 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityTransf
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
-import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
 import com.rarible.protocol.union.worker.config.ReconciliationProperties
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.mockk.clearMocks
@@ -50,7 +50,7 @@ class ReconciliationOwnershipSourceJobTest {
     fun beforeEach() {
         clearMocks(orderServiceRouter, ownershipEventService, ownershipService)
         coEvery { orderServiceRouter.getService(BlockchainDto.ETHEREUM) } returns activityService
-        coEvery { ownershipEventService.onActivity(any()) } returns Unit
+        coEvery { ownershipEventService.onActivity(any(), any(), any()) } returns Unit
     }
 
     @Test
