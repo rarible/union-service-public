@@ -9,9 +9,9 @@ import com.rarible.protocol.union.core.model.UnionItemMetaRefreshEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaUpdateEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.service.ItemMetaService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 

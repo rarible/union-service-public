@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.meta.loader.executor
 
 import com.rarible.core.common.nowMillis
-import com.rarible.loader.cache.internal.CacheRepository
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
@@ -13,7 +12,6 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -137,7 +135,6 @@ sealed class DownloadExecutor<T>(
 }
 
 class ItemDownloadExecutor(
-    private val legacyRepository: CacheRepository,
     repository: DownloadEntryRepository<UnionMeta>,
     downloader: Downloader<UnionMeta>,
     notifier: DownloadNotifier<UnionMeta>,
@@ -155,18 +152,6 @@ class ItemDownloadExecutor(
 
     override val type = "ITEM"
     override fun getBlockchain(task: DownloadTask) = IdParser.parseItemId(task.id).blockchain
-
-    override suspend fun download(id: String, current: DownloadEntry<UnionMeta>?): UnionMeta {
-        // TODO remove later
-        if (current == null || current.status == DownloadStatus.SCHEDULED) {
-            val meta = legacyRepository.get<UnionMeta>(ItemMetaDownloader.TYPE, id)?.data
-            if (meta != null) {
-                logger.info("Found meta in legacy repo for [{}]", id)
-                return meta
-            }
-        }
-        return super.download(id, current)
-    }
 
 }
 

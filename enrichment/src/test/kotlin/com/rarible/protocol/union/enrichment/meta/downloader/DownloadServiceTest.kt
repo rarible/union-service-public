@@ -5,9 +5,10 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloadService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaNotifier
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaTaskPublisher
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
@@ -38,7 +39,7 @@ class DownloadServiceTest {
 
     private val downloader: ItemMetaDownloader = mockk()
 
-    private val downloadService = ItemMetaDownloadService(
+    private val downloadService = ItemMetaService(
         repository,
         publisher,
         downloader,
@@ -47,7 +48,7 @@ class DownloadServiceTest {
     )
 
     private lateinit var itemId: ItemIdDto
-    private val pipeline = "test"
+    private val pipeline = ItemMetaPipeline.REFRESH
 
     @BeforeEach
     fun beforeEach() {
