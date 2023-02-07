@@ -193,6 +193,7 @@ class EnrichmentOwnershipEventService(
     suspend fun onActivity(
         activity: ActivityDto,
         ownership: UnionOwnership? = null,
+        eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
         val source = activity.source() ?: return
@@ -223,7 +224,7 @@ class EnrichmentOwnershipEventService(
                     updated = existing.copy(source = newSource),
                     notificationEnabled = notificationEnabled,
                     ownership = ownership,
-                    eventTimeMarks = null
+                    eventTimeMarks = eventTimeMarks
                 )
             }
         }

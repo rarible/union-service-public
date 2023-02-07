@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.immutablex.handlers
 
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
@@ -9,8 +8,7 @@ import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
-import com.rarible.protocol.union.core.model.blockchainAndIndexerOutMarks
-import com.rarible.protocol.union.core.model.blockchainEventMark
+import com.rarible.protocol.union.core.model.blockchainAndIndexerMarks
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -33,6 +31,7 @@ import com.rarible.protocol.union.integration.immutablex.service.ImxActivityServ
 import com.rarible.protocol.union.integration.immutablex.service.ImxItemService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import org.slf4j.LoggerFactory
 import java.time.Instant
 
 class ImxActivityEventHandler(
@@ -49,7 +48,7 @@ class ImxActivityEventHandler(
 
     private val blockchain = BlockchainDto.IMMUTABLEX
 
-    private val logger by Logger()
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun handle(events: List<ImmutablexEvent>) {
 
@@ -99,7 +98,7 @@ class ImxActivityEventHandler(
 
     private suspend fun onMint(mint: ImmutablexMint, creators: Map<String, String>) {
         val item = ImxItemConverter.convert(mint, creators[mint.itemId()], blockchain)
-        val eventTimeMarks = blockchainEventMark("indexer-out", mint.timestamp)
+        val eventTimeMarks = blockchainAndIndexerMarks(mint.timestamp)
         itemHandler.onEvent(UnionItemUpdateEvent(item, eventTimeMarks))
 
         onItemTransferred(mint.itemId(), null, mint.user, mint.timestamp, creators)
@@ -112,7 +111,7 @@ class ImxActivityEventHandler(
         onItemTransferred(itemId, transfer.user, receiver, transfer.timestamp, creators)
 
         if (transfer.isBurn) {
-            val eventTimeMarks = blockchainEventMark("indexer-out", transfer.timestamp)
+            val eventTimeMarks = blockchainAndIndexerMarks(transfer.timestamp)
             itemHandler.onEvent(UnionItemDeleteEvent(ItemIdDto(blockchain, transfer.encodedItemId()), eventTimeMarks))
         }
     }
@@ -142,7 +141,7 @@ class ImxActivityEventHandler(
         if (itemId == null) {
             return
         }
-        val eventTimeMarks = blockchainAndIndexerOutMarks(date)
+        val eventTimeMarks = blockchainAndIndexerMarks(date)
         if (fromUser != null) {
             val fromUserAddress = UnionAddressConverter.convert(blockchain, fromUser)
             val deletedOwnershipId = OwnershipIdDto(blockchain, TokenIdDecoder.encodeItemId(itemId), fromUserAddress)

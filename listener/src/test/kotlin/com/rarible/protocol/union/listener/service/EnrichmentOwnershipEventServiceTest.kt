@@ -261,8 +261,8 @@ class EnrichmentOwnershipEventServiceTest {
         val burn = randomUnionActivityBurn(randomEthItemId())
         val emptySource = randomUnionActivityTransfer(randomEthItemId()).copy(purchase = null)
 
-        ownershipEventService.onActivity(burn)
-        ownershipEventService.onActivity(emptySource)
+        ownershipEventService.onActivity(burn, null, stubEventMark())
+        ownershipEventService.onActivity(emptySource, null, stubEventMark())
 
         coVerify(exactly = 0) { ownershipService.get(any()) }
     }
@@ -277,7 +277,7 @@ class EnrichmentOwnershipEventServiceTest {
         coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
         coEvery { ownershipService.save(any()) } returnsArgument 1
 
-        ownershipEventService.onActivity(mint, null, false)
+        ownershipEventService.onActivity(mint, null, stubEventMark(), false)
 
         coVerify(exactly = 1) { ownershipService.save(shortOwnership.copy(source = OwnershipSourceDto.MINT)) }
     }
@@ -291,7 +291,7 @@ class EnrichmentOwnershipEventServiceTest {
 
         coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
 
-        ownershipEventService.onActivity(mint, null, false)
+        ownershipEventService.onActivity(mint, null, stubEventMark(), false)
 
         coVerify(exactly = 0) { ownershipService.save(any()) }
     }
@@ -305,7 +305,7 @@ class EnrichmentOwnershipEventServiceTest {
 
         coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
 
-        ownershipEventService.onActivity(mint, null, false)
+        ownershipEventService.onActivity(mint, null, stubEventMark(), false)
 
         coVerify(exactly = 0) { ownershipService.save(any()) }
     }
@@ -321,7 +321,7 @@ class EnrichmentOwnershipEventServiceTest {
         coEvery { activityService.getOwnershipSource(ownershipId) } returns OwnershipSourceDto.TRANSFER
         coEvery { ownershipService.save(any()) } returnsArgument 1
 
-        ownershipEventService.onActivity(mint, null, false)
+        ownershipEventService.onActivity(mint, null, stubEventMark(), false)
 
         coVerify(exactly = 1) { ownershipService.save(shortOwnership.copy(source = OwnershipSourceDto.TRANSFER)) }
     }
@@ -336,7 +336,7 @@ class EnrichmentOwnershipEventServiceTest {
 
         coEvery { ownershipService.getOrEmpty(ShortOwnershipId(ownershipId)) } returns shortOwnership
 
-        ownershipEventService.onActivity(mint, null, false)
+        ownershipEventService.onActivity(mint, null, stubEventMark(), false)
 
         coVerify(exactly = 0) { ownershipService.save(any()) }
     }

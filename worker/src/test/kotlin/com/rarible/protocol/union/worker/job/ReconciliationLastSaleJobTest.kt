@@ -8,12 +8,12 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityBurn
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivitySale
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
 import com.rarible.protocol.union.worker.config.ReconciliationProperties
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.mockk.clearMocks
@@ -48,7 +48,7 @@ class ReconciliationLastSaleJobTest {
     fun beforeEach() {
         clearMocks(orderServiceRouter, itemEventService, itemService)
         coEvery { orderServiceRouter.getService(BlockchainDto.ETHEREUM) } returns activityService
-        coEvery { itemEventService.onActivity(any()) } returns Unit
+        coEvery { itemEventService.onActivity(any(), any(), any(), any()) } returns Unit
     }
 
     @Test
