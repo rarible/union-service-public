@@ -61,10 +61,11 @@ class ItemMetaLoader(
                 logger.error("Meta fetching failed with code: {} for Item {}", e.code.name, itemId)
 
                 when (e.code) {
-                    UnionMetaException.ErrorCode.UNPARSEABLE_JSON -> metrics.onMetaParseJsonError(itemId.blockchain)
-                    UnionMetaException.ErrorCode.UNPARSEABLE_LINK -> metrics.onMetaParseLinkError(itemId.blockchain)
+                    UnionMetaException.ErrorCode.NOT_FOUND -> metrics.onMetaFetchNotFound(itemId.blockchain)
+                    UnionMetaException.ErrorCode.CORRUPTED_URL -> metrics.onMetaCorruptedUrlError(itemId.blockchain)
+                    UnionMetaException.ErrorCode.CORRUPTED_DATA -> metrics.onMetaCorruptedDataError(itemId.blockchain)
                     UnionMetaException.ErrorCode.TIMEOUT -> metrics.onMetaFetchTimeout(itemId.blockchain)
-                    UnionMetaException.ErrorCode.UNKNOWN -> metrics.onMetaFetchError(itemId.blockchain)
+                    UnionMetaException.ErrorCode.ERROR -> metrics.onMetaError(itemId.blockchain)
                 }
                 throw e
             } catch (e: UnionNotFoundException) {
@@ -84,7 +85,7 @@ class ItemMetaLoader(
 
     private fun onMetaUnknownError(itemId: ItemIdDto, exception: Exception): Nothing {
         logger.error("Meta fetching failed with code: UNKNOWN for Item {}", itemId)
-        metrics.onMetaFetchError(itemId.blockchain)
+        metrics.onMetaError(itemId.blockchain)
 
         throw exception
     }

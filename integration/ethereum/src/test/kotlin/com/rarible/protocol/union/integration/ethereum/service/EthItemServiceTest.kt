@@ -117,7 +117,7 @@ class EthItemServiceTest {
             service.getItemMetaById("")
         }
 
-        Assertions.assertEquals(UnionMetaException.ErrorCode.UNPARSEABLE_LINK, exception.code)
+        Assertions.assertEquals(UnionMetaException.ErrorCode.CORRUPTED_URL, exception.code)
     }
 
     @Test
@@ -133,7 +133,7 @@ class EthItemServiceTest {
             service.getItemMetaById("")
         }
 
-        Assertions.assertEquals(UnionMetaException.ErrorCode.UNPARSEABLE_JSON, exception.code)
+        Assertions.assertEquals(UnionMetaException.ErrorCode.CORRUPTED_DATA, exception.code)
     }
 
     @Test
@@ -176,7 +176,7 @@ class EthItemServiceTest {
             service.getItemMetaById("")
         }
 
-        Assertions.assertEquals(UnionMetaException.ErrorCode.UNKNOWN, exception.code)
+        Assertions.assertEquals(UnionMetaException.ErrorCode.ERROR, exception.code)
     }
 
     @Test

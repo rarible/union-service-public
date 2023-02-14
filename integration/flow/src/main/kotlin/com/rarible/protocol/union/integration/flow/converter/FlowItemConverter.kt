@@ -92,10 +92,7 @@ object FlowItemConverter {
     }
 
     fun convert(source: com.rarible.protocol.dto.FlowMetaDto, itemId: String): UnionMeta {
-        // Legacy format of Flow meta, should not be used
-        val legacyContent = source.contents?.map(::convert) ?: emptyList()
-        val modernContent = source.content?.map(::convert) ?: emptyList()
-        val content = modernContent.ifEmpty { legacyContent }
+        val content = source.content?.map(::convert) ?: emptyList()
         return UnionMeta(
             name = source.name,
             collectionId = itemId.split(":").first(),

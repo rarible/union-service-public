@@ -34,43 +34,6 @@ class FlowItemConverterTest {
     }
 
     @Test
-    fun `flow item old meta`() {
-        val meta = FlowMetaDto(
-            name = "some_nft_meta",
-            description = randomString(),
-            raw = randomString(),
-            attributes = listOf(
-                FlowMetaAttributeDto("key1", "value1"),
-                FlowMetaAttributeDto("key2", "value2")
-            ),
-            contents = listOf(
-                "url1", "url2"
-            )
-        )
-
-        val itemId = randomFlowItemId()
-        val converted = FlowItemConverter.convert(meta, itemId.value)
-
-        assertThat(converted.name).isEqualTo(meta.name)
-        assertThat(converted.collectionId).isEqualTo(itemId.value.split(":").first())
-        assertThat(converted.description).isEqualTo(meta.description)
-        assertThat(converted.content).hasSize(2)
-        assertThat(converted.attributes.find { it.key == "key1" }?.value).isEqualTo("value1")
-        assertThat(converted.attributes.find { it.key == "key2" }?.value).isEqualTo("value2")
-
-        val originalImage = converted.content[0]
-        val bigImage = converted.content[1]
-
-        assertThat(originalImage.url).isEqualTo("url1")
-        assertThat(originalImage.representation).isEqualTo(MetaContentDto.Representation.ORIGINAL)
-        assertThat(originalImage.properties).isNull()
-
-        assertThat(bigImage.url).isEqualTo("url2")
-        assertThat(bigImage.representation).isEqualTo(MetaContentDto.Representation.ORIGINAL)
-        assertThat(bigImage.properties).isNull()
-    }
-
-    @Test
     fun `flow item meta`() {
         val meta = FlowMetaDto(
             name = "some_nft_meta",

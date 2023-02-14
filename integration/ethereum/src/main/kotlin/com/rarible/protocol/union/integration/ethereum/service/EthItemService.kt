@@ -61,12 +61,12 @@ open class EthItemService(
 
             return when (meta.status) {
                 NftItemMetaDto.Status.UNPARSEABLE_LINK -> throw UnionMetaException(
-                    UnionMetaException.ErrorCode.UNPARSEABLE_LINK,
+                    UnionMetaException.ErrorCode.CORRUPTED_URL,
                     "Can't parse meta url for: $itemId"
                 )
 
                 NftItemMetaDto.Status.UNPARSEABLE_JSON -> throw UnionMetaException(
-                    UnionMetaException.ErrorCode.UNPARSEABLE_JSON,
+                    UnionMetaException.ErrorCode.CORRUPTED_DATA,
                     "Can't parse meta json for: $itemId"
                 )
 
@@ -76,7 +76,7 @@ open class EthItemService(
                 )
 
                 NftItemMetaDto.Status.ERROR -> throw UnionMetaException(
-                    UnionMetaException.ErrorCode.UNKNOWN,
+                    UnionMetaException.ErrorCode.ERROR,
                     message = null
                 )
 
@@ -86,7 +86,7 @@ open class EthItemService(
             if (e.statusCode == HttpStatus.NOT_FOUND) throw UnionNotFoundException("Meta not found for: $itemId")
 
             throw UnionMetaException(
-                UnionMetaException.ErrorCode.UNKNOWN,
+                UnionMetaException.ErrorCode.ERROR,
                 e.message
             )
         }
