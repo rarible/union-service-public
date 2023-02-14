@@ -86,8 +86,7 @@ fun randomFlowMetaDto(): FlowMetaDto {
         description = randomString(),
         name = randomString(),
         raw = randomString(),
-        attributes = listOf(randomFlowMetaAttributeDto()),
-        contents = listOf(randomString())
+        attributes = listOf(randomFlowMetaAttributeDto())
     )
 }
 

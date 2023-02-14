@@ -26,16 +26,16 @@ class ItemMetaMetrics(
         increment(META_FETCH, tag(blockchain), status("fail"), reason("timeout"))
     }
 
-    fun onMetaFetchError(blockchain: BlockchainDto) {
-        increment(META_FETCH, tag(blockchain), status("fail"), reason("unknown_error"))
+    fun onMetaError(blockchain: BlockchainDto) {
+        increment(META_FETCH, tag(blockchain), status("fail"), reason("error"))
     }
 
-    fun onMetaParseLinkError(blockchain: BlockchainDto) {
-        increment(META_FETCH, tag(blockchain), status("fail"), reason("meta_parse_link"))
+    fun onMetaCorruptedUrlError(blockchain: BlockchainDto) {
+        increment(META_FETCH, tag(blockchain), status("fail"), reason("corrupted_url"))
     }
 
-    fun onMetaParseJsonError(blockchain: BlockchainDto) {
-        increment(META_FETCH, tag(blockchain), status("fail"), reason("meta_parse_json"))
+    fun onMetaCorruptedDataError(blockchain: BlockchainDto) {
+        increment(META_FETCH, tag(blockchain), status("fail"), reason("corrupted_data"))
     }
 
     //--------------------- Meta cache ----------------------//

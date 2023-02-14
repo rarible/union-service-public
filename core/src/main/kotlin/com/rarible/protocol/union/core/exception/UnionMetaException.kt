@@ -8,9 +8,10 @@ class UnionMetaException : UnionException {
     }
 
     enum class ErrorCode {
-        UNPARSEABLE_JSON,
-        UNPARSEABLE_LINK,
+        NOT_FOUND,
+        CORRUPTED_DATA,
+        CORRUPTED_URL,
         TIMEOUT,
-        UNKNOWN
+        ERROR
     }
 }

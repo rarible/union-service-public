@@ -2,7 +2,9 @@ package com.rarible.protocol.union.integration.flow.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.FlowItemIdsDto
+import com.rarible.protocol.dto.FlowMetaDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
+import com.rarible.protocol.union.core.exception.UnionMetaException
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
@@ -54,7 +56,36 @@ open class FlowItemService(
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
         val meta = flowNftItemControllerApi.getNftItemMetaById(itemId).awaitFirst()
-        return FlowItemConverter.convert(meta, itemId)
+
+        return when (meta.status) {
+            FlowMetaDto.Status.CORRUPTED_URL -> throw UnionMetaException(
+                UnionMetaException.ErrorCode.CORRUPTED_URL,
+                "Can't parse meta url for: $itemId"
+            )
+
+            FlowMetaDto.Status.CORRUPTED_DATA -> throw UnionMetaException(
+                UnionMetaException.ErrorCode.CORRUPTED_DATA,
+                "Can't parse meta json for: $itemId"
+            )
+
+            FlowMetaDto.Status.TIMEOUT -> throw UnionMetaException(
+                UnionMetaException.ErrorCode.TIMEOUT,
+                "Timeout during loading meta for: $itemId"
+            )
+
+            FlowMetaDto.Status.ERROR -> throw UnionMetaException(
+                UnionMetaException.ErrorCode.ERROR,
+                message = null
+            )
+
+            FlowMetaDto.Status.NOT_FOUND -> throw UnionMetaException(
+                UnionMetaException.ErrorCode.NOT_FOUND,
+                message = null
+            )
+
+            FlowMetaDto.Status.OK, null -> FlowItemConverter.convert(meta, itemId)
+        }
+
     }
 
     override suspend fun resetItemMeta(itemId: String) {

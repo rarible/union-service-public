@@ -34,11 +34,11 @@ open class SolanaItemService(
 
             return when (tokenMeta.status) {
                 TokenMetaDto.Status.UNPARSEABLE_LINK -> throw UnionMetaException(
-                    UnionMetaException.ErrorCode.UNPARSEABLE_LINK,
+                    UnionMetaException.ErrorCode.CORRUPTED_URL,
                     "Can't parse meta url for: $itemId"
                 )
                 TokenMetaDto.Status.UNPARSEABLE_JSON -> throw UnionMetaException(
-                    UnionMetaException.ErrorCode.UNPARSEABLE_JSON,
+                    UnionMetaException.ErrorCode.CORRUPTED_DATA,
                     "Can't parse meta json for: $itemId"
                 )
                 TokenMetaDto.Status.TIMEOUT -> throw UnionMetaException(
@@ -46,7 +46,7 @@ open class SolanaItemService(
                     "Timeout during loading meta for: $itemId"
                 )
                 TokenMetaDto.Status.ERROR -> throw UnionMetaException(
-                    UnionMetaException.ErrorCode.UNKNOWN,
+                    UnionMetaException.ErrorCode.ERROR,
                     message = null
                 )
                 TokenMetaDto.Status.OK -> SolanaItemMetaConverter.convert(tokenMeta)
@@ -55,7 +55,7 @@ open class SolanaItemService(
             if (e.statusCode == HttpStatus.NOT_FOUND) throw UnionNotFoundException("Meta not found for: $itemId")
 
             throw UnionMetaException(
-                UnionMetaException.ErrorCode.UNKNOWN,
+                UnionMetaException.ErrorCode.ERROR,
                 e.message
             )
         }
