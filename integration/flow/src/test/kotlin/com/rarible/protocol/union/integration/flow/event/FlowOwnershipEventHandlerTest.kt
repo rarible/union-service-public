@@ -33,7 +33,11 @@ class FlowOwnershipEventHandlerTest {
     @Test
     fun `flow ownership update event`() = runBlocking {
         val ownership = randomFlowNftOwnershipDto()
-        val dto = FlowNftOwnershipUpdateEventDto(randomString(), ownership.id!!, ownership)
+        val dto = FlowNftOwnershipUpdateEventDto(
+            eventId = randomString(),
+            ownershipId = ownership.id!!,
+            ownership = ownership
+        )
 
         handler.handle(dto)
 
@@ -51,7 +55,11 @@ class FlowOwnershipEventHandlerTest {
         val ownershipId = randomFlowOwnershipId()
         val ownership = randomFlowNftOwnershipDto(ownershipId)
 
-        val dto = FlowNftOwnershipDeleteEventDto(randomString(), ownershipId.value, ownership)
+        val dto = FlowNftOwnershipDeleteEventDto(
+            eventId = randomString(),
+            ownershipId = ownershipId.value,
+            ownership = ownership
+        )
 
         handler.handle(dto)
 

@@ -8,9 +8,9 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthEventTimeMarks
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEventTimeMarks
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -39,7 +39,7 @@ class EthereumOrderEventHandlerTest {
             eventId = randomString(),
             orderId = order.hash.prefixed(),
             order = order,
-            eventTimeMarks = randomEventTimeMarks()
+            eventTimeMarks = randomEthEventTimeMarks()
         )
 
         handler.handle(event)

@@ -1,9 +1,15 @@
 package com.rarible.protocol.union.integration.flow.converter
 
+import com.rarible.protocol.dto.FlowNftOwnershipDeleteEventDto
 import com.rarible.protocol.dto.FlowNftOwnershipDto
+import com.rarible.protocol.dto.FlowNftOwnershipUpdateEventDto
 import com.rarible.protocol.dto.FlowNftOwnershipsDto
+import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
+import com.rarible.protocol.union.core.model.UnionOwnershipEvent
+import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -50,6 +56,26 @@ object FlowOwnershipConverter {
             continuation = page.continuation,
             entities = page.ownerships.map { convert(it, blockchain) }
         )
+    }
+
+    suspend fun convert(event: FlowOwnershipEventDto, blockchain: BlockchainDto): UnionOwnershipEvent? {
+        val marks = FlowConverter.convert(event.eventTimeMarks)
+        return when (event) {
+            is FlowNftOwnershipUpdateEventDto -> {
+                val unionOwnership = convert(event.ownership, blockchain)
+                UnionOwnershipUpdateEvent(unionOwnership, marks)
+            }
+
+            is FlowNftOwnershipDeleteEventDto -> {
+                val ownershipId = OwnershipIdDto(
+                    blockchain = blockchain,
+                    contract = event.ownership.contract,
+                    tokenId = event.ownership.tokenId,
+                    owner = UnionAddressConverter.convert(blockchain, event.ownership.owner)
+                )
+                UnionOwnershipDeleteEvent(ownershipId, marks)
+            }
+        }
     }
 }
 
