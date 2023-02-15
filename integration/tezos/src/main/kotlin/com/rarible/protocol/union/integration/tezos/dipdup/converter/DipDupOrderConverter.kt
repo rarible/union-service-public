@@ -9,8 +9,7 @@ import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.client.model.DipDupOrderSort
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.service.CurrencyService
-import com.rarible.protocol.union.core.util.evalMakePrice
-import com.rarible.protocol.union.core.util.evalTakePrice
+import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDataDto
@@ -28,6 +27,7 @@ import com.rarible.protocol.union.dto.TezosOrderDataObjktV2Dto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
 import com.rarible.protocol.union.dto.TezosOrderDataTeiaV1Dto
 import com.rarible.protocol.union.dto.TezosOrderDataVersumV1Dto
+import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -67,9 +67,9 @@ class DipDupOrderConverter(
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
 
         // For BID (make = currency, take - NFT) we're calculating prices for taker
-        val takePrice = evalTakePrice(make, take)
+        val takePrice = evalTakePrice(make, take, order.takePrice)
         // For SELL (make = NFT, take - currency) we're calculating prices for maker
-        val makePrice = evalMakePrice(make, take)
+        val makePrice = evalMakePrice(make, take, order.makePrice)
 
         // So for USD conversion we are using take.type for MAKE price and vice versa
         val makePriceUsd = currencyService.toUsd(blockchain, take.type, makePrice)
@@ -185,5 +185,13 @@ class DipDupOrderConverter(
     fun convert(source: OrderSortDto) = when (source) {
         OrderSortDto.LAST_UPDATE_ASC -> DipDupOrderSort.LAST_UPDATE_ASC
         OrderSortDto.LAST_UPDATE_DESC -> DipDupOrderSort.LAST_UPDATE_DESC
+    }
+
+    fun evalMakePrice(make: AssetDto, take: AssetDto, currentPrice: BigDecimal?): BigDecimal? {
+        return if (make.type.ext.isNft) currentPrice?.let { it } ?: take.value.setScale(18) / make.value else null
+    }
+
+    fun evalTakePrice(make: AssetDto, take: AssetDto, currentPrice: BigDecimal?): BigDecimal? {
+        return if (take.type.ext.isNft) currentPrice?.let { it } ?: make.value.setScale(18) / take.value else null
     }
 }
