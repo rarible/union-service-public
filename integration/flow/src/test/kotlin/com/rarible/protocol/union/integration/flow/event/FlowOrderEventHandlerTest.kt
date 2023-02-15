@@ -33,7 +33,13 @@ class FlowOrderEventHandlerTest {
     fun `flow order event`() = runBlocking {
         val order = randomFlowV1OrderDto()
 
-        handler.handle(FlowOrderUpdateEventDto(randomString(), order.id.toString(), order))
+        handler.handle(
+            FlowOrderUpdateEventDto(
+                eventId = randomString(),
+                orderId = order.id.toString(),
+                order = order
+            )
+        )
 
         val expected = converter.convert(order, BlockchainDto.FLOW)
 

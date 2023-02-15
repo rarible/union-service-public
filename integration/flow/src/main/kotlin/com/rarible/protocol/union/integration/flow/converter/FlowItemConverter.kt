@@ -6,7 +6,10 @@ import com.rarible.protocol.dto.FlowHtmlContentDto
 import com.rarible.protocol.dto.FlowImageContentDto
 import com.rarible.protocol.dto.FlowMetaContentItemDto
 import com.rarible.protocol.dto.FlowModel3dContentDto
+import com.rarible.protocol.dto.FlowNftItemDeleteEventDto
 import com.rarible.protocol.dto.FlowNftItemDto
+import com.rarible.protocol.dto.FlowNftItemEventDto
+import com.rarible.protocol.dto.FlowNftItemUpdateEventDto
 import com.rarible.protocol.dto.FlowNftItemsDto
 import com.rarible.protocol.dto.FlowUnknownContentDto
 import com.rarible.protocol.dto.FlowVideoContentDto
@@ -16,6 +19,9 @@ import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionHtmlProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
+import com.rarible.protocol.union.core.model.UnionItemEvent
+import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
@@ -69,6 +75,25 @@ object FlowItemConverter {
             continuation = page.continuation,
             entities = page.items.map { convert(it, blockchain) }
         )
+    }
+
+    fun convert(event: FlowNftItemEventDto, blockchain: BlockchainDto): UnionItemEvent {
+        val marks = FlowConverter.convert(event.eventTimeMarks)
+        return when (event) {
+            is FlowNftItemUpdateEventDto -> {
+                val item = convert(event.item, blockchain)
+                UnionItemUpdateEvent(item, marks)
+            }
+
+            is FlowNftItemDeleteEventDto -> {
+                val itemId = ItemIdDto(
+                    blockchain = blockchain,
+                    contract = event.item.token,
+                    tokenId = event.item.tokenId.toBigInteger()
+                )
+                UnionItemDeleteEvent(itemId, marks)
+            }
+        }
     }
 
     private fun convert(
@@ -135,24 +160,29 @@ object FlowItemConverter {
                 width = source.width,
                 height = source.height
             )
+
             is FlowVideoContentDto -> UnionVideoProperties(
                 mimeType = source.mimeType,
                 size = size,
                 width = source.width,
                 height = source.height
             )
+
             is FlowAudioContentDto -> UnionAudioProperties(
                 mimeType = source.mimeType,
                 size = size
             )
+
             is FlowModel3dContentDto -> UnionModel3dProperties(
                 mimeType = source.mimeType,
                 size = size
             )
+
             is FlowHtmlContentDto -> UnionHtmlProperties(
                 mimeType = source.mimeType,
                 size = size
             )
+
             is FlowUnknownContentDto -> UnionUnknownProperties(
                 mimeType = source.mimeType,
                 size = size

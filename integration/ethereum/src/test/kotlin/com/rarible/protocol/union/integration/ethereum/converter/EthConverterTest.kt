@@ -19,8 +19,8 @@ import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721LazyAssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthEventTimeMarks
 import com.rarible.protocol.union.integration.ethereum.data.randomEthPartDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEventTimeMarks
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.TemporalUnitLessThanOffset
 import org.junit.jupiter.api.Test
@@ -143,7 +143,7 @@ class EthConverterTest {
 
     @Test
     fun `time marks - ok`() {
-        val marks = randomEventTimeMarks()
+        val marks = randomEthEventTimeMarks()
         val converted = EthConverter.convert(marks)!!
 
         assertThat(converted.source).isEqualTo(marks.source)

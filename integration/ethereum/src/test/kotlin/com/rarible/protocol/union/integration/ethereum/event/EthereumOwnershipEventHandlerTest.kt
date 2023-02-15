@@ -9,9 +9,9 @@ import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthEventTimeMarks
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
-import com.rarible.protocol.union.integration.ethereum.data.randomEventTimeMarks
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -39,7 +39,7 @@ class EthereumOwnershipEventHandlerTest {
             eventId = randomString(),
             ownershipId = ownership.id,
             ownership = ownership,
-            eventTimeMarks = randomEventTimeMarks()
+            eventTimeMarks = randomEthEventTimeMarks()
         )
 
         handler.handle(dto)

@@ -10,9 +10,9 @@ import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthEventTimeMarks
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEventTimeMarks
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -40,7 +40,7 @@ class EthereumItemEventHandlerTest {
             eventId = randomString(),
             itemId = item.id,
             item = item,
-            eventTimeMarks = randomEventTimeMarks()
+            eventTimeMarks = randomEthEventTimeMarks()
         )
 
         handler.handle(dto)
@@ -63,7 +63,7 @@ class EthereumItemEventHandlerTest {
             eventId = randomString(),
             itemId = itemId.value,
             item = deletedDto,
-            eventTimeMarks = randomEventTimeMarks()
+            eventTimeMarks = randomEthEventTimeMarks()
         )
 
         handler.handle(dto)

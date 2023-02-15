@@ -1,10 +1,14 @@
 package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.dto.FlowOrderDto
+import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOrderPlatformDto
 import com.rarible.protocol.dto.FlowOrderStatusDto
+import com.rarible.protocol.dto.FlowOrderUpdateEventDto
 import com.rarible.protocol.dto.FlowOrdersPaginationDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionOrderEvent
+import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
@@ -87,6 +91,16 @@ class FlowOrderConverter(
             entities = order.items.map { this.convert(it, blockchain) },
             continuation = order.continuation
         )
+    }
+
+    suspend fun convert(event: FlowOrderEventDto, blockchain: BlockchainDto): UnionOrderEvent {
+        val marks = FlowConverter.convert(event.eventTimeMarks)
+        when (event) {
+            is FlowOrderUpdateEventDto -> {
+                val unionOrder = convert(event.order, blockchain)
+                return UnionOrderUpdateEvent(unionOrder, marks)
+            }
+        }
     }
 
     fun convert(source: List<OrderStatusDto>?): List<FlowOrderStatusDto>? {

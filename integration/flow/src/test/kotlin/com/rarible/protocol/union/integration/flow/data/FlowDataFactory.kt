@@ -12,6 +12,8 @@ import com.rarible.protocol.dto.FlowAssetFungibleDto
 import com.rarible.protocol.dto.FlowAssetNFTDto
 import com.rarible.protocol.dto.FlowBurnDto
 import com.rarible.protocol.dto.FlowCreatorDto
+import com.rarible.protocol.dto.FlowEventTimeMarkDto
+import com.rarible.protocol.dto.FlowEventTimeMarksDto
 import com.rarible.protocol.dto.FlowMetaAttributeDto
 import com.rarible.protocol.dto.FlowMetaDto
 import com.rarible.protocol.dto.FlowMintDto
@@ -306,5 +308,17 @@ fun randomFlowOrderActivityMatchSideDto(asset: FlowAssetDto): FlowOrderActivityM
         maker = randomFlowAddress().value,
         asset = asset,
         type = FlowOrderActivityMatchSideDto.Type.values()[randomInt(FlowOrderActivityMatchSideDto.Type.values().size)]
+    )
+}
+
+fun randomFlowEventTimeMarks(): FlowEventTimeMarksDto {
+    return FlowEventTimeMarksDto(
+        source = randomString(),
+        marks = listOf(
+            FlowEventTimeMarkDto(
+                randomString(),
+                nowMillis().minusSeconds(randomLong(1000))
+            )
+        )
     )
 }

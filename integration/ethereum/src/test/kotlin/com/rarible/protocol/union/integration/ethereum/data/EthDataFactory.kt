@@ -900,7 +900,7 @@ fun randomEthOrderActivityMatchSide(): OrderActivityMatchSideDto {
     )
 }
 
-fun randomEventTimeMarks(): EventTimeMarksDto {
+fun randomEthEventTimeMarks(): EventTimeMarksDto {
     return EventTimeMarksDto(
         source = randomString(),
         marks = listOf(

@@ -35,7 +35,11 @@ class FlowItemEventHandlerTest {
     @Test
     fun `flow item update event`() = runBlocking {
         val item = randomFlowNftItemDto()
-        val dto = FlowNftItemUpdateEventDto(randomString(), item.id, item)
+        val dto = FlowNftItemUpdateEventDto(
+            eventId = randomString(),
+            itemId = item.id,
+            item = item
+        )
 
         handler.handle(dto)
 
@@ -57,7 +61,11 @@ class FlowItemEventHandlerTest {
             tokenId.toLong()
         )
 
-        val dto = FlowNftItemDeleteEventDto(randomString(), itemId.value, deletedDto)
+        val dto = FlowNftItemDeleteEventDto(
+            eventId = randomString(),
+            itemId = itemId.value,
+            item = deletedDto
+        )
 
         handler.handle(dto)
 
