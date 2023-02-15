@@ -95,12 +95,13 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         enrichmentCollectionService.save(shortCollection)
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
-        coEvery { testEthereumCollectionApi.getNftCollectionById(collectionIdFull.value) } returns ethCollectionDto.toMono()
+        coEvery { testEthereumCollectionApi.getNftCollectionById(collectionIdFull.value) } returns ethCollectionDto.copy(isRaribleContract = true).toMono()
 
         val unionCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()
 
         assertThat(unionCollection.id.value).isEqualTo(collectionIdFull.value)
         assertThat(unionCollection.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(unionCollection.self).isTrue
         assertThat(unionCollection.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
         assertThat(unionCollection.statistics?.itemCount).isEqualTo(statistics.itemCount.toLong())
         assertThat(unionCollection.statistics?.itemCountTotal).isEqualTo(statistics.itemCount)
