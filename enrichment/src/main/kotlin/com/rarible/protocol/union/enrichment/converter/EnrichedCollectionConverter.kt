@@ -29,6 +29,7 @@ object EnrichedCollectionConverter {
             parent = collection.parent,
             meta = (meta ?: collection.meta)?.let { EnrichedMetaConverter.convert(it) },
             type = collection.type,
+            self = collection.self,
             statistics = shortCollection?.statistics?.let { CollectionStatisticsConverter.convert(it) },
             bestSellOrder = shortCollection?.bestSellOrder?.let { orders[it.dtoId] },
             bestBidOrder = shortCollection?.bestBidOrder?.let { orders[it.dtoId] },
