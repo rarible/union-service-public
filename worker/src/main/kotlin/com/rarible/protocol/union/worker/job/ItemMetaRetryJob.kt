@@ -16,11 +16,9 @@ import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.time.delay
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
-@ConditionalOnProperty(name = ["common.feature-flags.enableMetaPipeline"], havingValue = "true")
 class ItemMetaRetryJob(
     private val handler: ItemMetaRetryJobHandler,
     properties: WorkerProperties,
