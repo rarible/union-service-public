@@ -1,10 +1,12 @@
 package com.rarible.protocol.union.integration.tezos.converter
 
-import com.rarible.core.common.justOrEmpty
+import com.rarible.dipdup.client.core.model.Asset
+import com.rarible.dipdup.client.core.model.DipDupOrder
+import com.rarible.dipdup.client.core.model.OrderStatus
+import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.TezosNFTAssetTypeDto
-import com.rarible.protocol.union.dto.TezosOrderDataLegacyDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
 import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
@@ -13,6 +15,8 @@ import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
+import java.time.OffsetDateTime
 
 class TezosOrderConverterTest {
 
@@ -45,6 +49,82 @@ class TezosOrderConverterTest {
         assertThat(converted.makePriceUsd).isEqualTo(dto.take.assetValue.setScale(18) / dto.make.assetValue.setScale(18))
 
         assertThat(converted.data).isInstanceOf(TezosOrderDataRaribleV2DataV2Dto::class.java)
+    }
+
+    @Test
+    fun `tezos should take makePrice`() = runBlocking<Unit> {
+        val dto = DipDupOrder(
+            id = "fde834ac-63cd-576a-9a30-0832fa493799",
+            internalOrderId = "2923516",
+            fill = BigDecimal.ZERO,
+            platform = TezosPlatform.OBJKT_V2,
+            cancelled = false,
+            status = OrderStatus.ACTIVE,
+            startAt = OffsetDateTime.now(),
+            endedAt = null,
+            endAt = null,
+            createdAt = OffsetDateTime.now(),
+            lastUpdatedAt = OffsetDateTime.now(),
+            maker = "tz1btzFK9Gg4nv4kEQNEpV5nnUXW6gHKDDNo",
+            make = Asset(
+                assetType = Asset.MT(
+                    assetClass = "TEZOS_MT",
+                    contract = "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton",
+                    tokenId = 603126.toBigInteger()
+                ),
+                assetValue = BigDecimal.ZERO
+            ),
+            makePrice = 3.3.toBigDecimal(),
+            taker = null,
+            take = Asset(assetType = Asset.XTZ(assetClass = "XTZ"), assetValue = BigDecimal.ZERO),
+            takePrice = 3.3.toBigDecimal(),
+            salt = 27871898.toBigInteger(),
+            originFees = emptyList(),
+            payouts = emptyList(),
+            legacyData = null
+        )
+
+        val converted = tezosOrderConverter.convert(dto, BlockchainDto.TEZOS)
+        assertThat(converted.makePrice).isEqualTo(3.3.toBigDecimal())
+        assertThat(converted.takePrice).isNull()
+    }
+
+    @Test
+    fun `tezos objkt should calculate makePrice`() = runBlocking<Unit> {
+        val dto = DipDupOrder(
+            id = "fde834ac-63cd-576a-9a30-0832fa493799",
+            internalOrderId = "2923516",
+            fill = BigDecimal.ZERO,
+            platform = TezosPlatform.OBJKT_V2,
+            cancelled = false,
+            status = OrderStatus.ACTIVE,
+            startAt = OffsetDateTime.now(),
+            endedAt = null,
+            endAt = null,
+            createdAt = OffsetDateTime.now(),
+            lastUpdatedAt = OffsetDateTime.now(),
+            maker = "tz1btzFK9Gg4nv4kEQNEpV5nnUXW6gHKDDNo",
+            make = Asset(
+                assetType = Asset.MT(
+                    assetClass = "TEZOS_MT",
+                    contract = "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton",
+                    tokenId = 603126.toBigInteger()
+                ),
+                assetValue = 1.toBigDecimal()
+            ),
+            makePrice = null,
+            taker = null,
+            take = Asset(assetType = Asset.XTZ(assetClass = "XTZ"), assetValue = 0.1.toBigDecimal()),
+            takePrice = null,
+            salt = 27871898.toBigInteger(),
+            originFees = emptyList(),
+            payouts = emptyList(),
+            legacyData = null
+        )
+
+        val converted = tezosOrderConverter.convert(dto, BlockchainDto.TEZOS)
+        assertThat(converted.makePrice).isEqualTo(0.1.toBigDecimal().setScale(18))
+        assertThat(converted.takePrice).isNull()
     }
 
 }
