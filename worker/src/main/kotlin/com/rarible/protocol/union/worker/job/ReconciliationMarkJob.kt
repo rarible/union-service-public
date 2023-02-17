@@ -49,7 +49,7 @@ class ReconciliationMarkJobHandler(
     activeBlockchains: List<BlockchainDto>
 ) : JobHandler {
 
-    private val batch: Int = 8
+    private val batch: Int = 48
     private val blockchains = activeBlockchains.toSet()
 
     private val logger = LoggerFactory.getLogger(javaClass)
