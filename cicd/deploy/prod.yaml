@@ -27,18 +27,18 @@ protocol-union-meta-loader:
     META_LOADER_DOWNLOADER_ITEM_EVENT_WORKERS: 6
     META_LOADER_DOWNLOADER_ITEM_EVENT_BATCHSIZE: 128
     META_LOADER_DOWNLOADER_ITEM_EVENT_POOLSIZE: 48
-    # Less sensitive pipeline since most of new items should be handled in EVENT pipeline, but has hihh priority too
+    # Less sensitive pipeline since most of new items should be handled in EVENT pipeline, but has high priority too
     META_LOADER_DOWNLOADER_ITEM_API_WORKERS: 6
-    META_LOADER_DOWNLOADER_ITEM_API_BATCHSIZE: 128
-    META_LOADER_DOWNLOADER_ITEM_API_POOLSIZE: 48
+    META_LOADER_DOWNLOADER_ITEM_API_BATCHSIZE: 256
+    META_LOADER_DOWNLOADER_ITEM_API_POOLSIZE: 64
     # Manual refreshes, average throughput required, but delay is not super-important
     META_LOADER_DOWNLOADER_ITEM_REFRESH_WORKERS: 6
     META_LOADER_DOWNLOADER_ITEM_REFRESH_BATCHSIZE: 64
     META_LOADER_DOWNLOADER_ITEM_REFRESH_POOLSIZE: 8
     # Background job retries download data failed previously, low priority
     META_LOADER_DOWNLOADER_ITEM_RETRY_WORKERS: 6
-    META_LOADER_DOWNLOADER_ITEM_RETRY_BATCHSIZE: 32
-    META_LOADER_DOWNLOADER_ITEM_RETRY_POOLSIZE: 8
+    META_LOADER_DOWNLOADER_ITEM_RETRY_BATCHSIZE: 128
+    META_LOADER_DOWNLOADER_ITEM_RETRY_POOLSIZE: 32
     # Pipeline for initial sync with new blockchain, should be configured on demand, ATM not needed
     META_LOADER_DOWNLOADER_ITEM_SYNC_WORKERS: 1
     META_LOADER_DOWNLOADER_ITEM_SYNC_BATCHSIZE: 4

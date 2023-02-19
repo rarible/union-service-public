@@ -23,7 +23,6 @@ data class UnionMetaProperties(
         .map { Duration.parse(it) }
         .ifEmpty {
             listOf(
-                Duration.ofMinutes(5),
                 Duration.ofHours(1),
                 Duration.ofHours(24)
             )
