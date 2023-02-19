@@ -22,6 +22,7 @@ protocol-union-meta-loader:
   resources:
     jvm:
       xmx_megabytes: 2048
+      max_direct_memory_megabytes: 64
   environments:
     # The most sensitive pipeline, should be handled ASAP without delay
     META_LOADER_DOWNLOADER_ITEM_EVENT_WORKERS: 6
