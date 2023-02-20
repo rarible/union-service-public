@@ -94,7 +94,7 @@ class DownloadExecutorConfiguration(
 
     private fun getItemPipelineConfiguration(pipeline: String): ExecutorPipelineProperties {
         val result = metaLoaderProperties.downloader.item[pipeline] ?: ExecutorPipelineProperties()
-        logger.info("Settings for ITEM downloader pipeline: {}", result)
+        logger.info("Settings for ITEM downloader pipeline '{}': {}", pipeline, result)
         return result
     }
 
