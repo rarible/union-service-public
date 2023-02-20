@@ -24,7 +24,6 @@ import io.micrometer.core.instrument.MeterRegistry
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -32,7 +31,6 @@ import org.springframework.context.annotation.Import
 import java.util.*
 
 @Configuration
-@ConditionalOnProperty("common.feature-flags.enableMetaPipeline", havingValue = "true", matchIfMissing = false)
 @Import(value = [UnionMetaLoaderConfiguration::class])
 @EnableConfigurationProperties(value = [UnionMetaLoaderProperties::class])
 class DownloadExecutorConfiguration(
@@ -96,7 +94,7 @@ class DownloadExecutorConfiguration(
 
     private fun getItemPipelineConfiguration(pipeline: String): ExecutorPipelineProperties {
         val result = metaLoaderProperties.downloader.item[pipeline] ?: ExecutorPipelineProperties()
-        logger.info("Settings for ITEM downloader pipeline: {}", result)
+        logger.info("Settings for ITEM downloader pipeline '{}': {}", pipeline, result)
         return result
     }
 

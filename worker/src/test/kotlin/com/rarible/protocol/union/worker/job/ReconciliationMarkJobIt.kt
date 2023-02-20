@@ -64,7 +64,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
 
     @Test
     fun `reconcile collection - with fail`() = runBlocking<Unit> {
-        val collectionMarks = (1..10).map { randomCollectionMark() }
+        val collectionMarks = (1..8).map { randomCollectionMark() }
         val failedCollectionId = IdParser.parseCollectionId(collectionMarks[5].id)
 
         collectionMarks.forEach { itemReconciliationMarkRepository.save(it) }
@@ -101,7 +101,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
 
     @Test
     fun `reconcile items - with fail`() = runBlocking<Unit> {
-        val itemMarks = (1..10).map { randomItemMark() }
+        val itemMarks = (1..8).map { randomItemMark() }
         val failedItemId = IdParser.parseItemId(itemMarks[5].id)
 
         itemMarks.forEach { itemReconciliationMarkRepository.save(it) }

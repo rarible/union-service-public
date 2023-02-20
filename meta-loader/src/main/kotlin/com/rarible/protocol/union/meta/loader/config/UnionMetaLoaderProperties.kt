@@ -10,13 +10,13 @@ class UnionMetaLoaderProperties(
     val downloader: DownloaderProperties
 )
 
-class DownloaderProperties(
+data class DownloaderProperties(
     val item: Map<String, ExecutorPipelineProperties>
     // Add the same for the collection
 )
 
-class ExecutorPipelineProperties(
+data class ExecutorPipelineProperties(
     val workers: Int = 3,
-    val batchSize: Int = 64,
-    val poolSize: Int = 4
+    val batchSize: Int = 32,
+    val poolSize: Int = 16
 )

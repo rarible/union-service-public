@@ -30,7 +30,5 @@ data class FeatureFlagsProperties(
     // items
     var enableItemQueriesToElasticSearch: Boolean = false,
     var enableSearchItems: Boolean = false,
-    var enableItemSaveImmediateToElasticSearch: Boolean = false,
-
-    val enableMetaPipeline: Boolean = false
+    var enableItemSaveImmediateToElasticSearch: Boolean = false
 )

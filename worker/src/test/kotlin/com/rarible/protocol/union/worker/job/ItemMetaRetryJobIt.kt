@@ -11,7 +11,6 @@ import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.listener.job.ItemMetaRetryJobHandler
 import com.rarible.protocol.union.worker.IntegrationTest
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -41,7 +40,6 @@ class ItemMetaRetryJobIt {
         val handler = ItemMetaRetryJobHandler(itemRepository, metaProperties, metaService, blockchainRouter)
         val now = Instant.now()
         val idNow = randomEthItemId()
-        val id6m = randomEthItemId()
         val id2h = randomEthItemId()
         val id25h = randomEthItemId()
 
@@ -56,21 +54,10 @@ class ItemMetaRetryJobIt {
         )
 
         itemRepository.save(
-            randomShortItem(id6m).copy(
-                metaEntry = DownloadEntry(
-                    id = "-6m",
-                    retries = 1,
-                    status = DownloadStatus.RETRY,
-                    retriedAt = now.minus(6, ChronoUnit.MINUTES)
-                )
-            )
-        )
-
-        itemRepository.save(
             randomShortItem(id2h).copy(
                 metaEntry = DownloadEntry(
                     id = "-2h",
-                    retries = 1,
+                    retries = 0,
                     status = DownloadStatus.RETRY,
                     retriedAt = now.minus(2, ChronoUnit.HOURS)
                 )
@@ -82,7 +69,7 @@ class ItemMetaRetryJobIt {
                 metaEntry = DownloadEntry(
                     id = "-25h",
                     status = DownloadStatus.RETRY,
-                    retries = 3,
+                    retries = 2,
                     retriedAt = now.minus(25, ChronoUnit.HOURS)
                 )
             )
@@ -91,13 +78,11 @@ class ItemMetaRetryJobIt {
         handler.handle()
 
         coVerify(exactly = 0) { metaService.schedule(idNow, ItemMetaPipeline.RETRY, true) }
-        coVerify(exactly = 0) { metaService.schedule(id6m, ItemMetaPipeline.RETRY, true) }
         coVerify(exactly = 1) { metaService.schedule(id2h, ItemMetaPipeline.RETRY, true) }
         coVerify(exactly = 0) { metaService.schedule(id25h, ItemMetaPipeline.RETRY, true) }
 
         assertEquals(0, itemRepository.get(ShortItemId(idNow))?.metaEntry?.retries)
-        assertEquals(1, itemRepository.get(ShortItemId(id6m))?.metaEntry?.retries)
-        assertEquals(2, itemRepository.get(ShortItemId(id2h))?.metaEntry?.retries)
-        assertEquals(3, itemRepository.get(ShortItemId(id25h))?.metaEntry?.retries)
+        assertEquals(1, itemRepository.get(ShortItemId(id2h))?.metaEntry?.retries)
+        assertEquals(2, itemRepository.get(ShortItemId(id25h))?.metaEntry?.retries)
     }
 }

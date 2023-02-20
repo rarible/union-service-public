@@ -110,6 +110,6 @@ class ReconcileMarksProperties(
 )
 
 class MetaItemRetry(
-    val enabled: Boolean = false,
+    val enabled: Boolean = true,
     val rate: Duration = Duration.ofMinutes(1)
 )
