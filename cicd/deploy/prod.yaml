@@ -38,8 +38,8 @@ protocol-union-meta-loader:
     META_LOADER_DOWNLOADER_ITEM_REFRESH_POOL_SIZE: 32
     # Background job retries download data failed previously, low priority
     META_LOADER_DOWNLOADER_ITEM_RETRY_WORKERS: 6
-    META_LOADER_DOWNLOADER_ITEM_RETRY_BATCH_SIZE: 32
-    META_LOADER_DOWNLOADER_ITEM_RETRY_POOL_SIZE: 32
+    META_LOADER_DOWNLOADER_ITEM_RETRY_BATCH_SIZE: 64
+    META_LOADER_DOWNLOADER_ITEM_RETRY_POOL_SIZE: 64
     # Pipeline for initial sync with new blockchain, should be configured on demand, ATM not needed
     META_LOADER_DOWNLOADER_ITEM_SYNC_WORKERS: 1
     META_LOADER_DOWNLOADER_ITEM_SYNC_BATCH_SIZE: 4
