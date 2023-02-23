@@ -33,7 +33,7 @@ class FlowItemControllerApiMock(
                 lastUpdatedFrom,
                 lastUpdatedTo
             )
-        } returns Mono.just(FlowNftItemsDto(returnItems.size.toLong(), null, returnItems.asList()))
+        } returns Mono.just(FlowNftItemsDto(null, returnItems.asList()))
     }
 
     fun mockGetNftOrderItemsByOwner(
@@ -44,7 +44,7 @@ class FlowItemControllerApiMock(
     ) {
         every {
             nftItemControllerApi.getNftItemsByOwner(owner, continuation, size)
-        } returns Mono.just(FlowNftItemsDto(returnItems.size.toLong(), null, returnItems.asList()))
+        } returns Mono.just(FlowNftItemsDto(null, returnItems.asList()))
     }
 
     fun mockGetNftOrderItemsByCollection(
@@ -55,7 +55,7 @@ class FlowItemControllerApiMock(
     ) {
         every {
             nftItemControllerApi.getNftItemsByCollection(collection, continuation, size)
-        } returns Mono.just(FlowNftItemsDto(returnItems.size.toLong(), null, returnItems.asList()))
+        } returns Mono.just(FlowNftItemsDto(null, returnItems.asList()))
     }
 
     fun mockGetNftOrderItemsByCreator(
@@ -66,7 +66,7 @@ class FlowItemControllerApiMock(
     ) {
         every {
             nftItemControllerApi.getNftItemsByCreator(creator, continuation, size)
-        } returns Mono.just(FlowNftItemsDto(returnItems.size.toLong(), null, returnItems.asList()))
+        } returns Mono.just(FlowNftItemsDto(null, returnItems.asList()))
     }
 
 }

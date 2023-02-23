@@ -126,9 +126,7 @@ class CollectionControllerElasticFt : AbstractIntegrationTest() {
         coEvery {
             testFlowCollectionApi.searchNftCollectionsByIds((listOf(flowDto1.id)))
         } returns FlowNftCollectionsDto(
-            total = 1, continuation = null, data = listOf(
-                flowDto1
-            )
+            continuation = null, data = listOf(flowDto1)
         ).toMono()
 
         coEvery {

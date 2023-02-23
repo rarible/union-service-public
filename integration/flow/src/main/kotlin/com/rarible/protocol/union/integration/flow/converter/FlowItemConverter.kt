@@ -71,7 +71,7 @@ object FlowItemConverter {
 
     fun convert(page: FlowNftItemsDto, blockchain: BlockchainDto): Page<UnionItem> {
         return Page(
-            total = page.total,
+            total = 0,
             continuation = page.continuation,
             entities = page.items.map { convert(it, blockchain) }
         )

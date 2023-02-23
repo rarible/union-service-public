@@ -467,7 +467,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 size,
                 any()
             )
-        } returns FlowActivitiesDto(size, null, getFlowOrderActivityList(size)).toMono()
+        } returns FlowActivitiesDto(null, getFlowOrderActivityList(size)).toMono()
     }
 
     private fun mockFlowNftActivitiesSync(
@@ -480,7 +480,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 size,
                 any()
             )
-        } returns FlowActivitiesDto(size, null, getFlowNftActivityList(size)).toMono()
+        } returns FlowActivitiesDto(null, getFlowNftActivityList(size)).toMono()
     }
 
     private fun fillEthereumActivitiesLists(
@@ -598,7 +598,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 maxSize,
                 any()
             )
-        } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
+        } returns FlowActivitiesDto(null, listOf(activity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
             types, listOf(flowCollectionId.fullId()), continuation, null, 100000, sort, null,
@@ -630,7 +630,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
         coEvery {
             testFlowActivityApi.getNftOrderActivitiesById(any())
-        } returns FlowActivitiesDto(1, null, listOf(flowSourceActivity)).toMono()
+        } returns FlowActivitiesDto(null, listOf(flowSourceActivity)).toMono()
 
         coEvery {
             testEthereumActivityOrderApi.getOrderActivitiesById(any())
@@ -757,7 +757,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 tokenId.toLong(),
                 continuation, defaultSize, any()
             )
-        } returns FlowActivitiesDto(1, null, listOf(activity)).toMono()
+        } returns FlowActivitiesDto(null, listOf(activity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
             types, flowItemId.fullId(), continuation, null, defaultSize, sort, null,
@@ -825,7 +825,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
         coEvery {
             testFlowActivityApi.getNftOrderAllActivities(any(), isNull(), eq(size), any())
-        } returns FlowActivitiesDto(1, null, flowActivities).toMono()
+        } returns FlowActivitiesDto(null, flowActivities).toMono()
 
         val activities = activityControllerApi.getAllActivities(
             types, blockchains, null, null, size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST, null,
@@ -925,7 +925,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
 
         coEvery {
             testFlowActivityApi.getNftOrderAllActivities(any(), eq(flowContinuation), eq(size), any())
-        } returns FlowActivitiesDto(1, null, flowActivities).toMono()
+        } returns FlowActivitiesDto(null, flowActivities).toMono()
 
         val activities = activityControllerApi.getAllActivities(
             types, blockchains, null, cursorArg.toString(), size,
@@ -1044,7 +1044,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 eq(size),
                 sort?.name
             )
-        } returns FlowActivitiesDto(1, null, listOf(flowActivity)).toMono()
+        } returns FlowActivitiesDto(null, listOf(flowActivity)).toMono()
 
         val now = nowMillis()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
@@ -1137,7 +1137,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 eq(size),
                 sort?.name
             )
-        } returns FlowActivitiesDto(1, null, listOf(flowActivity)).toMono()
+        } returns FlowActivitiesDto(null, listOf(flowActivity)).toMono()
 
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
@@ -1184,7 +1184,7 @@ class ActivityControllerFt : AbstractIntegrationTest() {
                 eq(size),
                 sort?.name
             )
-        } returns FlowActivitiesDto(0, null, listOf()).toMono()
+        } returns FlowActivitiesDto(null, listOf()).toMono()
 
         val now = nowMillis()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)

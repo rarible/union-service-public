@@ -33,7 +33,7 @@ class FlowOwnershipControllerApiMock(
                 continuation,
                 size
             )
-        } returns Mono.just(FlowNftOwnershipsDto(returnOwnerships.size.toLong(), null, returnOwnerships.asList()))
+        } returns Mono.just(FlowNftOwnershipsDto(null, returnOwnerships.asList()))
     }
 
     fun mockGetNftAllOwnerships(continuation: String?, size: Int, vararg returnOwnerships: FlowNftOwnershipDto) {
@@ -42,7 +42,7 @@ class FlowOwnershipControllerApiMock(
                 continuation,
                 size
             )
-        } returns Mono.just(FlowNftOwnershipsDto(returnOwnerships.size.toLong(), null, returnOwnerships.asList()))
+        } returns Mono.just(FlowNftOwnershipsDto(null, returnOwnerships.asList()))
     }
 
 }

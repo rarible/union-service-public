@@ -187,7 +187,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
         coEvery {
             testFlowCollectionApi.searchNftCollectionsByOwner(flowOwnerId.value, continuation, size)
-        } returns FlowNftCollectionsDto(1, null, listOf(collection)).toMono()
+        } returns FlowNftCollectionsDto(null, listOf(collection)).toMono()
 
         val unionCollections = collectionControllerClient.getCollectionsByOwner(
             flowOwnerId.fullId(), null, continuation, size
@@ -214,7 +214,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
         coEvery {
             testFlowCollectionApi.searchNftAllCollections(null, size)
-        } returns FlowNftCollectionsDto(2, null, flowCollections).toMono()
+        } returns FlowNftCollectionsDto(null, flowCollections).toMono()
 
         coEvery {
             testEthereumCollectionApi.searchNftAllCollections(ethContinuation, size)
@@ -232,7 +232,6 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(unionCollections.collections).hasSize(6)
-        assertThat(unionCollections.total).isEqualTo(6)
         assertThat(unionCollections.continuation).isNull()
     }
 

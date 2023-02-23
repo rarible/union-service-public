@@ -251,7 +251,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
                     )
                 )
             )
-        } returns FlowActivitiesDto(null, null, listOf(flowActivity1)).toMono()
+        } returns FlowActivitiesDto(null, listOf(flowActivity1)).toMono()
 
         coEvery {
             testSolanaActivityApi.searchActivitiesByIds(
