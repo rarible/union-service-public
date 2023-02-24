@@ -52,7 +52,7 @@ object FlowOwnershipConverter {
 
     fun convert(page: FlowNftOwnershipsDto, blockchain: BlockchainDto): Page<UnionOwnership> {
         return Page(
-            total = page.total,
+            total = 0,
             continuation = page.continuation,
             entities = page.ownerships.map { convert(it, blockchain) }
         )

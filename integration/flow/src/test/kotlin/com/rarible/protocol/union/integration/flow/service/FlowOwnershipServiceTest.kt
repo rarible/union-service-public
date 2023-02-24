@@ -40,7 +40,7 @@ internal class FlowOwnershipServiceTest {
         val expected2 = FlowOwnershipConverter.convert(ownership2, BlockchainDto.FLOW)
         coEvery {
             ownershipControllerApi.getNftOwnershipsById(any())
-        } returns FlowNftOwnershipsDto(2, null, listOf(ownership1, ownership2)).toMono()
+        } returns FlowNftOwnershipsDto(null, listOf(ownership1, ownership2)).toMono()
 
         // when
         val actual = service.getOwnershipsByIds(listOf(id1, id2))
@@ -63,7 +63,7 @@ internal class FlowOwnershipServiceTest {
         val ownership = randomFlowNftOwnershipDto(id)
         coEvery {
             ownershipControllerApi.getNftAllOwnerships(any(), any())
-        } returns FlowNftOwnershipsDto(2, newContinuation, listOf(ownership)).toMono()
+        } returns FlowNftOwnershipsDto(newContinuation, listOf(ownership)).toMono()
 
         // when
         val actual = service.getOwnershipsAll(continuation, size)

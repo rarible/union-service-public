@@ -59,7 +59,7 @@ class ActivityConsumerIt {
         elasticsearchTestBootstrapper.bootstrap()
         coEvery {
             flowNftItemControllerApi.getItemByIds(any())
-        } returns FlowNftItemsDto(0, "", emptyList()).toMono() // TODO more meaningful response
+        } returns FlowNftItemsDto("", emptyList()).toMono() // TODO more meaningful response
         coEvery {
             ethereumNftItemControllerApi.getNftItemsByIds(any())
         } returns Flux.empty()

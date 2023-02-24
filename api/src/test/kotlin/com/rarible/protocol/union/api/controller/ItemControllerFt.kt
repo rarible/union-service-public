@@ -624,7 +624,6 @@ class ItemControllerFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(items.items).hasSize(3)
-        assertThat(items.total).isEqualTo(4)
         assertThat(items.continuation).isNotNull()
     }
 

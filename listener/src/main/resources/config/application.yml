@@ -193,8 +193,8 @@ listener:
       wrapped: 10
   meta-scheduling:
     item:
-      workers: 4
-      batchSize: 16
+      workers: 3
+      batchSize: 512
   metrics:
     root-path: "protocol.union.listener"
 
