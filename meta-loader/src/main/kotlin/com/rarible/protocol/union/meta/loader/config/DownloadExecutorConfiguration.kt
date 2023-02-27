@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadTask
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaNotifier
@@ -28,7 +29,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import java.util.*
+import java.util.UUID
 
 @Configuration
 @Import(value = [UnionMetaLoaderConfiguration::class])
@@ -48,12 +49,19 @@ class DownloadExecutorConfiguration(
     private val clientIdPrefix = "$env.$host.${UUID.randomUUID()}"
 
     @Bean
+    fun itemDownloadExecutorMetrics() = DownloadExecutorMetrics(
+        meterRegistry = meterRegistry,
+        type = "ITEM",
+        blockchainExtractor = { id -> IdParser.parseItemId(id).blockchain }
+    )
+
+    @Bean
     @Qualifier("item.meta.download.executor.manager")
     fun itemMetaDownloadExecutorManager(
         itemMetaRepository: ItemMetaRepository,
         itemMetaDownloader: ItemMetaDownloader,
         itemMetaNotifier: ItemMetaNotifier,
-        metrics: DownloadExecutorMetrics
+        itemDownloadExecutorMetrics: DownloadExecutorMetrics
     ): DownloadExecutorManager {
         val maxRetries = metaProperties.retryIntervals.size
         val executors = HashMap<String, DownloadExecutor<UnionMeta>>()
@@ -65,7 +73,7 @@ class DownloadExecutorConfiguration(
                 itemMetaDownloader,
                 itemMetaNotifier,
                 pool,
-                metrics,
+                itemDownloadExecutorMetrics,
                 maxRetries
             )
             executors[pipeline] = executor
@@ -142,5 +150,4 @@ class DownloadExecutorConfiguration(
     private fun consumerGroup(suffix: String): String {
         return "${env}.protocol.union.${suffix}"
     }
-
 }
