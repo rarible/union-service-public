@@ -7,8 +7,6 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
@@ -31,7 +29,6 @@ sealed class DownloadExecutor<T>(
     protected val logger = LoggerFactory.getLogger(javaClass)
 
     abstract val type: String
-    abstract fun getBlockchain(task: DownloadTask): BlockchainDto
 
     suspend fun execute(tasks: List<DownloadTask>) {
         tasks.map {
@@ -43,7 +40,7 @@ sealed class DownloadExecutor<T>(
         val started = Instant.now()
         val current = repository.get(task.id) ?: getDefault(task)
         if (current.succeedAt != null && task.scheduledAt.isBefore(current.succeedAt)) {
-            metrics.onSkippedTask(started, getBlockchain(task), type, task.pipeline, task.force)
+            metrics.onSkippedTask(started, task)
             return
         }
 
@@ -70,7 +67,7 @@ sealed class DownloadExecutor<T>(
 
         saved?.let { notifier.notify(saved) }
 
-        metrics.onSuccessfulTask(started, getBlockchain(task), type, task.pipeline, task.force)
+        metrics.onSuccessfulTask(started, task)
         logger.info("Data download SUCCEEDED for {} task: {} ({})", type, task.id, task.pipeline)
     }
 
@@ -113,8 +110,8 @@ sealed class DownloadExecutor<T>(
 
     private fun markStatus(started: Instant, task: DownloadTask, status: DownloadStatus) {
         when (status) {
-            DownloadStatus.FAILED -> metrics.onFailedTask(started, getBlockchain(task), type, task.pipeline, task.force)
-            DownloadStatus.RETRY -> metrics.onRetriedTask(started, getBlockchain(task), type, task.pipeline, task.force)
+            DownloadStatus.FAILED -> metrics.onFailedTask(started, task)
+            DownloadStatus.RETRY -> metrics.onRetriedTask(started, task)
             else -> logger.warn("Incorrect status of failed {} task {} ({}): {}", type, task.id, task.pipeline, status)
         }
     }
@@ -151,8 +148,6 @@ class ItemDownloadExecutor(
 ) {
 
     override val type = "ITEM"
-    override fun getBlockchain(task: DownloadTask) = IdParser.parseItemId(task.id).blockchain
-
 }
 
 class CollectionDownloadExecutor(
@@ -172,6 +167,4 @@ class CollectionDownloadExecutor(
 ) {
 
     override val type = "COLLECTION"
-    override fun getBlockchain(task: DownloadTask) = IdParser.parseCollectionId(task.id).blockchain
-
 }
