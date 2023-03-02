@@ -7,12 +7,10 @@ import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
-import com.rarible.protocol.union.enrichment.configuration.ClickHouseConfiguration
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.worker.job.BestOrderCheckJob
 import com.rarible.protocol.union.worker.job.BestOrderCheckJobHandler
-import com.rarible.protocol.union.worker.job.CollectionStatisticsResyncJob
 import com.rarible.protocol.union.worker.job.ReconciliationMarkJob
 import com.rarible.protocol.union.worker.job.ReconciliationMarkJobHandler
 import com.rarible.protocol.union.worker.task.search.ReindexService
@@ -32,8 +30,7 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 @Import(
     value = [
         EnrichmentApiConfiguration::class,
-        SearchConfiguration::class,
-        ClickHouseConfiguration::class,
+        SearchConfiguration::class
     ]
 )
 @EnableRaribleTask
@@ -87,16 +84,6 @@ class WorkerConfiguration(
             repositories = esRepositories,
             restHighLevelClient = highLevelClient,
         )
-    }
-
-    @Bean
-    @ConditionalOnProperty(name = ["worker.collection-statistics-resync.enabled"], havingValue = "true")
-    fun collectionStatisticsResyncJob(
-        properties: WorkerProperties,
-        meterRegistry: MeterRegistry,
-        taskRepository: TaskRepository
-    ): CollectionStatisticsResyncJob {
-        return CollectionStatisticsResyncJob(properties, meterRegistry, taskRepository)
     }
 
     @Bean
