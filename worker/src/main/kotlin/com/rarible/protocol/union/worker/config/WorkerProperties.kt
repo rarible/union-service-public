@@ -11,7 +11,6 @@ data class WorkerProperties(
     val searchReindex: SearchReindexProperties,
     val metrics: MetricsProperties = MetricsProperties(),
     val reconciliation: ReconciliationProperties,
-    val collectionStatisticsResync: CollectionStatisticsResyncProperties,
     val platformBestSellCleanup: PlatformBestSellCleanUpProperties = PlatformBestSellCleanUpProperties(),
     val priceUpdate: PriceUpdateProperties,
     val reconcileMarks: ReconcileMarksProperties,
@@ -85,12 +84,6 @@ class ReconciliationProperties(
 
 data class MetricsProperties(
     val rootPath: String = "protocol.union.worker"
-)
-
-class CollectionStatisticsResyncProperties(
-    val enabled: Boolean = false,
-    val rate: Duration = Duration.ofHours(12),
-    val limit: Int = 50
 )
 
 data class PlatformBestSellCleanUpProperties(

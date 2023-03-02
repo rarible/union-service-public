@@ -18,7 +18,6 @@ import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
-import com.rarible.protocol.union.enrichment.test.data.randomCollectionStatistics
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -84,13 +83,12 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val collectionIdFull = EthConverter.convert(collectionId, BlockchainDto.ETHEREUM)
         val ethCollectionDto = randomEthCollectionDto(collectionId)
         val ethUnionCollection = EthCollectionConverter.convert(ethCollectionDto, BlockchainDto.ETHEREUM)
-        val statistics = randomCollectionStatistics()
         val collectionAsset = randomEthCollectionAsset(collectionId)
         val ethOrder = randomEthV2OrderDto(collectionAsset, randomAddress(), randomEthAssetErc20())
         val ethUnionOrder = ethOrderConverter.convert(ethOrder, BlockchainDto.ETHEREUM)
 
         val shortOrder = ShortOrderConverter.convert(ethUnionOrder)
-        val shortCollection = EnrichedCollectionConverter.convertToShortCollection(ethUnionCollection, statistics)
+        val shortCollection = EnrichedCollectionConverter.convertToShortCollection(ethUnionCollection)
             .copy(bestSellOrder = shortOrder)
         enrichmentCollectionService.save(shortCollection)
 
@@ -103,8 +101,6 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         assertThat(unionCollection.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
         assertThat(unionCollection.self).isTrue
         assertThat(unionCollection.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
-        assertThat(unionCollection.statistics?.itemCount).isEqualTo(statistics.itemCount.toLong())
-        assertThat(unionCollection.statistics?.itemCountTotal).isEqualTo(statistics.itemCount)
     }
 
     @Test
