@@ -66,8 +66,6 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
             Assertions.assertThat(messages[0].value.collection.status).isEqualTo(expected.status)
             Assertions.assertThat(messages[0].value.collection.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
             Assertions.assertThat(messages[0].value.collection.bestBidOrder).isNull()
-            Assertions.assertThat(messages[0].value.collection.statistics?.itemCount).isEqualTo(expected.statistics?.itemCount)
-            Assertions.assertThat(messages[0].value.collection.statistics?.itemCountTotal).isEqualTo(expected.statistics?.itemCountTotal)
         }
     }
 

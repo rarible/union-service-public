@@ -8,7 +8,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
-import com.rarible.protocol.union.enrichment.test.data.randomCollectionStatistics
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import io.mockk.coEvery
@@ -37,8 +36,7 @@ internal class CollectionReconciliationControllerFt : AbstractIntegrationTest() 
                         collection = EthCollectionConverter.convert(
                             collectionDto1,
                             BlockchainDto.ETHEREUM
-                        ),
-                        statistics = randomCollectionStatistics()
+                        )
                     ).copy(lastUpdatedAt = Instant.ofEpochMilli(2000))
                 )
             }
@@ -49,8 +47,7 @@ internal class CollectionReconciliationControllerFt : AbstractIntegrationTest() 
                         collection = EthCollectionConverter.convert(
                             collectionDto2,
                             BlockchainDto.ETHEREUM
-                        ),
-                        statistics = randomCollectionStatistics()
+                        )
                     ).copy(lastUpdatedAt = Instant.ofEpochMilli(3000))
                 )
             }

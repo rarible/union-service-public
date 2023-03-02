@@ -10,7 +10,6 @@ import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.enrichment.model.CollectionStatistics
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
@@ -127,25 +126,6 @@ class EnrichmentCollectionEventService(
         val exist = current != null
         val short = current ?: ShortCollection.empty(collectionId)
         return Triple(current, action(short), exist)
-    }
-
-    suspend fun onCollectionStatisticsUpdate(
-        collectionId: ShortCollectionId,
-        statistics: CollectionStatistics,
-        notificationEnabled: Boolean
-    ): Unit = optimisticLock {
-        val collection = enrichmentCollectionService.getOrEmpty(collectionId)
-        if (collection.statistics != statistics) {
-            try {
-                saveAndNotify(
-                    updated = collection.copy(statistics = statistics),
-                    notificationEnabled = notificationEnabled,
-                    eventTimeMarks = null // TODO maybe add something?
-                )
-            } catch (e: Exception) {
-                logger.error("Failed to update collection [$collection] with new statistics [$statistics]", e)
-            }
-        }
     }
 
     private suspend fun saveAndNotify(
