@@ -99,8 +99,3 @@ worker:
           enabled: true
         - blockchain: IMMUTABLEX
           enabled: false
-
-clickhouse:
-  database: default
-  user: default
-  password: ""
