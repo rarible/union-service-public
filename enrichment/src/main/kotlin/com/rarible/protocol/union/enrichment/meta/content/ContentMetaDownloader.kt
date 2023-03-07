@@ -109,7 +109,7 @@ class ContentMetaDownloader(
         logger.info("Resolved embedded meta content ${original.representation}: $properties")
         return original.copy(
             url = contentMetaService.getEmbeddedSchemaUrl(toSave.id),
-            properties = properties
+            properties = properties.withAvailable(true)
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.repository
 
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOrder
@@ -18,6 +19,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import scalether.domain.Address
 import java.time.Instant
 
 @IntegrationTest
@@ -115,5 +117,53 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
             size = 1
         )
         assertThat(resultWithContinuationAndSize).containsExactly(result[1])
+    }
+
+    @Test
+    fun findAllFromIdExcluded() = runBlocking<Unit> {
+        val item1 = itemRepository.save(
+            randomShortItem(
+                id = ItemIdDto(
+                    blockchain = BlockchainDto.ETHEREUM,
+                    value = "${Address.ONE()}:1"
+                )
+            )
+        )
+        val item2 = itemRepository.save(
+            randomShortItem(
+                id = ItemIdDto(
+                    blockchain = BlockchainDto.ETHEREUM,
+                    value = "${Address.ONE()}:2"
+                )
+            )
+        )
+        val item3 = itemRepository.save(
+            randomShortItem(
+                id = ItemIdDto(
+                    blockchain = BlockchainDto.ETHEREUM,
+                    value = "${Address.ONE()}:3"
+                )
+            )
+        )
+        val item4 = itemRepository.save(
+            randomShortItem(
+                id = ItemIdDto(
+                    blockchain = BlockchainDto.ETHEREUM,
+                    value = "${Address.ONE()}:4"
+                )
+            )
+        )
+        val item5 = itemRepository.save(
+            randomShortItem(
+                id = ItemIdDto(
+                    blockchain = BlockchainDto.ETHEREUM,
+                    value = "${Address.ONE()}:5"
+                )
+            )
+        )
+
+        assertThat(itemRepository.findAll().toList()).containsExactly(item1, item2, item3, item4, item5)
+
+        assertThat(itemRepository.findAll(fromIdExcluded = item2.id).toList()).containsExactly(item3, item4, item5)
     }
 }
