@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Component
 
+@Deprecated("remove after release")
 @Component
 class FixEmbeddedContentAvailableTask(
     private val itemRepository: ItemRepository,
