@@ -288,7 +288,8 @@ class EthOrderConverter(
                             zone = EthConverter.convert(data.zone, blockchain),
                             zoneHash = EthConverter.convert(data.zoneHash),
                             conduitKey = EthConverter.convert(data.conduitKey),
-                            counter = data.counter
+                            counter = data.counter,
+                            nonce = data.nonce
                         )
                     },
                     optionalRoyalties = optionalRoyalties,

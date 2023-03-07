@@ -332,6 +332,7 @@ class EthOrderConverterTest {
         assertThat(converted.zoneHash).isEqualTo(dto.zoneHash.prefixed())
         assertThat(converted.conduitKey).isEqualTo(dto.conduitKey.prefixed())
         assertThat(converted.counter).isEqualTo(dto.counter)
+        assertThat(converted.nonce).isEqualTo(dto.nonce)
         with(converted.offer.single()) {
             assertThat(itemType).isEqualTo(EthSeaportItemTypeDto.ERC721)
             assertThat(token.value).isEqualTo(offerDto.token.prefixed())
