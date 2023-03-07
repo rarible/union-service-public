@@ -21,6 +21,8 @@ sealed class UnionMetaContentProperties {
     abstract fun isEmpty(): Boolean
 
     abstract fun isFull(): Boolean
+
+    abstract fun withAvailable(available: Boolean): UnionMetaContentProperties
 }
 
 data class UnionImageProperties(
@@ -40,6 +42,7 @@ data class UnionImageProperties(
             && height != null
     }
 
+    override fun withAvailable(available: Boolean): UnionImageProperties = copy(available = available)
 }
 
 data class UnionVideoProperties(
@@ -58,6 +61,8 @@ data class UnionVideoProperties(
             && width != null
             && height != null
     }
+
+    override fun withAvailable(available: Boolean): UnionVideoProperties = copy(available = available)
 }
 
 data class UnionAudioProperties(
@@ -70,6 +75,7 @@ data class UnionAudioProperties(
 
     override fun isFull(): Boolean = mimeType != null && size != null
 
+    override fun withAvailable(available: Boolean): UnionAudioProperties = copy(available = available)
 }
 
 data class UnionModel3dProperties(
@@ -82,6 +88,7 @@ data class UnionModel3dProperties(
 
     override fun isFull(): Boolean = mimeType != null && size != null
 
+    override fun withAvailable(available: Boolean): UnionModel3dProperties = copy(available = available)
 }
 
 data class UnionHtmlProperties(
@@ -94,6 +101,7 @@ data class UnionHtmlProperties(
 
     override fun isFull(): Boolean = mimeType != null && size != null
 
+    override fun withAvailable(available: Boolean): UnionHtmlProperties = copy(available = available)
 }
 
 data class UnionUnknownProperties(
@@ -106,4 +114,5 @@ data class UnionUnknownProperties(
 
     override fun isFull(): Boolean = false
 
+    override fun withAvailable(available: Boolean): UnionUnknownProperties = copy(available = available)
 }

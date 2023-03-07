@@ -164,10 +164,12 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         assertThat(enriched.width).isEqualTo(192)
         assertThat(enriched.height).isEqualTo(192)
         assertThat(enriched.mimeType).isEqualTo(MimeType.SVG_XML_IMAGE.value)
+        assertThat(enriched.available).isTrue
 
         val embedded = embeddedContentService.get(embeddedId)!!
         assertThat(embedded.data).isEqualTo(data.toByteArray())
         assertThat(embedded.mimeType).isEqualTo(MimeType.SVG_XML_IMAGE.value)
+        assertThat(embedded.available).isTrue
     }
 
     @Test
@@ -183,10 +185,12 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val enriched = result.properties!! as UnionImageProperties
 
         assertThat(enriched.mimeType).isEqualTo(MimeType.GIF_IMAGE.value)
+        assertThat(enriched.available).isTrue
 
         val embedded = embeddedContentService.get(embeddedId)!!
         assertThat(embedded.data).isEqualTo(text.toByteArray())
         assertThat(embedded.mimeType).isEqualTo(MimeType.GIF_IMAGE.value)
+        assertThat(embedded.available).isTrue
     }
 
     private fun randomContentMeta(mimeType: String): ContentMeta {
