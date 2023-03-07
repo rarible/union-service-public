@@ -472,6 +472,7 @@ fun randomEthOrderOpenSeaV1DataV1Dto(): OrderOpenSeaV1DataV1Dto {
 }
 
 fun randomEthOrderBasicSeaportDataV1Dto(): OrderBasicSeaportDataV1Dto {
+    val counter = randomLong()
     return OrderBasicSeaportDataV1Dto(
         protocol = randomAddress(),
         orderType = SeaportOrderTypeDto.values().random(),
@@ -480,7 +481,8 @@ fun randomEthOrderBasicSeaportDataV1Dto(): OrderBasicSeaportDataV1Dto {
         zone = randomAddress(),
         zoneHash = Word.apply(randomWord()),
         conduitKey = Word.apply(randomWord()),
-        counter = randomLong()
+        counter = counter,
+        nonce = counter.toBigInteger()
     )
 }
 
