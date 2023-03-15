@@ -4,8 +4,8 @@ protocol-union-api:
     nodePort: 30118
   resources:
     jvm:
-      xmx_megabytes: 1024
-      max_direct_memory_megabytes: 256
+      xmx_megabytes: 1536
+      max_direct_memory_megabytes: 512
 
 protocol-union-listener:
   resources:
