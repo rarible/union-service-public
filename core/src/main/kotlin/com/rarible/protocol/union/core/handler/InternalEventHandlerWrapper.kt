@@ -13,8 +13,7 @@ class InternalEventHandlerWrapper<B>(
         try {
             internalHandler.handle(event)
         } catch (ex: Exception) {
-            logger.error("Unexpected exception during handling internal event [{}]", event, ex)
+            logger.error("Unexpected exception during handling internal event $event", ex)
         }
     }
-
 }
