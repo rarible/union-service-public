@@ -8,7 +8,6 @@ import com.rarible.protocol.union.core.model.UnionInternalCollectionEvent
 import com.rarible.protocol.union.core.model.UnionInternalItemEvent
 import com.rarible.protocol.union.core.model.UnionInternalOrderEvent
 import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
-import com.rarible.protocol.union.dto.BlockchainDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -26,29 +25,6 @@ class UnionWrappedEventHandler(
 ) : InternalEventHandler<UnionInternalBlockchainEvent> {
 
     override suspend fun handle(event: UnionInternalBlockchainEvent) {
-        when (event) {
-            is UnionInternalActivityEvent -> {}
-            is UnionInternalAuctionEvent -> {}
-            is UnionInternalCollectionEvent -> {}
-            is UnionInternalOrderEvent -> {}
-            is UnionInternalItemEvent -> {
-                if (event.event.itemId.blockchain == BlockchainDto.POLYGON &&
-                    event.event.itemId.value.startsWith("0xba6666b118f8303f990f3519df07e160227cce87")
-                ) {
-                    logger.info("Ignore event with itemId: ${event.event.itemId}")
-                    return
-                }
-            }
-            is UnionInternalOwnershipEvent -> {
-                if (event.event.ownershipId.blockchain == BlockchainDto.POLYGON &&
-                    event.event.ownershipId.getItemId().value.startsWith("0xba6666b118f8303f990f3519df07e160227cce87")
-                ) {
-                    logger.info("Ignore event with ownershipId: ${event.event.ownershipId}")
-                    return
-                }
-
-            }
-        }
         when (event) {
             is UnionInternalItemEvent -> internalItemEventHandler.onEvent(event.event)
             is UnionInternalOwnershipEvent -> internalOwnershipEventHandler.onEvent(event.event)
