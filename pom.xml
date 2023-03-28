@@ -34,7 +34,7 @@
     </pluginRepositories>
 
     <properties>
-        <revision>1.44</revision>
+        <revision>1.45</revision>
         <maven.deploy.skip>true</maven.deploy.skip>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -55,7 +55,7 @@
         <rarible.protocol.solana.version>1.41.0</rarible.protocol.solana.version>
         <rarible.protocol.tezos.api.version>1.39.18</rarible.protocol.tezos.api.version>
 
-        <rarible.protocol.union.version>1.44.3</rarible.protocol.union.version>
+        <rarible.protocol.union.version>1.45.0</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>
