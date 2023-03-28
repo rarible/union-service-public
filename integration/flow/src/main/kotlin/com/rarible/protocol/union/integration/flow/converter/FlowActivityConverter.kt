@@ -104,7 +104,7 @@ class FlowActivityConverter(
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = FlowConverter.convert(source.make, blockchain),
                     take = payment,
-                    reverted = false,
+                    reverted = source.reverted,
                     lastUpdatedAt = source.updatedAt
                 )
             }
@@ -124,7 +124,7 @@ class FlowActivityConverter(
                         blockNumber = source.blockNumber ?: 0,
                         logIndex = source.logIndex ?: 0
                     ),
-                    reverted = false,
+                    reverted = source.reverted,
                     lastUpdatedAt = source.updatedAt
                 )
             }
@@ -145,7 +145,7 @@ class FlowActivityConverter(
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     ),
-                    reverted = false,
+                    reverted = source.reverted,
                     lastUpdatedAt = source.updatedAt
                 )
             }
@@ -166,7 +166,7 @@ class FlowActivityConverter(
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     ),
-                    reverted = false,
+                    reverted = source.reverted,
                     lastUpdatedAt = source.updatedAt
                 )
             }
@@ -188,7 +188,7 @@ class FlowActivityConverter(
                         blockNumber = source.blockNumber,
                         logIndex = source.logIndex
                     ),
-                    reverted = false,
+                    reverted = source.reverted,
                     purchase = source.purchased,
                     lastUpdatedAt = source.updatedAt
                 )
@@ -208,7 +208,7 @@ class FlowActivityConverter(
                     maker = UnionAddressConverter.convert(blockchain, source.maker),
                     make = payment,
                     take = FlowConverter.convert(source.take, blockchain),
-                    reverted = false,
+                    reverted = source.reverted,
                     lastUpdatedAt = source.updatedAt
                 )
             }
@@ -221,7 +221,7 @@ class FlowActivityConverter(
                     make = FlowConverter.convertToType(source.make, blockchain),
                     take = FlowConverter.convertToType(source.take, blockchain),
                     transactionHash = source.transactionHash ?: "",
-                    reverted = false,
+                    reverted = source.reverted,
                     lastUpdatedAt = source.updatedAt
                 )
             }
@@ -266,7 +266,7 @@ class FlowActivityConverter(
                 blockNumber = source.blockNumber,
                 logIndex = source.logIndex
             ),
-            reverted = false,
+            reverted = source.reverted,
             lastUpdatedAt = source.updatedAt
         )
     }
@@ -289,7 +289,7 @@ class FlowActivityConverter(
         ),
         left = convert(source.left, blockchain),
         right = convert(source.right, blockchain),
-        reverted = false,
+        reverted = source.reverted,
         lastUpdatedAt = source.updatedAt
     )
 

@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.UnionInternalCollectionEvent
 import com.rarible.protocol.union.core.model.UnionInternalItemEvent
 import com.rarible.protocol.union.core.model.UnionInternalOrderEvent
 import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 /**
@@ -33,4 +34,6 @@ class UnionWrappedEventHandler(
             is UnionInternalCollectionEvent -> internalCollectionEventHandler.onEvent(event.event)
         }
     }
+
+    private val logger = LoggerFactory.getLogger(UnionWrappedEventHandler::class.java)
 }
