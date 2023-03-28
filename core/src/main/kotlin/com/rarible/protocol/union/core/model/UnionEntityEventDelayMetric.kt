@@ -14,7 +14,7 @@ abstract class UnionEntityEventDelayMetric(private val name: String) {
     }
 
     private class BlockchainTimingMetric(name: String, blockchain: BlockchainDto): TimingMetric(
-        name, tag("blockchain", blockchain.name.lowercase())
+        name, emptyList(), tag("blockchain", blockchain.name.lowercase())
     )
 }
 
