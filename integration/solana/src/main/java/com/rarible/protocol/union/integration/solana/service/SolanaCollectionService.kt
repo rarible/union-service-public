@@ -4,8 +4,10 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.CollectionControllerApi
 import com.rarible.protocol.solana.dto.CollectionsByIdRequestDto
 import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -27,6 +29,12 @@ open class SolanaCollectionService(
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
         val result = collectionApi.getCollectionById(collectionId).awaitFirst()
         return SolanaCollectionConverter.convert(result, blockchain)
+    }
+
+    override suspend fun getCollectionMetaById(collectionId: String): UnionCollectionMeta {
+        // TODO[SOLANA]: implement in right way
+        return getCollectionById(collectionId).meta
+            ?: throw UnionNotFoundException("Meta not found for Collection $blockchain:$collectionId")
     }
 
     override suspend fun getCollectionsByOwner(owner: String, continuation: String?, size: Int): Page<UnionCollection> {

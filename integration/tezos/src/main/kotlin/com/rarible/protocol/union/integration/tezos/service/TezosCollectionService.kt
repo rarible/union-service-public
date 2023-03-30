@@ -2,8 +2,10 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -42,6 +44,12 @@ open class TezosCollectionService(
         } else {
             tzktCollectionService.getCollectionById(collectionId)
         }
+    }
+
+    override suspend fun getCollectionMetaById(collectionId: String): UnionCollectionMeta {
+        // TODO[TEZOS]: implement in right way
+        return getCollectionById(collectionId).meta
+            ?: throw UnionNotFoundException("Meta not found for Collection $blockchain:$collectionId")
     }
 
     override suspend fun refreshCollectionMeta(collectionId: String) {

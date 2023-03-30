@@ -5,6 +5,7 @@ import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.AudioContentDto
+import com.rarible.protocol.dto.EthMetaStatusDto
 import com.rarible.protocol.dto.HtmlContentDto
 import com.rarible.protocol.dto.ImageContentDto
 import com.rarible.protocol.dto.MetaContentDto
@@ -47,7 +48,7 @@ class EthMetaConverterTest {
                 NftItemAttributeDto("key2", "value2")
             ),
             content = listOf(),
-            status = NftItemMetaDto.Status.OK
+            status = EthMetaStatusDto.OK
         )
 
         val itemId = randomEthItemId()
@@ -208,7 +209,7 @@ class EthMetaConverterTest {
             content = listOf(imageContent),
             tags = emptyList(),
             genres = emptyList(),
-            status = NftItemMetaDto.Status.OK
+            status = EthMetaStatusDto.OK
         )
 
         val itemId = randomEthItemId()
