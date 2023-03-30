@@ -2,7 +2,6 @@ package com.rarible.protocol.union.integration.ethereum.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.NftItemIdsDto
-import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.parser.AddressParser
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.core.exception.UnionMetaException
@@ -17,6 +16,7 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
+import com.rarible.protocol.union.integration.ethereum.converter.MetaStatusChecker
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
@@ -56,39 +56,16 @@ open class EthItemService(
     }
 
     override suspend fun getItemMetaById(itemId: String): UnionMeta {
+        val entityId = "Item: $blockchain:$itemId"
         try {
             val meta = itemControllerApi.getNftItemMetaById(itemId).awaitFirst()
-
-            return when (meta.status) {
-                NftItemMetaDto.Status.UNPARSEABLE_LINK -> throw UnionMetaException(
-                    UnionMetaException.ErrorCode.CORRUPTED_URL,
-                    "Can't parse meta url for: $itemId"
-                )
-
-                NftItemMetaDto.Status.UNPARSEABLE_JSON -> throw UnionMetaException(
-                    UnionMetaException.ErrorCode.CORRUPTED_DATA,
-                    "Can't parse meta json for: $itemId"
-                )
-
-                NftItemMetaDto.Status.TIMEOUT -> throw UnionMetaException(
-                    UnionMetaException.ErrorCode.TIMEOUT,
-                    "Timeout during loading meta for: $itemId"
-                )
-
-                NftItemMetaDto.Status.ERROR -> throw UnionMetaException(
-                    UnionMetaException.ErrorCode.ERROR,
-                    message = null
-                )
-
-                NftItemMetaDto.Status.OK -> EthMetaConverter.convert(meta, itemId)
-            }
+            MetaStatusChecker.checkStatus(meta.status, entityId)
+            return EthMetaConverter.convert(meta, itemId)
         } catch (e: NftItemControllerApi.ErrorGetNftItemMetaById) {
-            if (e.statusCode == HttpStatus.NOT_FOUND) throw UnionNotFoundException("Meta not found for: $itemId")
-
-            throw UnionMetaException(
-                UnionMetaException.ErrorCode.ERROR,
-                e.message
-            )
+            if (e.statusCode == HttpStatus.NOT_FOUND) {
+                throw UnionNotFoundException("Meta not found for $entityId")
+            }
+            throw UnionMetaException(UnionMetaException.ErrorCode.ERROR, e.message)
         }
     }
 

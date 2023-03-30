@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.AudioContentDto
+import com.rarible.protocol.dto.EthCollectionMetaDto
 import com.rarible.protocol.dto.HtmlContentDto
 import com.rarible.protocol.dto.ImageContentDto
 import com.rarible.protocol.dto.Model3dContentDto
-import com.rarible.protocol.dto.NftCollectionMetaDto
 import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.UnknownContentDto
 import com.rarible.protocol.dto.VideoContentDto
@@ -50,9 +50,7 @@ object EthMetaConverter {
         )
     }
 
-    fun convert(source: NftCollectionMetaDto?, blockchain: BlockchainDto): UnionCollectionMeta? {
-        if (source == null) return null
-
+    fun convert(source: EthCollectionMetaDto, blockchain: BlockchainDto): UnionCollectionMeta {
         return UnionCollectionMeta(
             name = source.name,
             description = source.description,

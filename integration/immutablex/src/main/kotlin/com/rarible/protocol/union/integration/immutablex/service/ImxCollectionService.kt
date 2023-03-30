@@ -2,8 +2,10 @@ package com.rarible.protocol.union.integration.immutablex.service
 
 import com.rarible.protocol.union.core.continuation.UnionCollectionContinuation
 import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -28,6 +30,11 @@ class ImxCollectionService(
     override suspend fun getCollectionById(collectionId: String): UnionCollection {
         val result = client.getById(collectionId)
         return ImxCollectionConverter.convert(result, blockchain)
+    }
+
+    override suspend fun getCollectionMetaById(collectionId: String): UnionCollectionMeta {
+        return getCollectionById(collectionId).meta
+            ?: throw UnionNotFoundException("Meta not found for Collection $blockchain:$collectionId")
     }
 
     override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {

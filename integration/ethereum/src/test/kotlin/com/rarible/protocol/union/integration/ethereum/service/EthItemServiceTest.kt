@@ -4,6 +4,7 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.dto.EthMetaStatusDto
 import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.NftItemRoyaltyListDto
@@ -109,7 +110,7 @@ class EthItemServiceTest {
         coEvery { itemControllerApi.getNftItemMetaById(any()) } returns Mono.just(
             NftItemMetaDto(
                 name = "",
-                status = NftItemMetaDto.Status.UNPARSEABLE_LINK
+                status = EthMetaStatusDto.UNPARSEABLE_LINK
             )
         )
 
@@ -125,7 +126,7 @@ class EthItemServiceTest {
         coEvery { itemControllerApi.getNftItemMetaById(any()) } returns Mono.just(
             NftItemMetaDto(
                 name = "",
-                status = NftItemMetaDto.Status.UNPARSEABLE_JSON
+                status = EthMetaStatusDto.UNPARSEABLE_JSON
             )
         )
 
@@ -141,7 +142,7 @@ class EthItemServiceTest {
         coEvery { itemControllerApi.getNftItemMetaById(any()) } returns Mono.just(
             NftItemMetaDto(
                 name = "",
-                status = NftItemMetaDto.Status.TIMEOUT
+                status = EthMetaStatusDto.TIMEOUT
             )
         )
 
@@ -168,7 +169,7 @@ class EthItemServiceTest {
         coEvery { itemControllerApi.getNftItemMetaById(any()) } returns Mono.just(
             NftItemMetaDto(
                 name = "",
-                status = NftItemMetaDto.Status.ERROR
+                status = EthMetaStatusDto.ERROR
             )
         )
 

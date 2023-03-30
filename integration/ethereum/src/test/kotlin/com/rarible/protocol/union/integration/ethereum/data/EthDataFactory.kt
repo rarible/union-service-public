@@ -29,6 +29,8 @@ import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.Erc1155AssetTypeDto
 import com.rarible.protocol.dto.Erc20AssetTypeDto
 import com.rarible.protocol.dto.Erc721AssetTypeDto
+import com.rarible.protocol.dto.EthCollectionMetaDto
+import com.rarible.protocol.dto.EthMetaStatusDto
 import com.rarible.protocol.dto.EventTimeMarkDto
 import com.rarible.protocol.dto.EventTimeMarksDto
 import com.rarible.protocol.dto.ImageContentDto
@@ -38,7 +40,6 @@ import com.rarible.protocol.dto.LooksRareOrderDto
 import com.rarible.protocol.dto.MetaContentDto
 import com.rarible.protocol.dto.MintDto
 import com.rarible.protocol.dto.NftCollectionDto
-import com.rarible.protocol.dto.NftCollectionMetaDto
 import com.rarible.protocol.dto.NftItemAttributeDto
 import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.dto.NftItemMetaDto
@@ -155,7 +156,7 @@ fun randomEthItemMeta(): NftItemMetaDto {
         tags = emptyList(),
         genres = emptyList(),
         content = randomMetaContentDtoList(),
-        status = NftItemMetaDto.Status.OK
+        status = EthMetaStatusDto.OK
     )
 }
 
@@ -562,8 +563,8 @@ fun randomEthCollectionDto(id: Address): NftCollectionDto {
     )
 }
 
-fun randomEthCollectionMetaDto(): NftCollectionMetaDto {
-    return NftCollectionMetaDto(
+fun randomEthCollectionMetaDto(): EthCollectionMetaDto {
+    return EthCollectionMetaDto(
         name = randomString(),
         description = randomString(),
         language = randomString(),
