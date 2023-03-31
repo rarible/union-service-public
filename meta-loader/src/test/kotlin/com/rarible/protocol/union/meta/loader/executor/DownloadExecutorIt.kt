@@ -21,6 +21,7 @@ import com.rarible.protocol.union.meta.loader.test.data.randomRetryMetaEntry
 import com.rarible.protocol.union.meta.loader.test.data.randomTask
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -42,7 +43,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var metrics: DownloadExecutorMetrics
 
-    val downloader: ItemMetaDownloader = mockk()
+    val downloader: ItemMetaDownloader = mockk() { every { type } returns "Item" }
     val notifier: DownloadNotifier<UnionMeta> = mockk { coEvery { notify(any()) } returns Unit }
     val pool = DownloadPool(2, "item-meta-test")
     val maxRetries = 2

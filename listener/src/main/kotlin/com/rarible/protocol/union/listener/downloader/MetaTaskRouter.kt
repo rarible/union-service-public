@@ -5,7 +5,7 @@ import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import kotlinx.coroutines.flow.collect
 
-class ItemMetaTaskRouter(
+class MetaTaskRouter(
     private val pipelineSenders: Map<String, RaribleKafkaProducer<DownloadTask>>
 ) : DownloadTaskRouter, AutoCloseable {
 

@@ -114,7 +114,9 @@ fun randomUnionItem(id: ItemIdDto): UnionItem {
     }
 }
 
-fun randomUnionMeta(): UnionMeta {
+fun randomUnionMeta(
+    content: List<UnionMetaContent> = emptyList()
+): UnionMeta {
     return UnionMeta(
         name = randomString(),
         description = randomString(),
@@ -127,7 +129,7 @@ fun randomUnionMeta(): UnionMeta {
         externalUri = randomString(),
         originalMetaUri = randomString(),
         attributes = listOf(randomUnionMetaAttribute()),
-        content = listOf(),
+        content = content,
         restrictions = listOf()
     )
 }
@@ -146,8 +148,7 @@ fun randomUnionCollectionMeta(): UnionCollectionMeta {
         originalMetaUri = randomString(),
         content = listOf(),
         feeRecipient = randomUnionAddress(),
-        sellerFeeBasisPoints = randomInt(10000),
-        externalLink = randomString() // TODO remove later
+        sellerFeeBasisPoints = randomInt(10000)
     )
 }
 
@@ -343,6 +344,36 @@ fun randomItemMetaDownloadEntry(
     failedAt: Instant? = nowMillis().minusSeconds(40),
     errorMessage: String? = "Error: ${randomString()}"
 ): DownloadEntry<UnionMeta> {
+    return DownloadEntry(
+        id = id,
+        status = status,
+        data = data,
+        downloads = downloads,
+        fails = fails,
+        retries = retries,
+        scheduledAt = scheduledAt,
+        updatedAt = updatedAt,
+        succeedAt = succeedAt,
+        failedAt = failedAt,
+        retriedAt = retriedAt,
+        errorMessage = errorMessage
+    )
+}
+
+fun randomCollectionMetaDownloadEntry(
+    id: String = randomEthItemId().fullId(),
+    status: DownloadStatus = DownloadStatus.SUCCESS,
+    data: UnionCollectionMeta? = randomUnionCollectionMeta(),
+    downloads: Int = 1,
+    fails: Int = 1,
+    retries: Int = 0,
+    scheduledAt: Instant? = nowMillis().minusSeconds(60),
+    updatedAt: Instant? = nowMillis().minusSeconds(20),
+    succeedAt: Instant? = nowMillis().minusSeconds(20),
+    retriedAt: Instant? = nowMillis().minusSeconds(30),
+    failedAt: Instant? = nowMillis().minusSeconds(40),
+    errorMessage: String? = "Error: ${randomString()}"
+): DownloadEntry<UnionCollectionMeta> {
     return DownloadEntry(
         id = id,
         status = status,

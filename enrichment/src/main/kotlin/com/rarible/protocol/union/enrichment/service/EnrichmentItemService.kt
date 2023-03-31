@@ -133,7 +133,7 @@ class EnrichmentItemService(
             item = fetchedItem.await(),
             shortItem = shortItem,
             // replacing inner IPFS urls with public urls
-            meta = contentMetaService.exposePublicUrls(trimmedMeta, itemId),
+            meta = contentMetaService.exposePublicUrls(trimmedMeta),
             orders = bestOrders,
             auctions = auctionsData.await()
         )

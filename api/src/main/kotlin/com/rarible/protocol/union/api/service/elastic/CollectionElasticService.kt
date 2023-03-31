@@ -14,6 +14,7 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
@@ -29,7 +30,7 @@ class CollectionElasticService(
     private val repository: EsCollectionRepository,
     private val router: BlockchainRouter<CollectionService>,
     private val enrichmentCollectionService: EnrichmentCollectionService
-): CollectionQueryService {
+) : CollectionQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -95,7 +96,7 @@ class CollectionElasticService(
                 logger.info("getCollectionsByIds(), time: ${time}ms. blockchain: ${k}, size ${ids.size}")
                 return@mapAsync mapAsyncResult
             }
-        .flatten().associateBy { seq[it.id.fullId()] }.toSortedMap(compareBy { it })
+            .flatten().associateBy { seq[it.id.fullId()] }.toSortedMap(compareBy { it })
 
         val cursor = if (result.isEmpty()) null else result.last().fromCollectionLite()
 
@@ -107,8 +108,12 @@ class CollectionElasticService(
             total = result.size.toLong(),
             continuation = cursor.toString(),
             collections = collections.values.toList().map {
-                val shortCollection = shortCollections[it.id]
-                enrichmentCollectionService.enrichCollection(shortCollection, it)
+                enrichmentCollectionService.enrichCollection(
+                    shortCollections[it.id],
+                    it,
+                    emptyMap(),
+                    CollectionMetaPipeline.API
+                )
             }
         )
     }

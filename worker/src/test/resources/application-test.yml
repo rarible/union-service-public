@@ -46,6 +46,10 @@ worker:
     enabled: false
     rate: PT1M
     delay: PT60M
+  meta-item-retry:
+    enabled: false
+  meta-collection-retry:
+    enabled: false
   search-reindex:
     activity:
       enabled: true

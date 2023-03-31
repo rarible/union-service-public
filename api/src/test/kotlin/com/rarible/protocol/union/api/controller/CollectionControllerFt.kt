@@ -1,16 +1,13 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.core.common.justOrEmpty
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.FlowNftCollectionsDto
 import com.rarible.protocol.dto.NftCollectionsDto
-import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
@@ -25,8 +22,6 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionAsset
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
 import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
@@ -35,21 +30,15 @@ import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDt
 import com.rarible.tzkt.model.CollectionType
 import com.rarible.tzkt.model.Page
 import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.web.client.RestTemplate
-import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
-import java.time.Duration
 
 @FlowPreview
 @IntegrationTest
@@ -229,48 +218,5 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
         assertThat(unionCollections.collections).hasSize(6)
         assertThat(unionCollections.continuation).isNull()
-    }
-
-    @Test
-    @Disabled // TODO unstable test
-    fun `refresh collection meta`() = runBlocking<Unit> {
-        val collectionAddress = randomAddress()
-        val collectionId = EthConverter.convert(collectionAddress, BlockchainDto.ETHEREUM)
-        val itemId1 = randomEthItemId()
-        val itemId2 = randomEthItemId()
-
-        val item1 = randomEthNftItemDto(itemId1)
-        val item2 = randomEthNftItemDto(itemId2)
-
-        val page1 = NftItemsDto(1, "page2", items = listOf(item1))
-        val page2 = NftItemsDto(1, "no more", items = listOf(item2))
-
-        every {
-            testEthereumCollectionApi.resetNftCollectionMetaById(collectionAddress.prefixed())
-        } returns Mono.empty()
-
-        every {
-            testEthereumItemApi.getNftItemsByCollection(
-                collectionAddress.prefixed(),
-                any(),
-                any(),
-                any()
-            )
-        } answers {
-            when (thirdArg<String?>()) {
-                null -> page1.justOrEmpty()
-                "page2" -> page2.justOrEmpty()
-                else -> NftItemsDto(0, null, emptyList()).justOrEmpty()
-            }
-        }
-//        coEvery { testItemMetaLoader.load(itemId1) } returns EthMetaConverter.convert(item1.meta!!)
-//        coEvery { testItemMetaLoader.load(itemId2) } returns EthMetaConverter.convert(item2.meta!!)
-
-        collectionControllerClient.refreshCollectionMeta(collectionId.fullId()).awaitFirstOrNull()
-
-        WaitAssert.wait(timeout = Duration.ofMillis(10_000)) {
-            coVerify(exactly = 1) { testItemMetaLoader.load(itemId1) }
-            coVerify(exactly = 1) { testItemMetaLoader.load(itemId2) }
-        }
     }
 }

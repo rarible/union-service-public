@@ -18,8 +18,11 @@ data class UnionMeta(
     val originalMetaUri: String? = null,
 
     val attributes: List<MetaAttributeDto> = emptyList(),
-    val content: List<UnionMetaContent> = emptyList(),
+    override val content: List<UnionMetaContent> = emptyList(),
 
     @Deprecated("Not supported, should be removed")
     val restrictions: List<Restriction> = emptyList()
-)
+) : ContentOwner<UnionMeta> {
+
+    override fun withContent(content: List<UnionMetaContent>) = this.copy(content = content)
+}

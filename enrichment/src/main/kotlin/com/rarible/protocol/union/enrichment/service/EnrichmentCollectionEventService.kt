@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingCollectionEventListener
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionChangeEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.service.OriginService
@@ -10,13 +11,14 @@ import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class EnrichmentCollectionEventService(
@@ -28,6 +30,16 @@ class EnrichmentCollectionEventService(
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
+
+    suspend fun onCollectionChanged(event: UnionCollectionChangeEvent) {
+        val collectionId = event.collectionId
+        val existing = enrichmentCollectionService.getOrEmpty(ShortCollectionId(collectionId))
+        val updateEvent = buildUpdateEvent(
+            short = existing,
+            eventTimeMarks = event.eventTimeMarks
+        )
+        sendUpdate(updateEvent)
+    }
 
     suspend fun onCollectionUpdate(update: UnionCollectionUpdateEvent) {
         val collection = update.collection
@@ -155,6 +167,7 @@ class EnrichmentCollectionEventService(
             shortCollection = short,
             collection = collection,
             orders = listOfNotNull(order).associateBy { it.id },
+            metaPipeline = CollectionMetaPipeline.EVENT
         )
 
         return CollectionUpdateEventDto(

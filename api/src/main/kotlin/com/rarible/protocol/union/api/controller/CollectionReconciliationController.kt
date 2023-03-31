@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
@@ -39,7 +40,7 @@ class CollectionReconciliationController(
 
         return CollectionsDto(
             total = 0,
-            collections = enrichmentCollectionService.enrich(shortCollections),
+            collections = enrichmentCollectionService.enrich(shortCollections, CollectionMetaPipeline.API),
             continuation = shortCollections.last().id.toDto().fullId()
         )
     }

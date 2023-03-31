@@ -160,7 +160,10 @@ worker:
     enabled: true
     rate: PT15S
   meta-item-retry:
-    enabled: false
+    enabled: true
+    rate: PT15M
+  meta-collection-retry:
+    enabled: true
     rate: PT15M
   search-reindex:
     activity:

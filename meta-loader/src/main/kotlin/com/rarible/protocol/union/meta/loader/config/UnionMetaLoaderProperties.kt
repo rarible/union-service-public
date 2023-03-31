@@ -11,7 +11,8 @@ class UnionMetaLoaderProperties(
 )
 
 data class DownloaderProperties(
-    val item: Map<String, ExecutorPipelineProperties>
+    val item: Map<String, ExecutorPipelineProperties>,
+    val collection: Map<String, ExecutorPipelineProperties>
     // Add the same for the collection
 )
 

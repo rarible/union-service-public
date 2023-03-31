@@ -1,8 +1,10 @@
 package com.rarible.protocol.union.enrichment.service
 
-import com.mongodb.client.result.DeleteResult
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.download.DownloadEntry
+import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.CollectionDto
@@ -10,6 +12,9 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaMetrics
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
@@ -28,6 +33,8 @@ class EnrichmentCollectionService(
     private val enrichmentOrderService: EnrichmentOrderService,
     private val contentMetaService: ContentMetaService,
     private val orderApiService: OrderApiMergeService,
+    private val collectionMetaService: CollectionMetaService,
+    private val metrics: CollectionMetaMetrics
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionService::class.java)
@@ -53,10 +60,6 @@ class EnrichmentCollectionService(
         return collectionRepository.getAll(ids)
     }
 
-    suspend fun delete(collectionId: ShortCollectionId): DeleteResult? {
-        return collectionRepository.delete(collectionId)
-    }
-
     suspend fun fetch(collectionId: ShortCollectionId): UnionCollection {
         val now = nowMillis()
         val collectionDto = collectionServiceRouter.getService(collectionId.blockchain)
@@ -69,7 +72,7 @@ class EnrichmentCollectionService(
         shortCollection: ShortCollection?,
         collection: UnionCollection?,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
-        loadMetaSynchronously: Boolean = false
+        metaPipeline: CollectionMetaPipeline
     ) = coroutineScope {
         require(shortCollection != null || collection != null)
         val collectionId = shortCollection?.id?.toDto() ?: collection!!.id
@@ -83,17 +86,24 @@ class EnrichmentCollectionService(
         )
 
         val unionCollection = fetchedCollection.await()
+        val metaEntry = shortCollection?.metaEntry
+        val meta = metaEntry?.data ?: unionCollection.meta
+
+        onMetaEntry(unionCollection.id, metaPipeline, metaEntry)
 
         EnrichedCollectionConverter.convert(
             collection = unionCollection,
             // replacing inner IPFS urls with public urls
-            meta = contentMetaService.exposePublicUrls(unionCollection.meta, collectionId),
+            meta = contentMetaService.exposePublicUrls(meta),
             shortCollection = shortCollection,
             orders = bestOrders
         )
     }
 
-    suspend fun enrich(shortCollections: List<ShortCollection>): List<CollectionDto> {
+    suspend fun enrich(
+        shortCollections: List<ShortCollection>,
+        metaPipeline: CollectionMetaPipeline
+    ): List<CollectionDto> {
         if (shortCollections.isEmpty()) {
             return emptyList()
         }
@@ -105,23 +115,27 @@ class EnrichmentCollectionService(
             collectionServiceRouter.getService(it.key).getCollectionsByIds(it.value)
         }
 
-        return enrichCollections(shortCollectionsById, unionCollections)
+        return enrichCollections(shortCollectionsById, unionCollections, metaPipeline)
     }
 
-    suspend fun enrichUnionCollections(unionCollections: List<UnionCollection>): List<CollectionDto> {
+    suspend fun enrichUnionCollections(
+        unionCollections: List<UnionCollection>,
+        metaPipeline: CollectionMetaPipeline
+    ): List<CollectionDto> {
         if (unionCollections.isEmpty()) {
             return emptyList()
         }
         val shortCollections: Map<CollectionIdDto, ShortCollection> =
             collectionRepository.getAll(unionCollections.map { ShortCollectionId(it.id) })
-            .associateBy { it.id.toDto() }
+                .associateBy { it.id.toDto() }
 
-        return enrichCollections(shortCollections, unionCollections)
+        return enrichCollections(shortCollections, unionCollections, metaPipeline)
     }
 
     private suspend fun enrichCollections(
         shortCollections: Map<CollectionIdDto, ShortCollection>,
         unionCollections: List<UnionCollection>,
+        metaPipeline: CollectionMetaPipeline
     ): List<CollectionDto> {
         val shortOrderIds = shortCollections.values
             .map { it.getAllBestOrders() }
@@ -132,13 +146,29 @@ class EnrichmentCollectionService(
             .associateBy { it.id }
 
         return unionCollections.map {
-            EnrichedCollectionConverter.convert(
-                collection = it,
-                // replacing inner IPFS urls with public urls
-                meta = contentMetaService.exposePublicUrls(it.meta, it.id),
-                shortCollection = shortCollections[it.id],
-                orders = orders
-            )
+            enrichCollection(shortCollections[it.id], it, orders, metaPipeline)
+        }
+    }
+
+    private suspend fun onMetaEntry(
+        collectionId: CollectionIdDto,
+        metaPipeline: CollectionMetaPipeline,
+        entry: DownloadEntry<UnionCollectionMeta>?
+    ) {
+        when {
+            // No entry - it means we see this item/meta first time, not cached at all
+            entry == null -> {
+                collectionMetaService.schedule(collectionId, metaPipeline, false)
+                metrics.onMetaCacheMiss(collectionId.blockchain)
+            }
+            // Downloaded - cool, we hit cache!
+            entry.status == DownloadStatus.SUCCESS -> {
+                metrics.onMetaCacheHit(collectionId.blockchain)
+            }
+            // Otherwise, downloading in progress or completely failed - mark as "empty" cache
+            else -> {
+                metrics.onMetaCacheEmpty(collectionId.blockchain)
+            }
         }
     }
 }

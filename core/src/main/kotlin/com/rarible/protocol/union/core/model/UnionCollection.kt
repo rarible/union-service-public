@@ -11,6 +11,7 @@ data class UnionCollection(
     val type: CollectionDto.Type,
     val minters: List<UnionAddress>? = listOf(),
     val features: List<CollectionDto.Features> = listOf(),
+    // TODO remove later
     val meta: UnionCollectionMeta? = null,
     val owner: UnionAddress? = null,
     val parent: CollectionIdDto? = null,

@@ -6,10 +6,8 @@ import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.client.core.model.OrderStatus
 import com.rarible.dipdup.client.core.model.TezosPlatform
-import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
-import com.rarible.protocol.union.integration.tezos.data.randomTezosTzktItemDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosTzktItemDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosTzktOwnershipDto
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.tzkt.model.Alias
@@ -21,7 +19,6 @@ import io.mockk.coEvery
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.ZoneOffset
@@ -29,9 +26,6 @@ import java.util.UUID
 
 @IntegrationTest
 class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
-
-    @Autowired
-    private lateinit var itemMetaLoader: ItemMetaLoader
 
     @Test
     @Disabled("Works locally, fix under PT-953")
@@ -50,7 +44,6 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
 
         coEvery { ownershipClient.ownershipsByToken(any(), any(), any(), any()) } returns Page(emptyList(), null)
         coEvery { ownershipClient.ownershipById(any()) } returns tokenBalance()
-        coEvery { itemMetaLoader.load(any()) } returns UnionMeta("test")
 
         dipDupOrderProducer.send(
             KafkaMessage(

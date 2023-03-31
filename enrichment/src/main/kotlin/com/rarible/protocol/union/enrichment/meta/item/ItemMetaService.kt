@@ -16,7 +16,7 @@ class ItemMetaService(
     metrics: DownloadMetrics
 ) : DownloadService<ItemIdDto, UnionMeta>(repository, publisher, downloader, notifier, metrics) {
 
-    override val type = "ITEM"
+    override val type = downloader.type
     override fun toId(key: ItemIdDto) = key.fullId()
     override fun getBlockchain(key: ItemIdDto) = key.blockchain
 

@@ -17,8 +17,6 @@ import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
-import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentUrlProvider
 import org.apache.commons.codec.digest.DigestUtils
 import org.codehaus.plexus.util.StringUtils
@@ -81,11 +79,11 @@ class ContentMetaService(
         }
     }
 
-    fun exposePublicUrls(meta: UnionMeta?, id: ItemIdDto): UnionMeta? {
+    fun exposePublicUrls(meta: UnionMeta?): UnionMeta? {
         return meta?.let { it.copy(content = exposePublicUrls(it.content)) }
     }
 
-    fun exposePublicUrls(meta: UnionCollectionMeta?, id: CollectionIdDto): UnionCollectionMeta? {
+    fun exposePublicUrls(meta: UnionCollectionMeta?): UnionCollectionMeta? {
         return meta?.let { it.copy(content = exposePublicUrls(it.content)) }
     }
 

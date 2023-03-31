@@ -3,7 +3,6 @@ package com.rarible.protocol.union.listener.config
 import com.rarible.core.daemon.DaemonWorkerProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
-import java.time.Duration
 
 @ConstructorBinding
 @ConfigurationProperties("listener")
@@ -26,10 +25,10 @@ data class MetricsProperties(
 
 data class MetaSchedulingProperties(
     val item: MetaEntrySchedulingProperties = MetaEntrySchedulingProperties(),
-    // TODO add collection
+    val collection: MetaEntrySchedulingProperties = MetaEntrySchedulingProperties()
 )
 
 data class MetaEntrySchedulingProperties(
-    val workers: Int = 4,
-    val batchSize: Int = 16
+    val workers: Int = 3,
+    val batchSize: Int = 500
 )

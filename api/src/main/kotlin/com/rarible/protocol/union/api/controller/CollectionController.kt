@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
@@ -50,7 +51,12 @@ class CollectionController(
         val shortCollectionId = ShortCollectionId(fullCollectionId)
         val unionCollection = router.getService(fullCollectionId.blockchain).getCollectionById(fullCollectionId.value)
         val shortCollection = enrichmentCollectionService.get(shortCollectionId)
-        val enrichedCollection = enrichmentCollectionService.enrichCollection(shortCollection, unionCollection)
+        val enrichedCollection = enrichmentCollectionService.enrichCollection(
+            shortCollection,
+            unionCollection,
+            emptyMap(),
+            CollectionMetaPipeline.API
+        )
         return ResponseEntity.ok(enrichedCollection)
     }
 

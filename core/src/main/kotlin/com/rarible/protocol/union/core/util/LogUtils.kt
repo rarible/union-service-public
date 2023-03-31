@@ -72,6 +72,19 @@ object LogUtils {
         )
     }
 
+    suspend fun <T> addToMdc(
+        collectionId: CollectionIdDto,
+        block: suspend CoroutineScope.() -> T
+    ): T {
+        return addToMdc(
+            values = listOf(
+                "blockchain" to collectionId.blockchain.name,
+                "collection" to collectionId.value
+            ),
+            block = block
+        )
+    }
+
     @ExperimentalCoroutinesApi
     suspend fun <T> addToMdc(item: UnionItem, block: suspend CoroutineScope.() -> T): T {
         return addToMdc(

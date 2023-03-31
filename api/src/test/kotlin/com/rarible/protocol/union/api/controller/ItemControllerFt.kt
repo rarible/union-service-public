@@ -4,33 +4,36 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.dto.ImageContentDto
-import com.rarible.protocol.dto.MetaContentDto
 import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.NftItemRoyaltyListDto
 import com.rarible.protocol.dto.RaribleAuctionV1Dto
-import com.rarible.protocol.dto.VideoContentDto
 import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.client.ItemControllerApi.ErrorSearchItems
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionImageProperties
+import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemsSearchFilterDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
+import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
+import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
+import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
-import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
@@ -89,6 +92,9 @@ class ItemControllerFt : AbstractIntegrationTest() {
     @Autowired
     lateinit var itemMetaService: ItemMetaService
 
+    @Autowired
+    lateinit var itemRepository: ItemRepository
+
     @Test
     fun `get item by id - ethereum, enriched`() = runBlocking<Unit> {
         // Enriched item
@@ -139,21 +145,10 @@ class ItemControllerFt : AbstractIntegrationTest() {
     fun `get item image by id`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val imageUrl = "https://rarible.mypinata.cloud/ipfs/QfgdfgajhkjkP97RAnx443626262VNFDotF9U4Jkac567457/image.png"
-        val meta = randomEthItemMeta().copy(
-            content = listOf(
-                ImageContentDto(
-                    fileName = null,
-                    url = imageUrl,
-                    representation = MetaContentDto.Representation.ORIGINAL,
-                    mimeType = "image/png",
-                    size = null,
-                    width = null,
-                    height = null
-                )
-            )
-        )
+        val content = UnionMetaContent(imageUrl, MetaContentDto.Representation.ORIGINAL, null, UnionImageProperties())
+        val meta = randomUnionMeta(content = listOf(content))
 
-        coEvery { testItemMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta, itemId.value)
+        itemRepository.save(randomShortItem(itemId).copy(metaEntry = randomItemMetaDownloadEntry(data = meta)))
 
         val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/image", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
@@ -164,21 +159,10 @@ class ItemControllerFt : AbstractIntegrationTest() {
     fun `get item video by id`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val videoUrl = "https://rarible.mypinata.cloud/ipfs/Qmd72hpaFPnP97RAnxHKTCYb41ddVNFDotF9U4JkacsaLi/image.gif"
-        val meta = randomEthItemMeta().copy(
-            content = listOf(
-                VideoContentDto(
-                    fileName = null,
-                    url = videoUrl,
-                    representation = MetaContentDto.Representation.ORIGINAL,
-                    mimeType = "image/gif",
-                    size = null,
-                    width = null,
-                    height = null
-                )
-            )
-        )
+        val content = UnionMetaContent(videoUrl, MetaContentDto.Representation.ORIGINAL, null, UnionVideoProperties())
+        val meta = randomUnionMeta(content = listOf(content))
 
-        coEvery { testItemMetaLoader.load(itemId) } returns EthMetaConverter.convert(meta, itemId.value)
+        itemRepository.save(randomShortItem(itemId).copy(metaEntry = randomItemMetaDownloadEntry(data = meta)))
 
         val response =
             restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/animation", String::class.java)

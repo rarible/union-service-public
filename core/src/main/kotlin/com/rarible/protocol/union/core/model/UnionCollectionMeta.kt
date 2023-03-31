@@ -20,8 +20,8 @@ data class UnionCollectionMeta(
     val feeRecipient: UnionAddress? = null,
     val sellerFeeBasisPoints: Int? = null,
 
-    val content: List<UnionMetaContent> = listOf(),
+    override val content: List<UnionMetaContent> = listOf()
+) : ContentOwner<UnionCollectionMeta> {
 
-    @Deprecated("Use externalUri")
-    val externalLink: String? = null,
-)
+    override fun withContent(content: List<UnionMetaContent>) = this.copy(content = content)
+}

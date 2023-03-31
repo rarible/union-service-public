@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import kotlinx.coroutines.async
@@ -112,19 +113,19 @@ class CollectionApiMergeService(
         }.awaitAll()
     }
 
-    suspend fun enrich(unionCollectionsPage: Page<UnionCollection>): CollectionsDto {
+    suspend fun enrich(page: Page<UnionCollection>): CollectionsDto {
         return CollectionsDto(
-            total = unionCollectionsPage.total,
-            continuation = unionCollectionsPage.continuation,
-            collections = enrichmentCollectionService.enrichUnionCollections(unionCollectionsPage.entities)
+            total = page.total,
+            continuation = page.continuation,
+            collections = enrichmentCollectionService.enrichUnionCollections(page.entities, CollectionMetaPipeline.API)
         )
     }
 
-    suspend fun enrich(unionCollectionsSlice: Slice<UnionCollection>, total: Long): CollectionsDto {
+    suspend fun enrich(slice: Slice<UnionCollection>, total: Long): CollectionsDto {
         return CollectionsDto(
             total = total,
-            continuation = unionCollectionsSlice.continuation,
-            collections = enrichmentCollectionService.enrichUnionCollections(unionCollectionsSlice.entities)
+            continuation = slice.continuation,
+            collections = enrichmentCollectionService.enrichUnionCollections(slice.entities, CollectionMetaPipeline.API)
         )
     }
 }
