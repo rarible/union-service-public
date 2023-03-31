@@ -23,6 +23,7 @@ import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerCon
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.listener.downloader.MetaTaskRouter
+import com.rarible.protocol.union.listener.handler.internal.CollectionMetaTaskSchedulerHandler
 import com.rarible.protocol.union.listener.handler.internal.ItemMetaTaskSchedulerHandler
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
@@ -164,7 +165,7 @@ class UnionListenerConfiguration(
 
     @Bean
     fun collectionMetaDownloadScheduleWorker(
-        handler: ItemMetaTaskSchedulerHandler
+        handler: CollectionMetaTaskSchedulerHandler
     ): ConsumerWorkerGroup<DownloadTask> {
         val properties = listenerProperties.metaScheduling.collection
         val consumerGroupSuffix = "meta.collection"
