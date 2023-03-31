@@ -44,7 +44,7 @@ class UnionContentMetaProviderIt : AbstractIntegrationTest() {
 
         coEvery { testContentMetaReceiver.receive(any<URL>()) } returns contentMeta
 
-        val properties = unionContentMetaProvider.getContent(itemId, urlResource)
+        val properties = unionContentMetaProvider.getContent(itemId.blockchain, urlResource)
 
         val fromCache = contentCacheStorage.get("ipfs://$path")!!
 
@@ -61,7 +61,7 @@ class UnionContentMetaProviderIt : AbstractIntegrationTest() {
 
         coEvery { testContentMetaReceiver.receive(any<String>()) } returns contentMeta
 
-        unionContentMetaProvider.getContent(itemId, urlResource)
+        unionContentMetaProvider.getContent(itemId.blockchain, urlResource)
 
         val fromCache = contentCacheStorage.get("ipfs://$path")
 
@@ -76,7 +76,7 @@ class UnionContentMetaProviderIt : AbstractIntegrationTest() {
         // Content not resolved
         coEvery { testContentMetaReceiver.receive(any<String>()) } returns null
 
-        unionContentMetaProvider.getContent(itemId, urlResource)
+        unionContentMetaProvider.getContent(itemId.blockchain, urlResource)
 
         val fromCache = contentCacheStorage.get("ipfs://$path")
 
@@ -97,7 +97,7 @@ class UnionContentMetaProviderIt : AbstractIntegrationTest() {
 
         contentCacheStorage.save(entry)
 
-        val properties = unionContentMetaProvider.getContent(itemId, urlResource)
+        val properties = unionContentMetaProvider.getContent(itemId.blockchain, urlResource)
 
         // Content returned and cached
         assertThat(properties).isEqualTo(entry.content)
@@ -110,7 +110,7 @@ class UnionContentMetaProviderIt : AbstractIntegrationTest() {
 
         coEvery { testContentMetaReceiver.receive(any<String>()) } returns contentMeta
 
-        unionContentMetaProvider.getContent(itemId, urlResource)
+        unionContentMetaProvider.getContent(itemId.blockchain, urlResource)
 
         val fromCache = contentCacheStorage.get(urlResource.original)
 

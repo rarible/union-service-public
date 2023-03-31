@@ -23,7 +23,6 @@ import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.integration.ethereum.mock.EthAuctionControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthItemControllerApiMock
@@ -43,10 +42,6 @@ import java.util.concurrent.LinkedBlockingQueue
 
 @Suppress("UNCHECKED_CAST")
 abstract class AbstractIntegrationTest {
-
-    @Autowired
-    @Qualifier("test.union.meta.loader")
-    lateinit var testItemMetaLoader: ItemMetaLoader
 
     @Autowired
     @Qualifier("test.content.meta.receiver")
@@ -136,8 +131,6 @@ abstract class AbstractIntegrationTest {
             testEthereumOwnershipApi,
             testEthereumOrderApi,
             testEthereumAuctionApi,
-
-            testItemMetaLoader,
             testContentMetaReceiver
         )
         ethereumItemControllerApiMock = EthItemControllerApiMock(testEthereumItemApi)

@@ -20,13 +20,15 @@ import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
-import com.rarible.protocol.union.listener.downloader.ItemMetaTaskRouter
+import com.rarible.protocol.union.listener.downloader.MetaTaskRouter
 import com.rarible.protocol.union.listener.handler.internal.ItemMetaTaskSchedulerHandler
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -142,6 +144,59 @@ class UnionListenerConfiguration(
         )
     }
 
+    @Bean
+    @Qualifier("item.meta.schedule.router")
+    fun itemMetaTaskRouter(): MetaTaskRouter {
+        val producers = HashMap<String, RaribleKafkaProducer<DownloadTask>>()
+        ItemMetaPipeline.values().map { it.pipeline }.forEach { pipeline ->
+            val topic = UnionInternalTopicProvider.getItemMetaDownloadTaskExecutorTopic(env, pipeline)
+            val producer = RaribleKafkaProducer(
+                clientId = "${env}.protocol-union-service.meta.scheduler",
+                valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+                valueClass = DownloadTask::class.java,
+                defaultTopic = topic,
+                bootstrapServers = properties.brokerReplicaSet
+            )
+            producers[pipeline] = producer
+        }
+        return MetaTaskRouter(producers)
+    }
+
+    @Bean
+    fun collectionMetaDownloadScheduleWorker(
+        handler: ItemMetaTaskSchedulerHandler
+    ): ConsumerWorkerGroup<DownloadTask> {
+        val properties = listenerProperties.metaScheduling.collection
+        val consumerGroupSuffix = "meta.collection"
+        val clientIdSuffix = "collection-meta-task-scheduler"
+        val topic = UnionInternalTopicProvider.getCollectionMetaDownloadTaskSchedulerTopic(env)
+        return consumerFactory.createInternalBatchedConsumerWorker(
+            consumer = { index -> createDownloadTaskConsumer(index, clientIdSuffix, consumerGroupSuffix, topic) },
+            handler = handler,
+            daemonWorkerProperties = DaemonWorkerProperties(consumerBatchSize = properties.batchSize),
+            workers = properties.workers,
+            type = "collection-meta-task-scheduler"
+        )
+    }
+
+    @Bean
+    @Qualifier("collection.meta.schedule.router")
+    fun collectionMetaTaskRouter(): MetaTaskRouter {
+        val producers = HashMap<String, RaribleKafkaProducer<DownloadTask>>()
+        CollectionMetaPipeline.values().map { it.pipeline }.forEach { pipeline ->
+            val topic = UnionInternalTopicProvider.getCollectionMetaDownloadTaskExecutorTopic(env, pipeline)
+            val producer = RaribleKafkaProducer(
+                clientId = "${env}.protocol-union-service.meta.scheduler",
+                valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+                valueClass = DownloadTask::class.java,
+                defaultTopic = topic,
+                bootstrapServers = properties.brokerReplicaSet
+            )
+            producers[pipeline] = producer
+        }
+        return MetaTaskRouter(producers)
+    }
+
     private fun createDownloadTaskConsumer(
         index: Int,
         clientIdSuffix: String,
@@ -157,23 +212,6 @@ class UnionListenerConfiguration(
             bootstrapServers = properties.brokerReplicaSet,
             offsetResetStrategy = OffsetResetStrategy.EARLIEST
         )
-    }
-
-    @Bean
-    fun itemMetaTaskRouter(): ItemMetaTaskRouter {
-        val producers = HashMap<String, RaribleKafkaProducer<DownloadTask>>()
-        ItemMetaPipeline.values().map { it.pipeline }.forEach { pipeline ->
-            val topic = UnionInternalTopicProvider.getItemMetaDownloadTaskExecutorTopic(env, pipeline)
-            val producer = RaribleKafkaProducer(
-                clientId = "${env}.protocol-union-service.meta.scheduler",
-                valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-                valueClass = DownloadTask::class.java,
-                defaultTopic = topic,
-                bootstrapServers = properties.brokerReplicaSet
-            )
-            producers[pipeline] = producer
-        }
-        return ItemMetaTaskRouter(producers)
     }
 
     // --------------- Meta 3.0 beans END

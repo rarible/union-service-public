@@ -17,6 +17,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.micrometer.core.instrument.logging.LoggingMeterRegistry
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -37,7 +38,7 @@ class DownloadServiceTest {
 
     private val metrics: DownloadMetrics = DownloadMetrics(LoggingMeterRegistry())
 
-    private val downloader: ItemMetaDownloader = mockk()
+    private val downloader: ItemMetaDownloader = mockk() { every { type } returns "Item" }
 
     private val downloadService = ItemMetaService(
         repository,

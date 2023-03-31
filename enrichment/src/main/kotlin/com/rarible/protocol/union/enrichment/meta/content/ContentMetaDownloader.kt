@@ -5,7 +5,7 @@ import com.rarible.core.meta.resource.model.UrlResource
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionUnknownProperties
-import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentService
 import com.rarible.protocol.union.enrichment.meta.embedded.UnionEmbeddedContent
 import kotlinx.coroutines.async
@@ -25,7 +25,8 @@ class ContentMetaDownloader(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun enrichContent(
-        itemId: ItemIdDto,
+        id: String,
+        blockchain: BlockchainDto,
         metaContent: List<UnionMetaContent>
     ): List<UnionMetaContent> = coroutineScope {
         metaContent.map { content ->
@@ -33,29 +34,29 @@ class ContentMetaDownloader(
                 // Checking if there is embedded content first
                 val embedded = contentMetaService.detectEmbeddedContent(content.url)
                 embedded?.let {
-                    return@async embedContent(itemId, content, it)
+                    return@async embedContent(blockchain, content, it)
                 }
 
                 // Now check is there is valid url
                 val resource = contentMetaService.parseUrl(content.url)
                 if (resource == null) {
-                    metrics.onContentResolutionFailed(itemId.blockchain, "remote", "unknown_url_format")
-                    logger.warn("Unknown URL format in content of Item $itemId: ${content.url}")
+                    metrics.onContentResolutionFailed(blockchain, "remote", "unknown_url_format")
+                    logger.warn("Unknown URL format in content of $id: ${content.url}")
                     return@async null
                 }
 
-                downloadContent(itemId, content, resource)
+                downloadContent(blockchain, content, resource)
             }
         }.awaitAll().filterNotNull()
     }
 
     private suspend fun downloadContent(
-        itemId: ItemIdDto,
+        blockchain: BlockchainDto,
         content: UnionMetaContent,
         resource: UrlResource
     ): UnionMetaContent {
 
-        val resolvedProperties = contentMetaProvider.getContent(itemId, resource)
+        val resolvedProperties = contentMetaProvider.getContent(blockchain, resource)
         val internalUrl = contentMetaService.resolveInternalHttpUrl(resource)
 
         val contentProperties = when {
@@ -80,11 +81,10 @@ class ContentMetaDownloader(
     }
 
     private suspend fun embedContent(
-        itemId: ItemIdDto,
+        blockchain: BlockchainDto,
         original: UnionMetaContent,
         embedded: EmbeddedContent
     ): UnionMetaContent {
-        val blockchain = itemId.blockchain
         val contentMeta = embedded.meta
         val converted = contentMetaService.convertToProperties(contentMeta)
         when (converted) {

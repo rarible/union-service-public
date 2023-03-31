@@ -22,7 +22,6 @@ import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.tzkt.client.OwnershipClient
 import com.rarible.tzkt.client.TokenClient
 import io.mockk.clearMocks
@@ -30,7 +29,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,10 +38,6 @@ import java.util.concurrent.LinkedBlockingQueue
 
 @Suppress("UNCHECKED_CAST")
 abstract class AbstractDipDupIntegrationTest {
-
-    @Autowired
-    @Qualifier("test.union.meta.loader")
-    lateinit var testUnionMetaLoader: ItemMetaLoader
 
     @Autowired
     @Qualifier("test.content.meta.receiver")
@@ -100,7 +94,6 @@ abstract class AbstractDipDupIntegrationTest {
 
     @BeforeEach
     fun cleanupMetaMocks() {
-        clearMocks(testUnionMetaLoader)
         clearMocks(ownershipClient)
         clearMocks(tokenClient)
     }

@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.enrichment.model
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderOwner
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
@@ -31,6 +33,8 @@ data class ShortCollection(
     val multiCurrency: Boolean = bestSellOrders.size > 1 || bestBidOrders.size > 1,
 
     val lastUpdatedAt: Instant,
+
+    val metaEntry: DownloadEntry<UnionCollectionMeta>? = null,
 
     @Version
     val version: Long? = null
@@ -77,6 +81,14 @@ data class ShortCollection(
         get() = _id
         set(_) {}
 
+    fun withMeta(entry: DownloadEntry<UnionCollectionMeta>): ShortCollection {
+        val metaChanged = this.metaEntry?.data != entry.data
+        return this.copy(
+            metaEntry = entry,
+            lastUpdatedAt = if (metaChanged) nowMillis() else lastUpdatedAt
+        )
+    }
+
     override fun withBestBidOrders(orders: Map<String, ShortOrder>): ShortCollection {
         return this.copy(bestBidOrders = orders)
     }
@@ -91,6 +103,12 @@ data class ShortCollection(
 
     override fun withBestSellOrder(order: ShortOrder?): ShortCollection {
         return this.copy(bestSellOrder = order)
+    }
+
+    fun withNextRetry(): ShortCollection {
+        return this.copy(
+            metaEntry = metaEntry?.copy(retries = metaEntry.retries + 1, retriedAt = nowMillis())
+        )
     }
 
     override fun getAllBestOrders(): List<ShortOrder> {

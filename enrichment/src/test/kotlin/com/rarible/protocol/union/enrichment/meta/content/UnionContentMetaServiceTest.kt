@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.meta
+package com.rarible.protocol.union.enrichment.meta.content
 
 import com.rarible.core.meta.resource.detector.embedded.EmbeddedContentDetector
 import com.rarible.core.meta.resource.model.MimeType
@@ -10,11 +10,9 @@ import com.rarible.core.meta.resource.resolver.RandomGatewayProvider
 import com.rarible.core.meta.resource.resolver.UrlResolver
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.enrichment.configuration.EmbeddedContentProperties
-import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentUrlProvider
 import com.rarible.protocol.union.enrichment.test.data.randomUnionContent
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
-import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -40,41 +38,41 @@ class UnionContentMetaServiceTest {
     @Test
     fun `resolve public ipfs - foreign replaced by public gateway`() {
         // Broken IPFS URL
-        assertFixedIpfsUrl("htt://mypinata.com/ipfs/${CID}", CID)
+        assertFixedIpfsUrl("htt://mypinata.com/ipfs/$CID", CID)
         // Relative IPFS path
-        assertFixedIpfsUrl("/ipfs/${CID}/abc.png", "${CID}/abc.png")
+        assertFixedIpfsUrl("/ipfs/$CID/abc.png", "$CID/abc.png")
 
         // Abstract IPFS urls with /ipfs/ path and broken slashes
-        assertFixedIpfsUrl("ipfs:/ipfs/${CID}", CID)
-        assertFixedIpfsUrl("ipfs://ipfs/${CID}", CID)
-        assertFixedIpfsUrl("ipfs:///ipfs/${CID}", CID)
-        assertFixedIpfsUrl("ipfs:////ipfs/${CID}", CID)
+        assertFixedIpfsUrl("ipfs:/ipfs/$CID", CID)
+        assertFixedIpfsUrl("ipfs://ipfs/$CID", CID)
+        assertFixedIpfsUrl("ipfs:///ipfs/$CID", CID)
+        assertFixedIpfsUrl("ipfs:////ipfs/$CID", CID)
 
-        assertFixedIpfsUrl("ipfs:////ipfs/${CID}", CID)
-        assertFixedIpfsUrl("ipfs:////ipfs//${CID}", CID)
-        assertFixedIpfsUrl("ipfs:////ipfs///${CID}", CID)
+        assertFixedIpfsUrl("ipfs:////ipfs/$CID", CID)
+        assertFixedIpfsUrl("ipfs:////ipfs//$CID", CID)
+        assertFixedIpfsUrl("ipfs:////ipfs///$CID", CID)
     }
 
     @Test
     fun `resolve public ipfs - original gateway kept`() {
         // Regular IPFS URL
-        assertOriginalIpfsUrl("https://ipfs.io/ipfs/${CID}")
+        assertOriginalIpfsUrl("https://ipfs.io/ipfs/$CID")
         // Regular IPFS URL with 2 /ipfs/ parts
-        assertOriginalIpfsUrl("https://ipfs.io/ipfs/something/ipfs/${CID}")
+        assertOriginalIpfsUrl("https://ipfs.io/ipfs/something/ipfs/$CID")
         // Regular IPFS URL but without CID
         assertOriginalIpfsUrl("http://ipfs.io/ipfs/123.jpg")
     }
 
     @Test
     fun `resolve public ipfs - prefixed urls`() {
-        assertFixedIpfsUrl("ipfs:/folder/${CID}/abc.json", "folder/${CID}/abc.json")
+        assertFixedIpfsUrl("ipfs:/folder/$CID/abc.json", "folder/$CID/abc.json")
         assertFixedIpfsUrl("ipfs://folder/abc", "folder/abc")
-        assertFixedIpfsUrl("ipfs:///folder/subfolder/${CID}", "folder/subfolder/${CID}")
-        assertFixedIpfsUrl("ipfs:////${CID}", CID)
+        assertFixedIpfsUrl("ipfs:///folder/subfolder/$CID", "folder/subfolder/$CID")
+        assertFixedIpfsUrl("ipfs:////$CID", CID)
 
         // Various case of ipfs prefix
-        assertFixedIpfsUrl("IPFS://${CID}", CID)
-        assertFixedIpfsUrl("Ipfs:///${CID}", CID)
+        assertFixedIpfsUrl("IPFS://$CID", CID)
+        assertFixedIpfsUrl("Ipfs:///$CID", CID)
 
         // Abstract IPFS urls with /ipfs/ path and broken slashes without a CID
         assertFixedIpfsUrl("ipfs:/ipfs/abc", "abc")
@@ -84,8 +82,8 @@ class UnionContentMetaServiceTest {
 
     @Test
     fun `resolve internal ipfs - replaced by internal gateway`() {
-        val result = metaContentService.resolveInternalHttpUrl("https://dweb.link/ipfs/${CID}/1.png")
-        assertThat(result).isEqualTo("${IPFS_PRIVATE_GATEWAY}/ipfs/${CID}/1.png")
+        val result = metaContentService.resolveInternalHttpUrl("https://dweb.link/ipfs/$CID/1.png")
+        assertThat(result).isEqualTo("$IPFS_PRIVATE_GATEWAY/ipfs/$CID/1.png")
     }
 
     @Test
@@ -97,8 +95,8 @@ class UnionContentMetaServiceTest {
     @Test
     fun `resolve public ipfs - replace legacy`() {
         assertThat(
-            metaContentService.resolveInternalHttpUrl("${IPFS_CUSTOM_GATEWAY}/ipfs/${CID}")
-        ).isEqualTo("${IPFS_PRIVATE_GATEWAY}/ipfs/${CID}")
+            metaContentService.resolveInternalHttpUrl("$IPFS_CUSTOM_GATEWAY/ipfs/$CID")
+        ).isEqualTo("$IPFS_PRIVATE_GATEWAY/ipfs/$CID")
     }
 
     @Test
@@ -167,7 +165,7 @@ class UnionContentMetaServiceTest {
 
     private fun assertFixedIpfsUrl(url: String, expectedPath: String) {
         val result = metaContentService.resolvePublicHttpUrl(url)
-        assertThat(result).isEqualTo("${IPFS_PUBLIC_GATEWAY}/ipfs/$expectedPath")
+        assertThat(result).isEqualTo("$IPFS_PUBLIC_GATEWAY/ipfs/$expectedPath")
     }
 
     private fun assertOriginalIpfsUrl(url: String, expectedPath: String? = null) {
@@ -182,7 +180,7 @@ class UnionContentMetaServiceTest {
         val content = randomUnionContent(UnionImageProperties()).copy(url = sourceUrl)
 
         val meta = randomUnionMeta().copy(content = listOf(content))
-        val withPublicUrls = metaContentService.exposePublicUrls(meta, randomEthItemId())!!
+        val withPublicUrls = metaContentService.exposePublicUrls(meta)!!
 
         assertThat(withPublicUrls.content[0].url).isEqualTo(expected)
     }
@@ -208,14 +206,14 @@ class UnionContentMetaServiceTest {
 
             // Full IPFS url with public gateway - should be the same
             Arguments.of(
-                "${IPFS_PUBLIC_GATEWAY}/ipfs/$CID", "${IPFS_PUBLIC_GATEWAY}/ipfs/$CID"
+                "$IPFS_PUBLIC_GATEWAY/ipfs/$CID", "$IPFS_PUBLIC_GATEWAY/ipfs/$CID"
             ),
             // Short IPFS url, should be replaced by public gateway
-            Arguments.of("ipfs://$CID/a", "${IPFS_PUBLIC_GATEWAY}/ipfs/$CID/a"),
+            Arguments.of("ipfs://$CID/a", "$IPFS_PUBLIC_GATEWAY/ipfs/$CID/a"),
             // IPFS CID, should be replaced by public gateway
-            Arguments.of(CID, "${IPFS_PUBLIC_GATEWAY}/ipfs/$CID"),
+            Arguments.of(CID, "$IPFS_PUBLIC_GATEWAY/ipfs/$CID"),
             // Legacy IPFS URL - should be replaced by current public URL
-            Arguments.of("https://rarible.mypinata.com/ipfs/$CID", "${IPFS_PUBLIC_GATEWAY}/ipfs/$CID"),
+            Arguments.of("https://rarible.mypinata.com/ipfs/$CID", "$IPFS_PUBLIC_GATEWAY/ipfs/$CID"),
             // Declared IPFS gateway, should stay the same
             Arguments.of("https://mypinata.com/ipfs/$CID", "https://mypinata.com/ipfs/$CID")
         )

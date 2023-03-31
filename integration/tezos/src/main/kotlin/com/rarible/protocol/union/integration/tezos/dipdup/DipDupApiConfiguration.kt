@@ -99,7 +99,7 @@ class DipDupApiConfiguration(
     fun tzktBigMapKeyClient() = BigMapKeyClient(tzktWebClient)
 
     @Bean
-    fun collectionMetaService(ipfsClient: IPFSClient) = MetaCollectionService(tzktWebClient, ipfsClient)
+    fun tzktCollectionMetaService(ipfsClient: IPFSClient) = MetaCollectionService(tzktWebClient, ipfsClient)
 
     @Bean
     fun tzktCollectionClient(

@@ -38,6 +38,7 @@ import com.rarible.protocol.union.enrichment.evaluator.ItemBestBidOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.ItemBestSellOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestBidOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestSellOrderProvider
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.OriginOrders
 import com.rarible.protocol.union.enrichment.model.ShortCollectionId
@@ -52,7 +53,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class EnrichmentRefreshService(
@@ -201,6 +202,7 @@ class EnrichmentRefreshService(
             shortCollection = updatedCollection,
             collection = unionCollectionDeferred.await(),
             orders = ordersHint,
+            metaPipeline = CollectionMetaPipeline.REFRESH
         )
         notifyUpdate(enriched)
     }

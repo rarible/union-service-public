@@ -23,7 +23,6 @@ import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaLoader
 import com.rarible.protocol.union.integration.ethereum.mock.EthActivityControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthAuctionControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthItemControllerApiMock
@@ -42,7 +41,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -73,10 +71,6 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     protected lateinit var testCollectionEventProducer: RaribleKafkaProducer<CollectionEventDto>
-
-    @Autowired
-    @Qualifier("test.union.meta.loader")
-    lateinit var testItemMetaLoader: ItemMetaLoader
 
     //--------------------- CURRENCY ---------------------//
 
@@ -262,9 +256,7 @@ abstract class AbstractIntegrationTest {
             testFlowOrderApi,
 
             testItemEventProducer,
-            testOwnershipEventProducer,
-
-            testItemMetaLoader
+            testOwnershipEventProducer
         )
         ethereumItemControllerApiMock = EthItemControllerApiMock(testEthereumItemApi)
         ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)

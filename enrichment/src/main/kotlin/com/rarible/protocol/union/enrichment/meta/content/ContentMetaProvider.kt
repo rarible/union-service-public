@@ -6,7 +6,6 @@ import com.rarible.core.meta.resource.model.UrlResource
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.meta.content.cache.ContentCache
 import com.rarible.protocol.union.enrichment.meta.content.cache.ContentCacheService
 import org.slf4j.LoggerFactory
@@ -24,12 +23,12 @@ class ContentMetaProvider(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun getContent(itemId: ItemIdDto, resource: UrlResource): UnionMetaContentProperties? {
+    suspend fun getContent(blockchain: BlockchainDto, resource: UrlResource): UnionMetaContentProperties? {
         val cache = getCache(resource)
-        getFromCache(cache, itemId, resource)?.let { return it }
+        getFromCache(cache, blockchain, resource)?.let { return it }
 
-        val fetched = fetch(itemId, resource)
-        updateCache(cache, itemId, resource, fetched)
+        val fetched = fetch(blockchain, resource)
+        updateCache(cache, blockchain, resource, fetched)
 
         return fetched
     }
@@ -44,10 +43,9 @@ class ContentMetaProvider(
 
     private suspend fun getFromCache(
         cache: ContentCache?,
-        itemId: ItemIdDto,
+        blockchain: BlockchainDto,
         resource: UrlResource
     ): UnionMetaContentProperties? {
-        val blockchain = itemId.blockchain
         if (cache == null) {
             metrics.onContentCacheSkipped(blockchain)
             return null
@@ -67,14 +65,13 @@ class ContentMetaProvider(
 
     private suspend fun updateCache(
         cache: ContentCache?,
-        itemId: ItemIdDto,
+        blockchain: BlockchainDto,
         resource: UrlResource,
         result: UnionMetaContentProperties?
     ) {
         cache ?: return
 
         val cacheType = cache.getType()
-        val blockchain = itemId.blockchain
 
         when {
             result == null -> metrics.onContentCacheNotUpdated(blockchain, cacheType, "not_found")
@@ -86,8 +83,7 @@ class ContentMetaProvider(
         }
     }
 
-    private suspend fun fetch(itemId: ItemIdDto, resource: UrlResource): UnionMetaContentProperties? {
-        val blockchain = itemId.blockchain
+    private suspend fun fetch(blockchain: BlockchainDto, resource: UrlResource): UnionMetaContentProperties? {
         val internalUrl = contentMetaService.resolveInternalHttpUrl(resource)
         if (internalUrl == resource.original) {
             logger.info("Fetching content meta by URL $internalUrl")
@@ -99,7 +95,7 @@ class ContentMetaProvider(
             URL(internalUrl)
         } catch (e: Throwable) {
             logger.warn("Wrong URL: $internalUrl", e)
-            metrics.onContentResolutionFailed(itemId.blockchain, "remote", "malformed_url")
+            metrics.onContentResolutionFailed(blockchain, "remote", "malformed_url")
             return null
         }
 
@@ -110,7 +106,7 @@ class ContentMetaProvider(
             properties
         } catch (e: Exception) {
             logger.warn("Failed to receive content meta via URL {}", internalUrl, e)
-            metrics.onContentResolutionFailed(itemId.blockchain, "remote", "error")
+            metrics.onContentResolutionFailed(blockchain, "remote", "error")
             null
         }
     }

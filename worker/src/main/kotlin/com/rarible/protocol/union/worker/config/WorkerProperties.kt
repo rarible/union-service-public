@@ -14,7 +14,8 @@ data class WorkerProperties(
     val platformBestSellCleanup: PlatformBestSellCleanUpProperties = PlatformBestSellCleanUpProperties(),
     val priceUpdate: PriceUpdateProperties,
     val reconcileMarks: ReconcileMarksProperties,
-    val metaItemRetry: MetaItemRetry,
+    val metaItemRetry: MetaRetry,
+    val metaCollectionRetry: MetaRetry,
 )
 
 data class SearchReindexProperties(
@@ -102,7 +103,7 @@ class ReconcileMarksProperties(
     val rate: Duration = Duration.ofSeconds(15)
 )
 
-class MetaItemRetry(
+class MetaRetry(
     val enabled: Boolean = true,
     val rate: Duration = Duration.ofMinutes(1)
 )

@@ -7,7 +7,8 @@ import java.time.Instant
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes(
-    JsonSubTypes.Type(name = "UPDATE", value = UnionItemUpdateEvent::class)
+    JsonSubTypes.Type(name = "UPDATE", value = UnionCollectionUpdateEvent::class),
+    JsonSubTypes.Type(name = "CHANGE", value = UnionCollectionChangeEvent::class)
 )
 
 sealed class UnionCollectionEvent {
@@ -29,6 +30,16 @@ data class UnionCollectionUpdateEvent(
     ) : this(collection.id, collection, eventTimeMarks)
 
     override fun addTimeMark(name: String, date: Instant?): UnionCollectionUpdateEvent {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
+}
+
+data class UnionCollectionChangeEvent(
+    override val collectionId: CollectionIdDto,
+    override val eventTimeMarks: UnionEventTimeMarks?
+) : UnionCollectionEvent() {
+
+    override fun addTimeMark(name: String, date: Instant?): UnionCollectionChangeEvent {
         return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
     }
 }

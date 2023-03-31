@@ -6,14 +6,19 @@ import com.rarible.core.daemon.sequential.ConsumerBatchWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadTask
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaDownloader
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaNotifier
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaNotifier
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.repository.CollectionMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
+import com.rarible.protocol.union.meta.loader.executor.CollectionDownloadExecutor
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutor
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutorHandler
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutorManager
@@ -48,12 +53,11 @@ class DownloadExecutorConfiguration(
 
     private val clientIdPrefix = "$env.$host.${UUID.randomUUID()}"
 
-    @Bean
-    fun itemDownloadExecutorMetrics() = DownloadExecutorMetrics(
-        meterRegistry = meterRegistry,
-        type = "ITEM",
-        blockchainExtractor = { id -> IdParser.parseItemId(id).blockchain }
-    )
+    companion object {
+
+        const val COLLECTION_TYPE = "collection"
+        const val ITEM_TYPE = "item"
+    }
 
     @Bean
     @Qualifier("item.meta.download.executor.manager")
@@ -89,7 +93,7 @@ class DownloadExecutorConfiguration(
         @Qualifier("item.meta.download.executor.manager")
         executorManager: DownloadExecutorManager
     ): ConsumerWorkerGroup<DownloadTask> {
-        val type = "item"
+        val type = ITEM_TYPE
         val workers = ItemMetaPipeline.values().map { it.name.lowercase() }.map { pipeline ->
             val conf = getItemPipelineConfiguration(pipeline)
             val handler = DownloadExecutorHandler(pipeline, executorManager)
@@ -102,7 +106,58 @@ class DownloadExecutorConfiguration(
 
     private fun getItemPipelineConfiguration(pipeline: String): ExecutorPipelineProperties {
         val result = metaLoaderProperties.downloader.item[pipeline] ?: ExecutorPipelineProperties()
-        logger.info("Settings for ITEM downloader pipeline '{}': {}", pipeline, result)
+        logger.info("Settings for Item downloader pipeline '{}': {}", pipeline, result)
+        return result
+    }
+
+    @Bean
+    @Qualifier("collection.meta.download.executor.manager")
+    fun collectionMetaDownloadExecutorManager(
+        collectionMetaRepository: CollectionMetaRepository,
+        collectionMetaDownloader: CollectionMetaDownloader,
+        collectionMetaNotifier: CollectionMetaNotifier,
+        collectionDownloadExecutorMetrics: DownloadExecutorMetrics
+    ): DownloadExecutorManager {
+        val maxRetries = metaProperties.retryIntervals.size
+        val executors = HashMap<String, DownloadExecutor<UnionCollectionMeta>>()
+        CollectionMetaPipeline.values().map { it.name.lowercase() }.forEach { pipeline ->
+            val conf = getCollectionPipelineConfiguration(pipeline)
+            val pool = DownloadPool(conf.poolSize, "collection-meta-task-executor")
+            val executor = CollectionDownloadExecutor(
+                collectionMetaRepository,
+                collectionMetaDownloader,
+                collectionMetaNotifier,
+                pool,
+                collectionDownloadExecutorMetrics,
+                maxRetries
+            )
+            executors[pipeline] = executor
+            logger.info(
+                "Created collection-meta-task-executor (pipeline: $pipeline, poolSize: ${conf.poolSize})"
+            )
+        }
+        return DownloadExecutorManager(executors)
+    }
+
+    @Bean
+    fun collectionMetaDownloadTaskConsumer(
+        @Qualifier("collection.meta.download.executor.manager")
+        executorManager: DownloadExecutorManager
+    ): ConsumerWorkerGroup<DownloadTask> {
+        val type = COLLECTION_TYPE
+        val workers = CollectionMetaPipeline.values().map { it.name.lowercase() }.map { pipeline ->
+            val conf = getCollectionPipelineConfiguration(pipeline)
+            val handler = DownloadExecutorHandler(pipeline, executorManager)
+            createMetaDownloaderBatchConsumer(pipeline, conf.workers, conf.batchSize, type, handler)
+        }.map { it.workers }.flatten()
+
+        // Just join all pipeline workers into single list
+        return ConsumerWorkerGroup(workers)
+    }
+
+    private fun getCollectionPipelineConfiguration(pipeline: String): ExecutorPipelineProperties {
+        val result = metaLoaderProperties.downloader.item[pipeline] ?: ExecutorPipelineProperties()
+        logger.info("Settings for Collection downloader pipeline '{}': {}", pipeline, result)
         return result
     }
 
@@ -117,7 +172,7 @@ class DownloadExecutorConfiguration(
         val clientIdSuffix = "$type-meta-task-executor"
         val workerSet = (1..workers).map {
             ConsumerBatchWorker(
-                consumer = createDownloadExecutorConsumer(it, clientIdSuffix, consumerGroupSuffix, pipeline),
+                consumer = createDownloadExecutorConsumer(it, clientIdSuffix, consumerGroupSuffix, type, pipeline),
                 properties = DaemonWorkerProperties(consumerBatchSize = batchSize),
                 eventHandler = handler,
                 meterRegistry = meterRegistry,
@@ -134,14 +189,20 @@ class DownloadExecutorConfiguration(
         index: Int,
         clientIdSuffix: String,
         consumerGroupSuffix: String,
+        type: String,
         pipeline: String
     ): RaribleKafkaConsumer<DownloadTask> {
+        val topic = when (type) {
+            COLLECTION_TYPE -> UnionInternalTopicProvider.getCollectionMetaDownloadTaskExecutorTopic(env, pipeline)
+            ITEM_TYPE -> UnionInternalTopicProvider.getItemMetaDownloadTaskExecutorTopic(env, pipeline)
+            else -> throw IllegalArgumentException("Unsupported type for meta-loader: $type")
+        }
         return RaribleKafkaConsumer(
             clientId = "$clientIdPrefix.union-$clientIdSuffix.$pipeline-$index",
             valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
             valueClass = DownloadTask::class.java,
             consumerGroup = consumerGroup("download.executor.$consumerGroupSuffix"),
-            defaultTopic = UnionInternalTopicProvider.getItemMetaDownloadTaskExecutorTopic(env, pipeline),
+            defaultTopic = topic,
             bootstrapServers = metaLoaderProperties.brokerReplicaSet,
             offsetResetStrategy = OffsetResetStrategy.EARLIEST
         )
