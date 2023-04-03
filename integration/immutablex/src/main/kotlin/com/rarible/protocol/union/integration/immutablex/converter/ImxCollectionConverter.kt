@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollection
@@ -28,6 +29,7 @@ object ImxCollectionConverter {
         return UnionCollection(
             id = CollectionIdDto(blockchain, source.address),
             name = source.name,
+            structureKind = UnionCollection.StructureKind.REGULAR,
             type = UnionCollection.Type.ERC721,
             features = listOf(UnionCollection.Features.APPROVE_FOR_ALL),
             minters = listOfNotNull(minter),

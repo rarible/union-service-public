@@ -5,6 +5,7 @@ import com.rarible.protocol.dto.FlowNftCollectionsDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import org.slf4j.LoggerFactory
@@ -28,6 +29,7 @@ object FlowCollectionConverter {
             name = source.name,
             symbol = source.symbol,
             owner = UnionAddressConverter.convert(blockchain, source.owner),
+            structureKind = UnionCollection.StructureKind.REGULAR,
             type = UnionCollection.Type.FLOW,
             features = convert(source.features),
             minters = null // Not supported in Flow yet.

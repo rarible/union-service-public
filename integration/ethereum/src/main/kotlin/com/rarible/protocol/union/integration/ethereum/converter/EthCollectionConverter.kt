@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import org.slf4j.LoggerFactory
@@ -45,6 +46,7 @@ object EthCollectionConverter {
             name = source.name,
             status = convert(source.status),
             symbol = source.symbol,
+            structureKind = UnionCollection.StructureKind.REGULAR,
             type = convert(source.type),
             owner = source.owner?.let { EthConverter.convert(it, blockchain) },
             features = source.features.map { convert(it) },
