@@ -52,10 +52,17 @@ data class EnrichmentCollection(
     val version: Long? = null
 ) : BestSellOrderOwner<EnrichmentCollection>, BestBidOrderOwner<EnrichmentCollection>, OriginOrdersOwner {
 
-    fun withCalculatedFields(): EnrichmentCollection {
+    fun withCalculatedFieldsAndUpdatedAt(): EnrichmentCollection {
         return this.copy(
             multiCurrency = bestSellOrders.size > 1 || bestBidOrders.size > 1,
             lastUpdatedAt = nowMillis()
+        )
+    }
+
+    @Deprecated("Required for migration only, remove later")
+    fun withCalculatedFields(): EnrichmentCollection {
+        return this.copy(
+            multiCurrency = bestSellOrders.size > 1 || bestBidOrders.size > 1
         )
     }
 

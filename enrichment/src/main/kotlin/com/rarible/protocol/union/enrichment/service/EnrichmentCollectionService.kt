@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
@@ -35,7 +36,8 @@ class EnrichmentCollectionService(
     private val contentMetaService: ContentMetaService,
     private val orderApiService: OrderApiMergeService,
     private val collectionMetaService: CollectionMetaService,
-    private val metrics: CollectionMetaMetrics
+    private val metrics: CollectionMetaMetrics,
+    private val ff: FeatureFlagsProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionService::class.java)
@@ -64,16 +66,22 @@ class EnrichmentCollectionService(
         return EnrichmentCollectionConverter.convert(fetched)
     }
 
-    suspend fun update(collection: UnionCollection): EnrichmentCollection {
+    suspend fun update(collection: UnionCollection, updateDate: Boolean = true): EnrichmentCollection {
         val id = EnrichmentCollectionId(collection.id)
         val updated = collectionRepository.get(id)?.withData(collection) // Update existing
             ?: EnrichmentCollectionConverter.convert(collection) // Or create new one
 
-        return collectionRepository.save(updated.withCalculatedFields())
+        // TODO update after the migration
+        val withCalculatedFields = if (updateDate) {
+            updated.withCalculatedFieldsAndUpdatedAt()
+        } else {
+            updated.withCalculatedFields()
+        }
+        return collectionRepository.save(withCalculatedFields)
     }
 
     suspend fun save(collection: EnrichmentCollection): EnrichmentCollection? {
-        return collectionRepository.save(collection.withCalculatedFields())
+        return collectionRepository.save(collection.withCalculatedFieldsAndUpdatedAt())
     }
 
     suspend fun findAll(ids: List<EnrichmentCollectionId>): List<EnrichmentCollection> {
@@ -81,6 +89,48 @@ class EnrichmentCollectionService(
     }
 
     suspend fun enrichCollection(
+        enrichmentCollection: EnrichmentCollection?,
+        collection: UnionCollection?,
+        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
+        metaPipeline: CollectionMetaPipeline
+    ): CollectionDto {
+        require(enrichmentCollection != null || collection != null)
+        if (ff.enableUnionCollections) {
+            if (enrichmentCollection != null) {
+                return enrichCollection(enrichmentCollection, orders, metaPipeline)
+            } else {
+                logger.warn("Enrichment Collection {} not synced!", collection!!.id.fullId())
+            }
+        }
+        return enrichCollectionLegacy(enrichmentCollection, collection, orders, metaPipeline)
+    }
+
+    suspend fun enrichCollection(
+        enrichmentCollection: EnrichmentCollection,
+        orders: Map<OrderIdDto, OrderDto>,
+        metaPipeline: CollectionMetaPipeline
+    ): CollectionDto {
+
+        val collectionId = enrichmentCollection.id.toDto()
+        val metaEntry = enrichmentCollection.metaEntry
+
+        val bestOrders = enrichmentOrderService.fetchMissingOrders(
+            existing = enrichmentCollection.getAllBestOrders(),
+            orders = orders
+        )
+
+        onMetaEntry(collectionId, metaPipeline, metaEntry)
+
+        return CollectionDtoConverter.convert(
+            collection = enrichmentCollection,
+            // replacing inner IPFS urls with public urls
+            meta = contentMetaService.exposePublicUrls(metaEntry?.data),
+            orders = bestOrders
+        )
+    }
+
+    @Deprecated("Remove after the migration to Union data")
+    private suspend fun enrichCollectionLegacy(
         enrichmentCollection: EnrichmentCollection?,
         collection: UnionCollection?,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
@@ -103,7 +153,7 @@ class EnrichmentCollectionService(
 
         onMetaEntry(unionCollection.id, metaPipeline, metaEntry)
 
-        CollectionDtoConverter.convert(
+        CollectionDtoConverter.convertLegacy(
             collection = unionCollection,
             // replacing inner IPFS urls with public urls
             meta = contentMetaService.exposePublicUrls(meta),

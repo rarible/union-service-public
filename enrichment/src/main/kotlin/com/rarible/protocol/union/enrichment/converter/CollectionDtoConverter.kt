@@ -9,7 +9,8 @@ import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 
 object CollectionDtoConverter {
 
-    fun convert(
+    @Deprecated("UnionCollection should not be used after the migration")
+    fun convertLegacy(
         // TODO COLLECTION won't be needed after the migration
         collection: UnionCollection,
         // TODO COLLECTION must be required after the migration
@@ -27,13 +28,37 @@ object CollectionDtoConverter {
             status = collection.status?.let { convert(it) },
             symbol = collection.symbol,
             parent = collection.parent,
-            meta = (meta ?: collection.meta)?.let { MetaDtoConverter.convert(it) },
             type = convert(collection.type),
             self = collection.self,
+            meta = meta?.let { MetaDtoConverter.convert(it) },
             bestSellOrder = enrichmentCollection?.bestSellOrder?.let { orders[it.dtoId] },
             bestBidOrder = enrichmentCollection?.bestBidOrder?.let { orders[it.dtoId] },
             originOrders = enrichmentCollection?.originOrders?.let { OriginOrdersConverter.convert(it, orders) }
                 ?: emptyList()
+        )
+    }
+
+    fun convert(
+        collection: EnrichmentCollection,
+        meta: UnionCollectionMeta? = null,
+        orders: Map<OrderIdDto, OrderDto> = emptyMap()
+    ): CollectionDto {
+        return CollectionDto(
+            id = collection.id.toDto(),
+            blockchain = collection.id.blockchain,
+            features = collection.features.map { convert(it) },
+            owner = collection.owner,
+            minters = collection.minters,
+            name = collection.name,
+            status = collection.status?.let { convert(it) },
+            symbol = collection.symbol,
+            parent = collection.parent?.toDto(),
+            type = convert(collection.type!!), // TODO Must be required after the migration
+            self = collection.self,
+            meta = meta?.let { MetaDtoConverter.convert(it) },
+            bestSellOrder = collection.bestSellOrder?.let { orders[it.dtoId] },
+            bestBidOrder = collection.bestBidOrder?.let { orders[it.dtoId] },
+            originOrders = OriginOrdersConverter.convert(collection.originOrders, orders)
         )
     }
 
