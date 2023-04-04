@@ -50,7 +50,11 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         collectionEventService.onCollectionChanged(UnionCollectionChangeEvent(collectionId, stubEventMark()))
 
-        val expected = CollectionDtoConverter.convert(unionCollection)
+        val expected = CollectionDtoConverter.convertLegacy(
+            collection = unionCollection,
+            meta = unionCollection.meta
+        )
+
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
@@ -68,7 +72,10 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionUpdate(UnionCollectionUpdateEvent(unionCollection, stubEventMark()))
 
         val updated = collectionService.get(EnrichmentCollectionId(collectionId))!!
-        val expected = CollectionDtoConverter.convert(unionCollection)
+        val expected = CollectionDtoConverter.convertLegacy(
+            collection = unionCollection,
+            meta = unionCollection.meta
+        )
 
         assertThat(updated.version).isEqualTo(0L)
         waitAssert {
@@ -91,7 +98,10 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionUpdate(UnionCollectionUpdateEvent(unionCollection, stubEventMark()))
 
         val updated = collectionService.get(current.id)!!
-        val expected = CollectionDtoConverter.convert(unionCollection)
+        val expected = CollectionDtoConverter.convertLegacy(
+            collection = unionCollection,
+            meta = unionCollection.meta
+        )
 
         assertThat(updated.version).isGreaterThan(current.version)
         waitAssert {
@@ -120,7 +130,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionBestSellOrderUpdate(collectionId, unionBestSell, null, true)
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = CollectionDtoConverter.convert(unionCollection, enrichmentCollection)
+        val expected = CollectionDtoConverter.convertLegacy(unionCollection, enrichmentCollection)
             .copy(bestSellOrder = unionBestSell)
 
         val saved = collectionService.get(enrichmentCollection.id)!!
@@ -155,7 +165,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionBestBidOrderUpdate(collectionId, unionBestBid, stubEventMark(), true)
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = CollectionDtoConverter.convert(unionCollection).copy(bestBidOrder = unionBestBid)
+        val expected = CollectionDtoConverter.convertLegacy(unionCollection).copy(bestBidOrder = unionBestBid)
 
         val saved = collectionService.get(enrichmentCollection.id)!!
         assertThat(saved.bestBidOrder).isEqualTo(ShortOrderConverter.convert(unionBestBid))

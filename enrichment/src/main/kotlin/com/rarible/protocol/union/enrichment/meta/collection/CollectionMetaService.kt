@@ -21,21 +21,21 @@ class CollectionMetaService(
     override fun getBlockchain(key: CollectionIdDto) = key.blockchain
 
     suspend fun get(
-        itemId: CollectionIdDto,
+        collectionId: CollectionIdDto,
         sync: Boolean,
         pipeline: CollectionMetaPipeline
-    ) = get(itemId, sync, pipeline.pipeline)
+    ) = get(collectionId, sync, pipeline.pipeline)
 
     suspend fun download(
-        itemId: CollectionIdDto,
+        collectionId: CollectionIdDto,
         pipeline: CollectionMetaPipeline,
         force: Boolean
-    ) = download(itemId, pipeline.pipeline, force)
+    ) = download(collectionId, pipeline.pipeline, force)
 
     suspend fun schedule(
-        itemId: CollectionIdDto,
+        collectionId: CollectionIdDto,
         pipeline: CollectionMetaPipeline,
         force: Boolean
-    ) = schedule(itemId, pipeline.pipeline, force)
+    ) = schedule(collectionId, pipeline.pipeline, force)
 
 }

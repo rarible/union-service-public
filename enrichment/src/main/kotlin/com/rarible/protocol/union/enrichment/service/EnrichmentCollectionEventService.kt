@@ -43,7 +43,7 @@ class EnrichmentCollectionEventService(
 
     suspend fun onCollectionUpdate(update: UnionCollectionUpdateEvent) {
         val collection = update.collection
-        val existing = enrichmentCollectionService.update(collection)
+        val existing = optimisticLock { enrichmentCollectionService.update(collection) }
         val updateEvent = buildUpdateEvent(
             enrichmentCollection = existing,
             unionCollection = collection,
