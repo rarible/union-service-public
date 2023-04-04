@@ -5,7 +5,6 @@ import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -30,10 +29,10 @@ object DipDupCollectionConverter {
         return UnionCollection(
             id = CollectionIdDto(blockchain, collection.id),
             name = collection.name ?: UNTITLED,
-            type = CollectionDto.Type.TEZOS_MT,
+            type = UnionCollection.Type.TEZOS_MT,
             owner = UnionAddress(blockchain.group(), collection.owner),
             minters = minters(collection),
-            features = listOf(CollectionDto.Features.SECONDARY_SALE_FEES, CollectionDto.Features.BURN),
+            features = listOf(UnionCollection.Features.SECONDARY_SALE_FEES, UnionCollection.Features.BURN),
             symbol = collection.symbol,
             meta = collection.meta?.let { convertMeta(it) }
         )

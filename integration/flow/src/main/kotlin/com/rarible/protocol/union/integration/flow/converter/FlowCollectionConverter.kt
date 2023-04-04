@@ -5,7 +5,6 @@ import com.rarible.protocol.dto.FlowNftCollectionsDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import org.slf4j.LoggerFactory
@@ -29,7 +28,7 @@ object FlowCollectionConverter {
             name = source.name,
             symbol = source.symbol,
             owner = UnionAddressConverter.convert(blockchain, source.owner),
-            type = CollectionDto.Type.FLOW,
+            type = UnionCollection.Type.FLOW,
             features = convert(source.features),
             minters = null // Not supported in Flow yet.
         )
@@ -43,14 +42,14 @@ object FlowCollectionConverter {
         )
     }
 
-    fun convert(feature: FlowNftCollectionDto.Features): CollectionDto.Features {
-        return when(feature) {
-            FlowNftCollectionDto.Features.BURN -> CollectionDto.Features.BURN
-            FlowNftCollectionDto.Features.SECONDARY_SALE_FEES -> CollectionDto.Features.SECONDARY_SALE_FEES
+    fun convert(feature: FlowNftCollectionDto.Features): UnionCollection.Features {
+        return when (feature) {
+            FlowNftCollectionDto.Features.BURN -> UnionCollection.Features.BURN
+            FlowNftCollectionDto.Features.SECONDARY_SALE_FEES -> UnionCollection.Features.SECONDARY_SALE_FEES
         }
     }
 
-    fun convert(features: List<FlowNftCollectionDto.Features>): List<CollectionDto.Features> {
+    fun convert(features: List<FlowNftCollectionDto.Features>): List<UnionCollection.Features> {
         return features.map(this::convert)
     }
 

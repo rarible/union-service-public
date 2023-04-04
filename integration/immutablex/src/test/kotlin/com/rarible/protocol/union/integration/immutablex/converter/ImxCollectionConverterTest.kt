@@ -2,8 +2,8 @@ package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.integration.data.randomImxCollection
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexCollection
 import org.assertj.core.api.Assertions.assertThat
@@ -30,7 +30,7 @@ class ImxCollectionConverterTest {
         assertThat(meta.content).hasSize(1)
         assertThat(meta.content[0].url).isEqualTo(imxCollection.collectionImageUrl)
 
-        assertThat(collection.features).isEqualTo(listOf(CollectionDto.Features.APPROVE_FOR_ALL))
+        assertThat(collection.features).isEqualTo(listOf(UnionCollection.Features.APPROVE_FOR_ALL))
 
         assertThat(collection.minters).hasSize(1)
         assertThat(collection.minters!![0].value).isEqualTo(imxCollection.projectOwnerAddress)
@@ -63,6 +63,6 @@ class ImxCollectionConverterTest {
         assertThat(meta.description).isNull()
         assertThat(meta.content).isEmpty()
 
-        assertThat(collection.features).isEqualTo(listOf(CollectionDto.Features.APPROVE_FOR_ALL))
+        assertThat(collection.features).isEqualTo(listOf(UnionCollection.Features.APPROVE_FOR_ALL))
     }
 }

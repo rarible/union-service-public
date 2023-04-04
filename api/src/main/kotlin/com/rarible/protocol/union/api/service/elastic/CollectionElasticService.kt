@@ -15,8 +15,8 @@ import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
-import com.rarible.protocol.union.enrichment.model.ShortCollection
-import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.service.query.collection.CollectionQueryService
@@ -100,8 +100,8 @@ class CollectionElasticService(
 
         val cursor = if (result.isEmpty()) null else result.last().fromCollectionLite()
 
-        val shortCollections: Map<CollectionIdDto, ShortCollection> = enrichmentCollectionService
-            .findAll(collections.map { ShortCollectionId(it.value.id) })
+        val enrichmentCollections: Map<CollectionIdDto, EnrichmentCollection> = enrichmentCollectionService
+            .findAll(collections.map { EnrichmentCollectionId(it.value.id) })
             .associateBy { it.id.toDto() }
 
         return CollectionsDto(
@@ -109,7 +109,7 @@ class CollectionElasticService(
             continuation = cursor.toString(),
             collections = collections.values.toList().map {
                 enrichmentCollectionService.enrichCollection(
-                    shortCollections[it.id],
+                    enrichmentCollections[it.id],
                     it,
                     emptyMap(),
                     CollectionMetaPipeline.API

@@ -16,8 +16,8 @@ import com.rarible.protocol.union.enrichment.evaluator.CollectionBestSellOrderPr
 import com.rarible.protocol.union.enrichment.evaluator.ItemBestBidOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.ItemBestSellOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestSellOrderProvider
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import com.rarible.protocol.union.enrichment.model.OriginOrders
-import com.rarible.protocol.union.enrichment.model.ShortCollection
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -25,7 +25,7 @@ import com.rarible.protocol.union.enrichment.util.bidCurrencyId
 import com.rarible.protocol.union.enrichment.util.origins
 import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.TreeMap
 
 @Component
 class BestOrderService(
@@ -54,10 +54,10 @@ class BestOrderService(
 
     //---------------------- Collection ---------------------//
     suspend fun updateBestSellOrder(
-        collection: ShortCollection,
+        collection: EnrichmentCollection,
         order: OrderDto,
         origins: List<String>
-    ): ShortCollection {
+    ): EnrichmentCollection {
         val providerFactory = CollectionBestSellOrderProvider.Factory(collection.id, enrichmentOrderService)
         val originOrders = updateOriginSell(collection.originOrders, order, origins, providerFactory)
         val updated = updateBestSell(collection, providerFactory.create(null), order)
@@ -65,17 +65,17 @@ class BestOrderService(
     }
 
     suspend fun updateBestBidOrder(
-        collection: ShortCollection,
+        collection: EnrichmentCollection,
         order: OrderDto,
         origins: List<String>
-    ): ShortCollection {
+    ): EnrichmentCollection {
         val providerFactory = CollectionBestBidOrderProvider.Factory(collection.id, enrichmentOrderService)
         val originOrders = updateOriginBid(collection.originOrders, order, origins, providerFactory)
         val updated = updateBestBid(collection, providerFactory.create(null), order)
         return updated.copy(originOrders = originOrders)
     }
 
-    suspend fun updateBestOrders(collection: ShortCollection): ShortCollection {
+    suspend fun updateBestOrders(collection: EnrichmentCollection): EnrichmentCollection {
         val originBestOrders = refreshBestOrders(collection.originOrders)
         return refreshBestBidOrder(refreshBestSellOrder(collection))
             .copy(originOrders = originBestOrders)

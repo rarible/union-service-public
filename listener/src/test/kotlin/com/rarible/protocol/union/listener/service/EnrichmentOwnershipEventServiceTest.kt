@@ -10,7 +10,7 @@ import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OwnershipSourceDto
-import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
+import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -100,7 +100,7 @@ class EnrichmentOwnershipEventServiceTest {
                 expectedShortOwnership,
                 null,
                 listOf(order).associateBy { it.id })
-        } returns EnrichedOwnershipConverter.convert(randomUnionOwnership(), shortOwnership)
+        } returns OwnershipDtoConverter.convert(randomUnionOwnership(), shortOwnership)
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order, stubEventMark())
 
@@ -158,7 +158,7 @@ class EnrichmentOwnershipEventServiceTest {
                 expectedShortOwnership,
                 null,
                 listOf(order).associateBy { it.id })
-        } returns EnrichedOwnershipConverter.convert(randomUnionOwnership(), shortOwnership)
+        } returns OwnershipDtoConverter.convert(randomUnionOwnership(), shortOwnership)
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order, stubEventMark())
 
@@ -194,7 +194,7 @@ class EnrichmentOwnershipEventServiceTest {
                 expectedShortOwnership,
                 null,
                 listOf(hackedOrder).associateBy { it.id })
-        } returns EnrichedOwnershipConverter.convert(randomUnionOwnership(), shortOwnership)
+        } returns OwnershipDtoConverter.convert(randomUnionOwnership(), shortOwnership)
 
         ownershipEventService.onPoolOrderUpdated(shortOwnership.id, order, PoolItemAction.EXCLUDED, stubEventMark())
 

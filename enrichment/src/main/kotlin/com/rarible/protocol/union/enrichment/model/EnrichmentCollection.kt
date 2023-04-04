@@ -1,9 +1,12 @@
 package com.rarible.protocol.union.enrichment.model
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderOwner
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
 import org.springframework.data.annotation.AccessType
@@ -15,12 +18,21 @@ import java.time.Instant
 
 /**
  * Table with additional info about collection, e.g. best sell/bid orders.
- * If there is no such info, related collection doesn't present in this table.
  */
 @Document("enrichment_collection")
-data class ShortCollection(
+data class EnrichmentCollection(
     val blockchain: BlockchainDto,
     val collectionId: String,
+
+    val name: String,
+    val status: UnionCollection.Status? = null,
+    val type: UnionCollection.Type? = null,
+    val minters: List<UnionAddress>? = listOf(),
+    val features: List<UnionCollection.Features> = listOf(),
+    val owner: UnionAddress? = null,
+    val parent: EnrichmentCollectionId? = null,
+    val symbol: String? = null,
+    val self: Boolean? = null,
 
     override val bestSellOrder: ShortOrder? = null,
     override val bestSellOrders: Map<String, ShortOrder>,
@@ -38,34 +50,13 @@ data class ShortCollection(
 
     @Version
     val version: Long? = null
-) : BestSellOrderOwner<ShortCollection>, BestBidOrderOwner<ShortCollection>, OriginOrdersOwner {
+) : BestSellOrderOwner<EnrichmentCollection>, BestBidOrderOwner<EnrichmentCollection>, OriginOrdersOwner {
 
-    fun withCalculatedFields(): ShortCollection {
+    fun withCalculatedFields(): EnrichmentCollection {
         return this.copy(
             multiCurrency = bestSellOrders.size > 1 || bestBidOrders.size > 1,
             lastUpdatedAt = nowMillis()
         )
-    }
-
-    companion object {
-
-        fun empty(collectionId: ShortCollectionId): ShortCollection {
-            return ShortCollection(
-                version = null,
-                blockchain = collectionId.blockchain,
-                collectionId = collectionId.collectionId,
-
-                bestSellOrder = null,
-                bestSellOrders = emptyMap(),
-
-                originOrders = emptySet(),
-
-                bestBidOrder = null,
-                bestBidOrders = emptyMap(),
-
-                lastUpdatedAt = nowMillis()
-            )
-        }
     }
 
     fun isNotEmpty(): Boolean {
@@ -73,15 +64,15 @@ data class ShortCollection(
     }
 
     @Transient
-    private val _id: ShortCollectionId = ShortCollectionId(blockchain, collectionId)
+    private val _id: EnrichmentCollectionId = EnrichmentCollectionId(blockchain, collectionId)
 
     @get:Id
     @get:AccessType(AccessType.Type.PROPERTY)
-    var id: ShortCollectionId
+    var id: EnrichmentCollectionId
         get() = _id
         set(_) {}
 
-    fun withMeta(entry: DownloadEntry<UnionCollectionMeta>): ShortCollection {
+    fun withMeta(entry: DownloadEntry<UnionCollectionMeta>): EnrichmentCollection {
         val metaChanged = this.metaEntry?.data != entry.data
         return this.copy(
             metaEntry = entry,
@@ -89,25 +80,40 @@ data class ShortCollection(
         )
     }
 
-    override fun withBestBidOrders(orders: Map<String, ShortOrder>): ShortCollection {
+    override fun withBestBidOrders(orders: Map<String, ShortOrder>): EnrichmentCollection {
         return this.copy(bestBidOrders = orders)
     }
 
-    override fun withBestBidOrder(order: ShortOrder?): ShortCollection {
+    override fun withBestBidOrder(order: ShortOrder?): EnrichmentCollection {
         return this.copy(bestBidOrder = order)
     }
 
-    override fun withBestSellOrders(orders: Map<String, ShortOrder>): ShortCollection {
+    override fun withBestSellOrders(orders: Map<String, ShortOrder>): EnrichmentCollection {
         return this.copy(bestSellOrders = orders)
     }
 
-    override fun withBestSellOrder(order: ShortOrder?): ShortCollection {
+    override fun withBestSellOrder(order: ShortOrder?): EnrichmentCollection {
         return this.copy(bestSellOrder = order)
     }
 
-    fun withNextRetry(): ShortCollection {
+    fun withNextRetry(): EnrichmentCollection {
         return this.copy(
             metaEntry = metaEntry?.copy(retries = metaEntry.retries + 1, retriedAt = nowMillis())
+        )
+    }
+
+    fun withData(collection: UnionCollection): EnrichmentCollection {
+        val converted = EnrichmentCollectionConverter.convert(collection)
+        return this.copy(
+            name = converted.name,
+            status = converted.status,
+            type = converted.type,
+            minters = converted.minters,
+            features = converted.features,
+            owner = converted.owner,
+            parent = converted.parent,
+            symbol = converted.symbol,
+            self = converted.self
         )
     }
 

@@ -42,8 +42,8 @@ import com.rarible.protocol.union.dto.SudoSwapCurveTypeDto
 import com.rarible.protocol.union.dto.SudoSwapPoolTypeDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
-import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
+import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
+import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
@@ -267,11 +267,11 @@ fun randomUnionActivitySale(itemId: ItemIdDto) = runBlocking {
 }
 
 fun randomItemDto(itemId: ItemIdDto): ItemDto {
-    return EnrichedItemConverter.convert(randomUnionItem(itemId))
+    return ItemDtoConverter.convert(randomUnionItem(itemId))
 }
 
 fun randomOwnershipDto(ownershipId: OwnershipIdDto): OwnershipDto {
-    return EnrichedOwnershipConverter.convert(randomUnionOwnership(ownershipId))
+    return OwnershipDtoConverter.convert(randomUnionOwnership(ownershipId))
 }
 
 fun randomEsActivity() = EsActivity(

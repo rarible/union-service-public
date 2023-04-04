@@ -16,7 +16,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
+import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -119,7 +119,7 @@ class EnrichmentOwnershipService(
             orders = orders
         )
 
-        EnrichedOwnershipConverter.convert(fetchedOwnership.await(), short, bestOrders)
+        OwnershipDtoConverter.convert(fetchedOwnership.await(), short, bestOrders)
     }
 
     suspend fun enrich(unionOwnerships: List<UnionAuctionOwnershipWrapper>): List<OwnershipDto> {
@@ -144,7 +144,7 @@ class EnrichmentOwnershipService(
                 val existingEnrichedOwnership = existingEnrichedOwnerships[it.ownershipId]
                 // Enriching it if possible
                 val ownership = if (existingEnrichedOwnership == null) {
-                    EnrichedOwnershipConverter.convert(it.ownership!!)
+                    OwnershipDtoConverter.convert(it.ownership!!)
                 } else {
                     enrichOwnership(existingEnrichedOwnership, it.ownership, orders)
                 }
@@ -178,7 +178,7 @@ class EnrichmentOwnershipService(
         return withDisguising(auction) {
             // we need to enrich ownership BEFORE disguising it
             // such ownership is "fake" and doesn't exist in blockchain DB
-            disguiseAuctionOwnership(EnrichedOwnershipConverter.convert(it), auction)
+            disguiseAuctionOwnership(OwnershipDtoConverter.convert(it), auction)
         }
     }
 

@@ -3,9 +3,7 @@ package com.rarible.protocol.union.api.service
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.api.service.api.OwnershipApiQueryService
-import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.core.DefaultBlockchainProperties
-import com.rarible.protocol.union.core.model.UnionAuctionOwnershipWrapper
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.service.AuctionContractService
@@ -14,12 +12,11 @@ import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
+import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
@@ -114,8 +111,8 @@ class OwnershipApiServiceTest {
 
         coEvery { enrichmentOwnershipService.enrich(any()) } answers {
             listOf(
-                EnrichedOwnershipConverter.convert(disguisedFullAuctionOwnership),
-                EnrichedOwnershipConverter.convert(partialOwnership),
+                OwnershipDtoConverter.convert(disguisedFullAuctionOwnership),
+                OwnershipDtoConverter.convert(partialOwnership),
             )
         }
 
@@ -162,8 +159,8 @@ class OwnershipApiServiceTest {
 
         coEvery { enrichmentOwnershipService.enrich(any()) } answers {
             listOf(
-                EnrichedOwnershipConverter.convert(partialOwnership),
-                EnrichedOwnershipConverter.convert(freeOwnership),
+                OwnershipDtoConverter.convert(partialOwnership),
+                OwnershipDtoConverter.convert(freeOwnership),
             )
         }
 
@@ -212,7 +209,7 @@ class OwnershipApiServiceTest {
     private suspend fun mockDisguise(auction: AuctionDto, ownership: UnionOwnership) {
         coEvery {
             enrichmentOwnershipService.disguiseAuctionWithEnrichment(auction)
-        } returns EnrichedOwnershipConverter.convert(ownership)
+        } returns OwnershipDtoConverter.convert(ownership)
     }
 
     private suspend fun mockAuctions(itemId: ItemIdDto, vararg auctions: AuctionDto) {

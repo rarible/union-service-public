@@ -24,7 +24,7 @@ class EnrichedMetaConverterTest {
     fun `convert item meta`() {
         val entry = randomItemMetaDownloadEntry()
         val meta = entry.data!!
-        val converted = EnrichedMetaConverter.convert(entry)!!
+        val converted = MetaDtoConverter.convert(entry)!!
 
         assertThat(converted.name).isEqualTo(meta.name)
         assertThat(converted.description).isEqualTo(meta.description)
@@ -44,7 +44,7 @@ class EnrichedMetaConverterTest {
     @Test
     fun `convert item meta - failed entry`() {
         val entry = randomItemMetaDownloadEntry(data = null, status = DownloadStatus.FAILED)
-        val converted = EnrichedMetaConverter.convert(entry)
+        val converted = MetaDtoConverter.convert(entry)
         assertThat(converted).isNull()
     }
 
@@ -52,7 +52,7 @@ class EnrichedMetaConverterTest {
     fun `convert collection meta`() {
         val meta = randomUnionCollectionMeta()
 
-        val converted = EnrichedMetaConverter.convert(meta)
+        val converted = MetaDtoConverter.convert(meta)
 
         assertThat(converted.name).isEqualTo(meta.name)
         assertThat(converted.description).isEqualTo(meta.description)
@@ -81,7 +81,7 @@ class EnrichedMetaConverterTest {
 
         val meta = randomUnionMeta().copy(content = listOf(image))
 
-        val converted = EnrichedMetaConverter.convert(meta)
+        val converted = MetaDtoConverter.convert(meta)
         val convertedImage = converted.content[0] as ImageContentDto
 
         assertThat(convertedImage.url).isEqualTo(image.url)
@@ -105,7 +105,7 @@ class EnrichedMetaConverterTest {
 
         val meta = randomUnionMeta().copy(content = listOf(video))
 
-        val converted = EnrichedMetaConverter.convert(meta)
+        val converted = MetaDtoConverter.convert(meta)
         val convertedVideo = converted.content[0] as VideoContentDto
 
         assertThat(convertedVideo.url).isEqualTo(video.url)
@@ -127,7 +127,7 @@ class EnrichedMetaConverterTest {
 
         val meta = randomUnionMeta().copy(content = listOf(audio))
 
-        val converted = EnrichedMetaConverter.convert(meta)
+        val converted = MetaDtoConverter.convert(meta)
         val convertedAudio = converted.content[0] as AudioContentDto
 
         assertThat(convertedAudio.url).isEqualTo(audio.url)
@@ -147,7 +147,7 @@ class EnrichedMetaConverterTest {
 
         val meta = randomUnionMeta().copy(content = listOf(model))
 
-        val converted = EnrichedMetaConverter.convert(meta)
+        val converted = MetaDtoConverter.convert(meta)
         val convertedModel = converted.content[0] as Model3dContentDto
 
         assertThat(convertedModel.url).isEqualTo(model.url)

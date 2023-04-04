@@ -9,7 +9,7 @@ import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
+import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -58,7 +58,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val ownershipId = randomEthOwnershipId(itemId)
         val ownershipDto = randomUnionOwnership(ownershipId)
 
-        val expected = EnrichedOwnershipConverter.convert(ownershipDto)
+        val expected = OwnershipDtoConverter.convert(ownershipDto)
 
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, emptyList())
 
@@ -107,7 +107,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val saved = ownershipService.get(shortOwnership.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(shortOwnership.bestSellOrder)
 
-        val expected = EnrichedOwnershipConverter.convert(unionOwnership)
+        val expected = OwnershipDtoConverter.convert(unionOwnership)
             .copy(bestSellOrder = unionBestSell)
 
         // We don't have related item in enrichment DB, so expect only Ownership update
@@ -179,7 +179,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         val saved = ownershipService.get(shortOwnership.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
 
-        val expected = EnrichedOwnershipConverter.convert(unionOwnership)
+        val expected = OwnershipDtoConverter.convert(unionOwnership)
             .copy(bestSellOrder = unionBestSell)
 
         // Since Item doesn't exist in Enrichment DB, we expect only Ownership event
@@ -206,7 +206,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         ownershipEventHandler.onAuctionUpdated(auction)
 
-        val expected = EnrichedOwnershipConverter.convert(unionOwnership)
+        val expected = OwnershipDtoConverter.convert(unionOwnership)
             .copy(auction = auction)
             .copy(value = unionOwnership.value + auction.sell.value.toBigInteger())
 
@@ -234,7 +234,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         ownershipEventHandler.onAuctionUpdated(auction)
 
-        val expected = EnrichedOwnershipConverter.convert(unionOwnership)
+        val expected = OwnershipDtoConverter.convert(unionOwnership)
 
         // Auction should be NOT attached to the Ownership since it is cancelled
         waitAssert {

@@ -4,10 +4,11 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 
-data class ShortCollectionId(
+data class EnrichmentCollectionId(
     val blockchain: BlockchainDto,
     val collectionId: String
 ) {
+
     constructor(dto: CollectionIdDto) : this(
         dto.blockchain,
         dto.value
@@ -26,8 +27,8 @@ data class ShortCollectionId(
 
     companion object {
 
-        fun of(collectionId: String): ShortCollectionId {
-            return ShortCollectionId(IdParser.parseCollectionId(collectionId))
+        fun of(collectionId: String): EnrichmentCollectionId {
+            return EnrichmentCollectionId(IdParser.parseCollectionId(collectionId))
         }
     }
 

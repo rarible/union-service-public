@@ -12,7 +12,7 @@ import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
-import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
@@ -77,9 +77,9 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         val ethUnionOrder = ethOrderConverter.convert(ethOrder, BlockchainDto.ETHEREUM)
 
         val shortOrder = ShortOrderConverter.convert(ethUnionOrder)
-        val shortCollection = EnrichedCollectionConverter.convertToShortCollection(ethUnionCollection)
+        val enrichmentCollection = EnrichmentCollectionConverter.convert(ethUnionCollection)
             .copy(bestSellOrder = shortOrder)
-        enrichmentCollectionService.save(shortCollection)
+        enrichmentCollectionService.save(enrichmentCollection)
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionIdFull.value) } returns ethCollectionDto.copy(isRaribleContract = true).toMono()

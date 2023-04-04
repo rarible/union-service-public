@@ -18,7 +18,7 @@ import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.Model3dContentDto
 import com.rarible.protocol.union.dto.VideoContentDto
 
-object EnrichedMetaConverter {
+object MetaDtoConverter {
 
     fun convert(meta: UnionCollectionMeta): CollectionMetaDto {
         return CollectionMetaDto(

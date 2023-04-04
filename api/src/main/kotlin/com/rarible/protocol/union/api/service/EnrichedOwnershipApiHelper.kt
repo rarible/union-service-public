@@ -16,7 +16,7 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.subchains
-import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
+import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
@@ -132,7 +132,7 @@ class EnrichedOwnershipApiHelper(
     private suspend fun enrich(unionOwnership: UnionOwnership): OwnershipDto {
         val shortId = ShortOwnershipId(unionOwnership.id)
         val shortOwnership = enrichmentOwnershipService.get(shortId)
-            ?: return EnrichedOwnershipConverter.convert(unionOwnership)
+            ?: return OwnershipDtoConverter.convert(unionOwnership)
 
         return enrichmentOwnershipService.enrichOwnership(shortOwnership, unionOwnership)
     }

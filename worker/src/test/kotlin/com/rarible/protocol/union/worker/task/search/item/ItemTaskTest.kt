@@ -6,10 +6,11 @@ import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.ItemContinuation
 import com.rarible.protocol.union.dto.continuation.page.Page
-import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -18,7 +19,6 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
-import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.RateLimiter
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
@@ -48,7 +48,7 @@ internal class ItemTaskTest {
     }
 
     private val item = randomUnionItem(randomEthItemId())
-    private val enrichedItem = EnrichedItemConverter.convert(item)
+    private val enrichedItem = ItemDtoConverter.convert(item)
     private val firstContinuation = ItemContinuation.ByLastUpdatedAndId.getContinuation(enrichedItem).toString()
 
     private val itemService = mockk<ItemService> {
