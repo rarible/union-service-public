@@ -11,13 +11,14 @@ import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
+import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
-import com.rarible.protocol.union.enrichment.model.ShortCollection
-import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.util.spent
@@ -39,28 +40,15 @@ class EnrichmentCollectionService(
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionService::class.java)
 
-    suspend fun get(collectionId: ShortCollectionId): ShortCollection? {
+    suspend fun get(collectionId: EnrichmentCollectionId): EnrichmentCollection? {
         return collectionRepository.get(collectionId)
     }
 
-    suspend fun getOrCreateWithLastUpdatedAtUpdate(collectionId: ShortCollectionId): ShortCollection {
-        val collection = collectionRepository.get(collectionId) ?: ShortCollection.empty(collectionId)
-        return collectionRepository.save(collection.withCalculatedFields())
-    }
-
-    suspend fun save(collection: ShortCollection): ShortCollection? {
-        return collectionRepository.save(collection.withCalculatedFields())
-    }
-
-    suspend fun getOrEmpty(collectionId: ShortCollectionId): ShortCollection {
-        return collectionRepository.get(collectionId) ?: ShortCollection.empty(collectionId)
-    }
-
-    suspend fun findAll(ids: List<ShortCollectionId>): List<ShortCollection> {
+    suspend fun getAll(ids: List<EnrichmentCollectionId>): List<EnrichmentCollection> {
         return collectionRepository.getAll(ids)
     }
 
-    suspend fun fetch(collectionId: ShortCollectionId): UnionCollection {
+    suspend fun fetch(collectionId: EnrichmentCollectionId): UnionCollection {
         val now = nowMillis()
         val collectionDto = collectionServiceRouter.getService(collectionId.blockchain)
             .getCollectionById(collectionId.collectionId)
@@ -68,54 +56,79 @@ class EnrichmentCollectionService(
         return collectionDto
     }
 
+    suspend fun getOrFetch(collectionId: EnrichmentCollectionId): EnrichmentCollection {
+        get(collectionId)?.let { return it }
+        // Ideally we shouldn't have such situations (possible only if we got order event earlier than collection)
+        logger.warn("Collection not found in Union DB, fetching: {}", collectionId.toDto().fullId())
+        val fetched = fetch(collectionId)
+        return EnrichmentCollectionConverter.convert(fetched)
+    }
+
+    suspend fun update(collection: UnionCollection): EnrichmentCollection {
+        val id = EnrichmentCollectionId(collection.id)
+        val updated = collectionRepository.get(id)?.withData(collection) // Update existing
+            ?: EnrichmentCollectionConverter.convert(collection) // Or create new one
+
+        return collectionRepository.save(updated.withCalculatedFields())
+    }
+
+    suspend fun save(collection: EnrichmentCollection): EnrichmentCollection? {
+        return collectionRepository.save(collection.withCalculatedFields())
+    }
+
+    suspend fun findAll(ids: List<EnrichmentCollectionId>): List<EnrichmentCollection> {
+        return collectionRepository.getAll(ids)
+    }
+
     suspend fun enrichCollection(
-        shortCollection: ShortCollection?,
+        enrichmentCollection: EnrichmentCollection?,
         collection: UnionCollection?,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         metaPipeline: CollectionMetaPipeline
     ) = coroutineScope {
-        require(shortCollection != null || collection != null)
-        val collectionId = shortCollection?.id?.toDto() ?: collection!!.id
+        require(enrichmentCollection != null || collection != null)
+        val collectionId = enrichmentCollection?.id?.toDto() ?: collection!!.id
         val fetchedCollection = async {
-            collection ?: fetch(ShortCollectionId(collectionId))
+            collection ?: fetch(EnrichmentCollectionId(collectionId))
         }
 
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
-            existing = shortCollection?.getAllBestOrders() ?: emptyList(),
+            existing = enrichmentCollection?.getAllBestOrders() ?: emptyList(),
             orders = orders
         )
 
         val unionCollection = fetchedCollection.await()
-        val metaEntry = shortCollection?.metaEntry
+        val metaEntry = enrichmentCollection?.metaEntry
         val meta = metaEntry?.data ?: unionCollection.meta
 
         onMetaEntry(unionCollection.id, metaPipeline, metaEntry)
 
-        EnrichedCollectionConverter.convert(
+        CollectionDtoConverter.convert(
             collection = unionCollection,
             // replacing inner IPFS urls with public urls
             meta = contentMetaService.exposePublicUrls(meta),
-            shortCollection = shortCollection,
+            enrichmentCollection = enrichmentCollection,
             orders = bestOrders
         )
     }
 
     suspend fun enrich(
-        shortCollections: List<ShortCollection>,
+        enrichmentCollections: List<EnrichmentCollection>,
         metaPipeline: CollectionMetaPipeline
     ): List<CollectionDto> {
-        if (shortCollections.isEmpty()) {
+        if (enrichmentCollections.isEmpty()) {
             return emptyList()
         }
-        val shortCollectionsById: Map<CollectionIdDto, ShortCollection> = shortCollections.associateBy { it.id.toDto() }
+        val enrichmentCollectionsById: Map<CollectionIdDto, EnrichmentCollection> =
+            enrichmentCollections.associateBy { it.id.toDto() }
 
-        val groupedIds = shortCollections.groupBy({ it.blockchain }, { it.id.collectionId })
+        val groupedIds = enrichmentCollections.groupBy({ it.blockchain }, { it.id.collectionId })
 
         val unionCollections = groupedIds.flatMap {
             collectionServiceRouter.getService(it.key).getCollectionsByIds(it.value)
         }
 
-        return enrichCollections(shortCollectionsById, unionCollections, metaPipeline)
+        return enrichCollections(enrichmentCollectionsById, unionCollections, metaPipeline)
     }
 
     suspend fun enrichUnionCollections(
@@ -125,19 +138,19 @@ class EnrichmentCollectionService(
         if (unionCollections.isEmpty()) {
             return emptyList()
         }
-        val shortCollections: Map<CollectionIdDto, ShortCollection> =
-            collectionRepository.getAll(unionCollections.map { ShortCollectionId(it.id) })
+        val enrichmentCollections: Map<CollectionIdDto, EnrichmentCollection> =
+            collectionRepository.getAll(unionCollections.map { EnrichmentCollectionId(it.id) })
                 .associateBy { it.id.toDto() }
 
-        return enrichCollections(shortCollections, unionCollections, metaPipeline)
+        return enrichCollections(enrichmentCollections, unionCollections, metaPipeline)
     }
 
     private suspend fun enrichCollections(
-        shortCollections: Map<CollectionIdDto, ShortCollection>,
+        enrichmentCollections: Map<CollectionIdDto, EnrichmentCollection>,
         unionCollections: List<UnionCollection>,
         metaPipeline: CollectionMetaPipeline
     ): List<CollectionDto> {
-        val shortOrderIds = shortCollections.values
+        val shortOrderIds = enrichmentCollections.values
             .map { it.getAllBestOrders() }
             .flatten()
             .map { it.dtoId }
@@ -146,7 +159,7 @@ class EnrichmentCollectionService(
             .associateBy { it.id }
 
         return unionCollections.map {
-            enrichCollection(shortCollections[it.id], it, orders, metaPipeline)
+            enrichCollection(enrichmentCollections[it.id], it, orders, metaPipeline)
         }
     }
 

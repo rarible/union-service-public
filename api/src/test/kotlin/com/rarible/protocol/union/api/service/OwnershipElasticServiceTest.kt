@@ -19,7 +19,7 @@ import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
+import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
@@ -124,8 +124,8 @@ class OwnershipElasticServiceTest {
 
         coEvery { enrichmentOwnershipService.enrich(any()) } answers {
             listOf(
-                EnrichedOwnershipConverter.convert(disguisedFullAuctionOwnership),
-                EnrichedOwnershipConverter.convert(partialOwnership),
+                OwnershipDtoConverter.convert(disguisedFullAuctionOwnership),
+                OwnershipDtoConverter.convert(partialOwnership),
             )
         }
 
@@ -172,8 +172,8 @@ class OwnershipElasticServiceTest {
 
         coEvery { enrichmentOwnershipService.enrich(any()) } answers {
             listOf(
-                EnrichedOwnershipConverter.convert(partialOwnership),
-                EnrichedOwnershipConverter.convert(freeOwnership),
+                OwnershipDtoConverter.convert(partialOwnership),
+                OwnershipDtoConverter.convert(freeOwnership),
             )
         }
 
@@ -211,7 +211,7 @@ class OwnershipElasticServiceTest {
     private suspend fun mockDisguise(auction: AuctionDto, ownership: UnionOwnership) {
         coEvery {
             enrichmentOwnershipService.disguiseAuctionWithEnrichment(auction)
-        } returns EnrichedOwnershipConverter.convert(ownership)
+        } returns OwnershipDtoConverter.convert(ownership)
     }
 
     private suspend fun mockAuctions(itemId: ItemIdDto, vararg auctions: AuctionDto) {

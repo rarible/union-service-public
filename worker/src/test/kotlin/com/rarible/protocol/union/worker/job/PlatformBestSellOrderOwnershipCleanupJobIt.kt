@@ -2,7 +2,7 @@ package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
+import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -11,8 +11,8 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.worker.config.PlatformBestSellCleanUpProperties
 import com.rarible.protocol.union.worker.IntegrationTest
+import com.rarible.protocol.union.worker.config.PlatformBestSellCleanUpProperties
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.mockk.coEvery
 import io.mockk.every
@@ -46,7 +46,7 @@ class PlatformBestSellOrderOwnershipCleanupJobIt {
         coEvery { listener.onEvent(any()) } returns Unit
         coEvery { ownershipService.enrichOwnership(any()) } answers {
             val shortOwnership = it.invocation.args[0] as ShortOwnership
-            EnrichedOwnershipConverter.convert(randomUnionOwnership(shortOwnership.id.toDto()), shortOwnership)
+            OwnershipDtoConverter.convert(randomUnionOwnership(shortOwnership.id.toDto()), shortOwnership)
         }
     }
 

@@ -6,7 +6,7 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionsDto
-import com.rarible.protocol.union.enrichment.converter.EnrichedCollectionConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
@@ -29,10 +29,10 @@ internal class CollectionReconciliationControllerFt : AbstractIntegrationTest() 
     fun getCollections() {
         val collectionDto1 = randomEthCollectionDto(randomAddress())
         val collectionDto2 = randomEthCollectionDto(randomAddress())
-        val shortCollection1 =
+        val enrichmentCollection1 =
             runBlocking {
                 collectionRepository.save(
-                    EnrichedCollectionConverter.convertToShortCollection(
+                    EnrichmentCollectionConverter.convert(
                         collection = EthCollectionConverter.convert(
                             collectionDto1,
                             BlockchainDto.ETHEREUM
@@ -40,10 +40,10 @@ internal class CollectionReconciliationControllerFt : AbstractIntegrationTest() 
                     ).copy(lastUpdatedAt = Instant.ofEpochMilli(2000))
                 )
             }
-        val shortCollection2 =
+        val enrichmentCollection2 =
             runBlocking {
                 collectionRepository.save(
-                    EnrichedCollectionConverter.convertToShortCollection(
+                    EnrichmentCollectionConverter.convert(
                         collection = EthCollectionConverter.convert(
                             collectionDto2,
                             BlockchainDto.ETHEREUM
@@ -55,8 +55,8 @@ internal class CollectionReconciliationControllerFt : AbstractIntegrationTest() 
             testEthereumCollectionApi.getNftCollectionsByIds(
                 match { request ->
                     request.ids.size == 2 &&
-                        request.ids.contains(shortCollection1.id.collectionId) &&
-                        request.ids.contains(shortCollection2.id.collectionId)
+                        request.ids.contains(enrichmentCollection1.id.collectionId) &&
+                        request.ids.contains(enrichmentCollection2.id.collectionId)
                 }
             )
         } returns NftCollectionsDto(total = 0, collections = listOf(collectionDto1, collectionDto2)).toMono()
@@ -70,8 +70,8 @@ internal class CollectionReconciliationControllerFt : AbstractIntegrationTest() 
         )
 
         assertThat(result.collections.map { it.id.fullId() }).containsExactlyInAnyOrder(
-            shortCollection1.id.toDto().fullId(),
-            shortCollection2.id.toDto().fullId(),
+            enrichmentCollection1.id.toDto().fullId(),
+            enrichmentCollection2.id.toDto().fullId(),
         )
     }
 }

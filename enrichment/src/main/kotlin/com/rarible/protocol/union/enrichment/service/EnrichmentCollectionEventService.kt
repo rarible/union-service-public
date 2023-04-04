@@ -12,8 +12,8 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
-import com.rarible.protocol.union.enrichment.model.ShortCollection
-import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -29,13 +29,13 @@ class EnrichmentCollectionEventService(
     private val originService: OriginService
 ) {
 
-    private val logger = LoggerFactory.getLogger(EnrichmentCollectionEventService::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun onCollectionChanged(event: UnionCollectionChangeEvent) {
         val collectionId = event.collectionId
-        val existing = enrichmentCollectionService.getOrEmpty(ShortCollectionId(collectionId))
+        val existing = enrichmentCollectionService.getOrFetch(EnrichmentCollectionId(collectionId))
         val updateEvent = buildUpdateEvent(
-            short = existing,
+            enrichmentCollection = existing,
             eventTimeMarks = event.eventTimeMarks
         )
         sendUpdate(updateEvent)
@@ -43,10 +43,10 @@ class EnrichmentCollectionEventService(
 
     suspend fun onCollectionUpdate(update: UnionCollectionUpdateEvent) {
         val collection = update.collection
-        val existing = enrichmentCollectionService.getOrCreateWithLastUpdatedAtUpdate(ShortCollectionId(collection.id))
+        val existing = enrichmentCollectionService.update(collection)
         val updateEvent = buildUpdateEvent(
-            short = existing,
-            collection = collection,
+            enrichmentCollection = existing,
+            unionCollection = collection,
             eventTimeMarks = update.eventTimeMarks
         )
         sendUpdate(updateEvent)
@@ -59,7 +59,7 @@ class EnrichmentCollectionEventService(
         notificationEnabled: Boolean
     ) = coroutineScope {
         updateCollection(
-            ShortCollectionId(collectionId),
+            EnrichmentCollectionId(collectionId),
             order,
             eventTimeMarks,
             notificationEnabled
@@ -76,7 +76,7 @@ class EnrichmentCollectionEventService(
         notificationEnabled: Boolean
     ) = coroutineScope {
         updateCollection(
-            ShortCollectionId(collectionId),
+            EnrichmentCollectionId(collectionId),
             order,
             eventTimeMarks,
             notificationEnabled
@@ -87,7 +87,7 @@ class EnrichmentCollectionEventService(
     }
 
     suspend fun recalculateBestOrders(
-        collection: ShortCollection,
+        collection: EnrichmentCollection,
         eventTimeMarks: UnionEventTimeMarks?
     ): Boolean {
         val updated = bestOrderService.updateBestOrders(collection)
@@ -108,40 +108,33 @@ class EnrichmentCollectionEventService(
     }
 
     private suspend fun updateCollection(
-        itemId: ShortCollectionId,
+        collectionId: EnrichmentCollectionId,
         order: OrderDto,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean,
-        orderUpdateAction: suspend (item: ShortCollection) -> ShortCollection
+        orderUpdateAction: suspend (collection: EnrichmentCollection) -> EnrichmentCollection
     ) = optimisticLock {
-        val (short, updated, exist) = update(itemId, orderUpdateAction)
-        if (short != updated && (exist || updated.isNotEmpty())) {
+        val current = enrichmentCollectionService.getOrFetch(collectionId)
+        val updated = orderUpdateAction(current)
+
+        // Notify if something changed OR just created
+        if (current != updated || current.version == null) {
             saveAndNotify(
                 updated = updated,
                 notificationEnabled = notificationEnabled,
                 eventTimeMarks = eventTimeMarks,
                 order = order
             )
-            logger.info("Saved Collection [{}] after Order event [{}]", itemId, order.id)
+            logger.info("Saved Collection [{}] after Order event [{}]", collectionId, order.id)
         } else {
             logger.info(
-                "Collection [{}] not changed after Order event [{}], event won't be published", itemId, order.id
+                "Collection [{}] not changed after Order event [{}], event won't be published", collectionId, order.id
             )
         }
     }
 
-    private suspend fun update(
-        collectionId: ShortCollectionId,
-        action: suspend (collection: ShortCollection) -> ShortCollection
-    ): Triple<ShortCollection?, ShortCollection, Boolean> {
-        val current = enrichmentCollectionService.get(collectionId)
-        val exist = current != null
-        val short = current ?: ShortCollection.empty(collectionId)
-        return Triple(current, action(short), exist)
-    }
-
     private suspend fun saveAndNotify(
-        updated: ShortCollection,
+        updated: EnrichmentCollection,
         notificationEnabled: Boolean,
         collection: UnionCollection? = null,
         order: OrderDto? = null,
@@ -158,14 +151,14 @@ class EnrichmentCollectionEventService(
     }
 
     private suspend fun buildUpdateEvent(
-        short: ShortCollection,
-        collection: UnionCollection? = null,
+        enrichmentCollection: EnrichmentCollection,
+        unionCollection: UnionCollection? = null,
         order: OrderDto? = null,
         eventTimeMarks: UnionEventTimeMarks?
     ): CollectionUpdateEventDto {
         val dto = enrichmentCollectionService.enrichCollection(
-            shortCollection = short,
-            collection = collection,
+            enrichmentCollection = enrichmentCollection,
+            collection = unionCollection,
             orders = listOfNotNull(order).associateBy { it.id },
             metaPipeline = CollectionMetaPipeline.EVENT
         )

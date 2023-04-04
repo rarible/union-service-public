@@ -10,7 +10,7 @@ import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -92,7 +92,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
             // TODO: see CHARLIE-158: here we ensure that meta is taken from the blockchain's Item.
             assertThat(messages[0].value.item).isEqualTo(
-                EnrichedItemConverter.convert(unionItem, meta = unionItem.meta)
+                ItemDtoConverter.convert(unionItem, meta = unionItem.meta)
             )
         }
     }
@@ -119,7 +119,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         itemEventService.onItemUpdated(UnionItemUpdateEvent(unionItem, stubEventMark()))
 
-        val expected = EnrichedItemConverter.convert(unionItem)
+        val expected = ItemDtoConverter.convert(unionItem)
             .copy(
                 bestSellOrder = unionBestSell,
                 bestBidOrder = unionBestBid
@@ -206,7 +206,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         assertThat(saved.totalStock).isEqualTo(30.toBigInteger())
 
         // In result event for item we expect updated totalStock/sellers
-        val expected = EnrichedItemConverter.convert(unionItem, saved, meta = unionMeta).copy(
+        val expected = ItemDtoConverter.convert(unionItem, saved, meta = unionMeta).copy(
             sellers = 2,
             totalStock = 30.toBigInteger()
         )
@@ -255,7 +255,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemEventService.onItemBestSellOrderUpdated(shortItem.id, unionBestSell, stubEventMark())
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = EnrichedItemConverter.convert(unionItem).copy(bestSellOrder = unionBestSell)
+        val expected = ItemDtoConverter.convert(unionItem).copy(bestSellOrder = unionBestSell)
 
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))

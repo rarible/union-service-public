@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.listener.repository
 
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
-import com.rarible.protocol.union.enrichment.test.data.randomShortCollection
+import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollection
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
@@ -18,15 +18,15 @@ class CollectionRepositoryIt : AbstractIntegrationTest() {
     @Test
     fun findIdsByLastUpdatedAt() = runBlocking<Unit> {
         val collection1 =
-            collectionRepository.save(randomShortCollection().copy(lastUpdatedAt = Instant.ofEpochMilli(1000)))
+            collectionRepository.save(randomEnrichmentCollection().copy(lastUpdatedAt = Instant.ofEpochMilli(1000)))
         val collection2 =
-            collectionRepository.save(randomShortCollection().copy(lastUpdatedAt = Instant.ofEpochMilli(2000)))
+            collectionRepository.save(randomEnrichmentCollection().copy(lastUpdatedAt = Instant.ofEpochMilli(2000)))
         val collection3 =
-            collectionRepository.save(randomShortCollection().copy(lastUpdatedAt = Instant.ofEpochMilli(3000)))
+            collectionRepository.save(randomEnrichmentCollection().copy(lastUpdatedAt = Instant.ofEpochMilli(3000)))
         val collection4 =
-            collectionRepository.save(randomShortCollection().copy(lastUpdatedAt = Instant.ofEpochMilli(4000)))
+            collectionRepository.save(randomEnrichmentCollection().copy(lastUpdatedAt = Instant.ofEpochMilli(4000)))
         val collection5 =
-            collectionRepository.save(randomShortCollection().copy(lastUpdatedAt = Instant.ofEpochMilli(5000)))
+            collectionRepository.save(randomEnrichmentCollection().copy(lastUpdatedAt = Instant.ofEpochMilli(5000)))
 
         val result = collectionRepository.findIdsByLastUpdatedAt(
             lastUpdatedFrom = Instant.ofEpochMilli(1500),

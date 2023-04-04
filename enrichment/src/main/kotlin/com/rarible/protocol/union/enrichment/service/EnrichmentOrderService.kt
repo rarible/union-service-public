@@ -11,7 +11,7 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.ext
-import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -105,7 +105,7 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestSell(collectionId: ShortCollectionId, currencyId: String, origin: String?): OrderDto? {
+    suspend fun getBestSell(collectionId: EnrichmentCollectionId, currencyId: String, origin: String?): OrderDto? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform(
             collectionId, OrderType.SELL, OrderFilters.COLLECTION
@@ -152,7 +152,7 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestBid(id: ShortCollectionId, currencyId: String, origin: String?): OrderDto? {
+    suspend fun getBestBid(id: EnrichmentCollectionId, currencyId: String, origin: String?): OrderDto? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform(
             id, OrderType.BID, OrderFilters.COLLECTION

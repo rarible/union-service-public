@@ -13,7 +13,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
-import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
@@ -48,11 +48,11 @@ class CollectionController(
         collection: String
     ): ResponseEntity<CollectionDto> {
         val fullCollectionId = IdParser.parseCollectionId(collection)
-        val shortCollectionId = ShortCollectionId(fullCollectionId)
+        val enrichmentCollectionId = EnrichmentCollectionId(fullCollectionId)
         val unionCollection = router.getService(fullCollectionId.blockchain).getCollectionById(fullCollectionId.value)
-        val shortCollection = enrichmentCollectionService.get(shortCollectionId)
+        val enrichmentCollection = enrichmentCollectionService.get(enrichmentCollectionId)
         val enrichedCollection = enrichmentCollectionService.enrichCollection(
-            shortCollection,
+            enrichmentCollection,
             unionCollection,
             emptyMap(),
             CollectionMetaPipeline.API

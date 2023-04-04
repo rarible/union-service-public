@@ -5,8 +5,8 @@ import com.rarible.core.apm.SpanType
 import com.rarible.core.mongo.util.div
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
-import com.rarible.protocol.union.enrichment.model.ShortCollection
-import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -38,7 +38,7 @@ class CollectionRepository(
 
     private val logger = LoggerFactory.getLogger(CollectionRepository::class.java)
 
-    private val collection: String = template.getCollectionName(ShortCollection::class.java)
+    private val collection: String = template.getCollectionName(EnrichmentCollection::class.java)
 
     suspend fun createIndices() {
         ALL_INDEXES.forEach { index ->
@@ -47,81 +47,81 @@ class CollectionRepository(
         }
     }
 
-    suspend fun save(collection: ShortCollection): ShortCollection {
+    suspend fun save(collection: EnrichmentCollection): EnrichmentCollection {
         return template.save(collection).awaitFirst()
     }
 
-    suspend fun get(collectionId: ShortCollectionId): ShortCollection? {
-        return template.findById<ShortCollection>(collectionId).awaitFirstOrNull()
+    suspend fun get(collectionId: EnrichmentCollectionId): EnrichmentCollection? {
+        return template.findById<EnrichmentCollection>(collectionId).awaitFirstOrNull()
     }
 
-    suspend fun getAll(ids: List<ShortCollectionId>): List<ShortCollection> {
+    suspend fun getAll(ids: List<EnrichmentCollectionId>): List<EnrichmentCollection> {
         val criteria = Criteria("_id").inValues(ids)
-        return template.find<ShortCollection>(Query(criteria)).collectList().awaitFirst()
+        return template.find<EnrichmentCollection>(Query(criteria)).collectList().awaitFirst()
     }
 
-    fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<ShortCollection> {
+    fun findWithMultiCurrency(lastUpdateAt: Instant): Flow<EnrichmentCollection> {
         val query = Query(
             Criteria().andOperator(
-                ShortCollection::multiCurrency isEqualTo true,
-                ShortCollection::lastUpdatedAt lte lastUpdateAt
+                EnrichmentCollection::multiCurrency isEqualTo true,
+                EnrichmentCollection::lastUpdatedAt lte lastUpdateAt
             )
         ).withHint(MULTI_CURRENCY_DEFINITION.indexKeys)
 
-        return template.find(query, ShortCollection::class.java).asFlow()
+        return template.find(query, EnrichmentCollection::class.java).asFlow()
     }
 
     suspend fun findIdsByLastUpdatedAt(
         lastUpdatedFrom: Instant,
         lastUpdatedTo: Instant,
-        continuation: ShortCollectionId?,
+        continuation: EnrichmentCollectionId?,
         size: Int = 20
-    ): List<ShortCollection> =
+    ): List<EnrichmentCollection> =
         template.find(
             Query(
-                where(ShortCollection::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)
+                where(EnrichmentCollection::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)
                     .apply {
                         if (continuation != null) {
-                            and(ShortCollection::id).gt(continuation)
+                            and(EnrichmentCollection::id).gt(continuation)
                         }
                     })
-                .with(Sort.by(ShortCollection::id.name))
+                .with(Sort.by(EnrichmentCollection::id.name))
                 .limit(size),
-            ShortCollection::class.java
+            EnrichmentCollection::class.java
         ).collectList().awaitFirst()
 
-    fun getCollectionsForMetaRetry(now: Instant, retryPeriod: Duration, attempt: Int): Flow<ShortCollection> {
+    fun getCollectionsForMetaRetry(now: Instant, retryPeriod: Duration, attempt: Int): Flow<EnrichmentCollection> {
         val query = Query(
             Criteria().andOperator(
-                ShortCollection::metaEntry / DownloadEntry<*>::status isEqualTo DownloadStatus.RETRY,
-                ShortCollection::metaEntry / DownloadEntry<*>::retries isEqualTo attempt,
-                ShortCollection::metaEntry / DownloadEntry<*>::retriedAt lt now.minus(retryPeriod)
+                EnrichmentCollection::metaEntry / DownloadEntry<*>::status isEqualTo DownloadStatus.RETRY,
+                EnrichmentCollection::metaEntry / DownloadEntry<*>::retries isEqualTo attempt,
+                EnrichmentCollection::metaEntry / DownloadEntry<*>::retriedAt lt now.minus(retryPeriod)
             )
         )
 
-        return template.find(query, ShortCollection::class.java).asFlow()
+        return template.find(query, EnrichmentCollection::class.java).asFlow()
     }
 
     companion object {
 
         private val STATUS_RETRIES_FAILED_AT_DEFINITION = Index()
-            .partial(PartialIndexFilter.of(ShortCollection::metaEntry / DownloadEntry<*>::status isEqualTo DownloadStatus.RETRY))
-            .on("${ShortCollection::metaEntry.name}.${DownloadEntry<*>::retries.name}", Sort.Direction.ASC)
-            .on("${ShortCollection::metaEntry.name}.${DownloadEntry<*>::retriedAt.name}", Sort.Direction.ASC)
+            .partial(PartialIndexFilter.of(EnrichmentCollection::metaEntry / DownloadEntry<*>::status isEqualTo DownloadStatus.RETRY))
+            .on("${EnrichmentCollection::metaEntry.name}.${DownloadEntry<*>::retries.name}", Sort.Direction.ASC)
+            .on("${EnrichmentCollection::metaEntry.name}.${DownloadEntry<*>::retriedAt.name}", Sort.Direction.ASC)
             .background()
 
         private val BLOCKCHAIN_DEFINITION = Index()
-            .on(ShortCollection::blockchain.name, Sort.Direction.ASC)
+            .on(EnrichmentCollection::blockchain.name, Sort.Direction.ASC)
             .on("_id", Sort.Direction.ASC)
             .background()
 
         private val MULTI_CURRENCY_DEFINITION = Index()
-            .on(ShortCollection::multiCurrency.name, Sort.Direction.DESC)
-            .on(ShortCollection::lastUpdatedAt.name, Sort.Direction.DESC)
+            .on(EnrichmentCollection::multiCurrency.name, Sort.Direction.DESC)
+            .on(EnrichmentCollection::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
         private val LAST_UPDATED_AT_ID: Index = Index()
-            .on(ShortCollection::lastUpdatedAt.name, Sort.Direction.ASC)
+            .on(EnrichmentCollection::lastUpdatedAt.name, Sort.Direction.ASC)
             .on("_id", Sort.Direction.ASC)
             .background()
 

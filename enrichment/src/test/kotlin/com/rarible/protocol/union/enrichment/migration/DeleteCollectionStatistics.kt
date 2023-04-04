@@ -4,7 +4,7 @@ import com.mongodb.reactivestreams.client.MongoClients
 import com.rarible.core.test.containers.MongodbTestContainer
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.enrichment.migration.ChangeLog00003DeleteCollectionStatistics.Companion.STATISTICS
-import com.rarible.protocol.union.enrichment.model.ShortCollection
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -27,7 +27,9 @@ class DeleteCollectionStatistics {
         val migration = ChangeLog00003DeleteCollectionStatistics()
         migration.deleteCollectionStatistics(mongoTemplate)
 
-        val collection = mongoTemplate.find(Query(Criteria.where(STATISTICS).exists(true)), ShortCollection::class.java).awaitFirstOrNull()
+        val collection =
+            mongoTemplate.find(Query(Criteria.where(STATISTICS).exists(true)), EnrichmentCollection::class.java)
+                .awaitFirstOrNull()
         assertThat(collection).isNull()
     }
 

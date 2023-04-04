@@ -29,6 +29,7 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderProviderFactory
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderComparator
@@ -40,8 +41,8 @@ import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestBidOrderProv
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestSellOrderProvider
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.OriginOrders
-import com.rarible.protocol.union.enrichment.model.ShortCollectionId
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -78,14 +79,14 @@ class EnrichmentRefreshService(
     private val logger = LoggerFactory.getLogger(EnrichmentRefreshService::class.java)
 
     suspend fun reconcileCollection(collectionId: CollectionIdDto) = coroutineScope {
-        val shortCollectionId = ShortCollectionId(collectionId)
+        val enrichmentCollectionId = EnrichmentCollectionId(collectionId)
         val sellCurrenciesDeferred = async { getSellCurrencies(collectionId) }
         val bidCurrenciesDeferred = async { getBidCurrencies(collectionId) }
 
         val sellCurrencies = sellCurrenciesDeferred.await()
         val bidCurrencies = bidCurrenciesDeferred.await()
 
-        reconcileCollection(shortCollectionId, sellCurrencies, bidCurrencies)
+        reconcileCollection(enrichmentCollectionId, sellCurrencies, bidCurrencies)
     }
 
     suspend fun reconcileItem(itemId: ItemIdDto, full: Boolean) = coroutineScope {
@@ -166,23 +167,32 @@ class EnrichmentRefreshService(
     }
 
     private suspend fun reconcileCollection(
-        shortCollectionId: ShortCollectionId,
+        enrichmentCollectionId: EnrichmentCollectionId,
         sellCurrencies: List<String>,
         bidCurrencies: List<String>
     ) = coroutineScope {
-        logger.info("Starting to reconcile Collection [{}]", shortCollectionId)
-        val unionCollectionDeferred = async { enrichmentCollectionService.fetch(shortCollectionId) }
+        logger.info("Starting to reconcile Collection [{}]", enrichmentCollectionId)
+        val unionCollectionDeferred = async { enrichmentCollectionService.fetch(enrichmentCollectionId) }
 
-        val bestSellProviderFactory = CollectionBestSellOrderProvider.Factory(shortCollectionId, enrichmentOrderService)
-        val bestBidProviderFactory = CollectionBestBidOrderProvider.Factory(shortCollectionId, enrichmentOrderService)
+        val bestSellProviderFactory =
+            CollectionBestSellOrderProvider.Factory(enrichmentCollectionId, enrichmentOrderService)
 
-        val origins = originService.getOrigins(shortCollectionId.toDto())
+        val bestBidProviderFactory =
+            CollectionBestBidOrderProvider.Factory(enrichmentCollectionId, enrichmentOrderService)
+
+        val origins = originService.getOrigins(enrichmentCollectionId.toDto())
         val bestOrders = getOriginBestOrders(
             origins, sellCurrencies, bidCurrencies, bestSellProviderFactory, bestBidProviderFactory, emptyList()
         )
 
+        val unionCollection = unionCollectionDeferred.await()
+
         val updatedCollection = optimisticLock {
-            val shortCollection = enrichmentCollectionService.getOrEmpty(shortCollectionId).copy(
+
+            val exist = enrichmentCollectionService.get(enrichmentCollectionId)?.withData(unionCollection)
+                ?: EnrichmentCollectionConverter.convert(unionCollection)
+
+            val enrichmentCollection = exist.copy(
                 bestSellOrders = bestOrders.global.bestSellOrders,
                 bestSellOrder = bestOrders.global.bestSellOrder,
                 bestBidOrders = bestOrders.global.bestBidOrders,
@@ -191,16 +201,16 @@ class EnrichmentRefreshService(
             )
 
             logger.info(
-                "Saving refreshed Collection [{}] with gathered enrichment data [{}]", shortCollectionId,
-                shortCollection
+                "Saving refreshed Collection [{}] with gathered enrichment data [{}]", enrichmentCollectionId,
+                enrichmentCollection
             )
-            enrichmentCollectionService.save(shortCollection)
+            enrichmentCollectionService.save(enrichmentCollection)
         }
 
         val ordersHint = bestOrders.all
         val enriched = enrichmentCollectionService.enrichCollection(
-            shortCollection = updatedCollection,
-            collection = unionCollectionDeferred.await(),
+            enrichmentCollection = updatedCollection,
+            collection = unionCollection,
             orders = ordersHint,
             metaPipeline = CollectionMetaPipeline.REFRESH
         )

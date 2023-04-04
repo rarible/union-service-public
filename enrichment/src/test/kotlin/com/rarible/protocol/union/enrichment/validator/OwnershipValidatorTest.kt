@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.enrichment.validator
 
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.enrichment.converter.EnrichedOwnershipConverter
+import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
@@ -12,9 +12,9 @@ class OwnershipValidatorTest {
 
     @Test
     fun `valid item`() {
-        val empty = EnrichedOwnershipConverter.convert(randomUnionOwnership(randomEthOwnershipId()))
+        val empty = OwnershipDtoConverter.convert(randomUnionOwnership(randomEthOwnershipId()))
 
-        val sellValid = EnrichedOwnershipConverter.convert(randomUnionOwnership(randomEthOwnershipId()))
+        val sellValid = OwnershipDtoConverter.convert(randomUnionOwnership(randomEthOwnershipId()))
             .copy(bestSellOrder = randomUnionSellOrderDto())
 
         assertThat(OwnershipValidator.isValid(null)).isTrue()
@@ -24,7 +24,7 @@ class OwnershipValidatorTest {
 
     @Test
     fun `invalid item`() {
-        val sellInvalid = EnrichedOwnershipConverter.convert(randomUnionOwnership(randomEthOwnershipId()))
+        val sellInvalid = OwnershipDtoConverter.convert(randomUnionOwnership(randomEthOwnershipId()))
             .copy(bestSellOrder = randomUnionSellOrderDto().copy(status = OrderStatusDto.CANCELLED))
 
         assertThat(OwnershipValidator.isValid(sellInvalid)).isFalse()

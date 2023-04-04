@@ -2,10 +2,10 @@ package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.ImageContentDto
 import com.rarible.protocol.dto.NftCollectionDto
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import org.assertj.core.api.Assertions.assertThat
@@ -27,7 +27,7 @@ class EthCollectionConverterTest {
         assertThat(converted.name).isEqualTo(dto.name)
         assertThat(converted.symbol).isEqualTo(dto.symbol)
         assertThat(converted.type.name).isEqualTo(dto.type.name)
-        assertThat(converted.status).isEqualTo(CollectionDto.Status.PENDING)
+        assertThat(converted.status).isEqualTo(UnionCollection.Status.PENDING)
         assertThat(converted.owner!!.value).isEqualTo(dto.owner!!.prefixed())
         assertThat(converted.features.map { it.name }).isEqualTo(dto.features.map { it.name })
     }

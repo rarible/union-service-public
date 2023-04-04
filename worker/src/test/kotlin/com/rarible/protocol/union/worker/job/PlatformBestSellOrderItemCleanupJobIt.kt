@@ -2,7 +2,7 @@ package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.enrichment.converter.EnrichedItemConverter
+import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -12,9 +12,8 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.worker.config.PlatformBestSellCleanUpProperties
 import com.rarible.protocol.union.worker.IntegrationTest
-import com.rarible.protocol.union.worker.config.ReconciliationProperties
+import com.rarible.protocol.union.worker.config.PlatformBestSellCleanUpProperties
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.mockk.coEvery
 import io.mockk.every
@@ -49,7 +48,7 @@ class PlatformBestSellOrderItemCleanupJobIt {
         coEvery { listener.onEvent(any()) } returns Unit
         coEvery { itemService.enrichItem(shortItem = any(), metaPipeline = any()) } answers {
             val shortItem = it.invocation.args[0] as ShortItem
-            EnrichedItemConverter.convert(randomUnionItem(shortItem.id.toDto()), shortItem)
+            ItemDtoConverter.convert(randomUnionItem(shortItem.id.toDto()), shortItem)
         }
     }
 

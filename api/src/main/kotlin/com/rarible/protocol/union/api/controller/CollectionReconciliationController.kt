@@ -4,7 +4,7 @@ import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
-import com.rarible.protocol.union.enrichment.model.ShortCollectionId
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import org.springframework.http.MediaType
@@ -28,20 +28,20 @@ class CollectionReconciliationController(
     ): CollectionsDto {
         if (size !in 1..200) throw UnionException("Size param must be between 1 and 200")
 
-        val shortCollections = collectionRepository.findIdsByLastUpdatedAt(
+        val enrichmentCollections = collectionRepository.findIdsByLastUpdatedAt(
             lastUpdatedFrom = lastUpdatedFrom,
             lastUpdatedTo = lastUpdatedTo,
-            continuation = continuation?.let { ShortCollectionId(IdParser.parseCollectionId(continuation)) },
+            continuation = continuation?.let { EnrichmentCollectionId(IdParser.parseCollectionId(continuation)) },
             size = size
         )
-        if (shortCollections.isEmpty()) {
+        if (enrichmentCollections.isEmpty()) {
             return CollectionsDto()
         }
 
         return CollectionsDto(
             total = 0,
-            collections = enrichmentCollectionService.enrich(shortCollections, CollectionMetaPipeline.API),
-            continuation = shortCollections.last().id.toDto().fullId()
+            collections = enrichmentCollectionService.enrich(enrichmentCollections, CollectionMetaPipeline.API),
+            continuation = enrichmentCollections.last().id.toDto().fullId()
         )
     }
 }

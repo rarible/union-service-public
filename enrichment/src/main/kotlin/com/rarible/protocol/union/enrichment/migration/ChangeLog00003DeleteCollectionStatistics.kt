@@ -2,7 +2,7 @@ package com.rarible.protocol.union.enrichment.migration
 
 import com.github.cloudyrock.mongock.ChangeLog
 import com.github.cloudyrock.mongock.ChangeSet
-import com.rarible.protocol.union.enrichment.model.ShortCollection
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import io.changock.migration.api.annotations.NonLockGuarded
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.runBlocking
@@ -23,7 +23,7 @@ class ChangeLog00003DeleteCollectionStatistics {
         @NonLockGuarded template: ReactiveMongoTemplate
     ) = runBlocking {
         val query = Query(Criteria.where(STATISTICS).exists(true))
-        template.updateMulti(query, Update().unset(STATISTICS), ShortCollection::class.java).awaitFirstOrNull()
+        template.updateMulti(query, Update().unset(STATISTICS), EnrichmentCollection::class.java).awaitFirstOrNull()
     }
 
     companion object {

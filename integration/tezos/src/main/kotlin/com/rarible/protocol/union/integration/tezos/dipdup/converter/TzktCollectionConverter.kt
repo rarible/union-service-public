@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.tezos.dipdup.converter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Page
@@ -66,10 +65,10 @@ object TzktCollectionConverter {
         )
     }
 
-    private fun convertType(source: Contract): CollectionDto.Type {
+    private fun convertType(source: Contract): UnionCollection.Type {
         return when {
-            source.collectionType == CollectionType.NFT -> CollectionDto.Type.TEZOS_NFT
-            else -> CollectionDto.Type.TEZOS_MT
+            source.collectionType == CollectionType.NFT -> UnionCollection.Type.TEZOS_NFT
+            else -> UnionCollection.Type.TEZOS_MT
         }
     }
 
@@ -77,9 +76,13 @@ object TzktCollectionConverter {
         return source.creator?.let { UnionAddressConverter.convert(blockchain, it.address!!) }
     }
 
-    private fun features(source: Contract): List<CollectionDto.Features> {
-        return when(convertType(source)) {
-            CollectionDto.Type.TEZOS_MT -> listOf(CollectionDto.Features.SECONDARY_SALE_FEES, CollectionDto.Features.BURN)
+    private fun features(source: Contract): List<UnionCollection.Features> {
+        return when (convertType(source)) {
+            UnionCollection.Type.TEZOS_MT -> listOf(
+                UnionCollection.Features.SECONDARY_SALE_FEES,
+                UnionCollection.Features.BURN
+            )
+
             else -> emptyList()
         }
     }

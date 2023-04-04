@@ -57,7 +57,7 @@ class CoreConfiguration(
 
     @Autowired
     fun setMapKeyDotReplacement(mappingMongoConverter: MappingMongoConverter) {
-        mappingMongoConverter.setMapKeyDotReplacement("__DOT__");
+        mappingMongoConverter.setMapKeyDotReplacement("__DOT__")
     }
 
     @Bean
