@@ -1,4 +1,4 @@
-package com.rarible.protocol.Contract.core.mongo
+package com.rarible.protocol.union.core.mongo
 
 import com.rarible.core.mongo.converter.SimpleMongoConverter
 import com.rarible.protocol.union.dto.ContractAddress
