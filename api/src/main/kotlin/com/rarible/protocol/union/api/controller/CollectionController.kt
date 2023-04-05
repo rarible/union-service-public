@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.service.select.CollectionSourceSelectService
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -51,14 +52,17 @@ class CollectionController(
     ): ResponseEntity<CollectionDto> {
         val fullCollectionId = IdParser.parseCollectionId(collection)
         val enrichmentCollectionId = EnrichmentCollectionId(fullCollectionId)
+        val enrichmentCollection = enrichmentCollectionService.get(enrichmentCollectionId)
 
         val unionCollection = if (ff.enableUnionCollections) {
+            if (enrichmentCollection == null) {
+                throw UnionNotFoundException("Collection [$collection] not found")
+            }
             null
         } else {
             router.getService(fullCollectionId.blockchain).getCollectionById(fullCollectionId.value)
         }
 
-        val enrichmentCollection = enrichmentCollectionService.get(enrichmentCollectionId)
         val enrichedCollection = enrichmentCollectionService.enrichCollection(
             enrichmentCollection,
             unionCollection,
