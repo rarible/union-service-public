@@ -234,7 +234,7 @@ class EthMetaConverterTest {
     fun `eth collection meta`() {
         val meta = randomEthCollectionMetaDto()
 
-        val converted = EthMetaConverter.convert(meta, BlockchainDto.ETHEREUM)!!
+        val converted = EthMetaConverter.convert(meta, BlockchainDto.ETHEREUM)
 
         assertThat(converted).isNotNull
 

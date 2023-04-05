@@ -49,7 +49,7 @@ object CollectionDtoConverter {
             features = collection.features.map { convert(it) },
             owner = collection.owner,
             minters = collection.minters,
-            name = collection.name,
+            name = collection.name ?: "Untitled",
             status = collection.status?.let { convert(it) },
             symbol = collection.symbol,
             parent = collection.parent?.toDto(),
