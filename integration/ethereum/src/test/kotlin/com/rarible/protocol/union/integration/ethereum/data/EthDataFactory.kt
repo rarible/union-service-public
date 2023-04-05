@@ -560,6 +560,7 @@ fun randomEthCollectionDto(id: Address): NftCollectionDto {
         features = listOf(NftCollectionDto.Features.values()[randomInt(NftCollectionDto.Features.values().size)]),
         supportsLazyMint = true,
         meta = randomEthCollectionMetaDto(),
+        minters = emptyList()
     )
 }
 
