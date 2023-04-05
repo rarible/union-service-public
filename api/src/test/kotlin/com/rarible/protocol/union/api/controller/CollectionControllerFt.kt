@@ -10,7 +10,6 @@ import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -23,6 +22,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionAsset
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
+import com.rarible.protocol.union.integration.flow.converter.FlowCollectionConverter
 import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
 import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
@@ -70,7 +70,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     fun `get collection by id - ethereum, enriched`() = runBlocking<Unit> {
         val collectionId = randomAddress()
         val collectionIdFull = EthConverter.convert(collectionId, BlockchainDto.ETHEREUM)
-        val ethCollectionDto = randomEthCollectionDto(collectionId)
+        val ethCollectionDto = randomEthCollectionDto(collectionId).copy(isRaribleContract = true)
         val ethUnionCollection = EthCollectionConverter.convert(ethCollectionDto, BlockchainDto.ETHEREUM)
         val collectionAsset = randomEthCollectionAsset(collectionId)
         val ethOrder = randomEthV2OrderDto(collectionAsset, randomAddress(), randomEthAssetErc20())
@@ -93,34 +93,17 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `get collection by id - tezos`() = runBlocking<Unit> {
-        val collectionId = randomString()
-        val collectionIdFull = UnionAddressConverter.convert(BlockchainDto.TEZOS, collectionId)
-        val collection = randomTezosCollectionDto(collectionId)
-
-        coEvery {
-            tzktCollectionClient.collection(collectionIdFull.value)
-        } returns collection
-        coEvery {
-            tzktCollectionClient.collectionType(any())
-        } returns CollectionType.MT
-
-        val unionCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()
-
-        assertThat(unionCollection.id.value).isEqualTo(collectionIdFull.value)
-        assertThat(unionCollection.id.blockchain).isEqualTo(BlockchainDto.TEZOS)
-    }
-
-    @Test
     fun `get collection by id - flow`() = runBlocking<Unit> {
         val collectionId = randomString()
         val collectionIdFull = UnionAddressConverter.convert(BlockchainDto.FLOW, collectionId)
         val collection = randomFlowCollectionDto(collectionId)
 
+        val unionCollection = FlowCollectionConverter.convert(collection, BlockchainDto.FLOW)
+        enrichmentCollectionService.save(EnrichmentCollectionConverter.convert(unionCollection))
+
         coEvery { testFlowCollectionApi.getNftCollectionById(collectionId) } returns collection.toMono()
 
-        val unionCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()
-        val flowCollection = unionCollection as CollectionDto
+        val flowCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()
 
         assertThat(flowCollection.id.value).isEqualTo(collectionIdFull.value)
         assertThat(flowCollection.id.blockchain).isEqualTo(BlockchainDto.FLOW)

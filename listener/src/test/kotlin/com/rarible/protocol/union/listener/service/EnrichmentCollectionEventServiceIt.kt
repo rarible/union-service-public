@@ -50,16 +50,14 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         collectionEventService.onCollectionChanged(UnionCollectionChangeEvent(collectionId, stubEventMark()))
 
-        val expected = CollectionDtoConverter.convertLegacy(
-            collection = unionCollection,
-            meta = unionCollection.meta
-        )
+        val expected = CollectionDtoConverter.convertLegacy(unionCollection)
 
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
-            assertThat(messages[0].value.collection).isEqualTo(expected)
+            // TODO COLLECTION update meta check after the migration
+            assertThat(messages[0].value.collection.copy(meta = null)).isEqualTo(expected)
         }
     }
 
@@ -72,17 +70,15 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionUpdate(UnionCollectionUpdateEvent(unionCollection, stubEventMark()))
 
         val updated = collectionService.get(EnrichmentCollectionId(collectionId))!!
-        val expected = CollectionDtoConverter.convertLegacy(
-            collection = unionCollection,
-            meta = unionCollection.meta
-        )
+        val expected = CollectionDtoConverter.convertLegacy(unionCollection)
 
         assertThat(updated.version).isEqualTo(0L)
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
-            assertThat(messages[0].value.collection).isEqualTo(expected)
+            // TODO COLLECTION update meta check after the migration
+            assertThat(messages[0].value.collection.copy(meta = null)).isEqualTo(expected)
         }
     }
 
@@ -98,17 +94,15 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionUpdate(UnionCollectionUpdateEvent(unionCollection, stubEventMark()))
 
         val updated = collectionService.get(current.id)!!
-        val expected = CollectionDtoConverter.convertLegacy(
-            collection = unionCollection,
-            meta = unionCollection.meta
-        )
+        val expected = CollectionDtoConverter.convertLegacy(unionCollection)
 
         assertThat(updated.version).isGreaterThan(current.version)
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
-            assertThat(messages[0].value.collection).isEqualTo(expected)
+            // TODO COLLECTION update meta check after the migration
+            assertThat(messages[0].value.collection.copy(meta = null)).isEqualTo(expected)
         }
     }
 

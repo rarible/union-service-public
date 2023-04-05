@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.service.elastic
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.EsCollectionCursor.Companion.fromCollectionLite
 import com.rarible.protocol.union.core.model.EsCollectionGenericFilter
 import com.rarible.protocol.union.core.model.EsCollectionLite
@@ -29,7 +30,8 @@ import kotlin.system.measureTimeMillis
 class CollectionElasticService(
     private val repository: EsCollectionRepository,
     private val router: BlockchainRouter<CollectionService>,
-    private val enrichmentCollectionService: EnrichmentCollectionService
+    private val enrichmentCollectionService: EnrichmentCollectionService,
+    private val ff: FeatureFlagsProperties
 ) : CollectionQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -78,6 +80,37 @@ class CollectionElasticService(
     }
 
     private suspend fun processResult(result: List<EsCollectionLite>): CollectionsDto {
+        return if (ff.enableUnionCollections) {
+            processResultModern(result)
+        } else {
+            processResultLegacy(result)
+        }
+    }
+
+    private suspend fun processResultModern(result: List<EsCollectionLite>): CollectionsDto {
+        val seq = mutableMapOf<String, Int>()
+        val enabledBlockchains = router.getEnabledBlockchains(null)
+
+        result.forEachIndexed { index, esCollection ->
+            seq[IdParser.parseCollectionId(esCollection.collectionId).fullId()] = index
+        }
+
+        val collectionIds = seq.keys.map { EnrichmentCollectionId(IdParser.parseCollectionId(it)) }
+            .filter { enabledBlockchains.contains(it.blockchain) }
+
+        val cursor = if (result.isEmpty()) null else result.last().fromCollectionLite()
+
+        val enrichmentCollections = enrichmentCollectionService.getAll(collectionIds)
+
+        return CollectionsDto(
+            total = result.size.toLong(),
+            continuation = cursor.toString(),
+            collections = enrichmentCollectionService.enrich(enrichmentCollections, CollectionMetaPipeline.API)
+        )
+    }
+
+    @Deprecated("Should be removed after the migration")
+    private suspend fun processResultLegacy(result: List<EsCollectionLite>): CollectionsDto {
         val seq = mutableMapOf<String, Int>()
         val enabledBlockchains = router.getEnabledBlockchains(null)
 

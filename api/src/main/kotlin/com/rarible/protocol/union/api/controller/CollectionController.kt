@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.select.CollectionSourceSelectService
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -30,7 +31,8 @@ class CollectionController(
     private val collectionSourceSelector: CollectionSourceSelectService,
     private val itemSourceSelectService: ItemSourceSelectService,
     private val itemMetaService: ItemMetaService,
-    private val enrichmentCollectionService: EnrichmentCollectionService
+    private val enrichmentCollectionService: EnrichmentCollectionService,
+    private val ff: FeatureFlagsProperties
 ) : CollectionControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -49,7 +51,13 @@ class CollectionController(
     ): ResponseEntity<CollectionDto> {
         val fullCollectionId = IdParser.parseCollectionId(collection)
         val enrichmentCollectionId = EnrichmentCollectionId(fullCollectionId)
-        val unionCollection = router.getService(fullCollectionId.blockchain).getCollectionById(fullCollectionId.value)
+
+        val unionCollection = if (ff.enableUnionCollections) {
+            null
+        } else {
+            router.getService(fullCollectionId.blockchain).getCollectionById(fullCollectionId.value)
+        }
+
         val enrichmentCollection = enrichmentCollectionService.get(enrichmentCollectionId)
         val enrichedCollection = enrichmentCollectionService.enrichCollection(
             enrichmentCollection,
