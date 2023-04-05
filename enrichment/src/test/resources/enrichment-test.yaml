@@ -1,0 +1,20 @@
+common:
+  collection-mappings:
+    - collectionId: ETHEREUM:collection_1
+      rules:
+        - type: BY_CONTRACT_ADDRESS
+          contractAddress: ETHEREUM:0x123
+        - type: BY_CONTRACT_TOKENS
+          contractAddress: ETHEREUM:0x456
+          tokens:
+            - ETHEREUM:0xabcf
+            - ETHEREUM:0xfbcda
+    - collectionId: ETHEREUM:collection_2
+      rules:
+        - type: BY_CONTRACT_ADDRESS
+          contractAddress: ETHEREUM:0x789
+        - type: BY_CONTRACT_TOKENS
+          contractAddress: ETHEREUM:0x012
+          tokens:
+            - ETHEREUM:0xbac
+            - ETHEREUM:0xabc
