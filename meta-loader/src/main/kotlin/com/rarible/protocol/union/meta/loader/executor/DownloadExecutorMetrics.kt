@@ -15,29 +15,29 @@ class DownloadExecutorMetrics(
     meterRegistry
 ) {
 
-    fun onSuccessfulTask(started: Instant, task: DownloadTask) {
+    fun onSuccessfulTask(started: Instant, task: DownloadTask, retry: Int) {
         val blockchain = blockchainExtractor(task.id)
-        onTaskHandled(started, blockchain, type, "ok", task)
+        onTaskHandled(started, blockchain, type, "ok", task, retry)
         onTaskDone(blockchain, type, "ok", task)
     }
 
     // Task debounced
-    fun onSkippedTask(started: Instant, task: DownloadTask) {
+    fun onSkippedTask(started: Instant, task: DownloadTask, retry: Int) {
         val blockchain = blockchainExtractor(task.id)
-        onTaskHandled(started, blockchain, type, "skip", task)
+        onTaskHandled(started, blockchain, type, "skip", task, retry)
     }
 
     // Download failed, new status of the task is FAILED
-    fun onFailedTask(started: Instant, task: DownloadTask) {
+    fun onFailedTask(started: Instant, task: DownloadTask, retry: Int) {
         val blockchain = blockchainExtractor(task.id)
-        onTaskHandled(started, blockchain, type, "fail", task)
+        onTaskHandled(started, blockchain, type, "fail", task, retry)
         onTaskDone(blockchain, type, "fail", task)
     }
 
     // Download failed, but new status of task is RETRY
-    fun onRetriedTask(started: Instant, task: DownloadTask) {
+    fun onRetriedTask(started: Instant, task: DownloadTask, retry: Int) {
         val blockchain = blockchainExtractor(task.id)
-        onTaskHandled(started, blockchain, type, "retry", task)
+        onTaskHandled(started, blockchain, type, "retry", task, retry)
     }
 
     private fun onTaskHandled(
@@ -46,6 +46,7 @@ class DownloadExecutorMetrics(
         type: String,
         status: String,
         task: DownloadTask,
+        retry: Int
     ) {
         meterRegistry.timer(
             DOWNLOAD_TASK,
@@ -54,6 +55,7 @@ class DownloadExecutorMetrics(
                 type(type.lowercase()),
                 status(status.lowercase()),
                 tag("pipeline", task.pipeline.lowercase()),
+                tag("retry", retry.toString()),
                 tag("force", task.force.toString())
             )
         ).record(Duration.between(started, Instant.now()))
