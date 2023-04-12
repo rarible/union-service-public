@@ -7,6 +7,7 @@ data class UnionCollection(
     val id: CollectionIdDto,
     val name: String,
     val status: Status? = null,
+    val structure: Structure = Structure.REGULAR,
     val type: Type,
     val minters: List<UnionAddress>? = listOf(),
     val features: List<Features> = listOf(),
@@ -25,6 +26,12 @@ data class UnionCollection(
         MINT_WITH_ADDRESS,
         SECONDARY_SALE_FEES,
         MINT_AND_TRANSFER
+    }
+
+    enum class Structure {
+        REGULAR,
+        COMPOSITE,
+        PART
     }
 
     enum class Type {

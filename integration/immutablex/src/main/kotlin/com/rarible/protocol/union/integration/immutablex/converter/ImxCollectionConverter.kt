@@ -28,6 +28,7 @@ object ImxCollectionConverter {
         return UnionCollection(
             id = CollectionIdDto(blockchain, source.address),
             name = source.name,
+            structure = UnionCollection.Structure.REGULAR,
             type = UnionCollection.Type.ERC721,
             features = listOf(UnionCollection.Features.APPROVE_FOR_ALL),
             minters = listOfNotNull(minter),

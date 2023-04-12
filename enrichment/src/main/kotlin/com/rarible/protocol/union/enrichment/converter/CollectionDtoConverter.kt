@@ -16,7 +16,7 @@ object CollectionDtoConverter {
         // TODO COLLECTION must be required after the migration
         enrichmentCollection: EnrichmentCollection? = null,
         meta: UnionCollectionMeta? = null,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap()
+        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
     ): CollectionDto {
         return CollectionDto(
             id = collection.id,
@@ -28,6 +28,7 @@ object CollectionDtoConverter {
             status = collection.status?.let { convert(it) },
             symbol = collection.symbol,
             parent = collection.parent,
+            structure = convert(collection.structure),
             type = convert(collection.type),
             self = collection.self,
             meta = meta?.let { MetaDtoConverter.convert(it) },
@@ -41,7 +42,7 @@ object CollectionDtoConverter {
     fun convert(
         collection: EnrichmentCollection,
         meta: UnionCollectionMeta? = null,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap()
+        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
     ): CollectionDto {
         return CollectionDto(
             id = collection.id.toDto(),
@@ -53,6 +54,7 @@ object CollectionDtoConverter {
             status = collection.status?.let { convert(it) },
             symbol = collection.symbol,
             parent = collection.parent?.toDto(),
+            structure = convert(collection.structure!!), // TODO Must be required after the migration
             type = convert(collection.type!!), // TODO Must be required after the migration
             self = collection.self,
             meta = meta?.let { MetaDtoConverter.convert(it) },
@@ -70,6 +72,14 @@ object CollectionDtoConverter {
             UnionCollection.Features.MINT_WITH_ADDRESS -> CollectionDto.Features.MINT_WITH_ADDRESS
             UnionCollection.Features.SECONDARY_SALE_FEES -> CollectionDto.Features.SECONDARY_SALE_FEES
             UnionCollection.Features.MINT_AND_TRANSFER -> CollectionDto.Features.MINT_AND_TRANSFER
+        }
+    }
+
+    private fun convert(structure: UnionCollection.Structure): CollectionDto.Structure {
+        return when (structure) {
+            UnionCollection.Structure.REGULAR -> CollectionDto.Structure.REGULAR
+            UnionCollection.Structure.COMPOSITE -> CollectionDto.Structure.COMPOSITE
+            UnionCollection.Structure.PART -> CollectionDto.Structure.PART
         }
     }
 

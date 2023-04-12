@@ -45,6 +45,7 @@ object EthCollectionConverter {
             name = source.name,
             status = convert(source.status),
             symbol = source.symbol,
+            structure = UnionCollection.Structure.REGULAR,
             type = convert(source.type),
             owner = source.owner?.let { EthConverter.convert(it, blockchain) },
             features = source.features.map { convert(it) },

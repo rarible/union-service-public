@@ -16,12 +16,13 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 object SolanaCollectionConverter {
 
     fun convert(
-        source: com.rarible.protocol.solana.dto.CollectionDto,
-        blockchain: BlockchainDto
+        source: CollectionDto,
+        blockchain: BlockchainDto,
     ): UnionCollection {
         return UnionCollection(
             id = CollectionIdDto(blockchain, source.address),
             parent = null,
+            structure = UnionCollection.Structure.REGULAR,
             type = UnionCollection.Type.SOLANA,
             name = source.name,
             symbol = source.symbol,
