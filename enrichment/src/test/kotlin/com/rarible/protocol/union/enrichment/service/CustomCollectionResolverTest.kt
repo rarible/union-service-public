@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -88,7 +89,7 @@ class CustomCollectionResolverTest {
         )
         val properties = EnrichmentCollectionProperties(listOf(mapping))
 
-        return CustomCollectionResolver(router, properties)
+        return CustomCollectionResolver(router, properties, FeatureFlagsProperties(enableCustomCollections = true))
     }
 
 }

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -15,7 +16,8 @@ import java.util.EnumMap
 @Component
 class CustomCollectionResolver(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
-    collectionProperties: EnrichmentCollectionProperties
+    collectionProperties: EnrichmentCollectionProperties,
+    private val ff: FeatureFlagsProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -29,6 +31,9 @@ class CustomCollectionResolver(
     }
 
     private fun indexRule(rule: CustomCollectionMapping) {
+        if (!ff.enableCustomCollections) {
+            return
+        }
         val customCollectionId = EnrichmentCollectionId.of(rule.customCollection)
         rule.collections.forEach { rawCollectionId ->
             val collectionId = EnrichmentCollectionId.of(rawCollectionId)
