@@ -39,7 +39,7 @@ class EsCollectionConverterTest {
                     id = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().toString()),
                     blockchain = BlockchainDto.ETHEREUM,
                     name = randomString(),
-                    structureKind = CollectionDto.StructureKind.REGULAR,
+                    structure = CollectionDto.Structure.REGULAR,
                     type = CollectionDto.Type.ERC721,
                     minters = listOf(
                         UnionAddress(BlockchainDto.ETHEREUM.group(), randomAddress().toString())
@@ -56,7 +56,7 @@ class EsCollectionConverterTest {
                     id = CollectionIdDto(BlockchainDto.FLOW, randomString()),
                     blockchain = BlockchainDto.FLOW,
                     name = randomString(),
-                    structureKind = CollectionDto.StructureKind.REGULAR,
+                    structure = CollectionDto.Structure.REGULAR,
                     type = CollectionDto.Type.FLOW,
                     features = listOf(CollectionDto.Features.BURN),
                     meta = CollectionMetaDto(
@@ -70,7 +70,7 @@ class EsCollectionConverterTest {
                     id = CollectionIdDto(BlockchainDto.SOLANA, randomString()),
                     blockchain = BlockchainDto.SOLANA,
                     name = randomString(),
-                    structureKind = CollectionDto.StructureKind.REGULAR,
+                    structure = CollectionDto.Structure.REGULAR,
                     type = CollectionDto.Type.SOLANA,
                     features = listOf(CollectionDto.Features.BURN),
                     meta = null

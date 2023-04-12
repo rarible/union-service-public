@@ -37,7 +37,7 @@ class CollectionConsumerIt {
     private val collection = CollectionDto(
         id = collectionId,
         blockchain = blockchain,
-        structureKind = CollectionDto.StructureKind.REGULAR,
+        structure = CollectionDto.Structure.REGULAR,
         type = CollectionDto.Type.ERC721,
         name = randomString(),
         symbol = randomString(),

@@ -26,7 +26,7 @@ data class EnrichmentCollection(
 
     val name: String,
     val status: UnionCollection.Status? = null,
-    val structureKind: UnionCollection.StructureKind? = null,
+    val structure: UnionCollection.Structure? = UnionCollection.Structure.REGULAR,
     val type: UnionCollection.Type? = null,
     val minters: List<UnionAddress>? = listOf(),
     val features: List<UnionCollection.Features> = listOf(),

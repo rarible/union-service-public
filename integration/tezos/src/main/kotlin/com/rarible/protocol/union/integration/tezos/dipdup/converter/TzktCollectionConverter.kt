@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.tezos.dipdup.converter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Page
@@ -60,7 +59,7 @@ object TzktCollectionConverter {
             name = source.name ?: "Unnamed Collection",
             symbol = source.symbol,
             owner = owner(source, blockchain),
-            structureKind = UnionCollection.StructureKind.REGULAR,
+            structure = UnionCollection.Structure.REGULAR,
             type = convertType(source),
             features = features(source),
             minters = minters(source, blockchain)

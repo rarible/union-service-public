@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.model
 
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 
@@ -8,7 +7,7 @@ data class UnionCollection(
     val id: CollectionIdDto,
     val name: String,
     val status: Status? = null,
-    val structureKind: StructureKind,
+    val structure: Structure = Structure.REGULAR,
     val type: Type,
     val minters: List<UnionAddress>? = listOf(),
     val features: List<Features> = listOf(),
@@ -29,10 +28,10 @@ data class UnionCollection(
         MINT_AND_TRANSFER
     }
 
-    enum class StructureKind {
+    enum class Structure {
         REGULAR,
-        COMPOUND,
-        FRAGMENT
+        COMPOSITE,
+        PART
     }
 
     enum class Type {

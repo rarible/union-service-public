@@ -22,7 +22,7 @@ object SolanaCollectionConverter {
         return UnionCollection(
             id = CollectionIdDto(blockchain, source.address),
             parent = null,
-            structureKind = UnionCollection.StructureKind.REGULAR,
+            structure = UnionCollection.Structure.REGULAR,
             type = UnionCollection.Type.SOLANA,
             name = source.name,
             symbol = source.symbol,

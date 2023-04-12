@@ -115,7 +115,7 @@ class CollectionReindexServiceTest {
             id = CollectionIdDto(BlockchainDto.ETHEREUM, randomString()),
             parent = null,
             blockchain = BlockchainDto.ETHEREUM,
-            structureKind = CollectionDto.StructureKind.REGULAR,
+            structure = CollectionDto.Structure.REGULAR,
             type = CollectionDto.Type.CRYPTO_PUNKS,
             name = randomString(),
             symbol = null,

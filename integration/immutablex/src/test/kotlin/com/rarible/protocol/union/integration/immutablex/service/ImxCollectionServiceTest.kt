@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.immutablex.service
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.integration.MockWebClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionClient
@@ -28,7 +27,7 @@ class ImxCollectionServiceTest {
             UnionCollection(
                 id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
                 parent = null,
-                structureKind = UnionCollection.StructureKind.REGULAR,
+                structure = UnionCollection.Structure.REGULAR,
                 type = UnionCollection.Type.ERC721,
                 name = "CERTIFICATE3",
                 symbol = null,
@@ -44,7 +43,7 @@ class ImxCollectionServiceTest {
             UnionCollection(
                 id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0xa8106fe2195c3fa48ed52b52f7981f74d18d8ba4"),
                 parent = null,
-                structureKind = UnionCollection.StructureKind.REGULAR,
+                structure = UnionCollection.Structure.REGULAR,
                 type = UnionCollection.Type.ERC721,
                 name = "CERTIFICATE2",
                 symbol = null,
@@ -75,7 +74,7 @@ class ImxCollectionServiceTest {
             UnionCollection(
                 id = CollectionIdDto(BlockchainDto.IMMUTABLEX, "0x62d25241d4a5d619c1b06114210250d19d2424c0"),
                 parent = null,
-                structureKind = UnionCollection.StructureKind.REGULAR,
+                structure = UnionCollection.Structure.REGULAR,
                 type = UnionCollection.Type.ERC721,
                 name = "CERTIFICATE3",
                 symbol = null,

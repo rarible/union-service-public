@@ -28,7 +28,7 @@ object CollectionDtoConverter {
             status = collection.status?.let { convert(it) },
             symbol = collection.symbol,
             parent = collection.parent,
-            structureKind = convert(collection.structureKind),
+            structure = convert(collection.structure),
             type = convert(collection.type),
             self = collection.self,
             meta = meta?.let { MetaDtoConverter.convert(it) },
@@ -54,7 +54,7 @@ object CollectionDtoConverter {
             status = collection.status?.let { convert(it) },
             symbol = collection.symbol,
             parent = collection.parent?.toDto(),
-            structureKind = convert(collection.structureKind!!), // TODO Must be required after the migration
+            structure = convert(collection.structure!!), // TODO Must be required after the migration
             type = convert(collection.type!!), // TODO Must be required after the migration
             self = collection.self,
             meta = meta?.let { MetaDtoConverter.convert(it) },
@@ -75,11 +75,11 @@ object CollectionDtoConverter {
         }
     }
 
-    private fun convert(structureKind: UnionCollection.StructureKind): CollectionDto.StructureKind {
-        return when (structureKind) {
-            UnionCollection.StructureKind.REGULAR -> CollectionDto.StructureKind.REGULAR
-            UnionCollection.StructureKind.COMPOUND -> CollectionDto.StructureKind.COMPOUND
-            UnionCollection.StructureKind.FRAGMENT -> CollectionDto.StructureKind.FRAGMENT
+    private fun convert(structure: UnionCollection.Structure): CollectionDto.Structure {
+        return when (structure) {
+            UnionCollection.Structure.REGULAR -> CollectionDto.Structure.REGULAR
+            UnionCollection.Structure.COMPOSITE -> CollectionDto.Structure.COMPOSITE
+            UnionCollection.Structure.PART -> CollectionDto.Structure.PART
         }
     }
 
