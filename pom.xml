@@ -34,7 +34,7 @@
     </pluginRepositories>
 
     <properties>
-        <revision>1.45</revision>
+        <revision>1.46</revision>
         <maven.deploy.skip>true</maven.deploy.skip>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -46,16 +46,16 @@
         <postgresql.version>42.3.4</postgresql.version>
         <okhttp.version>4.9.3</okhttp.version>
 
-        <rarible.core.version>2.5.6</rarible.core.version>
+        <rarible.core.version>2.5.15</rarible.core.version>
         <rarible.ethereum.version>1.7.0</rarible.ethereum.version>
 
         <rarible.protocol.currency.version>1.38.3</rarible.protocol.currency.version>
-        <rarible.protocol.ethereum.version>1.45.1</rarible.protocol.ethereum.version>
+        <rarible.protocol.ethereum.version>1.46.0</rarible.protocol.ethereum.version>
         <rarible.protocol.flow.version>1.43.7</rarible.protocol.flow.version>
         <rarible.protocol.solana.version>1.41.0</rarible.protocol.solana.version>
-        <rarible.protocol.tezos.api.version>1.39.18</rarible.protocol.tezos.api.version>
+        <rarible.protocol.tezos.api.version>1.39.19</rarible.protocol.tezos.api.version>
 
-        <rarible.protocol.union.version>1.45.0</rarible.protocol.union.version>
+        <rarible.protocol.union.version>1.46.1</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>

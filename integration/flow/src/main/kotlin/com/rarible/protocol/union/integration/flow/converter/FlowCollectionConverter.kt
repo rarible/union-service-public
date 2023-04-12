@@ -28,6 +28,7 @@ object FlowCollectionConverter {
             name = source.name,
             symbol = source.symbol,
             owner = UnionAddressConverter.convert(blockchain, source.owner),
+            structure = UnionCollection.Structure.REGULAR,
             type = UnionCollection.Type.FLOW,
             features = convert(source.features),
             minters = null // Not supported in Flow yet.

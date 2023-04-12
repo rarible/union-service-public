@@ -90,6 +90,7 @@ class EnrichmentCollectionService(
 
     suspend fun enrichCollection(
         enrichmentCollection: EnrichmentCollection?,
+        // TODO COLLECTION remove it after switching to union data
         collection: UnionCollection?,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         metaPipeline: CollectionMetaPipeline
@@ -105,7 +106,7 @@ class EnrichmentCollectionService(
         return enrichCollectionLegacy(enrichmentCollection, collection, orders, metaPipeline)
     }
 
-    suspend fun enrichCollection(
+    private suspend fun enrichCollection(
         enrichmentCollection: EnrichmentCollection,
         orders: Map<OrderIdDto, OrderDto>,
         metaPipeline: CollectionMetaPipeline
@@ -169,18 +170,34 @@ class EnrichmentCollectionService(
         if (enrichmentCollections.isEmpty()) {
             return emptyList()
         }
-        val enrichmentCollectionsById: Map<CollectionIdDto, EnrichmentCollection> =
-            enrichmentCollections.associateBy { it.id.toDto() }
 
-        val groupedIds = enrichmentCollections.groupBy({ it.blockchain }, { it.id.collectionId })
+        if (!ff.enableUnionCollections) {
+            val enrichmentCollectionsById: Map<CollectionIdDto, EnrichmentCollection> =
+                enrichmentCollections.associateBy { it.id.toDto() }
 
-        val unionCollections = groupedIds.flatMap {
-            collectionServiceRouter.getService(it.key).getCollectionsByIds(it.value)
+            val groupedIds = enrichmentCollections.groupBy({ it.blockchain }, { it.id.collectionId })
+
+            val unionCollections = groupedIds.flatMap {
+                collectionServiceRouter.getService(it.key).getCollectionsByIds(it.value)
+            }
+
+            return enrichCollections(enrichmentCollectionsById, unionCollections, metaPipeline)
         }
 
-        return enrichCollections(enrichmentCollectionsById, unionCollections, metaPipeline)
+        val shortOrderIds = enrichmentCollections
+            .map { it.getAllBestOrders() }
+            .flatten()
+            .map { it.dtoId }
+
+        val orders = orderApiService.getByIds(shortOrderIds)
+            .associateBy { it.id }
+
+        return enrichmentCollections.map {
+            enrichCollection(it, orders, metaPipeline)
+        }
     }
 
+    @Deprecated("Should be removed in PT-2340")
     suspend fun enrichUnionCollections(
         unionCollections: List<UnionCollection>,
         metaPipeline: CollectionMetaPipeline
@@ -195,6 +212,7 @@ class EnrichmentCollectionService(
         return enrichCollections(enrichmentCollections, unionCollections, metaPipeline)
     }
 
+    @Deprecated("Remove after the migration")
     private suspend fun enrichCollections(
         enrichmentCollections: Map<CollectionIdDto, EnrichmentCollection>,
         unionCollections: List<UnionCollection>,

@@ -8,11 +8,11 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionMetaDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
-import java.util.stream.Stream
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import java.util.stream.Stream
 
 class EsCollectionConverterTest {
 
@@ -39,6 +39,7 @@ class EsCollectionConverterTest {
                     id = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().toString()),
                     blockchain = BlockchainDto.ETHEREUM,
                     name = randomString(),
+                    structure = CollectionDto.Structure.REGULAR,
                     type = CollectionDto.Type.ERC721,
                     minters = listOf(
                         UnionAddress(BlockchainDto.ETHEREUM.group(), randomAddress().toString())
@@ -55,6 +56,7 @@ class EsCollectionConverterTest {
                     id = CollectionIdDto(BlockchainDto.FLOW, randomString()),
                     blockchain = BlockchainDto.FLOW,
                     name = randomString(),
+                    structure = CollectionDto.Structure.REGULAR,
                     type = CollectionDto.Type.FLOW,
                     features = listOf(CollectionDto.Features.BURN),
                     meta = CollectionMetaDto(
@@ -68,6 +70,7 @@ class EsCollectionConverterTest {
                     id = CollectionIdDto(BlockchainDto.SOLANA, randomString()),
                     blockchain = BlockchainDto.SOLANA,
                     name = randomString(),
+                    structure = CollectionDto.Structure.REGULAR,
                     type = CollectionDto.Type.SOLANA,
                     features = listOf(CollectionDto.Features.BURN),
                     meta = null

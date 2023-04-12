@@ -29,6 +29,7 @@ object DipDupCollectionConverter {
         return UnionCollection(
             id = CollectionIdDto(blockchain, collection.id),
             name = collection.name ?: UNTITLED,
+            structure = UnionCollection.Structure.REGULAR,
             type = UnionCollection.Type.TEZOS_MT,
             owner = UnionAddress(blockchain.group(), collection.owner),
             minters = minters(collection),

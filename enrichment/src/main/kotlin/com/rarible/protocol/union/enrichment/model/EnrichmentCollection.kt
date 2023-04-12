@@ -24,8 +24,9 @@ data class EnrichmentCollection(
     val blockchain: BlockchainDto,
     val collectionId: String,
 
-    val name: String,
+    val name: String?,
     val status: UnionCollection.Status? = null,
+    val structure: UnionCollection.Structure? = UnionCollection.Structure.REGULAR,
     val type: UnionCollection.Type? = null,
     val minters: List<UnionAddress>? = listOf(),
     val features: List<UnionCollection.Features> = listOf(),

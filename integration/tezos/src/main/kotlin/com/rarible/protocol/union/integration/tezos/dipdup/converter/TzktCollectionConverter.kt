@@ -59,6 +59,7 @@ object TzktCollectionConverter {
             name = source.name ?: "Unnamed Collection",
             symbol = source.symbol,
             owner = owner(source, blockchain),
+            structure = UnionCollection.Structure.REGULAR,
             type = convertType(source),
             features = features(source),
             minters = minters(source, blockchain)
@@ -66,8 +67,8 @@ object TzktCollectionConverter {
     }
 
     private fun convertType(source: Contract): UnionCollection.Type {
-        return when {
-            source.collectionType == CollectionType.NFT -> UnionCollection.Type.TEZOS_NFT
+        return when (source.collectionType) {
+            CollectionType.NFT -> UnionCollection.Type.TEZOS_NFT
             else -> UnionCollection.Type.TEZOS_MT
         }
     }

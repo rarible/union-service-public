@@ -24,6 +24,7 @@ protocol-union-meta-loader:
       xmx_megabytes: 2048
       max_direct_memory_megabytes: 64
   environments:
+    META_RETRIES: PT1H,P1D,P3D,P5D
     # The most sensitive pipeline, should be handled ASAP without delay
     META_LOADER_DOWNLOADER_ITEM_EVENT_WORKERS: 6
     META_LOADER_DOWNLOADER_ITEM_EVENT_BATCH_SIZE: 32
