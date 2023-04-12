@@ -15,25 +15,25 @@ class DownloadExecutorMetrics(
     meterRegistry
 ) {
 
-    fun onSuccessfulTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask) {
-        onTaskHandled(started, blockchain, type, "ok", task)
+    fun onSuccessfulTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask, retry: Int) {
+        onTaskHandled(started, blockchain, type, "ok", task, retry)
         onTaskDone(blockchain, type, "ok", task)
     }
 
     // Task debounced
-    fun onSkippedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask) {
-        onTaskHandled(started, blockchain, type, "skip", task)
+    fun onSkippedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask, retry: Int) {
+        onTaskHandled(started, blockchain, type, "skip", task, retry)
     }
 
     // Download failed, new status of the task is FAILED
-    fun onFailedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask) {
-        onTaskHandled(started, blockchain, type, "fail", task)
+    fun onFailedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask, retry: Int) {
+        onTaskHandled(started, blockchain, type, "fail", task, retry)
         onTaskDone(blockchain, type, "fail", task)
     }
 
     // Download failed, but new status of task is RETRY
-    fun onRetriedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask) {
-        onTaskHandled(started, blockchain, type, "retry", task)
+    fun onRetriedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask, retry: Int) {
+        onTaskHandled(started, blockchain, type, "retry", task, retry)
     }
 
     private fun onTaskHandled(
@@ -42,6 +42,7 @@ class DownloadExecutorMetrics(
         type: String,
         status: String,
         task: DownloadTask,
+        retry: Int
     ) {
         meterRegistry.timer(
             DOWNLOAD_TASK,
@@ -50,6 +51,7 @@ class DownloadExecutorMetrics(
                 type(type.lowercase()),
                 status(status.lowercase()),
                 tag("pipeline", task.pipeline.lowercase()),
+                tag("retry", retry.toString()),
                 tag("force", task.force.toString())
             )
         ).record(Duration.between(started, Instant.now()))

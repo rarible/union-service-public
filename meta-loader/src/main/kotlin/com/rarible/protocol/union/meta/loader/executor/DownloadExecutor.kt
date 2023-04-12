@@ -45,7 +45,8 @@ sealed class DownloadExecutor<T>(
         val started = Instant.now()
         val current = repository.get(task.id) ?: getDefault(task)
         if (current.succeedAt != null && task.scheduledAt.isBefore(current.succeedAt)) {
-            metrics.onSkippedTask(type, blockchainExtractor(task.id), started, task)
+            val retry = if (current.status != DownloadStatus.SUCCESS) current.retries else 0
+            metrics.onSkippedTask(type, blockchainExtractor(task.id), started, task, retry)
             return
         }
 
@@ -65,14 +66,17 @@ sealed class DownloadExecutor<T>(
 
     private suspend fun onSuccess(started: Instant, task: DownloadTask, data: T) {
         // For successful case we should rewrite current data anyway
+        var retry = 0
         val saved = repository.update(task.id) { exist ->
             val current = exist ?: getDefault(task)
+            // If current.status == success, there is no sense to count its previous retries
+            retry = if (current.status != DownloadStatus.SUCCESS) current.retries else 0
             current.withSuccessInc(data)
         }
 
         saved?.let { notifier.notify(saved) }
 
-        metrics.onSuccessfulTask(type, blockchainExtractor(task.id), started, task)
+        metrics.onSuccessfulTask(type, blockchainExtractor(task.id), started, task, retry)
         logger.info("Data download SUCCEEDED for {} task: {} ({})", type, task.id, task.pipeline)
     }
 
@@ -100,7 +104,7 @@ sealed class DownloadExecutor<T>(
                 DownloadStatus.SCHEDULED -> failed.copy(status = status, retries = 0, retriedAt = nowMillis())
             }
 
-            markStatus(started, task, status)
+            markStatus(started, task, status, failed.retries)
             updated
         }
 
@@ -113,10 +117,10 @@ sealed class DownloadExecutor<T>(
         }
     }
 
-    private fun markStatus(started: Instant, task: DownloadTask, status: DownloadStatus) {
+    private fun markStatus(started: Instant, task: DownloadTask, status: DownloadStatus, retry: Int) {
         when (status) {
-            DownloadStatus.FAILED -> metrics.onFailedTask(type, blockchainExtractor(task.id), started, task)
-            DownloadStatus.RETRY -> metrics.onRetriedTask(type, blockchainExtractor(task.id), started, task)
+            DownloadStatus.FAILED -> metrics.onFailedTask(type, blockchainExtractor(task.id), started, task, retry)
+            DownloadStatus.RETRY -> metrics.onRetriedTask(type, blockchainExtractor(task.id), started, task, retry)
             else -> logger.warn("Incorrect status of failed {} task {} ({}): {}", type, task.id, task.pipeline, status)
         }
     }
