@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 @Component
 class CustomCollectionJob(
     private val eventProducer: UnionInternalBlockchainEventProducer,
-    private val ruleHandlerProvider: CustomCollectionItemFetcherProvider
+    private val customCollectionItemFetcherProvider: CustomCollectionItemFetcherProvider
 ) {
 
     private val batchSize = 50
@@ -20,18 +20,18 @@ class CustomCollectionJob(
      * @param continuation last state of the migration (format depends on the rule type)
      */
     suspend fun migrate(name: String, continuation: String?): String? {
-        val handlers = ruleHandlerProvider.get(name)
+        val fetchers = customCollectionItemFetcherProvider.get(name)
         val state = continuation?.let { CustomCollectionJobState(it) }
-        var currentRule = state?.rule ?: 0
+        var currentFetcher = state?.rule ?: 0
         var currentState = state?.state
-        while (currentRule < handlers.size) {
-            val handler = handlers[currentRule]
+        while (currentFetcher < fetchers.size) {
+            val handler = fetchers[currentFetcher]
             val next = handler.next(currentState, batchSize)
             if (next.state != null) {
                 notify(next.items)
-                return CustomCollectionJobState(currentRule, next.state).toString()
+                return CustomCollectionJobState(currentFetcher, next.state).toString()
             }
-            currentRule++
+            currentFetcher++
             currentState = null
         }
         return null
