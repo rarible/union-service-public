@@ -32,6 +32,8 @@ data class FeatureFlagsProperties(
     var enableSearchItems: Boolean = false,
     var enableItemSaveImmediateToElasticSearch: Boolean = false,
 
+    val enableCustomCollections: Boolean = false,
+
     // Union data
     val enableUnionCollections: Boolean = false
 )

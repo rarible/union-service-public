@@ -41,6 +41,7 @@ class EnrichmentItemService(
     private val itemMetaTrimmer: ItemMetaTrimmer,
     private val contentMetaService: ContentMetaService,
     private val originService: OriginService,
+    private val customCollectionResolver: CustomCollectionResolver,
     private val metrics: ItemMetaMetrics,
 ) {
 
@@ -129,13 +130,16 @@ class EnrichmentItemService(
             logger.info("Received Item with large meta: $itemId")
         }
 
+        val resolvedItem = fetchedItem.await()
+
         ItemDtoConverter.convert(
-            item = fetchedItem.await(),
+            item = resolvedItem,
             shortItem = shortItem,
             // replacing inner IPFS urls with public urls
             meta = contentMetaService.exposePublicUrls(trimmedMeta),
             orders = bestOrders,
-            auctions = auctionsData.await()
+            auctions = auctionsData.await(),
+            customCollection = customCollectionResolver.resolveCustomCollection(resolvedItem.id)
         )
     }
 
