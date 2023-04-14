@@ -10,24 +10,28 @@ class CustomCollectionItemFetcherByCollection(
     collections: List<CollectionIdDto>
 ) : CustomCollectionItemFetcher {
 
-    private val collectionIds = TreeSet(collections.map { it.fullId() })
+    private val collectionIds = run {
+        val result = TreeSet(CollectionIdDto.Comparators.LEXICOGRAPHICAL)
+        result.addAll(collections)
+        result
+    }
 
     override suspend fun next(state: String?, batchSize: Int): CustomCollectionItemBatch {
         // We need to take collection from current state (which is itemId), but if that's the first
         // request, we should use first collection from the list
         val continuation = DateIdContinuation.parse(state)
         val itemId = continuation?.id?.let { IdParser.parseItemId(it) }
-        val collectionId = itemId?.let { customCollectionItemProvider.getItemCollectionId(itemId) }
-            ?: IdParser.parseCollectionId(collectionIds.first())
+        var currentCollectionId = itemId?.let { customCollectionItemProvider.getItemCollectionId(itemId) }
+            ?: collectionIds.first()
 
-        var items = customCollectionItemProvider.fetch(collectionId, state, batchSize)
+        var items = customCollectionItemProvider.fetch(currentCollectionId, state, batchSize)
 
         // If there are no items left for this collection, switching to next from the config
-        var currentCollectionId = collectionId.fullId()
         while (items.isEmpty()) {
             val nextCollectionId = collectionIds.tailSet(currentCollectionId, false).firstOrNull()
                 ?: return CustomCollectionItemBatch.empty()
-            items = customCollectionItemProvider.fetch(IdParser.parseCollectionId(nextCollectionId), null, batchSize)
+
+            items = customCollectionItemProvider.fetch(nextCollectionId, null, batchSize)
             currentCollectionId = nextCollectionId
         }
 

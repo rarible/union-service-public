@@ -9,13 +9,16 @@ class CustomCollectionItemFetcherByList(
     items: List<ItemIdDto>
 ) : CustomCollectionItemFetcher {
 
-    private val itemIds = TreeSet(items.map { it.fullId() })
+    private val itemIds = run {
+        val result = TreeSet(ItemIdDto.Comparators.LEXICOGRAPHICAL)
+        result.addAll(items)
+        result
+    }
 
     override suspend fun next(state: String?, batchSize: Int): CustomCollectionItemBatch {
-        val after = state?.let { itemIds.tailSet(state, false) } ?: itemIds
-        val batch = after.take(batchSize).map { IdParser.parseItemId(it) }
+        val after = state?.let { itemIds.tailSet(IdParser.parseItemId(it), false) } ?: itemIds
+        val batch = after.take(batchSize)
         val items = customCollectionItemProvider.fetch(batch)
-        val result = items.sortedBy { it.id.fullId() }
-        return CustomCollectionItemBatch(result.lastOrNull()?.id?.fullId(), result)
+        return CustomCollectionItemBatch(batch.lastOrNull()?.fullId(), items)
     }
 }
