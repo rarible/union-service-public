@@ -36,7 +36,7 @@ class CustomCollectionTaskHandler(
         return flow {
             var next = from
             do {
-                next = job.migrate(param, from)
+                next = job.migrate(param, next)
                 if (next != null) {
                     emit(next)
                 }

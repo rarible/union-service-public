@@ -25,8 +25,8 @@ class CustomCollectionJob(
         var currentFetcher = state?.rule ?: 0
         var currentState = state?.state
         while (currentFetcher < fetchers.size) {
-            val handler = fetchers[currentFetcher]
-            val next = handler.next(currentState, batchSize)
+            val fetcher = fetchers[currentFetcher]
+            val next = fetcher.next(currentState, batchSize)
             if (next.state != null) {
                 notify(next.items)
                 return CustomCollectionJobState(currentFetcher, next.state).toString()

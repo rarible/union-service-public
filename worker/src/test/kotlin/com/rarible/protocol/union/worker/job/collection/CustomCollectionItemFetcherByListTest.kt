@@ -48,4 +48,28 @@ class CustomCollectionItemFetcherByListTest {
         assertThat(batch3.state).isNull()
     }
 
+    @Test
+    fun test() = runBlocking<Unit> {
+        val item1 = randomUnionItem(
+            ItemIdDto(
+                BlockchainDto.ETHEREUM,
+                "0x6972347e66a32f40ef3c012615c13cb88bf681cc:66891234636452780444728742514468970113916103980372408812967600838058321117185"
+            )
+        )
+        val items = listOf(item1.id)
+
+        val fetcher = CustomCollectionItemFetcherByList(customCollectionItemProvider, items)
+        coEvery { customCollectionItemProvider.fetch(listOf(item1.id)) } returns listOf(item1)
+        coEvery { customCollectionItemProvider.fetch(listOf()) } returns listOf()
+
+        // First batch
+        val batch1 = fetcher.next(null, 50)
+        assertThat(batch1.items).isEqualTo(listOf(item1))
+        assertThat(batch1.state).isEqualTo(item1.id.toString())
+
+        val batch2 = fetcher.next(item1.id.toString(), 50)
+        assertThat(batch2.items).isEmpty()
+        assertThat(batch2.state).isNull()
+    }
+
 }
