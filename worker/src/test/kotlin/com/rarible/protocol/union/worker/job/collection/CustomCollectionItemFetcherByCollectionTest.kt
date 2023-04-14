@@ -25,11 +25,12 @@ class CustomCollectionItemFetcherByCollectionTest {
         val item1 = randomUnionItem(ItemIdDto(BlockchainDto.ETHEREUM, ethCollection1, "1".toBigInteger()))
         val item2 = randomUnionItem(ItemIdDto(BlockchainDto.ETHEREUM, ethCollection1, "2".toBigInteger()))
         val state1 = DateIdContinuation(item2.lastUpdatedAt, item2.id.fullId())
+        val nativeState1 = DateIdContinuation(item2.lastUpdatedAt, item2.id.value)
 
         val fetcher = CustomCollectionItemFetcherByCollection(customCollectionItemProvider, listOf(collectionId1))
         coEvery { customCollectionItemProvider.fetch(collectionId1, null, 2) } returns listOf(item1, item2)
         coEvery { customCollectionItemProvider.getItemCollectionId(item2.id) } returns collectionId1
-        coEvery { customCollectionItemProvider.fetch(collectionId1, state1.toString(), 2) } returns listOf()
+        coEvery { customCollectionItemProvider.fetch(collectionId1, nativeState1.toString(), 2) } returns listOf()
 
         // First batch
         val batch1 = fetcher.next(null, 2)
@@ -53,8 +54,10 @@ class CustomCollectionItemFetcherByCollectionTest {
         val ethCollection3 = collectionId3.value
 
         val item1 = randomUnionItem(ItemIdDto(BlockchainDto.ETHEREUM, ethCollection1, "1".toBigInteger()))
+        val nativeState1 = DateIdContinuation(item1.lastUpdatedAt, item1.id.value)
         val state1 = DateIdContinuation(item1.lastUpdatedAt, item1.id.fullId())
         val item3 = randomUnionItem(ItemIdDto(BlockchainDto.ETHEREUM, ethCollection3, "1".toBigInteger()))
+        val nativeState3 = DateIdContinuation(item3.lastUpdatedAt, item3.id.value)
         val state3 = DateIdContinuation(item3.lastUpdatedAt, item3.id.fullId())
 
         val fetcher = CustomCollectionItemFetcherByCollection(
@@ -64,13 +67,13 @@ class CustomCollectionItemFetcherByCollectionTest {
 
         coEvery { customCollectionItemProvider.getItemCollectionId(item1.id) } returns collectionId1
         coEvery { customCollectionItemProvider.fetch(collectionId1, null, 2) } returns listOf(item1)
-        coEvery { customCollectionItemProvider.fetch(collectionId1, state1.toString(), 2) } returns listOf()
+        coEvery { customCollectionItemProvider.fetch(collectionId1, nativeState1.toString(), 2) } returns listOf()
 
         coEvery { customCollectionItemProvider.fetch(collectionId2, null, 2) } returns listOf()
 
         coEvery { customCollectionItemProvider.getItemCollectionId(item3.id) } returns collectionId3
         coEvery { customCollectionItemProvider.fetch(collectionId3, null, 2) } returns listOf(item3)
-        coEvery { customCollectionItemProvider.fetch(collectionId3, state3.toString(), 2) } returns listOf()
+        coEvery { customCollectionItemProvider.fetch(collectionId3, nativeState3.toString(), 2) } returns listOf()
 
         // First batch
         val batch1 = fetcher.next(null, 2)

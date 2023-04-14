@@ -24,7 +24,8 @@ class CustomCollectionItemFetcherByCollection(
         var currentCollectionId = itemId?.let { customCollectionItemProvider.getItemCollectionId(itemId) }
             ?: collectionIds.first()
 
-        var items = customCollectionItemProvider.fetch(currentCollectionId, state, batchSize)
+        val nativeContinuation = continuation?.let { DateIdContinuation(it.date, itemId!!.value) }?.toString()
+        var items = customCollectionItemProvider.fetch(currentCollectionId, nativeContinuation, batchSize)
 
         // If there are no items left for this collection, switching to next from the config
         while (items.isEmpty()) {
