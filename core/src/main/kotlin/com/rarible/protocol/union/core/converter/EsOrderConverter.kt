@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.EthErc721LazyAssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.EthGenerativeArtAssetTypeDto
 import com.rarible.protocol.union.dto.EthLooksRareOrderDataV1Dto
+import com.rarible.protocol.union.dto.EthLooksRareOrderDataV2Dto
 import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
 import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
@@ -110,6 +111,7 @@ object EsOrderConverter {
             is EthOrderDataLegacyDto,
             is EthOrderCryptoPunksDataDto,
             is EthLooksRareOrderDataV1Dto,
+            is EthLooksRareOrderDataV2Dto,
             is EthSudoSwapAmmDataV1Dto -> emptyList()
         }.map { it.fullId() }
     }
