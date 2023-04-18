@@ -35,5 +35,7 @@ data class FeatureFlagsProperties(
     val enableCustomCollections: Boolean = false,
 
     // Union data
-    val enableUnionCollections: Boolean = false
+    val enableUnionCollections: Boolean = false,
+
+    val enableSpringKafka: Boolean = true,
 )
