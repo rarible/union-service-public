@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.core.handler.InternalEventHandler
+import com.rarible.protocol.union.core.handler.InternalEventHandlerWrapper
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.CompositeRegisteredTimer
 import com.rarible.protocol.union.core.model.ItemEventDelayMetric
