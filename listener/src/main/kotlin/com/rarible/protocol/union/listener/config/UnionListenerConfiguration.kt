@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.core.handler.InternalEventHandler
+import com.rarible.protocol.union.core.handler.InternalEventHandlerWrapper
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.CompositeRegisteredTimer
 import com.rarible.protocol.union.core.model.ItemEventDelayMetric
@@ -39,8 +40,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
-import java.util.*
-import kotlin.math.log
+import java.util.UUID
 
 @Configuration
 @EnableRaribleTask
@@ -101,7 +101,7 @@ class UnionListenerConfiguration(
                 val container = unionInternalEventContainerFactory.createContainer(
                     UnionInternalTopicProvider.getInternalBlockchainTopic(env, blockchain)
                 )
-                container.setupMessageListener(MessageListenerEventHandlerAdapter(handler))
+                container.setupMessageListener(MessageListenerEventHandlerAdapter(InternalEventHandlerWrapper(handler)))
                 container.containerProperties.groupId = consumerGroup("blockchain.${blockchain.name.lowercase()}")
                 container.containerProperties.clientId = "$clientIdPrefix.union-blockchain-event-consumer"
                 container
