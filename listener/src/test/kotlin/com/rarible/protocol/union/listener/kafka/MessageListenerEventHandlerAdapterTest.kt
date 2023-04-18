@@ -28,7 +28,8 @@ internal class MessageListenerEventHandlerAdapterTest {
             ConsumerRecord("topic", 0, 3, "key3", "value3"),
         )
         coEvery { handler.handle("value2") } throws RuntimeException("")
-        coEvery { handler.handle(any()) } returns Unit
+        coEvery { handler.handle("value1") } returns Unit
+        coEvery { handler.handle("value3") } returns Unit
 
         messageListenerEventHandlerAdapter.onMessage(batch)
 
