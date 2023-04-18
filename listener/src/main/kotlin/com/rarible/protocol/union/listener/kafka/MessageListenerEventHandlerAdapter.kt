@@ -6,7 +6,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.slf4j.LoggerFactory
 import org.springframework.kafka.listener.BatchMessageListener
 
 class MessageListenerEventHandlerAdapter<T>(
@@ -21,9 +20,5 @@ class MessageListenerEventHandlerAdapter<T>(
                 }
             }
         }.awaitAll()
-    }
-
-    companion object {
-        private val logger = LoggerFactory.getLogger(MessageListenerEventHandlerAdapter::class.java)
     }
 }
