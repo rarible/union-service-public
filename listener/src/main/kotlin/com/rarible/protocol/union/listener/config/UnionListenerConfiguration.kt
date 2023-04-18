@@ -100,7 +100,7 @@ class UnionListenerConfiguration(
                 val container = unionInternalEventContainerFactory.createContainer(
                     UnionInternalTopicProvider.getInternalBlockchainTopic(env, blockchain)
                 )
-                container.setupMessageListener(MessageListenerEventHandlerAdapter(handler))
+                container.setupMessageListener(MessageListenerEventHandlerAdapter(InternalEventHandlerWrapper(handler)))
                 container.containerProperties.groupId = consumerGroup("blockchain.${blockchain.name.lowercase()}")
                 container.containerProperties.clientId = "$clientIdPrefix.union-blockchain-event-consumer"
                 container

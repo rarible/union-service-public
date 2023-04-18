@@ -17,11 +17,7 @@ class MessageListenerEventHandlerAdapter<T>(
         recordsByKey.values.map { group ->
             async {
                 group.forEach {
-                    try {
-                        handler.handle(it.value())
-                    } catch (e: Exception) {
-                        logger.error("Unexpected exception during handling internal event $it", e)
-                    }
+                    handler.handle(it.value())
                 }
             }
         }.awaitAll()

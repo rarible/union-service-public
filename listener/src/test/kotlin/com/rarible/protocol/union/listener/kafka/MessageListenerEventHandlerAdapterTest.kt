@@ -10,7 +10,6 @@ import kotlinx.coroutines.runBlocking
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.lang.RuntimeException
 
 @ExtendWith(MockKExtension::class)
 internal class MessageListenerEventHandlerAdapterTest {
@@ -27,9 +26,7 @@ internal class MessageListenerEventHandlerAdapterTest {
             ConsumerRecord("topic", 0, 1, "key2", "value2"),
             ConsumerRecord("topic", 0, 3, "key3", "value3"),
         )
-        coEvery { handler.handle("value2") } throws RuntimeException("")
-        coEvery { handler.handle("value1") } returns Unit
-        coEvery { handler.handle("value3") } returns Unit
+        coEvery { handler.handle(any()) } returns Unit
 
         messageListenerEventHandlerAdapter.onMessage(batch)
 
