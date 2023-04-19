@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.core.service.dummy
 
-import com.rarible.protocol.union.core.model.TypedActivityId
-import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
+import com.rarible.protocol.union.core.model.TypedActivityId
+import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -23,7 +23,7 @@ class DummyActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         return Slice.empty()
     }
 
@@ -32,7 +32,7 @@ class DummyActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         return Slice.empty()
     }
 
@@ -41,7 +41,7 @@ class DummyActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         return Slice.empty()
     }
 
@@ -51,7 +51,7 @@ class DummyActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         return Slice.empty()
     }
 
@@ -61,7 +61,7 @@ class DummyActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         return Slice.empty()
     }
 
@@ -72,7 +72,7 @@ class DummyActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         return Slice.empty()
     }
 
@@ -84,11 +84,11 @@ class DummyActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         return Slice.empty()
     }
 
-    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> {
+    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<UnionActivityDto> {
         return emptyList()
     }
 }

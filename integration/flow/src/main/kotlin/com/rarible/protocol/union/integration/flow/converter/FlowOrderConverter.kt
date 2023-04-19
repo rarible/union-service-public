@@ -42,8 +42,8 @@ class FlowOrderConverter(
 
     private suspend fun convertInternal(order: FlowOrderDto, blockchain: BlockchainDto): OrderDto {
 
-        val make = FlowConverter.convert(order.make, blockchain)
-        val take = FlowConverter.convert(order.take, blockchain)
+        val make = FlowConverter.convertLegacy(order.make, blockchain)
+        val take = FlowConverter.convertLegacy(order.take, blockchain)
 
         val maker = UnionAddressConverter.convert(blockchain, order.maker)
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }

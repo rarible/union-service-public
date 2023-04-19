@@ -11,13 +11,10 @@ import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
+import com.rarible.protocol.union.core.model.UnionEthErc721AssetTypeDto
 import com.rarible.protocol.union.core.test.nativeTestCurrencies
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CurrencyDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
-
-import com.rarible.protocol.currency.dto.CurrencyDto as CurrencyDtoExternal
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -119,7 +116,7 @@ class CurrencyServiceTest {
         val blockchain = BlockchainDto.ETHEREUM
         val address = ContractAddressConverter.convert(blockchain, randomString())
         val assetType = EthErc20AssetTypeDto(address)
-        val nftAssetType = EthErc721AssetTypeDto(address, randomBigInt())
+        val nftAssetType = UnionEthErc721AssetTypeDto(address, randomBigInt())
 
         val nullValue = currencyService.toUsd(blockchain, assetType, null)
         assertThat(nullValue).isNull()

@@ -2,7 +2,6 @@ package com.rarible.protocol.union.search.indexer.handler
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.core.model.EsActivity
@@ -12,6 +11,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
 import org.elasticsearch.action.support.WriteRequest
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -22,9 +22,7 @@ class ActivityEventHandler(
     metricFactory: IndexerMetricFactory,
 ) : ConsumerBatchEventHandler<ActivityDto> {
 
-    companion object {
-        private val logger by Logger()
-    }
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private val entitySaveCounters = BlockchainDto.values().associateWith {
         metricFactory.createEntitySaveCountMetric(EsEntity.ACTIVITY, it)
@@ -61,7 +59,7 @@ class ActivityEventHandler(
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
         logger.info(
             "Handling of ${event.size} ActivityDto events completed in $elapsedTime ms" +
-                    " (saved ${convertedEvents.size}, deleted ${revertedEvents.size})"
+                " (saved ${convertedEvents.size}, deleted ${revertedEvents.size})"
         )
     }
 

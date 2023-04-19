@@ -65,7 +65,7 @@ open class SolanaOrderService(
 
     override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
         val result = orderApi.getBidCurrencies(itemId).awaitFirst()
-        return result.currencies.map { SolanaConverter.convert(it, blockchain) }
+        return result.currencies.map { SolanaConverter.convertLegacy(it, blockchain) }
     }
 
     override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
@@ -122,7 +122,7 @@ open class SolanaOrderService(
 
     override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
         val result = orderApi.getSellCurrencies(itemId).awaitFirst()
-        return result.currencies.map { SolanaConverter.convert(it, blockchain) }
+        return result.currencies.map { SolanaConverter.convertLegacy(it, blockchain) }
     }
 
     override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {

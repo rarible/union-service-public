@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyDto
 import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
@@ -32,7 +33,6 @@ import org.junit.jupiter.api.extension.ExtendWith
 import randomUnionAddress
 import java.math.BigDecimal
 import java.time.Instant
-
 
 @ExtendWith(MockKExtension::class)
 class SellActivityEnricherTest {
@@ -147,7 +147,7 @@ class SellActivityEnricherTest {
             currencyService.getNativeCurrency(any())
         } returns CurrencyDto(CurrencyIdParser.parse("TEZOS:tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU"), "tezos")
         coEvery {
-            currencyService.toUsd(any(), any(), any(), any())
+            currencyService.toUsd(any(), any<AssetTypeDto>(), any(), any())
         } returns usdDecimal
         coEvery {
             currencyService.getRate(any(), any(), any()).rate

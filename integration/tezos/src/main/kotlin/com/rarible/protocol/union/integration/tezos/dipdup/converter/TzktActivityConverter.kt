@@ -2,15 +2,16 @@ package com.rarible.protocol.union.integration.tezos.dipdup.converter
 
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.exception.UnionDataFormatException
-import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionBurnActivityDto
+import com.rarible.protocol.union.core.model.UnionMintActivityDto
+import com.rarible.protocol.union.core.model.UnionTransferActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BurnActivityDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MintActivityDto
-import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.tzkt.model.ActivityType
 import com.rarible.tzkt.model.TypedTokenActivity
 import java.math.BigDecimal
@@ -29,10 +30,10 @@ object TzktActivityConverter {
         else -> null
     }
 
-    fun convert(source: TypedTokenActivity, blockchain: BlockchainDto): ActivityDto {
+    fun convert(source: TypedTokenActivity, blockchain: BlockchainDto): UnionActivityDto {
         val id = ActivityIdDto(blockchain, source.id.toString())
         return when (source.type) {
-            ActivityType.MINT -> MintActivityDto(
+            ActivityType.MINT -> UnionMintActivityDto(
                 id = id,
                 date = source.timestamp.toInstant(),
                 reverted = false,
@@ -41,9 +42,11 @@ object TzktActivityConverter {
                 value = convertValue(BigDecimal(source.amount), id),
                 tokenId = source.tokenId(),
                 itemId = ItemIdDto(blockchain, source.contract(), source.tokenId()),
-                contract = ContractAddress(blockchain, source.contract())
+                contract = ContractAddress(blockchain, source.contract()),
+                collection = CollectionIdDto(blockchain, source.contract())
             )
-            ActivityType.BURN -> BurnActivityDto(
+
+            ActivityType.BURN -> UnionBurnActivityDto(
                 id = id,
                 date = source.timestamp.toInstant(),
                 reverted = false,
@@ -52,9 +55,11 @@ object TzktActivityConverter {
                 value = convertValue(BigDecimal(source.amount), id),
                 tokenId = source.tokenId(),
                 itemId = ItemIdDto(blockchain, source.contract(), source.tokenId()),
-                contract = ContractAddress(blockchain, source.contract())
+                contract = ContractAddress(blockchain, source.contract()),
+                collection = CollectionIdDto(blockchain, source.contract())
             )
-            ActivityType.TRANSFER -> TransferActivityDto(
+
+            ActivityType.TRANSFER -> UnionTransferActivityDto(
                 id = id,
                 date = source.timestamp.toInstant(),
                 reverted = false,
@@ -64,7 +69,8 @@ object TzktActivityConverter {
                 value = convertValue(BigDecimal(source.amount), id),
                 tokenId = source.tokenId(),
                 itemId = ItemIdDto(blockchain, source.contract(), source.tokenId()),
-                contract = ContractAddress(blockchain, source.contract())
+                contract = ContractAddress(blockchain, source.contract()),
+                collection = CollectionIdDto(blockchain, source.contract())
             )
         }
     }

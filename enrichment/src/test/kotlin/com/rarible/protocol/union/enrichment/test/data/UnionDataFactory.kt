@@ -14,33 +14,33 @@ import com.rarible.protocol.union.core.model.EsCollection
 import com.rarible.protocol.union.core.model.EsCollectionLite
 import com.rarible.protocol.union.core.model.EsItem
 import com.rarible.protocol.union.core.model.EsTrait
+import com.rarible.protocol.union.core.model.UnionBurnActivityDto
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
+import com.rarible.protocol.union.core.model.UnionMintActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderListActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderMatchSellDto
+import com.rarible.protocol.union.core.model.UnionTransferActivityDto
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
-import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.EthSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.MintActivityDto
-import com.rarible.protocol.union.dto.OrderListActivityDto
-import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SudoSwapCurveTypeDto
 import com.rarible.protocol.union.dto.SudoSwapPoolTypeDto
-import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
@@ -228,7 +228,7 @@ fun randomUnionAuctionDto(ownershipId: OwnershipIdDto) = runBlocking {
 fun randomUnionActivityMint(itemId: ItemIdDto) = runBlocking {
     val mint = mockedEthActivityConverter.convert(
         randomEthItemMintActivity(), itemId.blockchain
-    ) as MintActivityDto
+    ) as UnionMintActivityDto
 
     mint.copy(itemId = itemId)
 }
@@ -236,7 +236,7 @@ fun randomUnionActivityMint(itemId: ItemIdDto) = runBlocking {
 fun randomUnionActivityOrderList(blockchain: BlockchainDto) = runBlocking {
     val list = mockedEthActivityConverter.convert(
         randomEthOrderListActivity(), blockchain
-    ) as OrderListActivityDto
+    ) as UnionOrderListActivityDto
 
     list
 }
@@ -244,7 +244,7 @@ fun randomUnionActivityOrderList(blockchain: BlockchainDto) = runBlocking {
 fun randomUnionActivityTransfer(itemId: ItemIdDto) = runBlocking {
     val mint = mockedEthActivityConverter.convert(
         randomEthItemTransferActivity(), itemId.blockchain
-    ) as TransferActivityDto
+    ) as UnionTransferActivityDto
 
     mint.copy(itemId = itemId)
 }
@@ -252,7 +252,7 @@ fun randomUnionActivityTransfer(itemId: ItemIdDto) = runBlocking {
 fun randomUnionActivityBurn(itemId: ItemIdDto) = runBlocking {
     val mint = mockedEthActivityConverter.convert(
         randomEthItemBurnActivity(), itemId.blockchain
-    ) as BurnActivityDto
+    ) as UnionBurnActivityDto
 
     mint.copy(itemId = itemId)
 }
@@ -263,7 +263,7 @@ fun randomUnionActivitySale(itemId: ItemIdDto) = runBlocking {
 
     mockedEthActivityConverter.convert(
         dto, itemId.blockchain
-    ) as OrderMatchSellDto
+    ) as UnionOrderMatchSellDto
 }
 
 fun randomItemDto(itemId: ItemIdDto): ItemDto {

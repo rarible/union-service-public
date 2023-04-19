@@ -15,6 +15,18 @@ import com.rarible.protocol.dto.PartDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.exception.UnionValidationException
+import com.rarible.protocol.union.core.model.UnionAssetDto
+import com.rarible.protocol.union.core.model.UnionAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthAmmNftAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthCollectionAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthCryptoPunksAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthErc1155AssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthErc1155LazyAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthErc20AssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthErc721AssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthErc721LazyAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthEthereumAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthGenerativeArtAssetTypeDto
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionSourceEventTimeMark
 import com.rarible.protocol.union.dto.ActivitySortDto
@@ -140,8 +152,16 @@ object EthConverter {
         )
     }
 
-    fun convert(source: com.rarible.protocol.dto.AssetDto, blockchain: BlockchainDto): AssetDto {
+    @Deprecated("remove after migration to UnionOrder")
+    fun convertLegacy(source: com.rarible.protocol.dto.AssetDto, blockchain: BlockchainDto): AssetDto {
         return AssetDto(
+            type = convertLegacy(source.assetType, blockchain),
+            value = source.valueDecimal!!
+        )
+    }
+
+    fun convert(source: com.rarible.protocol.dto.AssetDto, blockchain: BlockchainDto): UnionAssetDto {
+        return UnionAssetDto(
             type = convert(source.assetType, blockchain),
             value = source.valueDecimal!!
         )
@@ -154,7 +174,63 @@ object EthConverter {
         )
     }
 
-    fun convert(source: com.rarible.protocol.dto.AssetTypeDto, blockchain: BlockchainDto): AssetTypeDto {
+    fun convert(source: com.rarible.protocol.dto.AssetTypeDto, blockchain: BlockchainDto): UnionAssetTypeDto {
+        return when (source) {
+            is EthAssetTypeDto -> UnionEthEthereumAssetTypeDto(blockchain)
+            is Erc20AssetTypeDto -> UnionEthErc20AssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
+            )
+
+            is Erc721AssetTypeDto -> UnionEthErc721AssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
+                tokenId = source.tokenId
+            )
+
+            is Erc1155AssetTypeDto -> UnionEthErc1155AssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
+                tokenId = source.tokenId
+            )
+
+            is Erc721LazyAssetTypeDto -> UnionEthErc721LazyAssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
+                tokenId = source.tokenId,
+                uri = source.uri,
+                creators = source.creators.map { convertToCreator(it, blockchain) },
+                royalties = source.royalties.map { convertToRoyalty(it, blockchain) },
+                signatures = source.signatures.map { convert(it) }
+            )
+
+            is Erc1155LazyAssetTypeDto -> UnionEthErc1155LazyAssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
+                tokenId = source.tokenId,
+                uri = source.uri,
+                supply = source.supply,
+                creators = source.creators.map { convertToCreator(it, blockchain) },
+                royalties = source.royalties.map { convertToRoyalty(it, blockchain) },
+                signatures = source.signatures.map { convert(it) }
+            )
+
+            is CryptoPunksAssetTypeDto -> UnionEthCryptoPunksAssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
+                tokenId = source.tokenId
+            )
+
+            is GenerativeArtAssetTypeDto -> UnionEthGenerativeArtAssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
+            )
+
+            is CollectionAssetTypeDto -> UnionEthCollectionAssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
+            )
+
+            is AmmNftAssetTypeDto -> UnionEthAmmNftAssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
+            )
+        }
+    }
+
+    @Deprecated("remove after migration to UnionOrder")
+    fun convertLegacy(source: com.rarible.protocol.dto.AssetTypeDto, blockchain: BlockchainDto): AssetTypeDto {
         return when (source) {
             is EthAssetTypeDto -> EthEthereumAssetTypeDto(blockchain)
             is Erc20AssetTypeDto -> EthErc20AssetTypeDto(

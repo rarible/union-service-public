@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.configuration
 import com.rarible.core.mongo.configuration.EnableRaribleMongo
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
+import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentServicePackage
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -17,7 +18,8 @@ import org.springframework.context.annotation.PropertySource
     basePackageClasses = [
         EnrichmentServicePackage::class,
         ItemRepository::class,
-        OutgoingItemEventListener::class
+        OutgoingItemEventListener::class,
+        ItemDtoConverter::class
     ]
 )
 @PropertySource(

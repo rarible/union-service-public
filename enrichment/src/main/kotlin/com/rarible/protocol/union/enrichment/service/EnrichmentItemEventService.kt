@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.PoolItemAction
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionItemChangeEvent
@@ -12,15 +13,18 @@ import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.evaluator.OrderPoolEvaluator
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.model.ItemLastSale
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -122,6 +126,26 @@ class EnrichmentItemEventService(
     }
 
     suspend fun onActivity(
+        activity: UnionActivityDto,
+        item: UnionItem? = null,
+        eventTimeMarks: UnionEventTimeMarks?,
+        notificationEnabled: Boolean = true
+    ) {
+        val lastSale = ItemLastSaleConverter.convert(activity) ?: return
+        val itemId = activity.itemId() ?: return
+
+        onActivity(
+            id = activity.id,
+            reverted = activity.reverted,
+            itemId = itemId,
+            lastSale = lastSale,
+            eventTimeMarks = eventTimeMarks,
+            notificationEnabled = notificationEnabled
+        )
+    }
+
+    @Deprecated("keep with UnionActivity only")
+    suspend fun onActivityLegacy(
         activity: ActivityDto,
         item: UnionItem? = null,
         eventTimeMarks: UnionEventTimeMarks?,
@@ -130,11 +154,31 @@ class EnrichmentItemEventService(
         val lastSale = ItemLastSaleConverter.convert(activity) ?: return
         val itemId = activity.itemId() ?: return
 
+        onActivity(
+            id = activity.id,
+            reverted = activity.reverted,
+            itemId = itemId,
+            lastSale = lastSale,
+            eventTimeMarks = eventTimeMarks,
+            notificationEnabled = notificationEnabled
+        )
+    }
+
+    suspend fun onActivity(
+        id: ActivityIdDto,
+        itemId: ItemIdDto,
+        lastSale: ItemLastSale,
+        reverted: Boolean?,
+        item: UnionItem? = null,
+        eventTimeMarks: UnionEventTimeMarks?,
+        notificationEnabled: Boolean = true
+    ) {
+
         optimisticLock {
             val existing = enrichmentItemService.getOrEmpty(ShortItemId(itemId))
             val currentLastSale = existing.lastSale
 
-            val newLastSale = if (activity.reverted == true) {
+            val newLastSale = if (reverted == true) {
                 // We should re-evaluate last sale only if received activity has the same sale data
                 if (lastSale == currentLastSale) {
                     logger.info("Reverting Activity LastSale {} for Item [{}], reverting it", lastSale, itemId)
@@ -151,11 +195,11 @@ class EnrichmentItemEventService(
             }
 
             if (newLastSale == currentLastSale) {
-                logger.info("Item [{}] not changed after Activity event [{}]", itemId, activity.id)
+                logger.info("Item [{}] not changed after Activity event [{}]", itemId, id)
             } else {
                 logger.info(
                     "Item [{}] LastSale changed on Activity event [{}]: {} -> {}",
-                    itemId, activity.id, currentLastSale, newLastSale
+                    itemId, id, currentLastSale, newLastSale
                 )
                 saveAndNotify(
                     updated = existing.copy(lastSale = newLastSale),

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.integration
 
+import com.rarible.protocol.union.core.model.UnionAssetTypeDto
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionClient
@@ -29,7 +30,7 @@ abstract class ImxManualTest {
     protected val imxActivityConverter = ImxActivityConverter(
         mockk() {
             coEvery {
-                toUsd(any(), any(), any(), any())
+                toUsd(any(), any<UnionAssetTypeDto>(), any(), any())
             } returns BigDecimal.ONE
         }
     )

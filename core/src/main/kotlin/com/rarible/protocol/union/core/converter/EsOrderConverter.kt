@@ -133,7 +133,12 @@ object EsOrderConverter {
     }
 
     fun orderType(assetDto: AssetDto): EsOrder.Type {
-        val type = listOf(::ethType, ::flowType, ::tezosType, ::solanaType)
+        val type = listOf(
+            EsOrderConverter::ethType,
+            EsOrderConverter::flowType,
+            EsOrderConverter::tezosType,
+            EsOrderConverter::solanaType
+        )
             .firstNotNullOfOrNull { it(assetDto) }
         return type ?: throw IllegalArgumentException("Unknown parameter $assetDto for order assetType conversion")
     }

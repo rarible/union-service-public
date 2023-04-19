@@ -31,7 +31,7 @@ class EnrichmentOrderService(
         return try {
             orderServiceRouter.getService(id.blockchain).getOrderById(id.value)
         } catch (e: WebClientResponseProxyException) {
-            logger.warn("Unable to retrieve original Order [{}] from indexer: {}, response:", id, e.message, e.data)
+            logger.warn("Unable to retrieve original Order [{}] from indexer: {}, response: {}", id, e.message, e.data)
             null
         }
     }
@@ -250,16 +250,16 @@ class EnrichmentOrderService(
 
     private fun orderBidFilter(order: OrderDto, filter: OrderFilters): Boolean {
         return when (filter) {
-            OrderFilters.COLLECTION -> order.take.type.ext.isCollection
-            OrderFilters.ITEM -> !order.take.type.ext.isCollection
+            OrderFilters.COLLECTION -> order.take.type.ext.isCollectionAsset
+            OrderFilters.ITEM -> !order.take.type.ext.isCollectionAsset
             OrderFilters.ALL -> true
         }
     }
 
     private fun orderSellFilter(order: OrderDto, filter: OrderFilters): Boolean {
         return when (filter) {
-            OrderFilters.COLLECTION -> order.make.type.ext.isCollection
-            OrderFilters.ITEM -> !order.make.type.ext.isCollection
+            OrderFilters.COLLECTION -> order.make.type.ext.isCollectionAsset
+            OrderFilters.ITEM -> !order.make.type.ext.isCollectionAsset
             OrderFilters.ALL -> true
         }
     }

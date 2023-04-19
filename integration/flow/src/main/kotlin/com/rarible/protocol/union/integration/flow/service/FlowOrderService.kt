@@ -70,7 +70,7 @@ open class FlowOrderService(
     override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
         val assets = bidControllerApi.getBidCurrencies(itemId)
             .collectList().awaitFirst()
-        return assets.map { FlowConverter.convert(it, blockchain).type }
+        return assets.map { FlowConverter.convertLegacy(it, blockchain).type }
     }
 
     override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
@@ -130,7 +130,7 @@ open class FlowOrderService(
     override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
         val assets = orderControllerApi.getSellCurrencies(itemId)
             .collectList().awaitFirst()
-        return assets.map { FlowConverter.convert(it, blockchain).type }
+        return assets.map { FlowConverter.convertLegacy(it, blockchain).type }
     }
 
     override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {

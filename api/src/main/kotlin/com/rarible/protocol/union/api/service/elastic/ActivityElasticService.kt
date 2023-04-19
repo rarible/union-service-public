@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActi
 import com.rarible.protocol.union.core.model.EsActivityLite
 import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.core.model.TypedActivityId
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
@@ -40,6 +41,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.query.activity.ActivityQueryService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -50,6 +52,7 @@ import java.time.Instant
 class ActivityElasticService(
     private val filterConverter: ActivityFilterConverter,
     private val esActivityRepository: EsActivityRepository,
+    private val enrichmentActivityService: EnrichmentActivityService,
     private val router: BlockchainRouter<ActivityService>,
     elasticMetricsFactory: ElasticMetricsFactory,
 ) : ActivityQueryService {
@@ -251,7 +254,7 @@ class ActivityElasticService(
                 checkMissingIds(blockchain, ids, response)
                 response
             } else emptyList()
-        }
+        }.let { enrichmentActivityService.enrich(it) }
 
         val activitiesIdMapping = activities.associateBy { it.id.fullId() }
         return esActivities.mapNotNull { esActivity ->
@@ -290,7 +293,11 @@ class ActivityElasticService(
         }
     }
 
-    private fun checkMissingIds(blockchain: BlockchainDto, ids: List<TypedActivityId>, response: List<ActivityDto>) {
+    private fun checkMissingIds(
+        blockchain: BlockchainDto,
+        ids: List<TypedActivityId>,
+        response: List<UnionActivityDto>
+    ) {
         val foundIds = mutableSetOf<String>()
         response.mapTo(foundIds) { it.id.value }
         val missingIds = mutableListOf<String>()

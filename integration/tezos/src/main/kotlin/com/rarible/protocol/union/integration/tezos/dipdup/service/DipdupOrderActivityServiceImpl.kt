@@ -2,7 +2,7 @@ package com.rarible.protocol.union.integration.tezos.dipdup.service
 
 import com.rarible.core.logging.Logger
 import com.rarible.dipdup.client.OrderActivityClient
-import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -18,7 +18,12 @@ class DipdupOrderActivityServiceImpl(
 
     private val blockchain = BlockchainDto.TEZOS
 
-    override suspend fun getAll(types: List<ActivityTypeDto>, continuation: String?, limit: Int, sort: ActivitySortDto?): Slice<ActivityDto> {
+    override suspend fun getAll(
+        types: List<ActivityTypeDto>,
+        continuation: String?,
+        limit: Int,
+        sort: ActivitySortDto?
+    ): Slice<UnionActivityDto> {
         val dipdupTypes = dipDupActivityConverter.convertToDipDupOrderActivitiesTypes(types)
         val sortAsc = when (sort) {
             ActivitySortDto.EARLIEST_FIRST -> true
@@ -38,7 +43,7 @@ class DipdupOrderActivityServiceImpl(
         continuation: String?,
         limit: Int,
         sort: SyncSortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val sortTezos = sort?.let { DipDupActivityConverter.convert(it) }
         logger.info("Fetch dipdup all order activities sync: $continuation, $limit, $sort")
         val page = dipdupActivityClient.getActivitiesSync(limit, continuation, sortTezos)
@@ -55,7 +60,7 @@ class DipdupOrderActivityServiceImpl(
         continuation: String?,
         limit: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val dipdupTypes = dipDupActivityConverter.convertToDipDupOrderActivitiesTypes(types)
         val sortAsc = when (sort) {
             ActivitySortDto.EARLIEST_FIRST -> true
@@ -80,7 +85,7 @@ class DipdupOrderActivityServiceImpl(
         }
     }
 
-    override suspend fun getByIds(ids: List<String>): List<ActivityDto> {
+    override suspend fun getByIds(ids: List<String>): List<UnionActivityDto> {
         logger.info("Fetch dipdup activities by ids: $ids")
         val activities = dipdupActivityClient.getActivitiesByIds(ids)
         return activities.map { dipDupActivityConverter.convert(it, BlockchainDto.TEZOS) }

@@ -28,18 +28,18 @@ class CustomCollectionResolverTest {
     }
 
     @Test
-    fun `by item - ok`() = runBlocking<Unit> {
+    fun `by item - ok, via item list`() = runBlocking<Unit> {
         val customCollectionId = randomEthCollectionId()
         val itemId = randomEthItemId()
 
         val resolver = createResolver(customCollectionId, items = listOf(itemId))
         val collection = resolver.resolveCustomCollection(itemId)
 
-        assertThat(collection?.toDto()).isEqualTo(customCollectionId)
+        assertThat(collection).isEqualTo(customCollectionId)
     }
 
     @Test
-    fun `by item - ok, not mapped`() = runBlocking<Unit> {
+    fun `by item - not mapped, via item list`() = runBlocking<Unit> {
         val customCollectionId = randomEthCollectionId()
         val itemId = randomEthItemId()
 
@@ -52,7 +52,7 @@ class CustomCollectionResolverTest {
     }
 
     @Test
-    fun `by collection - ok`() = runBlocking<Unit> {
+    fun `by item - ok, via collection`() = runBlocking<Unit> {
         val customCollectionId = randomEthCollectionId()
         val collectionId = randomEthCollectionId()
         val itemId = ItemIdDto(collectionId.blockchain, "${collectionId.value}:1")
@@ -60,11 +60,11 @@ class CustomCollectionResolverTest {
         val resolver = createResolver(customCollectionId, collections = listOf(collectionId))
         val collection = resolver.resolveCustomCollection(itemId)
 
-        assertThat(collection?.toDto()).isEqualTo(customCollectionId)
+        assertThat(collection).isEqualTo(customCollectionId)
     }
 
     @Test
-    fun `by collection - ok, not mapped`() = runBlocking<Unit> {
+    fun `by item - not mapped, via collection`() = runBlocking<Unit> {
         val customCollectionId = randomEthCollectionId()
         val collectionId = randomEthCollectionId()
         val itemId = ItemIdDto(BlockchainDto.POLYGON, "${collectionId.value}:1")
@@ -75,6 +75,28 @@ class CustomCollectionResolverTest {
 
         assertThat(collection1).isNull()
         assertThat(collection2).isNull()
+    }
+
+    @Test
+    fun `by collection - ok`() = runBlocking<Unit> {
+        val customCollectionId = randomEthCollectionId()
+        val collectionId = randomEthCollectionId()
+
+        val resolver = createResolver(customCollectionId, collections = listOf(collectionId))
+        val collection = resolver.resolveCustomCollection(collectionId)
+
+        assertThat(collection).isEqualTo(customCollectionId)
+    }
+
+    @Test
+    fun `by collection - not mapped`() = runBlocking<Unit> {
+        val customCollectionId = randomEthCollectionId()
+        val collectionId = randomEthCollectionId()
+
+        val resolver = createResolver(customCollectionId, collections = listOf(collectionId))
+        val collection = resolver.resolveCustomCollection(randomEthCollectionId())
+
+        assertThat(collection).isNull()
     }
 
     private fun createResolver(

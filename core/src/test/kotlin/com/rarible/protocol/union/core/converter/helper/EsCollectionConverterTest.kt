@@ -1,7 +1,8 @@
-package com.rarible.protocol.union.core.converter
+package com.rarible.protocol.union.core.converter.helper
 
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.converter.EsCollectionConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto

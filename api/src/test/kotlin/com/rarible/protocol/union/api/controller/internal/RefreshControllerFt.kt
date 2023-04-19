@@ -365,7 +365,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
     fun `reconcile collection`() = runBlocking<Unit> {
         val collectionId = CollectionIdDto(BlockchainDto.ETHEREUM, ethOriginCollection)
         val currencyAsset = randomEthAssetErc20()
-        val currencyId = EthConverter.convert(currencyAsset, BlockchainDto.ETHEREUM).type.ext.currencyAddress()
+        val currencyId = EthConverter.convert(currencyAsset, BlockchainDto.ETHEREUM).type.currencyId()!!
 
         val fakeItemId = ItemIdDto(BlockchainDto.ETHEREUM, collectionId.value, BigInteger("-1"))
 
@@ -397,9 +397,9 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val reconciled = result.collection
         val originOrders = reconciled.originOrders!!.toList()[0]
 
-        assertThat(reconciled.bestBidOrder!!.take.type.ext.isCollection).isTrue
+        assertThat(reconciled.bestBidOrder!!.take.type.ext.isCollectionAsset).isTrue
         assertThat(reconciled.bestBidOrder!!.take.type.ext.collectionId).isEqualTo(collectionId)
-        assertThat(reconciled.bestSellOrder!!.make.type.ext.isCollection).isTrue
+        assertThat(reconciled.bestSellOrder!!.make.type.ext.isCollectionAsset).isTrue
         assertThat(reconciled.bestSellOrder!!.make.type.ext.collectionId).isEqualTo(collectionId)
 
         assertThat(originOrders.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
@@ -417,7 +417,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val collectionId = randomEthCollectionId()
         val fakeItemId = ItemIdDto(BlockchainDto.ETHEREUM, collectionId.value, BigInteger("-1"))
         val currencyAsset = randomEthAssetErc20()
-        val currencyId = EthConverter.convert(currencyAsset, BlockchainDto.ETHEREUM).type.ext.currencyAddress()
+        val currencyId = EthConverter.convert(currencyAsset, BlockchainDto.ETHEREUM).type.currencyId()!!
 
         ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(fakeItemId, currencyAsset.assetType)
         ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(fakeItemId, currencyAsset.assetType)

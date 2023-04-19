@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
+import com.rarible.protocol.union.core.model.UnionEthErc20AssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
@@ -114,7 +116,7 @@ class ImxOrderConverterTest {
 
         val asset = ImxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
 
-        assertThat(asset.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(asset.type).isInstanceOf(UnionEthErc20AssetTypeDto::class.java)
         assertThat(asset.value).isEqualTo(BigDecimal("100.0"))
     }
 
@@ -128,7 +130,7 @@ class ImxOrderConverterTest {
         )
 
         val asset = ImxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
-        val type = asset.type as EthErc20AssetTypeDto
+        val type = asset.type as UnionEthErc20AssetTypeDto
 
         assertThat(type.contract.value).isEqualTo(side.data.tokenAddress)
         assertThat(asset.value).isEqualTo(BigDecimal("1000"))
@@ -140,7 +142,7 @@ class ImxOrderConverterTest {
         val side = randomImxOrderSellSide()
 
         val asset = ImxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
-        val type = asset.type as EthErc721AssetTypeDto
+        val type = asset.type as UnionEthErc721AssetTypeDto
 
         assertThat(type.contract.value).isEqualTo(side.data.tokenAddress)
         assertThat(type.tokenId).isEqualTo(side.data.tokenId)
@@ -154,7 +156,7 @@ class ImxOrderConverterTest {
         val side = randomImxOrderSellSide().copy(data = data)
 
         val asset = ImxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
-        val type = asset.type as EthErc721AssetTypeDto
+        val type = asset.type as UnionEthErc721AssetTypeDto
 
         assertThat(type.contract.value).isEqualTo(side.data.tokenAddress)
         assertThat(type.tokenId).isEqualTo(side.data.tokenId)

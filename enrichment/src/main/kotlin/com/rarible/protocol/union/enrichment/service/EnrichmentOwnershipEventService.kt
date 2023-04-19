@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.PoolItemAction
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
@@ -13,12 +14,15 @@ import com.rarible.protocol.union.core.model.source
 import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.OwnershipSourceDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipSourceComparator
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -190,7 +194,8 @@ class EnrichmentOwnershipEventService(
         }
     }
 
-    suspend fun onActivity(
+    @Deprecated("keep UnionActivity only")
+    suspend fun onActivityLegacy(
         activity: ActivityDto,
         ownership: UnionOwnership? = null,
         eventTimeMarks: UnionEventTimeMarks?,
@@ -198,10 +203,48 @@ class EnrichmentOwnershipEventService(
     ) {
         val source = activity.source() ?: return
         val ownershipId = activity.ownershipId() ?: return
+        onActivity(
+            id = activity.id,
+            reverted = activity.reverted,
+            source = source,
+            ownershipId = ownershipId,
+            ownership = ownership,
+            eventTimeMarks = eventTimeMarks,
+            notificationEnabled = notificationEnabled
+        )
+    }
 
+    suspend fun onActivity(
+        activity: UnionActivityDto,
+        ownership: UnionOwnership? = null,
+        eventTimeMarks: UnionEventTimeMarks?,
+        notificationEnabled: Boolean = true
+    ) {
+        val source = activity.source() ?: return
+        val ownershipId = activity.ownershipId() ?: return
+        onActivity(
+            id = activity.id,
+            reverted = activity.reverted,
+            source = source,
+            ownershipId = ownershipId,
+            ownership = ownership,
+            eventTimeMarks = eventTimeMarks,
+            notificationEnabled = notificationEnabled
+        )
+    }
+
+    private suspend fun onActivity(
+        id: ActivityIdDto,
+        reverted: Boolean?,
+        source: OwnershipSourceDto,
+        ownershipId: OwnershipIdDto,
+        ownership: UnionOwnership? = null,
+        eventTimeMarks: UnionEventTimeMarks?,
+        notificationEnabled: Boolean = true
+    ) {
         optimisticLock {
             val existing = enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(ownershipId))
-            val newSource = if (activity.reverted == true) {
+            val newSource = if (reverted == true) {
                 // We should re-evaluate source only if received activity has the same source
                 if (source == existing.source) {
                     logger.info("Reverting Activity source {} for Ownership [{}]", source, ownershipId)
@@ -214,11 +257,11 @@ class EnrichmentOwnershipEventService(
             }
 
             if (newSource == existing.source) {
-                logger.info("Ownership [{}] not changed after Activity event [{}]", ownershipId, activity.id)
+                logger.info("Ownership [{}] not changed after Activity event [{}]", ownershipId, id)
             } else {
                 logger.info(
                     "Ownership [{}] source changed on Activity event [{}]: {} -> {}",
-                    ownershipId, activity.id, existing.source, newSource
+                    ownershipId, id, existing.source, newSource
                 )
                 saveAndNotify(
                     updated = existing.copy(source = newSource),

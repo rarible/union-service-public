@@ -107,8 +107,8 @@ class EthOrderConverter(
         val maker = EthConverter.convert(order.maker, blockchain)
         val ethTaker = if (order.taker != null && order.taker != Address.ZERO()) order.taker else null
         val taker = ethTaker?.let { EthConverter.convert(it, blockchain) }
-        val make = EthConverter.convert(order.make, blockchain)
-        val take = EthConverter.convert(order.take, blockchain)
+        val make = EthConverter.convertLegacy(order.make, blockchain)
+        val take = EthConverter.convertLegacy(order.take, blockchain)
         // For BID (make = currency, take - NFT) we're calculating prices for taker
         val takePrice = evalTakePrice(make, take)
         // For SELL (make = NFT, take - currency) we're calculating prices for maker
@@ -585,8 +585,8 @@ class EthOrderConverter(
         return when (source) {
             is OrderSideMatchDto -> PendingOrderMatchDto(
                 id = OrderIdDto(blockchain, EthConverter.convert(source.hash)),
-                make = source.make?.let { EthConverter.convert(it, blockchain) },
-                take = source.take?.let { EthConverter.convert(it, blockchain) },
+                make = source.make?.let { EthConverter.convertLegacy(it, blockchain) },
+                take = source.take?.let { EthConverter.convertLegacy(it, blockchain) },
                 date = source.date,
                 side = source.side?.let { convert(it) },
                 /** TODO ETHEREUM [OrderSideMatchDto.fill] must be BigDecimal, or fillValue */
@@ -601,23 +601,23 @@ class EthOrderConverter(
             )
             is OrderCancelDto -> PendingOrderCancelDto(
                 id = OrderIdDto(blockchain, EthConverter.convert(source.hash)),
-                make = source.make?.let { EthConverter.convert(it, blockchain) },
-                take = source.take?.let { EthConverter.convert(it, blockchain) },
+                make = source.make?.let { EthConverter.convertLegacy(it, blockchain) },
+                take = source.take?.let { EthConverter.convertLegacy(it, blockchain) },
                 date = source.date,
                 maker = source.maker?.let { EthConverter.convert(it, blockchain) },
                 owner = source.owner?.let { EthConverter.convert(it, blockchain) }
             )
             is com.rarible.protocol.dto.OnChainOrderDto -> OnChainOrderDto(
                 id = OrderIdDto(blockchain, EthConverter.convert(source.hash)),
-                make = source.make?.let { EthConverter.convert(it, blockchain) },
-                take = source.take?.let { EthConverter.convert(it, blockchain) },
+                make = source.make?.let { EthConverter.convertLegacy(it, blockchain) },
+                take = source.take?.let { EthConverter.convertLegacy(it, blockchain) },
                 date = source.date,
                 maker = source.maker?.let { EthConverter.convert(it, blockchain) }
             )
             is com.rarible.protocol.dto.OnChainAmmOrderDto -> OnChainAmmOrderDto(
                 id = OrderIdDto(blockchain, EthConverter.convert(source.hash)),
-                make = source.make?.let { EthConverter.convert(it, blockchain) },
-                take = source.take?.let { EthConverter.convert(it, blockchain) },
+                make = source.make?.let { EthConverter.convertLegacy(it, blockchain) },
+                take = source.take?.let { EthConverter.convertLegacy(it, blockchain) },
                 date = source.date,
                 maker = source.maker?.let { EthConverter.convert(it, blockchain) }
             )

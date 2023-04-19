@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.converter
 
-import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -13,9 +12,8 @@ class ItemDtoConverterTest {
     fun `convert - ok, custom collection`() {
         val unionItem = randomUnionItem(randomEthItemId())
         val customCollection = randomEthCollectionId()
-        val enrichCustomCollectionId = EnrichmentCollectionId(customCollection)
 
-        val result = ItemDtoConverter.convert(item = unionItem, customCollection = enrichCustomCollectionId)
+        val result = ItemDtoConverter.convert(item = unionItem, customCollection = customCollection)
 
         assertThat(result.collection).isEqualTo(customCollection)
     }

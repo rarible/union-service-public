@@ -1,26 +1,25 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
-import com.rarible.core.test.data.randomBigDecimal
+import com.rarible.protocol.union.core.model.UnionAuctionBidActivityDto
+import com.rarible.protocol.union.core.model.UnionAuctionCancelActivityDto
+import com.rarible.protocol.union.core.model.UnionAuctionEndActivityDto
+import com.rarible.protocol.union.core.model.UnionAuctionFinishActivityDto
+import com.rarible.protocol.union.core.model.UnionAuctionOpenActivityDto
+import com.rarible.protocol.union.core.model.UnionAuctionStartActivityDto
+import com.rarible.protocol.union.core.model.UnionBurnActivityDto
+import com.rarible.protocol.union.core.model.UnionMintActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderActivityMatchSideDto
+import com.rarible.protocol.union.core.model.UnionOrderBidActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderCancelBidActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderCancelListActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderListActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderMatchActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderMatchSellDto
+import com.rarible.protocol.union.core.model.UnionOrderMatchSwapDto
+import com.rarible.protocol.union.core.model.UnionTransferActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
-import com.rarible.protocol.union.dto.AuctionBidActivityDto
-import com.rarible.protocol.union.dto.AuctionCancelActivityDto
-import com.rarible.protocol.union.dto.AuctionEndActivityDto
-import com.rarible.protocol.union.dto.AuctionFinishActivityDto
-import com.rarible.protocol.union.dto.AuctionOpenActivityDto
-import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MintActivityDto
-import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
-import com.rarible.protocol.union.dto.OrderBidActivityDto
-import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
-import com.rarible.protocol.union.dto.OrderCancelListActivityDto
-import com.rarible.protocol.union.dto.OrderListActivityDto
-import com.rarible.protocol.union.dto.OrderMatchActivityDto
-import com.rarible.protocol.union.dto.OrderMatchSellDto
-import com.rarible.protocol.union.dto.OrderMatchSwapDto
-import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionBidActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionCancelActivity
@@ -49,13 +48,14 @@ class EthActivityConverterTest {
     @Test
     fun `eth order activity match side - swap`() = runBlocking<Unit> {
         val dto = randomEthOrderActivityMatch()
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionOrderMatchActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
 
-        assertThat(converted).isInstanceOf(OrderMatchSwapDto::class.java)
-        converted as OrderMatchSwapDto
+        assertThat(converted).isInstanceOf(UnionOrderMatchSwapDto::class.java)
+        converted as UnionOrderMatchSwapDto
+
         assertMatchSide(converted.left, dto.left)
         assertMatchSide(converted.right, dto.right)
 
@@ -76,12 +76,12 @@ class EthActivityConverterTest {
             left = left
         )
 
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionOrderMatchActivityDto
 
-        assertThat(converted).isInstanceOf(OrderMatchSellDto::class.java)
-        converted as OrderMatchSellDto
+        assertThat(converted).isInstanceOf(UnionOrderMatchSellDto::class.java)
+        converted as UnionOrderMatchSellDto
 
-        assertThat(converted.type).isEqualTo(OrderMatchSellDto.Type.SELL)
+        assertThat(converted.type).isEqualTo(UnionOrderMatchSellDto.Type.SELL)
         assertThat(converted.nft).isEqualTo(EthConverter.convert(left.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.payment).isEqualTo(EthConverter.convert(swapDto.right.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.seller).isEqualTo(EthConverter.convert(left.maker, BlockchainDto.ETHEREUM))
@@ -108,12 +108,12 @@ class EthActivityConverterTest {
             right = right
         )
 
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderMatchActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionOrderMatchActivityDto
 
-        assertThat(converted).isInstanceOf(OrderMatchSellDto::class.java)
-        converted as OrderMatchSellDto
+        assertThat(converted).isInstanceOf(UnionOrderMatchSellDto::class.java)
+        converted as UnionOrderMatchSellDto
 
-        assertThat(converted.type).isEqualTo(OrderMatchSellDto.Type.SELL)
+        assertThat(converted.type).isEqualTo(UnionOrderMatchSellDto.Type.SELL)
         assertThat(converted.nft).isEqualTo(EthConverter.convert(right.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.payment).isEqualTo(EthConverter.convert(swapDto.left.asset, BlockchainDto.ETHEREUM))
         assertThat(converted.seller).isEqualTo(EthConverter.convert(right.maker, BlockchainDto.ETHEREUM))
@@ -128,7 +128,7 @@ class EthActivityConverterTest {
     @Test
     fun `eth order activity bid`() = runBlocking<Unit> {
         val dto = randomEthOrderBidActivity()
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderBidActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionOrderBidActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -143,7 +143,7 @@ class EthActivityConverterTest {
     @Test
     fun `eth order activity list`() = runBlocking<Unit> {
         val dto = randomEthOrderListActivity()
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderListActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionOrderListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -159,7 +159,7 @@ class EthActivityConverterTest {
     fun `eth order activity cancel bid`() = runBlocking<Unit> {
         val dto = randomEthOrderActivityCancelBid()
         val converted =
-            ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderCancelBidActivityDto
+            ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionOrderCancelBidActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -178,7 +178,7 @@ class EthActivityConverterTest {
     fun `eth order activity cancel list`() = runBlocking<Unit> {
         val dto = randomEthOrderActivityCancelList()
         val converted =
-            ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as OrderCancelListActivityDto
+            ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionOrderCancelListActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -196,12 +196,13 @@ class EthActivityConverterTest {
     @Test
     fun `eth item activity mint`() = runBlocking<Unit> {
         val dto = randomEthItemMintActivity()
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as MintActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionMintActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
-        assertThat(converted.contract!!.value).isEqualTo(dto.contract.prefixed()) // TODO remove later
+        assertThat(converted.contract!!.value).isEqualTo(dto.contract.prefixed())
+        assertThat(converted.collection!!.value).isEqualTo(dto.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(dto.tokenId) // TODO remove later
         assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.ETHEREUM, dto.contract.prefixed(), dto.tokenId))
         assertThat(converted.value).isEqualTo(dto.value)
@@ -217,12 +218,13 @@ class EthActivityConverterTest {
     @Test
     fun `eth item activity burn`() = runBlocking<Unit> {
         val dto = randomEthItemBurnActivity()
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as BurnActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionBurnActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
-        assertThat(converted.contract!!.value).isEqualTo(dto.contract.prefixed()) // TODO remove later
+        assertThat(converted.contract!!.value).isEqualTo(dto.contract.prefixed())
+        assertThat(converted.collection!!.value).isEqualTo(dto.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(dto.tokenId) // TODO remove later
         assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.ETHEREUM, dto.contract.prefixed(), dto.tokenId))
         assertThat(converted.value).isEqualTo(dto.value)
@@ -237,12 +239,13 @@ class EthActivityConverterTest {
     @Test
     fun `eth item activity transfer`() = runBlocking<Unit> {
         val dto = randomEthItemTransferActivity()
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as TransferActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionTransferActivityDto
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.owner.value).isEqualTo(dto.owner.prefixed())
-        assertThat(converted.contract!!.value).isEqualTo(dto.contract.prefixed()) // TODO remove later
+        assertThat(converted.contract!!.value).isEqualTo(dto.contract.prefixed())
+        assertThat(converted.collection!!.value).isEqualTo(dto.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(dto.tokenId) // TODO remove later
         assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.ETHEREUM, dto.contract.prefixed(), dto.tokenId))
         assertThat(converted.value).isEqualTo(dto.value)
@@ -259,7 +262,7 @@ class EthActivityConverterTest {
     fun `eth auction open`() = runBlocking<Unit> {
         val dto = randomEthAuctionOpenActivity()
 
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as AuctionOpenActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionAuctionOpenActivityDto
 
         assertThat(converted.id).isEqualTo(ActivityIdDto(BlockchainDto.ETHEREUM, dto.id))
         assertThat(converted.date).isEqualTo(dto.date)
@@ -271,7 +274,7 @@ class EthActivityConverterTest {
     fun `eth auction cancelled`() = runBlocking<Unit> {
         val dto = randomEthAuctionCancelActivity()
 
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as AuctionCancelActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionAuctionCancelActivityDto
 
         assertThat(converted.id).isEqualTo(ActivityIdDto(BlockchainDto.ETHEREUM, dto.id))
         assertThat(converted.date).isEqualTo(dto.date)
@@ -283,7 +286,7 @@ class EthActivityConverterTest {
     fun `eth auction finished`() = runBlocking<Unit> {
         val dto = randomEthAuctionFinishActivity()
 
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as AuctionFinishActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionAuctionFinishActivityDto
 
         assertThat(converted.id).isEqualTo(ActivityIdDto(BlockchainDto.ETHEREUM, dto.id))
         assertThat(converted.date).isEqualTo(dto.date)
@@ -295,7 +298,7 @@ class EthActivityConverterTest {
     fun `eth auction started`() = runBlocking<Unit> {
         val dto = randomEthAuctionStartActivity()
 
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as AuctionStartActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionAuctionStartActivityDto
 
         assertThat(converted.id).isEqualTo(ActivityIdDto(BlockchainDto.ETHEREUM, dto.id))
         assertThat(converted.date).isEqualTo(dto.date)
@@ -306,7 +309,7 @@ class EthActivityConverterTest {
     fun `eth auction ended`() = runBlocking<Unit> {
         val dto = randomEthAuctionEndActivity()
 
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as AuctionEndActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionAuctionEndActivityDto
 
         assertThat(converted.id).isEqualTo(ActivityIdDto(BlockchainDto.ETHEREUM, dto.id))
         assertThat(converted.date).isEqualTo(dto.date)
@@ -317,7 +320,7 @@ class EthActivityConverterTest {
     fun `eth auction bid`() = runBlocking<Unit> {
         val dto = randomEthAuctionBidActivity()
 
-        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as AuctionBidActivityDto
+        val converted = ethActivityConverter.convert(dto, BlockchainDto.ETHEREUM) as UnionAuctionBidActivityDto
 
         assertThat(converted.id).isEqualTo(ActivityIdDto(BlockchainDto.ETHEREUM, dto.id))
         assertThat(converted.date).isEqualTo(dto.date)
@@ -328,7 +331,7 @@ class EthActivityConverterTest {
     }
 
     private fun assertMatchSide(
-        dest: OrderActivityMatchSideDto,
+        dest: UnionOrderActivityMatchSideDto,
         expected: com.rarible.protocol.dto.OrderActivityMatchSideDto
     ) {
         assertThat(dest.hash).isEqualTo(expected.hash.prefixed())

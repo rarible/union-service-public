@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.worker.job
 
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -86,7 +86,7 @@ class ReconciliationLastSaleJobTest {
         coVerify(exactly = 0) { itemEventService.onActivity(any(), any(), any()) }
     }
 
-    private fun mockGetActivities(continuation: String?, size: Int, result: Slice<ActivityDto>): Unit {
+    private fun mockGetActivities(continuation: String?, size: Int, result: Slice<UnionActivityDto>): Unit {
         coEvery {
             activityService.getAllActivities(
                 types = listOf(ActivityTypeDto.SELL),

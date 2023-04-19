@@ -1,12 +1,12 @@
 package com.rarible.protocol.union.integration.immutablex
 
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxActivityEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxCollectionEventHandler
@@ -39,7 +39,7 @@ class ImxConsumerConfiguration {
 
     @Bean
     fun immutablexActivityEventHandler(
-        activityHandler: IncomingEventHandler<ActivityDto>,
+        activityHandler: IncomingEventHandler<UnionActivityDto>,
         itemHandler: IncomingEventHandler<UnionItemEvent>,
         ownershipHandler: IncomingEventHandler<UnionOwnershipEvent>,
         itemService: ImxItemService,

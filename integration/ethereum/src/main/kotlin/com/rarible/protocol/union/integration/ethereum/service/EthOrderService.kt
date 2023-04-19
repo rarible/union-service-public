@@ -72,7 +72,7 @@ open class EthOrderService(
             contract,
             tokenId.toString()
         ).awaitFirst()
-        return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
+        return assetTypes.currencies.map { EthConverter.convertLegacy(it, blockchain) }
     }
 
     override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
@@ -80,7 +80,7 @@ open class EthOrderService(
             collectionId,
             "-1"
         ).awaitFirst()
-        return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
+        return assetTypes.currencies.map { EthConverter.convertLegacy(it, blockchain) }
     }
 
     override suspend fun getOrderBidsByItem(
@@ -144,7 +144,7 @@ open class EthOrderService(
             contract,
             tokenId.toString()
         ).awaitFirst()
-        return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
+        return assetTypes.currencies.map { EthConverter.convertLegacy(it, blockchain) }
     }
 
     override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
@@ -152,7 +152,7 @@ open class EthOrderService(
             collectionId,
             "-1"
         ).awaitFirst()
-        return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
+        return assetTypes.currencies.map { EthConverter.convertLegacy(it, blockchain) }
     }
 
     override suspend fun getSellOrders(

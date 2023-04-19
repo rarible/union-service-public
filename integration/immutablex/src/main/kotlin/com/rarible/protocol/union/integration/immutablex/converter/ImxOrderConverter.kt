@@ -4,8 +4,13 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionAssetDto
+import com.rarible.protocol.union.core.model.UnionEthErc20AssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthErc721AssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
@@ -18,7 +23,6 @@ import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
-import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderData
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderFee
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderSide
 import java.math.BigDecimal
@@ -50,8 +54,8 @@ object ImxOrderConverter {
     }
 
     private fun convertInternal(order: ImmutablexOrder, blockchain: BlockchainDto): OrderDto {
-        val make: AssetDto = toAsset(order, order.sell, blockchain)
-        val take: AssetDto = toAsset(order, order.buy, blockchain)
+        val make: AssetDto = toAssetLegacy(order, order.sell, blockchain)
+        val take: AssetDto = toAssetLegacy(order, order.buy, blockchain)
 
         val (quantity, makePrice, takePrice) = if (make.type.ext.isNft) {
             Triple(getQuantityWithFees(order.buy), take.value, null)
@@ -123,19 +127,47 @@ object ImxOrderConverter {
         else -> OrderStatusDto.HISTORICAL
     }
 
-    fun toAsset(order: ImmutablexOrder, side: ImmutablexOrderSide, blockchain: BlockchainDto): AssetDto {
+    fun toAsset(order: ImmutablexOrder, side: ImmutablexOrderSide, blockchain: BlockchainDto): UnionAssetDto {
         // In the Asset we should specify price WITHOUT fees
         val totalFees = order.fees?.sumOf { it.amount }?.toBigInteger() ?: BigInteger.ZERO
         return when (side.type) {
             ERC721 -> {
                 val tokenId = side.data.encodedTokenId() ?: throw ImxDataException("Token ID not specified in asset")
                 val contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
-                AssetDto(EthErc721AssetTypeDto(contract, tokenId), BigDecimal.ONE)
+                UnionAssetDto(UnionEthErc721AssetTypeDto(contract, tokenId), BigDecimal.ONE)
             }
+
+            ETH -> {
+                val type = UnionEthEthereumAssetTypeDto(blockchain)
+                UnionAssetDto(type, normalizeQuantity(side, totalFees))
+            }
+
+            ERC20 -> {
+                val contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
+                val type = UnionEthErc20AssetTypeDto(contract)
+                UnionAssetDto(type, normalizeQuantity(side, totalFees))
+            }
+
+            else -> throw IllegalStateException("Unsupported asset type: ${side.type}")
+        }
+    }
+
+    private fun toAssetLegacy(order: ImmutablexOrder, side: ImmutablexOrderSide, blockchain: BlockchainDto): AssetDto {
+        // In the Asset we should specify price WITHOUT fees
+        val totalFees = order.fees?.sumOf { it.amount }?.toBigInteger() ?: BigInteger.ZERO
+        return when (side.type) {
+            ERC721 -> {
+                val tokenId = side.data.encodedTokenId() ?: throw ImxDataException("Token ID not specified in asset")
+                val contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
+                val collectionId = CollectionIdDto(contract.blockchain, contract.value)
+                AssetDto(EthErc721AssetTypeDto(contract, collectionId, tokenId), BigDecimal.ONE)
+            }
+
             ETH -> {
                 val type = EthEthereumAssetTypeDto(blockchain)
                 AssetDto(type, normalizeQuantity(side, totalFees))
             }
+
             ERC20 -> {
                 val contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
                 val type = EthErc20AssetTypeDto(contract)

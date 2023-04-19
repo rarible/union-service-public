@@ -12,11 +12,11 @@ import com.rarible.protocol.union.core.event.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.event.EthActivityEventHandler
@@ -82,7 +82,7 @@ class PolygonConsumerConfiguration(
     @Bean
     @Qualifier("polygon.activity.handler")
     fun polygonActivityEventHandler(
-        handler: IncomingEventHandler<ActivityDto>,
+        handler: IncomingEventHandler<UnionActivityDto>,
         converter: EthActivityConverter
     ): EthActivityEventHandler {
         return PolygonActivityEventHandler(handler, converter)
@@ -151,7 +151,7 @@ class PolygonConsumerConfiguration(
     @Bean
     fun polygonActivityWorker(
         @Qualifier("polygon.activity.consumer.factory") factory: EthActivityEventsConsumerFactory,
-        @Qualifier("polygon.activity.handler") handler: BlockchainEventHandler<com.rarible.protocol.dto.ActivityDto, ActivityDto>
+        @Qualifier("polygon.activity.handler") handler: BlockchainEventHandler<com.rarible.protocol.dto.ActivityDto, UnionActivityDto>
     ): KafkaConsumerWorker<com.rarible.protocol.dto.ActivityDto> {
         val consumer = factory.createActivityConsumer(consumerFactory.activityGroup, Blockchain.POLYGON)
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers, batchSize)

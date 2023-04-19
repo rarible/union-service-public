@@ -4,19 +4,19 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.FlowActivitiesDto
 import com.rarible.protocol.dto.NftActivitiesByIdRequestDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftOrderActivityControllerApi
+import com.rarible.protocol.union.core.continuation.UnionActivityContinuation
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.ContinuationFactory
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
@@ -36,7 +36,7 @@ open class FlowActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val activities = activityControllerApi.getNftOrderAllActivities(
             types.map { it.name },
             continuation,
@@ -51,7 +51,7 @@ open class FlowActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         if (type == SyncTypeDto.AUCTION) {
             return Slice.empty()
         }
@@ -74,7 +74,7 @@ open class FlowActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         return Slice.empty()
     }
 
@@ -84,7 +84,7 @@ open class FlowActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val activities = activityControllerApi.getNftOrderActivitiesByCollection(
             types.map { it.name },
             collection,
@@ -102,7 +102,7 @@ open class FlowActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val activities = activityControllerApi.getNftOrderActivitiesByItem(
             types.map { it.name },
@@ -122,7 +122,7 @@ open class FlowActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         return Slice.empty() // TODO Not implemented
     }
 
@@ -134,7 +134,7 @@ open class FlowActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val activities = activityControllerApi.getNftOrderActivitiesByUser(
             types.map { it.name },
             users,
@@ -147,35 +147,39 @@ open class FlowActivityService(
         return result(activities, size, sort)
     }
 
-    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> {
+    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<UnionActivityDto> {
         val result = activityControllerApi.getNftOrderActivitiesById(NftActivitiesByIdRequestDto(ids.map { it.id }))
             .awaitFirst()
         return flowActivityConverter.convert(result)
     }
 
-    private fun ActivitySortDto?.toFactory() = when(this) {
-        ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
-        ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAndIdAsc
+    private fun ActivitySortDto?.toFactory() = when (this) {
+        ActivitySortDto.LATEST_FIRST, null -> UnionActivityContinuation.ByLastUpdatedAndIdDesc
+        ActivitySortDto.EARLIEST_FIRST -> UnionActivityContinuation.ByLastUpdatedAndIdAsc
     }
 
-    private fun SyncSortDto?.toFactory() = when(this) {
-        SyncSortDto.DB_UPDATE_ASC, null -> ActivityContinuation.ByLastUpdatedSyncAndIdAsc
-        SyncSortDto.DB_UPDATE_DESC -> ActivityContinuation.ByLastUpdatedSyncAndIdDesc
+    private fun SyncSortDto?.toFactory() = when (this) {
+        SyncSortDto.DB_UPDATE_ASC, null -> UnionActivityContinuation.ByLastUpdatedSyncAndIdAsc
+        SyncSortDto.DB_UPDATE_DESC -> UnionActivityContinuation.ByLastUpdatedSyncAndIdDesc
     }
 
-    private suspend fun result(activities: FlowActivitiesDto, size: Int, sort: ActivitySortDto?): Slice<ActivityDto> {
+    private suspend fun result(
+        activities: FlowActivitiesDto,
+        size: Int,
+        sort: ActivitySortDto?
+    ): Slice<UnionActivityDto> {
         return resultAll(activities, size, sort.toFactory())
     }
 
-    private suspend fun result(activities: FlowActivitiesDto, size: Int, sort: SyncSortDto?): Slice<ActivityDto> {
+    private suspend fun result(activities: FlowActivitiesDto, size: Int, sort: SyncSortDto?): Slice<UnionActivityDto> {
         return resultAll(activities, size, sort.toFactory())
     }
 
     private suspend fun resultAll(
         activities: FlowActivitiesDto,
         size: Int,
-        sortFactory: ContinuationFactory<ActivityDto, DateIdContinuation>
-    ): Slice<ActivityDto> {
+        sortFactory: ContinuationFactory<UnionActivityDto, DateIdContinuation>
+    ): Slice<UnionActivityDto> {
         return Paging(
             sortFactory,
             flowActivityConverter.convert(activities)

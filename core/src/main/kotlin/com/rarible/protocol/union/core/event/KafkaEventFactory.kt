@@ -3,6 +3,7 @@ package com.rarible.protocol.union.core.event
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.model.UnionAuctionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionInternalActivityEvent
@@ -19,7 +20,6 @@ import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionPoolOrderUpdateEvent
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.model.getItemId
-import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -30,7 +30,7 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.dto.ext
-import java.util.*
+import java.util.UUID
 
 object KafkaEventFactory {
 
@@ -136,8 +136,8 @@ object KafkaEventFactory {
                 val takeAssetExt = order.take.type.ext
 
                 when {
-                    makeAssetExt.isCollection -> makeAssetExt.collectionId!!.fullId()
-                    takeAssetExt.isCollection -> takeAssetExt.collectionId!!.fullId()
+                    makeAssetExt.isCollectionAsset -> makeAssetExt.collectionId!!.fullId()
+                    takeAssetExt.isCollectionAsset -> takeAssetExt.collectionId!!.fullId()
                     makeAssetExt.itemId != null -> makeAssetExt.itemId!!.fullId()
                     takeAssetExt.itemId != null -> takeAssetExt.itemId!!.fullId()
                     else -> event.orderId.fullId()
@@ -165,7 +165,7 @@ object KafkaEventFactory {
         )
     }
 
-    fun internalActivityEvent(dto: ActivityDto): KafkaMessage<UnionInternalBlockchainEvent> {
+    fun internalActivityEvent(dto: UnionActivityDto): KafkaMessage<UnionInternalBlockchainEvent> {
         val itemId = dto.itemId()
 
         val key = itemId?.fullId() ?: dto.id.fullId()

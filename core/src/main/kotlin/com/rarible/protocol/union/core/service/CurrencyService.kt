@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
 import com.rarible.protocol.union.core.model.CurrencyRate
+import com.rarible.protocol.union.core.model.UnionAssetTypeDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyDto
@@ -78,12 +79,48 @@ class CurrencyService(
         if (value == BigDecimal.ZERO) {
             return BigDecimal.ZERO
         }
-        val address = assetExt.currencyAddress()
+        val currencyId = assetExt.currencyAddress()
 
+        return toUsd(
+            blockchain = blockchain,
+            currencyId = currencyId,
+            value = value,
+            at = at
+        )
+    }
+
+    suspend fun toUsd(
+        blockchain: BlockchainDto,
+        assetType: UnionAssetTypeDto,
+        value: BigDecimal?,
+        at: Instant? = null
+    ): BigDecimal? {
+        if (!assetType.isCurrency() || value == null) {
+            return null
+        }
+        if (value == BigDecimal.ZERO) {
+            return BigDecimal.ZERO
+        }
+        val currencyId = assetType.currencyId()!!
+
+        return toUsd(
+            blockchain = blockchain,
+            currencyId = currencyId,
+            value = value,
+            at = at
+        )
+    }
+
+    private suspend fun toUsd(
+        blockchain: BlockchainDto,
+        currencyId: String,
+        value: BigDecimal,
+        at: Instant? = null
+    ): BigDecimal? {
         val rate = if (canUseCurrentRate(at)) {
-            getCurrentRate(blockchain, address)
+            getCurrentRate(blockchain, currencyId)
         } else {
-            fetchRateSafe(blockchain, address, at!!)
+            fetchRateSafe(blockchain, currencyId, at!!)
         }
         return rate?.let { value.multiply(it.rate) }
     }
@@ -147,10 +184,13 @@ class CurrencyService(
     }
 
     private inner class CurrenciesHolder {
+
         @Volatile
         private var currencies: List<CurrencyDto> = emptyList()
+
         @Volatile
         private var nativeCurrencies: Map<BlockchainDto, CurrencyDto> = emptyMap()
+
         @Volatile
         private var currencyRates: List<CurrencyRate> = emptyList()
 

@@ -5,7 +5,6 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.currency.dto.CurrenciesDto
-import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
@@ -47,7 +46,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import randomOrder
 import reactor.kotlin.core.publisher.toMono
 import java.time.Duration
-import kotlin.math.pow
 import kotlin.random.Random
 
 @IntegrationTest

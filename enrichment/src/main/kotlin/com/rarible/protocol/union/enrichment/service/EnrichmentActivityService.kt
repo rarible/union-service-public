@@ -1,27 +1,50 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionMintActivityDto
+import com.rarible.protocol.union.core.model.UnionTransferActivityDto
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipSourceDto
-import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.enrichment.converter.ActivityDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
+import com.rarible.protocol.union.enrichment.converter.data.EnrichmentActivityData
 import com.rarible.protocol.union.enrichment.model.ItemLastSale
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class EnrichmentActivityService(
-    private val activityRouter: BlockchainRouter<ActivityService>
+    private val activityRouter: BlockchainRouter<ActivityService>,
+    private val customCollectionResolver: CustomCollectionResolver
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    suspend fun enrich(activity: UnionActivityDto): ActivityDto {
+        // We expect here only one of them != null
+        val itemId = activity.itemId()
+        val collectionId = activity.collectionId()
+
+        val customCollection = when {
+            itemId != null -> customCollectionResolver.resolveCustomCollection(itemId)
+            collectionId != null -> customCollectionResolver.resolveCustomCollection(collectionId)
+            else -> null
+        }
+
+        val data = EnrichmentActivityData(customCollection)
+        return ActivityDtoConverter.convert(activity, data)
+    }
+
+    suspend fun enrich(activities: List<UnionActivityDto>): List<ActivityDto> {
+        return activities.map { enrich(it) }
+    }
 
     suspend fun getOwnershipSource(ownershipId: OwnershipIdDto): OwnershipSourceDto {
         val itemId = ownershipId.getItemId()
@@ -35,7 +58,7 @@ class EnrichmentActivityService(
         return OwnershipSourceDto.TRANSFER
     }
 
-    private suspend fun getItemMint(itemId: ItemIdDto, owner: UnionAddress): ActivityDto? {
+    private suspend fun getItemMint(itemId: ItemIdDto, owner: UnionAddress): UnionActivityDto? {
         // For item there should be only one mint
         val mint = activityRouter.getService(itemId.blockchain).getActivitiesByItem(
             types = listOf(ActivityTypeDto.MINT),
@@ -46,7 +69,7 @@ class EnrichmentActivityService(
         ).entities.firstOrNull()
 
         // Originally, there ALWAYS should be a mint
-        if (mint == null || (mint as MintActivityDto).owner != owner) {
+        if (mint == null || (mint as UnionMintActivityDto).owner != owner) {
             logger.info("Mint activity NOT found for Item [{}] and owner [{}]", itemId, owner.fullId())
             return null
         }
@@ -55,7 +78,7 @@ class EnrichmentActivityService(
         return mint
     }
 
-    private suspend fun getItemPurchase(itemId: ItemIdDto, owner: UnionAddress): ActivityDto? {
+    private suspend fun getItemPurchase(itemId: ItemIdDto, owner: UnionAddress): UnionActivityDto? {
         // TODO not sure this is a good way to search transfer, ideally there should be filter by user
         var continuation: String? = null
         do {
@@ -67,7 +90,7 @@ class EnrichmentActivityService(
                 sort = ActivitySortDto.LATEST_FIRST
             )
             val purchase = response.entities.firstOrNull {
-                (it is TransferActivityDto)
+                (it is UnionTransferActivityDto)
                     && it.owner == owner
                     && it.purchase == true
             }

@@ -2,24 +2,22 @@ package com.rarible.protocol.union.integration.tezos.dipdup.event
 
 import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
+import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionBurnActivityDto
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.core.model.UnionMintActivityDto
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
-import com.rarible.protocol.union.core.model.itemId
-import com.rarible.protocol.union.core.model.ownershipId
+import com.rarible.protocol.union.core.model.UnionTransferActivityDto
 import com.rarible.protocol.union.core.model.stubEventMark
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
 import kotlinx.coroutines.async
@@ -39,24 +37,27 @@ open class DipDupTransfersEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
     private val blockchain = BlockchainDto.TEZOS
 
-    fun isTransfersEvent(event: ActivityDto): Boolean {
-        return event is MintActivityDto || event is TransferActivityDto || event is BurnActivityDto
+    fun isTransfersEvent(event: UnionActivityDto): Boolean {
+        return event is UnionMintActivityDto || event is UnionTransferActivityDto || event is UnionBurnActivityDto
     }
 
-    suspend fun handle(event: ActivityDto) = coroutineScope {
+    suspend fun handle(event: UnionActivityDto) = coroutineScope {
         if (isNft(event)) {
             when (event) {
-                is MintActivityDto -> listOf(
+                is UnionMintActivityDto -> listOf(
                     async { sendItemEvent(event.itemId()) },
                     async { sendOwnershipEvent(event.ownershipId()) })
-                is TransferActivityDto -> listOf(
+
+                is UnionTransferActivityDto -> listOf(
                     async { sendOwnershipEvent(event.itemId()?.toOwnership(event.from.value)) },
                     async { sendOwnershipEvent(event.ownershipId()) }
                 )
-                is BurnActivityDto -> listOf(
+
+                is UnionBurnActivityDto -> listOf(
                     async { sendItemEvent(event.itemId()) },
                     async { sendOwnershipEvent(event.itemId()?.let { it.toOwnership(event.owner.value) }) }
                 )
+
                 else -> emptyList()
             }.awaitAll()
         } else {
@@ -91,7 +92,7 @@ open class DipDupTransfersEventHandler(
         return id?.let { tokenService.getItemById(id.value) } ?: throw UnionValidationException("ItemId is empty")
     }
 
-    private suspend fun isNft(event: ActivityDto): Boolean {
+    private suspend fun isNft(event: UnionActivityDto): Boolean {
         return event.itemId()?.let { tokenService.isNft(it.value) } ?: false
     }
 

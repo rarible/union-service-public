@@ -3,6 +3,8 @@ package com.rarible.protocol.union.integration.immutablex.handlers
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
+import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionAssetTypeDto
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
@@ -10,7 +12,6 @@ import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.core.model.blockchainAndIndexerMarks
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.integration.data.randomImxMint
@@ -37,7 +38,7 @@ import java.math.BigDecimal
 
 class ImxActivityEventHandlerTest {
 
-    private val activityHandler: IncomingEventHandler<ActivityDto> = mockk {
+    private val activityHandler: IncomingEventHandler<UnionActivityDto> = mockk {
         coEvery { onEvent(any()) } returns Unit
     }
     private val itemHandler: IncomingEventHandler<UnionItemEvent> = mockk {
@@ -55,7 +56,7 @@ class ImxActivityEventHandlerTest {
     private val imxActivityConverter: ImxActivityConverter = ImxActivityConverter(
         mockk() {
             coEvery {
-                toUsd(any(), any(), any(), any())
+                toUsd(any(), any<UnionAssetTypeDto>(), any(), any())
             } returns BigDecimal.ONE
         }
     )

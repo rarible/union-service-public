@@ -16,7 +16,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class EnrichmentOrderEventService(
@@ -76,14 +76,14 @@ class EnrichmentOrderEventService(
         when {
             // TODO PT-1151 Maybe we need to ensure there is AMM order? originally they should not get here
             // Floor sell (not present ATM)
-            makeAssetExt.isCollection -> onCollectionSellOrder(
+            makeAssetExt.isCollectionAsset -> onCollectionSellOrder(
                 order,
                 makeAssetExt.collectionId!!,
                 eventTimeMarks,
                 notificationEnabled
             )
             // Floor bid
-            takeAssetExt.isCollection -> onCollectionBidOrder(
+            takeAssetExt.isCollectionAsset -> onCollectionBidOrder(
                 order,
                 takeAssetExt.collectionId!!,
                 eventTimeMarks,
