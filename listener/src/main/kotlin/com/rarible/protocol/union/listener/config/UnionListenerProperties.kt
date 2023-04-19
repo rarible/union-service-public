@@ -16,7 +16,9 @@ data class UnionListenerProperties(
 class InternalConsumerProperties(
     val brokerReplicaSet: String,
     val workers: Map<String, Int>,
-    val blockchainWorkers: Map<String, Int> = emptyMap()
+    val blockchainWorkers: Map<String, Int> = emptyMap(),
+    val batchSize: Int = 100,
+    val concurrency: Int = 5,
 )
 
 data class MetricsProperties(

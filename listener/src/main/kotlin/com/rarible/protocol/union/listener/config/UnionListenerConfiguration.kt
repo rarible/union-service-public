@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.core.handler.InternalEventHandler
+import com.rarible.protocol.union.core.handler.InternalEventHandlerWrapper
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.CompositeRegisteredTimer
 import com.rarible.protocol.union.core.model.ItemEventDelayMetric
@@ -25,16 +26,21 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.listener.downloader.MetaTaskRouter
 import com.rarible.protocol.union.listener.handler.internal.CollectionMetaTaskSchedulerHandler
 import com.rarible.protocol.union.listener.handler.internal.ItemMetaTaskSchedulerHandler
+import com.rarible.protocol.union.listener.kafka.MessageListenerContainerGroup
+import com.rarible.protocol.union.listener.kafka.MessageListenerEventHandlerAdapter
+import com.rarible.protocol.union.listener.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import java.util.*
+import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
+import java.util.UUID
 
 @Configuration
 @EnableRaribleTask
@@ -86,19 +92,50 @@ class UnionListenerConfiguration(
 
     @Bean
     fun unionBlockchainEventWorker(
-        handler: InternalEventHandler<UnionInternalBlockchainEvent>
-    ): KafkaConsumerWorker<UnionInternalBlockchainEvent> {
-        val consumers = blockchains.map { blockchain ->
-            consumerFactory.createInternalBlockchainEventConsumer(
-                consumer = { index -> createUnionBlockchainEventConsumer(index, blockchain) },
-                handler = handler,
-                daemon = listenerProperties.monitoringWorker,
-                workers = properties.blockchainWorkers,
-                blockchain = blockchain
-            )
+        handler: InternalEventHandler<UnionInternalBlockchainEvent>,
+        unionInternalEventContainerFactory: ConcurrentKafkaListenerContainerFactory<String, UnionInternalBlockchainEvent>
+    ): KafkaConsumerWorker<UnionInternalBlockchainEvent> =
+        if (ff.enableSpringKafka) {
+            logger.info("Will use Spring Kafka for internal message consuming")
+            val containers = blockchains.map { blockchain ->
+                val container = unionInternalEventContainerFactory.createContainer(
+                    UnionInternalTopicProvider.getInternalBlockchainTopic(env, blockchain)
+                )
+                container.setupMessageListener(MessageListenerEventHandlerAdapter(InternalEventHandlerWrapper(handler)))
+                container.containerProperties.groupId = consumerGroup("blockchain.${blockchain.name.lowercase()}")
+                container.containerProperties.clientId = "$clientIdPrefix.union-blockchain-event-consumer"
+                container
+            }
+            MessageListenerContainerGroup(containers)
+        } else {
+            logger.info("Will use Rarible Kafka for internal message consuming")
+            val consumers = blockchains.map { blockchain ->
+                consumerFactory.createInternalBlockchainEventConsumer(
+                    consumer = { index -> createUnionBlockchainEventConsumer(index, blockchain) },
+                    handler = handler,
+                    daemon = listenerProperties.monitoringWorker,
+                    workers = properties.blockchainWorkers,
+                    blockchain = blockchain
+                )
+            }
+            val workers = consumers.flatMap { it.workers }
+            ConsumerWorkerGroup(workers)
         }
-        val workers = consumers.flatMap { it.workers }
-        return ConsumerWorkerGroup(workers)
+
+    @Bean
+    fun unionInternalEventContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, UnionInternalBlockchainEvent> =
+        containerFactory(UnionInternalBlockchainEvent::class.java)
+
+    private fun <T> containerFactory(
+        valueClass: Class<T>,
+    ): ConcurrentKafkaListenerContainerFactory<String, T> {
+        return RaribleKafkaListenerContainerFactory(
+            valueClass = valueClass,
+            concurrency = properties.concurrency,
+            kafkaBootstrapServers = properties.brokerReplicaSet,
+            batchSize = properties.batchSize,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+        )
     }
 
     private fun createUnionReconciliationMarkEventConsumer(
@@ -234,5 +271,9 @@ class UnionListenerConfiguration(
     @Bean
     fun orderCompositeRegisteredTimer(): CompositeRegisteredTimer {
         return OrderEventDelayMetric(listenerProperties.metrics.rootPath).bind(meterRegistry)
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(UnionListenerConfiguration::class.java)
     }
 }
