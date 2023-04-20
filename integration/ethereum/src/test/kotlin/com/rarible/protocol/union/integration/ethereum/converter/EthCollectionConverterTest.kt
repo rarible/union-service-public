@@ -1,12 +1,8 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
-import com.rarible.protocol.dto.ImageContentDto
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.union.core.model.UnionCollection
-import com.rarible.protocol.union.core.model.UnionImageProperties
-import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -62,6 +58,7 @@ class EthCollectionConverterTest {
         assertThat(converted.owner).isNull()
     }
 
+    /*
     @Test
     fun `eth collection - convert meta`() {
         val dto = randomEthCollectionDto()
@@ -90,4 +87,6 @@ class EthCollectionConverterTest {
         assertThat(properties.height).isEqualTo(expected.height)
         assertThat(properties.size).isEqualTo(expected.size)
     }
+    */
+
 }

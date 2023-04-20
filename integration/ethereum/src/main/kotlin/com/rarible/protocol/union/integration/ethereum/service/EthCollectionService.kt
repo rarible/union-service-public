@@ -17,7 +17,6 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionCo
 import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import com.rarible.protocol.union.integration.ethereum.converter.MetaStatusChecker
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.http.HttpStatus
 
@@ -60,7 +59,7 @@ open class EthCollectionService(
     }
 
     override suspend fun refreshCollectionMeta(collectionId: String) {
-        collectionControllerApi.resetNftCollectionMetaById(collectionId).awaitFirstOrNull()
+        //collectionControllerApi.resetNftCollectionMetaById(collectionId).awaitFirstOrNull()
     }
 
     override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
