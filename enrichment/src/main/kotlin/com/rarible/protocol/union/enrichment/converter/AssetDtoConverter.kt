@@ -182,7 +182,9 @@ object AssetDtoConverter {
         source: UnionEthEthereumAssetType,
         data: EnrichmentAssetData
     ): EthEthereumAssetTypeDto {
-        return EthEthereumAssetTypeDto()
+        return EthEthereumAssetTypeDto(
+            blockchain = source.blockchain,
+        )
     }
 
     private fun convert(
