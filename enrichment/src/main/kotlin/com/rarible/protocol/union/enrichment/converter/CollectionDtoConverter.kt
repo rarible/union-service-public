@@ -2,12 +2,17 @@ package com.rarible.protocol.union.enrichment.converter
 
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import org.slf4j.LoggerFactory
 
 object CollectionDtoConverter {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Deprecated("UnionCollection should not be used after the migration")
     fun convertLegacy(
@@ -29,7 +34,7 @@ object CollectionDtoConverter {
             symbol = collection.symbol,
             parent = collection.parent,
             structure = convert(collection.structure),
-            type = convert(collection.type),
+            type = convert(EnrichmentCollectionId(collection.id), collection.type),
             self = collection.self,
             meta = meta?.let { MetaDtoConverter.convert(it) },
             bestSellOrder = enrichmentCollection?.bestSellOrder?.let { orders[it.dtoId] },
@@ -55,7 +60,7 @@ object CollectionDtoConverter {
             symbol = collection.symbol,
             parent = collection.parent?.toDto(),
             structure = convert(collection.structure!!), // TODO Must be required after the migration
-            type = convert(collection.type!!), // TODO Must be required after the migration
+            type = convert(collection.id, collection.type), // TODO Must be required after the migration
             self = collection.self,
             meta = meta?.let { MetaDtoConverter.convert(it) },
             bestSellOrder = collection.bestSellOrder?.let { orders[it.dtoId] },
@@ -83,16 +88,29 @@ object CollectionDtoConverter {
         }
     }
 
-    private fun convert(source: UnionCollection.Type): CollectionDto.Type {
-        return when (source) {
-            UnionCollection.Type.CRYPTO_PUNKS -> CollectionDto.Type.CRYPTO_PUNKS
-            UnionCollection.Type.ERC721 -> CollectionDto.Type.ERC721
-            UnionCollection.Type.ERC1155 -> CollectionDto.Type.ERC1155
-            UnionCollection.Type.FLOW -> CollectionDto.Type.FLOW
-            UnionCollection.Type.TEZOS_NFT -> CollectionDto.Type.TEZOS_NFT
-            UnionCollection.Type.TEZOS_MT -> CollectionDto.Type.TEZOS_MT
-            UnionCollection.Type.SOLANA -> CollectionDto.Type.SOLANA
-            UnionCollection.Type.IMMUTABLEX -> CollectionDto.Type.IMMUTABLEX
+    private fun convert(collectionId: EnrichmentCollectionId, source: UnionCollection.Type?): CollectionDto.Type {
+        // TODO workaround for 'ghost' collections remain in DB after the migration to Union DB,
+        // should be fixed later, now just watch the logs
+        return if (source == null) {
+            logger.warn("Unknown collection {}, type can't be determined", collectionId.toDto().fullId())
+            when (collectionId.blockchain) {
+                BlockchainDto.ETHEREUM, BlockchainDto.POLYGON -> CollectionDto.Type.ERC721
+                BlockchainDto.IMMUTABLEX -> CollectionDto.Type.IMMUTABLEX
+                BlockchainDto.FLOW -> CollectionDto.Type.FLOW
+                BlockchainDto.TEZOS -> CollectionDto.Type.TEZOS_NFT
+                BlockchainDto.SOLANA -> CollectionDto.Type.SOLANA
+            }
+        } else {
+            return when (source) {
+                UnionCollection.Type.CRYPTO_PUNKS -> CollectionDto.Type.CRYPTO_PUNKS
+                UnionCollection.Type.ERC721 -> CollectionDto.Type.ERC721
+                UnionCollection.Type.ERC1155 -> CollectionDto.Type.ERC1155
+                UnionCollection.Type.FLOW -> CollectionDto.Type.FLOW
+                UnionCollection.Type.TEZOS_NFT -> CollectionDto.Type.TEZOS_NFT
+                UnionCollection.Type.TEZOS_MT -> CollectionDto.Type.TEZOS_MT
+                UnionCollection.Type.SOLANA -> CollectionDto.Type.SOLANA
+                UnionCollection.Type.IMMUTABLEX -> CollectionDto.Type.IMMUTABLEX
+            }
         }
     }
 

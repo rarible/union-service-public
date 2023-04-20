@@ -5,11 +5,13 @@ import com.rarible.protocol.dto.AmmOrderNftUpdateEventDto
 import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.LegacyOrderDto
 import com.rarible.protocol.dto.LooksRareOrderDto
+import com.rarible.protocol.dto.LooksRareV2OrderDto
 import com.rarible.protocol.dto.OpenSeaV1OrderDto
 import com.rarible.protocol.dto.OrderBasicSeaportDataV1Dto
 import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderEventDto
 import com.rarible.protocol.dto.OrderExchangeHistoryDto
+import com.rarible.protocol.dto.OrderLooksRareDataV2Dto
 import com.rarible.protocol.dto.OrderOpenSeaV1DataV1Dto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.dto.OrderRaribleV2DataV2Dto
@@ -35,6 +37,7 @@ import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthLooksRareOrderDataV1Dto
+import com.rarible.protocol.union.dto.EthLooksRareOrderDataV2Dto
 import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
 import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
@@ -404,6 +407,49 @@ class EthOrderConverter(
                     optionalRoyalties = optionalRoyalties,
                 )
             }
+
+            is LooksRareV2OrderDto -> {
+                OrderDto(
+                    id = orderId,
+                    platform = PlatformDto.LOOKSRARE,
+                    status = status,
+                    maker = maker,
+                    taker = taker,
+                    make = make,
+                    take = take,
+                    salt = salt,
+                    signature = signature,
+                    pending = pending,
+                    fill = order.fillValue!!,
+                    startedAt = startedAt,
+                    endedAt = endedAt,
+                    makeStock = order.makeStockValue!!,
+                    cancelled = order.cancelled,
+                    createdAt = order.createdAt,
+                    lastUpdatedAt = order.lastUpdateAt,
+                    dbUpdatedAt = order.dbUpdatedAt,
+                    makePrice = makePrice,
+                    takePrice = takePrice,
+                    makePriceUsd = makePriceUsd,
+                    takePriceUsd = takePriceUsd,
+                    data = EthLooksRareOrderDataV2Dto(
+                        quoteType = convert(order.data.quoteType),
+                        globalNonce = order.data.globalNonce,
+                        orderNonce = order.data.orderNonce,
+                        subsetNonce = order.data.subsetNonce,
+                        additionalParameters = EthConverter.convert(order.data.additionalParameters),
+                        strategyId = order.data.strategyId
+                    ),
+                    optionalRoyalties = optionalRoyalties,
+                )
+            }
+        }
+    }
+
+    fun convert(source: OrderLooksRareDataV2Dto.QuoteType): EthLooksRareOrderDataV2Dto.QuoteType {
+        return when (source) {
+            OrderLooksRareDataV2Dto.QuoteType.ASK -> EthLooksRareOrderDataV2Dto.QuoteType.ASK
+            OrderLooksRareDataV2Dto.QuoteType.BID -> EthLooksRareOrderDataV2Dto.QuoteType.BID
         }
     }
 
