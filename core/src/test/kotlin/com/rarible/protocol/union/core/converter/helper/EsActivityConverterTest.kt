@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.core.converter
+package com.rarible.protocol.union.core.converter.helper
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
@@ -10,8 +10,7 @@ import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.EsActivityEnrichmentProperties
-import com.rarible.protocol.union.core.FeatureFlagsProperties
-import com.rarible.protocol.union.core.converter.helper.SellActivityEnricher
+import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -39,6 +38,7 @@ import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
+import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
@@ -70,10 +70,13 @@ import java.time.Instant
 class EsActivityConverterTest {
 
     private val router = mockk<BlockchainRouter<ItemService>>()
-
     private val enricher = mockk<SellActivityEnricher>()
 
-    private val converter = EsActivityConverter(router, enricher, EsActivityEnrichmentProperties())
+    private val converter = EsActivityConverter(
+        router,
+        enricher,
+        EsActivityEnrichmentProperties()
+    )
 
     @Test
     fun `should convert activities batch`() = runBlocking<Unit> {
@@ -125,11 +128,11 @@ class EsActivityConverterTest {
             maker = randomUnionAddress(),
             make = AssetDto(
                 type = SolanaNftAssetTypeDto(
-                    solanaListItemId
+                    itemId = solanaListItemId
                 ),
                 value = randomBigDecimal(),
             ),
-            take = randomAsset(),
+            take = randomPaymentAsset(),
             source = OrderActivitySourceDto.RARIBLE,
             price = randomBigDecimal(),
             hash = randomString(),
@@ -302,12 +305,12 @@ class EsActivityConverterTest {
             transactionHash = randomString(),
             buyer = randomUnionAddress(),
             seller = randomUnionAddress(),
-            nft = randomAsset(),
-            payment = randomAsset(),
+            nft = randomNftAsset(),
+            payment = randomPaymentAsset(),
             source = OrderActivitySourceDto.RARIBLE,
             price = randomBigDecimal(),
             type = OrderMatchSellDto.Type.SELL,
-            )
+        )
         val volumeInfo = SellActivityEnricher.SellVolumeInfo(
             sellCurrency = randomString(),
             volumeUsd = randomDouble(),
@@ -343,8 +346,8 @@ class EsActivityConverterTest {
             id = randomActivityId(),
             date = randomDate(),
             maker = randomUnionAddress(),
-            make = randomAsset(),
-            take = randomAsset(),
+            make = randomPaymentAsset(),
+            take = randomNftAsset(),
             source = OrderActivitySourceDto.RARIBLE,
             price = randomBigDecimal(),
             hash = randomString(),
@@ -373,8 +376,8 @@ class EsActivityConverterTest {
             id = randomActivityId(),
             date = randomDate(),
             maker = randomUnionAddress(),
-            make = randomAsset(),
-            take = randomAsset(),
+            make = randomNftAsset(),
+            take = randomPaymentAsset(),
             source = OrderActivitySourceDto.RARIBLE,
             price = randomBigDecimal(),
             hash = randomString(),
@@ -403,8 +406,8 @@ class EsActivityConverterTest {
             id = randomActivityId(),
             date = randomDate(),
             maker = randomUnionAddress(),
-            make = randomAssetType(),
-            take = randomAssetType(),
+            make = randomPaymentAssetType(),
+            take = randomNftAssetType(),
             source = OrderActivitySourceDto.RARIBLE,
             hash = randomString(),
             transactionHash = randomString(),
@@ -439,8 +442,8 @@ class EsActivityConverterTest {
             id = randomActivityId(),
             date = randomDate(),
             maker = randomUnionAddress(),
-            make = randomAssetType(),
-            take = randomAssetType(),
+            make = randomNftAssetType(),
+            take = randomPaymentAssetType(),
             source = OrderActivitySourceDto.RARIBLE,
             hash = randomString(),
             transactionHash = randomString(),
@@ -676,24 +679,40 @@ class EsActivityConverterTest {
         return OrderActivityMatchSideDto(
             maker = randomUnionAddress(),
             hash = randomString(),
-            asset = randomAsset()
+            asset = randomPaymentAsset()
         )
     }
 
-    private fun randomAsset(): AssetDto {
+    private fun randomNftAsset(): AssetDto {
         return AssetDto(
-            type = randomAssetType(),
+            type = randomNftAssetType(),
             value = randomBigDecimal(),
         )
     }
 
-    private fun randomAssetType(): AssetTypeDto {
+    private fun randomPaymentAsset(): AssetDto {
+        return AssetDto(
+            type = randomPaymentAssetType(),
+            value = randomBigDecimal(),
+        )
+    }
+
+    private fun randomNftAssetType(): AssetTypeDto {
+        val blockchain = BlockchainDto.ETHEREUM
+        val address = randomString()
         return EthErc1155AssetTypeDto(
+            contract = ContractAddress(blockchain, address),
+            collection = CollectionIdDto(blockchain, address),
+            tokenId = randomBigInt(),
+        )
+    }
+
+    private fun randomPaymentAssetType(): AssetTypeDto {
+        return EthErc20AssetTypeDto(
             contract = ContractAddress(
                 randomBlockchain(),
                 randomString()
-            ),
-            tokenId = randomBigInt(),
+            )
         )
     }
 
@@ -709,8 +728,8 @@ class EsActivityConverterTest {
             ),
             type = AuctionDto.Type.values().random(),
             seller = randomUnionAddress(),
-            sell = randomAsset(),
-            buy = randomAssetType(),
+            sell = randomNftAsset(),
+            buy = randomPaymentAssetType(),
             endTime = randomDate(),
             minimalStep = randomBigDecimal(),
             minimalPrice = randomBigDecimal(),

@@ -10,10 +10,10 @@ import com.rarible.protocol.union.core.event.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.integration.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.integration.flow.event.FlowActivityEventHandler
@@ -70,7 +70,7 @@ class FlowConsumerConfiguration(
 
     @Bean
     fun flowActivityEventHandler(
-        handler: IncomingEventHandler<ActivityDto>,
+        handler: IncomingEventHandler<UnionActivityDto>,
         converter: FlowActivityConverter
     ): FlowActivityEventHandler {
         return FlowActivityEventHandler(handler, converter)
@@ -116,7 +116,7 @@ class FlowConsumerConfiguration(
     @Bean
     fun flowActivityWorker(
         factory: FlowNftIndexerEventsConsumerFactory,
-        handler: BlockchainEventHandler<FlowActivityDto, ActivityDto>
+        handler: BlockchainEventHandler<FlowActivityDto, UnionActivityDto>
     ): KafkaConsumerWorker<FlowActivityDto> {
         val consumer = factory.createAcitivityEventsConsumer(consumerFactory.activityGroup)
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers, batchSize)

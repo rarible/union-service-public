@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.integration.tezos.converter
 
 import com.rarible.dipdup.client.core.model.DipDupMintActivity
+import com.rarible.protocol.union.core.model.UnionMintActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemMintActivity
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import com.rarible.protocol.union.test.mock.CurrencyMock
@@ -19,13 +19,14 @@ class TezosActivityConverterTest {
     fun `tezos item activity mint`() = runBlocking<Unit> {
         val dto = randomTezosItemMintActivity()
         val actType = dto as DipDupMintActivity
-        val converted = dipdupActivityConverter.convert(dto, BlockchainDto.TEZOS) as MintActivityDto
+        val converted = dipdupActivityConverter.convert(dto, BlockchainDto.TEZOS) as UnionMintActivityDto
 
         assertThat(converted.id.value).isEqualTo(actType.id)
         assertThat(converted.date).isEqualTo(actType.date.toInstant())
 
         assertThat(converted.owner.value).isEqualTo(actType.owner)
         assertThat(converted.contract!!.value).isEqualTo(actType.contract)
+        assertThat(converted.collection!!.value).isEqualTo(actType.contract)
         assertThat(converted.tokenId).isEqualTo(actType.tokenId)
         assertThat(converted.itemId).isEqualTo(ItemIdDto(BlockchainDto.TEZOS, actType.contract, actType.tokenId))
         assertThat(converted.value).isEqualTo(actType.value.toBigInteger())

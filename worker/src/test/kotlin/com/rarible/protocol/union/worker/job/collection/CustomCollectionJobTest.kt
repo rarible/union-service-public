@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test
 
 class CustomCollectionJobTest {
 
-    private val blockchainEventProducer: RaribleKafkaProducer<UnionInternalBlockchainEvent> = mockk() {
+    private val blockchainEventProducer: RaribleKafkaProducer<UnionInternalBlockchainEvent> = mockk {
         coEvery { send(any<KafkaMessage<UnionInternalBlockchainEvent>>()) } returns mockk()
     }
 
@@ -31,6 +31,9 @@ class CustomCollectionJobTest {
     )
 
     private val itemFetcherProvider: CustomCollectionItemFetcherProvider = mockk()
+    private val updater: CustomCollectionUpdater = mockk {
+        coEvery { update(any()) } returns Unit
+    }
 
     private val fetcher1: CustomCollectionItemFetcher = mockk()
     private val fetcher2: CustomCollectionItemFetcher = mockk()
@@ -40,7 +43,8 @@ class CustomCollectionJobTest {
 
     private val job = CustomCollectionJob(
         eventProducer,
-        itemFetcherProvider
+        itemFetcherProvider,
+        listOf(updater)
     )
 
     @BeforeEach
@@ -86,6 +90,10 @@ class CustomCollectionJobTest {
         verifyItemChangeEvent(item1.id)
         verifyItemChangeEvent(item2.id)
         verifyItemChangeEvent(item3.id)
+
+        coVerify { updater.update(item1) }
+        coVerify { updater.update(item2) }
+        coVerify { updater.update(item3) }
     }
 
     private fun verifyItemChangeEvent(itemId: ItemIdDto) {

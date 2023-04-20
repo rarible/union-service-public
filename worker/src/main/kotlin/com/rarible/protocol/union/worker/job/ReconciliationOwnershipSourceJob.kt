@@ -1,10 +1,8 @@
 package com.rarible.protocol.union.worker.job
 
-import com.rarible.protocol.union.core.model.ownershipId
-import com.rarible.protocol.union.core.model.source
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -67,7 +65,7 @@ class ReconciliationOwnershipSourceJob(
         return page.continuation
     }
 
-    private suspend fun safeUpdate(activity: ActivityDto) {
+    private suspend fun safeUpdate(activity: UnionActivityDto) {
         try {
             if (activity.source() == null || activity.ownershipId() == null) return
             // If ownership doesn't exist, skip activity

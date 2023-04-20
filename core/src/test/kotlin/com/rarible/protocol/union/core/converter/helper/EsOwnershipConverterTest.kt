@@ -1,7 +1,8 @@
-package com.rarible.protocol.union.core.converter
+package com.rarible.protocol.union.core.converter.helper
 
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.converter.EsOwnershipConverter
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipDto

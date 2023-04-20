@@ -51,7 +51,7 @@ class DipDupOrderConverter(
 
     suspend fun convert(source: List<Asset.AssetType>, blockchain: BlockchainDto): List<AssetTypeDto> {
         try {
-            return source.map { DipDupConverter.convert(it, blockchain) }
+            return source.map { DipDupConverter.convertLegacy(it, blockchain) }
         } catch (e: Exception) {
             logger.error("Failed to convert {} list of assets: {} \n{}", blockchain, e.message, source)
             throw e
@@ -60,8 +60,8 @@ class DipDupOrderConverter(
 
     private suspend fun convertInternal(order: DipDupOrder, blockchain: BlockchainDto): OrderDto {
 
-        val make = DipDupConverter.convert(order.make, blockchain)
-        val take = DipDupConverter.convert(order.take, blockchain)
+        val make = DipDupConverter.convertLegacy(order.make, blockchain)
+        val take = DipDupConverter.convertLegacy(order.take, blockchain)
 
         val maker = UnionAddressConverter.convert(blockchain, order.maker)
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }

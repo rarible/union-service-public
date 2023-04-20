@@ -2,7 +2,6 @@ package com.rarible.protocol.union.search.indexer.handler
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsCollectionConverter
 import com.rarible.protocol.union.core.model.EsCollection
@@ -14,6 +13,7 @@ import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
 import org.elasticsearch.action.support.WriteRequest
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -23,9 +23,7 @@ class CollectionEventHandler(
     metricFactory: IndexerMetricFactory,
 ) : ConsumerBatchEventHandler<CollectionEventDto> {
 
-    companion object {
-        private val logger by Logger()
-    }
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private val entitySaveCounters = BlockchainDto.values().associateWith {
         metricFactory.createEntitySaveCountMetric(EsEntity.COLLECTION, it)

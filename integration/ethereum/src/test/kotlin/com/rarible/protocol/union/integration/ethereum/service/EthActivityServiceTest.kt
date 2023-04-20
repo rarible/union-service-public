@@ -18,7 +18,7 @@ import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
-import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.core.model.UnionMintActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -85,11 +85,11 @@ internal class EthActivityServiceTest {
 
             val dateMint = nowMillis().minusSeconds(5)
             val dateTransfer = dateMint.plusSeconds(3)
-            val unionMint = mockk<ActivityDto> {
+            val unionMint = mockk<UnionMintActivityDto> {
                 every { id } returns ActivityIdDto(blockchainDto, "A")
                 every { date } returns dateMint
             }
-            val unionTransfer = mockk<ActivityDto> {
+            val unionTransfer = mockk<UnionMintActivityDto> {
                 every { id } returns ActivityIdDto(blockchainDto, "B")
                 every { date } returns dateTransfer
             }
@@ -149,22 +149,22 @@ internal class EthActivityServiceTest {
                 activityAuctionControllerApi.getAuctionActivitiesById(ActivitiesByIdRequestDto(listOf("ETHEREUM:C", "ETHEREUM:F")))
             } returns Mono.just(auctionActivityResp)
 
-            val unionActivityA = mockk<ActivityDto> {
+            val unionActivityA = mockk<UnionMintActivityDto> {
                 every { id } returns ActivityIdDto(BlockchainDto.ETHEREUM, "A")
             }
-            val unionActivityB = mockk<ActivityDto> {
+            val unionActivityB = mockk<UnionMintActivityDto> {
                 every { id } returns ActivityIdDto(BlockchainDto.ETHEREUM, "B")
             }
-            val unionActivityC = mockk<ActivityDto> {
+            val unionActivityC = mockk<UnionMintActivityDto> {
                 every { id } returns ActivityIdDto(BlockchainDto.ETHEREUM, "C")
             }
-            val unionActivityD = mockk<ActivityDto> {
+            val unionActivityD = mockk<UnionMintActivityDto> {
                 every { id } returns ActivityIdDto(BlockchainDto.ETHEREUM, "D")
             }
-            val unionActivityE = mockk<ActivityDto> {
+            val unionActivityE = mockk<UnionMintActivityDto> {
                 every { id } returns ActivityIdDto(BlockchainDto.ETHEREUM, "E")
             }
-            val unionActivityF = mockk<ActivityDto> {
+            val unionActivityF = mockk<UnionMintActivityDto> {
                 every { id } returns ActivityIdDto(BlockchainDto.ETHEREUM, "F")
             }
             coEvery { ethActivityConverter.convert(itemActivityA, blockchainDto) } returns unionActivityA
@@ -193,7 +193,7 @@ internal class EthActivityServiceTest {
             items = (1..size).map { randomEthOrderActivityMatch() }
         )
         val expectedActivity = activities.items.map {
-            mockk<ActivityDto> {
+            mockk<UnionMintActivityDto> {
                 every { lastUpdatedAt } returns Instant.now()
                 every { id } returns ActivityIdDto(blockchainDto, "test")
             }
@@ -224,7 +224,7 @@ internal class EthActivityServiceTest {
             items = (1..size).map { randomEthItemMintActivity() }
         )
         val expectedActivity = activities.items.map {
-            mockk<ActivityDto> {
+            mockk<UnionMintActivityDto> {
                 every { lastUpdatedAt } returns Instant.now()
                 every { id } returns ActivityIdDto(blockchainDto, "test")
             }

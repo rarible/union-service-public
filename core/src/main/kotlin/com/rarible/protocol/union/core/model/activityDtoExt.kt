@@ -24,6 +24,7 @@ import com.rarible.protocol.union.dto.OwnershipSourceDto
 import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.ext
 
+@Deprecated("keep UnionActivity only")
 fun ActivityDto.itemId(): ItemIdDto? {
     return when (this) {
         is MintActivityDto -> this.itemId
@@ -49,6 +50,7 @@ fun ActivityDto.itemId(): ItemIdDto? {
     }
 }
 
+@Deprecated("keep UnionActivity only")
 fun ActivityDto.ownershipId(): OwnershipIdDto? {
     return when (this) {
         is MintActivityDto -> this.itemId?.toOwnership(this.owner.value)
@@ -57,6 +59,7 @@ fun ActivityDto.ownershipId(): OwnershipIdDto? {
     }
 }
 
+@Deprecated("keep UnionActivity only")
 fun ActivityDto.source(): OwnershipSourceDto? {
     return when (this) {
         is MintActivityDto -> OwnershipSourceDto.MINT

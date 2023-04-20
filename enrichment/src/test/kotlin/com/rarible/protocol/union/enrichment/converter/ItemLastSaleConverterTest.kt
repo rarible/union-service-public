@@ -13,10 +13,12 @@ class ItemLastSaleConverterTest {
 
         val lastSale = ItemLastSaleConverter.convert(sell)!!
 
+        val expectedAsset = AssetDtoConverter.convert(sell.payment.type)
+
         assertThat(lastSale.date).isEqualTo(sell.date)
         assertThat(lastSale.seller).isEqualTo(sell.seller)
         assertThat(lastSale.buyer).isEqualTo(sell.buyer)
-        assertThat(lastSale.currency).isEqualTo(sell.payment.type)
+        assertThat(lastSale.currency).isEqualTo(expectedAsset)
         assertThat(lastSale.value).isEqualTo(sell.nft.value)
         assertThat(lastSale.price).isEqualTo(sell.price)
     }

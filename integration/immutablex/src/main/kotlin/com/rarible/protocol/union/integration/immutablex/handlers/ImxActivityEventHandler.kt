@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.immutablex.handlers
 
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
@@ -9,7 +10,6 @@ import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.core.model.blockchainAndIndexerMarks
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 
 class ImxActivityEventHandler(
-    private val activityHandler: IncomingEventHandler<ActivityDto>,
+    private val activityHandler: IncomingEventHandler<UnionActivityDto>,
     private val itemHandler: IncomingEventHandler<UnionItemEvent>,
     private val ownershipHandler: IncomingEventHandler<UnionOwnershipEvent>,
 

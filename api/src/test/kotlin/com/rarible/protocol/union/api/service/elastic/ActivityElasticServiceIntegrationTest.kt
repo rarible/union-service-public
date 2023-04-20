@@ -14,7 +14,9 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.converter.ActivityDtoConverter
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityOrderList
@@ -50,6 +52,9 @@ internal class ActivityElasticServiceIntegrationTest {
     @Autowired
     private lateinit var metricsFactory: ElasticMetricsFactory
 
+    @Autowired
+    private lateinit var enrichmentActivityService: EnrichmentActivityService
+
     private lateinit var service: ActivityElasticService
 
     private lateinit var one: EsActivity
@@ -70,6 +75,7 @@ internal class ActivityElasticServiceIntegrationTest {
         service = ActivityElasticService(
             filterConverter,
             repository,
+            enrichmentActivityService,
             router,
             metricsFactory
         )
@@ -175,7 +181,11 @@ internal class ActivityElasticServiceIntegrationTest {
             val actual = service.getAllActivities(types, blockchains, null, null, size, sort)
 
             // then
-            assertThat(actual.activities).containsExactly(eth1, eth2, flow1)
+            assertThat(actual.activities).containsExactly(
+                ActivityDtoConverter.convert(eth1),
+                ActivityDtoConverter.convert(eth2),
+                ActivityDtoConverter.convert(flow1)
+            )
             assertThat(actual.cursor).startsWith("4800_")
             assertCounterChanges()
         }
@@ -214,7 +224,9 @@ internal class ActivityElasticServiceIntegrationTest {
             val actual = service.getAllActivities(types, blockchains, null, null, size, sort)
 
             // then
-            assertThat(actual.activities).containsExactly(eth2)
+            assertThat(actual.activities)
+                .containsExactly(ActivityDtoConverter.convert(eth2))
+
             assertCounterChanges(
                 BlockchainDto.ETHEREUM to 1,
                 BlockchainDto.FLOW to 1,
@@ -248,7 +260,9 @@ internal class ActivityElasticServiceIntegrationTest {
             val actual = service.getActivitiesByCollection(types, listOf(collection), null, null, size, sort)
 
             // then
-            assertThat(actual.activities).containsExactly(eth2)
+            assertThat(actual.activities)
+                .containsExactly(ActivityDtoConverter.convert(eth2))
+
             assertThat(actual.cursor).startsWith("4900_")
             assertCounterChanges()
         }
@@ -281,7 +295,9 @@ internal class ActivityElasticServiceIntegrationTest {
             val actual = service.getActivitiesByItem(types, item, null, null, size, sort)
 
             // then
-            assertThat(actual.activities).containsExactly(eth7)
+            assertThat(actual.activities)
+                .containsExactly(ActivityDtoConverter.convert(eth7))
+
             assertThat(actual.cursor).startsWith("4700_")
             assertCounterChanges()
         }
@@ -334,7 +350,10 @@ internal class ActivityElasticServiceIntegrationTest {
             )
 
             // then
-            assertThat(actual.activities).containsExactly(eth1, eth7)
+            assertThat(actual.activities).containsExactly(
+                ActivityDtoConverter.convert(eth1),
+                ActivityDtoConverter.convert(eth7)
+            )
             assertThat(actual.cursor).startsWith("4700_")
             assertCounterChanges()
         }

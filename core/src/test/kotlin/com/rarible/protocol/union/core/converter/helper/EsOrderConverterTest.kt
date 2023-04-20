@@ -1,17 +1,18 @@
-package com.rarible.protocol.union.core.converter
+package com.rarible.protocol.union.core.converter.helper
 
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.converter.EsOrderConverter
+import com.rarible.protocol.union.core.model.EsOrder
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
-import com.rarible.protocol.union.core.model.EsOrder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.math.BigInteger
 
-class ElasticOrderConverterTest {
+class EsOrderConverterTest {
 
     private val converter = EsOrderConverter
 

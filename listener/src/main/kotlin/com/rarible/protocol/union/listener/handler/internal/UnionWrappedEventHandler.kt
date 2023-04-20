@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.protocol.union.core.handler.InternalEventHandler
 import com.rarible.protocol.union.core.model.UnionInternalActivityEvent
+import com.rarible.protocol.union.core.model.UnionInternalActivityLegacyEvent
 import com.rarible.protocol.union.core.model.UnionInternalAuctionEvent
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
 import com.rarible.protocol.union.core.model.UnionInternalCollectionEvent
@@ -30,6 +31,7 @@ class UnionWrappedEventHandler(
             is UnionInternalOwnershipEvent -> internalOwnershipEventHandler.onEvent(event.event)
             is UnionInternalOrderEvent -> internalOrderEventHandler.onEvent(event.event)
             is UnionInternalAuctionEvent -> internalAuctionEventHandler.onEvent(event.event)
+            is UnionInternalActivityLegacyEvent -> internalActivityEventHandler.onEvent(event.event)
             is UnionInternalActivityEvent -> internalActivityEventHandler.onEvent(event.event)
             is UnionInternalCollectionEvent -> internalCollectionEventHandler.onEvent(event.event)
         }

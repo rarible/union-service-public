@@ -3,9 +3,16 @@ package com.rarible.protocol.union.integration.tezos.dipdup.converter
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
+import com.rarible.protocol.union.core.model.UnionAssetDto
+import com.rarible.protocol.union.core.model.UnionAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionTezosFTAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionTezosMTAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionTezosNFTAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionTezosXTZAssetTypeDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.TezosFTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosMTAssetTypeDto
@@ -14,26 +21,60 @@ import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
 
 object DipDupConverter {
 
-    fun convert(source: Asset, blockchain: BlockchainDto): AssetDto {
-        return AssetDto(
+    fun convert(source: Asset, blockchain: BlockchainDto): UnionAssetDto {
+        return UnionAssetDto(
             type = convert(source = source.assetType, blockchain = blockchain),
             value = source.assetValue
         )
     }
 
-    fun convert(source: Asset.AssetType, blockchain: BlockchainDto): AssetTypeDto {
+    fun convert(source: Asset.AssetType, blockchain: BlockchainDto): UnionAssetTypeDto {
+        return when (source) {
+            is Asset.XTZ -> UnionTezosXTZAssetTypeDto()
+            is Asset.FT -> UnionTezosFTAssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, source.contract),
+                tokenId = source.tokenId
+            )
+
+            is Asset.MT -> UnionTezosMTAssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, source.contract),
+                tokenId = source.tokenId
+            )
+
+            is Asset.NFT -> UnionTezosNFTAssetTypeDto(
+                contract = ContractAddressConverter.convert(blockchain, source.contract),
+                tokenId = source.tokenId
+            )
+
+            else -> UnionTezosXTZAssetTypeDto()
+        }
+    }
+
+    @Deprecated("remove after migration to UnionOrder")
+    fun convertLegacy(source: Asset, blockchain: BlockchainDto): AssetDto {
+        return AssetDto(
+            type = convertLegacy(source = source.assetType, blockchain = blockchain),
+            value = source.assetValue
+        )
+    }
+
+    @Deprecated("remove after migration to UnionOrder")
+    fun convertLegacy(source: Asset.AssetType, blockchain: BlockchainDto): AssetTypeDto {
         return when (source) {
             is Asset.XTZ -> TezosXTZAssetTypeDto()
             is Asset.FT -> TezosFTAssetTypeDto(
-                    contract = ContractAddressConverter.convert(blockchain, source.contract!!),
-                    tokenId = source.tokenId
-                )
+                contract = ContractAddressConverter.convert(blockchain, source.contract),
+                tokenId = source.tokenId
+            )
+
             is Asset.MT -> TezosMTAssetTypeDto(
-                contract = ContractAddressConverter.convert(blockchain, source.contract!!),
+                contract = ContractAddressConverter.convert(blockchain, source.contract),
+                collection = CollectionIdDto(blockchain, source.contract),
                 tokenId = source.tokenId
             )
             is Asset.NFT -> TezosNFTAssetTypeDto(
-                contract = ContractAddressConverter.convert(blockchain, source.contract!!),
+                contract = ContractAddressConverter.convert(blockchain, source.contract),
+                collection = CollectionIdDto(blockchain, source.contract),
                 tokenId = source.tokenId
             )
             else -> TezosXTZAssetTypeDto()

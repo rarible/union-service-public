@@ -1,9 +1,8 @@
 package com.rarible.protocol.union.worker.job
 
-import com.rarible.protocol.union.core.model.itemId
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -67,7 +66,7 @@ class ReconciliationLastSaleJob(
         return page.continuation
     }
 
-    private suspend fun safeUpdate(activity: ActivityDto) {
+    private suspend fun safeUpdate(activity: UnionActivityDto) {
 
         try {
             // Originally, it should not happen

@@ -4,7 +4,9 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMapping
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentCollectionProperties
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
@@ -34,7 +36,7 @@ class CustomCollectionResolver(
         if (!ff.enableCustomCollections) {
             return
         }
-        val customCollectionId = EnrichmentCollectionId.of(rule.customCollection)
+        val customCollectionId = IdParser.parseCollectionId(rule.customCollection)
         rule.collections.forEach { rawCollectionId ->
             val collectionId = EnrichmentCollectionId.of(rawCollectionId)
             index.computeIfAbsent(collectionId.blockchain) { CustomCollectionRuleIndex() }
@@ -47,7 +49,7 @@ class CustomCollectionResolver(
         }
     }
 
-    suspend fun resolveCustomCollection(itemId: ItemIdDto): EnrichmentCollectionId? {
+    suspend fun resolveCustomCollection(itemId: ItemIdDto): CollectionIdDto? {
         val blockchainIndex = index[itemId.blockchain] ?: return null
         blockchainIndex.byItem[itemId.value]?.let { return it }
 
@@ -58,11 +60,17 @@ class CustomCollectionResolver(
         return blockchainIndex.byCollection[collectionId]
     }
 
+    suspend fun resolveCustomCollection(collectionId: CollectionIdDto): CollectionIdDto? {
+        val blockchainIndex = index[collectionId.blockchain] ?: return null
+
+        return blockchainIndex.byCollection[collectionId.value]
+    }
+
     private class CustomCollectionRuleIndex {
 
         // Mapped WITHOUT blockchain prefix
-        val byItem = HashMap<String, EnrichmentCollectionId>()
-        val byCollection = HashMap<String, EnrichmentCollectionId>()
+        val byItem = HashMap<String, CollectionIdDto>()
+        val byCollection = HashMap<String, CollectionIdDto>()
         // TODO potentially here we can add byRange
     }
 

@@ -40,6 +40,7 @@ import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
+import com.rarible.protocol.union.enrichment.converter.ActivityDtoConverter
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
@@ -621,10 +622,13 @@ class ActivityControllerFt : AbstractIntegrationTest() {
             ethSourceActivity, BlockchainDto.ETHEREUM
         )
 
+        val flowExpected = ActivityDtoConverter.convert(flowActivity)
+        val ethExpected = ActivityDtoConverter.convert(ethActivity)
+
         esActivityRepository.saveAll(
             listOf(
-                esActivityConverter.convert(flowActivity, flowCollectionId.value)!!,
-                esActivityConverter.convert(ethActivity, ethCollectionId.value)!!
+                esActivityConverter.convert(flowExpected, flowCollectionId.value)!!,
+                esActivityConverter.convert(ethExpected, ethCollectionId.value)!!
             )
         )
 

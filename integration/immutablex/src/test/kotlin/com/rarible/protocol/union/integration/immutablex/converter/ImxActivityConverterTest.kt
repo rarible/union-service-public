@@ -1,15 +1,16 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.core.test.data.randomLong
+import com.rarible.protocol.union.core.model.UnionAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionBurnActivityDto
+import com.rarible.protocol.union.core.model.UnionEthErc20AssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthErc721AssetTypeDto
+import com.rarible.protocol.union.core.model.UnionMintActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderMatchSellDto
+import com.rarible.protocol.union.core.model.UnionOrderMatchSwapDto
+import com.rarible.protocol.union.core.model.UnionTransferActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BurnActivityDto
-import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
-import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
-import com.rarible.protocol.union.dto.OrderMatchSellDto
-import com.rarible.protocol.union.dto.OrderMatchSwapDto
-import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.integration.data.randomImxMint
 import com.rarible.protocol.union.integration.data.randomImxOrder
 import com.rarible.protocol.union.integration.data.randomImxTrade
@@ -30,7 +31,7 @@ class ImxActivityConverterTest {
     private val imxActivityConverter = ImxActivityConverter(
         mockk() {
             coEvery {
-                toUsd(any(), any(), any(), any())
+                toUsd(any(), any<UnionAssetTypeDto>(), any(), any())
             } returns BigDecimal.ONE
         }
     )
@@ -54,11 +55,11 @@ class ImxActivityConverterTest {
         )
 
         val orders = mapOf(sell.orderId to sell, buy.orderId to buy)
-        val result = imxActivityConverter.convert(trade, orders, blockchain) as OrderMatchSellDto
+        val result = imxActivityConverter.convert(trade, orders, blockchain) as UnionOrderMatchSellDto
 
         assertThat(result.id).isEqualTo(trade.activityId)
         assertThat(result.source).isEqualTo(OrderActivitySourceDto.RARIBLE)
-        assertThat(result.type).isEqualTo(OrderMatchSellDto.Type.SELL) // TODO always sell?
+        assertThat(result.type).isEqualTo(UnionOrderMatchSellDto.Type.SELL) // TODO always sell?
         assertThat(result.date).isEqualTo(trade.timestamp)
         assertThat(result.transactionHash).isEqualTo(trade.transactionId.toString())
 
@@ -68,13 +69,14 @@ class ImxActivityConverterTest {
         assertThat(result.seller.value).isEqualTo(sell.creator)
         assertThat(result.buyer.value).isEqualTo(buy.creator)
 
-        assertThat(result.nft.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
-        assertThat(result.payment.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(result.nft.type).isInstanceOf(UnionEthErc721AssetTypeDto::class.java)
+        assertThat(result.payment.type).isInstanceOf(UnionEthErc20AssetTypeDto::class.java)
 
         assertThat(result.nft.value).isEqualTo(BigDecimal.ONE)
         // Considering decimals = 0
-        assertThat(result.payment.value).isEqualTo(buy.sell.data.quantity!!.toBigDecimal())
-        assertThat(result.price).isEqualTo(buy.sell.data.quantity!!.toBigDecimal())
+        val expected = buy.sell.data.quantity!!.toBigDecimal()
+        assertThat(result.payment.value).isEqualTo(expected)
+        assertThat(result.price).isEqualTo(expected)
     }
 
     @Test
@@ -98,7 +100,7 @@ class ImxActivityConverterTest {
         )
 
         val orders = mapOf(sell.orderId to sell, buy.orderId to buy)
-        val result = imxActivityConverter.convert(trade, orders, blockchain) as OrderMatchSwapDto
+        val result = imxActivityConverter.convert(trade, orders, blockchain) as UnionOrderMatchSwapDto
 
         assertThat(result.id).isEqualTo(trade.activityId)
         assertThat(result.source).isEqualTo(OrderActivitySourceDto.RARIBLE)
@@ -118,13 +120,14 @@ class ImxActivityConverterTest {
     fun `convert mint`()= runBlocking<Unit> {
         val imxMint = randomImxMint()
 
-        val mint = imxActivityConverter.convert(imxMint, emptyMap(), blockchain) as MintActivityDto
+        val mint = imxActivityConverter.convert(imxMint, emptyMap(), blockchain) as UnionMintActivityDto
 
         assertThat(mint.id.value).isEqualTo(imxMint.transactionId.toString())
         assertThat(mint.date).isEqualTo(imxMint.timestamp)
         assertThat(mint.owner.value).isEqualTo(imxMint.user)
         assertThat(mint.itemId!!.value).isEqualTo(imxMint.encodedItemId())
         assertThat(mint.contract!!.value).isEqualTo(imxMint.token.data.tokenAddress)
+        assertThat(mint.collection!!.value).isEqualTo(imxMint.token.data.tokenAddress)
         assertThat(mint.tokenId!!).isEqualTo(imxMint.token.data.encodedTokenId())
         assertThat(mint.value).isEqualTo(imxMint.token.data.quantity)
         assertThat(mint.transactionHash).isEqualTo(imxMint.transactionId.toString())
@@ -134,7 +137,7 @@ class ImxActivityConverterTest {
     fun `convert transfer`() = runBlocking<Unit> {
         val imxTransfer = randomImxTransfer()
 
-        val transfer = imxActivityConverter.convert(imxTransfer, emptyMap(), blockchain) as TransferActivityDto
+        val transfer = imxActivityConverter.convert(imxTransfer, emptyMap(), blockchain) as UnionTransferActivityDto
 
         assertThat(transfer.id.value).isEqualTo(imxTransfer.transactionId.toString())
         assertThat(transfer.date).isEqualTo(imxTransfer.timestamp)
@@ -142,6 +145,7 @@ class ImxActivityConverterTest {
         assertThat(transfer.owner.value).isEqualTo(imxTransfer.receiver)
         assertThat(transfer.itemId!!.value).isEqualTo(imxTransfer.encodedItemId())
         assertThat(transfer.contract!!.value).isEqualTo(imxTransfer.token.data.tokenAddress)
+        assertThat(transfer.collection!!.value).isEqualTo(imxTransfer.token.data.tokenAddress)
         assertThat(transfer.tokenId!!).isEqualTo(imxTransfer.token.data.encodedTokenId())
         assertThat(transfer.value).isEqualTo(imxTransfer.token.data.quantity)
         assertThat(transfer.transactionHash).isEqualTo(imxTransfer.transactionId.toString())
@@ -151,13 +155,14 @@ class ImxActivityConverterTest {
     fun `convert transfer - burn`() = runBlocking<Unit> {
         val imxTransfer = randomImxTransfer(receiver = Address.ZERO().prefixed())
 
-        val burn = imxActivityConverter.convert(imxTransfer, emptyMap(), blockchain) as BurnActivityDto
+        val burn = imxActivityConverter.convert(imxTransfer, emptyMap(), blockchain) as UnionBurnActivityDto
 
         assertThat(burn.id.value).isEqualTo(imxTransfer.transactionId.toString())
         assertThat(burn.date).isEqualTo(imxTransfer.timestamp)
         assertThat(burn.owner.value).isEqualTo(imxTransfer.user)
         assertThat(burn.itemId!!.value).isEqualTo(imxTransfer.encodedItemId())
         assertThat(burn.contract!!.value).isEqualTo(imxTransfer.token.data.tokenAddress)
+        assertThat(burn.collection!!.value).isEqualTo(imxTransfer.token.data.tokenAddress)
         assertThat(burn.tokenId!!).isEqualTo(imxTransfer.token.data.encodedTokenId())
         assertThat(burn.value).isEqualTo(imxTransfer.token.data.quantity)
         assertThat(burn.transactionHash).isEqualTo(imxTransfer.transactionId.toString())

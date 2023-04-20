@@ -6,19 +6,19 @@ import com.rarible.dipdup.client.ActivityClient
 import com.rarible.dipdup.client.OrderActivityClient
 import com.rarible.dipdup.client.TokenActivityClient
 import com.rarible.dipdup.client.model.DipDupSyncSort
+import com.rarible.protocol.union.core.continuation.UnionActivityContinuation
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
@@ -55,7 +55,7 @@ open class TezosActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         return getDipDupAndTzktActivities(types, continuation, size, sort)
     }
 
@@ -90,7 +90,7 @@ open class TezosActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val tezosSort = sort?.let { DipDupActivityConverter.convert(it) } ?: DipDupSyncSort.DB_UPDATE_DESC
         val tezosType = type?.let { DipDupActivityConverter.convert(it) }
         val page = activityClient.getActivitiesSync(tezosType, tezosSort, size, continuation)
@@ -105,7 +105,7 @@ open class TezosActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         return Slice.empty()
     }
 
@@ -115,7 +115,7 @@ open class TezosActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         // This method isn't implemented in the new backend
         return Slice.empty()
     }
@@ -126,7 +126,7 @@ open class TezosActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         return getDipDupAndTzktActivitiesByItem(types, contract, tokenId, continuation, size, sort)
     }
@@ -164,7 +164,7 @@ open class TezosActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         return Slice.empty() // TODO Not implemented
     }
 
@@ -176,12 +176,12 @@ open class TezosActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         // TODO this method isn't implemented in the new backend
         return Slice.empty()
     }
 
-    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> = coroutineScope {
+    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<UnionActivityDto> = coroutineScope {
         val itemActivitiesIds = mutableListOf<String>()
         val orderActivitiesIds = mutableListOf<String>()
 
@@ -190,6 +190,7 @@ open class TezosActivityService(
                 ActivityTypeDto.TRANSFER, ActivityTypeDto.MINT, ActivityTypeDto.BURN -> {
                     itemActivitiesIds.add(id)
                 }
+
                 ActivityTypeDto.BID, ActivityTypeDto.LIST, ActivityTypeDto.SELL, ActivityTypeDto.CANCEL_LIST, ActivityTypeDto.CANCEL_BID -> {
                     orderActivitiesIds.add(id)
                 }
@@ -227,8 +228,8 @@ open class TezosActivityService(
     }
 
     private fun continuationFactory(sort: ActivitySortDto?) = when (sort) {
-        ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAsc
-        ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedDesc
+        ActivitySortDto.EARLIEST_FIRST -> UnionActivityContinuation.ByLastUpdatedAsc
+        ActivitySortDto.LATEST_FIRST, null -> UnionActivityContinuation.ByLastUpdatedDesc
     }
 
     private fun isValidUUID(str: String?): Boolean {

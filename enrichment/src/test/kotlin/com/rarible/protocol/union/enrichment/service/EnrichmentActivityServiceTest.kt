@@ -1,14 +1,26 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.protocol.union.core.model.UnionAssetDto
+import com.rarible.protocol.union.core.model.UnionEthCollectionAssetTypeDto
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ContractAddress
+import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
+import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OwnershipSourceDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.enrichment.converter.ActivityDtoConverter
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
+import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityOrderList
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityTransfer
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import io.mockk.clearMocks
@@ -19,6 +31,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 
 class EnrichmentActivityServiceTest {
 
@@ -27,6 +40,7 @@ class EnrichmentActivityServiceTest {
 
     private val blockchain = BlockchainDto.ETHEREUM
     private val activityService: ActivityService = mockk()
+    private val customCollectionResolver: CustomCollectionResolver = mockk()
 
     private lateinit var service: EnrichmentActivityService
 
@@ -35,8 +49,56 @@ class EnrichmentActivityServiceTest {
         clearMocks(activityService)
         every { activityService.blockchain } returns blockchain
         service = EnrichmentActivityService(
-            BlockchainRouter(listOf(activityService), listOf(blockchain))
+            BlockchainRouter(listOf(activityService), listOf(blockchain)),
+            customCollectionResolver
         )
+    }
+
+    @Test
+    fun `enrich - ok`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val activity = randomUnionActivityMint(itemId)
+
+        coEvery { customCollectionResolver.resolveCustomCollection(itemId) } returns null
+
+        val result = service.enrich(activity)
+        val expected = ActivityDtoConverter.convert(activity)
+
+        assertThat(result).isEqualTo(expected)
+    }
+
+    @Test
+    fun `enrich - ok, custom collection by item`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val customCollection = randomEthCollectionId()
+        val activity = randomUnionActivityMint(itemId)
+
+        coEvery { customCollectionResolver.resolveCustomCollection(itemId) } returns customCollection
+
+        val result = service.enrich(activity)
+        val expected = (ActivityDtoConverter.convert(activity) as MintActivityDto)
+            .copy(collection = customCollection)
+
+        assertThat(result).isEqualTo(expected)
+    }
+
+    @Test
+    fun `enrich - ok, custom collection by collection`() = runBlocking<Unit> {
+        val contract = ContractAddress(BlockchainDto.ETHEREUM, randomEthAddress())
+        val collectionId = CollectionIdDto(contract.blockchain, contract.value)
+        val collectionAsset = UnionAssetDto(UnionEthCollectionAssetTypeDto(contract), BigDecimal.ONE)
+        val customCollection = randomEthCollectionId()
+
+        val activity = randomUnionActivityOrderList(BlockchainDto.ETHEREUM)
+            .copy(make = collectionAsset)
+
+        coEvery { customCollectionResolver.resolveCustomCollection(collectionId) } returns customCollection
+
+        val result = service.enrich(activity)
+        val expected = (ActivityDtoConverter.convert(activity) as OrderListActivityDto)
+            .copy(make = AssetDto(EthCollectionAssetTypeDto(contract, customCollection), BigDecimal.ONE))
+
+        assertThat(result).isEqualTo(expected)
     }
 
     @Test

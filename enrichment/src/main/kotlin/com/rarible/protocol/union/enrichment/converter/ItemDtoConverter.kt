@@ -8,11 +8,11 @@ import com.rarible.protocol.union.dto.AmmOrdersDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemLastSaleDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.ItemLastSale
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import java.math.BigInteger
@@ -25,7 +25,7 @@ object ItemDtoConverter {
         meta: UnionMeta? = null,
         orders: Map<OrderIdDto, OrderDto> = emptyMap(),
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
-        customCollection: EnrichmentCollectionId? = null
+        customCollection: CollectionIdDto? = null
     ): ItemDto {
         val contractAndTokenId = if (item.id.blockchain != BlockchainDto.SOLANA) {
             CompositeItemIdParser.split(item.id.value)
@@ -36,7 +36,7 @@ object ItemDtoConverter {
         return ItemDto(
             id = item.id,
             blockchain = item.id.blockchain,
-            collection = customCollection?.toDto() ?: item.collection,
+            collection = customCollection ?: item.collection,
             contract = contractAndTokenId?.let { // TODO do something with this
                 ContractAddressConverter.convert(item.id.blockchain, it.first)
             },

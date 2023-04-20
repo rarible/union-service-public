@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.worker.job
 
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -51,6 +51,7 @@ class ReconciliationOwnershipSourceJobTest {
         clearMocks(orderServiceRouter, ownershipEventService, ownershipService)
         coEvery { orderServiceRouter.getService(BlockchainDto.ETHEREUM) } returns activityService
         coEvery { ownershipEventService.onActivity(any(), any(), any()) } returns Unit
+        coEvery { ownershipEventService.onActivityLegacy(any(), any(), any()) } returns Unit
     }
 
     @Test
@@ -85,10 +86,10 @@ class ReconciliationOwnershipSourceJobTest {
         val result = job.reconcileBatch(null, BlockchainDto.ETHEREUM)
 
         assertThat(result).isNull()
-        coVerify(exactly = 0) { ownershipEventService.onActivity(any(), any(), any()) }
+        coVerify(exactly = 0) { ownershipEventService.onActivityLegacy(any(), any(), any()) }
     }
 
-    private fun mockGetActivities(continuation: String?, size: Int, result: Slice<ActivityDto>): Unit {
+    private fun mockGetActivities(continuation: String?, size: Int, result: Slice<UnionActivityDto>): Unit {
         coEvery {
             activityService.getAllActivities(
                 types = listOf(ActivityTypeDto.MINT, ActivityTypeDto.TRANSFER),

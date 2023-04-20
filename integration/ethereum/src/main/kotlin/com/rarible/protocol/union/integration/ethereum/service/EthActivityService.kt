@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
 import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.dto.ActivitiesByIdRequestDto
 import com.rarible.protocol.dto.AuctionActivitiesDto
 import com.rarible.protocol.dto.AuctionActivityFilterAllDto
@@ -25,12 +24,13 @@ import com.rarible.protocol.dto.OrderActivityFilterDto
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.union.core.continuation.UnionActivityContinuation
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
+import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.ActivityTypeDto.AUCTION_BID
@@ -51,7 +51,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.dto.continuation.ActivityContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
@@ -60,6 +59,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
+import org.slf4j.LoggerFactory
 import scalether.domain.Address
 import java.time.Instant
 
@@ -71,8 +71,9 @@ open class EthActivityService(
     private val ethActivityConverter: EthActivityConverter
 ) : AbstractBlockchainService(blockchain), ActivityService {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     companion object {
-        private val logger by Logger()
 
         private val EMPTY_ORDER_ACTIVITIES = OrderActivitiesDto(null, listOf())
         private val EMPTY_AUCTION_ACTIVITIES = AuctionActivitiesDto(null, listOf())
@@ -84,7 +85,7 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val nftFilter = ethActivityConverter.convertToNftAllTypes(types)?.let {
             NftActivityFilterAllDto(it)
         }
@@ -102,10 +103,10 @@ open class EthActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<ActivityDto> = coroutineScope {
+    ): Slice<UnionActivityDto> = coroutineScope {
         val continuationFactory = when (sort) {
-            SyncSortDto.DB_UPDATE_DESC -> ActivityContinuation.ByLastUpdatedSyncAndIdDesc
-            SyncSortDto.DB_UPDATE_ASC, null -> ActivityContinuation.ByLastUpdatedSyncAndIdAsc
+            SyncSortDto.DB_UPDATE_DESC -> UnionActivityContinuation.ByLastUpdatedSyncAndIdDesc
+            SyncSortDto.DB_UPDATE_ASC, null -> UnionActivityContinuation.ByLastUpdatedSyncAndIdAsc
         }
 
         val ethSort = EthConverter.convert(sort)
@@ -128,10 +129,10 @@ open class EthActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val continuationFactory = when (sort) {
-            SyncSortDto.DB_UPDATE_DESC -> ActivityContinuation.ByLastUpdatedSyncAndIdDesc
-            SyncSortDto.DB_UPDATE_ASC, null -> ActivityContinuation.ByLastUpdatedSyncAndIdAsc
+            SyncSortDto.DB_UPDATE_DESC -> UnionActivityContinuation.ByLastUpdatedSyncAndIdDesc
+            SyncSortDto.DB_UPDATE_ASC, null -> UnionActivityContinuation.ByLastUpdatedSyncAndIdAsc
         }
         val ethSort = EthConverter.convert(sort)
 
@@ -151,7 +152,7 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         ethSort: com.rarible.protocol.dto.SyncSortDto?
-    ): List<ActivityDto> = coroutineScope {
+    ): List<UnionActivityDto> = coroutineScope {
         val itemActivities = itemActivitiesAsync(continuation, size, ethSort)
         val orderActivities = orderActivitiesAsync(continuation, size, ethSort)
         val auctionActivities = auctionActivitiesAsync(continuation, size, ethSort)
@@ -163,7 +164,7 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         ethSort: com.rarible.protocol.dto.SyncSortDto?
-    ): List<ActivityDto> = coroutineScope {
+    ): List<UnionActivityDto> = coroutineScope {
         val orderRevertedActivities = orderRevertedActivitiesAsync(continuation, size, ethSort)
         val itemRevertedActivities = itemRevertedActivitiesAsync(continuation, size, ethSort)
         val auctionRevertedActivities = auctionRevertedActivitiesAsync(continuation, size, ethSort)
@@ -174,7 +175,7 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         ethSort: com.rarible.protocol.dto.SyncSortDto?
-    ): Deferred<List<ActivityDto>> = coroutineScope {
+    ): Deferred<List<UnionActivityDto>> = coroutineScope {
         async {
             val itemsDto = activityItemControllerApi.getNftActivitiesSync(
                 false,
@@ -190,7 +191,7 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         ethSort: com.rarible.protocol.dto.SyncSortDto?
-    ): Deferred<List<ActivityDto>> = coroutineScope {
+    ): Deferred<List<UnionActivityDto>> = coroutineScope {
         async {
             val itemsDto = activityOrderControllerApi.getOrderActivitiesSync(continuation, size, ethSort).awaitFirst()
             itemsDto.items.map {
@@ -203,7 +204,7 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         ethSort: com.rarible.protocol.dto.SyncSortDto?
-    ): Deferred<List<ActivityDto>> = coroutineScope {
+    ): Deferred<List<UnionActivityDto>> = coroutineScope {
         async {
             val itemsDto =
                 activityAuctionControllerApi.getAuctionActivitiesSync(continuation, size, ethSort).awaitFirst()
@@ -217,9 +218,10 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         ethSort: com.rarible.protocol.dto.SyncSortDto?
-    ): Deferred<List<ActivityDto>> = coroutineScope {
+    ): Deferred<List<UnionActivityDto>> = coroutineScope {
         async {
-            val itemsDto = activityOrderControllerApi.getOrderRevertedActivitiesSync(continuation, size, ethSort).awaitFirst()
+            val itemsDto =
+                activityOrderControllerApi.getOrderRevertedActivitiesSync(continuation, size, ethSort).awaitFirst()
             itemsDto.items.map {
                 ethActivityConverter.convert(it, blockchain)
             }
@@ -230,7 +232,7 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         ethSort: com.rarible.protocol.dto.SyncSortDto?
-    ): Deferred<List<ActivityDto>> = coroutineScope {
+    ): Deferred<List<UnionActivityDto>> = coroutineScope {
         async { emptyList() }
     }
 
@@ -238,7 +240,7 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         ethSort: com.rarible.protocol.dto.SyncSortDto?
-    ): Deferred<List<ActivityDto>> = coroutineScope {
+    ): Deferred<List<UnionActivityDto>> = coroutineScope {
         async {
             val itemsDto = activityItemControllerApi.getNftActivitiesSync(
                 true,
@@ -256,7 +258,7 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val nftFilter = ethActivityConverter.convertToNftCollectionTypes(types)?.let {
             NftActivityFilterByCollectionDto(Address.apply(collection), it)
         }
@@ -275,7 +277,7 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val nftFilter = ethActivityConverter.convertToNftItemTypes(types)?.let {
             NftActivityFilterByItemDto(Address.apply(contract), tokenId, it)
@@ -296,7 +298,7 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val nftFilter = ethActivityConverter.convertToNftItemAndOwnerTypes(types)?.let {
             NftActivityFilterByItemAndOwnerDto(Address.apply(contract), tokenId, Address.apply(owner), it)
@@ -312,7 +314,7 @@ open class EthActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<ActivityDto> {
+    ): Slice<UnionActivityDto> {
         val userAddresses = users.map { EthConverter.convertToAddress(it) }
         val nftFilter = ethActivityConverter.convertToNftUserTypes(types)?.let {
             NftActivityFilterByUserDto(userAddresses, it, from?.epochSecond, to?.epochSecond)
@@ -326,7 +328,7 @@ open class EthActivityService(
         return getEthereumActivities(nftFilter, orderFilter, auctionFilter, continuation, size, sort)
     }
 
-    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<ActivityDto> = coroutineScope {
+    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<UnionActivityDto> = coroutineScope {
         val itemActivitiesIds = mutableListOf<String>()
         val orderActivitiesIds = mutableListOf<String>()
         val auctionActivitiesIds = mutableListOf<String>()
@@ -336,9 +338,11 @@ open class EthActivityService(
                 TRANSFER, MINT, BURN -> {
                     itemActivitiesIds.add(id)
                 }
+
                 BID, LIST, SELL, CANCEL_LIST, CANCEL_BID -> {
                     orderActivitiesIds.add(id)
                 }
+
                 AUCTION_BID, AUCTION_CREATED, AUCTION_CANCEL, AUCTION_FINISHED, AUCTION_STARTED, AUCTION_ENDED -> {
                     auctionActivitiesIds.add(id)
                 }
@@ -354,14 +358,16 @@ open class EthActivityService(
         }
         val orderRequest = async {
             if (orderActivitiesIds.isNotEmpty()) {
-                activityOrderControllerApi.getOrderActivitiesById(ActivitiesByIdRequestDto(orderActivitiesIds)).awaitFirst()
+                activityOrderControllerApi.getOrderActivitiesById(ActivitiesByIdRequestDto(orderActivitiesIds))
+                    .awaitFirst()
             } else {
                 EMPTY_ORDER_ACTIVITIES
             }
         }
         val auctionRequest = async {
             if (auctionActivitiesIds.isNotEmpty()) {
-                activityAuctionControllerApi.getAuctionActivitiesById(ActivitiesByIdRequestDto(auctionActivitiesIds)).awaitFirst()
+                activityAuctionControllerApi.getAuctionActivitiesById(ActivitiesByIdRequestDto(auctionActivitiesIds))
+                    .awaitFirst()
             } else {
                 EMPTY_AUCTION_ACTIVITIES
             }
@@ -387,8 +393,8 @@ open class EthActivityService(
         sort: ActivitySortDto?
     ) = coroutineScope {
         val continuationFactory = when (sort) {
-            ActivitySortDto.EARLIEST_FIRST -> ActivityContinuation.ByLastUpdatedAndIdAsc
-            ActivitySortDto.LATEST_FIRST, null -> ActivityContinuation.ByLastUpdatedAndIdDesc
+            ActivitySortDto.EARLIEST_FIRST -> UnionActivityContinuation.ByLastUpdatedAndIdAsc
+            ActivitySortDto.LATEST_FIRST, null -> UnionActivityContinuation.ByLastUpdatedAndIdDesc
         }
 
         val ethSort = EthConverter.convert(sort)

@@ -5,12 +5,16 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionItemChangeEvent
 import com.rarible.protocol.union.core.model.offchainEventMark
 import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 
 @Component
 class CustomCollectionJob(
     private val eventProducer: UnionInternalBlockchainEventProducer,
-    private val customCollectionItemFetcherProvider: CustomCollectionItemFetcherProvider
+    private val customCollectionItemFetcherProvider: CustomCollectionItemFetcherProvider,
+    private val updaters: List<CustomCollectionUpdater>
 ) {
 
     private val batchSize = 50
@@ -28,7 +32,7 @@ class CustomCollectionJob(
             val fetcher = fetchers[currentFetcher]
             val next = fetcher.next(currentState, batchSize)
             if (next.state != null) {
-                notify(next.items)
+                migrate(next.items)
                 return CustomCollectionJobState(currentFetcher, next.state).toString()
             }
             currentFetcher++
@@ -38,17 +42,19 @@ class CustomCollectionJob(
     }
 
     // Here we need just to send events, collections will be replaced in listener
-    suspend fun notify(items: List<UnionItem>) {
+    private suspend fun migrate(items: List<UnionItem>) = coroutineScope {
         // TODO ideally, there should be check - if collection already substituted, but it is possible
         // only if we have items in Union
-        items.forEach {
-            val itemId = it.id
-            val eventTimeMarks = offchainEventMark("enrichment-in")
-            val message = KafkaEventFactory.internalItemEvent(UnionItemChangeEvent(itemId, eventTimeMarks))
-            eventProducer.getProducer(itemId.blockchain).send(message)
-        }
+        items.map { item ->
+            async {
+                val itemId = item.id
+                val eventTimeMarks = offchainEventMark("enrichment-in")
+                val message = KafkaEventFactory.internalItemEvent(UnionItemChangeEvent(itemId, eventTimeMarks))
+                updaters.forEach { it.update(item) }
+                eventProducer.getProducer(itemId.blockchain).send(message)
+            }
+        }.awaitAll()
     }
-
 }
 
 
