@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.core.elasticsearch
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
+import com.rarible.protocol.union.core.model.elastic.EntityDefinition
+import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.stereotype.Component
 

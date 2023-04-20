@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.core.elasticsearch
 
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
+import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
 
 class NoopReindexSchedulingService(
     private val indexService: IndexService

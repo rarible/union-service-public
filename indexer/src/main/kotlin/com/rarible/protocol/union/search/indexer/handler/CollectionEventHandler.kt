@@ -5,7 +5,7 @@ import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsCollectionConverter
 import com.rarible.protocol.union.core.model.elastic.EsCollection
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionEventDto

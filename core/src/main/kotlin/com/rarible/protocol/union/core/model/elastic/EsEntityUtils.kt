@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.core.model.elasticsearch
+package com.rarible.protocol.union.core.model.elastic
 
 import kotlin.random.Random.Default.nextLong
 

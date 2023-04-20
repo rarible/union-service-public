@@ -1,12 +1,11 @@
 package com.rarible.protocol.union.worker.config
 
 import com.rarible.core.task.EnableRaribleTask
-import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
+import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.worker.job.BestOrderCheckJob

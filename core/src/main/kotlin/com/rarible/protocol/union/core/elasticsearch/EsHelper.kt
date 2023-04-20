@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.elasticsearch
 
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
+import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest

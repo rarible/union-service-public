@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.core.model.elasticsearch
+package com.rarible.protocol.union.core.model.elastic
 
 import java.math.BigInteger
 import java.security.MessageDigest

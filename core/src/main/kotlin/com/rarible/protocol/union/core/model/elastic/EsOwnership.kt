@@ -1,9 +1,7 @@
 package com.rarible.protocol.union.core.model.elastic
 
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadSettings
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig.loadMapping
+import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig.loadSettings
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Field

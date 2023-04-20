@@ -1,6 +1,6 @@
-package com.rarible.protocol.union.core.model.elasticsearch
+package com.rarible.protocol.union.core.model.elastic
 
-import com.rarible.protocol.union.core.model.elasticsearch.SettingsHasher.md5
+import com.rarible.protocol.union.core.model.elastic.SettingsHasher.md5
 
 data class EntityDefinition(
     val entity: EsEntity,

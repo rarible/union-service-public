@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.core.elasticsearch
 
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
+import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
 
 enum class EsEntityMetadataType(val suffix: String) {
     MAPPING("_mapping"),

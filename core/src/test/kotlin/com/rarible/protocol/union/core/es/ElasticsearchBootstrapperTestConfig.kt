@@ -4,7 +4,7 @@ import com.rarible.protocol.union.core.elasticsearch.EsMetadataRepository
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig
+import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient

@@ -13,8 +13,8 @@ import com.rarible.protocol.union.core.elasticsearch.EsNameResolver.Companion.ME
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.ReindexSchedulingService
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
+import com.rarible.protocol.union.core.model.elastic.EntityDefinition
+import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow

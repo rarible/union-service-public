@@ -5,9 +5,8 @@ import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.IndexService
+import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
 import com.rarible.protocol.union.core.model.elastic.EsItem
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
@@ -53,7 +52,7 @@ internal class ChangeEsItemAliasTaskUnitTest {
 
         every {
             entity
-        }  returns EsEntity.ITEM
+        } returns com.rarible.protocol.union.core.model.elastic.EsEntity.ITEM
     }
 
     private val esItemRepository = mockk<EsItemRepository> {

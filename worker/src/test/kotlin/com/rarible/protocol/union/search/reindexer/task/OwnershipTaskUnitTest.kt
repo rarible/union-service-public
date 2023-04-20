@@ -5,8 +5,8 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
+import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository

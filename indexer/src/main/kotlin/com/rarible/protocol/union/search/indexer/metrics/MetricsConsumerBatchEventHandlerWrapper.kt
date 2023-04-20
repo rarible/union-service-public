@@ -2,7 +2,7 @@ package com.rarible.protocol.union.search.indexer.metrics
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.dto.BlockchainDto
 import java.time.Instant
 

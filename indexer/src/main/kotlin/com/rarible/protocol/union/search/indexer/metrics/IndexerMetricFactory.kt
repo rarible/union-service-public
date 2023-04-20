@@ -2,7 +2,7 @@ package com.rarible.protocol.union.search.indexer.metrics
 
 import com.rarible.core.telemetry.metrics.LongGaugeMetric
 import com.rarible.core.telemetry.metrics.RegisteredGauge
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.search.indexer.config.IndexerProperties
 import io.micrometer.core.instrument.Counter

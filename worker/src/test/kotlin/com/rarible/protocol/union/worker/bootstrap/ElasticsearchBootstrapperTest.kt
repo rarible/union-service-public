@@ -11,9 +11,9 @@ import com.rarible.protocol.union.core.elasticsearch.ReindexSchedulingService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.elasticsearch.getId
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
+import com.rarible.protocol.union.core.model.elastic.EntityDefinition
+import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
 import com.rarible.protocol.union.core.model.elastic.EsActivity
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.worker.IntegrationTest
 import io.mockk.clearMocks
 import io.mockk.coVerify

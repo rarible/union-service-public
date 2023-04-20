@@ -1,11 +1,6 @@
-package com.rarible.protocol.union.core.model.elasticsearch
+package com.rarible.protocol.union.core.model.elastic
 
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.core.model.elastic.EsActivity
-import com.rarible.protocol.union.core.model.elastic.EsCollection
-import com.rarible.protocol.union.core.model.elastic.EsItem
-import com.rarible.protocol.union.core.model.elastic.EsOrder
-import com.rarible.protocol.union.core.model.elastic.EsOwnership
 
 object EsEntitiesConfig {
 

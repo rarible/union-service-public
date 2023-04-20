@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.metrics
 
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.dto.BlockchainDto
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.ImmutableTag

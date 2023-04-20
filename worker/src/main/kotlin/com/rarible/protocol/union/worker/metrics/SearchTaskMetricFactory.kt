@@ -2,7 +2,7 @@ package com.rarible.protocol.union.worker.metrics
 
 import com.rarible.core.telemetry.metrics.CountingMetric
 import com.rarible.core.telemetry.metrics.RegisteredCounter
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncTypeDto

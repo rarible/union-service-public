@@ -6,13 +6,13 @@ import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.ReindexSchedulingService
+import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
 import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.model.elastic.EsCollection
+import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsOrder
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
-import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.task.ActivityTaskParam
 import com.rarible.protocol.union.core.task.CollectionTaskParam
 import com.rarible.protocol.union.core.task.ItemTaskParam
