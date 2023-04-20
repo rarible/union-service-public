@@ -29,7 +29,6 @@ class ActivityEventHandler(
     }
 
     override suspend fun handle(event: List<ActivityDto>) {
-        logger.info("Handling ${event.size} ActivityDto events: {}", event)
         val startTime = nowMillis()
 
         val normalEvents = mutableListOf<ActivityDto>()
@@ -44,7 +43,6 @@ class ActivityEventHandler(
         }
 
         val convertedEvents = converter.batchConvert(normalEvents)
-        logger.info("Saving events:{}", convertedEvents)
 
         val refreshPolicy =
             if (featureFlagsProperties.enableActivitySaveImmediateToElasticSearch) {

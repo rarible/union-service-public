@@ -166,6 +166,7 @@ class EsActivityConverterTest {
     @Test
     fun `should convert MintActivityDto`() = runBlocking<Unit> {
         // given
+        val customCollection = CollectionIdDto(BlockchainDto.ETHEREUM, "custom")
         val source = MintActivityDto(
             id = randomActivityId(),
             date = randomDate(),
@@ -179,6 +180,7 @@ class EsActivityConverterTest {
             itemId = randomItemId(),
             transactionHash = randomString(),
             value = randomBigInt(),
+            collection = customCollection
         )
 
         // when
@@ -193,7 +195,7 @@ class EsActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.MINT)
         assertThat(actual.userFrom).isNull()
         assertThat(actual.userTo).isEqualTo(source.owner.value)
-        assertThat(actual.collection).isEqualTo(source.itemId!!.extractCollection())
+        assertThat(actual.collection).isEqualTo(customCollection.value)
         assertThat(actual.item).isEqualTo(source.itemId!!.value)
     }
 
@@ -395,7 +397,7 @@ class EsActivityConverterTest {
         assertThat(actual.type).isEqualTo(ActivityTypeDto.LIST)
         assertThat(actual.userFrom).isEqualTo(source.maker.value)
         assertThat(actual.userTo).isNull()
-        assertThat(actual.collection).isEqualTo(source.make.type.ext.itemId!!.extractCollection())
+        assertThat(actual.collection).isEqualTo(source.make.type.ext.collectionId!!.value)
         assertThat(actual.item).isEqualTo(source.make.type.ext.itemId!!.value)
     }
 
