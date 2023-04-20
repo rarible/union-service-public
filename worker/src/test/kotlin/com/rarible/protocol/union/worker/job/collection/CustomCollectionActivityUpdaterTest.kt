@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.worker.job.collection
 
 import com.rarible.protocol.union.core.converter.EsActivityConverter
-import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
+import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitySortDto
@@ -87,7 +87,7 @@ class CustomCollectionActivityUpdaterTest {
         itemId: ItemIdDto,
         continuation: String? = null,
         returnContinuation: String? = null,
-        vararg activities: UnionActivityDto
+        vararg activities: UnionActivity
     ) {
         val activityTypes = listOf(
             ActivityTypeDto.TRANSFER,

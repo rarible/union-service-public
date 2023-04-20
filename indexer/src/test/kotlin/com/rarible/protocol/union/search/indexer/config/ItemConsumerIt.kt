@@ -4,7 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.core.event.KafkaEventFactory
-import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto

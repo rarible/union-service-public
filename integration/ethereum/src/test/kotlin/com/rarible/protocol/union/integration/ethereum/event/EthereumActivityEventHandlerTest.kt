@@ -2,7 +2,7 @@ package com.rarible.protocol.union.integration.ethereum.event
 
 import com.rarible.protocol.dto.ActivityDto
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 
 class EthereumActivityEventHandlerTest {
 
-    private val incomingEventHandler: IncomingEventHandler<UnionActivityDto> = mockk()
+    private val incomingEventHandler: IncomingEventHandler<UnionActivity> = mockk()
     private val ethAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
     private val ethActivityConverter = EthActivityConverter(ethAuctionConverter)
     private val handler = EthereumActivityEventHandler(incomingEventHandler, ethActivityConverter)

@@ -2,16 +2,16 @@ package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.dto.FlowOrderActivityMatchSideDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.model.UnionBurnActivityDto
-import com.rarible.protocol.union.core.model.UnionFlowAssetTypeFtDto
-import com.rarible.protocol.union.core.model.UnionMintActivityDto
+import com.rarible.protocol.union.core.model.UnionBurnActivity
+import com.rarible.protocol.union.core.model.UnionFlowAssetTypeFt
+import com.rarible.protocol.union.core.model.UnionMintActivity
 import com.rarible.protocol.union.core.model.UnionOrderActivityMatchSideDto
-import com.rarible.protocol.union.core.model.UnionOrderCancelListActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderListActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderMatchActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderMatchSellDto
-import com.rarible.protocol.union.core.model.UnionOrderMatchSwapDto
-import com.rarible.protocol.union.core.model.UnionTransferActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderCancelListActivity
+import com.rarible.protocol.union.core.model.UnionOrderListActivity
+import com.rarible.protocol.union.core.model.UnionOrderMatchActivity
+import com.rarible.protocol.union.core.model.UnionOrderMatchSell
+import com.rarible.protocol.union.core.model.UnionOrderMatchSwap
+import com.rarible.protocol.union.core.model.UnionTransferActivity
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
@@ -39,13 +39,13 @@ class FlowActivityConverterTest {
             left = randomFlowOrderActivityMatchSideDto(randomFlowFungibleAsset()),
             right = randomFlowOrderActivityMatchSideDto(randomFlowFungibleAsset())
         )
-        val converted = converter.convert(dto) as UnionOrderMatchActivityDto
+        val converted = converter.convert(dto) as UnionOrderMatchActivity
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
 
-        assertThat(converted).isInstanceOf(UnionOrderMatchSwapDto::class.java)
-        converted as UnionOrderMatchSwapDto
+        assertThat(converted).isInstanceOf(UnionOrderMatchSwap::class.java)
+        converted as UnionOrderMatchSwap
 
         assertMatchSide(converted.left, dto.left)
         assertMatchSide(converted.right, dto.right)
@@ -57,15 +57,15 @@ class FlowActivityConverterTest {
     @Test
     fun `flow order activity match - nft to payment`() = runBlocking<Unit> {
         val dto = randomFlowNftOrderActivitySell()
-        val converted = converter.convert(dto) as UnionOrderMatchActivityDto
+        val converted = converter.convert(dto) as UnionOrderMatchActivity
 
-        assertThat(converted).isInstanceOf(UnionOrderMatchSellDto::class.java)
-        converted as UnionOrderMatchSellDto
+        assertThat(converted).isInstanceOf(UnionOrderMatchSell::class.java)
+        converted as UnionOrderMatchSell
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
 
-        assertThat(converted.type).isEqualTo(UnionOrderMatchSellDto.Type.SELL)
+        assertThat(converted.type).isEqualTo(UnionOrderMatchSell.Type.SELL)
         assertThat(converted.nft).isEqualTo(FlowConverter.convert(dto.left.asset, BlockchainDto.FLOW))
         assertThat(converted.payment).isEqualTo(FlowConverter.convert(dto.right.asset, BlockchainDto.FLOW))
         assertThat(converted.seller).isEqualTo(
@@ -97,15 +97,15 @@ class FlowActivityConverterTest {
             left = randomFlowOrderActivityMatchSideDto(randomFlowFungibleAsset()),
             right = randomFlowOrderActivityMatchSideDto(randomFlowNftAsset())
         )
-        val converted = converter.convert(dto) as UnionOrderMatchActivityDto
+        val converted = converter.convert(dto) as UnionOrderMatchActivity
 
-        assertThat(converted).isInstanceOf(UnionOrderMatchSellDto::class.java)
-        converted as UnionOrderMatchSellDto
+        assertThat(converted).isInstanceOf(UnionOrderMatchSell::class.java)
+        converted as UnionOrderMatchSell
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
 
-        assertThat(converted.type).isEqualTo(UnionOrderMatchSellDto.Type.ACCEPT_BID)
+        assertThat(converted.type).isEqualTo(UnionOrderMatchSell.Type.ACCEPT_BID)
         assertThat(converted.nft).isEqualTo(FlowConverter.convert(dto.right.asset, BlockchainDto.FLOW))
         assertThat(converted.payment).isEqualTo(FlowConverter.convert(dto.left.asset, BlockchainDto.FLOW))
         assertThat(converted.seller).isEqualTo(
@@ -134,7 +134,7 @@ class FlowActivityConverterTest {
     @Test
     fun `flow order activity list`() = runBlocking<Unit> {
         val dto = randomFlowNftOrderActivityListDto()
-        val converted = converter.convert(dto) as UnionOrderListActivityDto
+        val converted = converter.convert(dto) as UnionOrderListActivity
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -144,10 +144,10 @@ class FlowActivityConverterTest {
         assertThat(converted.hash).isEqualTo(dto.hash)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
         assertThat(converted.make.value).isEqualTo(dto.make.value)
-        val makeType = converted.make.type as UnionFlowAssetTypeFtDto
+        val makeType = converted.make.type as UnionFlowAssetTypeFt
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         assertThat(converted.take.value).isEqualTo(dto.take.value)
-        val takeType = converted.take.type as UnionFlowAssetTypeFtDto
+        val takeType = converted.take.type as UnionFlowAssetTypeFt
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
     }
 
@@ -155,15 +155,15 @@ class FlowActivityConverterTest {
     fun `flow order activity cancel list`() = runBlocking<Unit> {
         val dto = randomFlowCancelListActivityDto()
         val converted =
-            converter.convert(dto) as UnionOrderCancelListActivityDto
+            converter.convert(dto) as UnionOrderCancelListActivity
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.hash).isEqualTo(dto.hash)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
-        val makeType = converted.make as UnionFlowAssetTypeFtDto
+        val makeType = converted.make as UnionFlowAssetTypeFt
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
-        val takeType = converted.take as UnionFlowAssetTypeFtDto
+        val takeType = converted.take as UnionFlowAssetTypeFt
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)
@@ -172,7 +172,7 @@ class FlowActivityConverterTest {
     @Test
     fun `flow item activity mint`() = runBlocking<Unit> {
         val dto = randomFlowMintDto()
-        val converted = converter.convert(dto) as UnionMintActivityDto
+        val converted = converter.convert(dto) as UnionMintActivity
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -193,7 +193,7 @@ class FlowActivityConverterTest {
     @Test
     fun `flow item activity transfer`() = runBlocking<Unit> {
         val dto = randomFlowTransferDto()
-        val converted = converter.convert(dto) as UnionTransferActivityDto
+        val converted = converter.convert(dto) as UnionTransferActivity
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -214,7 +214,7 @@ class FlowActivityConverterTest {
     @Test
     fun `flow item activity burn`() = runBlocking<Unit> {
         val dto = randomFlowBurnDto()
-        val converted = converter.convert(dto) as UnionBurnActivityDto
+        val converted = converter.convert(dto) as UnionBurnActivity
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -235,7 +235,7 @@ class FlowActivityConverterTest {
     @Test
     fun `flow order activity bid`() = runBlocking<Unit> {
         val dto = randomFlowNftOrderActivityListDto()
-        val converted = converter.convert(dto) as UnionOrderListActivityDto
+        val converted = converter.convert(dto) as UnionOrderListActivity
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
@@ -245,10 +245,10 @@ class FlowActivityConverterTest {
         assertThat(converted.hash).isEqualTo(dto.hash)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
         assertThat(converted.make.value).isEqualTo(dto.make.value)
-        val makeType = converted.make.type as UnionFlowAssetTypeFtDto
+        val makeType = converted.make.type as UnionFlowAssetTypeFt
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         assertThat(converted.take.value).isEqualTo(dto.take.value)
-        val takeType = converted.take.type as UnionFlowAssetTypeFtDto
+        val takeType = converted.take.type as UnionFlowAssetTypeFt
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
     }
 
@@ -256,15 +256,15 @@ class FlowActivityConverterTest {
     fun `flow order activity cancel bid`() = runBlocking<Unit> {
         val dto = randomFlowCancelListActivityDto()
         val converted =
-            converter.convert(dto) as UnionOrderCancelListActivityDto
+            converter.convert(dto) as UnionOrderCancelListActivity
 
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.hash).isEqualTo(dto.hash)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
-        val makeType = converted.make as UnionFlowAssetTypeFtDto
+        val makeType = converted.make as UnionFlowAssetTypeFt
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
-        val takeType = converted.take as UnionFlowAssetTypeFtDto
+        val takeType = converted.take as UnionFlowAssetTypeFt
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
         assertThat(converted.transactionHash).isEqualTo(dto.transactionHash)
         assertThat(converted.blockchainInfo!!.transactionHash).isEqualTo(dto.transactionHash)

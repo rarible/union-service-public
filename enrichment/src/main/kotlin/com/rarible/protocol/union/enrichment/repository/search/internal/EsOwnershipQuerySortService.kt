@@ -1,14 +1,11 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.model.EsItem
-import com.rarible.protocol.union.core.model.EsItemSort
-import com.rarible.protocol.union.core.model.EsOwnership
-import com.rarible.protocol.union.core.model.EsOwnershipSort
-import com.rarible.protocol.union.core.model.EsOwnershipSort.EARLIEST_FIRST
-import com.rarible.protocol.union.core.model.EsOwnershipSort.HIGHEST_SELL_PRICE_FIRST
-import com.rarible.protocol.union.core.model.EsOwnershipSort.LATEST_FIRST
-import com.rarible.protocol.union.core.model.EsOwnershipSort.LOWEST_SELL_PRICE_FIRST
-import com.rarible.protocol.union.core.service.CurrencyService
+import com.rarible.protocol.union.core.model.elastic.EsOwnership
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipSort
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipSort.EARLIEST_FIRST
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipSort.HIGHEST_SELL_PRICE_FIRST
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipSort.LATEST_FIRST
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipSort.LOWEST_SELL_PRICE_FIRST
 import org.elasticsearch.search.sort.SortOrder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.stereotype.Component

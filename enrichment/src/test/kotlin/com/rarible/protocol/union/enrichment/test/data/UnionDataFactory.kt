@@ -8,25 +8,25 @@ import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.core.model.EsActivityLite
-import com.rarible.protocol.union.core.model.EsCollection
-import com.rarible.protocol.union.core.model.EsCollectionLite
-import com.rarible.protocol.union.core.model.EsItem
-import com.rarible.protocol.union.core.model.EsTrait
-import com.rarible.protocol.union.core.model.UnionBurnActivityDto
+import com.rarible.protocol.union.core.model.UnionBurnActivity
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
-import com.rarible.protocol.union.core.model.UnionMintActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderListActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderMatchSellDto
-import com.rarible.protocol.union.core.model.UnionTransferActivityDto
+import com.rarible.protocol.union.core.model.UnionMintActivity
+import com.rarible.protocol.union.core.model.UnionOrderListActivity
+import com.rarible.protocol.union.core.model.UnionOrderMatchSell
+import com.rarible.protocol.union.core.model.UnionTransferActivity
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
+import com.rarible.protocol.union.core.model.elastic.EsActivity
+import com.rarible.protocol.union.core.model.elastic.EsActivityLite
+import com.rarible.protocol.union.core.model.elastic.EsCollection
+import com.rarible.protocol.union.core.model.elastic.EsCollectionLite
+import com.rarible.protocol.union.core.model.elastic.EsItem
+import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
@@ -228,7 +228,7 @@ fun randomUnionAuctionDto(ownershipId: OwnershipIdDto) = runBlocking {
 fun randomUnionActivityMint(itemId: ItemIdDto) = runBlocking {
     val mint = mockedEthActivityConverter.convert(
         randomEthItemMintActivity(), itemId.blockchain
-    ) as UnionMintActivityDto
+    ) as UnionMintActivity
 
     mint.copy(itemId = itemId)
 }
@@ -236,7 +236,7 @@ fun randomUnionActivityMint(itemId: ItemIdDto) = runBlocking {
 fun randomUnionActivityOrderList(blockchain: BlockchainDto) = runBlocking {
     val list = mockedEthActivityConverter.convert(
         randomEthOrderListActivity(), blockchain
-    ) as UnionOrderListActivityDto
+    ) as UnionOrderListActivity
 
     list
 }
@@ -244,7 +244,7 @@ fun randomUnionActivityOrderList(blockchain: BlockchainDto) = runBlocking {
 fun randomUnionActivityTransfer(itemId: ItemIdDto) = runBlocking {
     val mint = mockedEthActivityConverter.convert(
         randomEthItemTransferActivity(), itemId.blockchain
-    ) as UnionTransferActivityDto
+    ) as UnionTransferActivity
 
     mint.copy(itemId = itemId)
 }
@@ -252,7 +252,7 @@ fun randomUnionActivityTransfer(itemId: ItemIdDto) = runBlocking {
 fun randomUnionActivityBurn(itemId: ItemIdDto) = runBlocking {
     val mint = mockedEthActivityConverter.convert(
         randomEthItemBurnActivity(), itemId.blockchain
-    ) as UnionBurnActivityDto
+    ) as UnionBurnActivity
 
     mint.copy(itemId = itemId)
 }
@@ -263,7 +263,7 @@ fun randomUnionActivitySale(itemId: ItemIdDto) = runBlocking {
 
     mockedEthActivityConverter.convert(
         dto, itemId.blockchain
-    ) as UnionOrderMatchSellDto
+    ) as UnionOrderMatchSell
 }
 
 fun randomItemDto(itemId: ItemIdDto): ItemDto {

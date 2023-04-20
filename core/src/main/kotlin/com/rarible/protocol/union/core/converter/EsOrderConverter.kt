@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.core.converter
 
-import com.rarible.protocol.union.core.model.EsOrder
+import com.rarible.protocol.union.core.model.elastic.EsOrder
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto

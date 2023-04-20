@@ -11,12 +11,12 @@ import com.rarible.protocol.dto.Erc721AssetTypeDto
 import com.rarible.protocol.dto.Erc721LazyAssetTypeDto
 import com.rarible.protocol.dto.EthAssetTypeDto
 import com.rarible.protocol.dto.EventTimeMarksDto
-import com.rarible.protocol.union.core.model.UnionEthErc1155AssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc1155LazyAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc20AssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc721AssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc721LazyAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthEthereumAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionEthErc1155AssetType
+import com.rarible.protocol.union.core.model.UnionEthErc1155LazyAssetType
+import com.rarible.protocol.union.core.model.UnionEthErc20AssetType
+import com.rarible.protocol.union.core.model.UnionEthErc721AssetType
+import com.rarible.protocol.union.core.model.UnionEthErc721LazyAssetType
+import com.rarible.protocol.union.core.model.UnionEthEthereumAssetType
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthEventTimeMarks
@@ -47,7 +47,7 @@ class EthConverterTest {
 
         val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM)
 
-        assertThat(converted).isInstanceOf(UnionEthEthereumAssetTypeDto::class.java)
+        assertThat(converted).isInstanceOf(UnionEthEthereumAssetType::class.java)
     }
 
     @Test
@@ -56,7 +56,7 @@ class EthConverterTest {
             contract = randomAddress()
         )
 
-        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as UnionEthErc20AssetTypeDto
+        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as UnionEthErc20AssetType
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract.prefixed())
     }
@@ -68,7 +68,7 @@ class EthConverterTest {
             tokenId = randomBigInt()
         )
 
-        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as UnionEthErc721AssetTypeDto
+        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as UnionEthErc721AssetType
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)
@@ -81,7 +81,7 @@ class EthConverterTest {
             tokenId = randomBigInt()
         )
 
-        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as UnionEthErc1155AssetTypeDto
+        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as UnionEthErc1155AssetType
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)
@@ -101,7 +101,7 @@ class EthConverterTest {
             signatures = listOf(binary)
         )
 
-        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as UnionEthErc721LazyAssetTypeDto
+        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as UnionEthErc721LazyAssetType
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)
@@ -128,7 +128,7 @@ class EthConverterTest {
             supply = randomBigInt()
         )
 
-        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as UnionEthErc1155LazyAssetTypeDto
+        val converted = EthConverter.convert(assetType, BlockchainDto.ETHEREUM) as UnionEthErc1155LazyAssetType
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract.prefixed())
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)

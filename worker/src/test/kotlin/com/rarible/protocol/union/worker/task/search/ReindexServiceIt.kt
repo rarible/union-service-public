@@ -2,7 +2,7 @@ package com.rarible.protocol.union.worker.task.search
 
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
-import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository

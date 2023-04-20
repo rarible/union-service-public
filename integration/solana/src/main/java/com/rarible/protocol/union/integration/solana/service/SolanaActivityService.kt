@@ -10,7 +10,7 @@ import com.rarible.protocol.solana.dto.ActivityFilterByUserDto
 import com.rarible.protocol.solana.dto.ActivityFilterDto
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivitySortDto
@@ -36,7 +36,7 @@ open class SolanaActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val solanaTypes = types.mapNotNull { activityConverter.convertToAllTypes(it) }
         if (solanaTypes.isEmpty()) return Slice.empty()
 
@@ -51,7 +51,7 @@ open class SolanaActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val solanaSort = sort?.let { activityConverter.convert(sort) }
         val solanaType = type?.let { activityConverter.convert(type) }
         val result = activityApi.getActivitiesSync(solanaType, continuation, size, solanaSort).awaitFirst()
@@ -67,7 +67,7 @@ open class SolanaActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         return Slice.empty()
     }
 
@@ -77,7 +77,7 @@ open class SolanaActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val solanaTypes = types.mapNotNull { activityConverter.convertToCollectionTypes(it) }
         if (solanaTypes.isEmpty()) return Slice.empty()
 
@@ -94,7 +94,7 @@ open class SolanaActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val solanaTypes = types.mapNotNull { activityConverter.convertToItemTypes(it) }
         if (solanaTypes.isEmpty()) return Slice.empty()
 
@@ -112,7 +112,7 @@ open class SolanaActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         return Slice.empty() // TODO Not implemented
     }
 
@@ -123,7 +123,7 @@ open class SolanaActivityService(
         to: Instant?,
         continuation: String?,
         size: Int, sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val solanaTypes = types.mapNotNull { activityConverter.convertToUserTypes(it) }
         if (solanaTypes.isEmpty()) return Slice.empty()
 
@@ -137,7 +137,7 @@ open class SolanaActivityService(
 
     }
 
-    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<UnionActivityDto> {
+    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<UnionActivity> {
         val result = activityApi.searchActivitiesByIds(ActivitiesByIdRequestDto(ids.map { it.id }))
             .awaitFirst()
         return result.activities.map { activityConverter.convert(it, blockchain) }
@@ -148,7 +148,7 @@ open class SolanaActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val solanaSort = sort?.let { SolanaConverter.convert(it) }
         val result = activityApi.searchActivities(filter, continuation, size, solanaSort)
             .awaitFirst()

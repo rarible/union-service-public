@@ -1,16 +1,13 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.api.service.UserActivityTypeConverter
-import com.rarible.protocol.union.core.FeatureFlagsProperties
-import com.rarible.protocol.union.core.model.ActivityByCollectionFilter
+import com.rarible.protocol.union.core.model.elastic.ActivityByCollectionFilter
+import com.rarible.protocol.union.core.model.elastic.ElasticActivityQueryGenericFilter
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
 import com.rarible.protocol.union.dto.CollectionIdDto
-import io.mockk.every
+import com.rarible.protocol.union.dto.UserActivityTypeDto
 import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.SpyK
 import io.mockk.junit5.MockKExtension
 import org.assertj.core.api.Assertions.assertThat
@@ -18,7 +15,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.Instant
-
 
 @ExtendWith(MockKExtension::class)
 class ActivityFilterConverterTest {

@@ -1,13 +1,13 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.api.service.UserActivityTypeConverter
-import com.rarible.protocol.union.core.model.ActivityByCollectionFilter
+import com.rarible.protocol.union.core.model.elastic.ActivityByCollectionFilter
+import com.rarible.protocol.union.core.model.elastic.ElasticActivityFilter
+import com.rarible.protocol.union.core.model.elastic.ElasticActivityQueryGenericFilter
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.core.model.ElasticActivityFilter
-import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
 import org.springframework.stereotype.Service
 import java.time.Instant
 

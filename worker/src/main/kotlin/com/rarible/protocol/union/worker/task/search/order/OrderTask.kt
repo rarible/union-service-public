@@ -1,11 +1,10 @@
 package com.rarible.protocol.union.worker.task.search.order
 
-import com.rarible.core.logging.Logger
 import com.rarible.core.task.TaskHandler
 import com.rarible.core.task.TaskRepository
-import com.rarible.protocol.union.core.model.EsOrder
-import com.rarible.protocol.union.worker.config.OrderReindexProperties
+import com.rarible.protocol.union.core.model.elastic.EsOrder
 import com.rarible.protocol.union.core.task.OrderTaskParam
+import com.rarible.protocol.union.worker.config.OrderReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow

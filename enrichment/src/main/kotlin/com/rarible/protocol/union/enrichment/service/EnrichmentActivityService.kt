@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.enrichment.service
 
-import com.rarible.protocol.union.core.model.UnionActivityDto
-import com.rarible.protocol.union.core.model.UnionMintActivityDto
-import com.rarible.protocol.union.core.model.UnionTransferActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
+import com.rarible.protocol.union.core.model.UnionMintActivity
+import com.rarible.protocol.union.core.model.UnionTransferActivity
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityDto
@@ -27,7 +27,7 @@ class EnrichmentActivityService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun enrich(activity: UnionActivityDto): ActivityDto {
+    suspend fun enrich(activity: UnionActivity): ActivityDto {
         // We expect here only one of them != null
         val itemId = activity.itemId()
         val collectionId = activity.collectionId()
@@ -42,7 +42,7 @@ class EnrichmentActivityService(
         return ActivityDtoConverter.convert(activity, data)
     }
 
-    suspend fun enrich(activities: List<UnionActivityDto>): List<ActivityDto> {
+    suspend fun enrich(activities: List<UnionActivity>): List<ActivityDto> {
         return activities.map { enrich(it) }
     }
 
@@ -58,7 +58,7 @@ class EnrichmentActivityService(
         return OwnershipSourceDto.TRANSFER
     }
 
-    private suspend fun getItemMint(itemId: ItemIdDto, owner: UnionAddress): UnionActivityDto? {
+    private suspend fun getItemMint(itemId: ItemIdDto, owner: UnionAddress): UnionActivity? {
         // For item there should be only one mint
         val mint = activityRouter.getService(itemId.blockchain).getActivitiesByItem(
             types = listOf(ActivityTypeDto.MINT),
@@ -69,7 +69,7 @@ class EnrichmentActivityService(
         ).entities.firstOrNull()
 
         // Originally, there ALWAYS should be a mint
-        if (mint == null || (mint as UnionMintActivityDto).owner != owner) {
+        if (mint == null || (mint as UnionMintActivity).owner != owner) {
             logger.info("Mint activity NOT found for Item [{}] and owner [{}]", itemId, owner.fullId())
             return null
         }
@@ -78,7 +78,7 @@ class EnrichmentActivityService(
         return mint
     }
 
-    private suspend fun getItemPurchase(itemId: ItemIdDto, owner: UnionAddress): UnionActivityDto? {
+    private suspend fun getItemPurchase(itemId: ItemIdDto, owner: UnionAddress): UnionActivity? {
         // TODO not sure this is a good way to search transfer, ideally there should be filter by user
         var continuation: String? = null
         do {
@@ -90,7 +90,7 @@ class EnrichmentActivityService(
                 sort = ActivitySortDto.LATEST_FIRST
             )
             val purchase = response.entities.firstOrNull {
-                (it is UnionTransferActivityDto)
+                (it is UnionTransferActivity)
                     && it.owner == owner
                     && it.purchase == true
             }

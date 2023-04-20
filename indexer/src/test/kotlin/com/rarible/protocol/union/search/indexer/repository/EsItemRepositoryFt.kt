@@ -6,11 +6,11 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.EsItem
-import com.rarible.protocol.union.core.model.EsItemGenericFilter
-import com.rarible.protocol.union.core.model.EsItemSort
-import com.rarible.protocol.union.core.model.EsTrait
-import com.rarible.protocol.union.core.model.TraitFilter
+import com.rarible.protocol.union.core.model.elastic.EsItem
+import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
+import com.rarible.protocol.union.core.model.elastic.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsTrait
+import com.rarible.protocol.union.core.model.elastic.TraitFilter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration

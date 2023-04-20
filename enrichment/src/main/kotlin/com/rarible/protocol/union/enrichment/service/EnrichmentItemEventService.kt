@@ -3,7 +3,7 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.PoolItemAction
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionItemChangeEvent
@@ -126,7 +126,7 @@ class EnrichmentItemEventService(
     }
 
     suspend fun onActivity(
-        activity: UnionActivityDto,
+        activity: UnionActivity,
         item: UnionItem? = null,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true

@@ -2,12 +2,12 @@ package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
-import com.rarible.protocol.union.core.model.ElasticActivityFilter
-import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActivityLite
-import com.rarible.protocol.union.core.model.EsActivityLite
-import com.rarible.protocol.union.core.model.EsActivityQueryResult
-import com.rarible.protocol.union.core.model.EsActivitySort
+import com.rarible.protocol.union.core.model.elastic.ElasticActivityFilter
+import com.rarible.protocol.union.core.model.elastic.EsActivity
+import com.rarible.protocol.union.core.model.elastic.EsActivityCursor.Companion.fromActivityLite
+import com.rarible.protocol.union.core.model.elastic.EsActivityLite
+import com.rarible.protocol.union.core.model.elastic.EsActivityQueryResult
+import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst

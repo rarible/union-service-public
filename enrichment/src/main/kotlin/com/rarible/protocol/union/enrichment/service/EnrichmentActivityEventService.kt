@@ -2,7 +2,7 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.OutgoingActivityEventListener
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.blockchainAndIndexerMarks
 import com.rarible.protocol.union.core.model.isBlockchainEvent
 import com.rarible.protocol.union.core.model.offchainAndIndexerMarks
@@ -50,7 +50,7 @@ class EnrichmentActivityEventService(
         }
     }
 
-    suspend fun onActivity(activity: UnionActivityDto) {
+    suspend fun onActivity(activity: UnionActivity) {
         // Workaround since we can't pass EVentTimeMarks for activities
         val isBlockchainEvent = activity.isBlockchainEvent()
         val marks = if (isBlockchainEvent) {

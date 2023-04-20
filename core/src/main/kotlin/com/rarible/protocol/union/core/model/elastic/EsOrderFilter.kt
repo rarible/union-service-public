@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalStdlibApi::class, ExperimentalStdlibApi::class)
 
-package com.rarible.protocol.union.core.model
+package com.rarible.protocol.union.core.model.elastic
 
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto

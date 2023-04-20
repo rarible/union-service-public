@@ -2,7 +2,7 @@ package com.rarible.protocol.union.core.converter.helper
 
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.converter.EsOrderConverter
-import com.rarible.protocol.union.core.model.EsOrder
+import com.rarible.protocol.union.core.model.elastic.EsOrder
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress

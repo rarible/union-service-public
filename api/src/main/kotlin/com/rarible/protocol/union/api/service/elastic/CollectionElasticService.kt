@@ -4,10 +4,10 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.FeatureFlagsProperties
-import com.rarible.protocol.union.core.model.EsCollectionCursor.Companion.fromCollectionLite
-import com.rarible.protocol.union.core.model.EsCollectionGenericFilter
-import com.rarible.protocol.union.core.model.EsCollectionLite
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.elastic.EsCollectionCursor.Companion.fromCollectionLite
+import com.rarible.protocol.union.core.model.elastic.EsCollectionGenericFilter
+import com.rarible.protocol.union.core.model.elastic.EsCollectionLite
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto

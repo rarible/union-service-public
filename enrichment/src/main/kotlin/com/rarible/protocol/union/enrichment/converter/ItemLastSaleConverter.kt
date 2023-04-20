@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.enrichment.converter
 
-import com.rarible.protocol.union.core.model.UnionActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderMatchSellDto
+import com.rarible.protocol.union.core.model.UnionActivity
+import com.rarible.protocol.union.core.model.UnionOrderMatchSell
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.enrichment.model.ItemLastSale
@@ -27,12 +27,12 @@ object ItemLastSaleConverter {
         }
     }
 
-    fun convert(sell: UnionActivityDto?): ItemLastSale? {
+    fun convert(sell: UnionActivity?): ItemLastSale? {
         if (sell == null) {
             return null
         }
         return when (sell) {
-            is UnionOrderMatchSellDto -> ItemLastSale(
+            is UnionOrderMatchSell -> ItemLastSale(
                 date = sell.date,
                 seller = sell.seller,
                 buyer = sell.buyer,

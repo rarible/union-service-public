@@ -1,14 +1,13 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.model.EsItem
-import com.rarible.protocol.union.core.model.EsItemSort
-import com.rarible.protocol.union.core.model.EsItemSort.EARLIEST_FIRST
-import com.rarible.protocol.union.core.model.EsItemSort.HIGHEST_BID_PRICE_FIRST
-import com.rarible.protocol.union.core.model.EsItemSort.HIGHEST_SELL_PRICE_FIRST
-import com.rarible.protocol.union.core.model.EsItemSort.LATEST_FIRST
-import com.rarible.protocol.union.core.model.EsItemSort.LOWEST_BID_PRICE_FIRST
-import com.rarible.protocol.union.core.model.EsItemSort.LOWEST_SELL_PRICE_FIRST
-import com.rarible.protocol.union.core.service.CurrencyService
+import com.rarible.protocol.union.core.model.elastic.EsItem
+import com.rarible.protocol.union.core.model.elastic.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsItemSort.EARLIEST_FIRST
+import com.rarible.protocol.union.core.model.elastic.EsItemSort.HIGHEST_BID_PRICE_FIRST
+import com.rarible.protocol.union.core.model.elastic.EsItemSort.HIGHEST_SELL_PRICE_FIRST
+import com.rarible.protocol.union.core.model.elastic.EsItemSort.LATEST_FIRST
+import com.rarible.protocol.union.core.model.elastic.EsItemSort.LOWEST_BID_PRICE_FIRST
+import com.rarible.protocol.union.core.model.elastic.EsItemSort.LOWEST_SELL_PRICE_FIRST
 import org.elasticsearch.search.sort.SortOrder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.stereotype.Component

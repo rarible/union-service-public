@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.apm.CaptureTransaction
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityEventService
@@ -24,7 +24,7 @@ class UnionInternalActivityEventHandler(
     }
 
     @CaptureTransaction("UnionActivityEvent")
-    suspend fun onEvent(event: UnionActivityDto) {
+    suspend fun onEvent(event: UnionActivity) {
         try {
             enrichmentActivityEventService.onActivity(event)
         } catch (e: Throwable) {

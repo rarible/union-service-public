@@ -2,9 +2,9 @@ package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
-import com.rarible.protocol.union.core.model.EsOwnership
-import com.rarible.protocol.union.core.model.EsOwnershipFilter
-import com.rarible.protocol.union.core.model.EsOwnershipSort
+import com.rarible.protocol.union.core.model.elastic.EsOwnership
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipFilter
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipSort
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsEntitySearchAfterCursorService

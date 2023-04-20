@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
-import com.rarible.protocol.union.core.model.UnionAssetDto
-import com.rarible.protocol.union.core.model.UnionEthCollectionAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionEthCollectionAssetType
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitySortDto
@@ -86,7 +86,7 @@ class EnrichmentActivityServiceTest {
     fun `enrich - ok, custom collection by collection`() = runBlocking<Unit> {
         val contract = ContractAddress(BlockchainDto.ETHEREUM, randomEthAddress())
         val collectionId = CollectionIdDto(contract.blockchain, contract.value)
-        val collectionAsset = UnionAssetDto(UnionEthCollectionAssetTypeDto(contract), BigDecimal.ONE)
+        val collectionAsset = UnionAsset(UnionEthCollectionAssetType(contract), BigDecimal.ONE)
         val customCollection = randomEthCollectionId()
 
         val activity = randomUnionActivityOrderList(BlockchainDto.ETHEREUM)

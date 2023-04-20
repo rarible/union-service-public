@@ -4,10 +4,10 @@ import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.dipdup.client.core.model.Asset
-import com.rarible.protocol.union.core.model.UnionTezosFTAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionTezosMTAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionTezosNFTAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionTezosXTZAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionTezosFTAssetType
+import com.rarible.protocol.union.core.model.UnionTezosMTAssetType
+import com.rarible.protocol.union.core.model.UnionTezosNFTAssetType
+import com.rarible.protocol.union.core.model.UnionTezosXTZAssetType
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupConverter
 import org.assertj.core.api.Assertions.assertThat
@@ -23,7 +23,7 @@ class TezosConverterTest {
         val converted = DipDupConverter.convert(asset, BlockchainDto.TEZOS)
 
         assertThat(converted.value).isEqualTo(asset.assetValue)
-        assertThat(converted.type).isInstanceOf(UnionTezosXTZAssetTypeDto::class.java)
+        assertThat(converted.type).isInstanceOf(UnionTezosXTZAssetType::class.java)
     }
 
     @Test
@@ -32,7 +32,7 @@ class TezosConverterTest {
 
         val converted = DipDupConverter.convert(assetType, BlockchainDto.TEZOS)
 
-        assertThat(converted).isInstanceOf(UnionTezosXTZAssetTypeDto::class.java)
+        assertThat(converted).isInstanceOf(UnionTezosXTZAssetType::class.java)
     }
 
     @Test
@@ -42,7 +42,7 @@ class TezosConverterTest {
             tokenId = BigInteger.ZERO
         )
 
-        val converted = DipDupConverter.convert(assetType, BlockchainDto.TEZOS) as UnionTezosFTAssetTypeDto
+        val converted = DipDupConverter.convert(assetType, BlockchainDto.TEZOS) as UnionTezosFTAssetType
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract)
     }
@@ -54,7 +54,7 @@ class TezosConverterTest {
             tokenId = randomBigInt()
         )
 
-        val converted = DipDupConverter.convert(assetType, BlockchainDto.TEZOS) as UnionTezosNFTAssetTypeDto
+        val converted = DipDupConverter.convert(assetType, BlockchainDto.TEZOS) as UnionTezosNFTAssetType
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract)
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)
@@ -67,7 +67,7 @@ class TezosConverterTest {
             tokenId = randomBigInt()
         )
 
-        val converted = DipDupConverter.convert(assetType, BlockchainDto.TEZOS) as UnionTezosMTAssetTypeDto
+        val converted = DipDupConverter.convert(assetType, BlockchainDto.TEZOS) as UnionTezosMTAssetType
 
         assertThat(converted.contract.value).isEqualTo(assetType.contract)
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)

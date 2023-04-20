@@ -1,26 +1,26 @@
 package com.rarible.protocol.union.enrichment.converter
 
-import com.rarible.protocol.union.core.model.UnionAssetDto
-import com.rarible.protocol.union.core.model.UnionAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthAmmNftAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthCollectionAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthCryptoPunksAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc1155AssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc1155LazyAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc20AssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc721AssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc721LazyAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthEthereumAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthGenerativeArtAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionFlowAssetTypeFtDto
-import com.rarible.protocol.union.core.model.UnionFlowAssetTypeNftDto
-import com.rarible.protocol.union.core.model.UnionSolanaFtAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionSolanaNftAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionSolanaSolAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionTezosFTAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionTezosMTAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionTezosNFTAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionTezosXTZAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionEthAmmNftAssetType
+import com.rarible.protocol.union.core.model.UnionEthCollectionAssetType
+import com.rarible.protocol.union.core.model.UnionEthCryptoPunksAssetType
+import com.rarible.protocol.union.core.model.UnionEthErc1155AssetType
+import com.rarible.protocol.union.core.model.UnionEthErc1155LazyAssetType
+import com.rarible.protocol.union.core.model.UnionEthErc20AssetType
+import com.rarible.protocol.union.core.model.UnionEthErc721AssetType
+import com.rarible.protocol.union.core.model.UnionEthErc721LazyAssetType
+import com.rarible.protocol.union.core.model.UnionEthEthereumAssetType
+import com.rarible.protocol.union.core.model.UnionEthGenerativeArtAssetType
+import com.rarible.protocol.union.core.model.UnionFlowAssetTypeFt
+import com.rarible.protocol.union.core.model.UnionFlowAssetTypeNft
+import com.rarible.protocol.union.core.model.UnionSolanaFtAssetType
+import com.rarible.protocol.union.core.model.UnionSolanaNftAssetType
+import com.rarible.protocol.union.core.model.UnionSolanaSolAssetType
+import com.rarible.protocol.union.core.model.UnionTezosFTAssetType
+import com.rarible.protocol.union.core.model.UnionTezosMTAssetType
+import com.rarible.protocol.union.core.model.UnionTezosNFTAssetType
+import com.rarible.protocol.union.core.model.UnionTezosXTZAssetType
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -49,7 +49,7 @@ import com.rarible.protocol.union.enrichment.converter.data.EnrichmentAssetData
 object AssetDtoConverter {
 
     fun convert(
-        source: UnionAssetDto,
+        source: UnionAsset,
         data: EnrichmentAssetData = EnrichmentAssetData.empty()
     ): AssetDto {
         return AssetDto(
@@ -59,34 +59,34 @@ object AssetDtoConverter {
     }
 
     fun convert(
-        source: UnionAssetTypeDto,
+        source: UnionAssetType,
         data: EnrichmentAssetData = EnrichmentAssetData.empty()
     ): AssetTypeDto {
         return when (source) {
-            is UnionEthAmmNftAssetTypeDto -> convert(source, data)
-            is UnionEthCollectionAssetTypeDto -> convert(source, data)
-            is UnionEthCryptoPunksAssetTypeDto -> convert(source, data)
-            is UnionEthErc1155AssetTypeDto -> convert(source, data)
-            is UnionEthErc1155LazyAssetTypeDto -> convert(source, data)
-            is UnionEthErc20AssetTypeDto -> convert(source, data)
-            is UnionEthErc721AssetTypeDto -> convert(source, data)
-            is UnionEthErc721LazyAssetTypeDto -> convert(source, data)
-            is UnionEthEthereumAssetTypeDto -> convert(source, data)
-            is UnionEthGenerativeArtAssetTypeDto -> convert(source, data)
-            is UnionFlowAssetTypeFtDto -> convert(source, data)
-            is UnionFlowAssetTypeNftDto -> convert(source, data)
-            is UnionSolanaFtAssetTypeDto -> convert(source, data)
-            is UnionSolanaNftAssetTypeDto -> convert(source, data)
-            is UnionSolanaSolAssetTypeDto -> convert(source, data)
-            is UnionTezosFTAssetTypeDto -> convert(source, data)
-            is UnionTezosMTAssetTypeDto -> convert(source, data)
-            is UnionTezosNFTAssetTypeDto -> convert(source, data)
-            is UnionTezosXTZAssetTypeDto -> convert(source, data)
+            is UnionEthAmmNftAssetType -> convert(source, data)
+            is UnionEthCollectionAssetType -> convert(source, data)
+            is UnionEthCryptoPunksAssetType -> convert(source, data)
+            is UnionEthErc1155AssetType -> convert(source, data)
+            is UnionEthErc1155LazyAssetType -> convert(source, data)
+            is UnionEthErc20AssetType -> convert(source, data)
+            is UnionEthErc721AssetType -> convert(source, data)
+            is UnionEthErc721LazyAssetType -> convert(source, data)
+            is UnionEthEthereumAssetType -> convert(source, data)
+            is UnionEthGenerativeArtAssetType -> convert(source, data)
+            is UnionFlowAssetTypeFt -> convert(source, data)
+            is UnionFlowAssetTypeNft -> convert(source, data)
+            is UnionSolanaFtAssetType -> convert(source, data)
+            is UnionSolanaNftAssetType -> convert(source, data)
+            is UnionSolanaSolAssetType -> convert(source, data)
+            is UnionTezosFTAssetType -> convert(source, data)
+            is UnionTezosMTAssetType -> convert(source, data)
+            is UnionTezosNFTAssetType -> convert(source, data)
+            is UnionTezosXTZAssetType -> convert(source, data)
         }
     }
 
     private fun convert(
-        source: UnionEthAmmNftAssetTypeDto,
+        source: UnionEthAmmNftAssetType,
         data: EnrichmentAssetData
     ): EthAmmNftAssetTypeDto {
         return EthAmmNftAssetTypeDto(
@@ -96,7 +96,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionEthCollectionAssetTypeDto,
+        source: UnionEthCollectionAssetType,
         data: EnrichmentAssetData
     ): EthCollectionAssetTypeDto {
         return EthCollectionAssetTypeDto(
@@ -106,7 +106,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionEthCryptoPunksAssetTypeDto,
+        source: UnionEthCryptoPunksAssetType,
         data: EnrichmentAssetData
     ): EthCryptoPunksAssetTypeDto {
         return EthCryptoPunksAssetTypeDto(
@@ -117,7 +117,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionEthErc1155AssetTypeDto,
+        source: UnionEthErc1155AssetType,
         data: EnrichmentAssetData
     ): EthErc1155AssetTypeDto {
         return EthErc1155AssetTypeDto(
@@ -128,7 +128,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionEthErc1155LazyAssetTypeDto,
+        source: UnionEthErc1155LazyAssetType,
         data: EnrichmentAssetData
     ): EthErc1155LazyAssetTypeDto {
         return EthErc1155LazyAssetTypeDto(
@@ -144,7 +144,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionEthErc20AssetTypeDto,
+        source: UnionEthErc20AssetType,
         data: EnrichmentAssetData
     ): EthErc20AssetTypeDto {
         return EthErc20AssetTypeDto(
@@ -153,7 +153,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionEthErc721AssetTypeDto,
+        source: UnionEthErc721AssetType,
         data: EnrichmentAssetData
     ): EthErc721AssetTypeDto {
         return EthErc721AssetTypeDto(
@@ -164,7 +164,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionEthErc721LazyAssetTypeDto,
+        source: UnionEthErc721LazyAssetType,
         data: EnrichmentAssetData
     ): EthErc721LazyAssetTypeDto {
         return EthErc721LazyAssetTypeDto(
@@ -179,14 +179,14 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionEthEthereumAssetTypeDto,
+        source: UnionEthEthereumAssetType,
         data: EnrichmentAssetData
     ): EthEthereumAssetTypeDto {
         return EthEthereumAssetTypeDto()
     }
 
     private fun convert(
-        source: UnionEthGenerativeArtAssetTypeDto,
+        source: UnionEthGenerativeArtAssetType,
         data: EnrichmentAssetData
     ): EthGenerativeArtAssetTypeDto {
         return EthGenerativeArtAssetTypeDto(
@@ -196,7 +196,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionFlowAssetTypeFtDto,
+        source: UnionFlowAssetTypeFt,
         data: EnrichmentAssetData
     ): FlowAssetTypeFtDto {
         return FlowAssetTypeFtDto(
@@ -205,7 +205,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionFlowAssetTypeNftDto,
+        source: UnionFlowAssetTypeNft,
         data: EnrichmentAssetData
     ): FlowAssetTypeNftDto {
         return FlowAssetTypeNftDto(
@@ -216,7 +216,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionSolanaFtAssetTypeDto,
+        source: UnionSolanaFtAssetType,
         data: EnrichmentAssetData
     ): SolanaFtAssetTypeDto {
         return SolanaFtAssetTypeDto(
@@ -225,7 +225,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionSolanaNftAssetTypeDto,
+        source: UnionSolanaNftAssetType,
         data: EnrichmentAssetData
     ): SolanaNftAssetTypeDto {
         return SolanaNftAssetTypeDto(
@@ -236,14 +236,14 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionSolanaSolAssetTypeDto,
+        source: UnionSolanaSolAssetType,
         data: EnrichmentAssetData
     ): SolanaSolAssetTypeDto {
         return SolanaSolAssetTypeDto()
     }
 
     private fun convert(
-        source: UnionTezosFTAssetTypeDto,
+        source: UnionTezosFTAssetType,
         data: EnrichmentAssetData
     ): TezosFTAssetTypeDto {
         return TezosFTAssetTypeDto(
@@ -253,7 +253,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionTezosMTAssetTypeDto,
+        source: UnionTezosMTAssetType,
         data: EnrichmentAssetData
     ): TezosMTAssetTypeDto {
         return TezosMTAssetTypeDto(
@@ -264,7 +264,7 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionTezosNFTAssetTypeDto,
+        source: UnionTezosNFTAssetType,
         data: EnrichmentAssetData
     ): TezosNFTAssetTypeDto {
         return TezosNFTAssetTypeDto(
@@ -275,13 +275,13 @@ object AssetDtoConverter {
     }
 
     private fun convert(
-        source: UnionTezosXTZAssetTypeDto,
+        source: UnionTezosXTZAssetType,
         data: EnrichmentAssetData
     ): TezosXTZAssetTypeDto {
         return TezosXTZAssetTypeDto()
     }
 
-    private fun UnionAssetTypeDto.getEnrichedCollection(data: EnrichmentAssetData): CollectionIdDto? {
+    private fun UnionAssetType.getEnrichedCollection(data: EnrichmentAssetData): CollectionIdDto? {
         return data.customCollection ?: this.collectionId()
     }
 

@@ -3,9 +3,9 @@ package com.rarible.protocol.union.enrichment.repository.search
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
-import com.rarible.protocol.union.core.model.EsCollection
-import com.rarible.protocol.union.core.model.EsCollectionFilter
-import com.rarible.protocol.union.core.model.EsCollectionLite
+import com.rarible.protocol.union.core.model.elastic.EsCollection
+import com.rarible.protocol.union.core.model.elastic.EsCollectionFilter
+import com.rarible.protocol.union.core.model.elastic.EsCollectionLite
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsCollectionQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst

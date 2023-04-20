@@ -1,12 +1,9 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.model.EsCollection
-import com.rarible.protocol.union.core.model.EsCollectionCursor
-import com.rarible.protocol.union.core.model.EsCollectionFilter
-import com.rarible.protocol.union.core.model.EsCollectionGenericFilter
-import com.rarible.protocol.union.core.model.EsOwnership
+import com.rarible.protocol.union.core.model.elastic.EsCollection
+import com.rarible.protocol.union.core.model.elastic.EsCollectionFilter
+import com.rarible.protocol.union.core.model.elastic.EsCollectionGenericFilter
 import org.elasticsearch.index.query.BoolQueryBuilder
-import org.elasticsearch.index.query.RangeQueryBuilder
 import org.elasticsearch.search.sort.SortOrder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder

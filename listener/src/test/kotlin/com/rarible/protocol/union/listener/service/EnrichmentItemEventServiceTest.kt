@@ -2,7 +2,6 @@ package com.rarible.protocol.union.listener.service
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
-import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter

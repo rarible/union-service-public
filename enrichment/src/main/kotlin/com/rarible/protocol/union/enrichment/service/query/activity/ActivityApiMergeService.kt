@@ -2,7 +2,7 @@ package com.rarible.protocol.union.enrichment.service.query.activity
 
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.continuation.UnionActivityContinuation
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.PageSize
@@ -213,7 +213,7 @@ class ActivityApiMergeService(
         cursor: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): List<ArgSlice<UnionActivityDto>> {
+    ): List<ArgSlice<UnionActivity>> {
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
         val slices = getActivitiesByBlockchains(cursor, evaluatedBlockchains) { blockchain, continuation ->
             val blockDto = BlockchainDto.valueOf(blockchain)
@@ -230,7 +230,7 @@ class ActivityApiMergeService(
         cursor: String?,
         safeSize: Int,
         sort: ActivitySortDto?
-    ): List<ArgSlice<UnionActivityDto>> {
+    ): List<ArgSlice<UnionActivity>> {
         val evaluatedBlockchains = groupedByBlockchain.keys.map { it.name }
         val slices = getActivitiesByBlockchains(cursor, evaluatedBlockchains) { blockchain, continuation ->
             val blockDto = BlockchainDto.valueOf(blockchain)
@@ -241,7 +241,7 @@ class ActivityApiMergeService(
     }
 
     private suspend fun merge(
-        blockchainPages: Map<BlockchainDto, Slice<UnionActivityDto>>,
+        blockchainPages: Map<BlockchainDto, Slice<UnionActivity>>,
         size: Int,
         sort: ActivitySortDto?
     ): ActivitiesDto {
@@ -254,7 +254,7 @@ class ActivityApiMergeService(
         return dto.copy(continuation = continuation)
     }
 
-    private suspend fun toDtoWithCursor(slice: Slice<UnionActivityDto>): ActivitiesDto {
+    private suspend fun toDtoWithCursor(slice: Slice<UnionActivity>): ActivitiesDto {
         return ActivitiesDto(
             continuation = null,
             cursor = slice.continuation,
@@ -262,7 +262,7 @@ class ActivityApiMergeService(
         )
     }
 
-    private suspend fun toDto(slice: Slice<UnionActivityDto>): ActivitiesDto {
+    private suspend fun toDto(slice: Slice<UnionActivity>): ActivitiesDto {
         return ActivitiesDto(
             continuation = slice.continuation,
             cursor = slice.continuation,
@@ -276,7 +276,7 @@ class ActivityApiMergeService(
         blockchain: BlockchainDto,
         size: Int?,
         sort: ActivitySortDto?,
-        clientCall: suspend (continuation: String?, safeSize: Int) -> Slice<UnionActivityDto>
+        clientCall: suspend (continuation: String?, safeSize: Int) -> Slice<UnionActivity>
     ): ActivitiesDto {
         val factory = continuationFactory(sort)
         val safeSize = PageSize.ACTIVITY.limit(size)
@@ -310,8 +310,8 @@ class ActivityApiMergeService(
     private suspend fun getActivitiesByBlockchains(
         continuation: String?,
         blockchains: Collection<String>,
-        clientCall: suspend (blockchain: String, continuation: String?) -> Slice<UnionActivityDto>
-    ): List<ArgSlice<UnionActivityDto>> {
+        clientCall: suspend (blockchain: String, continuation: String?) -> Slice<UnionActivity>
+    ): List<ArgSlice<UnionActivity>> {
         val currentContinuation = CombinedContinuation.parse(continuation)
 
         return blockchains.mapAsync { blockchain ->

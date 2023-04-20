@@ -41,5 +41,5 @@ data class UnionInternalActivityLegacyEvent(
 ) : UnionInternalBlockchainEvent()
 
 data class UnionInternalActivityEvent(
-    val event: UnionActivityDto
+    val event: UnionActivity
 ) : UnionInternalBlockchainEvent()

@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.model.ActivityByCollectionFilter
-import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.core.model.EsActivitySort
-import com.rarible.protocol.union.core.model.ElasticActivityFilter
-import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.core.model.elastic.ActivityByCollectionFilter
+import com.rarible.protocol.union.core.model.elastic.ElasticActivityFilter
+import com.rarible.protocol.union.core.model.elastic.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.core.model.elastic.EsActivity
+import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.MatchQueryBuilder

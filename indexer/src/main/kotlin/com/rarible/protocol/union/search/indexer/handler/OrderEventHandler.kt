@@ -4,7 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsOrderConverter
-import com.rarible.protocol.union.core.model.EsOrder
+import com.rarible.protocol.union.core.model.elastic.EsOrder
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderEventDto

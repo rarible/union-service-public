@@ -14,7 +14,7 @@ import com.rarible.protocol.union.core.event.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaEvent
@@ -91,7 +91,7 @@ class DipDupConsumerConfiguration(
 
     @Bean
     fun dipDupActivityEventHandler(
-        handler: IncomingEventHandler<UnionActivityDto>,
+        handler: IncomingEventHandler<UnionActivity>,
         converter: DipDupActivityConverter,
         transfersEventHandler: DipDupTransfersEventHandler,
         properties: DipDupIntegrationProperties,

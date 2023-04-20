@@ -3,7 +3,7 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.PoolItemAction
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
@@ -215,7 +215,7 @@ class EnrichmentOwnershipEventService(
     }
 
     suspend fun onActivity(
-        activity: UnionActivityDto,
+        activity: UnionActivity,
         ownership: UnionOwnership? = null,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true

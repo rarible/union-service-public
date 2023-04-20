@@ -9,7 +9,7 @@ import com.rarible.protocol.union.core.event.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaEvent
@@ -75,7 +75,7 @@ class SolanaConsumerConfiguration(
 
     @Bean
     fun solanaActivityEventHandler(
-        handler: IncomingEventHandler<UnionActivityDto>,
+        handler: IncomingEventHandler<UnionActivity>,
         converter: SolanaActivityConverter
     ): SolanaActivityEventHandler {
         return SolanaActivityEventHandler(handler, converter)
@@ -137,7 +137,7 @@ class SolanaConsumerConfiguration(
     @Bean
     fun solanaActivityWorker(
         factory: SolanaEventsConsumerFactory,
-        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.ActivityDto, UnionActivityDto>
+        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.ActivityDto, UnionActivity>
     ): KafkaConsumerWorker<com.rarible.protocol.solana.dto.ActivityDto> {
         val consumer = factory.createActivityEventConsumer(consumerFactory.activityGroup)
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers, batchSize)

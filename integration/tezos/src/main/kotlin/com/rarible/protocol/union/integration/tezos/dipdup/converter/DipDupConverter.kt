@@ -3,12 +3,12 @@ package com.rarible.protocol.union.integration.tezos.dipdup.converter
 import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
-import com.rarible.protocol.union.core.model.UnionAssetDto
-import com.rarible.protocol.union.core.model.UnionAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionTezosFTAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionTezosMTAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionTezosNFTAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionTezosXTZAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionTezosFTAssetType
+import com.rarible.protocol.union.core.model.UnionTezosMTAssetType
+import com.rarible.protocol.union.core.model.UnionTezosNFTAssetType
+import com.rarible.protocol.union.core.model.UnionTezosXTZAssetType
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -21,32 +21,32 @@ import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
 
 object DipDupConverter {
 
-    fun convert(source: Asset, blockchain: BlockchainDto): UnionAssetDto {
-        return UnionAssetDto(
+    fun convert(source: Asset, blockchain: BlockchainDto): UnionAsset {
+        return UnionAsset(
             type = convert(source = source.assetType, blockchain = blockchain),
             value = source.assetValue
         )
     }
 
-    fun convert(source: Asset.AssetType, blockchain: BlockchainDto): UnionAssetTypeDto {
+    fun convert(source: Asset.AssetType, blockchain: BlockchainDto): UnionAssetType {
         return when (source) {
-            is Asset.XTZ -> UnionTezosXTZAssetTypeDto()
-            is Asset.FT -> UnionTezosFTAssetTypeDto(
+            is Asset.XTZ -> UnionTezosXTZAssetType()
+            is Asset.FT -> UnionTezosFTAssetType(
                 contract = ContractAddressConverter.convert(blockchain, source.contract),
                 tokenId = source.tokenId
             )
 
-            is Asset.MT -> UnionTezosMTAssetTypeDto(
+            is Asset.MT -> UnionTezosMTAssetType(
                 contract = ContractAddressConverter.convert(blockchain, source.contract),
                 tokenId = source.tokenId
             )
 
-            is Asset.NFT -> UnionTezosNFTAssetTypeDto(
+            is Asset.NFT -> UnionTezosNFTAssetType(
                 contract = ContractAddressConverter.convert(blockchain, source.contract),
                 tokenId = source.tokenId
             )
 
-            else -> UnionTezosXTZAssetTypeDto()
+            else -> UnionTezosXTZAssetType()
         }
     }
 

@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.core.converter.EsOrderConverter
-import com.rarible.protocol.union.core.model.EsAllOrderFilter
-import com.rarible.protocol.union.core.model.EsOrderSort
+import com.rarible.protocol.union.core.model.elastic.EsAllOrderFilter
+import com.rarible.protocol.union.core.model.elastic.EsOrderSort
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto

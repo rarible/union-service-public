@@ -9,7 +9,7 @@ import com.rarible.dipdup.client.model.DipDupSyncSort
 import com.rarible.protocol.union.core.continuation.UnionActivityContinuation
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
@@ -55,7 +55,7 @@ open class TezosActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         return getDipDupAndTzktActivities(types, continuation, size, sort)
     }
 
@@ -90,7 +90,7 @@ open class TezosActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val tezosSort = sort?.let { DipDupActivityConverter.convert(it) } ?: DipDupSyncSort.DB_UPDATE_DESC
         val tezosType = type?.let { DipDupActivityConverter.convert(it) }
         val page = activityClient.getActivitiesSync(tezosType, tezosSort, size, continuation)
@@ -105,7 +105,7 @@ open class TezosActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         return Slice.empty()
     }
 
@@ -115,7 +115,7 @@ open class TezosActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         // This method isn't implemented in the new backend
         return Slice.empty()
     }
@@ -126,7 +126,7 @@ open class TezosActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         return getDipDupAndTzktActivitiesByItem(types, contract, tokenId, continuation, size, sort)
     }
@@ -164,7 +164,7 @@ open class TezosActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         return Slice.empty() // TODO Not implemented
     }
 
@@ -176,12 +176,12 @@ open class TezosActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         // TODO this method isn't implemented in the new backend
         return Slice.empty()
     }
 
-    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<UnionActivityDto> = coroutineScope {
+    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<UnionActivity> = coroutineScope {
         val itemActivitiesIds = mutableListOf<String>()
         val orderActivitiesIds = mutableListOf<String>()
 

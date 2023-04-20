@@ -3,9 +3,9 @@ package com.rarible.protocol.union.api.service.elastic
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.api.metrics.ElasticMetricsFactory
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.core.model.EsActivityCursor
 import com.rarible.protocol.union.core.model.TypedActivityId
+import com.rarible.protocol.union.core.model.elastic.EsActivity
+import com.rarible.protocol.union.core.model.elastic.EsActivityCursor
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityIdDto

@@ -4,11 +4,11 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.flatMapAsync
 import com.rarible.protocol.union.api.metrics.ElasticMetricsFactory
-import com.rarible.protocol.union.core.model.EsActivityCursor.Companion.fromActivityLite
-import com.rarible.protocol.union.core.model.EsActivityLite
-import com.rarible.protocol.union.core.model.EsActivitySort
 import com.rarible.protocol.union.core.model.TypedActivityId
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
+import com.rarible.protocol.union.core.model.elastic.EsActivityCursor.Companion.fromActivityLite
+import com.rarible.protocol.union.core.model.elastic.EsActivityLite
+import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
@@ -296,7 +296,7 @@ class ActivityElasticService(
     private fun checkMissingIds(
         blockchain: BlockchainDto,
         ids: List<TypedActivityId>,
-        response: List<UnionActivityDto>
+        response: List<UnionActivity>
     ) {
         val foundIds = mutableSetOf<String>()
         response.mapTo(foundIds) { it.id.value }

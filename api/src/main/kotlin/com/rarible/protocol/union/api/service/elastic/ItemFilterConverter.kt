@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.protocol.union.core.model.EsItemFilter
-import com.rarible.protocol.union.core.model.EsItemGenericFilter
-import com.rarible.protocol.union.core.model.TraitFilter
+import com.rarible.protocol.union.core.model.elastic.EsItemFilter
+import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
+import com.rarible.protocol.union.core.model.elastic.TraitFilter
 import com.rarible.protocol.union.dto.ItemsSearchFilterDto
 import org.springframework.stereotype.Service
 import java.time.Instant

@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.converter
 
 import com.rarible.dipdup.client.core.model.DipDupMintActivity
-import com.rarible.protocol.union.core.model.UnionMintActivityDto
+import com.rarible.protocol.union.core.model.UnionMintActivity
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemMintActivity
@@ -19,7 +19,7 @@ class TezosActivityConverterTest {
     fun `tezos item activity mint`() = runBlocking<Unit> {
         val dto = randomTezosItemMintActivity()
         val actType = dto as DipDupMintActivity
-        val converted = dipdupActivityConverter.convert(dto, BlockchainDto.TEZOS) as UnionMintActivityDto
+        val converted = dipdupActivityConverter.convert(dto, BlockchainDto.TEZOS) as UnionMintActivity
 
         assertThat(converted.id.value).isEqualTo(actType.id)
         assertThat(converted.date).isEqualTo(actType.date.toInstant())

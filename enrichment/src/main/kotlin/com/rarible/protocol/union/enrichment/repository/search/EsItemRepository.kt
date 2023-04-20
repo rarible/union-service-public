@@ -2,10 +2,10 @@ package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
-import com.rarible.protocol.union.core.model.EsItem
-import com.rarible.protocol.union.core.model.EsItemFilter
-import com.rarible.protocol.union.core.model.EsItemLite
-import com.rarible.protocol.union.core.model.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsItem
+import com.rarible.protocol.union.core.model.elastic.EsItemFilter
+import com.rarible.protocol.union.core.model.elastic.EsItemLite
+import com.rarible.protocol.union.core.model.elastic.EsItemSort
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsEntitySearchAfterCursorService

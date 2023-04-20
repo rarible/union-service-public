@@ -6,26 +6,26 @@ import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.exception.UnionDataFormatException
 import com.rarible.protocol.union.core.handler.AbstractBlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import org.slf4j.LoggerFactory
 
 open class DipDupActivityEventHandler(
-    override val handler: IncomingEventHandler<UnionActivityDto>,
+    override val handler: IncomingEventHandler<UnionActivity>,
     private val dipDupOrderConverter: DipDupActivityConverter,
     private val dipDupTransfersEventHandler: DipDupTransfersEventHandler,
     private val properties: DipDupIntegrationProperties,
     private val mapper: ObjectMapper
-) : AbstractBlockchainEventHandler<DipDupActivity, UnionActivityDto>(
+) : AbstractBlockchainEventHandler<DipDupActivity, UnionActivity>(
     BlockchainDto.TEZOS,
     EventType.ACTIVITY
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    override suspend fun convert(event: DipDupActivity): UnionActivityDto? {
+    override suspend fun convert(event: DipDupActivity): UnionActivity? {
         logger.info("Received DipDup activity event: {}", mapper.writeValueAsString(event))
         return try {
             if (properties.useDipDupTokens) {

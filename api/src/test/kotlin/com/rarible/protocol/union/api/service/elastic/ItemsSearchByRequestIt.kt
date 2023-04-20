@@ -9,7 +9,7 @@ import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.test.nativeTestCurrencies

@@ -3,7 +3,7 @@ package com.rarible.protocol.union.core.elasticsearch
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.getRealName
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.moveAlias
-import com.rarible.protocol.union.core.model.EsMetadata
+import com.rarible.protocol.union.core.model.elastic.EsMetadata
 import com.rarible.protocol.union.core.model.elasticsearch.CurrentEntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import kotlinx.coroutines.reactive.awaitFirstOrNull

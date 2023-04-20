@@ -30,23 +30,23 @@ import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.TransferDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
-import com.rarible.protocol.union.core.model.UnionActivityDto
-import com.rarible.protocol.union.core.model.UnionAuctionBidActivityDto
-import com.rarible.protocol.union.core.model.UnionAuctionCancelActivityDto
-import com.rarible.protocol.union.core.model.UnionAuctionEndActivityDto
-import com.rarible.protocol.union.core.model.UnionAuctionFinishActivityDto
-import com.rarible.protocol.union.core.model.UnionAuctionOpenActivityDto
-import com.rarible.protocol.union.core.model.UnionAuctionStartActivityDto
-import com.rarible.protocol.union.core.model.UnionBurnActivityDto
-import com.rarible.protocol.union.core.model.UnionMintActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
+import com.rarible.protocol.union.core.model.UnionAuctionBidActivity
+import com.rarible.protocol.union.core.model.UnionAuctionCancelActivity
+import com.rarible.protocol.union.core.model.UnionAuctionEndActivity
+import com.rarible.protocol.union.core.model.UnionAuctionFinishActivity
+import com.rarible.protocol.union.core.model.UnionAuctionOpenActivity
+import com.rarible.protocol.union.core.model.UnionAuctionStartActivity
+import com.rarible.protocol.union.core.model.UnionBurnActivity
+import com.rarible.protocol.union.core.model.UnionMintActivity
 import com.rarible.protocol.union.core.model.UnionOrderActivityMatchSideDto
-import com.rarible.protocol.union.core.model.UnionOrderBidActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderCancelBidActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderCancelListActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderListActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderMatchSellDto
-import com.rarible.protocol.union.core.model.UnionOrderMatchSwapDto
-import com.rarible.protocol.union.core.model.UnionTransferActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderBidActivity
+import com.rarible.protocol.union.core.model.UnionOrderCancelBidActivity
+import com.rarible.protocol.union.core.model.UnionOrderCancelListActivity
+import com.rarible.protocol.union.core.model.UnionOrderListActivity
+import com.rarible.protocol.union.core.model.UnionOrderMatchSell
+import com.rarible.protocol.union.core.model.UnionOrderMatchSwap
+import com.rarible.protocol.union.core.model.UnionTransferActivity
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -79,7 +79,7 @@ class EthActivityConverter(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun convert(source: com.rarible.protocol.dto.ActivityDto, blockchain: BlockchainDto): UnionActivityDto {
+    suspend fun convert(source: com.rarible.protocol.dto.ActivityDto, blockchain: BlockchainDto): UnionActivity {
         try {
             return convertInternal(source, blockchain)
         } catch (e: Exception) {
@@ -95,7 +95,7 @@ class EthActivityConverter(
     private suspend fun convertInternal(
         source: com.rarible.protocol.dto.ActivityDto,
         blockchain: BlockchainDto
-    ): UnionActivityDto {
+    ): UnionActivity {
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
             is OrderActivityMatchDto -> {
@@ -134,7 +134,7 @@ class EthActivityConverter(
             is OrderActivityBidDto -> {
                 val payment = EthConverter.convert(source.make, blockchain)
                 val nft = EthConverter.convert(source.take, blockchain)
-                UnionOrderBidActivityDto(
+                UnionOrderBidActivity(
                     id = activityId,
                     date = source.date,
                     price = source.price,
@@ -153,7 +153,7 @@ class EthActivityConverter(
             is OrderActivityListDto -> {
                 val payment = EthConverter.convert(source.take, blockchain)
                 val nft = EthConverter.convert(source.make, blockchain)
-                UnionOrderListActivityDto(
+                UnionOrderListActivity(
                     id = activityId,
                     date = source.date,
                     price = source.price,
@@ -170,7 +170,7 @@ class EthActivityConverter(
             }
 
             is OrderActivityCancelBidDto -> {
-                UnionOrderCancelBidActivityDto(
+                UnionOrderCancelBidActivity(
                     id = activityId,
                     date = source.date,
                     source = convert(source.source),
@@ -192,7 +192,7 @@ class EthActivityConverter(
             }
 
             is OrderActivityCancelListDto -> {
-                UnionOrderCancelListActivityDto(
+                UnionOrderCancelListActivity(
                     id = activityId,
                     date = source.date,
                     source = convert(source.source),
@@ -215,7 +215,7 @@ class EthActivityConverter(
 
             is MintDto -> {
                 val contract = EthConverter.convert(source.contract)
-                UnionMintActivityDto(
+                UnionMintActivity(
                     id = activityId,
                     date = source.date,
                     owner = EthConverter.convert(source.owner, blockchain),
@@ -240,7 +240,7 @@ class EthActivityConverter(
 
             is BurnDto -> {
                 val contract = EthConverter.convert(source.contract)
-                UnionBurnActivityDto(
+                UnionBurnActivity(
                     id = activityId,
                     date = source.date,
                     owner = EthConverter.convert(source.owner, blockchain),
@@ -264,7 +264,7 @@ class EthActivityConverter(
 
             is TransferDto -> {
                 val contract = EthConverter.convert(source.contract)
-                UnionTransferActivityDto(
+                UnionTransferActivity(
                     id = activityId,
                     date = source.date,
                     from = EthConverter.convert(source.from, blockchain),
@@ -289,7 +289,7 @@ class EthActivityConverter(
             }
 
             is AuctionActivityOpenDto -> {
-                UnionAuctionOpenActivityDto(
+                UnionAuctionOpenActivity(
                     id = activityId,
                     date = source.date,
                     auction = auctionConverter.convert(source.auction, blockchain),
@@ -300,7 +300,7 @@ class EthActivityConverter(
             }
 
             is AuctionActivityBidDto -> {
-                UnionAuctionBidActivityDto(
+                UnionAuctionBidActivity(
                     id = activityId,
                     date = source.date,
                     bid = EthConverter.convert(source.bid, blockchain),
@@ -312,7 +312,7 @@ class EthActivityConverter(
             }
 
             is AuctionActivityFinishDto -> {
-                UnionAuctionFinishActivityDto(
+                UnionAuctionFinishActivity(
                     id = activityId,
                     date = source.date,
                     auction = auctionConverter.convert(source.auction, blockchain),
@@ -323,7 +323,7 @@ class EthActivityConverter(
             }
 
             is AuctionActivityCancelDto -> {
-                UnionAuctionCancelActivityDto(
+                UnionAuctionCancelActivity(
                     id = activityId,
                     date = source.date,
                     auction = auctionConverter.convert(source.auction, blockchain),
@@ -334,7 +334,7 @@ class EthActivityConverter(
             }
 
             is AuctionActivityStartDto -> {
-                UnionAuctionStartActivityDto(
+                UnionAuctionStartActivity(
                     id = activityId,
                     date = source.date,
                     auction = auctionConverter.convert(source.auction, blockchain),
@@ -344,7 +344,7 @@ class EthActivityConverter(
             }
 
             is AuctionActivityEndDto -> {
-                UnionAuctionEndActivityDto(
+                UnionAuctionEndActivity(
                     id = activityId,
                     date = source.date,
                     auction = auctionConverter.convert(source.auction, blockchain),
@@ -360,13 +360,13 @@ class EthActivityConverter(
         blockchain: BlockchainDto,
         nft: com.rarible.protocol.dto.OrderActivityMatchSideDto,
         payment: com.rarible.protocol.dto.OrderActivityMatchSideDto,
-        type: UnionOrderMatchSellDto.Type,
+        type: UnionOrderMatchSell.Type,
         activityId: ActivityIdDto
-    ): UnionOrderMatchSellDto {
+    ): UnionOrderMatchSell {
         val unionPayment = EthConverter.convert(payment.asset, blockchain)
         val priceUsd = source.priceUsd
 
-        return UnionOrderMatchSellDto(
+        return UnionOrderMatchSell(
             id = activityId,
             date = source.date,
             source = convert(source.source),
@@ -385,8 +385,8 @@ class EthActivityConverter(
             type = type,
             reverted = source.reverted ?: false,
             lastUpdatedAt = source.lastUpdatedAt,
-            sellMarketplaceMarker = if (type == UnionOrderMatchSellDto.Type.SELL) source.marketplaceMarker?.toString() else source.counterMarketplaceMarker?.toString(),
-            buyMarketplaceMarker = if (type == UnionOrderMatchSellDto.Type.ACCEPT_BID) source.marketplaceMarker?.toString() else source.counterMarketplaceMarker?.toString(),
+            sellMarketplaceMarker = if (type == UnionOrderMatchSell.Type.SELL) source.marketplaceMarker?.toString() else source.counterMarketplaceMarker?.toString(),
+            buyMarketplaceMarker = if (type == UnionOrderMatchSell.Type.ACCEPT_BID) source.marketplaceMarker?.toString() else source.counterMarketplaceMarker?.toString(),
         )
     }
 
@@ -394,7 +394,7 @@ class EthActivityConverter(
         source: OrderActivityMatchDto,
         blockchain: BlockchainDto,
         activityId: ActivityIdDto
-    ) = UnionOrderMatchSwapDto(
+    ) = UnionOrderMatchSwap(
         id = activityId,
         date = source.date,
         source = convert(source.source),
@@ -642,8 +642,8 @@ class EthActivityConverter(
 
     private fun convert(source: OrderActivityMatchDto.Type) =
         when (source) {
-            OrderActivityMatchDto.Type.SELL -> UnionOrderMatchSellDto.Type.SELL
-            OrderActivityMatchDto.Type.ACCEPT_BID -> UnionOrderMatchSellDto.Type.ACCEPT_BID
+            OrderActivityMatchDto.Type.SELL -> UnionOrderMatchSell.Type.SELL
+            OrderActivityMatchDto.Type.ACCEPT_BID -> UnionOrderMatchSell.Type.ACCEPT_BID
         }
 }
 

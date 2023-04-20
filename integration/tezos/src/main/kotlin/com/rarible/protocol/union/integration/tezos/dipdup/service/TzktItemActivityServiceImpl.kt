@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.service
 
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -20,7 +20,7 @@ class TzktItemActivityServiceImpl(
         continuation: String?,
         limit: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val tzktTypes = TzktActivityConverter.convertToTzktTypes(types)
         val sortAsc = when (sort) {
             ActivitySortDto.EARLIEST_FIRST -> true
@@ -42,7 +42,7 @@ class TzktItemActivityServiceImpl(
         continuation: String?,
         limit: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val tzktTypes = TzktActivityConverter.convertToTzktTypes(types)
         val sortAsc = when (sort) {
             ActivitySortDto.EARLIEST_FIRST -> true
@@ -66,7 +66,7 @@ class TzktItemActivityServiceImpl(
         }
     }
 
-    override suspend fun getByIds(ids: List<String>, wrapHash: Boolean): List<UnionActivityDto> {
+    override suspend fun getByIds(ids: List<String>, wrapHash: Boolean): List<UnionActivity> {
         return tzktTokenClient.getActivitiesByIds(ids, wrapHash).map { TzktActivityConverter.convert(it, blockchain) }
     }
 

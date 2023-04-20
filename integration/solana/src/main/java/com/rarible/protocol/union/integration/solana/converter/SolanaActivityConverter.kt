@@ -6,17 +6,17 @@ import com.rarible.protocol.solana.dto.ActivityFilterByItemTypeDto
 import com.rarible.protocol.solana.dto.ActivityFilterByUserTypeDto
 import com.rarible.protocol.solana.dto.OrderMatchActivityDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.model.UnionActivityDto
-import com.rarible.protocol.union.core.model.UnionBurnActivityDto
-import com.rarible.protocol.union.core.model.UnionMintActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
+import com.rarible.protocol.union.core.model.UnionBurnActivity
+import com.rarible.protocol.union.core.model.UnionMintActivity
 import com.rarible.protocol.union.core.model.UnionOrderActivityMatchSideDto
-import com.rarible.protocol.union.core.model.UnionOrderBidActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderCancelBidActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderCancelListActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderListActivityDto
-import com.rarible.protocol.union.core.model.UnionOrderMatchSellDto
-import com.rarible.protocol.union.core.model.UnionOrderMatchSwapDto
-import com.rarible.protocol.union.core.model.UnionTransferActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderBidActivity
+import com.rarible.protocol.union.core.model.UnionOrderCancelBidActivity
+import com.rarible.protocol.union.core.model.UnionOrderCancelListActivity
+import com.rarible.protocol.union.core.model.UnionOrderListActivity
+import com.rarible.protocol.union.core.model.UnionOrderMatchSell
+import com.rarible.protocol.union.core.model.UnionOrderMatchSwap
+import com.rarible.protocol.union.core.model.UnionTransferActivity
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.ActivityBlockchainInfoDto
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -40,7 +40,7 @@ class SolanaActivityConverter(
     suspend fun convert(
         source: com.rarible.protocol.solana.dto.ActivityDto,
         blockchain: BlockchainDto
-    ): UnionActivityDto {
+    ): UnionActivity {
         val activityId = ActivityIdDto(blockchain, source.id)
         val activitySource = OrderActivitySourceDto.RARIBLE
         return when (source) {
@@ -60,7 +60,7 @@ class SolanaActivityConverter(
 
                 if (nftType.isNft() && paymentType.isCurrency()) {
                     val priceUsd = currencyService.toUsd(blockchain, payment.type, source.price, source.date)
-                    UnionOrderMatchSellDto(
+                    UnionOrderMatchSell(
                         id = activityId,
                         date = source.date,
                         source = activitySource,
@@ -91,7 +91,7 @@ class SolanaActivityConverter(
                     val sellSide = UnionOrderActivityMatchSideDto(seller, source.sellerOrderHash, nft)
                     val buySide = UnionOrderActivityMatchSideDto(buyer, source.buyerOrderHash, payment)
 
-                    UnionOrderMatchSwapDto(
+                    UnionOrderMatchSwap(
                         id = activityId,
                         date = source.date,
                         source = activitySource,
@@ -110,7 +110,7 @@ class SolanaActivityConverter(
                 val nft = SolanaConverter.convert(source.take, blockchain)
                 val priceUsd = currencyService.toUsd(blockchain, payment.type, source.price, source.date)
 
-                UnionOrderBidActivityDto(
+                UnionOrderBidActivity(
                     id = activityId,
                     date = source.date,
                     price = source.price,
@@ -129,7 +129,7 @@ class SolanaActivityConverter(
                 val nft = SolanaConverter.convert(source.make, blockchain)
                 val priceUsd = currencyService.toUsd(blockchain, payment.type, source.price, source.date)
 
-                UnionOrderListActivityDto(
+                UnionOrderListActivity(
                     id = activityId,
                     date = source.date,
                     price = source.price,
@@ -144,7 +144,7 @@ class SolanaActivityConverter(
                 )
             }
             is com.rarible.protocol.solana.dto.OrderCancelBidActivityDto -> {
-                UnionOrderCancelBidActivityDto(
+                UnionOrderCancelBidActivity(
                     id = activityId,
                     date = source.date,
                     source = activitySource,
@@ -160,7 +160,7 @@ class SolanaActivityConverter(
                 )
             }
             is com.rarible.protocol.solana.dto.OrderCancelListActivityDto -> {
-                UnionOrderCancelListActivityDto(
+                UnionOrderCancelListActivity(
                     id = activityId,
                     date = source.date,
                     source = activitySource,
@@ -177,7 +177,7 @@ class SolanaActivityConverter(
             }
             is com.rarible.protocol.solana.dto.MintActivityDto -> {
 
-                UnionMintActivityDto(
+                UnionMintActivity(
                     id = activityId,
                     date = source.date,
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
@@ -192,7 +192,7 @@ class SolanaActivityConverter(
                 )
             }
             is com.rarible.protocol.solana.dto.BurnActivityDto -> {
-                UnionBurnActivityDto(
+                UnionBurnActivity(
                     id = activityId,
                     date = source.date,
                     owner = UnionAddressConverter.convert(blockchain, source.owner),
@@ -207,7 +207,7 @@ class SolanaActivityConverter(
                 )
             }
             is com.rarible.protocol.solana.dto.TransferActivityDto -> {
-                UnionTransferActivityDto(
+                UnionTransferActivity(
                     id = activityId,
                     date = source.date,
                     from = UnionAddressConverter.convert(blockchain, source.from),
@@ -319,8 +319,8 @@ class SolanaActivityConverter(
 
     private fun convert(source: OrderMatchActivityDto.Type) =
         when (source) {
-            OrderMatchActivityDto.Type.SELL -> UnionOrderMatchSellDto.Type.SELL
-            OrderMatchActivityDto.Type.ACCEPT_BID -> UnionOrderMatchSellDto.Type.ACCEPT_BID
+            OrderMatchActivityDto.Type.SELL -> UnionOrderMatchSell.Type.SELL
+            OrderMatchActivityDto.Type.ACCEPT_BID -> UnionOrderMatchSell.Type.ACCEPT_BID
         }
 
     fun convert(source: SyncSortDto): com.rarible.protocol.solana.dto.SyncSortDto =

@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.integration.solana.converter
 
-import com.rarible.protocol.union.core.model.UnionAssetDto
-import com.rarible.protocol.union.core.model.UnionAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionSolanaFtAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionSolanaNftAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionSolanaSolAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionSolanaFtAssetType
+import com.rarible.protocol.union.core.model.UnionSolanaNftAssetType
+import com.rarible.protocol.union.core.model.UnionSolanaSolAssetType
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
@@ -17,24 +17,24 @@ import com.rarible.protocol.union.dto.SolanaSolAssetTypeDto
 
 object SolanaConverter {
 
-    fun convert(source: com.rarible.protocol.solana.dto.AssetDto, blockchain: BlockchainDto): UnionAssetDto {
-        return UnionAssetDto(
+    fun convert(source: com.rarible.protocol.solana.dto.AssetDto, blockchain: BlockchainDto): UnionAsset {
+        return UnionAsset(
             type = convert(source.type, blockchain),
             value = source.value
         )
     }
 
-    fun convert(source: com.rarible.protocol.solana.dto.AssetTypeDto, blockchain: BlockchainDto): UnionAssetTypeDto =
+    fun convert(source: com.rarible.protocol.solana.dto.AssetTypeDto, blockchain: BlockchainDto): UnionAssetType =
         when (source) {
-            is com.rarible.protocol.solana.dto.SolanaNftAssetTypeDto -> UnionSolanaNftAssetTypeDto(
+            is com.rarible.protocol.solana.dto.SolanaNftAssetTypeDto -> UnionSolanaNftAssetType(
                 itemId = ItemIdDto(blockchain, source.mint)
             )
 
-            is com.rarible.protocol.solana.dto.SolanaFtAssetTypeDto -> UnionSolanaFtAssetTypeDto(
+            is com.rarible.protocol.solana.dto.SolanaFtAssetTypeDto -> UnionSolanaFtAssetType(
                 address = ContractAddress(blockchain, source.mint)
             )
 
-            is com.rarible.protocol.solana.dto.SolanaSolAssetTypeDto -> UnionSolanaSolAssetTypeDto()
+            is com.rarible.protocol.solana.dto.SolanaSolAssetTypeDto -> UnionSolanaSolAssetType()
         }
 
     @Deprecated("remove after migration to UnionOrder")

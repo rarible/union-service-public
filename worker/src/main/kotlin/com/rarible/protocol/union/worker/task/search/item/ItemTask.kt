@@ -3,7 +3,7 @@ package com.rarible.protocol.union.worker.task.search.item
 import com.rarible.core.task.TaskHandler
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
-import com.rarible.protocol.union.core.model.EsItem
+import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.task.ItemTaskParam

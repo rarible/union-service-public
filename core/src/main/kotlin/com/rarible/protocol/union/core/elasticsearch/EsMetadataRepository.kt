@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.core.elasticsearch
 
-import com.rarible.protocol.union.core.model.EsMetadata
+import com.rarible.protocol.union.core.model.elastic.EsMetadata
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations

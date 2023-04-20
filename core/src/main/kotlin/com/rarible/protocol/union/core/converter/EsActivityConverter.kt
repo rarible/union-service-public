@@ -3,7 +3,7 @@ package com.rarible.protocol.union.core.converter
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.EsActivityEnrichmentProperties
 import com.rarible.protocol.union.core.converter.helper.SellActivityEnricher
-import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.truncatedToSeconds

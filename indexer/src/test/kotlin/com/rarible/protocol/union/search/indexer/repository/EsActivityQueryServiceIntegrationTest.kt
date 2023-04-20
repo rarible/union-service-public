@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.search.indexer.repository
 
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.ElasticActivityQueryGenericFilter
-import com.rarible.protocol.union.core.model.EsActivityCursor
-import com.rarible.protocol.union.core.model.EsActivitySort
+import com.rarible.protocol.union.core.model.elastic.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.core.model.elastic.EsActivityCursor
+import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository

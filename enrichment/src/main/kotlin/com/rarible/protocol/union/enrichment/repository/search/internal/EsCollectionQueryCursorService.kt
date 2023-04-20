@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.model.EsCollection
-import com.rarible.protocol.union.core.model.EsCollectionCursor
+import com.rarible.protocol.union.core.model.elastic.EsCollection
+import com.rarible.protocol.union.core.model.elastic.EsCollectionCursor
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.springframework.stereotype.Component
 

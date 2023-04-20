@@ -6,8 +6,8 @@ import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.core.model.elastic.EsOwnership
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.AuctionBidDto

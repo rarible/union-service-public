@@ -2,7 +2,7 @@ package com.rarible.protocol.union.worker.task.search.ownership
 
 import com.rarible.core.task.TaskHandler
 import com.rarible.core.task.TaskRepository
-import com.rarible.protocol.union.core.model.EsOwnership
+import com.rarible.protocol.union.core.model.elastic.EsOwnership
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import com.rarible.protocol.union.worker.config.OwnershipReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory

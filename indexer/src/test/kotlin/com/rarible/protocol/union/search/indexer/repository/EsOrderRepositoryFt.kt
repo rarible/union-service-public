@@ -2,13 +2,13 @@ package com.rarible.protocol.union.search.indexer.repository
 
 import com.rarible.protocol.union.core.converter.EsOrderConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.EsAllOrderFilter
-import com.rarible.protocol.union.core.model.EsOrder
-import com.rarible.protocol.union.core.model.EsOrderBidOrdersByItem
-import com.rarible.protocol.union.core.model.EsOrderSellOrders
-import com.rarible.protocol.union.core.model.EsOrderSellOrdersByItem
-import com.rarible.protocol.union.core.model.EsOrderSort
-import com.rarible.protocol.union.core.model.EsOrdersByMakers
+import com.rarible.protocol.union.core.model.elastic.EsAllOrderFilter
+import com.rarible.protocol.union.core.model.elastic.EsOrder
+import com.rarible.protocol.union.core.model.elastic.EsOrderBidOrdersByItem
+import com.rarible.protocol.union.core.model.elastic.EsOrderSellOrders
+import com.rarible.protocol.union.core.model.elastic.EsOrderSellOrdersByItem
+import com.rarible.protocol.union.core.model.elastic.EsOrderSort
+import com.rarible.protocol.union.core.model.elastic.EsOrdersByMakers
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation

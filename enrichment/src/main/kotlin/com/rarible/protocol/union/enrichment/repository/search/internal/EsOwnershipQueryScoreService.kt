@@ -1,9 +1,8 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.model.EsOwnership
-import com.rarible.protocol.union.core.model.EsOwnershipSort
+import com.rarible.protocol.union.core.model.elastic.EsOwnership
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipSort
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OwnershipSearchSortDto
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder
 import org.springframework.stereotype.Service

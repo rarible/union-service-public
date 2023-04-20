@@ -7,12 +7,12 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.api.service.api.ItemEnrichService
 import com.rarible.protocol.union.api.service.api.ItemQueryService
 import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
-import com.rarible.protocol.union.core.model.EsItemLite
-import com.rarible.protocol.union.core.model.EsItemSort
-import com.rarible.protocol.union.core.model.EsOwnership
-import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
-import com.rarible.protocol.union.core.model.EsOwnershipSort
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.elastic.EsItemLite
+import com.rarible.protocol.union.core.model.elastic.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsOwnership
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipByOwnerFilter
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipSort
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.PageSize

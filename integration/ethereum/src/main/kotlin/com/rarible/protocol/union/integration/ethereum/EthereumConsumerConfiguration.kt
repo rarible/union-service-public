@@ -13,7 +13,7 @@ import com.rarible.protocol.union.core.event.ConsumerFactory
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionAuctionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
@@ -96,7 +96,7 @@ class EthereumConsumerConfiguration(
     @Bean
     @Qualifier("ethereum.activity.handler")
     fun ethereumActivityEventHandler(
-        handler: IncomingEventHandler<UnionActivityDto>,
+        handler: IncomingEventHandler<UnionActivity>,
         converter: EthActivityConverter
     ): EthActivityEventHandler {
         return EthereumActivityEventHandler(handler, converter)
@@ -173,7 +173,7 @@ class EthereumConsumerConfiguration(
     @Bean
     fun ethereumActivityWorker(
         @Qualifier("ethereum.activity.consumer.factory") factory: EthActivityEventsConsumerFactory,
-        @Qualifier("ethereum.activity.handler") handler: BlockchainEventHandler<com.rarible.protocol.dto.ActivityDto, UnionActivityDto>
+        @Qualifier("ethereum.activity.handler") handler: BlockchainEventHandler<com.rarible.protocol.dto.ActivityDto, UnionActivity>
     ): KafkaConsumerWorker<com.rarible.protocol.dto.ActivityDto> {
         val consumer = factory.createActivityConsumer(consumerFactory.activityGroup, Blockchain.ETHEREUM)
         return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers, batchSize)

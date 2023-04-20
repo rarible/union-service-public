@@ -2,11 +2,10 @@ package com.rarible.protocol.union.search.indexer.repository
 
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.EsOwnershipByItemFilter
-import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipByItemFilter
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipByOwnerFilter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest

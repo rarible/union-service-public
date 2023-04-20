@@ -2,7 +2,7 @@ package com.rarible.protocol.union.integration.tezos.dipdup.service
 
 import com.rarible.core.logging.Logger
 import com.rarible.dipdup.client.OrderActivityClient
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -23,7 +23,7 @@ class DipdupOrderActivityServiceImpl(
         continuation: String?,
         limit: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val dipdupTypes = dipDupActivityConverter.convertToDipDupOrderActivitiesTypes(types)
         val sortAsc = when (sort) {
             ActivitySortDto.EARLIEST_FIRST -> true
@@ -43,7 +43,7 @@ class DipdupOrderActivityServiceImpl(
         continuation: String?,
         limit: Int,
         sort: SyncSortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val sortTezos = sort?.let { DipDupActivityConverter.convert(it) }
         logger.info("Fetch dipdup all order activities sync: $continuation, $limit, $sort")
         val page = dipdupActivityClient.getActivitiesSync(limit, continuation, sortTezos)
@@ -60,7 +60,7 @@ class DipdupOrderActivityServiceImpl(
         continuation: String?,
         limit: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val dipdupTypes = dipDupActivityConverter.convertToDipDupOrderActivitiesTypes(types)
         val sortAsc = when (sort) {
             ActivitySortDto.EARLIEST_FIRST -> true
@@ -85,7 +85,7 @@ class DipdupOrderActivityServiceImpl(
         }
     }
 
-    override suspend fun getByIds(ids: List<String>): List<UnionActivityDto> {
+    override suspend fun getByIds(ids: List<String>): List<UnionActivity> {
         logger.info("Fetch dipdup activities by ids: $ids")
         val activities = dipdupActivityClient.getActivitiesByIds(ids)
         return activities.map { dipDupActivityConverter.convert(it, BlockchainDto.TEZOS) }

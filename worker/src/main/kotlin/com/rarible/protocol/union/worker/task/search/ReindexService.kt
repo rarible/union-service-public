@@ -6,11 +6,11 @@ import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.ReindexSchedulingService
-import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.core.model.EsCollection
-import com.rarible.protocol.union.core.model.EsItem
-import com.rarible.protocol.union.core.model.EsOrder
-import com.rarible.protocol.union.core.model.EsOwnership
+import com.rarible.protocol.union.core.model.elastic.EsActivity
+import com.rarible.protocol.union.core.model.elastic.EsCollection
+import com.rarible.protocol.union.core.model.elastic.EsItem
+import com.rarible.protocol.union.core.model.elastic.EsOrder
+import com.rarible.protocol.union.core.model.elastic.EsOwnership
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.task.ActivityTaskParam
@@ -19,7 +19,6 @@ import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.core.task.OrderTaskParam
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import com.rarible.protocol.union.core.task.RawTaskParam
-import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import com.rarible.protocol.union.worker.task.search.ChangeEsAliasTask.Companion.getChangeAliasTaskName

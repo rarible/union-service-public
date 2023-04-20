@@ -5,13 +5,13 @@ import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.IndexService
-import com.rarible.protocol.union.core.model.EsOrder
+import com.rarible.protocol.union.core.model.elastic.EsOrder
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinitionExtended
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.core.task.OrderTaskParam
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.worker.task.search.ChangeAliasTaskParam
-import com.rarible.protocol.union.core.task.OrderTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import io.mockk.coEvery
 import io.mockk.coVerify

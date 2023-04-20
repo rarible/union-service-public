@@ -3,7 +3,7 @@ package com.rarible.protocol.union.core.event
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionAuctionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionInternalActivityEvent
@@ -165,7 +165,7 @@ object KafkaEventFactory {
         )
     }
 
-    fun internalActivityEvent(dto: UnionActivityDto): KafkaMessage<UnionInternalBlockchainEvent> {
+    fun internalActivityEvent(dto: UnionActivity): KafkaMessage<UnionInternalBlockchainEvent> {
         val itemId = dto.itemId()
 
         val key = itemId?.fullId() ?: dto.id.fullId()

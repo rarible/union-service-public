@@ -4,10 +4,10 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.model.UnionAssetDto
-import com.rarible.protocol.union.core.model.UnionEthErc20AssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc721AssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthEthereumAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionEthErc20AssetType
+import com.rarible.protocol.union.core.model.UnionEthErc721AssetType
+import com.rarible.protocol.union.core.model.UnionEthEthereumAssetType
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -127,25 +127,25 @@ object ImxOrderConverter {
         else -> OrderStatusDto.HISTORICAL
     }
 
-    fun toAsset(order: ImmutablexOrder, side: ImmutablexOrderSide, blockchain: BlockchainDto): UnionAssetDto {
+    fun toAsset(order: ImmutablexOrder, side: ImmutablexOrderSide, blockchain: BlockchainDto): UnionAsset {
         // In the Asset we should specify price WITHOUT fees
         val totalFees = order.fees?.sumOf { it.amount }?.toBigInteger() ?: BigInteger.ZERO
         return when (side.type) {
             ERC721 -> {
                 val tokenId = side.data.encodedTokenId() ?: throw ImxDataException("Token ID not specified in asset")
                 val contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
-                UnionAssetDto(UnionEthErc721AssetTypeDto(contract, tokenId), BigDecimal.ONE)
+                UnionAsset(UnionEthErc721AssetType(contract, tokenId), BigDecimal.ONE)
             }
 
             ETH -> {
-                val type = UnionEthEthereumAssetTypeDto(blockchain)
-                UnionAssetDto(type, normalizeQuantity(side, totalFees))
+                val type = UnionEthEthereumAssetType(blockchain)
+                UnionAsset(type, normalizeQuantity(side, totalFees))
             }
 
             ERC20 -> {
                 val contract = ContractAddressConverter.convert(blockchain, side.data.tokenAddress!!)
-                val type = UnionEthErc20AssetTypeDto(contract)
-                UnionAssetDto(type, normalizeQuantity(side, totalFees))
+                val type = UnionEthErc20AssetType(contract)
+                UnionAsset(type, normalizeQuantity(side, totalFees))
             }
 
             else -> throw IllegalStateException("Unsupported asset type: ${side.type}")

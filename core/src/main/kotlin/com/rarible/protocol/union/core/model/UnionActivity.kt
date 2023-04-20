@@ -20,25 +20,25 @@ import java.time.Instant
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes(
-    JsonSubTypes.Type(name = "MINT", value = UnionMintActivityDto::class),
-    JsonSubTypes.Type(name = "BURN", value = UnionBurnActivityDto::class),
-    JsonSubTypes.Type(name = "TRANSFER", value = UnionTransferActivityDto::class),
-    JsonSubTypes.Type(name = "SWAP", value = UnionOrderMatchSwapDto::class),
-    JsonSubTypes.Type(name = "SELL", value = UnionOrderMatchSellDto::class),
-    JsonSubTypes.Type(name = "BID", value = UnionOrderBidActivityDto::class),
-    JsonSubTypes.Type(name = "LIST", value = UnionOrderListActivityDto::class),
-    JsonSubTypes.Type(name = "CANCEL_BID", value = UnionOrderCancelBidActivityDto::class),
-    JsonSubTypes.Type(name = "CANCEL_LIST", value = UnionOrderCancelListActivityDto::class),
-    JsonSubTypes.Type(name = "AUCTION_OPEN", value = UnionAuctionOpenActivityDto::class),
-    JsonSubTypes.Type(name = "AUCTION_BID", value = UnionAuctionBidActivityDto::class),
-    JsonSubTypes.Type(name = "AUCTION_FINISH", value = UnionAuctionFinishActivityDto::class),
-    JsonSubTypes.Type(name = "AUCTION_CANCEL", value = UnionAuctionCancelActivityDto::class),
-    JsonSubTypes.Type(name = "AUCTION_START", value = UnionAuctionStartActivityDto::class),
-    JsonSubTypes.Type(name = "AUCTION_END", value = UnionAuctionEndActivityDto::class),
-    JsonSubTypes.Type(name = "L2_DEPOSIT", value = UnionL2DepositActivityDto::class),
-    JsonSubTypes.Type(name = "L2_WITHDRAWAL", value = UnionL2WithdrawalActivityDto::class)
+    JsonSubTypes.Type(name = "MINT", value = UnionMintActivity::class),
+    JsonSubTypes.Type(name = "BURN", value = UnionBurnActivity::class),
+    JsonSubTypes.Type(name = "TRANSFER", value = UnionTransferActivity::class),
+    JsonSubTypes.Type(name = "SWAP", value = UnionOrderMatchSwap::class),
+    JsonSubTypes.Type(name = "SELL", value = UnionOrderMatchSell::class),
+    JsonSubTypes.Type(name = "BID", value = UnionOrderBidActivity::class),
+    JsonSubTypes.Type(name = "LIST", value = UnionOrderListActivity::class),
+    JsonSubTypes.Type(name = "CANCEL_BID", value = UnionOrderCancelBidActivity::class),
+    JsonSubTypes.Type(name = "CANCEL_LIST", value = UnionOrderCancelListActivity::class),
+    JsonSubTypes.Type(name = "AUCTION_OPEN", value = UnionAuctionOpenActivity::class),
+    JsonSubTypes.Type(name = "AUCTION_BID", value = UnionAuctionBidActivity::class),
+    JsonSubTypes.Type(name = "AUCTION_FINISH", value = UnionAuctionFinishActivity::class),
+    JsonSubTypes.Type(name = "AUCTION_CANCEL", value = UnionAuctionCancelActivity::class),
+    JsonSubTypes.Type(name = "AUCTION_START", value = UnionAuctionStartActivity::class),
+    JsonSubTypes.Type(name = "AUCTION_END", value = UnionAuctionEndActivity::class),
+    JsonSubTypes.Type(name = "L2_DEPOSIT", value = UnionL2DepositActivity::class),
+    JsonSubTypes.Type(name = "L2_WITHDRAWAL", value = UnionL2WithdrawalActivity::class)
 )
-sealed class UnionActivityDto {
+sealed class UnionActivity {
 
     abstract val id: ActivityIdDto
     abstract val date: Instant
@@ -62,7 +62,7 @@ sealed class UnionActivityDto {
     open fun isBlockchainEvent() = false
 }
 
-data class UnionMintActivityDto(
+data class UnionMintActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -77,7 +77,7 @@ data class UnionMintActivityDto(
     val mintPrice: BigDecimal? = null,
     val transactionHash: String,
     val blockchainInfo: ActivityBlockchainInfoDto? = null
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = itemId
     override fun ownershipId() = this.itemId?.toOwnership(this.owner.value)
@@ -86,7 +86,7 @@ data class UnionMintActivityDto(
 
 }
 
-data class UnionBurnActivityDto(
+data class UnionBurnActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -100,14 +100,14 @@ data class UnionBurnActivityDto(
     val value: BigInteger,
     val transactionHash: String,
     val blockchainInfo: ActivityBlockchainInfoDto? = null
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = itemId
     override fun isBlockchainEvent() = this.blockchainInfo != null
 
 }
 
-data class UnionTransferActivityDto(
+data class UnionTransferActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -123,7 +123,7 @@ data class UnionTransferActivityDto(
     val purchase: Boolean? = null,
     val transactionHash: String,
     val blockchainInfo: ActivityBlockchainInfoDto? = null
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = itemId
     override fun ownershipId() = this.itemId?.toOwnership(this.owner.value)
@@ -137,7 +137,7 @@ data class UnionTransferActivityDto(
     override fun isBlockchainEvent() = this.blockchainInfo != null
 }
 
-sealed class UnionOrderMatchActivityDto : UnionActivityDto() {
+sealed class UnionOrderMatchActivity : UnionActivity() {
 
     abstract val orderId: OrderIdDto?
     abstract val source: OrderActivitySourceDto
@@ -145,7 +145,7 @@ sealed class UnionOrderMatchActivityDto : UnionActivityDto() {
     abstract val blockchainInfo: ActivityBlockchainInfoDto?
 }
 
-data class UnionOrderMatchSwapDto(
+data class UnionOrderMatchSwap(
     override val orderId: OrderIdDto? = null,
     override val source: OrderActivitySourceDto,
     override val transactionHash: String,
@@ -157,12 +157,12 @@ data class UnionOrderMatchSwapDto(
     override val reverted: Boolean? = null,
     val left: UnionOrderActivityMatchSideDto,
     val right: UnionOrderActivityMatchSideDto
-) : UnionOrderMatchActivityDto() {
+) : UnionOrderMatchActivity() {
 
     override fun itemId() = null
 }
 
-data class UnionOrderMatchSellDto(
+data class UnionOrderMatchSell(
     override val orderId: OrderIdDto? = null,
     override val source: OrderActivitySourceDto,
     override val transactionHash: String,
@@ -172,8 +172,8 @@ data class UnionOrderMatchSellDto(
     override val lastUpdatedAt: Instant? = null,
     override val cursor: String? = null,
     override val reverted: Boolean? = null,
-    val nft: UnionAssetDto,
-    val payment: UnionAssetDto,
+    val nft: UnionAsset,
+    val payment: UnionAsset,
     val buyer: UnionAddress,
     val seller: UnionAddress,
     val buyerOrderHash: String? = null,
@@ -184,7 +184,7 @@ data class UnionOrderMatchSellDto(
     val type: Type,
     val sellMarketplaceMarker: String? = null,
     val buyMarketplaceMarker: String? = null
-) : UnionOrderMatchActivityDto() {
+) : UnionOrderMatchActivity() {
 
     enum class Type {
         SELL,
@@ -197,7 +197,7 @@ data class UnionOrderMatchSellDto(
 
 }
 
-data class UnionOrderBidActivityDto(
+data class UnionOrderBidActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -206,19 +206,19 @@ data class UnionOrderBidActivityDto(
     val orderId: OrderIdDto? = null,
     val hash: String,
     val maker: UnionAddress,
-    val make: UnionAssetDto,
-    val take: UnionAssetDto,
+    val make: UnionAsset,
+    val take: UnionAsset,
     val price: BigDecimal,
     val priceUsd: BigDecimal? = null,
     val source: OrderActivitySourceDto? = null,
     val marketplaceMarker: String? = null
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = this.take.type.itemId()
     override fun collectionId() = this.take.type.collectionId()
 }
 
-data class UnionOrderListActivityDto(
+data class UnionOrderListActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -227,18 +227,18 @@ data class UnionOrderListActivityDto(
     val orderId: OrderIdDto? = null,
     val hash: String,
     val maker: UnionAddress,
-    val make: UnionAssetDto,
-    val take: UnionAssetDto,
+    val make: UnionAsset,
+    val take: UnionAsset,
     val price: BigDecimal,
     val priceUsd: BigDecimal? = null,
     val source: OrderActivitySourceDto? = null
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = this.make.type.itemId()
     override fun collectionId() = this.make.type.collectionId()
 }
 
-data class UnionOrderCancelBidActivityDto(
+data class UnionOrderCancelBidActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -247,19 +247,19 @@ data class UnionOrderCancelBidActivityDto(
     val orderId: OrderIdDto? = null,
     val hash: String,
     val maker: UnionAddress,
-    val make: UnionAssetTypeDto,
-    val take: UnionAssetTypeDto,
+    val make: UnionAssetType,
+    val take: UnionAssetType,
     val source: OrderActivitySourceDto? = null,
     val transactionHash: String,
     val blockchainInfo: ActivityBlockchainInfoDto? = null
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = this.take.itemId()
     override fun collectionId() = this.take.collectionId()
     override fun isBlockchainEvent() = this.blockchainInfo != null
 }
 
-data class UnionOrderCancelListActivityDto(
+data class UnionOrderCancelListActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -268,19 +268,19 @@ data class UnionOrderCancelListActivityDto(
     val orderId: OrderIdDto? = null,
     val hash: String,
     val maker: UnionAddress,
-    val make: UnionAssetTypeDto,
-    val take: UnionAssetTypeDto,
+    val make: UnionAssetType,
+    val take: UnionAssetType,
     val source: OrderActivitySourceDto? = null,
     val transactionHash: String,
     val blockchainInfo: ActivityBlockchainInfoDto? = null
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = this.make.itemId()
     override fun collectionId() = this.make.collectionId()
     override fun isBlockchainEvent() = this.blockchainInfo != null
 }
 
-data class UnionAuctionOpenActivityDto(
+data class UnionAuctionOpenActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -288,13 +288,13 @@ data class UnionAuctionOpenActivityDto(
     override val reverted: Boolean? = null,
     val auction: AuctionDto,
     val transactionHash: String
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
 
 }
 
-data class UnionAuctionBidActivityDto(
+data class UnionAuctionBidActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -303,14 +303,14 @@ data class UnionAuctionBidActivityDto(
     val auction: AuctionDto,
     val bid: AuctionBidDto,
     val transactionHash: String
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
     override fun ownershipId() = null
 
 }
 
-data class UnionAuctionFinishActivityDto(
+data class UnionAuctionFinishActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -318,13 +318,13 @@ data class UnionAuctionFinishActivityDto(
     override val reverted: Boolean? = null,
     val auction: AuctionDto,
     val transactionHash: String
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
 
 }
 
-data class UnionAuctionCancelActivityDto(
+data class UnionAuctionCancelActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -332,39 +332,39 @@ data class UnionAuctionCancelActivityDto(
     override val reverted: Boolean? = null,
     val auction: AuctionDto,
     val transactionHash: String
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
 
 }
 
-data class UnionAuctionStartActivityDto(
+data class UnionAuctionStartActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
     override val cursor: String? = null,
     override val reverted: Boolean? = null,
     val auction: AuctionDto
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
 
 }
 
-data class UnionAuctionEndActivityDto(
+data class UnionAuctionEndActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
     override val cursor: String? = null,
     override val reverted: Boolean? = null,
     val auction: AuctionDto
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
 
 }
 
-data class UnionL2DepositActivityDto(
+data class UnionL2DepositActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -375,12 +375,12 @@ data class UnionL2DepositActivityDto(
     val itemId: ItemIdDto,
     val collection: CollectionIdDto?,
     val value: BigInteger? = null
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = this.itemId
 }
 
-data class UnionL2WithdrawalActivityDto(
+data class UnionL2WithdrawalActivity(
     override val id: ActivityIdDto,
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
@@ -391,7 +391,7 @@ data class UnionL2WithdrawalActivityDto(
     val itemId: ItemIdDto,
     val collection: CollectionIdDto?,
     val value: BigInteger? = null
-) : UnionActivityDto() {
+) : UnionActivity() {
 
     override fun itemId() = this.itemId
 

@@ -2,16 +2,16 @@ package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.model.UnionActivityDto
-import com.rarible.protocol.union.core.model.UnionAssetDto
-import com.rarible.protocol.union.core.model.UnionBurnActivityDto
-import com.rarible.protocol.union.core.model.UnionL2DepositActivityDto
-import com.rarible.protocol.union.core.model.UnionL2WithdrawalActivityDto
-import com.rarible.protocol.union.core.model.UnionMintActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionBurnActivity
+import com.rarible.protocol.union.core.model.UnionL2DepositActivity
+import com.rarible.protocol.union.core.model.UnionL2WithdrawalActivity
+import com.rarible.protocol.union.core.model.UnionMintActivity
 import com.rarible.protocol.union.core.model.UnionOrderActivityMatchSideDto
-import com.rarible.protocol.union.core.model.UnionOrderMatchSellDto
-import com.rarible.protocol.union.core.model.UnionOrderMatchSwapDto
-import com.rarible.protocol.union.core.model.UnionTransferActivityDto
+import com.rarible.protocol.union.core.model.UnionOrderMatchSell
+import com.rarible.protocol.union.core.model.UnionOrderMatchSwap
+import com.rarible.protocol.union.core.model.UnionTransferActivity
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -40,7 +40,7 @@ class ImxActivityConverter(
         activity: ImmutablexEvent,
         orders: Map<Long, ImmutablexOrder>,
         blockchain: BlockchainDto
-    ): UnionActivityDto {
+    ): UnionActivity {
         try {
             return convertInternal(activity, orders, blockchain)
         } catch (e: Exception) {
@@ -54,7 +54,7 @@ class ImxActivityConverter(
         orders: Map<Long, ImmutablexOrder>,
         blockchain: BlockchainDto
     ) = when (activity) {
-        is ImmutablexMint -> UnionMintActivityDto(
+        is ImmutablexMint -> UnionMintActivity(
             id = activity.activityId,
             date = activity.timestamp,
             owner = UnionAddressConverter.convert(blockchain, activity.user),
@@ -70,7 +70,7 @@ class ImxActivityConverter(
             val from = UnionAddressConverter.convert(blockchain, activity.user)
             val to = UnionAddressConverter.convert(blockchain, activity.receiver)
             if (to.value == Address.ZERO().toString()) {
-                UnionBurnActivityDto(
+                UnionBurnActivity(
                     id = activity.activityId,
                     date = activity.timestamp,
                     owner = from,
@@ -82,7 +82,7 @@ class ImxActivityConverter(
                     tokenId = activity.token.data.encodedTokenId(),
                 )
             } else {
-                UnionTransferActivityDto(
+                UnionTransferActivity(
                     id = activity.activityId,
                     date = activity.timestamp,
                     from = from,
@@ -117,7 +117,7 @@ class ImxActivityConverter(
             } else if (!makeType.isNft() && takeType.isNft()) {
                 convertToMatch(activity, takeAsset, makeAsset, taker, maker)
             } else {
-                UnionOrderMatchSwapDto(
+                UnionOrderMatchSwap(
                     id = activity.activityId,
                     date = activity.timestamp,
                     source = OrderActivitySourceDto.RARIBLE,
@@ -141,7 +141,7 @@ class ImxActivityConverter(
         }
 
         // We don't need these activities ATM
-        is ImmutablexDeposit -> UnionL2DepositActivityDto(
+        is ImmutablexDeposit -> UnionL2DepositActivity(
             id = activity.activityId,
             date = activity.timestamp,
             user = UnionAddressConverter.convert(blockchain, activity.user),
@@ -151,7 +151,7 @@ class ImxActivityConverter(
             value = activity.token.data.quantity
         )
 
-        is ImmutablexWithdrawal -> UnionL2WithdrawalActivityDto(
+        is ImmutablexWithdrawal -> UnionL2WithdrawalActivity(
             id = activity.activityId,
             date = activity.timestamp,
             user = UnionAddressConverter.convert(blockchain, activity.sender),
@@ -164,16 +164,16 @@ class ImxActivityConverter(
 
     private suspend fun convertToMatch(
         activity: ImmutablexTrade,
-        nft: UnionAssetDto,
-        payment: UnionAssetDto,
+        nft: UnionAsset,
+        payment: UnionAsset,
         seller: UnionAddress,
         buyer: UnionAddress
-    ): UnionOrderMatchSellDto {
+    ): UnionOrderMatchSell {
         val priceUsd = currencyService.toUsd(
             BlockchainDto.ETHEREUM, payment.type, payment.value, activity.timestamp
         )
 
-        return UnionOrderMatchSellDto(
+        return UnionOrderMatchSell(
             source = OrderActivitySourceDto.RARIBLE,
             transactionHash = activity.transactionId.toString(),
             blockchainInfo = null,
@@ -188,7 +188,7 @@ class ImxActivityConverter(
             price = payment.value,
             priceUsd = priceUsd,
             amountUsd = null,
-            type = UnionOrderMatchSellDto.Type.SELL
+            type = UnionOrderMatchSell.Type.SELL
         )
     }
 }

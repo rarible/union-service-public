@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.model.EsItem
-import com.rarible.protocol.union.core.model.EsItemFilter
-import com.rarible.protocol.union.core.model.EsItemGenericFilter
-import com.rarible.protocol.union.core.model.EsItemSort
-import com.rarible.protocol.union.core.model.TraitFilter
+import com.rarible.protocol.union.core.model.elastic.EsItem
+import com.rarible.protocol.union.core.model.elastic.EsItemFilter
+import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
+import com.rarible.protocol.union.core.model.elastic.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.TraitFilter
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.index.query.BoolQueryBuilder

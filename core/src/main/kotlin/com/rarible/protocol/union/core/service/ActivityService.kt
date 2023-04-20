@@ -2,7 +2,7 @@ package com.rarible.protocol.union.core.service
 
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
@@ -19,21 +19,21 @@ interface ActivityService : BlockchainService {
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto>
+    ): Slice<UnionActivity>
 
     suspend fun getAllActivitiesSync(
         continuation: String?,
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<UnionActivityDto>
+    ): Slice<UnionActivity>
 
     suspend fun getAllRevertedActivitiesSync(
         continuation: String?,
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<UnionActivityDto>
+    ): Slice<UnionActivity>
 
     suspend fun getActivitiesByCollection(
         types: List<ActivityTypeDto>,
@@ -41,7 +41,7 @@ interface ActivityService : BlockchainService {
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto>
+    ): Slice<UnionActivity>
 
     suspend fun getActivitiesByItem(
         types: List<ActivityTypeDto>,
@@ -49,7 +49,7 @@ interface ActivityService : BlockchainService {
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<UnionActivityDto>
+    ): Slice<UnionActivity>
 
     suspend fun getActivitiesByItemAndOwner(
         types: List<ItemAndOwnerActivityType>,
@@ -58,7 +58,7 @@ interface ActivityService : BlockchainService {
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto>
+    ): Slice<UnionActivity>
 
     suspend fun getActivitiesByUser(
         types: List<UserActivityTypeDto>,
@@ -68,9 +68,9 @@ interface ActivityService : BlockchainService {
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto>
+    ): Slice<UnionActivity>
 
     suspend fun getActivitiesByIds(
         ids: List<TypedActivityId>
-    ): List<UnionActivityDto>
+    ): List<UnionActivity>
 }

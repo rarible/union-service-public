@@ -5,7 +5,7 @@ import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
 import com.rarible.protocol.union.core.model.CurrencyRate
-import com.rarible.protocol.union.core.model.UnionAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyDto
@@ -91,7 +91,7 @@ class CurrencyService(
 
     suspend fun toUsd(
         blockchain: BlockchainDto,
-        assetType: UnionAssetTypeDto,
+        assetType: UnionAssetType,
         value: BigDecimal?,
         at: Instant? = null
     ): BigDecimal? {

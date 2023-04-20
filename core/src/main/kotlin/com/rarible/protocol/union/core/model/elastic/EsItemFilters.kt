@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.core.model
+package com.rarible.protocol.union.core.model.elastic
 
 import java.time.Instant
 

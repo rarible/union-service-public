@@ -2,12 +2,12 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.core.model.EsOwnership
-import com.rarible.protocol.union.core.model.EsOwnershipByItemFilter
-import com.rarible.protocol.union.core.model.EsOwnershipByOwnerFilter
-import com.rarible.protocol.union.core.model.EsOwnershipSort
-import com.rarible.protocol.union.core.model.EsOwnershipsSearchFilter
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.core.model.elastic.EsOwnership
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipByItemFilter
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipByOwnerFilter
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipSort
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipsSearchFilter
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto

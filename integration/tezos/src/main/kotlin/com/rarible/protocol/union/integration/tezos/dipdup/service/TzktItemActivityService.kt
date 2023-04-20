@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.service
 
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
@@ -13,7 +13,7 @@ interface TzktItemActivityService {
         continuation: String?,
         limit: Int,
         sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         TODO("Not implemented")
     }
 
@@ -21,11 +21,11 @@ interface TzktItemActivityService {
         types: List<ActivityTypeDto>,
         contract: String,
         tokenId: BigInteger, continuation: String?, limit: Int, sort: ActivitySortDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         TODO("Not implemented")
     }
 
-    suspend fun getByIds(ids: List<String>, wrapHash: Boolean): List<UnionActivityDto> {
+    suspend fun getByIds(ids: List<String>, wrapHash: Boolean): List<UnionActivity> {
         TODO("Not implemented")
     }
 

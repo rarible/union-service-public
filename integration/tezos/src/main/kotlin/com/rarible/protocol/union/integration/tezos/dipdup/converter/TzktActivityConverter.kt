@@ -2,10 +2,10 @@ package com.rarible.protocol.union.integration.tezos.dipdup.converter
 
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.exception.UnionDataFormatException
-import com.rarible.protocol.union.core.model.UnionActivityDto
-import com.rarible.protocol.union.core.model.UnionBurnActivityDto
-import com.rarible.protocol.union.core.model.UnionMintActivityDto
-import com.rarible.protocol.union.core.model.UnionTransferActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
+import com.rarible.protocol.union.core.model.UnionBurnActivity
+import com.rarible.protocol.union.core.model.UnionMintActivity
+import com.rarible.protocol.union.core.model.UnionTransferActivity
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -30,10 +30,10 @@ object TzktActivityConverter {
         else -> null
     }
 
-    fun convert(source: TypedTokenActivity, blockchain: BlockchainDto): UnionActivityDto {
+    fun convert(source: TypedTokenActivity, blockchain: BlockchainDto): UnionActivity {
         val id = ActivityIdDto(blockchain, source.id.toString())
         return when (source.type) {
-            ActivityType.MINT -> UnionMintActivityDto(
+            ActivityType.MINT -> UnionMintActivity(
                 id = id,
                 date = source.timestamp.toInstant(),
                 reverted = false,
@@ -46,7 +46,7 @@ object TzktActivityConverter {
                 collection = CollectionIdDto(blockchain, source.contract())
             )
 
-            ActivityType.BURN -> UnionBurnActivityDto(
+            ActivityType.BURN -> UnionBurnActivity(
                 id = id,
                 date = source.timestamp.toInstant(),
                 reverted = false,
@@ -59,7 +59,7 @@ object TzktActivityConverter {
                 collection = CollectionIdDto(blockchain, source.contract())
             )
 
-            ActivityType.TRANSFER -> UnionTransferActivityDto(
+            ActivityType.TRANSFER -> UnionTransferActivity(
                 id = id,
                 date = source.timestamp.toInstant(),
                 reverted = false,

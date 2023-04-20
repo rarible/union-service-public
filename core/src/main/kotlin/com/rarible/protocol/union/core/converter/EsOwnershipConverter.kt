@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.converter
 
 import com.rarible.protocol.union.core.converter.helper.getCurrencyAddressOrNull
-import com.rarible.protocol.union.core.model.EsOwnership
+import com.rarible.protocol.union.core.model.elastic.EsOwnership
 import com.rarible.protocol.union.core.model.getAuctionOwnershipId
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.getSellerOwnershipId

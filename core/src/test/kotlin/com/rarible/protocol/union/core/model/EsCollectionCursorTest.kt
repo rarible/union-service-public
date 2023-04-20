@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.model
 
+import com.rarible.protocol.union.core.model.elastic.EsCollectionCursor
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.DynamicTest.dynamicTest

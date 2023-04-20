@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.dto.FlowEventTimeMarksDto
-import com.rarible.protocol.union.core.model.UnionFlowAssetTypeFtDto
-import com.rarible.protocol.union.core.model.UnionFlowAssetTypeNftDto
+import com.rarible.protocol.union.core.model.UnionFlowAssetTypeFt
+import com.rarible.protocol.union.core.model.UnionFlowAssetTypeNft
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowEventTimeMarks
 import com.rarible.protocol.union.integration.flow.data.randomFlowFungibleAsset
@@ -19,7 +19,7 @@ class FlowConverterTest {
         val converted = FlowConverter.convert(dto, BlockchainDto.FLOW)
 
         // assertThat(converted.value.toBigDecimal()).isEqualTo(dto.value) // TODO - types incompatible
-        val type = converted.type as UnionFlowAssetTypeFtDto
+        val type = converted.type as UnionFlowAssetTypeFt
         assertThat(type.contract.value).isEqualTo(dto.contract)
     }
 
@@ -30,7 +30,7 @@ class FlowConverterTest {
         val converted = FlowConverter.convert(dto, BlockchainDto.FLOW)
 
         // assertThat(converted.value.toBigDecimal()).isEqualTo(dto.value) // TODO - types incompatible
-        val type = converted.type as UnionFlowAssetTypeNftDto
+        val type = converted.type as UnionFlowAssetTypeNft
         assertThat(type.contract.value).isEqualTo(dto.contract)
         assertThat(type.tokenId).isEqualTo(dto.tokenId)
     }

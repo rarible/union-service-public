@@ -7,7 +7,7 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.IndexService
-import com.rarible.protocol.union.core.model.EsActivity
+import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.task.ActivityTaskParam
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncTypeDto

@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.core.converter
 
 import com.rarible.protocol.union.core.converter.helper.getCurrencyAddressOrNull
-import com.rarible.protocol.union.core.model.EsItem
-import com.rarible.protocol.union.core.model.EsTrait
+import com.rarible.protocol.union.core.model.elastic.EsItem
+import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.dto.ItemDto
 import org.apache.commons.codec.digest.DigestUtils
 

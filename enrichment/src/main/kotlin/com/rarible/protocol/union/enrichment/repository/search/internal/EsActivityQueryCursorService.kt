@@ -1,12 +1,9 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.model.EsActivity
-import com.rarible.protocol.union.core.model.EsActivityCursor
-import com.rarible.protocol.union.core.model.EsActivitySort
+import com.rarible.protocol.union.core.model.elastic.EsActivity
+import com.rarible.protocol.union.core.model.elastic.EsActivityCursor
+import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import org.elasticsearch.index.query.BoolQueryBuilder
-import org.elasticsearch.index.query.QueryBuilder
-import org.elasticsearch.index.query.RangeQueryBuilder
-import org.elasticsearch.index.query.TermQueryBuilder
 import org.springframework.stereotype.Component
 
 @Component

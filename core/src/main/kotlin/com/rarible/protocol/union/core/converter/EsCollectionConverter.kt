@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.core.converter
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.core.model.EsCollection
+import com.rarible.protocol.union.core.model.elastic.EsCollection
 import com.rarible.protocol.union.dto.CollectionDto
 
 object EsCollectionConverter {

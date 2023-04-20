@@ -2,7 +2,7 @@ package com.rarible.protocol.union.search.indexer.repository
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsItemSort
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQuerySortService

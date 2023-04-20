@@ -3,7 +3,7 @@ package com.rarible.protocol.union.integration.immutablex.service
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.model.ItemAndOwnerActivityType
 import com.rarible.protocol.union.core.model.TypedActivityId
-import com.rarible.protocol.union.core.model.UnionActivityDto
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.ActivitySortDto
@@ -75,7 +75,7 @@ class ImxActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val result = getActivities(
             types = mapTypes(types),
             continuation = continuation,
@@ -90,7 +90,7 @@ class ImxActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val activitySort = when (sort) {
             SyncSortDto.DB_UPDATE_ASC -> ActivitySortDto.EARLIEST_FIRST
             SyncSortDto.DB_UPDATE_DESC -> ActivitySortDto.LATEST_FIRST
@@ -115,7 +115,7 @@ class ImxActivityService(
         size: Int,
         sort: SyncSortDto?,
         type: SyncTypeDto?
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         return Slice.empty()
     }
 
@@ -125,7 +125,7 @@ class ImxActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val result = getActivities(
             types = mapTypes(types),
             token = collection,
@@ -142,7 +142,7 @@ class ImxActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val (token, rawTokenId) = IdParser.split(itemId, 2)
         val tokenId = TokenIdDecoder.decode(rawTokenId)
         val result = getActivities(
@@ -163,7 +163,7 @@ class ImxActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val (token, rawTokenId) = IdParser.split(itemId, 2)
         val tokenId = TokenIdDecoder.decode(rawTokenId)
         val result = getActivities(
@@ -186,7 +186,7 @@ class ImxActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?,
-    ): Slice<UnionActivityDto> {
+    ): Slice<UnionActivity> {
         val result = coroutineScope {
             users.chunked(byUserRequestChunkSize).map { chunk ->
                 chunk.mapAsync {
@@ -206,7 +206,7 @@ class ImxActivityService(
         return convert(toSlice(size, sort, result))
     }
 
-    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<UnionActivityDto> {
+    override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<UnionActivity> {
         val grouped = ids.filter {
             allowedTypes.containsKey(it.type)
         }.groupBy({ allowedTypes[it.type]!! }, { it.id })
@@ -304,7 +304,7 @@ class ImxActivityService(
 
     // Here we have the slice with requested size and only here we can execute additional call to
     // fulfill additional data
-    private suspend fun convert(slice: Slice<ImmutablexEvent>): Slice<UnionActivityDto> {
+    private suspend fun convert(slice: Slice<ImmutablexEvent>): Slice<UnionActivity> {
         return Slice(
             // Here continuation implemented in the same way as for DTO, we can just pass it
             continuation = slice.continuation,
@@ -327,7 +327,7 @@ class ImxActivityService(
         }
     }
 
-    suspend fun convert(activities: List<ImmutablexEvent>): List<UnionActivityDto> {
+    suspend fun convert(activities: List<ImmutablexEvent>): List<UnionActivity> {
         val orders = getTradeOrders(activities)
         return activities.mapAsync {
             imxActivityConverter.convert(it, orders, blockchain)

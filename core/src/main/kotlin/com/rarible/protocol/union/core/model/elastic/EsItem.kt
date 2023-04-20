@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.core.model
+package com.rarible.protocol.union.core.model.elastic
 
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
@@ -10,32 +10,38 @@ import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.Instant
 
-data class EsOwnership(
+data class EsItem(
     @Id
-    @Field(fielddata = true)
-    val ownershipId: String, // holds sha256 in case original OwnershipId is bigger than 512 bytes
-    val originalOwnershipId: String?, // only filled when above field holds sha256
+    val id: String, // holds sha256 of itemId
+    val itemId: String,
     val blockchain: BlockchainDto,
-    val itemId: String? = null,
-    val collection: String? = null,
-    val owner: String,
-    @Field(type = FieldType.Date, fielddata = true)
-    val date: Instant,
-    val auctionId: String?,
-    val auctionOwnershipId: String?,
+    val collection: String?,
+    val deleted: Boolean = false,
+
+    val name: String?,
+    val description: String?,
+    val traits: List<EsTrait>,
+
+    val creators: List<String>,
+
+    @Field(type = FieldType.Date)
+    val mintedAt: Instant,
+
+    @Field(type = FieldType.Date)
+    val lastUpdatedAt: Instant,
+    val self: Boolean? = false,
 
     val bestSellAmount: Double? = null,
     val bestSellCurrency: String? = null, // blockchain:currencyAddress
     val bestSellMarketplace: String? = null,
+    val bestBidAmount: Double? = null,
+    val bestBidCurrency: String? = null, // blockchain:currencyAddress
+    val bestBidMarketplace: String? = null,
 ) {
-
-    val id: String
-        get() = originalOwnershipId ?: ownershipId
-
     companion object {
-        private const val VERSION: Int = 1
+        const val VERSION: Int = 1
 
-        val ENTITY_DEFINITION = EsEntity.OWNERSHIP.let {
+        val ENTITY_DEFINITION = EsEntity.ITEM.let {
             EntityDefinition(
                 entity = it,
                 mapping = loadMapping(it),
@@ -45,3 +51,5 @@ data class EsOwnership(
         }
     }
 }
+
+data class EsTrait(val key: String, val value: String?)

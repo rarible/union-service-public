@@ -2,8 +2,8 @@ package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
-import com.rarible.protocol.union.core.model.EsOrder
-import com.rarible.protocol.union.core.model.EsOrderFilter
+import com.rarible.protocol.union.core.model.elastic.EsOrder
+import com.rarible.protocol.union.core.model.elastic.EsOrderFilter
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations

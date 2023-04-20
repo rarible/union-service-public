@@ -15,18 +15,18 @@ import com.rarible.protocol.dto.PartDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.exception.UnionValidationException
-import com.rarible.protocol.union.core.model.UnionAssetDto
-import com.rarible.protocol.union.core.model.UnionAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthAmmNftAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthCollectionAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthCryptoPunksAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc1155AssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc1155LazyAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc20AssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc721AssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthErc721LazyAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthEthereumAssetTypeDto
-import com.rarible.protocol.union.core.model.UnionEthGenerativeArtAssetTypeDto
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionEthAmmNftAssetType
+import com.rarible.protocol.union.core.model.UnionEthCollectionAssetType
+import com.rarible.protocol.union.core.model.UnionEthCryptoPunksAssetType
+import com.rarible.protocol.union.core.model.UnionEthErc1155AssetType
+import com.rarible.protocol.union.core.model.UnionEthErc1155LazyAssetType
+import com.rarible.protocol.union.core.model.UnionEthErc20AssetType
+import com.rarible.protocol.union.core.model.UnionEthErc721AssetType
+import com.rarible.protocol.union.core.model.UnionEthErc721LazyAssetType
+import com.rarible.protocol.union.core.model.UnionEthEthereumAssetType
+import com.rarible.protocol.union.core.model.UnionEthGenerativeArtAssetType
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionSourceEventTimeMark
 import com.rarible.protocol.union.dto.ActivitySortDto
@@ -160,8 +160,8 @@ object EthConverter {
         )
     }
 
-    fun convert(source: com.rarible.protocol.dto.AssetDto, blockchain: BlockchainDto): UnionAssetDto {
-        return UnionAssetDto(
+    fun convert(source: com.rarible.protocol.dto.AssetDto, blockchain: BlockchainDto): UnionAsset {
+        return UnionAsset(
             type = convert(source.assetType, blockchain),
             value = source.valueDecimal!!
         )
@@ -174,24 +174,24 @@ object EthConverter {
         )
     }
 
-    fun convert(source: com.rarible.protocol.dto.AssetTypeDto, blockchain: BlockchainDto): UnionAssetTypeDto {
+    fun convert(source: com.rarible.protocol.dto.AssetTypeDto, blockchain: BlockchainDto): UnionAssetType {
         return when (source) {
-            is EthAssetTypeDto -> UnionEthEthereumAssetTypeDto(blockchain)
-            is Erc20AssetTypeDto -> UnionEthErc20AssetTypeDto(
+            is EthAssetTypeDto -> UnionEthEthereumAssetType(blockchain)
+            is Erc20AssetTypeDto -> UnionEthErc20AssetType(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
 
-            is Erc721AssetTypeDto -> UnionEthErc721AssetTypeDto(
+            is Erc721AssetTypeDto -> UnionEthErc721AssetType(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId
             )
 
-            is Erc1155AssetTypeDto -> UnionEthErc1155AssetTypeDto(
+            is Erc1155AssetTypeDto -> UnionEthErc1155AssetType(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId
             )
 
-            is Erc721LazyAssetTypeDto -> UnionEthErc721LazyAssetTypeDto(
+            is Erc721LazyAssetTypeDto -> UnionEthErc721LazyAssetType(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId,
                 uri = source.uri,
@@ -200,7 +200,7 @@ object EthConverter {
                 signatures = source.signatures.map { convert(it) }
             )
 
-            is Erc1155LazyAssetTypeDto -> UnionEthErc1155LazyAssetTypeDto(
+            is Erc1155LazyAssetTypeDto -> UnionEthErc1155LazyAssetType(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId,
                 uri = source.uri,
@@ -210,20 +210,20 @@ object EthConverter {
                 signatures = source.signatures.map { convert(it) }
             )
 
-            is CryptoPunksAssetTypeDto -> UnionEthCryptoPunksAssetTypeDto(
+            is CryptoPunksAssetTypeDto -> UnionEthCryptoPunksAssetType(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract)),
                 tokenId = source.tokenId
             )
 
-            is GenerativeArtAssetTypeDto -> UnionEthGenerativeArtAssetTypeDto(
+            is GenerativeArtAssetTypeDto -> UnionEthGenerativeArtAssetType(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
 
-            is CollectionAssetTypeDto -> UnionEthCollectionAssetTypeDto(
+            is CollectionAssetTypeDto -> UnionEthCollectionAssetType(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
 
-            is AmmNftAssetTypeDto -> UnionEthAmmNftAssetTypeDto(
+            is AmmNftAssetTypeDto -> UnionEthAmmNftAssetType(
                 contract = ContractAddressConverter.convert(blockchain, convert(source.contract))
             )
         }

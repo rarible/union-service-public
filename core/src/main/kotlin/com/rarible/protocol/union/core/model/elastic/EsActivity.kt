@@ -1,17 +1,16 @@
-package com.rarible.protocol.union.core.model
+package com.rarible.protocol.union.core.model.elastic
 
-import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
 import com.rarible.protocol.union.core.model.elasticsearch.EntityDefinition
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadMapping
-import com.rarible.protocol.union.core.model.elasticsearch.generateSalt
 import com.rarible.protocol.union.core.model.elasticsearch.EsEntitiesConfig.loadSettings
+import com.rarible.protocol.union.core.model.elasticsearch.EsEntity
+import com.rarible.protocol.union.core.model.elasticsearch.generateSalt
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.Instant
-
 
 sealed class EsActivitySealed {
     abstract val activityId: String // blockchain:value

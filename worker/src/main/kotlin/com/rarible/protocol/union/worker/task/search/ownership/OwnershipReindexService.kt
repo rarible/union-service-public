@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.worker.task.search.ownership
 
 import com.rarible.protocol.union.core.converter.EsOwnershipConverter
-import com.rarible.protocol.union.core.model.EsOwnership
 import com.rarible.protocol.union.core.model.UnionAuctionOwnershipWrapper
+import com.rarible.protocol.union.core.model.elastic.EsOwnership
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto

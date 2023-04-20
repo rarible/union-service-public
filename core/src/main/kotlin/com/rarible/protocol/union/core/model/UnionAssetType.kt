@@ -12,27 +12,27 @@ import java.math.BigInteger
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes(
-    JsonSubTypes.Type(name = "FLOW_NFT", value = UnionFlowAssetTypeNftDto::class),
-    JsonSubTypes.Type(name = "FLOW_FT", value = UnionFlowAssetTypeFtDto::class),
-    JsonSubTypes.Type(name = "XTZ", value = UnionTezosXTZAssetTypeDto::class),
-    JsonSubTypes.Type(name = "TEZOS_FT", value = UnionTezosFTAssetTypeDto::class),
-    JsonSubTypes.Type(name = "TEZOS_NFT", value = UnionTezosNFTAssetTypeDto::class),
-    JsonSubTypes.Type(name = "TEZOS_MT", value = UnionTezosMTAssetTypeDto::class),
-    JsonSubTypes.Type(name = "ETH", value = UnionEthEthereumAssetTypeDto::class),
-    JsonSubTypes.Type(name = "ERC20", value = UnionEthErc20AssetTypeDto::class),
-    JsonSubTypes.Type(name = "ERC721", value = UnionEthErc721AssetTypeDto::class),
-    JsonSubTypes.Type(name = "ERC721_Lazy", value = UnionEthErc721LazyAssetTypeDto::class),
-    JsonSubTypes.Type(name = "ERC1155", value = UnionEthErc1155AssetTypeDto::class),
-    JsonSubTypes.Type(name = "ERC1155_Lazy", value = UnionEthErc1155LazyAssetTypeDto::class),
-    JsonSubTypes.Type(name = "CRYPTO_PUNKS", value = UnionEthCryptoPunksAssetTypeDto::class),
-    JsonSubTypes.Type(name = "GEN_ART", value = UnionEthGenerativeArtAssetTypeDto::class),
-    JsonSubTypes.Type(name = "COLLECTION", value = UnionEthCollectionAssetTypeDto::class),
-    JsonSubTypes.Type(name = "AMM_NFT", value = UnionEthAmmNftAssetTypeDto::class),
-    JsonSubTypes.Type(name = "SOLANA_NFT", value = UnionSolanaNftAssetTypeDto::class),
-    JsonSubTypes.Type(name = "SOLANA_FT", value = UnionSolanaFtAssetTypeDto::class),
-    JsonSubTypes.Type(name = "SOLANA_SOL", value = UnionSolanaSolAssetTypeDto::class)
+    JsonSubTypes.Type(name = "FLOW_NFT", value = UnionFlowAssetTypeNft::class),
+    JsonSubTypes.Type(name = "FLOW_FT", value = UnionFlowAssetTypeFt::class),
+    JsonSubTypes.Type(name = "XTZ", value = UnionTezosXTZAssetType::class),
+    JsonSubTypes.Type(name = "TEZOS_FT", value = UnionTezosFTAssetType::class),
+    JsonSubTypes.Type(name = "TEZOS_NFT", value = UnionTezosNFTAssetType::class),
+    JsonSubTypes.Type(name = "TEZOS_MT", value = UnionTezosMTAssetType::class),
+    JsonSubTypes.Type(name = "ETH", value = UnionEthEthereumAssetType::class),
+    JsonSubTypes.Type(name = "ERC20", value = UnionEthErc20AssetType::class),
+    JsonSubTypes.Type(name = "ERC721", value = UnionEthErc721AssetType::class),
+    JsonSubTypes.Type(name = "ERC721_Lazy", value = UnionEthErc721LazyAssetType::class),
+    JsonSubTypes.Type(name = "ERC1155", value = UnionEthErc1155AssetType::class),
+    JsonSubTypes.Type(name = "ERC1155_Lazy", value = UnionEthErc1155LazyAssetType::class),
+    JsonSubTypes.Type(name = "CRYPTO_PUNKS", value = UnionEthCryptoPunksAssetType::class),
+    JsonSubTypes.Type(name = "GEN_ART", value = UnionEthGenerativeArtAssetType::class),
+    JsonSubTypes.Type(name = "COLLECTION", value = UnionEthCollectionAssetType::class),
+    JsonSubTypes.Type(name = "AMM_NFT", value = UnionEthAmmNftAssetType::class),
+    JsonSubTypes.Type(name = "SOLANA_NFT", value = UnionSolanaNftAssetType::class),
+    JsonSubTypes.Type(name = "SOLANA_FT", value = UnionSolanaFtAssetType::class),
+    JsonSubTypes.Type(name = "SOLANA_SOL", value = UnionSolanaSolAssetType::class)
 )
-sealed class UnionAssetTypeDto {
+sealed class UnionAssetType {
 
     open fun isCurrency(): Boolean = false
     open fun isNft(): Boolean = false
@@ -50,19 +50,19 @@ sealed class UnionAssetTypeDto {
 
 //------------------ FLOW ------------------//
 
-data class UnionFlowAssetTypeNftDto(
+data class UnionFlowAssetTypeNft(
     val contract: ContractAddress,
     val tokenId: BigInteger
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
     override fun collectionId() = toCollectionId(this.contract)
 }
 
-data class UnionFlowAssetTypeFtDto(
+data class UnionFlowAssetTypeFt(
     val contract: ContractAddress
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isCurrency() = true
     override fun currencyId() = this.contract.value
@@ -70,28 +70,28 @@ data class UnionFlowAssetTypeFtDto(
 
 //------------------ TEZOS ------------------//
 
-class UnionTezosXTZAssetTypeDto : UnionAssetTypeDto() {
+class UnionTezosXTZAssetType : UnionAssetType() {
 
     override fun isCurrency() = true
     override fun currencyId() = "XTZ"
 
-    override fun equals(other: Any?) = other?.javaClass == UnionTezosXTZAssetTypeDto::class.java
+    override fun equals(other: Any?) = other?.javaClass == UnionTezosXTZAssetType::class.java
     override fun hashCode(): Int = 1
 }
 
-data class UnionTezosFTAssetTypeDto(
+data class UnionTezosFTAssetType(
     val contract: ContractAddress,
     val tokenId: BigInteger? = null
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isCurrency() = true
     override fun currencyId() = tokenId?.let { "${this.contract.value}:${it}" } ?: this.contract.value
 }
 
-data class UnionTezosNFTAssetTypeDto(
+data class UnionTezosNFTAssetType(
     val contract: ContractAddress,
     val tokenId: BigInteger
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
@@ -99,10 +99,10 @@ data class UnionTezosNFTAssetTypeDto(
 
 }
 
-data class UnionTezosMTAssetTypeDto(
+data class UnionTezosMTAssetType(
     val contract: ContractAddress,
     val tokenId: BigInteger
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
@@ -111,58 +111,58 @@ data class UnionTezosMTAssetTypeDto(
 
 //------------------ ETH ------------------//
 
-data class UnionEthEthereumAssetTypeDto(
+data class UnionEthEthereumAssetType(
     val blockchain: BlockchainDto? = null
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isNft() = false
     override fun currencyId() = "0x0000000000000000000000000000000000000000"
 }
 
-data class UnionEthErc20AssetTypeDto(
+data class UnionEthErc20AssetType(
     val contract: ContractAddress
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isCurrency() = true
     override fun currencyId() = this.contract.value
 
 }
 
-data class UnionEthErc721AssetTypeDto(
+data class UnionEthErc721AssetType(
     val contract: ContractAddress,
     val tokenId: BigInteger
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
     override fun collectionId() = toCollectionId(this.contract)
 }
 
-data class UnionEthErc721LazyAssetTypeDto(
+data class UnionEthErc721LazyAssetType(
     val contract: ContractAddress,
     val tokenId: BigInteger,
     val uri: String,
     val creators: List<CreatorDto>,
     val royalties: List<RoyaltyDto>,
     val signatures: List<String>
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
     override fun collectionId() = toCollectionId(this.contract)
 }
 
-data class UnionEthErc1155AssetTypeDto(
+data class UnionEthErc1155AssetType(
     val contract: ContractAddress,
     val tokenId: BigInteger
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
     override fun collectionId() = toCollectionId(this.contract)
 }
 
-data class UnionEthErc1155LazyAssetTypeDto(
+data class UnionEthErc1155LazyAssetType(
     val contract: ContractAddress,
     val tokenId: BigInteger,
     val uri: String,
@@ -170,7 +170,7 @@ data class UnionEthErc1155LazyAssetTypeDto(
     val creators: List<CreatorDto>,
     val royalties: List<RoyaltyDto>,
     val signatures: List<String>
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
@@ -178,27 +178,27 @@ data class UnionEthErc1155LazyAssetTypeDto(
 
 }
 
-data class UnionEthCryptoPunksAssetTypeDto(
+data class UnionEthCryptoPunksAssetType(
     val contract: ContractAddress,
     val tokenId: Int
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId.toBigInteger())
     override fun collectionId() = toCollectionId(this.contract)
 }
 
-data class UnionEthGenerativeArtAssetTypeDto(
+data class UnionEthGenerativeArtAssetType(
     val contract: ContractAddress
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isCollectionAsset() = true
     override fun collectionId() = toCollectionId(this.contract)
 }
 
-data class UnionEthCollectionAssetTypeDto(
+data class UnionEthCollectionAssetType(
     val contract: ContractAddress
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isNft() = true
     override fun isCollectionAsset() = true
@@ -206,9 +206,9 @@ data class UnionEthCollectionAssetTypeDto(
 
 }
 
-data class UnionEthAmmNftAssetTypeDto(
+data class UnionEthAmmNftAssetType(
     val contract: ContractAddress
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isNft() = true
     override fun isCollectionAsset() = true
@@ -217,30 +217,30 @@ data class UnionEthAmmNftAssetTypeDto(
 
 //------------------ SOLANA ------------------//
 
-data class UnionSolanaNftAssetTypeDto(
+data class UnionSolanaNftAssetType(
     val contract: ContractAddress? = null,
     val itemId: ItemIdDto
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isNft() = true
     override fun itemId() = itemId
     override fun collectionId() = contract?.let { toCollectionId(it) }
 }
 
-data class UnionSolanaFtAssetTypeDto(
+data class UnionSolanaFtAssetType(
     val address: ContractAddress
-) : UnionAssetTypeDto() {
+) : UnionAssetType() {
 
     override fun isCurrency() = true
     override fun currencyId() = address.value
 }
 
-class UnionSolanaSolAssetTypeDto : UnionAssetTypeDto() {
+class UnionSolanaSolAssetType : UnionAssetType() {
 
     override fun isCurrency() = true
     override fun currencyId() = "So11111111111111111111111111111111111111112"
 
-    override fun equals(other: Any?) = other?.javaClass == UnionSolanaSolAssetTypeDto::class.java
+    override fun equals(other: Any?) = other?.javaClass == UnionSolanaSolAssetType::class.java
     override fun hashCode(): Int = 1
 }
 
