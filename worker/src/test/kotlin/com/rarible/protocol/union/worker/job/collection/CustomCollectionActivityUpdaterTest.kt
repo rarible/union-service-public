@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.model.UnionActivityDto
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitySortDto
+import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
@@ -88,9 +89,20 @@ class CustomCollectionActivityUpdaterTest {
         returnContinuation: String? = null,
         vararg activities: UnionActivityDto
     ) {
+        val activityTypes = listOf(
+            ActivityTypeDto.TRANSFER,
+            ActivityTypeDto.MINT,
+            ActivityTypeDto.BURN,
+            ActivityTypeDto.BID,
+            ActivityTypeDto.LIST,
+            ActivityTypeDto.SELL,
+            ActivityTypeDto.CANCEL_LIST,
+            ActivityTypeDto.CANCEL_BID
+        )
+
         coEvery {
             activityService.getActivitiesByItem(
-                types = emptyList(),
+                types = activityTypes,
                 itemId = itemId.value,
                 continuation = continuation,
                 size = any(),

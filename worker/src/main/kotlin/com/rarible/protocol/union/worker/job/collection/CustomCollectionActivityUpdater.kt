@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitySortDto
+import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import org.elasticsearch.action.support.WriteRequest
@@ -23,12 +24,23 @@ class CustomCollectionActivityUpdater(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    private val activityTypes = listOf(
+        ActivityTypeDto.TRANSFER,
+        ActivityTypeDto.MINT,
+        ActivityTypeDto.BURN,
+        ActivityTypeDto.BID,
+        ActivityTypeDto.LIST,
+        ActivityTypeDto.SELL,
+        ActivityTypeDto.CANCEL_LIST,
+        ActivityTypeDto.CANCEL_BID
+    )
+
     override suspend fun update(item: UnionItem) {
         val service = router.getService(item.id.blockchain)
         var continuation: String? = null
         do {
             val page = service.getActivitiesByItem(
-                types = emptyList(),
+                types = activityTypes,
                 itemId = item.id.value,
                 continuation = continuation,
                 size = batchSize,
