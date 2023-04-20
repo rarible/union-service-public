@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import org.elasticsearch.action.support.WriteRequest
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -19,6 +20,8 @@ class CustomCollectionActivityUpdater(
 ) : CustomCollectionUpdater {
 
     private val batchSize = 200
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun update(item: UnionItem) {
         val service = router.getService(item.id.blockchain)
@@ -40,6 +43,7 @@ class CustomCollectionActivityUpdater(
                 idsToDelete = emptyList(),
                 refreshPolicy = WriteRequest.RefreshPolicy.NONE
             )
+            logger.info("Updated {} activities for custom collection migration of Item {}", toSave.size, item.id)
 
             continuation = page.continuation
         } while (continuation != null)

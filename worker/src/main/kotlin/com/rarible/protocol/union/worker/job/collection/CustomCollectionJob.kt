@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProd
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -18,6 +19,8 @@ class CustomCollectionJob(
 ) {
 
     private val batchSize = 50
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     /**
      * @param name identifier of rule set in the configuration
@@ -33,6 +36,7 @@ class CustomCollectionJob(
             val next = fetcher.next(currentState, batchSize)
             if (next.state != null) {
                 migrate(next.items)
+                logger.info("Moving {} Items to custom collection: {}", next.items.size, name)
                 return CustomCollectionJobState(currentFetcher, next.state).toString()
             }
             currentFetcher++
