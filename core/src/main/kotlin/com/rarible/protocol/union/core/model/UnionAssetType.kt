@@ -115,7 +115,7 @@ data class UnionEthEthereumAssetType(
     val blockchain: BlockchainDto? = null
 ) : UnionAssetType() {
 
-    override fun isNft() = false
+    override fun isCurrency() = true
     override fun currencyId() = "0x0000000000000000000000000000000000000000"
 }
 
