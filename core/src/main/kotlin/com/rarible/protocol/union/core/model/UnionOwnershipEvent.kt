@@ -8,7 +8,8 @@ import java.time.Instant
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes(
     JsonSubTypes.Type(name = "UPDATE", value = UnionOwnershipUpdateEvent::class),
-    JsonSubTypes.Type(name = "DELETE", value = UnionOwnershipDeleteEvent::class)
+    JsonSubTypes.Type(name = "DELETE", value = UnionOwnershipDeleteEvent::class),
+    JsonSubTypes.Type(name = "CHANGE", value = UnionOwnershipChangeEvent::class)
 )
 sealed class UnionOwnershipEvent {
 
@@ -39,6 +40,17 @@ data class UnionOwnershipDeleteEvent(
 ) : UnionOwnershipEvent() {
 
     override fun addTimeMark(name: String, date: Instant?): UnionOwnershipDeleteEvent {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
+
+}
+
+data class UnionOwnershipChangeEvent(
+    override val ownershipId: OwnershipIdDto,
+    override val eventTimeMarks: UnionEventTimeMarks?
+) : UnionOwnershipEvent() {
+
+    override fun addTimeMark(name: String, date: Instant?): UnionOwnershipChangeEvent {
         return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
     }
 

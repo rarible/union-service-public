@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.apm.CaptureTransaction
+import com.rarible.protocol.union.core.model.UnionOwnershipChangeEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
@@ -18,9 +19,14 @@ class UnionInternalOwnershipEventHandler(
     suspend fun onEvent(event: UnionOwnershipEvent) {
         try {
             when (event) {
+                is UnionOwnershipChangeEvent -> {
+                    ownershipEventService.onOwnershipChanged(event)
+                }
+
                 is UnionOwnershipUpdateEvent -> {
                     ownershipEventService.onOwnershipUpdated(event)
                 }
+
                 is UnionOwnershipDeleteEvent -> {
                     ownershipEventService.onOwnershipDeleted(event)
                 }

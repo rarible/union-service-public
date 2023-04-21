@@ -4,18 +4,17 @@ import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
-import com.rarible.protocol.union.enrichment.model.ShortOwnership
+import com.rarible.protocol.union.enrichment.converter.data.EnrichmentOwnershipData
 
 object OwnershipDtoConverter {
 
     fun convert(
         ownership: UnionOwnership,
-        shortOwnership: ShortOwnership? = null,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap()
+        data: EnrichmentOwnershipData = EnrichmentOwnershipData.empty()
     ): OwnershipDto {
+        val shortOwnership = data.shortOwnership
+
         // TODO remove it later with contract/tokenId
         val contractAndTokenId = if (ownership.id.blockchain != BlockchainDto.SOLANA) {
             CompositeItemIdParser.split(ownership.id.itemIdValue)
@@ -26,7 +25,7 @@ object OwnershipDtoConverter {
             id = ownership.id,
             blockchain = ownership.id.blockchain,
             itemId = ownership.id.getItemId(),
-            collection = ownership.collection,
+            collection = data.customCollection ?: ownership.collection,
             contract = contractAndTokenId?.let {
                 ContractAddressConverter.convert(
                     ownership.id.blockchain, it.first
@@ -41,8 +40,8 @@ object OwnershipDtoConverter {
             lastUpdatedAt = ownership.lastUpdatedAt,
             pending = ownership.pending,
             // Enrichment data
-            bestSellOrder = shortOwnership?.bestSellOrder?.let { orders[it.dtoId] },
-            originOrders = shortOwnership?.originOrders?.let { OriginOrdersConverter.convert(it, orders) }
+            bestSellOrder = shortOwnership?.bestSellOrder?.let { data.orders[it.dtoId] },
+            originOrders = shortOwnership?.originOrders?.let { OriginOrdersConverter.convert(it, data.orders) }
                 ?: emptyList()
         )
     }

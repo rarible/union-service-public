@@ -1,15 +1,19 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.test.data.CUSTOM_COLLECTION
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
+import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -20,7 +24,7 @@ class EnrichmentOwnershipServiceIt {
     private lateinit var ownershipService: EnrichmentOwnershipService
 
     @Test
-    fun getTotalStock() = runBlocking<Unit> {
+    fun `total stock - ok`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
 
         val orderDto1 = ShortOrderConverter.convert(randomUnionSellOrder(itemId).copy(makeStock = 54.toBigDecimal()))
@@ -49,7 +53,20 @@ class EnrichmentOwnershipServiceIt {
 
         val itemSellStats = ownershipService.getItemSellStats(ShortItemId(itemId))
 
-        assertEquals(100, itemSellStats.totalStock.toInt())
-        assertEquals(3, itemSellStats.sellers)
+        assertThat(itemSellStats.totalStock.toInt()).isEqualTo(100)
+        assertThat(itemSellStats.sellers).isEqualTo(3)
+    }
+
+    @Test
+    fun `enrich - ok, custom collection`() = runBlocking<Unit> {
+        val collection = CUSTOM_COLLECTION
+        val itemId = ItemIdDto(collection.blockchain, "${collection.value}:1")
+        val ownership = randomUnionOwnership(itemId)/*.copy(collection = collection)*/
+        val shortOwnership = randomShortOwnership(ownership.id)
+
+        val dto = ownershipService.enrichOwnership(shortOwnership, ownership)
+        val expected = OwnershipDtoConverter.convert(ownership).copy(collection = CUSTOM_COLLECTION)
+
+        assertThat(dto).isEqualTo(expected)
     }
 }

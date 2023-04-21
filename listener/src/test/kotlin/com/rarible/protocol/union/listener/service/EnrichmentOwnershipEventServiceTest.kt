@@ -99,7 +99,7 @@ class EnrichmentOwnershipEventServiceTest {
                 expectedShortOwnership,
                 null,
                 listOf(order).associateBy { it.id })
-        } returns OwnershipDtoConverter.convert(randomUnionOwnership(), shortOwnership)
+        } returns OwnershipDtoConverter.convert(randomUnionOwnership())
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order, stubEventMark())
 
@@ -157,7 +157,7 @@ class EnrichmentOwnershipEventServiceTest {
                 expectedShortOwnership,
                 null,
                 listOf(order).associateBy { it.id })
-        } returns OwnershipDtoConverter.convert(randomUnionOwnership(), shortOwnership)
+        } returns OwnershipDtoConverter.convert(randomUnionOwnership())
 
         ownershipEventService.onOwnershipBestSellOrderUpdated(shortOwnership.id, order, stubEventMark())
 
@@ -193,7 +193,7 @@ class EnrichmentOwnershipEventServiceTest {
                 expectedShortOwnership,
                 null,
                 listOf(hackedOrder).associateBy { it.id })
-        } returns OwnershipDtoConverter.convert(randomUnionOwnership(), shortOwnership)
+        } returns OwnershipDtoConverter.convert(randomUnionOwnership())
 
         ownershipEventService.onPoolOrderUpdated(shortOwnership.id, order, PoolItemAction.EXCLUDED, stubEventMark())
 

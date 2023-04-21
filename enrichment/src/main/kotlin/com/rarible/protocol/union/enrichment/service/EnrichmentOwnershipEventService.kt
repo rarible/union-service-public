@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.core.model.UnionOwnershipChangeEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
@@ -48,6 +49,17 @@ class EnrichmentOwnershipEventService(
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipEventService::class.java)
+
+    suspend fun onOwnershipChanged(event: UnionOwnershipChangeEvent) {
+        val id = ShortOwnershipId(event.ownershipId)
+        val ownership = enrichmentOwnershipService.fetch(id)
+        val existing = enrichmentOwnershipService.getOrCreateWithLastUpdatedAtUpdate(id)
+        buildUpdateEvent(
+            short = existing,
+            ownership = ownership,
+            eventTimeMarks = event.eventTimeMarks
+        )?.let { sendUpdate(it) }
+    }
 
     suspend fun onOwnershipUpdated(event: UnionOwnershipUpdateEvent) {
         val ownership = event.ownership

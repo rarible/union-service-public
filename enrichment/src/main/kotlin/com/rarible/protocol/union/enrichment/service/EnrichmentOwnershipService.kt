@@ -17,6 +17,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
+import com.rarible.protocol.union.enrichment.converter.data.EnrichmentOwnershipData
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -38,6 +39,7 @@ class EnrichmentOwnershipService(
     private val ownershipRepository: OwnershipRepository,
     private val enrichmentOrderService: EnrichmentOrderService,
     private val orderApiService: OrderApiMergeService,
+    private val customCollectionResolver: CustomCollectionResolver
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentOwnershipService::class.java)
@@ -118,11 +120,19 @@ class EnrichmentOwnershipService(
             existing = short.getAllBestOrders(),
             orders = orders
         )
+        val unionOwnership = fetchedOwnership.await()
+
+        val customCollection = customCollectionResolver.resolveCustomCollection(unionOwnership.id.getItemId())
+
+        val data = EnrichmentOwnershipData(
+            shortOwnership = short,
+            orders = enrichmentOrderService.enrich(bestOrders),
+            customCollection = customCollection
+        )
 
         OwnershipDtoConverter.convert(
-            ownership = fetchedOwnership.await(),
-            shortOwnership = short,
-            orders = enrichmentOrderService.enrich(bestOrders)
+            ownership = unionOwnership,
+            data = data
         )
     }
 
