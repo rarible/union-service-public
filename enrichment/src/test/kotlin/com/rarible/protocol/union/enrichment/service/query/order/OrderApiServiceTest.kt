@@ -1,14 +1,14 @@
 package com.rarible.protocol.union.enrichment.service.query.order
 
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
+import com.rarible.protocol.union.core.model.UnionEthErc20AssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.enrichment.util.bidCurrencyId
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -18,7 +18,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -43,8 +43,8 @@ class OrderApiServiceTest {
         coEvery { orderService.getBidCurrencies(itemId.value) } returns emptyList()
         val result = getOrderBidsByItem(itemId, null, 10)
 
-        Assertions.assertThat(result.continuation).isNull()
-        Assertions.assertThat(result.orders).hasSize(0)
+        assertThat(result.continuation).isNull()
+        assertThat(result.entities).hasSize(0)
     }
 
     @Test
@@ -53,8 +53,8 @@ class OrderApiServiceTest {
         coEvery { orderService.getSellCurrencies(itemId.value) } returns emptyList()
         val result = getSellOrdersByItem(itemId, null, 10)
 
-        Assertions.assertThat(result.continuation).isNull()
-        Assertions.assertThat(result.orders).hasSize(0)
+        assertThat(result.continuation).isNull()
+        assertThat(result.entities).hasSize(0)
     }
 
     @Test
@@ -66,21 +66,21 @@ class OrderApiServiceTest {
         coEvery {
             orderService.getBidCurrencies(ethItemId.value)
         } returns listOf(
-            EthErc20AssetTypeDto(
+            UnionEthErc20AssetType(
                 ContractAddressConverter.convert(
                     ethItemId.blockchain,
-                    unionOrder.bidCurrencyId
+                    unionOrder.getBidCurrencyId()
                 )
             )
         )
 
-        val result = getOrderBidsByItem(ethItemId, "${unionOrder.bidCurrencyId}:COMPLETED", 10)
+        val result = getOrderBidsByItem(ethItemId, "${unionOrder.getBidCurrencyId()}:COMPLETED", 10)
 
-        Assertions.assertThat(result.continuation).isNull()
-        Assertions.assertThat(result.orders).hasSize(0)
+        assertThat(result.continuation).isNull()
+        assertThat(result.entities).hasSize(0)
     }
 
-    private suspend fun getOrderBidsByItem(itemId: ItemIdDto, continuation: String?, size: Int): OrdersDto {
+    private suspend fun getOrderBidsByItem(itemId: ItemIdDto, continuation: String?, size: Int): Slice<UnionOrder> {
         return orderApiService.getOrderBidsByItem(
             itemId = itemId,
             platform = PlatformDto.RARIBLE,
@@ -94,7 +94,7 @@ class OrderApiServiceTest {
         )
     }
 
-    private suspend fun getSellOrdersByItem(itemId: ItemIdDto, continuation: String?, size: Int): OrdersDto {
+    private suspend fun getSellOrdersByItem(itemId: ItemIdDto, continuation: String?, size: Int): Slice<UnionOrder> {
         return orderApiService.getSellOrdersByItem(
             itemId = itemId,
             platform = PlatformDto.RARIBLE,

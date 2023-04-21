@@ -3,12 +3,12 @@ package com.rarible.protocol.union.integration.solana.service
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.OrderControllerApi
 import com.rarible.protocol.solana.dto.OrderIdsDto
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
-import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -24,7 +24,7 @@ open class SolanaOrderService(
     private val solanaOrderConverter: SolanaOrderConverter
 ) : AbstractBlockchainService(BlockchainDto.SOLANA), OrderService {
 
-    override suspend fun getOrderById(id: String): OrderDto {
+    override suspend fun getOrderById(id: String): UnionOrder {
         val order = orderApi.getOrderById(id).awaitFirst()
         return solanaOrderConverter.convert(order, blockchain)
     }
@@ -34,7 +34,7 @@ open class SolanaOrderService(
         size: Int,
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val orders = orderApi.getOrdersAll(
             continuation,
             size,
@@ -48,7 +48,7 @@ open class SolanaOrderService(
         continuation: String?,
         size: Int,
         sort: SyncSortDto?
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val orders = orderApi.getOrdersSync(
             continuation,
             size,
@@ -58,17 +58,17 @@ open class SolanaOrderService(
         return solanaOrderConverter.convert(orders, blockchain)
     }
 
-    override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
+    override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {
         val result = orderApi.getOrdersByIds(OrderIdsDto(orderIds)).awaitFirst()
         return result.orders.map { solanaOrderConverter.convert(it, blockchain) }
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrencies(itemId: String): List<UnionAssetType> {
         val result = orderApi.getBidCurrencies(itemId).awaitFirst()
-        return result.currencies.map { SolanaConverter.convertLegacy(it, blockchain) }
+        return result.currencies.map { SolanaConverter.convert(it, blockchain) }
     }
 
-    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -83,7 +83,7 @@ open class SolanaOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val orders = orderApi.getOrderBidsByItem(
             itemId,
             currencyAddress,
@@ -107,7 +107,7 @@ open class SolanaOrderService(
         end: Long?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val orders = orderApi.getOrderBidsByMaker(
             maker,
             origin,
@@ -120,12 +120,12 @@ open class SolanaOrderService(
         return solanaOrderConverter.convert(orders, blockchain)
     }
 
-    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrencies(itemId: String): List<UnionAssetType> {
         val result = orderApi.getSellCurrencies(itemId).awaitFirst()
-        return result.currencies.map { SolanaConverter.convertLegacy(it, blockchain) }
+        return result.currencies.map { SolanaConverter.convert(it, blockchain) }
     }
 
-    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -134,7 +134,7 @@ open class SolanaOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val orders = orderApi.getSellOrders(
             origin,
             continuation,
@@ -150,7 +150,7 @@ open class SolanaOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -162,7 +162,7 @@ open class SolanaOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         //Not implemented
         return Slice.empty()
     }
@@ -177,7 +177,7 @@ open class SolanaOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         //Not implemented
         return Slice.empty()
     }
@@ -191,7 +191,7 @@ open class SolanaOrderService(
         currencyId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val orders = orderApi.getSellOrdersByItem(
             itemId,
             currencyId,
@@ -211,7 +211,7 @@ open class SolanaOrderService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val orders = orderApi.getSellOrdersByMaker(
             maker,
             origin,
@@ -226,7 +226,7 @@ open class SolanaOrderService(
         itemId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -242,7 +242,7 @@ open class SolanaOrderService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 }

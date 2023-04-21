@@ -9,6 +9,8 @@ import com.rarible.protocol.union.dto.ActivityDto
     JsonSubTypes.Type(name = "ITEM", value = UnionInternalItemEvent::class),
     JsonSubTypes.Type(name = "OWNERSHIP", value = UnionInternalOwnershipEvent::class),
     JsonSubTypes.Type(name = "ORDER", value = UnionInternalOrderEvent::class),
+    // TODO rename to ORDER after few releases
+    JsonSubTypes.Type(name = "ORDER_", value = UnionInternalOrderEvent::class),
     JsonSubTypes.Type(name = "AUCTION", value = UnionAuctionEvent::class),
     JsonSubTypes.Type(name = "ACTIVITY", value = UnionInternalActivityLegacyEvent::class),
     // TODO rename to ACTIVITY after few releases
@@ -32,10 +34,16 @@ data class UnionInternalOrderEvent(
     val event: UnionOrderEvent
 ) : UnionInternalBlockchainEvent()
 
+@Deprecated("Remove later, leave UnionInternalOrderEvent")
+data class UnionInternalOrderLegacyEvent(
+    val event: UnionOrderLegacyEvent
+) : UnionInternalBlockchainEvent()
+
 data class UnionInternalAuctionEvent(
     val event: UnionAuctionEvent
 ) : UnionInternalBlockchainEvent()
 
+@Deprecated("Remove later, leave UnionInternalActivityEvent")
 data class UnionInternalActivityLegacyEvent(
     val event: ActivityDto
 ) : UnionInternalBlockchainEvent()

@@ -6,11 +6,11 @@ import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionChangeEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OriginService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
@@ -54,7 +54,7 @@ class EnrichmentCollectionEventService(
 
     suspend fun onCollectionBestSellOrderUpdate(
         collectionId: CollectionIdDto,
-        order: OrderDto,
+        order: UnionOrder,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean
     ) = coroutineScope {
@@ -71,7 +71,7 @@ class EnrichmentCollectionEventService(
 
     suspend fun onCollectionBestBidOrderUpdate(
         collectionId: CollectionIdDto,
-        order: OrderDto,
+        order: UnionOrder,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean
     ) = coroutineScope {
@@ -109,7 +109,7 @@ class EnrichmentCollectionEventService(
 
     private suspend fun updateCollection(
         collectionId: EnrichmentCollectionId,
-        order: OrderDto,
+        order: UnionOrder,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean,
         orderUpdateAction: suspend (collection: EnrichmentCollection) -> EnrichmentCollection
@@ -137,7 +137,7 @@ class EnrichmentCollectionEventService(
         updated: EnrichmentCollection,
         notificationEnabled: Boolean,
         collection: UnionCollection? = null,
-        order: OrderDto? = null,
+        order: UnionOrder? = null,
         eventTimeMarks: UnionEventTimeMarks?
     ) {
         if (!notificationEnabled) {
@@ -153,7 +153,7 @@ class EnrichmentCollectionEventService(
     private suspend fun buildUpdateEvent(
         enrichmentCollection: EnrichmentCollection,
         unionCollection: UnionCollection? = null,
-        order: OrderDto? = null,
+        order: UnionOrder? = null,
         eventTimeMarks: UnionEventTimeMarks?
     ): CollectionUpdateEventDto {
         val dto = enrichmentCollectionService.enrichCollection(

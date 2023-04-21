@@ -1,14 +1,14 @@
 package com.rarible.protocol.union.worker.job
 
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
 import com.rarible.protocol.union.worker.config.ReconciliationProperties
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.mockk.clearMocks
@@ -104,20 +104,21 @@ class ReconciliationOrderJobTest {
         coVerify(exactly = 0) { orderEventService.updateOrder(any(), any()) }
     }
 
-    private fun mockGetOrdersAll(continuation: String?, size: Int, result: Slice<OrderDto>): Unit {
+    private fun mockGetOrdersAll(continuation: String?, size: Int, result: Slice<UnionOrder>): Unit {
         coEvery {
             orderService.getOrdersAll(
                 continuation,
                 size,
                 eq(OrderSortDto.LAST_UPDATE_DESC),
                 eq(listOf(OrderStatusDto.ACTIVE))
-            ) } returns result
+            )
+        } returns result
     }
 
-    private fun mockPagination(continuation: String?, count: Int): Slice<OrderDto> {
-        val orders = ArrayList<OrderDto>()
+    private fun mockPagination(continuation: String?, count: Int): Slice<UnionOrder> {
+        val orders = ArrayList<UnionOrder>()
         for (i in 1..count) {
-            orders.add(randomUnionSellOrderDto())
+            orders.add(randomUnionSellOrder())
         }
         return Slice(continuation, orders)
     }

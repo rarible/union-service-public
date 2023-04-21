@@ -1,12 +1,15 @@
 package com.rarible.protocol.union.worker.task.search.order;
 
 import com.rarible.core.telemetry.metrics.RegisteredCounter
-import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionEthCollectionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
-import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
-import com.rarible.protocol.union.dto.OrdersDto
+import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.RateLimiter
@@ -20,7 +23,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
-import randomOrder
+import randomUnionOrder
 import java.math.BigDecimal
 
 class OrderReindexServiceUnitTest {
@@ -31,9 +34,13 @@ class OrderReindexServiceUnitTest {
         } answers { arg(0) }
     }
 
-    private val orderDto1 = randomOrder().copy(
-        take = AssetDto(
-            type = EthCollectionAssetTypeDto(
+    private val enrichmentOrderService: EnrichmentOrderService = mockk() {
+        coEvery { enrich(any<UnionOrder>()) } coAnswers { OrderDtoConverter.convert(it.invocation.args[0] as UnionOrder) }
+    }
+
+    private val orderDto1 = randomUnionOrder().copy(
+        take = UnionAsset(
+            type = UnionEthCollectionAssetType(
                 contract = ContractAddress(
                     blockchain = BlockchainDto.ETHEREUM,
                     value = "0x8584d66b25318f31baf5b0fe13e7d2486d2b2f63"
@@ -41,29 +48,23 @@ class OrderReindexServiceUnitTest {
             ), value = BigDecimal.ONE
         )
     )
-    private val orderDto2 = randomOrder()
-    private val orderDto3 = randomOrder()
+    private val orderDto2 = randomUnionOrder()
+    private val orderDto3 = randomUnionOrder()
     private val continuation = orderDto2.id.fullId()
 
     private val orderApiMergeService = mockk<OrderApiMergeService> {
 
-        coEvery { getOrdersAll(any(), null, any(), any(), any()) } returns OrdersDto(
-            orders = listOf(orderDto1, orderDto2), continuation = continuation
+        coEvery { getOrdersAll(any(), null, any(), any(), any()) } returns Slice(
+            entities = listOf(orderDto1, orderDto2), continuation = continuation
         )
 
-        coEvery {
-            getOrdersAll(
-                any(), continuation, any(), any(), any()
-            )
-        } returns OrdersDto(
-            orders = listOf(orderDto3), continuation = null
+        coEvery { getOrdersAll(any(), continuation, any(), any(), any()) } returns Slice(
+            entities = listOf(orderDto3), continuation = null
         )
     }
 
     private val counter = mockk<RegisteredCounter> {
-        every {
-            increment(any())
-        } returns Unit
+        every { increment(any()) } returns Unit
     }
 
     private val searchTaskMetricFactory = mockk<SearchTaskMetricFactory> {
@@ -79,12 +80,9 @@ class OrderReindexServiceUnitTest {
     @Test
     fun `should skip reindexing if there's nothing to reindex`() = runBlocking<Unit> {
         val service = OrderReindexService(
+            mockk(),
             mockk {
-                coEvery {
-                    getOrdersAll(
-                        any(), any(), any(), any(), any()
-                    )
-                } returns OrdersDto(null, emptyList())
+                coEvery { getOrdersAll(any(), any(), any(), any(), any()) } returns Slice(null, emptyList())
             },
             repo,
             searchTaskMetricFactory,
@@ -105,6 +103,7 @@ class OrderReindexServiceUnitTest {
     @Test
     fun `should reindex two rounds`() = runBlocking<Unit> {
         val service = OrderReindexService(
+            enrichmentOrderService,
             orderApiMergeService,
             repo,
             searchTaskMetricFactory,

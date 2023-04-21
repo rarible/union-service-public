@@ -6,7 +6,7 @@ import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.ActivityDto
 import com.rarible.protocol.dto.ActivityTopicProvider
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
-import java.util.*
+import java.util.UUID
 
 class EthActivityEventsConsumerFactory(
     private val brokerReplicaSet: String,

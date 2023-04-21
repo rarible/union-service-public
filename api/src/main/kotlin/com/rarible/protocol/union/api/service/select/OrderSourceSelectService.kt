@@ -2,17 +2,17 @@ package com.rarible.protocol.union.api.service.select
 
 import com.rarible.protocol.union.api.service.elastic.OrderElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.service.query.order.OrderQueryService
 import org.springframework.stereotype.Component
@@ -27,14 +27,14 @@ class OrderSourceSelectService(
     /**
      * Should always route to OrderApiService
      */
-    suspend fun getOrderById(id: String): OrderDto {
+    suspend fun getOrderById(id: String): UnionOrder {
         return orderApiService.getOrderById(id)
     }
 
     /**
      * Should always route to OrderApiService
      */
-    suspend fun getByIds(orderIdsDto: OrderIdsDto): List<OrderDto> {
+    suspend fun getByIds(orderIdsDto: OrderIdsDto): List<UnionOrder> {
         return orderApiService.getByIds(orderIdsDto)
     }
 
@@ -45,7 +45,7 @@ class OrderSourceSelectService(
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?,
         searchEngine: SearchEngineDto?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         return getQuerySource(searchEngine).getOrdersAll(blockchains, continuation, size, sort, status)
     }
 
@@ -54,7 +54,7 @@ class OrderSourceSelectService(
         continuation: String?,
         size: Int?,
         sort: SyncSortDto?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         return orderApiService.getAllSync(blockchain, continuation, size, sort)
     }
 
@@ -67,7 +67,7 @@ class OrderSourceSelectService(
         continuation: String?,
         size: Int?,
         searchEngine: SearchEngineDto?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         return getQuerySource(searchEngine).getSellOrdersByItem(
             itemId, platform, maker, origin, status, continuation, size
         )
@@ -84,7 +84,7 @@ class OrderSourceSelectService(
         continuation: String?,
         size: Int?,
         searchEngine: SearchEngineDto?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         return getQuerySource(searchEngine).getOrderBidsByItem(
             itemId,
             platform,
@@ -109,7 +109,7 @@ class OrderSourceSelectService(
         continuation: String?,
         size: Int?,
         searchEngine: SearchEngineDto?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         return getQuerySource(searchEngine).getOrderBidsByMaker(
             blockchains,
             platform,
@@ -130,7 +130,7 @@ class OrderSourceSelectService(
         continuation: String?,
         size: Int?,
         searchEngine: SearchEngineDto?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         return getQuerySource(searchEngine).getSellOrders(blockchains, platform, origin, continuation, size)
     }
 
@@ -143,7 +143,7 @@ class OrderSourceSelectService(
         size: Int?,
         status: List<OrderStatusDto>?,
         searchEngine: SearchEngineDto?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         return getQuerySource(searchEngine).getSellOrdersByMaker(
             maker, blockchains, platform, origin, continuation, size, status
         )

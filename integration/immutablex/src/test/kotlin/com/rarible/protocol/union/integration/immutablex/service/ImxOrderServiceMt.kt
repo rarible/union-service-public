@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.immutablex.service
 import com.rarible.protocol.union.core.test.ManualTest
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.integration.ImxManualTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -88,7 +87,7 @@ class ImxOrderServiceMt : ImxManualTest() {
         )
 
         result.entities.forEach {
-            val itemId = it.make.type.ext.itemId!!.value
+            val itemId = it.make.type.itemId()!!.value
             assertThat(itemId).startsWith(collection)
         }
     }

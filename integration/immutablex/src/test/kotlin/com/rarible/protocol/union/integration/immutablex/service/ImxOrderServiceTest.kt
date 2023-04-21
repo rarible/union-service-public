@@ -5,7 +5,6 @@ import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.integration.data.randomImxOrder
 import com.rarible.protocol.union.integration.data.randomImxOrderBuySide
 import com.rarible.protocol.union.integration.data.randomImxOrderSellSide
@@ -54,7 +53,7 @@ class ImxOrderServiceTest {
 
         // we are interested only in sell-orders currencies, swap/buy orders should be filtered
         assertThat(result).hasSize(1)
-        assertThat(result[0].ext.currencyAddress()).isEqualTo(sell.buy.data.tokenAddress)
+        assertThat(result[0].currencyId()).isEqualTo(sell.buy.data.tokenAddress)
     }
 
     @Test
@@ -76,7 +75,7 @@ class ImxOrderServiceTest {
 
         // we are interested only in buy-orders currencies, swap/sell orders should be filtered
         assertThat(result).hasSize(1)
-        assertThat(result[0].ext.currencyAddress()).isEqualTo(buy.sell.data.tokenAddress)
+        assertThat(result[0].currencyId()).isEqualTo(buy.sell.data.tokenAddress)
     }
 
     @Test

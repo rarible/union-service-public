@@ -1,38 +1,19 @@
 package com.rarible.protocol.union.core.converter.helper
 
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyDto
-import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
-import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
-import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc1155LazyAssetTypeDto
-import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc721LazyAssetTypeDto
-import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
-import com.rarible.protocol.union.dto.EthGenerativeArtAssetTypeDto
-import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
-import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
-import com.rarible.protocol.union.dto.SolanaFtAssetTypeDto
-import com.rarible.protocol.union.dto.SolanaNftAssetTypeDto
-import com.rarible.protocol.union.dto.SolanaSolAssetTypeDto
-import com.rarible.protocol.union.dto.TezosFTAssetTypeDto
-import com.rarible.protocol.union.dto.TezosMTAssetTypeDto
-import com.rarible.protocol.union.dto.TezosNFTAssetTypeDto
-import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
 import com.rarible.protocol.union.dto.ext
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class SellActivityEnricher(
     private val currencyService: CurrencyService
 ) {
-    companion object {
-        private val logger by Logger()
-    }
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     data class SellVolumeInfo(
         val sellCurrency: String,
@@ -86,12 +67,16 @@ class SellActivityEnricher(
         source: OrderMatchSellDto,
         volumeUsd: Double,
         sellCurrency: String,
-        nativeCurrency: CurrencyDto): Double
-    {
+        nativeCurrency: CurrencyDto
+    ): Double {
         return if (isSellCurrencyNative(sellCurrency, nativeCurrency)) {
             source.payment.value.toDouble()
         } else {
-            val nativeRate = currencyService.getRate(nativeCurrency.currencyId.blockchain, nativeCurrency.currencyId.value, source.date)
+            val nativeRate = currencyService.getRate(
+                nativeCurrency.currencyId.blockchain,
+                nativeCurrency.currencyId.value,
+                source.date
+            )
                 .rate.toDouble()
             return volumeUsd / nativeRate
         }

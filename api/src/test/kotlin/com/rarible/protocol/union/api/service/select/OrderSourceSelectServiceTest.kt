@@ -2,15 +2,15 @@ package com.rarible.protocol.union.api.service.select
 
 import com.rarible.protocol.union.api.service.elastic.OrderElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -54,11 +54,11 @@ class OrderSourceSelectServiceTest {
     private val start = 500L
     private val end = 1000L
 
-    private val elasticListResponse = listOf(mockk<OrderDto>())
-    private val apiListResponse = listOf(mockk<OrderDto>())
+    private val elasticListResponse = listOf(mockk<UnionOrder>())
+    private val apiListResponse = listOf(mockk<UnionOrder>())
 
-    private val elasticOrdersResponse = mockk<OrdersDto>()
-    private val apiOrdersResponse = mockk<OrdersDto>()
+    private val elasticOrdersResponse = mockk<Slice<UnionOrder>>()
+    private val apiOrdersResponse = mockk<Slice<UnionOrder>>()
 
     @Nested
     inner class GetOrderByIdTest {
@@ -67,7 +67,7 @@ class OrderSourceSelectServiceTest {
         fun `should get order by id - select api even when elastic flag is on `() = runBlocking<Unit> {
             // given
             val id = "some id"
-            val expected = mockk<OrderDto>()
+            val expected = mockk<UnionOrder>()
             every { featureFlagsProperties.enableOrderQueriesToElasticSearch } returns true
             coEvery { orderApiService.getOrderById(id) } returns expected
 
@@ -82,7 +82,7 @@ class OrderSourceSelectServiceTest {
         fun `should get order by id - select api`() = runBlocking<Unit> {
             // given
             val id = "some id"
-            val expected = mockk<OrderDto>()
+            val expected = mockk<UnionOrder>()
             every { featureFlagsProperties.enableOrderQueriesToElasticSearch } returns false
             coEvery { orderApiService.getOrderById(id) } returns expected
 

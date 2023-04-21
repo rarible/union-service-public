@@ -21,7 +21,6 @@ import com.rarible.protocol.solana.dto.TokenMetaContentDto
 import com.rarible.protocol.solana.dto.TokenMetaDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import java.math.BigDecimal
 import java.math.BigInteger
 
 fun randomSolanaTokenDto(itemId: ItemIdDto) = TokenDto(

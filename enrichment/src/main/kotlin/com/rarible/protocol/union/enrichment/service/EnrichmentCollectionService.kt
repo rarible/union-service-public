@@ -4,13 +4,13 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
@@ -92,7 +92,7 @@ class EnrichmentCollectionService(
         enrichmentCollection: EnrichmentCollection?,
         // TODO COLLECTION remove it after switching to union data
         collection: UnionCollection?,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
+        orders: Map<OrderIdDto, UnionOrder> = emptyMap(),
         metaPipeline: CollectionMetaPipeline
     ): CollectionDto {
         require(enrichmentCollection != null || collection != null)
@@ -108,7 +108,7 @@ class EnrichmentCollectionService(
 
     private suspend fun enrichCollection(
         enrichmentCollection: EnrichmentCollection,
-        orders: Map<OrderIdDto, OrderDto>,
+        orders: Map<OrderIdDto, UnionOrder>,
         metaPipeline: CollectionMetaPipeline
     ): CollectionDto {
 
@@ -126,7 +126,7 @@ class EnrichmentCollectionService(
             collection = enrichmentCollection,
             // replacing inner IPFS urls with public urls
             meta = contentMetaService.exposePublicUrls(metaEntry?.data),
-            orders = bestOrders
+            orders = enrichmentOrderService.enrich(bestOrders)
         )
     }
 
@@ -134,7 +134,7 @@ class EnrichmentCollectionService(
     private suspend fun enrichCollectionLegacy(
         enrichmentCollection: EnrichmentCollection?,
         collection: UnionCollection?,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
+        orders: Map<OrderIdDto, UnionOrder> = emptyMap(),
         metaPipeline: CollectionMetaPipeline
     ) = coroutineScope {
         require(enrichmentCollection != null || collection != null)
@@ -159,7 +159,7 @@ class EnrichmentCollectionService(
             // replacing inner IPFS urls with public urls
             meta = contentMetaService.exposePublicUrls(meta),
             enrichmentCollection = enrichmentCollection,
-            orders = bestOrders
+            orders = enrichmentOrderService.enrich(bestOrders)
         )
     }
 

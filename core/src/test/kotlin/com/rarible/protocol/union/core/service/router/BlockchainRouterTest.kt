@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import randomOrder
+import randomUnionOrder
 
 class BlockchainRouterTest {
 
@@ -95,8 +95,8 @@ class BlockchainRouterTest {
         val cont1 = "c1"
         val cont2: String? = null
         val sort = SyncSortDto.DB_UPDATE_DESC
-        val order1 = randomOrder()
-        val order2 = randomOrder()
+        val order1 = randomUnionOrder()
+        val order2 = randomUnionOrder()
         val router = BlockchainRouter(listOf(service), listOf(BlockchainDto.ETHEREUM))
 
         coEvery { service.getAllSync(null, size, sort) } returns Slice(cont1, listOf(order1))
@@ -115,7 +115,7 @@ class BlockchainRouterTest {
         val cont1 = "c1"
         val cont2 = "c2"
         val sort = SyncSortDto.DB_UPDATE_DESC
-        val order1 = randomOrder()
+        val order1 = randomUnionOrder()
         val router = BlockchainRouter(listOf(service), listOf(BlockchainDto.ETHEREUM))
 
         coEvery { service.getAllSync(null, size, sort) } returns Slice(cont1, listOf(order1))

@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.test.context.ContextConfiguration
-import randomOrder
+import randomOrderDto
 import randomOrderId
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -48,7 +48,7 @@ internal class EsOrderRepositoryFt {
     @Test
     fun `should save and read`(): Unit = runBlocking {
 
-        val order = randomOrder()
+        val order = randomOrderDto()
         val esOrder = EsOrderConverter.convert(order)
 
         val id = repository.save(esOrder).orderId
@@ -62,7 +62,7 @@ internal class EsOrderRepositoryFt {
         val now = Instant.now().truncatedTo(ChronoUnit.SECONDS)
         // given
         val orders = List(95) {
-            randomOrder().copy(
+            randomOrderDto().copy(
                 id = randomOrderId(blockchain = BlockchainDto.ETHEREUM),
                 lastUpdatedAt = now.plusMillis(it.toLong())
             )
@@ -128,7 +128,7 @@ internal class EsOrderRepositoryFt {
         val now = Instant.now().truncatedTo(ChronoUnit.SECONDS)
         // given
         val orders = List(95) {
-            randomOrder().copy(
+            randomOrderDto().copy(
                 id = randomOrderId(blockchain = BlockchainDto.ETHEREUM),
                 lastUpdatedAt = now.plusMillis(it.toLong())
             )
@@ -192,7 +192,7 @@ internal class EsOrderRepositoryFt {
 //    @Disabled("Test fails after recent changes, to be fixed under PT-1216")
     fun `EsOrderSellOrdersByItem filter`(): Unit = runBlocking {
         // given
-        val orders = List(100) { randomOrder() }.map { EsOrderConverter.convert(it) }
+        val orders = List(100) { randomOrderDto() }.map { EsOrderConverter.convert(it) }
         repository.saveAll(orders)
 
         // when
@@ -227,7 +227,7 @@ internal class EsOrderRepositoryFt {
     fun `EsOrderBidOrdersByItem filter`(): Unit = runBlocking {
         // given
         val orders = List(100) {
-            val o = randomOrder()
+            val o = randomOrderDto()
             o.copy(take = o.make, make = o.take)
         }.map { EsOrderConverter.convert(it).copy(type = EsOrder.Type.BID) }
         repository.saveAll(orders)
@@ -266,7 +266,7 @@ internal class EsOrderRepositoryFt {
     fun `EsOrdersByMakers filter`(): Unit = runBlocking {
         // given
         val orders = List(100) {
-            val o = randomOrder()
+            val o = randomOrderDto()
             o.copy(take = o.make, make = o.take)
         }.map { EsOrderConverter.convert(it) }
         repository.saveAll(orders)
@@ -298,7 +298,7 @@ internal class EsOrderRepositoryFt {
     fun `EsOrdersByMakers filter with origin`(): Unit = runBlocking {
         // given
         val orders = List(100) {
-            val o = randomOrder()
+            val o = randomOrderDto()
             o.copy(take = o.make, make = o.take)
         }.map { EsOrderConverter.convert(it) }
         repository.saveAll(orders)
@@ -332,7 +332,7 @@ internal class EsOrderRepositoryFt {
     fun `EsOrderSellOrders filter`(): Unit = runBlocking {
         // given
         val orders = List(100) {
-            val o = randomOrder()
+            val o = randomOrderDto()
             o.copy(take = o.make, make = o.take)
         }.map { EsOrderConverter.convert(it) }
         repository.saveAll(orders)

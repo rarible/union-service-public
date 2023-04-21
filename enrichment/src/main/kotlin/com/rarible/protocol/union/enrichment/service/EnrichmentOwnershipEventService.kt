@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
@@ -17,7 +18,6 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OwnershipDeleteEventDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
@@ -27,7 +27,6 @@ import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipSourceComparator
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.util.setStatusByAction
 import com.rarible.protocol.union.enrichment.validator.OwnershipValidator
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -85,7 +84,7 @@ class EnrichmentOwnershipEventService(
 
     suspend fun onPoolOrderUpdated(
         ownershipId: ShortOwnershipId,
-        order: OrderDto,
+        order: UnionOrder,
         action: PoolItemAction,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
@@ -96,7 +95,7 @@ class EnrichmentOwnershipEventService(
 
     suspend fun onOwnershipBestSellOrderUpdated(
         ownershipId: ShortOwnershipId,
-        order: OrderDto,
+        order: UnionOrder,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) = optimisticLock {
@@ -283,7 +282,7 @@ class EnrichmentOwnershipEventService(
         notificationEnabled: Boolean,
         ownership: UnionOwnership? = null,
         auction: AuctionDto? = null,
-        order: OrderDto? = null,
+        order: UnionOrder? = null,
         eventTimeMarks: UnionEventTimeMarks?
     ) {
         if (!notificationEnabled) {
@@ -300,7 +299,7 @@ class EnrichmentOwnershipEventService(
         short: ShortOwnership,
         ownership: UnionOwnership? = null,
         auction: AuctionDto? = null,
-        order: OrderDto? = null,
+        order: UnionOrder? = null,
         eventTimeMarks: UnionEventTimeMarks?
     ): OwnershipUpdateEventDto? {
         val isAuctionOwnership = (auctionContractService.isAuctionContract(short.blockchain, short.owner))

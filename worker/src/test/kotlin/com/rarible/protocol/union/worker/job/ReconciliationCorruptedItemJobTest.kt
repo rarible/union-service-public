@@ -1,20 +1,20 @@
 package com.rarible.protocol.union.worker.job
 
 import com.rarible.core.test.data.randomBigDecimal
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionEthCollectionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
-import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
-import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
-import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrder
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.clearMocks
@@ -51,22 +51,22 @@ class ReconciliationCorruptedItemJobTest {
     @Test
     fun `reconcile corrupted items`() = runBlocking<Unit> {
         val correctItemId = randomEthItemId()
-        val correctBid = randomUnionBidOrderDto(correctItemId)
-        val correctSell = randomUnionSellOrderDto(correctItemId)
+        val correctBid = randomUnionBidOrder(correctItemId)
+        val correctSell = randomUnionSellOrder(correctItemId)
         val correctItem = randomShortItem(correctItemId).copy(
             bestSellOrder = ShortOrderConverter.convert(correctSell),
             bestBidOrder = ShortOrderConverter.convert(correctBid)
         )
 
         val corruptedItemId = randomEthItemId()
-        val corruptedBid = randomUnionBidOrderDto(corruptedItemId).copy(status = OrderStatusDto.INACTIVE)
+        val corruptedBid = randomUnionBidOrder(corruptedItemId).copy(status = UnionOrder.Status.INACTIVE)
         val corruptedItem = randomShortItem(corruptedItemId).copy(
             bestSellOrder = null,
             bestBidOrder = ShortOrderConverter.convert(corruptedBid)
         )
 
         val missedOrderItemId = randomEthItemId()
-        val missedOrderSell = randomUnionSellOrderDto(missedOrderItemId)
+        val missedOrderSell = randomUnionSellOrder(missedOrderItemId)
         val missedOrderItem = randomShortItem(missedOrderItemId).copy(
             bestSellOrder = ShortOrderConverter.convert(missedOrderSell),
             bestBidOrder = null
@@ -97,11 +97,12 @@ class ReconciliationCorruptedItemJobTest {
     @Test
     fun `clenaup legacy floor bid`() = runBlocking<Unit> {
 
-        val collectionAssetType = EthCollectionAssetTypeDto(ContractAddress(BlockchainDto.ETHEREUM, randomEthAddress()))
-        val take = AssetDto(collectionAssetType, randomBigDecimal())
+        val collectionAssetType =
+            UnionEthCollectionAssetType(ContractAddress(BlockchainDto.ETHEREUM, randomEthAddress()))
+        val take = UnionAsset(collectionAssetType, randomBigDecimal())
 
         val floorBidOrderItemId = randomEthItemId()
-        val floorBidOrder = randomUnionBidOrderDto(floorBidOrderItemId).copy(take = take)
+        val floorBidOrder = randomUnionBidOrder(floorBidOrderItemId).copy(take = take)
         val floorBidOrderItem = randomShortItem(floorBidOrderItemId).copy(
             bestSellOrder = null,
             bestBidOrder = ShortOrderConverter.convert(floorBidOrder)

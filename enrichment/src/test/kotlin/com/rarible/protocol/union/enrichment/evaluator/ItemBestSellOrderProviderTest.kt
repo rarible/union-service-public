@@ -12,7 +12,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import randomOrder
+import randomUnionOrder
 
 class ItemBestSellOrderProviderTest {
 
@@ -26,7 +26,7 @@ class ItemBestSellOrderProviderTest {
     @Test
     fun `direct is the best - without pool orders`() = runBlocking<Unit> {
         val currencyId = randomAddressString()
-        val directOrder = randomOrder()
+        val directOrder = randomUnionOrder()
 
         val shortItem = randomShortItem()
         val provider = ItemBestSellOrderProvider(shortItem, enrichmentOrderService)
@@ -54,9 +54,9 @@ class ItemBestSellOrderProviderTest {
     @Test
     fun `direct is the best`() = runBlocking<Unit> {
         val currencyId = randomAddressString()
-        val directOrder = randomOrder(makePrice = 1.toBigDecimal())
+        val directOrder = randomUnionOrder(makePrice = 1.toBigDecimal())
 
-        val poolOrder = randomOrder(makePrice = 2.toBigDecimal())
+        val poolOrder = randomUnionOrder(makePrice = 2.toBigDecimal())
         val shortPoolOrder = ShortPoolOrder(currencyId, ShortOrderConverter.convert(poolOrder))
 
         val shortItem = randomShortItem().copy(poolSellOrders = listOf(shortPoolOrder))
@@ -72,9 +72,9 @@ class ItemBestSellOrderProviderTest {
     @Test
     fun `direct is the best - pool order not found`() = runBlocking<Unit> {
         val currencyId = randomAddressString()
-        val directOrder = randomOrder(makePrice = 2.toBigDecimal())
+        val directOrder = randomUnionOrder(makePrice = 2.toBigDecimal())
 
-        val poolOrder = randomOrder(makePrice = 1.toBigDecimal())
+        val poolOrder = randomUnionOrder(makePrice = 1.toBigDecimal())
         val shortPoolOrder = ShortPoolOrder(currencyId, ShortOrderConverter.convert(poolOrder))
 
         val shortItem = randomShortItem().copy(poolSellOrders = listOf(shortPoolOrder))
@@ -92,9 +92,9 @@ class ItemBestSellOrderProviderTest {
     fun `direct is the best - origin specified`() = runBlocking<Unit> {
         val currencyId = randomAddressString()
         val origin = randomAddressString()
-        val directOrder = randomOrder(makePrice = 2.toBigDecimal())
+        val directOrder = randomUnionOrder(makePrice = 2.toBigDecimal())
 
-        val poolOrder = randomOrder(makePrice = 1.toBigDecimal())
+        val poolOrder = randomUnionOrder(makePrice = 1.toBigDecimal())
         val shortPoolOrder = ShortPoolOrder(currencyId, ShortOrderConverter.convert(poolOrder))
 
         val shortItem = randomShortItem().copy(poolSellOrders = listOf(shortPoolOrder))
@@ -111,9 +111,9 @@ class ItemBestSellOrderProviderTest {
     @Test
     fun `pool is the best`() = runBlocking<Unit> {
         val currencyId = randomAddressString()
-        val directOrder = randomOrder(makePrice = 2.toBigDecimal())
+        val directOrder = randomUnionOrder(makePrice = 2.toBigDecimal())
 
-        val poolOrder = randomOrder(makePrice = 1.toBigDecimal())
+        val poolOrder = randomUnionOrder(makePrice = 1.toBigDecimal())
         val shortPoolOrder = ShortPoolOrder(currencyId, ShortOrderConverter.convert(poolOrder))
 
         val shortItem = randomShortItem().copy(poolSellOrders = listOf(shortPoolOrder))
@@ -130,10 +130,10 @@ class ItemBestSellOrderProviderTest {
     @Test
     fun `pool is the best - several pool orders`() = runBlocking<Unit> {
         val currencyId = randomAddressString()
-        val poolOrder1 = randomOrder(makePrice = 2.toBigDecimal())
+        val poolOrder1 = randomUnionOrder(makePrice = 2.toBigDecimal())
         val shortPoolOrder1 = ShortPoolOrder(currencyId, ShortOrderConverter.convert(poolOrder1))
 
-        val poolOrder2 = randomOrder(makePrice = 1.toBigDecimal())
+        val poolOrder2 = randomUnionOrder(makePrice = 1.toBigDecimal())
         val shortPoolOrder2 = ShortPoolOrder(currencyId, ShortOrderConverter.convert(poolOrder2))
 
         val shortItem = randomShortItem().copy(poolSellOrders = listOf(shortPoolOrder1, shortPoolOrder2))
@@ -151,11 +151,11 @@ class ItemBestSellOrderProviderTest {
     @Test
     fun `pool is the best - several currencies`() = runBlocking<Unit> {
         val currencyId = randomAddressString()
-        val poolOrder1 = randomOrder(makePrice = 2.toBigDecimal())
+        val poolOrder1 = randomUnionOrder(makePrice = 2.toBigDecimal())
         val shortPoolOrder1 = ShortPoolOrder(currencyId, ShortOrderConverter.convert(poolOrder1))
 
         // Price is better, but has different currency
-        val poolOrder2 = randomOrder(makePrice = 1.toBigDecimal())
+        val poolOrder2 = randomUnionOrder(makePrice = 1.toBigDecimal())
         val shortPoolOrder2 = ShortPoolOrder(randomAddressString(), ShortOrderConverter.convert(poolOrder2))
 
         val shortItem = randomShortItem().copy(poolSellOrders = listOf(shortPoolOrder1, shortPoolOrder2))

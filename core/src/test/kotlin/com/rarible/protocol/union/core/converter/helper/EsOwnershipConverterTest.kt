@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import randomAssetTypeErc20
-import randomOrder
+import randomAssetTypeErc20Dto
+import randomOrderDto
 import randomOwnership
 import randomOwnershipId
 import java.util.stream.Stream
@@ -58,7 +58,7 @@ internal class EsOwnershipConverterTest {
         fun source(): Stream<Arguments> = BlockchainDto.values().map {
             randomOwnership(
                 id = randomOwnershipId(it),
-                bestSellOrder = randomOrder(take = AssetDto(randomAssetTypeErc20(it), randomBigDecimal()))
+                bestSellOrder = randomOrderDto(take = AssetDto(randomAssetTypeErc20Dto(it), randomBigDecimal()))
             )
         }.map { Arguments.of(it) }.stream()
     }

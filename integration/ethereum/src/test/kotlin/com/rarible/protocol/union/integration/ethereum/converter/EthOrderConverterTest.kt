@@ -6,9 +6,13 @@ import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.dto.OrderSideMatchDto
 import com.rarible.protocol.dto.SeaportItemTypeDto
 import com.rarible.protocol.dto.SeaportOrderTypeDto
+import com.rarible.protocol.union.core.model.UnionEthErc20AssetType
+import com.rarible.protocol.union.core.model.UnionEthErc721AssetType
+import com.rarible.protocol.union.core.model.UnionOnChainOrder
+import com.rarible.protocol.union.core.model.UnionOrder
+import com.rarible.protocol.union.core.model.UnionPendingOrderCancel
+import com.rarible.protocol.union.core.model.UnionPendingOrderMatch
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthLooksRareOrderDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3BuyDto
@@ -18,10 +22,7 @@ import com.rarible.protocol.union.dto.EthOrderSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthSeaportItemTypeDto
 import com.rarible.protocol.union.dto.EthSeaportOrderTypeDto
 import com.rarible.protocol.union.dto.EthX2Y2OrderDataV1Dto
-import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.PendingOrderCancelDto
-import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCryptoPunksOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLooksRareOrderDto
@@ -58,9 +59,9 @@ class EthOrderConverterTest {
         assertThat(converted.platform).isEqualTo(PlatformDto.RARIBLE)
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
         assertThat(converted.taker!!.value).isEqualTo(dto.taker!!.prefixed())
-        assertThat(converted.make.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+        assertThat(converted.make.type).isInstanceOf(UnionEthErc721AssetType::class.java)
         assertThat(converted.make.value).isEqualTo(dto.make.valueDecimal)
-        assertThat(converted.take.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(converted.take.type).isInstanceOf(UnionEthErc20AssetType::class.java)
         assertThat(converted.take.value).isEqualTo(dto.take.valueDecimal)
         assertThat(converted.salt).isEqualTo(dto.salt.prefixed())
         assertThat(converted.signature).isEqualTo(dto.signature!!.prefixed())
@@ -89,14 +90,14 @@ class EthOrderConverterTest {
         val dto = order.pending!![0] as OrderSideMatchDto
 
         val converted = ethOrderConverter.convert(order, BlockchainDto.ETHEREUM)
-            .pending!![0] as PendingOrderMatchDto
+            .pending!![0] as UnionPendingOrderMatch
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.maker!!.value).isEqualTo(dto.maker!!.prefixed())
-        assertThat(converted.make!!.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+        assertThat(converted.make!!.type).isInstanceOf(UnionEthErc721AssetType::class.java)
         assertThat(converted.make!!.value).isEqualTo(dto.make!!.valueDecimal)
-        assertThat(converted.take!!.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(converted.take!!.type).isInstanceOf(UnionEthErc20AssetType::class.java)
         assertThat(converted.take!!.value).isEqualTo(dto.take!!.valueDecimal)
 
         assertThat(converted.fill).isEqualTo(dto.fill.toBigDecimal())
@@ -117,14 +118,14 @@ class EthOrderConverterTest {
         val dto = order.pending!![0] as OrderCancelDto
 
         val converted = ethOrderConverter.convert(order, BlockchainDto.ETHEREUM)
-            .pending!![0] as PendingOrderCancelDto
+            .pending!![0] as UnionPendingOrderCancel
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.maker!!.value).isEqualTo(dto.maker!!.prefixed())
-        assertThat(converted.make!!.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+        assertThat(converted.make!!.type).isInstanceOf(UnionEthErc721AssetType::class.java)
         assertThat(converted.make!!.value).isEqualTo(dto.make!!.valueDecimal)
-        assertThat(converted.take!!.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(converted.take!!.type).isInstanceOf(UnionEthErc20AssetType::class.java)
         assertThat(converted.take!!.value).isEqualTo(dto.take!!.valueDecimal)
 
         assertThat(converted.owner!!.value).isEqualTo(dto.owner!!.prefixed())
@@ -136,14 +137,14 @@ class EthOrderConverterTest {
         val dto = order.pending!![0] as com.rarible.protocol.dto.OnChainOrderDto
 
         val converted = ethOrderConverter.convert(order, BlockchainDto.ETHEREUM)
-            .pending!![0] as OnChainOrderDto
+            .pending!![0] as UnionOnChainOrder
 
         assertThat(converted.id.value).isEqualTo(dto.hash.prefixed())
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.maker!!.value).isEqualTo(dto.maker!!.prefixed())
-        assertThat(converted.make!!.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+        assertThat(converted.make!!.type).isInstanceOf(UnionEthErc721AssetType::class.java)
         assertThat(converted.make!!.value).isEqualTo(dto.make!!.valueDecimal)
-        assertThat(converted.take!!.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(converted.take!!.type).isInstanceOf(UnionEthErc20AssetType::class.java)
         assertThat(converted.take!!.value).isEqualTo(dto.take!!.valueDecimal)
     }
 
@@ -158,9 +159,9 @@ class EthOrderConverterTest {
         assertThat(converted.platform).isEqualTo(PlatformDto.RARIBLE)
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
         assertThat(converted.taker!!.value).isEqualTo(dto.taker!!.prefixed())
-        assertThat(converted.make.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+        assertThat(converted.make.type).isInstanceOf(UnionEthErc721AssetType::class.java)
         assertThat(converted.make.value).isEqualTo(dto.make.valueDecimal)
-        assertThat(converted.take.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(converted.take.type).isInstanceOf(UnionEthErc20AssetType::class.java)
         assertThat(converted.take.value).isEqualTo(dto.take.valueDecimal)
         assertThat(converted.salt).isEqualTo(dto.salt.prefixed())
         assertThat(converted.signature).isEqualTo(dto.signature!!.prefixed())
@@ -200,7 +201,7 @@ class EthOrderConverterTest {
 
         assertThat(data.payout!!.account.value).isEqualTo(dataDto.payout?.account?.prefixed())
         assertThat(data.originFeeFirst!!.account.value).isEqualTo(dataDto.originFeeFirst?.account?.prefixed())
-        assertThat(data.originFeeSecond!!.account?.value).isEqualTo(dataDto.originFeeSecond?.account?.prefixed())
+        assertThat(data.originFeeSecond!!.account.value).isEqualTo(dataDto.originFeeSecond?.account?.prefixed())
         assertThat(data.maxFeesBasePoint).isEqualTo(dataDto.maxFeesBasePoint)
         assertThat(data.marketplaceMarker!!).isEqualTo(dataDto.marketplaceMarker?.prefixed())
     }
@@ -230,9 +231,9 @@ class EthOrderConverterTest {
         assertThat(converted.platform).isEqualTo(PlatformDto.OPEN_SEA)
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
         assertThat(converted.taker!!.value).isEqualTo(dto.taker!!.prefixed())
-        assertThat(converted.make.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+        assertThat(converted.make.type).isInstanceOf(UnionEthErc721AssetType::class.java)
         assertThat(converted.make.value).isEqualTo(dto.make.valueDecimal)
-        assertThat(converted.take.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(converted.take.type).isInstanceOf(UnionEthErc20AssetType::class.java)
         assertThat(converted.take.value).isEqualTo(dto.take.valueDecimal)
         assertThat(converted.salt).isEqualTo(dto.salt.prefixed())
         assertThat(converted.signature).isEqualTo(dto.signature!!.prefixed())
@@ -288,9 +289,9 @@ class EthOrderConverterTest {
         assertThat(converted.platform).isEqualTo(PlatformDto.OPEN_SEA)
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
         assertThat(converted.taker!!.value).isEqualTo(dto.taker!!.prefixed())
-        assertThat(converted.make.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+        assertThat(converted.make.type).isInstanceOf(UnionEthErc721AssetType::class.java)
         assertThat(converted.make.value).isEqualTo(dto.make.valueDecimal)
-        assertThat(converted.take.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(converted.take.type).isInstanceOf(UnionEthErc20AssetType::class.java)
         assertThat(converted.take.value).isEqualTo(dto.take.valueDecimal)
         assertThat(converted.salt).isEqualTo(dto.salt.prefixed())
         assertThat(converted.signature).isEqualTo(dto.signature!!.prefixed())
@@ -359,9 +360,9 @@ class EthOrderConverterTest {
         assertThat(converted.platform).isEqualTo(PlatformDto.CRYPTO_PUNKS)
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
         assertThat(converted.taker!!.value).isEqualTo(dto.taker!!.prefixed())
-        assertThat(converted.make.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+        assertThat(converted.make.type).isInstanceOf(UnionEthErc721AssetType::class.java)
         assertThat(converted.make.value).isEqualTo(dto.make.valueDecimal)
-        assertThat(converted.take.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(converted.take.type).isInstanceOf(UnionEthErc20AssetType::class.java)
         assertThat(converted.take.value).isEqualTo(dto.take.valueDecimal)
         assertThat(converted.salt).isEqualTo(dto.salt.prefixed())
         assertThat(converted.signature).isEqualTo(dto.signature!!.prefixed())
@@ -387,11 +388,11 @@ class EthOrderConverterTest {
     fun `eth order status`() {
         // given
         val unionStatuses = listOf(
-            OrderStatusDto.ACTIVE,
-            OrderStatusDto.FILLED,
-            OrderStatusDto.INACTIVE,
-            OrderStatusDto.HISTORICAL,
-            OrderStatusDto.CANCELLED
+            UnionOrder.Status.ACTIVE,
+            UnionOrder.Status.FILLED,
+            UnionOrder.Status.INACTIVE,
+            UnionOrder.Status.HISTORICAL,
+            UnionOrder.Status.CANCELLED
         )
         val ethStatuses = listOf(
             com.rarible.protocol.dto.OrderStatusDto.ACTIVE,
@@ -443,9 +444,9 @@ class EthOrderConverterTest {
             assertThat(actual.platform).isEqualTo(PlatformDto.X2Y2)
             assertThat(actual.maker.value).isEqualTo(dto.maker.prefixed())
             assertThat(actual.taker!!.value).isEqualTo(dto.taker!!.prefixed())
-            assertThat(actual.make.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+            assertThat(actual.make.type).isInstanceOf(UnionEthErc721AssetType::class.java)
             assertThat(actual.make.value).isEqualTo(dto.make.valueDecimal)
-            assertThat(actual.take.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+            assertThat(actual.take.type).isInstanceOf(UnionEthErc20AssetType::class.java)
             assertThat(actual.take.value).isEqualTo(dto.take.valueDecimal)
             assertThat(actual.salt).isEqualTo(dto.salt.prefixed())
             assertThat(actual.signature).isEqualTo(dto.signature!!.prefixed())
@@ -485,9 +486,9 @@ class EthOrderConverterTest {
         assertThat(converted.platform).isEqualTo(PlatformDto.LOOKSRARE)
         assertThat(converted.maker.value).isEqualTo(dto.maker.prefixed())
         assertThat(converted.taker!!.value).isEqualTo(dto.taker!!.prefixed())
-        assertThat(converted.make.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+        assertThat(converted.make.type).isInstanceOf(UnionEthErc721AssetType::class.java)
         assertThat(converted.make.value).isEqualTo(dto.make.valueDecimal)
-        assertThat(converted.take.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(converted.take.type).isInstanceOf(UnionEthErc20AssetType::class.java)
         assertThat(converted.take.value).isEqualTo(dto.take.valueDecimal)
         assertThat(converted.salt).isEqualTo(dto.salt.prefixed())
         assertThat(converted.signature).isEqualTo(dto.signature!!.prefixed())

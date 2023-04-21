@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
+import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
@@ -124,8 +125,8 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionBestSellOrderUpdate(collectionId, unionBestSell, null, true)
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = CollectionDtoConverter.convertLegacy(unionCollection, enrichmentCollection)
-            .copy(bestSellOrder = unionBestSell)
+        val expected = CollectionDtoConverter.convert(enrichmentCollection)
+            .copy(bestSellOrder = OrderDtoConverter.convert(unionBestSell))
 
         val saved = collectionService.get(enrichmentCollection.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
@@ -159,7 +160,8 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionBestBidOrderUpdate(collectionId, unionBestBid, stubEventMark(), true)
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = CollectionDtoConverter.convertLegacy(unionCollection).copy(bestBidOrder = unionBestBid)
+        val expected = CollectionDtoConverter.convertLegacy(unionCollection)
+            .copy(bestBidOrder = OrderDtoConverter.convert(unionBestBid))
 
         val saved = collectionService.get(enrichmentCollection.id)!!
         assertThat(saved.bestBidOrder).isEqualTo(ShortOrderConverter.convert(unionBestBid))

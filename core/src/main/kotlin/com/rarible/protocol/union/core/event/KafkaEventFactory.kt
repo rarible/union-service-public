@@ -29,7 +29,6 @@ import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
-import com.rarible.protocol.union.dto.ext
 import java.util.UUID
 
 object KafkaEventFactory {
@@ -132,14 +131,14 @@ object KafkaEventFactory {
         val key = when (event) {
             is UnionOrderUpdateEvent -> {
                 val order = event.order
-                val makeAssetExt = order.make.type.ext
-                val takeAssetExt = order.take.type.ext
+                val makeAsset = order.make.type
+                val takeAsset = order.take.type
 
                 when {
-                    makeAssetExt.isCollectionAsset -> makeAssetExt.collectionId!!.fullId()
-                    takeAssetExt.isCollectionAsset -> takeAssetExt.collectionId!!.fullId()
-                    makeAssetExt.itemId != null -> makeAssetExt.itemId!!.fullId()
-                    takeAssetExt.itemId != null -> takeAssetExt.itemId!!.fullId()
+                    makeAsset.isCollectionAsset() -> makeAsset.collectionId()!!.fullId()
+                    takeAsset.isCollectionAsset() -> takeAsset.collectionId()!!.fullId()
+                    makeAsset.itemId() != null -> makeAsset.itemId()!!.fullId()
+                    takeAsset.itemId() != null -> takeAsset.itemId()!!.fullId()
                     else -> event.orderId.fullId()
                 }
             }

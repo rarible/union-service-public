@@ -2,11 +2,9 @@ package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.protocol.union.core.model.UnionEthErc20AssetType
 import com.rarible.protocol.union.core.model.UnionEthErc721AssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
-import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.ImmutablexOrderDataV1Dto
-import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.data.randomImxOrder
 import com.rarible.protocol.union.integration.data.randomImxOrderBuySide
@@ -29,11 +27,11 @@ class ImxOrderConverterTest {
 
         assertThat(order.id.value).isEqualTo(imxOrder.orderId.toString())
 
-        assertThat(order.make.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+        assertThat(order.make.type).isInstanceOf(UnionEthErc721AssetType::class.java)
         assertThat(order.make.value).isEqualTo(BigDecimal.ONE)
 
         // By default we don't have decimals in DTO
-        assertThat(order.take.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(order.take.type).isInstanceOf(UnionEthErc20AssetType::class.java)
         assertThat(order.take.value).isEqualTo(payment)
 
         assertThat(order.maker.value).isEqualTo(imxOrder.creator)
@@ -42,7 +40,7 @@ class ImxOrderConverterTest {
         assertThat(order.takePrice).isNull()
 
         assertThat(order.platform).isEqualTo(PlatformDto.IMMUTABLEX)
-        assertThat(order.status).isEqualTo(OrderStatusDto.ACTIVE)
+        assertThat(order.status).isEqualTo(UnionOrder.Status.ACTIVE)
         assertThat(order.salt).isEqualTo(imxOrder.orderId.toString())
         assertThat(order.lastUpdatedAt).isEqualTo(imxOrder.updatedAt)
         assertThat(order.createdAt).isEqualTo(imxOrder.createdAt)
@@ -65,10 +63,10 @@ class ImxOrderConverterTest {
         assertThat(order.id.value).isEqualTo(imxOrder.orderId.toString())
 
         // By default we don't have decimals in DTO
-        assertThat(order.make.type).isInstanceOf(EthErc20AssetTypeDto::class.java)
+        assertThat(order.make.type).isInstanceOf(UnionEthErc20AssetType::class.java)
         assertThat(order.make.value).isEqualTo(payment)
 
-        assertThat(order.take.type).isInstanceOf(EthErc721AssetTypeDto::class.java)
+        assertThat(order.take.type).isInstanceOf(UnionEthErc721AssetType::class.java)
         assertThat(order.take.value).isEqualTo(BigDecimal.ONE)
 
         assertThat(order.maker.value).isEqualTo(imxOrder.creator)

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.select.OrderSourceSelectService
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
@@ -10,7 +11,9 @@ import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.SyncSortDto
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
@@ -18,7 +21,8 @@ import org.springframework.web.bind.annotation.RestController
 @ExperimentalCoroutinesApi
 @RestController
 class OrderController(
-    private val orderSourceSelector: OrderSourceSelectService
+    private val orderSourceSelector: OrderSourceSelectService,
+    private val enrichmentOrderService: EnrichmentOrderService
 ) : OrderControllerApi {
 
     override suspend fun getOrdersAll(
@@ -32,7 +36,7 @@ class OrderController(
         val result = orderSourceSelector.getOrdersAll(
             blockchains, continuation, size, sort, status, searchEngine
         )
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getAllSync(
@@ -42,7 +46,7 @@ class OrderController(
         sort: SyncSortDto?
     ): ResponseEntity<OrdersDto> {
         val result = orderSourceSelector.getAllSync(blockchain, continuation, size, sort)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getOrderBidsByItem(
@@ -70,7 +74,7 @@ class OrderController(
             size,
             searchEngine
         )
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getOrderBidsByMaker(
@@ -98,18 +102,18 @@ class OrderController(
             size,
             searchEngine
         )
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getOrderById(id: String): ResponseEntity<OrderDto> {
         val result = orderSourceSelector.getOrderById(id)
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(enrichmentOrderService.enrich(result))
     }
 
     // TODO UNION add tests
     override suspend fun getOrdersByIds(orderIdsDto: OrderIdsDto): ResponseEntity<OrdersDto> {
         val orders = orderSourceSelector.getByIds(orderIdsDto)
-        val result = OrdersDto(orders = orders)
+        val result = OrdersDto(orders = enrichmentOrderService.enrich(orders))
         return ResponseEntity.ok(result)
     }
 
@@ -124,7 +128,7 @@ class OrderController(
         val result = orderSourceSelector.getSellOrders(
             blockchains, platform, origin, continuation, size, searchEngine
         )
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getSellOrdersByItem(
@@ -141,7 +145,7 @@ class OrderController(
         val result = orderSourceSelector.getSellOrdersByItem(
             IdParser.parseItemId(itemId), platform, makerAddress, origin, status, continuation, size, searchEngine
         )
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(result))
     }
 
     override suspend fun getSellOrdersByMaker(
@@ -158,6 +162,11 @@ class OrderController(
         val result = orderSourceSelector.getSellOrdersByMaker(
             makers, blockchains, platform, origin, continuation, size, status, searchEngine
         )
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(toDto(result))
+    }
+
+    private suspend fun toDto(slice: Slice<UnionOrder>): OrdersDto {
+        val orders = enrichmentOrderService.enrich(slice.entities)
+        return OrdersDto(slice.continuation, orders)
     }
 }

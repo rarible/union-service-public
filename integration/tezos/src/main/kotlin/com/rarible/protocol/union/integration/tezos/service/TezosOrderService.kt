@@ -1,13 +1,13 @@
 package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.core.apm.CaptureSpan
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
-import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -27,7 +27,7 @@ open class TezosOrderService(
         size: Int,
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return dipdupOrderService.getOrdersAll(sort, status, null, continuation, size)
     }
 
@@ -35,15 +35,15 @@ open class TezosOrderService(
         continuation: String?,
         size: Int,
         sort: SyncSortDto?
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return dipdupOrderService.getOrdersAllSync(continuation, size, sort)
     }
 
-    override suspend fun getOrderById(id: String): OrderDto {
+    override suspend fun getOrderById(id: String): UnionOrder {
         return dipdupOrderService.getOrderById(id)
     }
 
-    override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
+    override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {
         val uuidIds = orderIds.filter(::isValidUUID)
         val orders = if (uuidIds.isNotEmpty()) {
             dipdupOrderService.getOrderByIds(uuidIds)
@@ -53,12 +53,12 @@ open class TezosOrderService(
         return orders
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrencies(itemId: String): List<UnionAssetType> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         return dipdupOrderService.getBidOrderCurrenciesByItem(contract, tokenId)
     }
 
-    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
         return dipdupOrderService.getBidOrderCurrenciesByCollection(collectionId)
     }
 
@@ -73,7 +73,7 @@ open class TezosOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         return dipdupOrderService.getBidOrdersByItem(
             contract,
@@ -96,7 +96,7 @@ open class TezosOrderService(
         end: Long?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return dipdupOrderService.getBidOrdersByMaker(
             maker = maker,
             platforms = DipDupConverter.convert(platform),
@@ -106,12 +106,12 @@ open class TezosOrderService(
         )
     }
 
-    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrencies(itemId: String): List<UnionAssetType> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         return dipdupOrderService.getSellOrderCurrenciesByItem(contract, tokenId)
     }
 
-    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
         return dipdupOrderService.getSellOrderCurrenciesByCollection(collectionId)
     }
 
@@ -120,12 +120,13 @@ open class TezosOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return dipdupOrderService.getSellOrders(
             origin = origin,
             platforms = DipDupConverter.convert(platform),
             continuation = continuation,
-            size = size)
+            size = size
+        )
     }
 
     override suspend fun getSellOrdersByCollection(
@@ -134,7 +135,7 @@ open class TezosOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return dipdupOrderService.getSellOrdersByCollection(
             contract = collection,
             origin = origin,
@@ -152,7 +153,7 @@ open class TezosOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         //Not implemented
         return Slice.empty()
     }
@@ -167,7 +168,7 @@ open class TezosOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         //Not implemented
         return Slice.empty()
     }
@@ -181,9 +182,18 @@ open class TezosOrderService(
         currencyId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
-        val slice = dipdupOrderService.getSellOrdersByItem(contract, tokenId, maker, DipDupConverter.convert(platform), currencyId, status, continuation, size)
+        val slice = dipdupOrderService.getSellOrdersByItem(
+            contract,
+            tokenId,
+            maker,
+            DipDupConverter.convert(platform),
+            currencyId,
+            status,
+            continuation,
+            size
+        )
         return slice
     }
 
@@ -194,7 +204,7 @@ open class TezosOrderService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return dipdupOrderService.getSellOrdersByMaker(
             maker = maker,
             platforms = DipDupConverter.convert(platform),
@@ -208,7 +218,7 @@ open class TezosOrderService(
         itemId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -224,7 +234,7 @@ open class TezosOrderService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 

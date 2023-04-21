@@ -6,23 +6,24 @@ import com.rarible.protocol.union.core.model.elastic.EsOrderSort
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import randomOrder
 import randomOrderId
+import randomUnionOrder
 
 internal class OrderElasticServiceTest {
 
     val ethOrders = listOf(
-        randomOrder().copy(id = randomOrderId(BlockchainDto.ETHEREUM)),
-        randomOrder().copy(id = randomOrderId(BlockchainDto.ETHEREUM)),
-        randomOrder().copy(id = randomOrderId(BlockchainDto.ETHEREUM))
+        randomUnionOrder().copy(id = randomOrderId(BlockchainDto.ETHEREUM)),
+        randomUnionOrder().copy(id = randomOrderId(BlockchainDto.ETHEREUM)),
+        randomUnionOrder().copy(id = randomOrderId(BlockchainDto.ETHEREUM))
     )
 
     val ethereumOrderService = mockk<EthOrderService> {
@@ -48,7 +49,9 @@ internal class OrderElasticServiceTest {
     val esOrderRepository = mockk<EsOrderRepository> {
         coEvery {
             findByFilter(any())
-        } returns ethOrders.map { EsOrderConverter.convert(it) }.sortedBy { it.lastUpdatedAt }
+        } returns ethOrders.map {
+            EsOrderConverter.convert(OrderDtoConverter.convert(it))
+        }.sortedBy { it.lastUpdatedAt }
     }
 
     val orderElasticService = OrderElasticService(router, esOrderRepository)
@@ -65,7 +68,7 @@ internal class OrderElasticServiceTest {
             )
         )
 
-        Assertions.assertThat(result.orders).containsExactlyElementsOf(
+        assertThat(result.entities).containsExactlyElementsOf(
             ethOrders.sortedBy { it.lastUpdatedAt }
         )
     }

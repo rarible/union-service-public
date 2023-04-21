@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos.mock
 
-import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.tzkt.client.OwnershipClient

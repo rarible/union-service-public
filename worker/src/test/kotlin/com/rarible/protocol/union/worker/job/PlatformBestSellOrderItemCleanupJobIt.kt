@@ -8,9 +8,9 @@ import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrder
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.worker.IntegrationTest
 import com.rarible.protocol.union.worker.config.PlatformBestSellCleanUpProperties
@@ -54,8 +54,8 @@ class PlatformBestSellOrderItemCleanupJobIt {
 
     @Test
     fun `cleanup openSea best sells`() = runBlocking<Unit> {
-        val bestSellOs = ShortOrderConverter.convert(randomUnionSellOrderDto().copy(platform = PlatformDto.OPEN_SEA))
-        val bestBidOs = ShortOrderConverter.convert(randomUnionBidOrderDto())
+        val bestSellOs = ShortOrderConverter.convert(randomUnionSellOrder().copy(platform = PlatformDto.OPEN_SEA))
+        val bestBidOs = ShortOrderConverter.convert(randomUnionBidOrder())
         val withOpenSea = ShortItemConverter.convert(randomUnionItem(randomEthItemId())).copy(
             bestSellOrder = bestSellOs,
             bestBidOrder = bestBidOs,
@@ -64,8 +64,8 @@ class PlatformBestSellOrderItemCleanupJobIt {
 
         )
 
-        val bestSell = ShortOrderConverter.convert(randomUnionSellOrderDto())
-        val bestBid = ShortOrderConverter.convert(randomUnionBidOrderDto())
+        val bestSell = ShortOrderConverter.convert(randomUnionSellOrder())
+        val bestBid = ShortOrderConverter.convert(randomUnionBidOrder())
         val withoutOpenSea = ShortItemConverter.convert(randomUnionItem(randomEthItemId())).copy(
             bestSellOrder = bestSell,
             bestBidOrder = bestBid,
@@ -74,7 +74,7 @@ class PlatformBestSellOrderItemCleanupJobIt {
         )
 
         val bestSellOsLast = ShortOrderConverter.convert(
-            randomUnionSellOrderDto().copy(platform = PlatformDto.OPEN_SEA)
+            randomUnionSellOrder().copy(platform = PlatformDto.OPEN_SEA)
         )
         val withOpenSeaEmpty = ShortItemConverter.convert(randomUnionItem(randomEthItemId())).copy(
             bestSellOrder = bestSellOsLast,

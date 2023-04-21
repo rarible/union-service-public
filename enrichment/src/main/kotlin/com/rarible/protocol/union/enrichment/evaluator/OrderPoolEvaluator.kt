@@ -1,16 +1,15 @@
 package com.rarible.protocol.union.enrichment.evaluator
 
 import com.rarible.protocol.union.core.model.PoolItemAction
-import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
-import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 
 object OrderPoolEvaluator {
 
-    fun updatePoolOrderSet(item: ShortItem, order: OrderDto, action: PoolItemAction): ShortItem {
-        val updatedOrder = ShortPoolOrder(order.sellCurrencyId, ShortOrderConverter.convert(order))
+    fun updatePoolOrderSet(item: ShortItem, order: UnionOrder, action: PoolItemAction): ShortItem {
+        val updatedOrder = ShortPoolOrder(order.getSellCurrencyId(), ShortOrderConverter.convert(order))
         val poolSellOrders = item.poolSellOrders
         val currentOrder = poolSellOrders.find { match(updatedOrder, it) }
         return when (action) {
@@ -18,18 +17,20 @@ object OrderPoolEvaluator {
                 val updatedPoolOrders = currentOrder?.let { poolSellOrders - currentOrder } ?: poolSellOrders
                 item.copy(poolSellOrders = updatedPoolOrders + updatedOrder)
             }
+
             PoolItemAction.EXCLUDED -> {
                 val updatedPoolOrders = currentOrder?.let { poolSellOrders - currentOrder } ?: poolSellOrders
                 item.copy(poolSellOrders = updatedPoolOrders)
             }
+
             PoolItemAction.UPDATED -> {
                 item
             }
         }
     }
 
-    fun needUpdateOrder(item: ShortItem, order: OrderDto, action: PoolItemAction): Boolean {
-        val shortOrder = ShortPoolOrder(order.sellCurrencyId, ShortOrderConverter.convert(order))
+    fun needUpdateOrder(item: ShortItem, order: UnionOrder, action: PoolItemAction): Boolean {
+        val shortOrder = ShortPoolOrder(order.getSellCurrencyId(), ShortOrderConverter.convert(order))
         val poolSellOrders = item.poolSellOrders
         return when (action) {
             PoolItemAction.INCLUDED, PoolItemAction.EXCLUDED -> true

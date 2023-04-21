@@ -20,8 +20,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
-import com.rarible.protocol.union.enrichment.util.bidCurrencyId
-import com.rarible.protocol.union.enrichment.util.sellCurrencyId
+
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
@@ -248,7 +247,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
                 continuation,
                 size,
                 emptyList(),
-                unionOrder.bidCurrencyId,
+                unionOrder.getBidCurrencyId(),
                 null,
                 null
             )
@@ -258,7 +257,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testEthereumOrderApi.getCurrenciesByBidOrdersOfItem(contract, tokenId.toString())
         } returns OrderCurrenciesDto(
             OrderCurrenciesDto.OrderType.BID,
-            listOf(Erc20AssetTypeDto(Address.apply(unionOrder.bidCurrencyId)))
+            listOf(Erc20AssetTypeDto(Address.apply(unionOrder.getBidCurrencyId())))
         ).toMono()
 
         val orders = orderControllerClient.getOrderBidsByItem(
@@ -358,7 +357,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
                 continuation,
                 size,
                 emptyList(),
-                unionOrder.sellCurrencyId
+                unionOrder.getSellCurrencyId()
             )
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
@@ -366,7 +365,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testEthereumOrderApi.getCurrenciesBySellOrdersOfItem(contract, tokenId.toString())
         } returns OrderCurrenciesDto(
             OrderCurrenciesDto.OrderType.SELL,
-            listOf(Erc20AssetTypeDto(Address.apply(unionOrder.sellCurrencyId)))
+            listOf(Erc20AssetTypeDto(Address.apply(unionOrder.getSellCurrencyId())))
         ).toMono()
 
         val orders = orderControllerClient.getSellOrdersByItem(

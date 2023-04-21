@@ -9,7 +9,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.worker.IntegrationTest
 import com.rarible.protocol.union.worker.config.PlatformBestSellCleanUpProperties
@@ -52,13 +52,13 @@ class PlatformBestSellOrderOwnershipCleanupJobIt {
 
     @Test
     fun `cleanup openSea best sells`() = runBlocking<Unit> {
-        val bestSellOs = ShortOrderConverter.convert(randomUnionSellOrderDto().copy(platform = PlatformDto.OPEN_SEA))
+        val bestSellOs = ShortOrderConverter.convert(randomUnionSellOrder().copy(platform = PlatformDto.OPEN_SEA))
         val withOpenSea = ShortOwnershipConverter.convert(randomUnionOwnership(randomEthItemId())).copy(
             bestSellOrder = bestSellOs,
             bestSellOrders = mapOf("123" to bestSellOs)
         )
 
-        val bestSell = ShortOrderConverter.convert(randomUnionSellOrderDto())
+        val bestSell = ShortOrderConverter.convert(randomUnionSellOrder())
         val withoutOpenSea = ShortOwnershipConverter.convert(randomUnionOwnership(randomEthItemId())).copy(
             bestSellOrder = bestSell,
             bestSellOrders = mapOf("123" to bestSell)

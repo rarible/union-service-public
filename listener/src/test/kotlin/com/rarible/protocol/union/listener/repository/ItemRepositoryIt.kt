@@ -8,7 +8,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
@@ -54,20 +54,20 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
 
     @Test
     fun `find all by blockchain`() = runBlocking<Unit> {
-        val item1 = itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.ETHEREUM, itemId = "aaa:1"))
-        val item2 = itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.ETHEREUM, itemId = "bbb:2"))
-        val item3 = itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.ETHEREUM, itemId = "ccc:3"))
+        val item1 = itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.TEZOS, itemId = "aaa:1"))
+        val item2 = itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.TEZOS, itemId = "bbb:2"))
+        val item3 = itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.TEZOS, itemId = "ccc:3"))
         itemRepository.save(randomShortItem().copy(blockchain = BlockchainDto.FLOW))
 
-        val firstPage = itemRepository.findByBlockchain(null, BlockchainDto.ETHEREUM, 2).toList()
+        val firstPage = itemRepository.findByBlockchain(null, BlockchainDto.TEZOS, 2).toList()
         assertThat(firstPage).isEqualTo(listOf(item1, item2))
 
-        val withOffset = itemRepository.findByBlockchain(item1.id, BlockchainDto.ETHEREUM, 3).toList()
+        val withOffset = itemRepository.findByBlockchain(item1.id, BlockchainDto.TEZOS, 3).toList()
         assertThat(withOffset).isEqualTo(listOf(item2, item3))
     }
 
     private fun randomSellOrder(platform: PlatformDto): ShortOrder {
-        val randomSellOrder = randomUnionSellOrderDto(randomEthItemId())
+        val randomSellOrder = randomUnionSellOrder(randomEthItemId())
             .copy(platform = platform)
 
         return ShortOrderConverter.convert(randomSellOrder)

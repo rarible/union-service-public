@@ -2,8 +2,8 @@ package com.rarible.protocol.union.enrichment.validator
 
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
+import com.rarible.protocol.union.enrichment.test.data.randomSellOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -15,7 +15,7 @@ class OwnershipValidatorTest {
         val empty = OwnershipDtoConverter.convert(randomUnionOwnership(randomEthOwnershipId()))
 
         val sellValid = OwnershipDtoConverter.convert(randomUnionOwnership(randomEthOwnershipId()))
-            .copy(bestSellOrder = randomUnionSellOrderDto())
+            .copy(bestSellOrder = randomSellOrderDto())
 
         assertThat(OwnershipValidator.isValid(null)).isTrue()
         assertThat(OwnershipValidator.isValid(empty)).isTrue()
@@ -25,7 +25,7 @@ class OwnershipValidatorTest {
     @Test
     fun `invalid item`() {
         val sellInvalid = OwnershipDtoConverter.convert(randomUnionOwnership(randomEthOwnershipId()))
-            .copy(bestSellOrder = randomUnionSellOrderDto().copy(status = OrderStatusDto.CANCELLED))
+            .copy(bestSellOrder = randomSellOrderDto().copy(status = OrderStatusDto.CANCELLED))
 
         assertThat(OwnershipValidator.isValid(sellInvalid)).isFalse()
     }

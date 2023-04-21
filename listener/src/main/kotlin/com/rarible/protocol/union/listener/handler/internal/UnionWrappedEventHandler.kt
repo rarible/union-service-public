@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
 import com.rarible.protocol.union.core.model.UnionInternalCollectionEvent
 import com.rarible.protocol.union.core.model.UnionInternalItemEvent
 import com.rarible.protocol.union.core.model.UnionInternalOrderEvent
+import com.rarible.protocol.union.core.model.UnionInternalOrderLegacyEvent
 import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -20,6 +21,7 @@ class UnionWrappedEventHandler(
     private val internalItemEventHandler: UnionInternalItemEventHandler,
     private val internalOwnershipEventHandler: UnionInternalOwnershipEventHandler,
     private val internalOrderEventHandler: UnionInternalOrderEventHandler,
+    private val internalOrderLegacyEventHandler: UnionInternalOrderLegacyEventHandler,
     private val internalAuctionEventHandler: UnionInternalAuctionEventHandler,
     private val internalActivityEventHandler: UnionInternalActivityEventHandler,
     private val internalCollectionEventHandler: UnionInternalCollectionEventHandler
@@ -29,6 +31,7 @@ class UnionWrappedEventHandler(
         when (event) {
             is UnionInternalItemEvent -> internalItemEventHandler.onEvent(event.event)
             is UnionInternalOwnershipEvent -> internalOwnershipEventHandler.onEvent(event.event)
+            is UnionInternalOrderLegacyEvent -> internalOrderLegacyEventHandler.onEvent(event.event)
             is UnionInternalOrderEvent -> internalOrderEventHandler.onEvent(event.event)
             is UnionInternalAuctionEvent -> internalAuctionEventHandler.onEvent(event.event)
             is UnionInternalActivityLegacyEvent -> internalActivityEventHandler.onEvent(event.event)

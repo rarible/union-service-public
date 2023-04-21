@@ -71,6 +71,7 @@ fun ActivityDto.source(): OwnershipSourceDto? {
     }
 }
 
+@Deprecated("keep UnionActivity only")
 fun ActivityDto.isBlockchainEvent(): Boolean {
     return when (this) {
         is MintActivityDto -> this.blockchainInfo != null

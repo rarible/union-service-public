@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.worker.job
 
+import com.rarible.protocol.union.core.model.UnionEthCollectionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -65,7 +65,7 @@ class ReconciliationCorruptedItemJob(
                     it.id, it.platform, it.lastUpdatedAt, itemId
                 )
                 corruptedItems.add(itemId)
-            } else if (it.take.type is EthCollectionAssetTypeDto) {
+            } else if (it.take.type is UnionEthCollectionAssetType) {
                 // TODO remove later, we need it only to cleanup legacy floor bids once
                 logger.info(
                     "Found best Floor Bid Order attached to the item: {} (platform={}, updatedAt={}), Item: {}",
@@ -94,7 +94,7 @@ class ReconciliationCorruptedItemJob(
         return page.lastOrNull()?.id
     }
 
-    private suspend fun getOrders(ids: Collection<OrderIdDto>): List<OrderDto> {
+    private suspend fun getOrders(ids: Collection<OrderIdDto>): List<UnionOrder> {
         val groupedIds = ids.groupBy({ it.blockchain }, { it.value })
         return groupedIds.flatMap {
             orderRouter.getService(it.key).getOrdersByIds(it.value)

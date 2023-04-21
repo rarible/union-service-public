@@ -34,7 +34,7 @@ import java.math.BigInteger
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.*
+import java.util.UUID
 
 fun randomTezosContract() = randomString(12)
 fun randomTezosAddress() = UnionAddressConverter.convert(BlockchainDto.TEZOS, randomString())

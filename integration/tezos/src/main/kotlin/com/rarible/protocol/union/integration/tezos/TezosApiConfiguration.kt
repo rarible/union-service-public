@@ -5,9 +5,7 @@ import com.rarible.dipdup.client.TokenActivityClient
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.OrderService
-import com.rarible.protocol.union.core.service.router.OrderProxyService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupApiConfiguration
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
@@ -35,7 +33,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
-
 
 @TezosConfiguration
 @Import(value = [CoreConfiguration::class, DipDupApiConfiguration::class])

@@ -1,19 +1,18 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
+import com.rarible.protocol.union.core.continuation.UnionOrderContinuation
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
-import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SyncSortDto
-import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
@@ -33,7 +32,7 @@ class ImxOrderService(
         size: Int,
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?,
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val orders = orderClient.getAllOrders(
             continuation,
             size,
@@ -42,8 +41,8 @@ class ImxOrderService(
         ).map { ImxOrderConverter.convert(it, blockchain) }
 
         val continuationFactory = when (sort) {
-            OrderSortDto.LAST_UPDATE_ASC -> OrderContinuation.ByLastUpdatedAndIdAsc
-            OrderSortDto.LAST_UPDATE_DESC, null -> OrderContinuation.ByLastUpdatedAndIdDesc
+            OrderSortDto.LAST_UPDATE_ASC -> UnionOrderContinuation.ByLastUpdatedAndIdAsc
+            OrderSortDto.LAST_UPDATE_DESC, null -> UnionOrderContinuation.ByLastUpdatedAndIdDesc
         }
 
         return Paging(continuationFactory, orders).getSlice(size)
@@ -53,7 +52,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
         sort: SyncSortDto?
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val safeSort = when (sort) {
             SyncSortDto.DB_UPDATE_ASC -> OrderSortDto.LAST_UPDATE_ASC
             SyncSortDto.DB_UPDATE_DESC -> OrderSortDto.LAST_UPDATE_DESC
@@ -62,30 +61,30 @@ class ImxOrderService(
         return getOrdersAll(continuation, size, safeSort, null)
     }
 
-    override suspend fun getOrderById(id: String): OrderDto {
+    override suspend fun getOrderById(id: String): UnionOrder {
         val order = orderClient.getById(id)
         return ImxOrderConverter.convert(order, blockchain)
     }
 
-    override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
+    override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {
         return orderClient.getByIds(orderIds).map {
             ImxOrderConverter.convert(it, blockchain)
         }
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrencies(itemId: String): List<UnionAssetType> {
         // TODO we can miss some orders here if item have a lot of cancelled/filled orders with different currencies
         // TODO maybe split it into 2 queries to distinguish ETH/ERC20 currencies?
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
         val orders = orderClient.getBuyOrdersByItem(token, tokenId, null, currencyProbeBatchSize)
         return orders.result.map { ImxOrderConverter.convert(it, blockchain).make.type }
             .toSet()
-            .filter { it.ext.isCurrency }
+            .filter { it.isCurrency() }
             .toList()
     }
 
     // IMX doesn't support floor orders
-    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -100,14 +99,14 @@ class ImxOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int,
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         origin?.let { return Slice.empty() }
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
         val orders = orderClient
             .getBuyOrdersByItem(token, tokenId, makers, status, currencyAddress, continuation, size)
             .map { ImxOrderConverter.convert(it, blockchain) }
 
-        return Paging(OrderContinuation.ByBidPriceUsdAndIdDesc, orders).getSlice(size)
+        return Paging(UnionOrderContinuation.ByBidPriceUsdAndIdDesc, orders).getSlice(size)
     }
 
     override suspend fun getOrderBidsByMaker(
@@ -119,15 +118,15 @@ class ImxOrderService(
         end: Long?, // Not supported for bids by IMX
         continuation: String?,
         size: Int,
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         origin?.let { return Slice.empty() }
         val orders = orderClient.getBuyOrdersByMaker(maker, status, continuation, size)
             .map { ImxOrderConverter.convert(it, blockchain) }
 
-        return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
+        return Paging(UnionOrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
 
-    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrencies(itemId: String): List<UnionAssetType> {
         // TODO we can miss some orders here if item have a lot of cancelled/filled orders with different currencies
         // TODO maybe split it into 2 queries to distinguish ETH/ERC20 currencies?
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
@@ -146,12 +145,12 @@ class ImxOrderService(
 
         return ordersWithAllStatuses.map { ImxOrderConverter.convert(it, blockchain).take.type }
             .toSet()
-            .filter { it.ext.isCurrency }
+            .filter { it.isCurrency() }
             .toList()
     }
 
     // IMX doesn't support floor orders
-    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -160,12 +159,12 @@ class ImxOrderService(
         origin: String?,
         continuation: String?,
         size: Int,
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         origin?.let { return Slice.empty() }
         val orders = orderClient.getSellOrders(continuation, size).map {
             ImxOrderConverter.convert(it, blockchain)
         }
-        return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
+        return Paging(UnionOrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
 
     override suspend fun getSellOrdersByCollection(
@@ -174,19 +173,19 @@ class ImxOrderService(
         origin: String?,
         continuation: String?,
         size: Int,
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         origin?.let { return Slice.empty() }
         val orders = orderClient.getSellOrdersByCollection(collection, continuation, size).map {
             ImxOrderConverter.convert(it, blockchain)
         }
-        return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
+        return Paging(UnionOrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
 
     // IMX doesn't support floor orders
     override suspend fun getOrderFloorSellsByCollection(
         platform: PlatformDto?, collectionId: String, origin: String?, status: List<OrderStatusDto>?,
         currencyAddress: String, continuation: String?, size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -194,7 +193,7 @@ class ImxOrderService(
     override suspend fun getOrderFloorBidsByCollection(
         platform: PlatformDto?, collectionId: String, origin: String?, status: List<OrderStatusDto>?, start: Long?,
         end: Long?, currencyAddress: String, continuation: String?, size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -207,7 +206,7 @@ class ImxOrderService(
         currencyId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         origin?.let { return Slice.empty() }
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
         val orders = orderClient.getSellOrdersByItem(
@@ -220,7 +219,7 @@ class ImxOrderService(
             size
         ).map { ImxOrderConverter.convert(it, blockchain) }
 
-        return Paging(OrderContinuation.BySellPriceUsdAndIdAsc, orders).getSlice(size)
+        return Paging(UnionOrderContinuation.BySellPriceUsdAndIdAsc, orders).getSlice(size)
     }
 
     override suspend fun getSellOrdersByMaker(
@@ -230,19 +229,19 @@ class ImxOrderService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int,
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         origin?.let { return Slice.empty() }
         val orders = orderClient.getSellOrdersByMaker(maker, status, continuation, size).map {
             ImxOrderConverter.convert(it, blockchain)
         }
-        return Paging(OrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
+        return Paging(UnionOrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
 
     override suspend fun getAmmOrdersByItem(
         itemId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -258,7 +257,7 @@ class ImxOrderService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 }

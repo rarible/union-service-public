@@ -6,7 +6,13 @@ import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionEthErc20AssetType
+import com.rarible.protocol.union.core.model.UnionEthErc721AssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.core.model.UnionPendingOrder
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
@@ -66,7 +72,7 @@ fun randomOwnership(
     lazyValue: BigInteger = randomBigInt(),
     pending: List<ItemHistoryDto> = listOf(),
     auction: AuctionDto? = randomAuction(id = randomAuctionId(id.blockchain)),
-    bestSellOrder: OrderDto? = randomOrder(id = randomOrderId(id.blockchain)),
+    bestSellOrder: OrderDto? = randomOrderDto(id = randomOrderId(id.blockchain)),
 ) = OwnershipDto(
     id = id,
     blockchain = blockchain,
@@ -111,8 +117,8 @@ fun randomAuction(
     contract: ContractAddress = ContractAddress(id.blockchain, randomString()),
     type: AuctionDto.Type? = AuctionDto.Type.values().random(),
     seller: UnionAddress = randomUnionAddress(id.blockchain),
-    sell: AssetDto = AssetDto(randomAssetType(id.blockchain), randomBigDecimal()),
-    buy: AssetTypeDto = randomAssetType(id.blockchain),
+    sell: AssetDto = AssetDto(randomAssetTypeDto(id.blockchain), randomBigDecimal()),
+    buy: AssetTypeDto = randomAssetTypeDto(id.blockchain),
     endTime: Instant? = randomInstant(),
     minimalStep: BigDecimal = randomBigDecimal(),
     minimalPrice: BigDecimal = randomBigDecimal(),
@@ -150,16 +156,73 @@ fun randomAuction(
     data = data,
 )
 
-fun randomAssetType(blockchain: BlockchainDto): AssetTypeDto = EthErc721AssetTypeDto(
+fun randomAssetTypeDto(blockchain: BlockchainDto): AssetTypeDto = EthErc721AssetTypeDto(
     contract = ContractAddress(blockchain, randomString()),
     tokenId = randomBigInt(),
 )
 
-fun randomAssetTypeErc20(blockchain: BlockchainDto): AssetTypeDto = EthErc20AssetTypeDto(
+fun randomAssetTypeErc20Dto(blockchain: BlockchainDto): AssetTypeDto = EthErc20AssetTypeDto(
     contract = ContractAddress(blockchain, randomString()),
 )
 
-fun randomOrder(
+fun randomUnionAssetType(blockchain: BlockchainDto): UnionAssetType = UnionEthErc721AssetType(
+    contract = ContractAddress(blockchain, randomString()),
+    tokenId = randomBigInt(),
+)
+
+fun randomUnionAssetTypeErc20(blockchain: BlockchainDto): UnionAssetType = UnionEthErc20AssetType(
+    contract = ContractAddress(blockchain, randomString()),
+)
+
+fun randomUnionOrder(
+    id: OrderIdDto = randomOrderId(),
+    fill: BigDecimal = randomBigDecimal(),
+    platform: PlatformDto = PlatformDto.values().random(),
+    status: UnionOrder.Status = UnionOrder.Status.values().random(),
+    startedAt: Instant? = null,
+    endedAt: Instant? = null,
+    makeStock: BigDecimal = randomBigDecimal(),
+    cancelled: Boolean = randomBoolean(),
+    createdAt: Instant = randomInstant(),
+    lastUpdatedAt: Instant = randomInstant(),
+    makePrice: BigDecimal? = randomBigDecimal(),
+    takePrice: BigDecimal? = randomBigDecimal(),
+    makePriceUsd: BigDecimal? = null,
+    takePriceUsd: BigDecimal? = null,
+    maker: UnionAddress = randomUnionAddress(id.blockchain),
+    taker: UnionAddress? = null,
+    make: UnionAsset = UnionAsset(randomUnionAssetType(id.blockchain), randomBigDecimal()),
+    take: UnionAsset = UnionAsset(randomUnionAssetType(id.blockchain), randomBigDecimal()),
+    salt: String = randomString(),
+    signature: String? = null,
+    pending: List<UnionPendingOrder>? = listOf(),
+    data: OrderDataDto = randomOrderData(),
+) = UnionOrder(
+    id = id,
+    fill = fill,
+    platform = platform,
+    status = status,
+    startedAt = startedAt,
+    endedAt = endedAt,
+    makeStock = makeStock,
+    cancelled = cancelled,
+    createdAt = createdAt,
+    lastUpdatedAt = lastUpdatedAt,
+    makePrice = makePrice,
+    takePrice = takePrice,
+    makePriceUsd = makePriceUsd,
+    takePriceUsd = takePriceUsd,
+    maker = maker,
+    taker = taker,
+    make = make,
+    take = take,
+    salt = salt,
+    signature = signature,
+    pending = pending,
+    data = data,
+)
+
+fun randomOrderDto(
     id: OrderIdDto = randomOrderId(),
     fill: BigDecimal = randomBigDecimal(),
     platform: PlatformDto = PlatformDto.values().random(),
@@ -176,8 +239,8 @@ fun randomOrder(
     takePriceUsd: BigDecimal? = null,
     maker: UnionAddress = randomUnionAddress(id.blockchain),
     taker: UnionAddress? = null,
-    make: AssetDto = AssetDto(randomAssetType(id.blockchain), randomBigDecimal()),
-    take: AssetDto = AssetDto(randomAssetType(id.blockchain), randomBigDecimal()),
+    make: AssetDto = AssetDto(randomAssetTypeDto(id.blockchain), randomBigDecimal()),
+    take: AssetDto = AssetDto(randomAssetTypeDto(id.blockchain), randomBigDecimal()),
     salt: String = randomString(),
     signature: String? = null,
     pending: List<PendingOrderDto>? = listOf(),

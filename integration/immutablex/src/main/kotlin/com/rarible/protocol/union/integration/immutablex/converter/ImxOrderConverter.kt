@@ -1,13 +1,13 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionAsset
 import com.rarible.protocol.union.core.model.UnionEthErc20AssetType
 import com.rarible.protocol.union.core.model.UnionEthErc721AssetType
 import com.rarible.protocol.union.core.model.UnionEthEthereumAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -16,15 +16,13 @@ import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.ImmutablexOrderDataV1Dto
 import com.rarible.protocol.union.dto.OrderDataDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderFee
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderSide
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -36,7 +34,7 @@ private const val ERC20 = "ERC20"
 
 object ImxOrderConverter {
 
-    private val logger by Logger()
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     //private val originFees = setOf("ecosystem", "protocol")
     //private val royalties = setOf("royalty")
@@ -44,7 +42,7 @@ object ImxOrderConverter {
     private val originFees = setOf("ecosystem", "protocol", "royalty")
     private val royalties = emptySet<String>() // TODO in IMX royalties works as originFees
 
-    fun convert(order: ImmutablexOrder, blockchain: BlockchainDto): OrderDto {
+    fun convert(order: ImmutablexOrder, blockchain: BlockchainDto): UnionOrder {
         return try {
             convertInternal(order, blockchain)
         } catch (e: Exception) {
@@ -53,11 +51,11 @@ object ImxOrderConverter {
         }
     }
 
-    private fun convertInternal(order: ImmutablexOrder, blockchain: BlockchainDto): OrderDto {
-        val make: AssetDto = toAssetLegacy(order, order.sell, blockchain)
-        val take: AssetDto = toAssetLegacy(order, order.buy, blockchain)
+    private fun convertInternal(order: ImmutablexOrder, blockchain: BlockchainDto): UnionOrder {
+        val make = toAsset(order, order.sell, blockchain)
+        val take = toAsset(order, order.buy, blockchain)
 
-        val (quantity, makePrice, takePrice) = if (make.type.ext.isNft) {
+        val (quantity, makePrice, takePrice) = if (make.type.isNft()) {
             Triple(getQuantityWithFees(order.buy), take.value, null)
         } else {
             Triple(getQuantityWithFees(order.sell), null, make.value)
@@ -65,9 +63,9 @@ object ImxOrderConverter {
 
         val status = convertStatus(order)
 
-        val fill = if (status == OrderStatusDto.FILLED) BigDecimal.ONE else BigDecimal.ZERO
-        val makeStock = if (status == OrderStatusDto.FILLED) BigDecimal.ZERO else make.value
-        return OrderDto(
+        val fill = if (status == UnionOrder.Status.FILLED) BigDecimal.ONE else BigDecimal.ZERO
+        val makeStock = if (status == UnionOrder.Status.FILLED) BigDecimal.ZERO else make.value
+        return UnionOrder(
             id = OrderIdDto(blockchain, "${order.orderId}"),
             make = make,
             take = take,
@@ -81,7 +79,7 @@ object ImxOrderConverter {
             salt = "${order.orderId}",
             lastUpdatedAt = order.updatedAt ?: nowMillis(),
             createdAt = order.createdAt,
-            cancelled = status == OrderStatusDto.CANCELLED,
+            cancelled = status == UnionOrder.Status.CANCELLED,
             makeStock = makeStock,
             data = makeData(quantity, order, blockchain)
         )
@@ -119,12 +117,12 @@ object ImxOrderConverter {
         )
     }
 
-    private fun convertStatus(order: ImmutablexOrder): OrderStatusDto = when (order.status) {
-        "active" -> OrderStatusDto.ACTIVE
-        "inactive" -> OrderStatusDto.INACTIVE
-        "filled" -> OrderStatusDto.FILLED
-        "cancelled" -> OrderStatusDto.CANCELLED
-        else -> OrderStatusDto.HISTORICAL
+    private fun convertStatus(order: ImmutablexOrder): UnionOrder.Status = when (order.status) {
+        "active" -> UnionOrder.Status.ACTIVE
+        "inactive" -> UnionOrder.Status.INACTIVE
+        "filled" -> UnionOrder.Status.FILLED
+        "cancelled" -> UnionOrder.Status.CANCELLED
+        else -> UnionOrder.Status.HISTORICAL
     }
 
     fun toAsset(order: ImmutablexOrder, side: ImmutablexOrderSide, blockchain: BlockchainDto): UnionAsset {

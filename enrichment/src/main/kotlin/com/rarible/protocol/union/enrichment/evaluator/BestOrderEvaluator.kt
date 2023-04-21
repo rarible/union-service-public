@@ -2,8 +2,7 @@ package com.rarible.protocol.union.enrichment.evaluator
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
-import com.rarible.protocol.union.dto.OrderDto
-import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.util.spent
@@ -22,7 +21,7 @@ class BestOrderEvaluator(
         private val logger by Logger()
     }
 
-    suspend fun evaluateBestOrder(current: ShortOrder?, updated: OrderDto): ShortOrder? {
+    suspend fun evaluateBestOrder(current: ShortOrder?, updated: UnionOrder): ShortOrder? {
         val shortUpdated = ShortOrderConverter.convert(updated)
         return if (isAlive(updated)) {
             onAliveOrderUpdate(current, shortUpdated)
@@ -116,8 +115,8 @@ class BestOrderEvaluator(
         return current
     }
 
-    private fun isAlive(order: OrderDto): Boolean {
-        return order.status == OrderStatusDto.ACTIVE
+    private fun isAlive(order: UnionOrder): Boolean {
+        return order.status == UnionOrder.Status.ACTIVE
     }
 
 }

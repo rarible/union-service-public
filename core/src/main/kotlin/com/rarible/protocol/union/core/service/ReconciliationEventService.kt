@@ -4,14 +4,13 @@ import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.UnionActivity
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.model.ownershipId
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.ext
 import org.springframework.stereotype.Component
 
 @Component
@@ -37,13 +36,13 @@ class ReconciliationEventService(
         ).ensureSuccess()
     }
 
-    suspend fun onFailedOrder(order: OrderDto) {
+    suspend fun onFailedOrder(order: UnionOrder) {
         // TODO collection not supported here
-        val makeAssetExt = order.make.type.ext
-        val takeAssetExt = order.take.type.ext
+        val makeAssetExt = order.make.type
+        val takeAssetExt = order.take.type
 
-        val makeItemId = makeAssetExt.itemId
-        val takeItemId = takeAssetExt.itemId
+        val makeItemId = makeAssetExt.itemId()
+        val takeItemId = takeAssetExt.itemId()
 
         if (makeItemId != null) {
             val ownershipId = makeItemId.toOwnership(order.maker.value)

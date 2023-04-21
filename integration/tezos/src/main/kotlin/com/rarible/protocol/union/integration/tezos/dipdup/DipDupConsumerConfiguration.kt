@@ -2,7 +2,6 @@ package com.rarible.protocol.union.integration.tezos.dipdup
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.core.logging.Logger
 import com.rarible.dipdup.client.core.model.DipDupActivity
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.listener.config.DipDupEventsConsumerFactory
@@ -32,6 +31,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupTransfers
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 
@@ -42,6 +42,8 @@ class DipDupConsumerConfiguration(
     private val properties: DipDupIntegrationProperties,
     private val consumerFactory: ConsumerFactory
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private val env = applicationEnvironmentInfo.name
     private val host = applicationEnvironmentInfo.host
@@ -177,7 +179,4 @@ class DipDupConsumerConfiguration(
         return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
-    companion object {
-        private val logger by Logger()
-    }
 }
