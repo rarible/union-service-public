@@ -29,7 +29,7 @@ object FlowConverter {
     fun convertToPayout(source: PayInfoDto, blockchain: BlockchainDto): PayoutDto {
         return PayoutDto(
             account = UnionAddressConverter.convert(blockchain, source.account),
-            value = toBasePoints(source.value)
+            value = source.value.toInt()
         )
     }
 
