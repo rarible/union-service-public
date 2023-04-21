@@ -8,15 +8,13 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
-import com.rarible.protocol.union.enrichment.util.bidCurrencyId
-import com.rarible.protocol.union.enrichment.util.sellCurrencyId
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
+
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.worker.AbstractIntegrationTest
@@ -76,11 +74,14 @@ internal class PriceUpdateJobTest: AbstractIntegrationTest() {
         val shortItem = randomShortItem(itemId).copy(
             bestSellOrder = sellOrder2,
             bestSellOrders = mapOf(
-                unionSellOrder1.sellCurrencyId to sellOrder1,
-                unionSellOrder2.sellCurrencyId to sellOrder2
+                unionSellOrder1.getSellCurrencyId() to sellOrder1,
+                unionSellOrder2.getSellCurrencyId() to sellOrder2
             ),
             bestBidOrder = bidOrder2,
-            bestBidOrders = mapOf(unionBidOrder1.bidCurrencyId to bidOrder1, unionBidOrder2.bidCurrencyId to bidOrder2),
+            bestBidOrders = mapOf(
+                unionBidOrder1.getBidCurrencyId() to bidOrder1,
+                unionBidOrder2.getBidCurrencyId() to bidOrder2
+            ),
             multiCurrency = true,
             lastUpdatedAt = Instant.EPOCH
         )
@@ -104,16 +105,16 @@ internal class PriceUpdateJobTest: AbstractIntegrationTest() {
     fun `should update best order for multi orders ownership`() = runBlocking<Unit> {
         val ownershipId = randomEthOwnershipId()
 
-        val unionSellOrder1 = randomUnionSellOrderDto(randomEthItemId())
-        val unionSellOrder2 = randomUnionSellOrderDto(randomEthItemId())
+        val unionSellOrder1 = randomUnionSellOrder(randomEthItemId())
+        val unionSellOrder2 = randomUnionSellOrder(randomEthItemId())
         val sellOrder1 = ShortOrderConverter.convert(unionSellOrder1).copy(makePrice = BigDecimal.valueOf(1))
         val sellOrder2 = ShortOrderConverter.convert(unionSellOrder2).copy(makePrice = BigDecimal.valueOf(2))
 
         val shortOwnership = randomShortOwnership(ownershipId).copy(
             bestSellOrder = sellOrder2,
             bestSellOrders = mapOf(
-                unionSellOrder1.sellCurrencyId to sellOrder1,
-                unionSellOrder2.sellCurrencyId to sellOrder2
+                unionSellOrder1.getSellCurrencyId() to sellOrder1,
+                unionSellOrder2.getSellCurrencyId() to sellOrder2
             ),
             multiCurrency = true,
             lastUpdatedAt = Instant.EPOCH

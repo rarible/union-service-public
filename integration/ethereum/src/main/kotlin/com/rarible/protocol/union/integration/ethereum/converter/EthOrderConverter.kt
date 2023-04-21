@@ -29,8 +29,14 @@ import com.rarible.protocol.dto.SeaportOfferDto
 import com.rarible.protocol.dto.SeaportOrderTypeDto
 import com.rarible.protocol.dto.SeaportV1OrderDto
 import com.rarible.protocol.dto.X2Y2OrderDto
+import com.rarible.protocol.union.core.model.UnionOnChainAmmOrder
+import com.rarible.protocol.union.core.model.UnionOnChainOrder
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
+import com.rarible.protocol.union.core.model.UnionPendingOrder
+import com.rarible.protocol.union.core.model.UnionPendingOrderCancel
+import com.rarible.protocol.union.core.model.UnionPendingOrderMatch
 import com.rarible.protocol.union.core.model.UnionPoolNftUpdateEvent
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
@@ -52,16 +58,10 @@ import com.rarible.protocol.union.dto.EthSeaportOrderTypeDto
 import com.rarible.protocol.union.dto.EthSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.dto.EthX2Y2OrderDataV1Dto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OnChainAmmOrderDto
-import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderDataDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.PendingOrderCancelDto
-import com.rarible.protocol.union.dto.PendingOrderDto
-import com.rarible.protocol.union.dto.PendingOrderMatchDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SudoSwapCurveTypeDto
 import com.rarible.protocol.union.dto.SudoSwapPoolTypeDto
@@ -79,7 +79,7 @@ class EthOrderConverter(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun convert(order: com.rarible.protocol.dto.OrderDto, blockchain: BlockchainDto): OrderDto {
+    suspend fun convert(order: com.rarible.protocol.dto.OrderDto, blockchain: BlockchainDto): UnionOrder {
         try {
             return convertInternal(order, blockchain)
         } catch (e: Exception) {
@@ -105,13 +105,16 @@ class EthOrderConverter(
         }
     }
 
-    private suspend fun convertInternal(order: com.rarible.protocol.dto.OrderDto, blockchain: BlockchainDto): OrderDto {
+    private suspend fun convertInternal(
+        order: com.rarible.protocol.dto.OrderDto,
+        blockchain: BlockchainDto
+    ): UnionOrder {
         val orderId = OrderIdDto(blockchain, order.id ?: EthConverter.convert(order.hash))
         val maker = EthConverter.convert(order.maker, blockchain)
         val ethTaker = if (order.taker != null && order.taker != Address.ZERO()) order.taker else null
         val taker = ethTaker?.let { EthConverter.convert(it, blockchain) }
-        val make = EthConverter.convertLegacy(order.make, blockchain)
-        val take = EthConverter.convertLegacy(order.take, blockchain)
+        val make = EthConverter.convert(order.make, blockchain)
+        val take = EthConverter.convert(order.take, blockchain)
         // For BID (make = currency, take - NFT) we're calculating prices for taker
         val takePrice = evalTakePrice(make, take)
         // For SELL (make = NFT, take - currency) we're calculating prices for maker
@@ -129,7 +132,7 @@ class EthOrderConverter(
         val optionalRoyalties = order.optionalRoyalties ?: false
         return when (order) {
             is LegacyOrderDto -> {
-                OrderDto(
+                UnionOrder(
                     id = orderId,
                     platform = PlatformDto.RARIBLE,
                     status = status,
@@ -159,7 +162,7 @@ class EthOrderConverter(
                 )
             }
             is RaribleV2OrderDto -> {
-                OrderDto(
+                UnionOrder(
                     id = orderId,
                     platform = PlatformDto.RARIBLE,
                     status = status,
@@ -187,7 +190,7 @@ class EthOrderConverter(
                 )
             }
             is OpenSeaV1OrderDto -> {
-                OrderDto(
+                UnionOrder(
                     id = orderId,
                     platform = PlatformDto.OPEN_SEA,
                     status = status,
@@ -231,7 +234,7 @@ class EthOrderConverter(
                 )
             }
             is CryptoPunkOrderDto -> {
-                OrderDto(
+                UnionOrder(
                     id = orderId,
                     platform = PlatformDto.CRYPTO_PUNKS,
                     status = status,
@@ -259,7 +262,7 @@ class EthOrderConverter(
                 )
             }
             is SeaportV1OrderDto -> {
-                OrderDto(
+                UnionOrder(
                     id = orderId,
                     platform = PlatformDto.OPEN_SEA,
                     status = status,
@@ -299,7 +302,7 @@ class EthOrderConverter(
                 )
             }
             is X2Y2OrderDto -> {
-                OrderDto(
+                UnionOrder(
                     id = orderId,
                     platform = PlatformDto.X2Y2,
                     status = status,
@@ -333,7 +336,7 @@ class EthOrderConverter(
                 )
             }
             is LooksRareOrderDto -> {
-                OrderDto(
+                UnionOrder(
                     id = orderId,
                     platform = PlatformDto.LOOKSRARE,
                     status = status,
@@ -380,7 +383,7 @@ class EthOrderConverter(
                         ) to PlatformDto.SUDOSWAP
                     }
                 }
-                OrderDto(
+                UnionOrder(
                     id = orderId,
                     platform = platform,
                     status = status,
@@ -409,7 +412,7 @@ class EthOrderConverter(
             }
 
             is LooksRareV2OrderDto -> {
-                OrderDto(
+                UnionOrder(
                     id = orderId,
                     platform = PlatformDto.LOOKSRARE,
                     status = status,
@@ -528,7 +531,7 @@ class EthOrderConverter(
         }
     }
 
-    suspend fun convert(source: OrdersPaginationDto, blockchain: BlockchainDto): Slice<OrderDto> {
+    suspend fun convert(source: OrdersPaginationDto, blockchain: BlockchainDto): Slice<UnionOrder> {
         return Slice(
             continuation = source.continuation,
             entities = source.orders.map { convert(it, blockchain) }
@@ -545,13 +548,13 @@ class EthOrderConverter(
         }
     }
 
-    fun convert(source: com.rarible.protocol.dto.OrderStatusDto): OrderStatusDto {
+    fun convert(source: com.rarible.protocol.dto.OrderStatusDto): UnionOrder.Status {
         return when (source) {
-            com.rarible.protocol.dto.OrderStatusDto.ACTIVE -> OrderStatusDto.ACTIVE
-            com.rarible.protocol.dto.OrderStatusDto.FILLED -> OrderStatusDto.FILLED
-            com.rarible.protocol.dto.OrderStatusDto.HISTORICAL -> OrderStatusDto.HISTORICAL
-            com.rarible.protocol.dto.OrderStatusDto.INACTIVE -> OrderStatusDto.INACTIVE
-            com.rarible.protocol.dto.OrderStatusDto.CANCELLED -> OrderStatusDto.CANCELLED
+            com.rarible.protocol.dto.OrderStatusDto.ACTIVE -> UnionOrder.Status.ACTIVE
+            com.rarible.protocol.dto.OrderStatusDto.FILLED -> UnionOrder.Status.FILLED
+            com.rarible.protocol.dto.OrderStatusDto.HISTORICAL -> UnionOrder.Status.HISTORICAL
+            com.rarible.protocol.dto.OrderStatusDto.INACTIVE -> UnionOrder.Status.INACTIVE
+            com.rarible.protocol.dto.OrderStatusDto.CANCELLED -> UnionOrder.Status.CANCELLED
         }
     }
 
@@ -603,11 +606,10 @@ class EthOrderConverter(
         }
     }
 
-
-    private fun convert(source: OrderSideDto): PendingOrderMatchDto.Side {
+    private fun convert(source: OrderSideDto): UnionPendingOrderMatch.Side {
         return when (source) {
-            OrderSideDto.RIGHT -> PendingOrderMatchDto.Side.RIGHT
-            OrderSideDto.LEFT -> PendingOrderMatchDto.Side.LEFT
+            OrderSideDto.RIGHT -> UnionPendingOrderMatch.Side.RIGHT
+            OrderSideDto.LEFT -> UnionPendingOrderMatch.Side.LEFT
         }
     }
 
@@ -627,14 +629,17 @@ class EthOrderConverter(
         }
     }
 
-    private fun convert(source: OrderExchangeHistoryDto, blockchain: BlockchainDto): PendingOrderDto {
+    private fun convert(source: OrderExchangeHistoryDto, blockchain: BlockchainDto): UnionPendingOrder {
+        val make = source.make?.let { EthConverter.convert(it, blockchain) }
+        val take = source.take?.let { EthConverter.convert(it, blockchain) }
         return when (source) {
-            is OrderSideMatchDto -> PendingOrderMatchDto(
+            is OrderSideMatchDto -> UnionPendingOrderMatch(
                 id = OrderIdDto(blockchain, EthConverter.convert(source.hash)),
-                make = source.make?.let { EthConverter.convertLegacy(it, blockchain) },
-                take = source.take?.let { EthConverter.convertLegacy(it, blockchain) },
+                make = make,
+                take = take,
                 date = source.date,
                 side = source.side?.let { convert(it) },
+                /** TODO ETHEREUM [OrderSideMatchDto.fill] must be BigDecimal, or fillValue */
                 /** TODO ETHEREUM [OrderSideMatchDto.fill] must be BigDecimal, or fillValue */
                 fill = source.fill.toBigDecimal(),
                 maker = source.maker?.let { EthConverter.convert(it, blockchain) },
@@ -645,25 +650,28 @@ class EthOrderConverter(
                 makePriceUsd = source.makePriceUsd,
                 takePriceUsd = source.takePriceUsd
             )
-            is OrderCancelDto -> PendingOrderCancelDto(
+
+            is OrderCancelDto -> UnionPendingOrderCancel(
                 id = OrderIdDto(blockchain, EthConverter.convert(source.hash)),
-                make = source.make?.let { EthConverter.convertLegacy(it, blockchain) },
-                take = source.take?.let { EthConverter.convertLegacy(it, blockchain) },
+                make = make,
+                take = take,
                 date = source.date,
                 maker = source.maker?.let { EthConverter.convert(it, blockchain) },
                 owner = source.owner?.let { EthConverter.convert(it, blockchain) }
             )
-            is com.rarible.protocol.dto.OnChainOrderDto -> OnChainOrderDto(
+
+            is com.rarible.protocol.dto.OnChainOrderDto -> UnionOnChainOrder(
                 id = OrderIdDto(blockchain, EthConverter.convert(source.hash)),
-                make = source.make?.let { EthConverter.convertLegacy(it, blockchain) },
-                take = source.take?.let { EthConverter.convertLegacy(it, blockchain) },
+                make = make,
+                take = take,
                 date = source.date,
                 maker = source.maker?.let { EthConverter.convert(it, blockchain) }
             )
-            is com.rarible.protocol.dto.OnChainAmmOrderDto -> OnChainAmmOrderDto(
+
+            is com.rarible.protocol.dto.OnChainAmmOrderDto -> UnionOnChainAmmOrder(
                 id = OrderIdDto(blockchain, EthConverter.convert(source.hash)),
-                make = source.make?.let { EthConverter.convertLegacy(it, blockchain) },
-                take = source.take?.let { EthConverter.convertLegacy(it, blockchain) },
+                make = make,
+                take = take,
                 date = source.date,
                 maker = source.maker?.let { EthConverter.convert(it, blockchain) }
             )

@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.worker.job
 
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.offchainEventMark
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
@@ -69,7 +69,7 @@ class ReconciliationOrderJob(
         return page.continuation
     }
 
-    private suspend fun safeUpdate(order: OrderDto) {
+    private suspend fun safeUpdate(order: UnionOrder) {
         try {
             // TODO: better to send notification if order has changes
             orderEventService.updateOrder(

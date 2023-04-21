@@ -3,12 +3,11 @@ package com.rarible.protocol.union.listener.service
 import com.mongodb.client.result.DeleteResult
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.model.PoolItemAction
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
-import com.rarible.protocol.union.core.model.ownershipId
 import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
-import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OwnershipSourceDto
 import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -26,7 +25,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityBurn
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityTransfer
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import io.mockk.clearMocks
@@ -85,7 +84,7 @@ class EnrichmentOwnershipEventServiceTest {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId(itemId)
         val shortOwnership = randomShortOwnership(ownershipId)
-        val order = randomUnionSellOrderDto(itemId, shortOwnership.id.owner)
+        val order = randomUnionSellOrder(itemId, shortOwnership.id.owner)
         val shortOrder = ShortOrderConverter.convert(order)
 
         val expectedShortOwnership = shortOwnership.copy(bestSellOrder = shortOrder)
@@ -117,7 +116,7 @@ class EnrichmentOwnershipEventServiceTest {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId(itemId)
         val shortOwnership = randomShortOwnership(ownershipId)
-        val order = randomUnionSellOrderDto(itemId, shortOwnership.id.owner)
+        val order = randomUnionSellOrder(itemId, shortOwnership.id.owner)
 
         // There is no existing short ownership, and order is cancelled
         coEvery { ownershipService.get(shortOwnership.id) } returns null
@@ -138,9 +137,9 @@ class EnrichmentOwnershipEventServiceTest {
     @Test
     fun `on ownership best sell order updated - ownership exist, order cancelled`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        val currentShortOrder = ShortOrderConverter.convert(randomUnionSellOrderDto())
+        val currentShortOrder = ShortOrderConverter.convert(randomUnionSellOrder())
         val shortOwnership = randomShortOwnership(itemId).copy(bestSellOrder = currentShortOrder)
-        val order = randomUnionSellOrderDto(itemId, shortOwnership.id.owner).copy(cancelled = true)
+        val order = randomUnionSellOrder(itemId, shortOwnership.id.owner).copy(cancelled = true)
 
         val expectedShortOwnership = shortOwnership.copy(bestSellOrder = null)
 
@@ -173,10 +172,10 @@ class EnrichmentOwnershipEventServiceTest {
     @Test
     fun `on ownership pool order updated - excluded`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        val currentShortOrder = ShortOrderConverter.convert(randomUnionSellOrderDto())
+        val currentShortOrder = ShortOrderConverter.convert(randomUnionSellOrder())
         val shortOwnership = randomShortOwnership(itemId).copy(bestSellOrder = currentShortOrder)
-        val order = randomUnionSellOrderDto(itemId, shortOwnership.id.owner)
-        val hackedOrder = order.copy(status = OrderStatusDto.FILLED)
+        val order = randomUnionSellOrder(itemId, shortOwnership.id.owner)
+        val hackedOrder = order.copy(status = UnionOrder.Status.FILLED)
 
         val expectedShortOwnership = shortOwnership.copy(bestSellOrder = null)
 
@@ -210,7 +209,7 @@ class EnrichmentOwnershipEventServiceTest {
     fun `on ownership best sell order updated - ownership exist, order not updated`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val temp = randomShortOwnership(itemId)
-        val order = randomUnionSellOrderDto(itemId, temp.id.owner)
+        val order = randomUnionSellOrder(itemId, temp.id.owner)
         val shortOrder = ShortOrderConverter.convert(order)
         val ownership = temp.copy(bestSellOrder = shortOrder)
 

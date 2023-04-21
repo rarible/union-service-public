@@ -43,7 +43,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import randomOrder
+import randomOrderDto
 import reactor.kotlin.core.publisher.toMono
 import java.time.Duration
 import kotlin.random.Random
@@ -97,7 +97,7 @@ class ItemsSearchByRequestIt {
                             ),
                             content = emptyList()
                         ),
-                        bestSellOrder = randomOrder(
+                        bestSellOrder = randomOrderDto(
                             take = AssetDto(
                                 EthErc20AssetTypeDto(
                                     contract = ContractAddress(
@@ -108,7 +108,7 @@ class ItemsSearchByRequestIt {
                                 randomDouble(1.0, 10.0).toBigDecimal(),
                             )
                         ),
-                        bestBidOrder = randomOrder(
+                        bestBidOrder = randomOrderDto(
                             make = AssetDto(
                                 EthErc20AssetTypeDto(
                                     contract = ContractAddress(
@@ -142,7 +142,7 @@ class ItemsSearchByRequestIt {
                             ),
                             content = emptyList()
                         ),
-                        bestSellOrder = randomOrder(
+                        bestSellOrder = randomOrderDto(
                             take = AssetDto(
                                 EthErc20AssetTypeDto(
                                     contract = ContractAddress(
@@ -153,7 +153,7 @@ class ItemsSearchByRequestIt {
                                 randomDouble(1.0, 10.0).toBigDecimal(),
                             )
                         ),
-                        bestBidOrder = randomOrder(
+                        bestBidOrder = randomOrderDto(
                             make = AssetDto(
                                 EthErc20AssetTypeDto(
                                     contract = ContractAddress(

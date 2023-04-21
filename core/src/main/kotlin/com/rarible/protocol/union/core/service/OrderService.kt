@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.router.BlockchainService
-import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -17,29 +17,29 @@ interface OrderService : BlockchainService {
         size: Int,
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
-    ): Slice<OrderDto>
+    ): Slice<UnionOrder>
 
     suspend fun getAllSync(
         continuation: String?,
         size: Int,
         sort: SyncSortDto?
-    ) : Slice<OrderDto>
+    ): Slice<UnionOrder>
 
     suspend fun getOrderById(
         id: String
-    ): OrderDto
+    ): UnionOrder
 
     suspend fun getOrdersByIds(
         orderIds: List<String>
-    ): List<OrderDto>
+    ): List<UnionOrder>
 
     suspend fun getBidCurrencies(
         itemId: String
-    ): List<AssetTypeDto>
+    ): List<UnionAssetType>
 
     suspend fun getBidCurrenciesByCollection(
         collectionId: String
-    ): List<AssetTypeDto>
+    ): List<UnionAssetType>
 
     suspend fun getOrderBidsByItem(
         platform: PlatformDto?,
@@ -52,7 +52,7 @@ interface OrderService : BlockchainService {
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto>
+    ): Slice<UnionOrder>
 
     suspend fun getOrderBidsByMaker(
         platform: PlatformDto?,
@@ -63,22 +63,22 @@ interface OrderService : BlockchainService {
         end: Long?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto>
+    ): Slice<UnionOrder>
 
     suspend fun getSellCurrencies(
         itemId: String
-    ): List<AssetTypeDto>
+    ): List<UnionAssetType>
 
     suspend fun getSellCurrenciesByCollection(
         collectionId: String
-    ): List<AssetTypeDto>
+    ): List<UnionAssetType>
 
     suspend fun getSellOrders(
         platform: PlatformDto?,
         origin: String?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto>
+    ): Slice<UnionOrder>
 
     suspend fun getSellOrdersByCollection(
         platform: PlatformDto?,
@@ -86,7 +86,7 @@ interface OrderService : BlockchainService {
         origin: String?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto>
+    ): Slice<UnionOrder>
 
     suspend fun getOrderFloorSellsByCollection(
         platform: PlatformDto?,
@@ -96,7 +96,7 @@ interface OrderService : BlockchainService {
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto>
+    ): Slice<UnionOrder>
 
     suspend fun getOrderFloorBidsByCollection(
         platform: PlatformDto?,
@@ -108,7 +108,7 @@ interface OrderService : BlockchainService {
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto>
+    ): Slice<UnionOrder>
 
     suspend fun getSellOrdersByItem(
         platform: PlatformDto?,
@@ -119,7 +119,7 @@ interface OrderService : BlockchainService {
         currencyId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto>
+    ): Slice<UnionOrder>
 
     suspend fun getSellOrdersByMaker(
         platform: PlatformDto?,
@@ -128,19 +128,19 @@ interface OrderService : BlockchainService {
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto>
+    ): Slice<UnionOrder>
 
     suspend fun getAmmOrdersAll(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto>
+    ): Slice<UnionOrder>
 
     suspend fun getAmmOrdersByItem(
         itemId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto>
+    ): Slice<UnionOrder>
 
     suspend fun getAmmOrderItemIds(
         id: String,

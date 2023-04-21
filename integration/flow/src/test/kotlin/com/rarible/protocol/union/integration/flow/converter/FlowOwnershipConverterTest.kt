@@ -2,9 +2,9 @@ package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowNftOwnershipDto
-import java.math.BigInteger
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 
 class FlowOwnershipConverterTest {
 

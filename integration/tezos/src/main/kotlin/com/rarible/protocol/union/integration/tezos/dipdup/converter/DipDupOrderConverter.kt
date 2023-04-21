@@ -8,12 +8,12 @@ import com.rarible.dipdup.client.core.model.Part
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.client.model.DipDupOrderSort
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.CurrencyService
-import com.rarible.protocol.union.dto.AssetDto
-import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDataDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -27,7 +27,6 @@ import com.rarible.protocol.union.dto.TezosOrderDataObjktV2Dto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
 import com.rarible.protocol.union.dto.TezosOrderDataTeiaV1Dto
 import com.rarible.protocol.union.dto.TezosOrderDataVersumV1Dto
-import com.rarible.protocol.union.dto.ext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
@@ -40,7 +39,7 @@ class DipDupOrderConverter(
     private val logger = LoggerFactory.getLogger(javaClass)
     private val mapper = ObjectMapper()
 
-    suspend fun convert(order: DipDupOrder, blockchain: BlockchainDto): OrderDto {
+    suspend fun convert(order: DipDupOrder, blockchain: BlockchainDto): UnionOrder {
         try {
             return convertInternal(order, blockchain)
         } catch (e: Exception) {
@@ -49,19 +48,19 @@ class DipDupOrderConverter(
         }
     }
 
-    suspend fun convert(source: List<Asset.AssetType>, blockchain: BlockchainDto): List<AssetTypeDto> {
+    suspend fun convert(source: List<Asset.AssetType>, blockchain: BlockchainDto): List<UnionAssetType> {
         try {
-            return source.map { DipDupConverter.convertLegacy(it, blockchain) }
+            return source.map { DipDupConverter.convert(it, blockchain) }
         } catch (e: Exception) {
             logger.error("Failed to convert {} list of assets: {} \n{}", blockchain, e.message, source)
             throw e
         }
     }
 
-    private suspend fun convertInternal(order: DipDupOrder, blockchain: BlockchainDto): OrderDto {
+    private suspend fun convertInternal(order: DipDupOrder, blockchain: BlockchainDto): UnionOrder {
 
-        val make = DipDupConverter.convertLegacy(order.make, blockchain)
-        val take = DipDupConverter.convertLegacy(order.take, blockchain)
+        val make = DipDupConverter.convert(order.make, blockchain)
+        val take = DipDupConverter.convert(order.take, blockchain)
 
         val maker = UnionAddressConverter.convert(blockchain, order.maker)
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
@@ -77,7 +76,7 @@ class DipDupOrderConverter(
 
         val status = convert(order.status)
 
-        return OrderDto(
+        return UnionOrder(
             id = OrderIdDto(blockchain, order.id),
             platform = DipDupConverter.convert(order.platform),
             maker = maker,
@@ -162,13 +161,13 @@ class DipDupOrderConverter(
         )
     }
 
-    fun convert(source: OrderStatus): OrderStatusDto {
+    fun convert(source: OrderStatus): UnionOrder.Status {
         return when (source) {
-            OrderStatus.ACTIVE -> OrderStatusDto.ACTIVE
-            OrderStatus.FILLED -> OrderStatusDto.FILLED
-            OrderStatus.CANCELLED -> OrderStatusDto.CANCELLED
-            OrderStatus.INACTIVE -> OrderStatusDto.INACTIVE
-            OrderStatus.HISTORICAL -> OrderStatusDto.HISTORICAL
+            OrderStatus.ACTIVE -> UnionOrder.Status.ACTIVE
+            OrderStatus.FILLED -> UnionOrder.Status.FILLED
+            OrderStatus.CANCELLED -> UnionOrder.Status.CANCELLED
+            OrderStatus.INACTIVE -> UnionOrder.Status.INACTIVE
+            OrderStatus.HISTORICAL -> UnionOrder.Status.HISTORICAL
         }
     }
 
@@ -187,11 +186,11 @@ class DipDupOrderConverter(
         OrderSortDto.LAST_UPDATE_DESC -> DipDupOrderSort.LAST_UPDATE_DESC
     }
 
-    fun evalMakePrice(make: AssetDto, take: AssetDto, currentPrice: BigDecimal?): BigDecimal? {
-        return if (make.type.ext.isNft) currentPrice?.let { it } ?: take.value.setScale(18) / make.value else null
+    fun evalMakePrice(make: UnionAsset, take: UnionAsset, currentPrice: BigDecimal?): BigDecimal? {
+        return if (make.type.isNft()) currentPrice ?: (take.value.setScale(18) / make.value) else null
     }
 
-    fun evalTakePrice(make: AssetDto, take: AssetDto, currentPrice: BigDecimal?): BigDecimal? {
-        return if (take.type.ext.isNft) currentPrice?.let { it } ?: make.value.setScale(18) / take.value else null
+    fun evalTakePrice(make: UnionAsset, take: UnionAsset, currentPrice: BigDecimal?): BigDecimal? {
+        return if (take.type.isNft()) currentPrice ?: (make.value.setScale(18) / take.value) else null
     }
 }

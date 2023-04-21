@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.core.common.flatMapAsync
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.elastic.EsAllOrderFilter
 import com.rarible.protocol.union.core.model.elastic.EsOrder
 import com.rarible.protocol.union.core.model.elastic.EsOrderBidOrdersByItem
@@ -16,11 +17,11 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
+import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderQueryService
@@ -41,12 +42,12 @@ class OrderElasticService(
         size: Int?,
         sort: OrderSortDto?,
         statuses: List<OrderStatusDto>?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         val safeSize = PageSize.ORDER.limit(size)
         val enabledBlockchains = router.getEnabledBlockchains(blockchains)
         if (enabledBlockchains.isEmpty()) {
             logger.info("Unable to find enabled blockchains for getOrdersAll(), blockchains={}", blockchains)
-            return OrdersDto()
+            return Slice.empty()
         }
 
         val orderFilter = EsAllOrderFilter(
@@ -64,7 +65,7 @@ class OrderElasticService(
         continuation: String?,
         size: Int?,
         sort: SyncSortDto?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         throw UnsupportedOperationException("Operation is not supported for Elastic Search")
     }
 
@@ -76,10 +77,10 @@ class OrderElasticService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         if (!router.isBlockchainEnabled(itemId.blockchain)) {
             logger.info("Unable to find enabled blockchains for getSellOrdersByItem(), item={}", itemId)
-            return OrdersDto()
+            return Slice.empty()
         }
         val safeSize = PageSize.ORDER.limit(size)
 
@@ -105,10 +106,10 @@ class OrderElasticService(
         end: Long?,
         continuation: String?,
         size: Int?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         if (!router.isBlockchainEnabled(itemId.blockchain)) {
             logger.info("Unable to find enabled blockchains for getOrderBidsByItem(), item={}", itemId)
-            return OrdersDto()
+            return Slice.empty()
         }
         val safeSize = PageSize.ORDER.limit(size)
 
@@ -134,14 +135,14 @@ class OrderElasticService(
         end: Long?,
         continuation: String?,
         size: Int?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         val enabledBlockchains = router.getEnabledBlockchains(blockchains).toList()
         if (enabledBlockchains.isEmpty()) {
             logger.info(
                 "Unable to find enabled blockchains for getOrderBidsByMaker(), makers={}, blockchains={}",
                 makers, blockchains
             )
-            return OrdersDto()
+            return Slice.empty()
         }
 
         val safeSize = PageSize.ORDER.limit(size)
@@ -166,11 +167,11 @@ class OrderElasticService(
         origin: String?,
         continuation: String?,
         size: Int?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         val enabledBlockchains = router.getEnabledBlockchains(blockchains).toList()
         if (enabledBlockchains.isEmpty()) {
             logger.info("Unable to find enabled blockchains for getSellOrders(), blockchains={}", blockchains)
-            return OrdersDto()
+            return Slice.empty()
         }
 
         val safeSize = PageSize.ORDER.limit(size)
@@ -194,14 +195,14 @@ class OrderElasticService(
         continuation: String?,
         size: Int?,
         status: List<OrderStatusDto>?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         val enabledBlockchains = router.getEnabledBlockchains(blockchains).toList()
         if (enabledBlockchains.isEmpty()) {
             logger.info(
                 "Unable to find enabled blockchains for getSellOrdersByMaker(), makers={} blockchains={}",
                 makers, blockchains
             )
-            return OrdersDto()
+            return Slice.empty()
         }
 
         val safeSize = PageSize.ORDER.limit(size)
@@ -220,7 +221,7 @@ class OrderElasticService(
         return fetchOrders(orderFilter)
     }
 
-    suspend fun fetchOrders(orderFilter: EsOrderFilter): OrdersDto {
+    suspend fun fetchOrders(orderFilter: EsOrderFilter): Slice<UnionOrder> {
         val esOrders = esOrderRepository.findByFilter(orderFilter)
         val orderIdsByBlockchain = esOrders.groupBy(EsOrder::blockchain, EsOrder::orderId)
 
@@ -234,17 +235,17 @@ class OrderElasticService(
 
         val sortedOrders = esOrders.mapNotNull { slices[it.orderId] }
 
-        return if (esOrders.isEmpty()) {
-            OrdersDto(orders = emptyList(), continuation = null)
-        } else {
-            val last = esOrders.last()
-            OrdersDto(
-                orders = sortedOrders,
-                continuation = DateIdContinuation(
-                    id = last.orderId,
-                    date = last.lastUpdatedAt
-                ).toString()
-            )
+        if (esOrders.isEmpty()) {
+            return Slice.empty()
         }
+        val last = esOrders.last()
+        return Slice(
+            entities = sortedOrders,
+            continuation = DateIdContinuation(
+                id = last.orderId,
+                date = last.lastUpdatedAt
+            ).toString()
+        )
+
     }
 }

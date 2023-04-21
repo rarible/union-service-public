@@ -11,6 +11,7 @@ import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
+import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -23,11 +24,10 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
-import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrder
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
-import com.rarible.protocol.union.enrichment.util.bidCurrencyId
-import com.rarible.protocol.union.enrichment.util.sellCurrencyId
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
+
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
@@ -121,8 +121,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         val expected = ItemDtoConverter.convert(unionItem)
             .copy(
-                bestSellOrder = unionBestSell,
-                bestBidOrder = unionBestBid
+                bestSellOrder = OrderDtoConverter.convert(unionBestSell),
+                bestBidOrder = OrderDtoConverter.convert(unionBestBid)
             )
 
         val saved = itemService.get(shortItem.id)!!
@@ -188,11 +188,11 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         )
         itemService.save(shortItem)
 
-        val bestSellOrder1 = randomUnionSellOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
+        val bestSellOrder1 = randomUnionSellOrder(itemId).copy(makeStock = 20.toBigDecimal())
         val ownership1 = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder1))
         ownershipService.save(ownership1)
 
-        val bestSellOrder2 = randomUnionSellOrderDto(itemId).copy(makeStock = 10.toBigDecimal())
+        val bestSellOrder2 = randomUnionSellOrder(itemId).copy(makeStock = 10.toBigDecimal())
         val ownership2 = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder2))
         ownershipService.save(ownership2)
 
@@ -226,7 +226,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         // Item should not be changed - we'll check version
         val expectedItem = itemService.save(shortItem)
 
-        val bestSellOrder = randomUnionSellOrderDto(itemId).copy(makeStock = 20.toBigDecimal())
+        val bestSellOrder = randomUnionSellOrder(itemId).copy(makeStock = 20.toBigDecimal())
         val ownership = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder))
         ownershipService.save(ownership)
 
@@ -255,7 +255,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemEventService.onItemBestSellOrderUpdated(shortItem.id, unionBestSell, stubEventMark())
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = ItemDtoConverter.convert(unionItem).copy(bestSellOrder = unionBestSell)
+        val expected = ItemDtoConverter.convert(unionItem)
+            .copy(bestSellOrder = OrderDtoConverter.convert(unionBestSell))
 
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
@@ -276,9 +277,9 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val shortItem = randomShortItem(itemId)
         itemService.save(shortItem)
 
-        val bestSellOrder = randomUnionSellOrderDto().copy(platform = PlatformDto.SUDOSWAP)
+        val bestSellOrder = randomUnionSellOrder().copy(platform = PlatformDto.SUDOSWAP)
         val shortOrder = ShortOrderConverter.convert(bestSellOrder)
-        val poolShortOrder = ShortPoolOrder(bestSellOrder.sellCurrencyId, shortOrder)
+        val poolShortOrder = ShortPoolOrder(bestSellOrder.getSellCurrencyId(), shortOrder)
 
         itemEventService.onPoolOrderUpdated(
             shortItem.id,
@@ -298,19 +299,19 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
     @Test
     fun `on best sell order updated - item removed from the pool`() = runBlocking<Unit> {
-        val bestSellOrder = randomUnionSellOrderDto().copy(platform = PlatformDto.SUDOSWAP)
+        val bestSellOrder = randomUnionSellOrder().copy(platform = PlatformDto.SUDOSWAP)
         val shortOrder = ShortOrderConverter.convert(bestSellOrder)
-        val poolShortOrder = ShortPoolOrder(bestSellOrder.sellCurrencyId, shortOrder)
+        val poolShortOrder = ShortPoolOrder(bestSellOrder.getSellCurrencyId(), shortOrder)
 
         val itemId = randomEthItemId()
         val shortItem = randomShortItem(itemId).copy(
             bestSellOrder = shortOrder,
-            bestBidOrder = ShortOrderConverter.convert(randomUnionBidOrderDto()),
+            bestBidOrder = ShortOrderConverter.convert(randomUnionBidOrder()),
             poolSellOrders = listOf(poolShortOrder)
         )
         itemService.save(shortItem)
 
-        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.sellCurrencyId)
+        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.getSellCurrencyId())
 
         itemEventService.onPoolOrderUpdated(
             shortItem.id,
@@ -328,7 +329,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
     @Test
     fun `on best sell order updated - item has no pool order`() = runBlocking<Unit> {
-        val bestSellOrder = randomUnionSellOrderDto().copy(platform = PlatformDto.SUDOSWAP)
+        val bestSellOrder = randomUnionSellOrder().copy(platform = PlatformDto.SUDOSWAP)
         val shortOrder = ShortOrderConverter.convert(bestSellOrder)
 
         val itemId = randomEthItemId()
@@ -338,7 +339,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         )
         itemService.save(shortItem)
 
-        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.sellCurrencyId)
+        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.getSellCurrencyId())
 
         itemEventService.onPoolOrderUpdated(
             shortItem.id,
@@ -368,7 +369,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
         ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
-        ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(itemId, unionBestBid.bidCurrencyId)
+        ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(itemId, unionBestBid.getBidCurrencyId())
 
         itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid, stubEventMark())
 
@@ -453,7 +454,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val item = ShortItemConverter.convert(randomUnionItem(randomEthItemId()))
 
         val itemWithDotMapKey = item.copy(
-            bestSellOrders = mapOf("A.something.Flow" to ShortOrderConverter.convert(randomUnionSellOrderDto()))
+            bestSellOrders = mapOf("A.something.Flow" to ShortOrderConverter.convert(randomUnionSellOrder()))
         )
 
         val saved = itemService.save(itemWithDotMapKey)

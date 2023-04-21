@@ -7,9 +7,9 @@ import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.client.exception.DipDupNotFound
 import com.rarible.dipdup.client.model.DipDupOrderSort
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
-import com.rarible.protocol.union.dto.AssetTypeDto
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.SyncSortDto
@@ -28,13 +28,13 @@ class DipdupOrderServiceImpl(
     private val blockchain = BlockchainDto.TEZOS
     private val enabledPlatforms = marketplaces.getEnabledMarketplaces().toList()
 
-    override suspend fun getOrderById(id: String): OrderDto {
+    override suspend fun getOrderById(id: String): UnionOrder {
         logger.info("Fetch dipdup order by id: $id")
         val order = safeApiCall { dipdupOrderClient.getOrderById(id) }
         return dipDupOrderConverter.convert(order, blockchain)
     }
 
-    override suspend fun getOrderByIds(ids: List<String>): List<OrderDto> {
+    override suspend fun getOrderByIds(ids: List<String>): List<UnionOrder> {
         logger.info("Fetch dipdup orders by ids: $ids")
         val orders = safeApiCall { dipdupOrderClient.getOrdersByIds(ids) }
         return orders.map { dipDupOrderConverter.convert(it, blockchain) }
@@ -46,7 +46,7 @@ class DipdupOrderServiceImpl(
         isBid: Boolean?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         logger.info("Fetch dipdup all orders: $sort, $statuses, $continuation, $size")
         val page = dipdupOrderClient.getOrdersAll(
             sort = sort?.let { dipDupOrderConverter.convert(it) },
@@ -62,7 +62,7 @@ class DipdupOrderServiceImpl(
         )
     }
 
-    override suspend fun getOrdersAllSync(continuation: String?, limit: Int, sort: SyncSortDto?): Slice<OrderDto> {
+    override suspend fun getOrdersAllSync(continuation: String?, limit: Int, sort: SyncSortDto?): Slice<UnionOrder> {
         val sortTezos = sort?.let { DipDupActivityConverter.convert(it) }
         logger.info("Fetch dipdup all order sync: $continuation, $limit, $sort")
         val page = dipdupOrderClient.getOrdersSync(limit, continuation, sortTezos)
@@ -77,7 +77,7 @@ class DipdupOrderServiceImpl(
         requested: List<TezosPlatform>,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         logger.info("Fetch dipdup sell orders: $requested, $origin, $continuation, $size")
         val page = dipdupOrderClient.getOrdersAll(
             sort = DipDupOrderSort.LAST_UPDATE_DESC,
@@ -99,7 +99,7 @@ class DipdupOrderServiceImpl(
         platforms: List<TezosPlatform>,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         logger.info("Fetch dipdup sell orders by collection: $contract, platforms=$platforms, continuation=$continuation, size=$size")
         val page = dipdupOrderClient.getOrdersByCollection(
             contract = contract,
@@ -124,7 +124,7 @@ class DipdupOrderServiceImpl(
         statuses: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         logger.info("Fetch dipdup sell orders by item: $contract:$tokenId, maker=$maker, platforms=$platforms, currency=$currencyId, status=$statuses, continuation=$continuation, size=$size")
         val page = dipdupOrderClient.getOrdersByItem(
             contract = contract,
@@ -149,7 +149,7 @@ class DipdupOrderServiceImpl(
         statuses: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val page = dipdupOrderClient.getOrdersByMakers(
             makers = maker,
             statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
@@ -164,7 +164,7 @@ class DipdupOrderServiceImpl(
         )
     }
 
-    override suspend fun getSellOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<AssetTypeDto> {
+    override suspend fun getSellOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<UnionAssetType> {
         logger.info("Fetch dipdup sell order currencies by item: $contract, $tokenId")
         return dipDupOrderConverter.convert(
             dipdupOrderClient.getSellOrdersCurrenciesByItem(contract, tokenId.toString()),
@@ -172,7 +172,7 @@ class DipdupOrderServiceImpl(
         )
     }
 
-    override suspend fun getSellOrderCurrenciesByCollection(contract: String): List<AssetTypeDto> {
+    override suspend fun getSellOrderCurrenciesByCollection(contract: String): List<UnionAssetType> {
         logger.info("Fetch dipdup sell order currencies by collection: $contract")
         return dipDupOrderConverter.convert(
             dipdupOrderClient.getSellOrdersCurrenciesByCollection(contract),
@@ -189,7 +189,7 @@ class DipdupOrderServiceImpl(
         statuses: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         logger.info("Fetch dipdup sell orders by item: $contract, $tokenId, $maker, $currencyId, $statuses, $continuation, $size")
         val page = dipdupOrderClient.getOrdersByItem(
             contract = contract,
@@ -214,7 +214,7 @@ class DipdupOrderServiceImpl(
         statuses: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val page = dipdupOrderClient.getOrdersByMakers(
             makers = maker,
             statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
@@ -229,7 +229,7 @@ class DipdupOrderServiceImpl(
         )
     }
 
-    override suspend fun getBidOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<AssetTypeDto> {
+    override suspend fun getBidOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<UnionAssetType> {
         logger.info("Fetch dipdup bid order currencies by item: $contract, $tokenId")
         return dipDupOrderConverter.convert(
             dipdupOrderClient.getBidOrdersCurrenciesByItem(contract, tokenId.toString()),
@@ -237,7 +237,7 @@ class DipdupOrderServiceImpl(
         )
     }
 
-    override suspend fun getBidOrderCurrenciesByCollection(contract: String): List<AssetTypeDto> {
+    override suspend fun getBidOrderCurrenciesByCollection(contract: String): List<UnionAssetType> {
         logger.info("Fetch dipdup bid order currencies by collection: $contract")
         return dipDupOrderConverter.convert(
             dipdupOrderClient.getBidOrdersCurrenciesByCollection(contract),

@@ -1,29 +1,31 @@
 package com.rarible.protocol.union.worker.task.search.order
 
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.converter.EsOrderConverter
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.RateLimiter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.elasticsearch.action.support.WriteRequest
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class OrderReindexService(
+    private val enrichmentOrderService: EnrichmentOrderService,
     private val orderApiMergeService: OrderApiMergeService,
     private val repository: EsOrderRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
     private val rateLimiter: RateLimiter,
 ) {
 
-    private val logger by Logger()
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     fun reindex(
         blockchain: BlockchainDto,
@@ -48,15 +50,15 @@ class OrderReindexService(
                     OrderStatusDto.values().asList()
                 )
 
-                if (res.orders.isNotEmpty()) {
+                if (res.entities.isNotEmpty()) {
                     repository.saveAll(
-                        res.orders.map {
+                        res.entities.map {
                             logger.info("Converting OrderDto  $it")
-                            EsOrderConverter.convert(it)
+                            EsOrderConverter.convert(enrichmentOrderService.enrich(it))
                         },
                         refreshPolicy = WriteRequest.RefreshPolicy.NONE
                     )
-                    counter.increment(res.orders.size)
+                    counter.increment(res.entities.size)
                 }
                 emit(res.continuation.orEmpty())
                 continuation = res.continuation

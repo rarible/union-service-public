@@ -2,15 +2,14 @@ package com.rarible.protocol.union.worker.job
 
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.model.PoolItemAction
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.offchainEventMark
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
-import com.rarible.protocol.union.enrichment.util.isPoolOrder
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -46,7 +45,7 @@ class ReconciliationPoolOrderJob(
             return null
         }
 
-        val orders = page.entities.filter { it.isPoolOrder } // Just for case
+        val orders = page.entities.filter { it.isPoolOrder() } // Just for case
 
         // It will be better to do NOT handle it in parallel, because we can get same items for different pool (1155)
         orders.forEach { order ->
@@ -66,7 +65,7 @@ class ReconciliationPoolOrderJob(
         return page.continuation
     }
 
-    private suspend fun safeUpdate(order: OrderDto, itemId: ItemIdDto) {
+    private suspend fun safeUpdate(order: UnionOrder, itemId: ItemIdDto) {
         try {
             orderEventService.updatePoolOrderPerItem(
                 order, itemId,

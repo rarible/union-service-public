@@ -1,12 +1,12 @@
 package com.rarible.protocol.union.core.service.dummy
 
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
-import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -22,7 +22,7 @@ class DummyOrderService(
         size: Int,
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -30,23 +30,23 @@ class DummyOrderService(
         continuation: String?,
         size: Int,
         sort: SyncSortDto?
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
-    override suspend fun getOrderById(id: String): OrderDto {
+    override suspend fun getOrderById(id: String): UnionOrder {
         throw UnionNotFoundException("Order [$id] not found, ${blockchain.name} is not available")
     }
 
-    override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
+    override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {
         return emptyList()
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrencies(itemId: String): List<UnionAssetType> {
         return emptyList()
     }
 
-    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -61,7 +61,7 @@ class DummyOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -74,15 +74,15 @@ class DummyOrderService(
         end: Long?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
-    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrencies(itemId: String): List<UnionAssetType> {
         return emptyList()
     }
 
-    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -91,7 +91,7 @@ class DummyOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -101,7 +101,7 @@ class DummyOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -113,7 +113,7 @@ class DummyOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -127,7 +127,7 @@ class DummyOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -140,7 +140,7 @@ class DummyOrderService(
         currencyId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -151,7 +151,7 @@ class DummyOrderService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -159,7 +159,7 @@ class DummyOrderService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -167,7 +167,7 @@ class DummyOrderService(
         itemId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 

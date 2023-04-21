@@ -43,6 +43,7 @@ import com.rarible.protocol.union.dto.SudoSwapCurveTypeDto
 import com.rarible.protocol.union.dto.SudoSwapPoolTypeDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
+import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
@@ -185,7 +186,7 @@ fun randomUnionOwnership(ownershipId: OwnershipIdDto) = EthOwnershipConverter.co
     ownershipId.blockchain
 )
 
-fun randomUnionSellOrderDto(
+fun randomUnionSellOrder(
     itemId: ItemIdDto = randomEthItemId(),
     owner: String = randomAddressString(),
     origins: List<String> = emptyList()
@@ -199,7 +200,13 @@ fun randomUnionSellOrderDto(
     )
 }
 
-fun randomUnionBidOrderDto(
+fun randomSellOrderDto(
+    itemId: ItemIdDto = randomEthItemId(),
+    owner: String = randomAddressString(),
+    origins: List<String> = emptyList()
+) = randomUnionSellOrder(itemId, owner, origins).let { OrderDtoConverter.convert(it) }
+
+fun randomUnionBidOrder(
     itemId: ItemIdDto = randomEthItemId(),
     owner: String = randomAddressString(),
     origins: List<String> = emptyList()
@@ -213,6 +220,12 @@ fun randomUnionBidOrderDto(
         itemId.blockchain
     )
 }
+
+fun randomBidOrderDto(
+    itemId: ItemIdDto = randomEthItemId(),
+    owner: String = randomAddressString(),
+    origins: List<String> = emptyList()
+) = randomUnionBidOrder(itemId, owner, origins).let { OrderDtoConverter.convert(it) }
 
 fun randomUnionAuctionDto(itemId: ItemIdDto) = randomUnionAuctionDto(
     itemId.toOwnership(randomAddressString())

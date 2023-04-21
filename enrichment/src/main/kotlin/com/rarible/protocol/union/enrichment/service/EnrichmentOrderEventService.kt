@@ -5,12 +5,11 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
-import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import org.slf4j.LoggerFactory
@@ -20,17 +19,18 @@ import java.util.UUID
 
 @Component
 class EnrichmentOrderEventService(
+    private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
     private val enrichmentCollectionEventService: EnrichmentCollectionEventService,
     private val orderEventListeners: List<OutgoingEventListener<OrderEventDto>>,
-    private val ff: FeatureFlagsProperties
+    private val ff: FeatureFlagsProperties,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun updatePoolOrder(
-        order: OrderDto,
+        order: UnionOrder,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
@@ -40,7 +40,7 @@ class EnrichmentOrderEventService(
     }
 
     suspend fun updatePoolOrderPerItem(
-        order: OrderDto,
+        order: UnionOrder,
         itemId: ItemIdDto,
         action: PoolItemAction,
         eventTimeMarks: UnionEventTimeMarks?,
@@ -59,16 +59,16 @@ class EnrichmentOrderEventService(
     }
 
     suspend fun updateOrder(
-        order: OrderDto,
+        order: UnionOrder,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
 
-        val makeAssetExt = order.make.type.ext
-        val takeAssetExt = order.take.type.ext
+        val makeAssetExt = order.make.type
+        val takeAssetExt = order.take.type
 
-        val makeItemIdDto = makeAssetExt.itemId
-        val takeItemIdDto = takeAssetExt.itemId
+        val makeItemIdDto = makeAssetExt.itemId()
+        val takeItemIdDto = takeAssetExt.itemId()
 
         val makeItemId = makeItemIdDto?.let { ShortItemId(it) }
         val takeItemId = takeItemIdDto?.let { ShortItemId(it) }
@@ -76,16 +76,16 @@ class EnrichmentOrderEventService(
         when {
             // TODO PT-1151 Maybe we need to ensure there is AMM order? originally they should not get here
             // Floor sell (not present ATM)
-            makeAssetExt.isCollectionAsset -> onCollectionSellOrder(
+            makeAssetExt.isCollectionAsset() -> onCollectionSellOrder(
                 order,
-                makeAssetExt.collectionId!!,
+                makeAssetExt.collectionId()!!,
                 eventTimeMarks,
                 notificationEnabled
             )
             // Floor bid
-            takeAssetExt.isCollectionAsset -> onCollectionBidOrder(
+            takeAssetExt.isCollectionAsset() -> onCollectionBidOrder(
                 order,
-                takeAssetExt.collectionId!!,
+                takeAssetExt.collectionId()!!,
                 eventTimeMarks,
                 notificationEnabled
             )
@@ -109,18 +109,18 @@ class EnrichmentOrderEventService(
         notify(order, eventTimeMarks)
     }
 
-    private suspend fun notify(order: OrderDto, eventTimeMarks: UnionEventTimeMarks?) {
+    private suspend fun notify(order: UnionOrder, eventTimeMarks: UnionEventTimeMarks?) {
         val event = OrderUpdateEventDto(
             eventId = UUID.randomUUID().toString(),
             orderId = order.id,
-            order = order,
+            order = enrichmentOrderService.enrich(order),
             eventTimeMarks = eventTimeMarks?.addOut()?.toDto()
         )
         orderEventListeners.forEach { it.onEvent(event) }
     }
 
     private suspend fun onItemSellOrder(
-        order: OrderDto,
+        order: UnionOrder,
         itemId: ShortItemId,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean
@@ -129,7 +129,7 @@ class EnrichmentOrderEventService(
     }
 
     private suspend fun onItemPoolOrder(
-        order: OrderDto,
+        order: UnionOrder,
         itemId: ShortItemId,
         action: PoolItemAction,
         eventTimeMarks: UnionEventTimeMarks?,
@@ -145,7 +145,7 @@ class EnrichmentOrderEventService(
     }
 
     private suspend fun onOwnershipSellOrder(
-        order: OrderDto,
+        order: UnionOrder,
         itemId: ShortItemId,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean
@@ -160,7 +160,7 @@ class EnrichmentOrderEventService(
     }
 
     private suspend fun onOwnershipPoolOrder(
-        order: OrderDto,
+        order: UnionOrder,
         itemId: ShortItemId,
         action: PoolItemAction,
         eventTimeMarks: UnionEventTimeMarks?,
@@ -177,7 +177,7 @@ class EnrichmentOrderEventService(
     }
 
     private suspend fun onItemBidOrder(
-        order: OrderDto,
+        order: UnionOrder,
         itemId: ShortItemId,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean
@@ -186,7 +186,7 @@ class EnrichmentOrderEventService(
     }
 
     private suspend fun onCollectionSellOrder(
-        order: OrderDto,
+        order: UnionOrder,
         collectionId: CollectionIdDto,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean
@@ -201,7 +201,7 @@ class EnrichmentOrderEventService(
     }
 
     private suspend fun onCollectionBidOrder(
-        order: OrderDto,
+        order: UnionOrder,
         collectionId: CollectionIdDto,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean

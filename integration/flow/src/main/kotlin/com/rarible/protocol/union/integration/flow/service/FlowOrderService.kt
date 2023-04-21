@@ -4,13 +4,13 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.FlowOrderIdsDto
 import com.rarible.protocol.flow.nft.api.client.FlowBidOrderControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
-import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -33,7 +33,7 @@ open class FlowOrderService(
         size: Int,
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val result = orderControllerApi.getOrdersAllByStatus(
             flowOrderConverter.convert(sort),
             continuation,
@@ -47,7 +47,7 @@ open class FlowOrderService(
         continuation: String?,
         size: Int,
         sort: SyncSortDto?
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val result = orderControllerApi.getOrdersSync(
             continuation,
             size,
@@ -56,24 +56,24 @@ open class FlowOrderService(
         return flowOrderConverter.convert(result, blockchain)
     }
 
-    override suspend fun getOrderById(id: String): OrderDto {
+    override suspend fun getOrderById(id: String): UnionOrder {
         val order = orderControllerApi.getOrderByOrderId(id).awaitFirst()
         return flowOrderConverter.convert(order, blockchain)
     }
 
-    override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
+    override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {
         val ids = orderIds.map { it.toLong() }
         val orders = orderControllerApi.getOrdersByIds(FlowOrderIdsDto(ids)).collectList().awaitFirst()
         return orders.map { flowOrderConverter.convert(it, blockchain) }
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrencies(itemId: String): List<UnionAssetType> {
         val assets = bidControllerApi.getBidCurrencies(itemId)
             .collectList().awaitFirst()
-        return assets.map { FlowConverter.convertLegacy(it, blockchain).type }
+        return assets.map { FlowConverter.convert(it, blockchain).type }
     }
 
-    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -88,7 +88,7 @@ open class FlowOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val result = bidControllerApi.getBidsByItem(
             contract,
@@ -114,7 +114,7 @@ open class FlowOrderService(
         end: Long?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val result = bidControllerApi.getOrderBidsByMaker(
             maker,
             origin,
@@ -127,13 +127,13 @@ open class FlowOrderService(
         return flowOrderConverter.convert(result, blockchain)
     }
 
-    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrencies(itemId: String): List<UnionAssetType> {
         val assets = orderControllerApi.getSellCurrencies(itemId)
             .collectList().awaitFirst()
-        return assets.map { FlowConverter.convertLegacy(it, blockchain).type }
+        return assets.map { FlowConverter.convert(it, blockchain).type }
     }
 
-    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -142,7 +142,7 @@ open class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val result = orderControllerApi.getSellOrders(
             origin,
             continuation,
@@ -157,7 +157,7 @@ open class FlowOrderService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val result = orderControllerApi.getSellOrdersByCollection(
             collection,
             origin,
@@ -175,7 +175,7 @@ open class FlowOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         //Not implemented
         return Slice.empty()
     }
@@ -190,7 +190,7 @@ open class FlowOrderService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         //Not implemented
         return Slice.empty()
     }
@@ -204,7 +204,7 @@ open class FlowOrderService(
         currencyId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val result = orderControllerApi.getSellOrdersByItemAndByStatus(
             contract,
@@ -226,7 +226,7 @@ open class FlowOrderService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         val result = orderControllerApi.getSellOrdersByMaker(
             maker,
             origin,
@@ -240,7 +240,7 @@ open class FlowOrderService(
         itemId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 
@@ -256,7 +256,7 @@ open class FlowOrderService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return Slice.empty()
     }
 }

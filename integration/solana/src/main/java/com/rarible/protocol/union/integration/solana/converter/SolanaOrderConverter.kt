@@ -2,14 +2,15 @@ package com.rarible.protocol.union.integration.solana.converter
 
 import com.rarible.protocol.solana.dto.AuctionHouseOrderDataV1Dto
 import com.rarible.protocol.solana.dto.AuctionHouseOrderDto
+import com.rarible.protocol.solana.dto.OrderDto
 import com.rarible.protocol.solana.dto.OrdersDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -28,10 +29,7 @@ class SolanaOrderConverter(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun convert(
-        order: com.rarible.protocol.solana.dto.OrderDto,
-        blockchain: BlockchainDto
-    ): OrderDto {
+    suspend fun convert(order: OrderDto, blockchain: BlockchainDto): UnionOrder {
         try {
             return convertToUnion(order, blockchain)
         } catch (e: Exception) {
@@ -40,12 +38,9 @@ class SolanaOrderConverter(
         }
     }
 
-    private suspend fun convertToUnion(
-        order: com.rarible.protocol.solana.dto.OrderDto,
-        blockchain: BlockchainDto
-    ): OrderDto {
-        val make = SolanaConverter.convertLegacy(order.make, blockchain)
-        val take = SolanaConverter.convertLegacy(order.take, blockchain)
+    private suspend fun convertToUnion(order: OrderDto, blockchain: BlockchainDto): UnionOrder {
+        val make = SolanaConverter.convert(order.make, blockchain)
+        val take = SolanaConverter.convert(order.take, blockchain)
 
         // For BID (make = currency, take - NFT) we're calculating prices for taker
         val takePrice = evalTakePrice(make, take)
@@ -55,7 +50,7 @@ class SolanaOrderConverter(
         val makePriceUsd = currencyService.toUsd(blockchain, take.type, makePrice)
         val takePriceUsd = currencyService.toUsd(blockchain, make.type, takePrice)
 
-        return OrderDto(
+        return UnionOrder(
             id = OrderIdDto(blockchain, order.hash),
             maker = UnionAddressConverter.convert(blockchain, order.maker),
             make = make,
@@ -85,7 +80,7 @@ class SolanaOrderConverter(
     }
 
     private fun convertOrderData(
-        order: com.rarible.protocol.solana.dto.OrderDto,
+        order: OrderDto,
         blockchain: BlockchainDto
     ) = when (order) {
         is AuctionHouseOrderDto -> when (val orderData = order.data) {
@@ -97,14 +92,14 @@ class SolanaOrderConverter(
         }
     }
 
-    private fun convert(status: com.rarible.protocol.solana.dto.OrderStatusDto): OrderStatusDto = when (status) {
-        com.rarible.protocol.solana.dto.OrderStatusDto.ACTIVE -> OrderStatusDto.ACTIVE
-        com.rarible.protocol.solana.dto.OrderStatusDto.FILLED -> OrderStatusDto.FILLED
-        com.rarible.protocol.solana.dto.OrderStatusDto.CANCELLED -> OrderStatusDto.CANCELLED
-        com.rarible.protocol.solana.dto.OrderStatusDto.INACTIVE -> OrderStatusDto.INACTIVE
+    private fun convert(status: com.rarible.protocol.solana.dto.OrderStatusDto): UnionOrder.Status = when (status) {
+        com.rarible.protocol.solana.dto.OrderStatusDto.ACTIVE -> UnionOrder.Status.ACTIVE
+        com.rarible.protocol.solana.dto.OrderStatusDto.FILLED -> UnionOrder.Status.FILLED
+        com.rarible.protocol.solana.dto.OrderStatusDto.CANCELLED -> UnionOrder.Status.CANCELLED
+        com.rarible.protocol.solana.dto.OrderStatusDto.INACTIVE -> UnionOrder.Status.INACTIVE
     }
 
-    suspend fun convert(source: OrdersDto, blockchain: BlockchainDto): Slice<OrderDto> = Slice(
+    suspend fun convert(source: OrdersDto, blockchain: BlockchainDto): Slice<UnionOrder> = Slice(
         continuation = source.continuation,
         entities = source.orders.map { convert(it, blockchain) }
     )

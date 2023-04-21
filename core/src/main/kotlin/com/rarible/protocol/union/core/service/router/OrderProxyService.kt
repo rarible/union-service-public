@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.core.service.router
 
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
-import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -22,7 +22,7 @@ class OrderProxyService(
         size: Int,
         sort: OrderSortDto?,
         status: List<OrderStatusDto>?
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return orderService.getOrdersAll(
             continuation,
             size,
@@ -35,7 +35,7 @@ class OrderProxyService(
         continuation: String?,
         size: Int,
         sort: SyncSortDto?
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return orderService.getAllSync(
             continuation,
             size,
@@ -43,19 +43,19 @@ class OrderProxyService(
         )
     }
 
-    override suspend fun getOrderById(id: String): OrderDto {
+    override suspend fun getOrderById(id: String): UnionOrder {
         return orderService.getOrderById(id)
     }
 
-    override suspend fun getOrdersByIds(orderIds: List<String>): List<OrderDto> {
+    override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {
         return orderService.getOrdersByIds(orderIds)
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrencies(itemId: String): List<UnionAssetType> {
         return orderService.getBidCurrencies(itemId)
     }
 
-    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -70,7 +70,7 @@ class OrderProxyService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         if (!isPlatformSupported(platform)) return Slice.empty()
         return orderService.getOrderBidsByItem(
             platform,
@@ -95,7 +95,7 @@ class OrderProxyService(
         end: Long?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         if (!isPlatformSupported(platform)) return Slice.empty()
         return orderService.getOrderBidsByMaker(
             platform,
@@ -109,11 +109,11 @@ class OrderProxyService(
         )
     }
 
-    override suspend fun getSellCurrencies(itemId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrencies(itemId: String): List<UnionAssetType> {
         return orderService.getSellCurrencies(itemId)
     }
 
-    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<AssetTypeDto> {
+    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -122,7 +122,7 @@ class OrderProxyService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         if (!isPlatformSupported(platform)) return Slice.empty()
         return orderService.getSellOrders(
             platform,
@@ -138,7 +138,7 @@ class OrderProxyService(
         origin: String?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         if (!isPlatformSupported(platform)) return Slice.empty()
         return orderService.getSellOrdersByCollection(
             platform,
@@ -157,7 +157,7 @@ class OrderProxyService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         if (!isPlatformSupported(platform)) return Slice.empty()
         return orderService.getOrderFloorSellsByCollection(
             platform,
@@ -180,7 +180,7 @@ class OrderProxyService(
         currencyAddress: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         if (!isPlatformSupported(platform)) return Slice.empty()
         return orderService.getOrderFloorBidsByCollection(
             platform,
@@ -204,7 +204,7 @@ class OrderProxyService(
         currencyId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         if (!isPlatformSupported(platform)) return Slice.empty()
         return orderService.getSellOrdersByItem(
             platform,
@@ -225,7 +225,7 @@ class OrderProxyService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         if (!isPlatformSupported(platform)) return Slice.empty()
         return orderService.getSellOrdersByMaker(
             platform,
@@ -241,7 +241,7 @@ class OrderProxyService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return orderService.getAmmOrdersAll(status, continuation, size)
     }
 
@@ -249,7 +249,7 @@ class OrderProxyService(
         itemId: String,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         return orderService.getAmmOrdersByItem(itemId, continuation, size)
     }
 

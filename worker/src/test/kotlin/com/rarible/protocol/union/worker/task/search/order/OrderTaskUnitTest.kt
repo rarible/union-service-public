@@ -3,10 +3,10 @@ package com.rarible.protocol.union.worker.task.search.order
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
+import com.rarible.protocol.union.core.task.OrderTaskParam
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.OrderReindexProperties
-import com.rarible.protocol.union.core.task.OrderTaskParam
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -17,11 +17,11 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactor.mono
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
-import randomOrder
+import randomOrderDto
 
 class OrderTaskUnitTest {
 
-    private val orderDto = randomOrder()
+    private val orderDto = randomOrderDto()
 
     private val paramFactory = ParamFactory(jacksonObjectMapper())
 

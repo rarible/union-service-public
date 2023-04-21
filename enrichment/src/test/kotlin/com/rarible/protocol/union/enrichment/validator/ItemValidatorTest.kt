@@ -3,10 +3,10 @@ package com.rarible.protocol.union.enrichment.validator
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
+import com.rarible.protocol.union.enrichment.test.data.randomBidOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomSellOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionAddress
-import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrderDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -18,15 +18,15 @@ class ItemValidatorTest {
         val empty = ItemDtoConverter.convert(randomUnionItem(randomEthItemId()))
         val bothValid = ItemDtoConverter.convert(randomUnionItem(randomEthItemId()))
             .copy(
-                bestSellOrder = randomUnionSellOrderDto(),
-                bestBidOrder = randomUnionBidOrderDto()
+                bestSellOrder = randomSellOrderDto(),
+                bestBidOrder = randomBidOrderDto()
             )
 
         val sellValid = ItemDtoConverter.convert(randomUnionItem(randomEthItemId()))
-            .copy(bestSellOrder = randomUnionSellOrderDto())
+            .copy(bestSellOrder = randomSellOrderDto())
 
         val bidValid = ItemDtoConverter.convert(randomUnionItem(randomEthItemId()))
-            .copy(bestBidOrder = randomUnionBidOrderDto())
+            .copy(bestBidOrder = randomBidOrderDto())
 
         val item: ItemDto? = null
         assertThat(EntityValidator.isValid(item)).isTrue()
@@ -40,18 +40,18 @@ class ItemValidatorTest {
     fun `invalid item`() {
         val bothInvalid = ItemDtoConverter.convert(randomUnionItem(randomEthItemId()))
             .copy(
-                bestSellOrder = randomUnionSellOrderDto().copy(taker = randomUnionAddress()),
-                bestBidOrder = randomUnionBidOrderDto().copy(status = OrderStatusDto.INACTIVE)
+                bestSellOrder = randomSellOrderDto().copy(taker = randomUnionAddress()),
+                bestBidOrder = randomBidOrderDto().copy(status = OrderStatusDto.INACTIVE)
             )
 
         val bidInvalid = ItemDtoConverter.convert(randomUnionItem(randomEthItemId()))
             .copy(
-                bestSellOrder = randomUnionSellOrderDto(),
-                bestBidOrder = randomUnionBidOrderDto().copy(status = OrderStatusDto.FILLED)
+                bestSellOrder = randomSellOrderDto(),
+                bestBidOrder = randomBidOrderDto().copy(status = OrderStatusDto.FILLED)
             )
 
         val sellInvalid = ItemDtoConverter.convert(randomUnionItem(randomEthItemId()))
-            .copy(bestSellOrder = randomUnionSellOrderDto().copy(status = OrderStatusDto.CANCELLED))
+            .copy(bestSellOrder = randomSellOrderDto().copy(status = OrderStatusDto.CANCELLED))
 
         assertThat(EntityValidator.isValid(bothInvalid)).isFalse()
         assertThat(EntityValidator.isValid(bidInvalid)).isFalse()

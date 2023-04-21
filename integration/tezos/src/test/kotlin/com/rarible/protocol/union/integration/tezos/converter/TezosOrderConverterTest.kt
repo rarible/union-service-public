@@ -4,11 +4,11 @@ import com.rarible.dipdup.client.core.model.Asset
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.client.core.model.OrderStatus
 import com.rarible.dipdup.client.core.model.TezosPlatform
+import com.rarible.protocol.union.core.model.UnionTezosNFTAssetType
+import com.rarible.protocol.union.core.model.UnionTezosXTZAssetType
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.TezosNFTAssetTypeDto
 import com.rarible.protocol.union.dto.TezosOrderDataRaribleV2DataV2Dto
-import com.rarible.protocol.union.dto.TezosXTZAssetTypeDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupOrderConverter
 import com.rarible.protocol.union.test.mock.CurrencyMock
@@ -31,14 +31,14 @@ class TezosOrderConverterTest {
         assertThat(converted.id.value).isEqualTo(dto.id)
         assertThat(converted.platform).isEqualTo(PlatformDto.RARIBLE)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
-        assertThat(converted.make.type).isInstanceOf(TezosNFTAssetTypeDto::class.java)
+        assertThat(converted.make.type).isInstanceOf(UnionTezosNFTAssetType::class.java)
         assertThat(converted.make.value).isEqualTo(dto.make.assetValue)
-        assertThat(converted.take.type).isInstanceOf(TezosXTZAssetTypeDto::class.java)
+        assertThat(converted.take.type).isInstanceOf(UnionTezosXTZAssetType::class.java)
         assertThat(converted.take.value).isEqualTo(dto.take.assetValue)
         assertThat(converted.salt).isEqualTo(dto.salt.toString())
         assertThat(converted.fill).isEqualTo(dto.fill)
-        assertThat(converted.startedAt).isEqualTo(dto.startAt?.let { it.toInstant() })
-        assertThat(converted.endedAt).isEqualTo(dto.endAt?.let { it.toInstant() })
+        assertThat(converted.startedAt).isEqualTo(dto.startAt?.toInstant())
+        assertThat(converted.endedAt).isEqualTo(dto.endAt?.toInstant())
         assertThat(converted.cancelled).isEqualTo(dto.cancelled)
         assertThat(converted.createdAt).isEqualTo(dto.createdAt.toInstant())
         assertThat(converted.lastUpdatedAt).isEqualTo(dto.lastUpdatedAt.toInstant())

@@ -14,7 +14,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.test.data.randomSudoSwapAmmDataV1Dto
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -60,7 +60,7 @@ class UnionInternalOrderEventHandlerTest {
 
     @Test
     fun `regular order update`() = runBlocking<Unit> {
-        val order = randomUnionSellOrderDto()
+        val order = randomUnionSellOrder()
         val marks = stubEventMark()
 
         coEvery { enrichmentOrderService.getById(order.id) } returns order
@@ -73,7 +73,7 @@ class UnionInternalOrderEventHandlerTest {
 
     @Test
     fun `regular order update - failed`() = runBlocking<Unit> {
-        val order = randomUnionSellOrderDto()
+        val order = randomUnionSellOrder()
         val marks = stubEventMark()
 
         coEvery { enrichmentOrderService.getById(order.id) } throws NullPointerException()
@@ -88,7 +88,7 @@ class UnionInternalOrderEventHandlerTest {
     @ValueSource(strings = ["INCLUDED", "EXCLUDED"])
     fun `pool order internal event`(actionString: String) = runBlocking<Unit> {
         val action = PoolItemAction.valueOf(actionString)
-        val order = randomUnionSellOrderDto()
+        val order = randomUnionSellOrder()
         val itemId = randomEthItemId()
         val marks = stubEventMark()
         coEvery { orderEventService.updatePoolOrderPerItem(order, itemId, action, marks) } returns Unit
@@ -101,7 +101,7 @@ class UnionInternalOrderEventHandlerTest {
     @Test
     fun `pool order internal event - failed`() = runBlocking<Unit> {
         val action = PoolItemAction.INCLUDED
-        val order = randomUnionSellOrderDto()
+        val order = randomUnionSellOrder()
         val itemId = randomEthItemId()
         val marks = stubEventMark()
 
@@ -115,7 +115,7 @@ class UnionInternalOrderEventHandlerTest {
 
     @Test
     fun `pool order update`() = runBlocking<Unit> {
-        val order = randomUnionSellOrderDto().copy(data = randomSudoSwapAmmDataV1Dto())
+        val order = randomUnionSellOrder().copy(data = randomSudoSwapAmmDataV1Dto())
         val marks = stubEventMark()
 
         val itemId1 = ShortItemId(randomEthItemId())
@@ -137,7 +137,7 @@ class UnionInternalOrderEventHandlerTest {
 
     @Test
     fun `pool nft update`() = runBlocking<Unit> {
-        val order = randomUnionSellOrderDto().copy(data = randomSudoSwapAmmDataV1Dto())
+        val order = randomUnionSellOrder().copy(data = randomSudoSwapAmmDataV1Dto())
         val marks = stubEventMark()
 
         val itemId1 = ShortItemId(randomEthItemId())

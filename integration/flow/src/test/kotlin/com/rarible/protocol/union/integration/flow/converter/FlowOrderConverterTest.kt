@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.integration.flow.converter
 
+import com.rarible.protocol.union.core.model.UnionFlowAssetTypeFt
+import com.rarible.protocol.union.core.model.UnionFlowAssetTypeNft
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
-import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowV1OrderDto
@@ -10,7 +10,6 @@ import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 
 class FlowOrderConverterTest {
 
@@ -39,10 +38,10 @@ class FlowOrderConverterTest {
         assertThat(converted.maker.value).isEqualTo(dto.maker)
         assertThat(converted.taker?.value).isEqualTo(dto.taker)
         assertThat(converted.make.value).isEqualTo(dto.make.value)
-        val makeType = converted.make.type as FlowAssetTypeNftDto
+        val makeType = converted.make.type as UnionFlowAssetTypeNft
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         assertThat(converted.take.value).isEqualTo(dto.take.value)
-        val takeType = converted.take.type as FlowAssetTypeFtDto
+        val takeType = converted.take.type as UnionFlowAssetTypeFt
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
 
         val data = converted.data as FlowOrderDataV1Dto

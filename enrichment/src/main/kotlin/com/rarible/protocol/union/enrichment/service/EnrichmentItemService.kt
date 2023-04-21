@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.service.ItemService
@@ -12,7 +13,6 @@ import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
@@ -103,7 +103,7 @@ class EnrichmentItemService(
     suspend fun enrichItem(
         shortItem: ShortItem?,
         item: UnionItem? = null,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
+        orders: Map<OrderIdDto, UnionOrder> = emptyMap(),
         auctions: Map<AuctionIdDto, AuctionDto> = emptyMap(),
         metaPipeline: ItemMetaPipeline
     ) = coroutineScope {
@@ -137,7 +137,7 @@ class EnrichmentItemService(
             shortItem = shortItem,
             // replacing inner IPFS urls with public urls
             meta = contentMetaService.exposePublicUrls(trimmedMeta),
-            orders = bestOrders,
+            orders = enrichmentOrderService.enrich(bestOrders),
             auctions = auctionsData.await(),
             customCollection = customCollectionResolver.resolveCustomCollection(resolvedItem.id)
         )

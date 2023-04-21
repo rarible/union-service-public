@@ -2,7 +2,7 @@ package com.rarible.protocol.union.integration.immutablex.client
 
 import com.rarible.protocol.union.dto.parser.IdParser
 import java.math.BigInteger
-import java.util.*
+import java.util.Arrays
 
 object TokenIdDecoder {
 

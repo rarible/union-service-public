@@ -2,33 +2,31 @@ package com.rarible.protocol.union.enrichment.service.query.order
 
 import com.rarible.core.common.flatMapAsync
 import com.rarible.core.common.mapAsync
-import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.core.continuation.UnionOrderContinuation
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
-import com.rarible.protocol.union.dto.OrdersDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
-import com.rarible.protocol.union.dto.continuation.OrderContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgPaging
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.dto.continuation.page.Paging
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -36,18 +34,14 @@ class OrderApiMergeService(
     private val router: BlockchainRouter<OrderService>
 ) : OrderQueryService {
 
-    companion object {
+    private val logger = LoggerFactory.getLogger(javaClass)
 
-        private val logger by Logger()
-        private val empty = OrdersDto(null, emptyList())
-    }
-
-    suspend fun getOrderById(id: String): OrderDto {
+    suspend fun getOrderById(id: String): UnionOrder {
         val orderId = IdParser.parseOrderId(id)
         return router.getService(orderId.blockchain).getOrderById(orderId.value)
     }
 
-    suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> {
+    suspend fun getByIds(ids: List<OrderIdDto>): List<UnionOrder> {
         logger.info(
             "Getting {} orders by IDs: first 100 [{}]",
             ids.size, ids.take(100).map { "${it.blockchain}:${it.value}" }
@@ -59,7 +53,7 @@ class OrderApiMergeService(
         }
     }
 
-    suspend fun getByIds(orderIdsDto: OrderIdsDto): List<OrderDto> {
+    suspend fun getByIds(orderIdsDto: OrderIdsDto): List<UnionOrder> {
         val ids = orderIdsDto.ids
             .map { IdParser.parseOrderId(it) }
 
@@ -74,7 +68,7 @@ class OrderApiMergeService(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         val safeSize = PageSize.ORDER.limit(size)
         val blockchain = itemId.blockchain
 
@@ -89,15 +83,15 @@ class OrderApiMergeService(
                 "Incompatible blockchain groups specified in getSellOrdersByItem: itemId={}, origin={}, maker={}",
                 itemId.fullId(), origin, maker
             )
-            return empty
+            return Slice.empty()
         }
 
         val currencyAssetTypes = router.getService(blockchain)
             .getSellCurrencies(itemId.value)
-            .map { it.ext.currencyAddress() }
+            .map { it.currencyId()!! }
 
         if (currencyAssetTypes.isEmpty()) {
-            return empty
+            return Slice.empty()
         }
 
         val currencySlices = getMultiCurrencyOrdersForItem(
@@ -116,11 +110,11 @@ class OrderApiMergeService(
         }
 
         // Here we're sorting orders using price evaluated in USD (DESC)
-        val slice = ArgPaging(
-            OrderContinuation.BySellPriceUsdAndIdAsc,
+        return ArgPaging(
+            UnionOrderContinuation.BySellPriceUsdAndIdAsc,
             currencySlices
         ).getSlice(safeSize)
-        return toDto(slice)
+
     }
 
     override suspend fun getOrdersAll(
@@ -129,10 +123,10 @@ class OrderApiMergeService(
         size: Int?,
         sort: OrderSortDto?,
         statuses: List<OrderStatusDto>?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         val safeSize = PageSize.ORDER.limit(size)
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map(BlockchainDto::name)
-        val slices: List<ArgSlice<OrderDto>> =
+        val slices: List<ArgSlice<UnionOrder>> =
             getOrdersByBlockchains(continuation, evaluatedBlockchains) { blockchain, cont ->
                 val blockDto = BlockchainDto.valueOf(blockchain)
                 router.getService(blockDto).getOrdersAll(cont, safeSize, sort, statuses)
@@ -144,7 +138,7 @@ class OrderApiMergeService(
                 "Slice(size={}, continuation={})",
             blockchains, continuation, size, slice.entities.size, slice.continuation
         )
-        return toDto(slice)
+        return slice
     }
 
     override suspend fun getAllSync(
@@ -152,7 +146,7 @@ class OrderApiMergeService(
         continuation: String?,
         size: Int?,
         sort: SyncSortDto?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         val safeSize = PageSize.ORDER.limit(size)
         val result = router.getService(blockchain).getAllSync(continuation, safeSize, sort)
         logger.info(
@@ -161,7 +155,7 @@ class OrderApiMergeService(
                 "Slice(size={}, continuation={})",
             blockchain, continuation, size, result.entities.size, result.continuation
         )
-        return toDto(result)
+        return result
     }
 
     override suspend fun getOrderBidsByItem(
@@ -174,7 +168,7 @@ class OrderApiMergeService(
         end: Long?,
         continuation: String?,
         size: Int?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         val safeSize = PageSize.ORDER.limit(size)
 
         val makerBlockchainGroups = maker?.let { list -> list.map { it.blockchainGroup } } ?: emptyList()
@@ -192,15 +186,15 @@ class OrderApiMergeService(
                 "Incompatible blockchain groups specified in getOrderBidsByItem: itemId={}, origin={}, makers={}",
                 itemId.fullId(), origin, maker?.map { it.fullId() }
             )
-            return empty
+            return Slice.empty()
         }
 
         val currencyContracts = router.getService(blockchain)
             .getBidCurrencies(itemId.value)
-            .map { it.ext.currencyAddress() }
+            .map { it.currencyId()!! }
 
         if (currencyContracts.isEmpty()) {
-            return empty
+            return Slice.empty()
         }
 
         val currencySlices = getMultiCurrencyOrdersForItem(
@@ -221,12 +215,10 @@ class OrderApiMergeService(
         }
 
         // Here we're sorting orders using price evaluated in USD (DESC)
-        val slice = ArgPaging(
-            OrderContinuation.ByBidPriceUsdAndIdDesc,
+        return ArgPaging(
+            UnionOrderContinuation.ByBidPriceUsdAndIdDesc,
             currencySlices
         ).getSlice(safeSize)
-
-        return toDto(slice)
     }
 
     override suspend fun getOrderBidsByMaker(
@@ -239,7 +231,7 @@ class OrderApiMergeService(
         end: Long?,
         continuation: String?,
         size: Int?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         val safeSize = PageSize.ORDER.limit(size)
         val makerBlockchainGroups = makers.map { it.blockchainGroup }.toSet()
         val originAddress = safeAddress(origin)
@@ -249,7 +241,7 @@ class OrderApiMergeService(
                 "Incompatible blockchain groups specified in getOrderBidsByMaker: origin={}, maker={}",
                 origin, makers.map { it.fullId() }
             )
-            return empty
+            return Slice.empty()
         }
 
         val blockchainSlices = router.executeForAll(filter.exclude(makerBlockchainGroups)) {
@@ -267,7 +259,7 @@ class OrderApiMergeService(
         }
 
         val combinedSlice = Paging(
-            OrderContinuation.ByLastUpdatedAndIdDesc,
+            UnionOrderContinuation.ByLastUpdatedAndIdDesc,
             blockchainSlices.flatMap { it.entities }
         ).getSlice(safeSize)
 
@@ -279,7 +271,7 @@ class OrderApiMergeService(
             combinedSlice.entities.size, combinedSlice.continuation
         )
 
-        return toDto(combinedSlice)
+        return combinedSlice
     }
 
     override suspend fun getSellOrders(
@@ -288,7 +280,7 @@ class OrderApiMergeService(
         origin: String?,
         continuation: String?,
         size: Int?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         val safeSize = PageSize.ORDER.limit(size)
         val originAddress = safeAddress(origin)
         val filter = BlockchainFilter(blockchains)
@@ -300,7 +292,7 @@ class OrderApiMergeService(
         }
 
         val combinedSlice = Paging(
-            OrderContinuation.ByLastUpdatedAndIdDesc,
+            UnionOrderContinuation.ByLastUpdatedAndIdDesc,
             blockchainPages.flatMap { it.entities }
         ).getSlice(safeSize)
 
@@ -310,7 +302,7 @@ class OrderApiMergeService(
             combinedSlice.entities.size, combinedSlice.continuation, blockchainPages.map { it.entities.size }
         )
 
-        return toDto(combinedSlice)
+        return combinedSlice
     }
 
     override suspend fun getSellOrdersByMaker(
@@ -321,7 +313,7 @@ class OrderApiMergeService(
         continuation: String?,
         size: Int?,
         status: List<OrderStatusDto>?
-    ): OrdersDto {
+    ): Slice<UnionOrder> {
         val safeSize = PageSize.ORDER.limit(size)
         val makerBlockchainGroups = makers.map { it.blockchainGroup }.toSet()
         val originAddress = safeAddress(origin)
@@ -332,7 +324,7 @@ class OrderApiMergeService(
                 "Incompatible blockchain groups specified in getSellOrdersByMaker: origin={}, makers={}",
                 origin, makers.map { it.fullId() }
             )
-            return empty
+            return Slice.empty()
         }
 
         val blockchainSlices = router.executeForAll(filter.exclude(makerBlockchainGroups)) {
@@ -348,7 +340,7 @@ class OrderApiMergeService(
         }
 
         val combinedSlice = Paging(
-            OrderContinuation.ByLastUpdatedAndIdDesc,
+            UnionOrderContinuation.ByLastUpdatedAndIdDesc,
             blockchainSlices.flatMap { it.entities }
         ).getSlice(safeSize)
 
@@ -365,15 +357,14 @@ class OrderApiMergeService(
             combinedSlice.entities.size,
             combinedSlice.continuation
         )
-
-        return toDto(combinedSlice)
+        return combinedSlice
     }
 
     private suspend fun getMultiCurrencyOrdersForItem(
         continuation: String?,
         currencyAssetTypes: List<String>,
-        clientCall: suspend (currency: String, continuation: String?) -> Slice<OrderDto>
-    ): List<ArgSlice<OrderDto>> {
+        clientCall: suspend (currency: String, continuation: String?) -> Slice<UnionOrder>
+    ): List<ArgSlice<UnionOrder>> {
 
         val currentContinuation = CombinedContinuation.parse(continuation)
 
@@ -392,8 +383,8 @@ class OrderApiMergeService(
     private suspend fun getOrdersByBlockchains(
         continuation: String?,
         blockchains: Collection<String>,
-        clientCall: suspend (blockchain: String, continuation: String?) -> Slice<OrderDto>
-    ): List<ArgSlice<OrderDto>> {
+        clientCall: suspend (blockchain: String, continuation: String?) -> Slice<UnionOrder>
+    ): List<ArgSlice<UnionOrder>> {
         val currentContinuation = CombinedContinuation.parse(continuation)
         return blockchains.mapAsync { blockchain ->
             val blockchainContinuation = currentContinuation.continuations[blockchain]
@@ -408,8 +399,8 @@ class OrderApiMergeService(
     }
 
     private fun continuationFactory(sort: OrderSortDto?) = when (sort) {
-        OrderSortDto.LAST_UPDATE_ASC -> OrderContinuation.ByLastUpdatedAndIdAsc
-        OrderSortDto.LAST_UPDATE_DESC, null -> OrderContinuation.ByLastUpdatedAndIdDesc
+        OrderSortDto.LAST_UPDATE_ASC -> UnionOrderContinuation.ByLastUpdatedAndIdAsc
+        OrderSortDto.LAST_UPDATE_DESC, null -> UnionOrderContinuation.ByLastUpdatedAndIdDesc
     }
 
     private fun safeAddress(id: String?): UnionAddress? {
@@ -423,12 +414,5 @@ class OrderApiMergeService(
     private fun ensureSameBlockchain(blockchains: Collection<BlockchainGroupDto?>): Boolean {
         val set = blockchains.filterNotNull().toSet()
         return set.size == 1
-    }
-
-    private fun toDto(slice: Slice<OrderDto>): OrdersDto {
-        return OrdersDto(
-            continuation = slice.continuation,
-            orders = slice.entities
-        )
     }
 }

@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.service
 
 import com.rarible.dipdup.client.core.model.TezosPlatform
-import com.rarible.protocol.union.dto.AssetTypeDto
-import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.core.model.UnionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.SyncSortDto
@@ -11,11 +11,11 @@ import java.math.BigInteger
 
 interface DipdupOrderService {
 
-    suspend fun getOrderById(id: String): OrderDto {
+    suspend fun getOrderById(id: String): UnionOrder {
         TODO("Not implemented")
     }
 
-    suspend fun getOrderByIds(id: List<String>): List<OrderDto> {
+    suspend fun getOrderByIds(id: List<String>): List<UnionOrder> {
         TODO("Not implemented")
     }
 
@@ -25,7 +25,7 @@ interface DipdupOrderService {
         isBid: Boolean? = null,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         TODO("Not implemented")
     }
 
@@ -33,7 +33,7 @@ interface DipdupOrderService {
         continuation: String?,
         limit: Int,
         sort: SyncSortDto?
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         TODO("Not implemented")
     }
 
@@ -42,7 +42,7 @@ interface DipdupOrderService {
         platforms: List<TezosPlatform>,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         TODO("Not implemented")
     }
 
@@ -52,7 +52,7 @@ interface DipdupOrderService {
         platforms: List<TezosPlatform>,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         TODO("Not implemented")
     }
 
@@ -65,7 +65,7 @@ interface DipdupOrderService {
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         TODO("Not implemented")
     }
 
@@ -75,15 +75,15 @@ interface DipdupOrderService {
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         TODO("Not implemented")
     }
 
-    suspend fun getSellOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<AssetTypeDto> {
+    suspend fun getSellOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<UnionAssetType> {
         TODO("Not implemented")
     }
 
-    suspend fun getSellOrderCurrenciesByCollection(contract: String): List<AssetTypeDto> {
+    suspend fun getSellOrderCurrenciesByCollection(contract: String): List<UnionAssetType> {
         TODO("Not implemented")
     }
 
@@ -96,7 +96,7 @@ interface DipdupOrderService {
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         TODO("Not implemented")
     }
 
@@ -106,15 +106,15 @@ interface DipdupOrderService {
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
-    ): Slice<OrderDto> {
+    ): Slice<UnionOrder> {
         TODO("Not implemented")
     }
 
-    suspend fun getBidOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<AssetTypeDto> {
+    suspend fun getBidOrderCurrenciesByItem(contract: String, tokenId: BigInteger): List<UnionAssetType> {
         TODO("Not implemented")
     }
 
-    suspend fun getBidOrderCurrenciesByCollection(contract: String): List<AssetTypeDto> {
+    suspend fun getBidOrderCurrenciesByCollection(contract: String): List<UnionAssetType> {
         TODO("Not implemented")
     }
 }

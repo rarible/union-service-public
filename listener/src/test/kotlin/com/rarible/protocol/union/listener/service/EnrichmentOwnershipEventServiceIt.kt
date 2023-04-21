@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
@@ -108,7 +109,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         assertThat(saved.bestSellOrder).isEqualTo(shortOwnership.bestSellOrder)
 
         val expected = OwnershipDtoConverter.convert(unionOwnership)
-            .copy(bestSellOrder = unionBestSell)
+            .copy(bestSellOrder = OrderDtoConverter.convert(unionBestSell))
 
         // We don't have related item in enrichment DB, so expect only Ownership update
         waitAssert {
@@ -180,7 +181,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         assertThat(saved.bestSellOrder).isEqualTo(ShortOrderConverter.convert(unionBestSell))
 
         val expected = OwnershipDtoConverter.convert(unionOwnership)
-            .copy(bestSellOrder = unionBestSell)
+            .copy(bestSellOrder = OrderDtoConverter.convert(unionBestSell))
 
         // Since Item doesn't exist in Enrichment DB, we expect only Ownership event
         waitAssert {

@@ -6,13 +6,13 @@ import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionAuctionOwnershipWrapper
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.AuctionDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -111,7 +111,7 @@ class EnrichmentOwnershipService(
     suspend fun enrichOwnership(
         short: ShortOwnership,
         ownership: UnionOwnership? = null,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap()
+        orders: Map<OrderIdDto, UnionOrder> = emptyMap()
     ) = coroutineScope {
         val fetchedOwnership = async { ownership ?: fetch(short.id) }
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
@@ -119,7 +119,11 @@ class EnrichmentOwnershipService(
             orders = orders
         )
 
-        OwnershipDtoConverter.convert(fetchedOwnership.await(), short, bestOrders)
+        OwnershipDtoConverter.convert(
+            ownership = fetchedOwnership.await(),
+            shortOwnership = short,
+            orders = enrichmentOrderService.enrich(bestOrders)
+        )
     }
 
     suspend fun enrich(unionOwnerships: List<UnionAuctionOwnershipWrapper>): List<OwnershipDto> {
@@ -129,7 +133,7 @@ class EnrichmentOwnershipService(
 
         val existingEnrichedOwnerships: Map<OwnershipIdDto, ShortOwnership> =
             findAll(unionOwnerships.mapNotNull { it.ownership?.let { ShortOwnershipId(it.id) } })
-            .associateBy { it.id.toDto() }
+                .associateBy { it.id.toDto() }
 
         // Looking for full orders for existing ownerships in order-indexer
         val shortOrderIds = existingEnrichedOwnerships.values

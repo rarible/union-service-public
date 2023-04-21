@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.event.OutgoingCollectionEventListener
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.service.AuctionContractService
@@ -22,13 +23,11 @@ import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
-import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderProviderFactory
@@ -47,8 +46,6 @@ import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
-import com.rarible.protocol.union.enrichment.util.bidCurrencyId
-import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -110,7 +107,7 @@ class EnrichmentRefreshService(
         itemId: ItemIdDto,
         sellCurrencies: List<String>,
         itemAuctions: Collection<AuctionDto>,
-        ammOrders: List<OrderDto>
+        ammOrders: List<UnionOrder>
     ) {
         // Skipping ownerships of Auctions
         val shortItemId = ShortItemId(itemId)
@@ -222,7 +219,7 @@ class EnrichmentRefreshService(
         sellCurrencies: List<String>,
         bidCurrencies: List<String>,
         auctions: Collection<AuctionDto>,
-        ammOrders: List<OrderDto>
+        ammOrders: List<UnionOrder>
     ) = coroutineScope {
         val shortItemId = ShortItemId(itemId)
 
@@ -232,7 +229,7 @@ class EnrichmentRefreshService(
         }
         val itemDtoDeferred = async { itemService.fetch(shortItemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
-        val poolSellOrders = ammOrders.map { ShortPoolOrder(it.sellCurrencyId, ShortOrderConverter.convert(it)) }
+        val poolSellOrders = ammOrders.map { ShortPoolOrder(it.getSellCurrencyId(), ShortOrderConverter.convert(it)) }
 
         // Reset pool sell orders before recalculations in order to avoid unnecessary getOrder() calls
         val shortItem = itemService.getOrEmpty(shortItemId).copy(poolSellOrders = emptyList())
@@ -292,7 +289,7 @@ class EnrichmentRefreshService(
         ownership: UnionOwnership,
         currencies: List<String>,
         auctions: Map<OwnershipIdDto, AuctionDto>,
-        ammOrders: OrderDto?,
+        ammOrders: UnionOrder?,
         origins: List<String>
     ) = coroutineScope {
         val shortOwnershipId = ShortOwnershipId(ownership.id)
@@ -328,7 +325,7 @@ class EnrichmentRefreshService(
     private suspend fun notifyUpdate(
         short: ShortOwnership,
         ownership: UnionOwnership,
-        orders: Map<OrderIdDto, OrderDto> = emptyMap(),
+        orders: Map<OrderIdDto, UnionOrder> = emptyMap(),
         auctions: Map<OwnershipIdDto, AuctionDto> = emptyMap()
     ): OwnershipEventDto {
         val enriched = ownershipService.enrichOwnership(short, ownership, orders)
@@ -387,7 +384,7 @@ class EnrichmentRefreshService(
             .getBidCurrencies(itemId.value)
 
         logger.info("Found Bid currencies for Item [{}] : {}", itemId.fullId(), result)
-        return result.map { it.ext.currencyAddress() }
+        return result.map { it.currencyId()!! }
     }
 
     private suspend fun getSellCurrencies(itemId: ItemIdDto): List<String> {
@@ -395,7 +392,7 @@ class EnrichmentRefreshService(
             .getSellCurrencies(itemId.value)
 
         logger.info("Found Sell currencies for Item [{}] : {}", itemId.fullId(), result)
-        return result.map { it.ext.currencyAddress() }
+        return result.map { it.currencyId()!! }
 
     }
 
@@ -404,7 +401,7 @@ class EnrichmentRefreshService(
             .getBidCurrenciesByCollection(collectionId.value)
 
         logger.info("Found Bid currencies for Collection [{}] : {}", collectionId.fullId(), result)
-        return result.map { it.ext.currencyAddress() }
+        return result.map { it.currencyId()!! }
     }
 
     private suspend fun getSellCurrencies(collectionId: CollectionIdDto): List<String> {
@@ -412,10 +409,10 @@ class EnrichmentRefreshService(
             .getSellCurrenciesByCollection(collectionId.value)
 
         logger.info("Found Sell currencies for Collection [{}] : {}", collectionId.fullId(), result)
-        return result.map { it.ext.currencyAddress() }
+        return result.map { it.currencyId()!! }
     }
 
-    private suspend fun getAmmOrders(itemId: ItemIdDto): List<OrderDto> {
+    private suspend fun getAmmOrders(itemId: ItemIdDto): List<UnionOrder> {
         if (!ff.enablePoolOrders) {
             return emptyList()
         }
@@ -432,9 +429,9 @@ class EnrichmentRefreshService(
         bidCurrencies: List<String>,
         bestSellProviderFactory: BestOrderProviderFactory<*>,
         bestBidProviderFactory: BestOrderProviderFactory<*>,
-        poolOrders: List<OrderDto>
+        poolOrders: List<UnionOrder>
     ) = coroutineScope {
-        val poolOrdersByCurrency = poolOrders.groupBy { it.sellCurrencyId }
+        val poolOrdersByCurrency = poolOrders.groupBy { it.getSellCurrencyId() }
         val originsDeferred = origins.map { origin ->
             async {
                 getBestOrders(
@@ -474,7 +471,7 @@ class EnrichmentRefreshService(
         bidCurrencies: List<String>,
         bestSellProviderFactory: BestOrderProviderFactory<*>,
         bestBidProviderFactory: BestOrderProviderFactory<*>,
-        poolOrders: Map<String, List<OrderDto>>
+        poolOrders: Map<String, List<UnionOrder>>
     ) = coroutineScope {
         // Looking for best sell orders
         val bestSellOrdersDtoDeferred = sellCurrencies.map { currencyId ->
@@ -491,10 +488,10 @@ class EnrichmentRefreshService(
         val bestSellOrdersDto = bestSellOrdersDtoDeferred.awaitAll().filterNotNull()
         val bestBidOrdersDto = bestBidOrdersDtoDeferred.awaitAll().filterNotNull()
 
-        val bestSellOrders = bestSellOrdersDto.associateBy { it.sellCurrencyId }
+        val bestSellOrders = bestSellOrdersDto.associateBy { it.getSellCurrencyId() }
             .mapValues { ShortOrderConverter.convert(it.value) }
 
-        val bestBidOrders = bestBidOrdersDto.associateBy { it.bidCurrencyId }
+        val bestBidOrders = bestBidOrdersDto.associateBy { it.getBidCurrencyId() }
             .mapValues { ShortOrderConverter.convert(it.value) }
 
         val all = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
@@ -513,9 +510,9 @@ class EnrichmentRefreshService(
 
     private fun chooseBestOrder(
         currencyId: String,
-        directOrder: OrderDto?,
-        poolOrders: Map<String, List<OrderDto>>
-    ): OrderDto? {
+        directOrder: UnionOrder?,
+        poolOrders: Map<String, List<UnionOrder>>
+    ): UnionOrder? {
         val poolOrdersByCurrency = poolOrders[currencyId] ?: emptyList()
         val allOrders = directOrder?.let { poolOrdersByCurrency + it } ?: poolOrdersByCurrency
         val mappedAllOrders = allOrders.associateBy { it.id.value }
@@ -525,13 +522,13 @@ class EnrichmentRefreshService(
     }
 
     data class OriginBestOrders(
-        val all: Map<OrderIdDto, OrderDto>,
+        val all: Map<OrderIdDto, UnionOrder>,
         val global: OriginOrders,
         val originOrders: Set<OriginOrders>
     )
 
     data class BestOrders(
-        val all: Map<OrderIdDto, OrderDto>,
+        val all: Map<OrderIdDto, UnionOrder>,
         val orders: OriginOrders
     )
 

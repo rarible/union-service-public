@@ -396,3 +396,9 @@ data class UnionL2WithdrawalActivity(
     override fun itemId() = this.itemId
 
 }
+
+data class UnionOrderActivityMatchSideDto(
+    val maker: UnionAddress,
+    val hash: String? = null,
+    val asset: UnionAsset
+)

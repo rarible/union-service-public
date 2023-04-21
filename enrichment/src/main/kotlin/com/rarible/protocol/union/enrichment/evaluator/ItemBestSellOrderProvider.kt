@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.enrichment.evaluator
 
-import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
@@ -15,7 +15,7 @@ class ItemBestSellOrderProvider(
     override val entityId: String = item.id.toString()
     override val entityType: Class<ShortItem> get() = ShortItem::class.java
 
-    override suspend fun fetch(currencyId: String): OrderDto? {
+    override suspend fun fetch(currencyId: String): UnionOrder? {
         val directOrder = enrichmentOrderService.getBestSell(item.id, currencyId, origin)
         // For origin orders we don't need to check pool orders
         if (origin != null || !enablePoolOrders) {

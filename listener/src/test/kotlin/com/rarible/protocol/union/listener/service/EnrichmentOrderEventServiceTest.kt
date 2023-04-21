@@ -4,16 +4,19 @@ import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.model.PoolItemAction
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionEthCollectionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.stubEventMark
-import com.rarible.protocol.union.dto.AssetDto
-import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
+import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
+import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
@@ -34,8 +37,12 @@ class EnrichmentOrderEventServiceTest {
     private val enrichmentItemEventService: EnrichmentItemEventService = mockk()
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService = mockk()
     private val enrichmentCollectionEventService: EnrichmentCollectionEventService = mockk()
+    private val enrichmentOrderService: EnrichmentOrderService = mockk() {
+        coEvery { enrich(any<UnionOrder>()) } coAnswers { OrderDtoConverter.convert(it.invocation.args[0] as UnionOrder) }
+    }
 
     private val orderEventService = EnrichmentOrderEventService(
+        enrichmentOrderService,
         enrichmentItemEventService,
         enrichmentOwnershipEventService,
         enrichmentCollectionEventService,
@@ -77,9 +84,9 @@ class EnrichmentOrderEventServiceTest {
         val shortItemId = ShortItemId(itemId)
         val shortOwnershipId = ShortOwnershipId(ownershipId)
 
-        val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value).copy(
-            make = EthConverter.convertLegacy(randomEthAssetErc1155(itemId), itemId.blockchain),
-            take = EthConverter.convertLegacy(randomEthAssetErc20(), itemId.blockchain)
+        val order = randomUnionSellOrder(itemId, ownershipId.owner.value).copy(
+            make = EthConverter.convert(randomEthAssetErc1155(itemId), itemId.blockchain),
+            take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
         )
 
         orderEventService.updateOrder(order, stubEventMark())
@@ -99,9 +106,9 @@ class EnrichmentOrderEventServiceTest {
         val shortItemId = ShortItemId(itemId)
         val shortOwnershipId = ShortOwnershipId(ownershipId)
 
-        val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value).copy(
-            make = EthConverter.convertLegacy(randomEthAssetErc1155(itemId), itemId.blockchain),
-            take = EthConverter.convertLegacy(randomEthAssetErc20(), itemId.blockchain)
+        val order = randomUnionSellOrder(itemId, ownershipId.owner.value).copy(
+            make = EthConverter.convert(randomEthAssetErc1155(itemId), itemId.blockchain),
+            take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
         )
 
         orderEventService.updatePoolOrderPerItem(order, itemId, PoolItemAction.INCLUDED, stubEventMark())
@@ -123,9 +130,9 @@ class EnrichmentOrderEventServiceTest {
         val collectionId = randomEthCollectionId()
         val assetAddress = ContractAddressConverter.convert(itemId.blockchain, collectionId.value)
 
-        val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value).copy(
-            make = AssetDto(EthCollectionAssetTypeDto(assetAddress), randomBigDecimal()),
-            take = EthConverter.convertLegacy(randomEthAssetErc20(), itemId.blockchain)
+        val order = randomUnionSellOrder(itemId, ownershipId.owner.value).copy(
+            make = UnionAsset(UnionEthCollectionAssetType(assetAddress), randomBigDecimal()),
+            take = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain)
         )
 
         orderEventService.updateOrder(order, stubEventMark())
@@ -146,9 +153,9 @@ class EnrichmentOrderEventServiceTest {
         val collectionId = randomEthCollectionId()
         val assetAddress = ContractAddressConverter.convert(itemId.blockchain, collectionId.value)
 
-        val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value).copy(
-            make = EthConverter.convertLegacy(randomEthAssetErc20(), itemId.blockchain),
-            take = AssetDto(EthCollectionAssetTypeDto(assetAddress), randomBigDecimal())
+        val order = randomUnionSellOrder(itemId, ownershipId.owner.value).copy(
+            make = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain),
+            take = UnionAsset(UnionEthCollectionAssetType(assetAddress), randomBigDecimal())
         )
 
         orderEventService.updateOrder(order, stubEventMark())
@@ -167,9 +174,9 @@ class EnrichmentOrderEventServiceTest {
 
         val shortItemId = ShortItemId(itemId)
 
-        val order = randomUnionSellOrderDto(itemId, ownershipId.owner.value).copy(
-            make = EthConverter.convertLegacy(randomEthAssetErc20(), itemId.blockchain),
-            take = EthConverter.convertLegacy(randomEthAssetErc721(itemId), itemId.blockchain)
+        val order = randomUnionSellOrder(itemId, ownershipId.owner.value).copy(
+            make = EthConverter.convert(randomEthAssetErc20(), itemId.blockchain),
+            take = EthConverter.convert(randomEthAssetErc721(itemId), itemId.blockchain)
         )
 
         orderEventService.updateOrder(order, stubEventMark())

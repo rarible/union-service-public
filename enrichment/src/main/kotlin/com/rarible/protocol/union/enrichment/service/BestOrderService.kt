@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.CurrencyService
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderComparator
 import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderOwner
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderComparator
@@ -21,9 +21,6 @@ import com.rarible.protocol.union.enrichment.model.OriginOrders
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
-import com.rarible.protocol.union.enrichment.util.bidCurrencyId
-import com.rarible.protocol.union.enrichment.util.origins
-import com.rarible.protocol.union.enrichment.util.sellCurrencyId
 import org.springframework.stereotype.Component
 import java.util.TreeMap
 
@@ -37,7 +34,7 @@ class BestOrderService(
     //---------------------- Ownership ----------------------//
     suspend fun updateBestSellOrder(
         ownership: ShortOwnership,
-        order: OrderDto,
+        order: UnionOrder,
         origins: List<String>
     ): ShortOwnership {
         val providerFactory = OwnershipBestSellOrderProvider.Factory(ownership.id, enrichmentOrderService)
@@ -55,7 +52,7 @@ class BestOrderService(
     //---------------------- Collection ---------------------//
     suspend fun updateBestSellOrder(
         collection: EnrichmentCollection,
-        order: OrderDto,
+        order: UnionOrder,
         origins: List<String>
     ): EnrichmentCollection {
         val providerFactory = CollectionBestSellOrderProvider.Factory(collection.id, enrichmentOrderService)
@@ -66,7 +63,7 @@ class BestOrderService(
 
     suspend fun updateBestBidOrder(
         collection: EnrichmentCollection,
-        order: OrderDto,
+        order: UnionOrder,
         origins: List<String>
     ): EnrichmentCollection {
         val providerFactory = CollectionBestBidOrderProvider.Factory(collection.id, enrichmentOrderService)
@@ -84,7 +81,7 @@ class BestOrderService(
     //------------------------- Item ------------------------//
     suspend fun updateBestSellOrder(
         item: ShortItem,
-        order: OrderDto,
+        order: UnionOrder,
         origins: List<String>
     ): ShortItem {
         val providerFactory = ItemBestSellOrderProvider.Factory(item, enrichmentOrderService, ff.enablePoolOrders)
@@ -94,7 +91,7 @@ class BestOrderService(
     }
 
     suspend fun updateBestBidOrder(
-        item: ShortItem, order: OrderDto,
+        item: ShortItem, order: UnionOrder,
         origins: List<String>
     ): ShortItem {
         val providerFactory = ItemBestBidOrderProvider.Factory(item, enrichmentOrderService)
@@ -145,7 +142,7 @@ class BestOrderService(
 
     private suspend fun updateCurrencyOrders(
         orders: Map<String, ShortOrder>,
-        updated: OrderDto,
+        updated: UnionOrder,
         evaluator: BestOrderEvaluator
     ): Map<String, ShortOrder> {
         val currencyId = evaluator.currencyId
@@ -163,9 +160,9 @@ class BestOrderService(
     private suspend fun <T : BestSellOrderOwner<T>> updateBestSell(
         bestSellOwner: T,
         bestOrderProvider: BestOrderProvider<*>,
-        order: OrderDto
+        order: UnionOrder
     ): T {
-        val currencyId = order.sellCurrencyId
+        val currencyId = order.getSellCurrencyId()
         val evaluator = BestOrderEvaluator(
             comparator = BestSellOrderComparator,
             provider = bestOrderProvider,
@@ -181,9 +178,9 @@ class BestOrderService(
     private suspend fun <T : BestBidOrderOwner<T>> updateBestBid(
         bestBidOwner: T,
         bestOrderProvider: BestOrderProvider<*>,
-        order: OrderDto
+        order: UnionOrder
     ): T {
-        val currencyId = order.bidCurrencyId
+        val currencyId = order.getBidCurrencyId()!!
         val evaluator = BestOrderEvaluator(
             comparator = BestBidOrderComparator,
             provider = bestOrderProvider,
@@ -212,7 +209,7 @@ class BestOrderService(
 
     private suspend fun updateOriginSell(
         originOrders: Set<OriginOrders>,
-        order: OrderDto,
+        order: UnionOrder,
         origins: List<String>,
         providerFactory: BestOrderProviderFactory<*>
     ): Set<OriginOrders> {
@@ -223,7 +220,7 @@ class BestOrderService(
 
     private suspend fun updateOriginBid(
         originOrders: Set<OriginOrders>,
-        order: OrderDto,
+        order: UnionOrder,
         origins: List<String>,
         providerFactory: BestOrderProviderFactory<*>
     ): Set<OriginOrders> {
@@ -234,7 +231,7 @@ class BestOrderService(
 
     private suspend fun updateOriginOrders(
         originOrders: Set<OriginOrders>,
-        order: OrderDto,
+        order: UnionOrder,
         origins: List<String>,
         providerFactory: BestOrderProviderFactory<*>,
         update: suspend (
@@ -242,7 +239,7 @@ class BestOrderService(
             bestOrderProvider: BestOrderProvider<*>
         ) -> OriginOrders
     ): Set<OriginOrders> {
-        val orderOrigins = order.origins
+        val orderOrigins = order.getOrigins()
         val matchedOrigins = origins.intersect(orderOrigins)
         if (matchedOrigins.isEmpty()) {
             return originOrders // Just to avoid unnecessary garbage production

@@ -22,7 +22,7 @@ import com.rarible.protocol.union.dto.ext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.TestFactory
-import randomOrder
+import randomOrderDto
 import java.math.BigDecimal
 import java.math.BigInteger
 
@@ -69,13 +69,13 @@ class EsItemConverterTest {
                     content = emptyList(),
                     restrictions = emptyList()
                 ),
-                bestSellOrder = randomOrder(
+                bestSellOrder = randomOrderDto(
                     take = AssetDto(
                         EthErc20AssetTypeDto(ContractAddress(BlockchainDto.ETHEREUM, randomString())),
                         BigDecimal("10")
                     )
                 ),
-                bestBidOrder = randomOrder(
+                bestBidOrder = randomOrderDto(
                     make = AssetDto(
                         EthErc20AssetTypeDto(ContractAddress(BlockchainDto.ETHEREUM, randomString())),
                         BigDecimal("5")

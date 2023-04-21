@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionItemChangeEvent
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.service.ReconciliationEventService
@@ -20,7 +21,6 @@ import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.evaluator.OrderPoolEvaluator
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
@@ -29,7 +29,6 @@ import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
-import com.rarible.protocol.union.enrichment.util.setStatusByAction
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -85,7 +84,7 @@ class EnrichmentItemEventService(
     // can use this full Order to avoid unnecessary getOrderById calls
     suspend fun onOwnershipUpdated(
         ownershipId: ShortOwnershipId,
-        order: OrderDto?,
+        order: UnionOrder?,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
@@ -234,7 +233,7 @@ class EnrichmentItemEventService(
 
     suspend fun onItemBestSellOrderUpdated(
         itemId: ShortItemId,
-        order: OrderDto,
+        order: UnionOrder,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
@@ -246,7 +245,7 @@ class EnrichmentItemEventService(
 
     suspend fun onItemBestBidOrderUpdated(
         itemId: ShortItemId,
-        order: OrderDto,
+        order: UnionOrder,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
@@ -258,7 +257,7 @@ class EnrichmentItemEventService(
 
     suspend fun onPoolOrderUpdated(
         itemId: ShortItemId,
-        order: OrderDto,
+        order: UnionOrder,
         action: PoolItemAction,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
@@ -294,7 +293,7 @@ class EnrichmentItemEventService(
 
     private suspend fun updateOrder(
         itemId: ShortItemId,
-        order: OrderDto,
+        order: UnionOrder,
         notificationEnabled: Boolean,
         eventTimeMarks: UnionEventTimeMarks?,
         orderUpdateAction: suspend (item: ShortItem) -> ShortItem
@@ -349,7 +348,7 @@ class EnrichmentItemEventService(
         updated: ShortItem,
         notificationEnabled: Boolean,
         item: UnionItem? = null,
-        order: OrderDto? = null,
+        order: UnionOrder? = null,
         auction: AuctionDto? = null,
         eventTimeMarks: UnionEventTimeMarks?
     ) {
@@ -366,7 +365,7 @@ class EnrichmentItemEventService(
     private suspend fun buildUpdateEvent(
         short: ShortItem,
         item: UnionItem? = null,
-        order: OrderDto? = null,
+        order: UnionOrder? = null,
         auction: AuctionDto? = null,
         eventTimeMarks: UnionEventTimeMarks? = null
     ): ItemUpdateEventDto {

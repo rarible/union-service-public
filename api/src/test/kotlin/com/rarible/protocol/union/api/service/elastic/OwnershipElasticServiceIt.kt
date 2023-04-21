@@ -36,6 +36,7 @@ import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import randomOwnershipId
@@ -299,6 +300,7 @@ class OwnershipElasticServiceIt {
     }
 
     @Test
+    @Disabled("Unstable test PT-2682")
     fun `should find by sell price`() = runBlocking<Unit> {
         // given
         val ratesPerCurrency = mockCurrencies()

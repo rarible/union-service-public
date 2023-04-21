@@ -1,16 +1,16 @@
 package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.model.PoolItemAction
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.enrichment.test.data.randomSudoSwapAmmDataV1Dto
-import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrderDto
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.worker.config.ReconciliationProperties
 import com.rarible.protocol.union.worker.config.WorkerProperties
@@ -88,7 +88,7 @@ class ReconciliationPoolOrderJobTest {
         }
     }
 
-    private fun mockGetOrdersAll(continuation: String?, result: Slice<OrderDto>) {
+    private fun mockGetOrdersAll(continuation: String?, result: Slice<UnionOrder>) {
         coEvery {
             orderService.getAmmOrdersAll(
                 eq(listOf(OrderStatusDto.ACTIVE)),
@@ -98,11 +98,11 @@ class ReconciliationPoolOrderJobTest {
         } returns result
     }
 
-    private fun mockPagination(continuation: String?, count: Int): Slice<OrderDto> {
-        val orders = ArrayList<OrderDto>()
+    private fun mockPagination(continuation: String?, count: Int): Slice<UnionOrder> {
+        val orders = ArrayList<UnionOrder>()
         for (i in 1..count) {
             orders.add(
-                randomUnionSellOrderDto().copy(
+                randomUnionSellOrder().copy(
                     data = randomSudoSwapAmmDataV1Dto()
                 )
             )
@@ -110,8 +110,8 @@ class ReconciliationPoolOrderJobTest {
         return Slice(continuation, orders)
     }
 
-    private fun mockPoolItemIds(orders: List<OrderDto>): Map<ItemIdDto, OrderDto> {
-        val result = HashMap<ItemIdDto, OrderDto>()
+    private fun mockPoolItemIds(orders: List<UnionOrder>): Map<ItemIdDto, UnionOrder> {
+        val result = HashMap<ItemIdDto, UnionOrder>()
         orders.forEach { order ->
             val itemIds = (0..5).map { randomEthItemId() }
             itemIds.forEach { result[it] = order }

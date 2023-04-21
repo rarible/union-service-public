@@ -375,7 +375,7 @@ object ActivityDtoConverter {
         )
     }
 
-    fun convert(
+    private fun convert(
         source: UnionAsset,
         data: EnrichmentActivityData
     ): AssetDto {
@@ -385,7 +385,7 @@ object ActivityDtoConverter {
         )
     }
 
-    fun convert(
+    private fun convert(
         source: UnionAssetType,
         data: EnrichmentActivityData
     ): AssetTypeDto {

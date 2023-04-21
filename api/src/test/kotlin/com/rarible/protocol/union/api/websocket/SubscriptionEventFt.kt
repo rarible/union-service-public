@@ -6,10 +6,10 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.model.UnionEthErc721AssetType
 import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemSubscriptionEventDto
@@ -21,6 +21,7 @@ import com.rarible.protocol.union.dto.OrdersByItemSubscriptionRequestDto
 import com.rarible.protocol.union.dto.SubscriptionActionDto
 import com.rarible.protocol.union.dto.SubscriptionEventDto
 import com.rarible.protocol.union.dto.SubscriptionRequestDto
+import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import kotlinx.coroutines.Dispatchers
@@ -108,12 +109,13 @@ internal class SubscriptionEventFt : AbstractIntegrationTest() {
     @Test
     fun `order event websocket test by itemId`() = runWithKafka {
         val order = ethOrderConverter.convert(randomEthV2OrderDto(), BlockchainDto.ETHEREUM)
-        val type = (order.make.type as EthErc721AssetTypeDto)
+        val type = (order.make.type as UnionEthErc721AssetType)
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, type.contract.value, type.tokenId)
         println("order is $order")
         println("itemId is $itemId")
+        val dto = OrderDtoConverter.convert(order)
 
-        val orderEventDto = OrderUpdateEventDto(order.id, "eventId", stubEventMark().toDto(), order)
+        val orderEventDto = OrderUpdateEventDto(order.id, "eventId", stubEventMark().toDto(), dto)
 
         webSocketRequests.tryEmitNext(listOf(OrdersByItemSubscriptionRequestDto(SubscriptionActionDto.SUBSCRIBE, itemId)))
 

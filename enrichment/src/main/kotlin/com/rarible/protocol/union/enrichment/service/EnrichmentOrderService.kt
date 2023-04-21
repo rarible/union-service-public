@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.flatMapAsync
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.OrderDto
@@ -10,7 +11,8 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
+import com.rarible.protocol.union.enrichment.converter.data.EnrichmentOrderData
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
@@ -22,12 +24,36 @@ import org.springframework.stereotype.Component
 
 @Component
 class EnrichmentOrderService(
-    private val orderServiceRouter: BlockchainRouter<OrderService>
+    private val orderServiceRouter: BlockchainRouter<OrderService>,
+    private val customCollectionResolver: CustomCollectionResolver
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentOrderService::class.java)
 
-    suspend fun getById(id: OrderIdDto): OrderDto? {
+    suspend fun enrich(order: UnionOrder): OrderDto {
+        // We expect here only one of them != null
+        val itemId = order.getItemId()
+        val collectionId = order.getAssetCollectionId()
+
+        val customCollection = when {
+            itemId != null -> customCollectionResolver.resolveCustomCollection(itemId)
+            collectionId != null -> customCollectionResolver.resolveCustomCollection(collectionId)
+            else -> null
+        }
+
+        val data = EnrichmentOrderData(customCollection)
+        return OrderDtoConverter.convert(order, data)
+    }
+
+    suspend fun enrich(orders: List<UnionOrder>): List<OrderDto> {
+        return orders.map { enrich(it) }
+    }
+
+    suspend fun enrich(orders: Map<OrderIdDto, UnionOrder>): Map<OrderIdDto, OrderDto> {
+        return orders.mapValues { enrich(it.value) }
+    }
+
+    suspend fun getById(id: OrderIdDto): UnionOrder? {
         return try {
             orderServiceRouter.getService(id.blockchain).getOrderById(id.value)
         } catch (e: WebClientResponseProxyException) {
@@ -36,7 +62,7 @@ class EnrichmentOrderService(
         }
     }
 
-    suspend fun getByIds(ids: List<OrderIdDto>): List<OrderDto> {
+    suspend fun getByIds(ids: List<OrderIdDto>): List<UnionOrder> {
         return ids
             .groupBy { it.blockchain }
             .flatMapAsync { (blockchain, ids) ->
@@ -47,8 +73,8 @@ class EnrichmentOrderService(
 
     suspend fun fetchMissingOrders(
         existing: List<ShortOrder?>,
-        orders: Map<OrderIdDto, OrderDto>
-    ): Map<OrderIdDto, OrderDto> {
+        orders: Map<OrderIdDto, UnionOrder>
+    ): Map<OrderIdDto, UnionOrder> {
         val notNull = existing.filterNotNull()
             .map { it.dtoId }
             .filterNot { orders.containsKey(it) }
@@ -64,7 +90,7 @@ class EnrichmentOrderService(
         return fetched.associateBy { it.id } + orders
     }
 
-    suspend fun getBestSell(id: ShortItemId, currencyId: String, origin: String?): OrderDto? {
+    suspend fun getBestSell(id: ShortItemId, currencyId: String, origin: String?): UnionOrder? {
         val result = withPreferredRariblePlatform(
             id, OrderType.SELL, OrderFilters.ITEM
         ) { platform, continuation, size ->
@@ -82,7 +108,7 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestSell(id: ShortOwnershipId, currencyId: String, origin: String?): OrderDto? {
+    suspend fun getBestSell(id: ShortOwnershipId, currencyId: String, origin: String?): UnionOrder? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform(
             id, OrderType.SELL, OrderFilters.ITEM
@@ -105,7 +131,7 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestSell(collectionId: EnrichmentCollectionId, currencyId: String, origin: String?): OrderDto? {
+    suspend fun getBestSell(collectionId: EnrichmentCollectionId, currencyId: String, origin: String?): UnionOrder? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform(
             collectionId, OrderType.SELL, OrderFilters.COLLECTION
@@ -127,7 +153,7 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestBid(id: ShortItemId, currencyId: String, origin: String?): OrderDto? {
+    suspend fun getBestBid(id: ShortItemId, currencyId: String, origin: String?): UnionOrder? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform(
             id, OrderType.BID, OrderFilters.ITEM
@@ -152,7 +178,7 @@ class EnrichmentOrderService(
         return result
     }
 
-    suspend fun getBestBid(id: EnrichmentCollectionId, currencyId: String, origin: String?): OrderDto? {
+    suspend fun getBestBid(id: EnrichmentCollectionId, currencyId: String, origin: String?): UnionOrder? {
         val now = nowMillis()
         val result = withPreferredRariblePlatform(
             id, OrderType.BID, OrderFilters.COLLECTION
@@ -180,8 +206,8 @@ class EnrichmentOrderService(
         id: Any,
         orderType: OrderType,
         filter: OrderFilters = OrderFilters.ALL,
-        clientCall: suspend (platform: PlatformDto?, continuation: String?, size: Int) -> Slice<OrderDto>
-    ): OrderDto? {
+        clientCall: suspend (platform: PlatformDto?, continuation: String?, size: Int) -> Slice<UnionOrder>
+    ): UnionOrder? {
         val bestOfAll =
             ignoreFilledTaker(id = id, clientCall = clientCall, platform = null, orderType = orderType, filter = filter)
         if (bestOfAll == null || bestOfAll.platform == PlatformDto.RARIBLE) {
@@ -205,12 +231,12 @@ class EnrichmentOrderService(
 
     suspend fun ignoreFilledTaker(
         id: Any,
-        clientCall: suspend (platform: PlatformDto?, continuation: String?, size: Int) -> Slice<OrderDto>,
+        clientCall: suspend (platform: PlatformDto?, continuation: String?, size: Int) -> Slice<UnionOrder>,
         platform: PlatformDto?,
         orderType: OrderType,
         filter: OrderFilters
-    ): OrderDto? {
-        var order: OrderDto?
+    ): UnionOrder? {
+        var order: UnionOrder?
         var continuation: String? = null
         var attempts = 0
 
@@ -241,25 +267,25 @@ class EnrichmentOrderService(
         return order
     }
 
-    private fun orderFilter(order: OrderDto, filter: OrderFilters, orderType: OrderType): Boolean {
+    private fun orderFilter(order: UnionOrder, filter: OrderFilters, orderType: OrderType): Boolean {
         return when (orderType) {
             OrderType.BID -> orderBidFilter(order, filter)
             OrderType.SELL -> orderSellFilter(order, filter)
         }
     }
 
-    private fun orderBidFilter(order: OrderDto, filter: OrderFilters): Boolean {
+    private fun orderBidFilter(order: UnionOrder, filter: OrderFilters): Boolean {
         return when (filter) {
-            OrderFilters.COLLECTION -> order.take.type.ext.isCollectionAsset
-            OrderFilters.ITEM -> !order.take.type.ext.isCollectionAsset
+            OrderFilters.COLLECTION -> order.take.type.isCollectionAsset()
+            OrderFilters.ITEM -> !order.take.type.isCollectionAsset()
             OrderFilters.ALL -> true
         }
     }
 
-    private fun orderSellFilter(order: OrderDto, filter: OrderFilters): Boolean {
+    private fun orderSellFilter(order: UnionOrder, filter: OrderFilters): Boolean {
         return when (filter) {
-            OrderFilters.COLLECTION -> order.make.type.ext.isCollectionAsset
-            OrderFilters.ITEM -> !order.make.type.ext.isCollectionAsset
+            OrderFilters.COLLECTION -> order.make.type.isCollectionAsset()
+            OrderFilters.ITEM -> !order.make.type.isCollectionAsset()
             OrderFilters.ALL -> true
         }
     }

@@ -7,6 +7,7 @@ import com.rarible.protocol.dto.FlowOrderStatusDto
 import com.rarible.protocol.dto.FlowOrderUpdateEventDto
 import com.rarible.protocol.dto.FlowOrdersPaginationDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.core.service.CurrencyService
@@ -14,7 +15,6 @@ import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.FlowOrderDataV1Dto
-import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -31,7 +31,7 @@ class FlowOrderConverter(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun convert(order: FlowOrderDto, blockchain: BlockchainDto): OrderDto {
+    suspend fun convert(order: FlowOrderDto, blockchain: BlockchainDto): UnionOrder {
         try {
             return convertInternal(order, blockchain)
         } catch (e: Exception) {
@@ -40,10 +40,10 @@ class FlowOrderConverter(
         }
     }
 
-    private suspend fun convertInternal(order: FlowOrderDto, blockchain: BlockchainDto): OrderDto {
+    private suspend fun convertInternal(order: FlowOrderDto, blockchain: BlockchainDto): UnionOrder {
 
-        val make = FlowConverter.convertLegacy(order.make, blockchain)
-        val take = FlowConverter.convertLegacy(order.take, blockchain)
+        val make = FlowConverter.convert(order.make, blockchain)
+        val take = FlowConverter.convert(order.take, blockchain)
 
         val maker = UnionAddressConverter.convert(blockchain, order.maker)
         val taker = order.taker?.let { UnionAddressConverter.convert(blockchain, it) }
@@ -58,9 +58,9 @@ class FlowOrderConverter(
 
         val status = convert(order.status!!)
 
-        return OrderDto(
+        return UnionOrder(
             id = OrderIdDto(blockchain, order.id.toString()),
-            platform = when(order.platform) {
+            platform = when (order.platform) {
                 FlowOrderPlatformDto.OTHER -> PlatformDto.OTHER
                 else -> PlatformDto.RARIBLE
             },
@@ -86,7 +86,7 @@ class FlowOrderConverter(
         )
     }
 
-    suspend fun convert(order: FlowOrdersPaginationDto, blockchain: BlockchainDto): Slice<OrderDto> {
+    suspend fun convert(order: FlowOrdersPaginationDto, blockchain: BlockchainDto): Slice<UnionOrder> {
         return Slice(
             entities = order.items.map { this.convert(it, blockchain) },
             continuation = order.continuation
@@ -117,13 +117,13 @@ class FlowOrderConverter(
         }
     }
 
-    fun convert(source: FlowOrderStatusDto): OrderStatusDto {
+    fun convert(source: FlowOrderStatusDto): UnionOrder.Status {
         return when (source) {
-            FlowOrderStatusDto.ACTIVE -> OrderStatusDto.ACTIVE
-            FlowOrderStatusDto.FILLED -> OrderStatusDto.FILLED
-            FlowOrderStatusDto.HISTORICAL -> OrderStatusDto.HISTORICAL
-            FlowOrderStatusDto.INACTIVE -> OrderStatusDto.INACTIVE
-            FlowOrderStatusDto.CANCELLED -> OrderStatusDto.CANCELLED
+            FlowOrderStatusDto.ACTIVE -> UnionOrder.Status.ACTIVE
+            FlowOrderStatusDto.FILLED -> UnionOrder.Status.FILLED
+            FlowOrderStatusDto.HISTORICAL -> UnionOrder.Status.HISTORICAL
+            FlowOrderStatusDto.INACTIVE -> UnionOrder.Status.INACTIVE
+            FlowOrderStatusDto.CANCELLED -> UnionOrder.Status.CANCELLED
         }
     }
 
