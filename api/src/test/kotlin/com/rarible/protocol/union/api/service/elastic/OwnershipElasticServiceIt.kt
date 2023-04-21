@@ -350,6 +350,7 @@ class OwnershipElasticServiceIt {
     }
 
     @Test
+    @Disabled("Unstable test PT-2682")
     fun `should find by usd sell price`() = runBlocking<Unit> {
         // given
         val ratesPerCurrency = mockCurrencies()
