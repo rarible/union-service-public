@@ -68,33 +68,33 @@ data class UnionOrder(
         CANCELLED
     }
 
-    fun getItemId(): ItemIdDto? = when {
+    fun itemId(): ItemIdDto? = when {
         (make.type.isNft() && !make.type.isCollectionAsset()) -> make.type.itemId()
         (take.type.isNft() && !take.type.isCollectionAsset()) -> take.type.itemId()
         else -> null
     }
 
-    fun getAssetCollectionId(): CollectionIdDto? = when {
+    fun assetCollectionId(): CollectionIdDto? = when {
         (make.type.isCollectionAsset()) -> make.type.collectionId()
         (take.type.isCollectionAsset()) -> take.type.collectionId()
         else -> null
     }
 
-    fun getSellCurrencyId(): String {
+    fun sellCurrencyId(): String {
         if (!take.type.isCurrency()) {
             throw IllegalArgumentException("Not a currency AssetType: $this")
         }
         return take.type.currencyId()!!
     }
 
-    fun getBidCurrencyId(): String {
+    fun bidCurrencyId(): String {
         if (!make.type.isCurrency()) {
             throw IllegalArgumentException("Not a currency AssetType: $this")
         }
         return make.type.currencyId()!!
     }
 
-    fun getOrigins(): Set<String> {
+    fun origins(): Set<String> {
         val data = this.data
         return when (data) {
             is EthOrderDataLegacyDto -> emptyList()
@@ -140,7 +140,7 @@ data class UnionOrder(
         }
     }
 
-    fun setStatusByAction(action: PoolItemAction): UnionOrder {
+    fun applyStatusByAction(action: PoolItemAction): UnionOrder {
         return when (action) {
             PoolItemAction.INCLUDED, PoolItemAction.UPDATED -> this
             // If item excluded from the pool, we can consider this order as FILLED to recalculate actual best sell

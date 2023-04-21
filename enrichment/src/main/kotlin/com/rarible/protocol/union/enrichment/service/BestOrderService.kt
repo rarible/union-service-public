@@ -162,7 +162,7 @@ class BestOrderService(
         bestOrderProvider: BestOrderProvider<*>,
         order: UnionOrder
     ): T {
-        val currencyId = order.getSellCurrencyId()
+        val currencyId = order.sellCurrencyId()
         val evaluator = BestOrderEvaluator(
             comparator = BestSellOrderComparator,
             provider = bestOrderProvider,
@@ -180,7 +180,7 @@ class BestOrderService(
         bestOrderProvider: BestOrderProvider<*>,
         order: UnionOrder
     ): T {
-        val currencyId = order.getBidCurrencyId()!!
+        val currencyId = order.bidCurrencyId()!!
         val evaluator = BestOrderEvaluator(
             comparator = BestBidOrderComparator,
             provider = bestOrderProvider,
@@ -239,7 +239,7 @@ class BestOrderService(
             bestOrderProvider: BestOrderProvider<*>
         ) -> OriginOrders
     ): Set<OriginOrders> {
-        val orderOrigins = order.getOrigins()
+        val orderOrigins = order.origins()
         val matchedOrigins = origins.intersect(orderOrigins)
         if (matchedOrigins.isEmpty()) {
             return originOrders // Just to avoid unnecessary garbage production

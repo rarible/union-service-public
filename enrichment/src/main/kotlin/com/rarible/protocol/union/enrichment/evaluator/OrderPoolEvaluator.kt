@@ -9,7 +9,7 @@ import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 object OrderPoolEvaluator {
 
     fun updatePoolOrderSet(item: ShortItem, order: UnionOrder, action: PoolItemAction): ShortItem {
-        val updatedOrder = ShortPoolOrder(order.getSellCurrencyId(), ShortOrderConverter.convert(order))
+        val updatedOrder = ShortPoolOrder(order.sellCurrencyId(), ShortOrderConverter.convert(order))
         val poolSellOrders = item.poolSellOrders
         val currentOrder = poolSellOrders.find { match(updatedOrder, it) }
         return when (action) {
@@ -30,7 +30,7 @@ object OrderPoolEvaluator {
     }
 
     fun needUpdateOrder(item: ShortItem, order: UnionOrder, action: PoolItemAction): Boolean {
-        val shortOrder = ShortPoolOrder(order.getSellCurrencyId(), ShortOrderConverter.convert(order))
+        val shortOrder = ShortPoolOrder(order.sellCurrencyId(), ShortOrderConverter.convert(order))
         val poolSellOrders = item.poolSellOrders
         return when (action) {
             PoolItemAction.INCLUDED, PoolItemAction.EXCLUDED -> true

@@ -262,7 +262,7 @@ class EnrichmentItemEventService(
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
-        val hackedOrder = order.setStatusByAction(action)
+        val hackedOrder = order.applyStatusByAction(action)
 
         updateOrder(itemId, hackedOrder, notificationEnabled, eventTimeMarks) { item ->
             val updated = OrderPoolEvaluator.updatePoolOrderSet(item, hackedOrder, action)

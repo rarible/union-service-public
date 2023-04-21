@@ -74,13 +74,13 @@ internal class PriceUpdateJobTest: AbstractIntegrationTest() {
         val shortItem = randomShortItem(itemId).copy(
             bestSellOrder = sellOrder2,
             bestSellOrders = mapOf(
-                unionSellOrder1.getSellCurrencyId() to sellOrder1,
-                unionSellOrder2.getSellCurrencyId() to sellOrder2
+                unionSellOrder1.sellCurrencyId() to sellOrder1,
+                unionSellOrder2.sellCurrencyId() to sellOrder2
             ),
             bestBidOrder = bidOrder2,
             bestBidOrders = mapOf(
-                unionBidOrder1.getBidCurrencyId() to bidOrder1,
-                unionBidOrder2.getBidCurrencyId() to bidOrder2
+                unionBidOrder1.bidCurrencyId() to bidOrder1,
+                unionBidOrder2.bidCurrencyId() to bidOrder2
             ),
             multiCurrency = true,
             lastUpdatedAt = Instant.EPOCH
@@ -113,8 +113,8 @@ internal class PriceUpdateJobTest: AbstractIntegrationTest() {
         val shortOwnership = randomShortOwnership(ownershipId).copy(
             bestSellOrder = sellOrder2,
             bestSellOrders = mapOf(
-                unionSellOrder1.getSellCurrencyId() to sellOrder1,
-                unionSellOrder2.getSellCurrencyId() to sellOrder2
+                unionSellOrder1.sellCurrencyId() to sellOrder1,
+                unionSellOrder2.sellCurrencyId() to sellOrder2
             ),
             multiCurrency = true,
             lastUpdatedAt = Instant.EPOCH

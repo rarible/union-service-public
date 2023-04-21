@@ -89,7 +89,7 @@ class EnrichmentOwnershipEventService(
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
-        val hackedOrder = order.setStatusByAction(action)
+        val hackedOrder = order.applyStatusByAction(action)
         return onOwnershipBestSellOrderUpdated(ownershipId, hackedOrder, eventTimeMarks, notificationEnabled)
     }
 

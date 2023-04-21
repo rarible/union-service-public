@@ -69,12 +69,12 @@ class OrderApiServiceTest {
             UnionEthErc20AssetType(
                 ContractAddressConverter.convert(
                     ethItemId.blockchain,
-                    unionOrder.getBidCurrencyId()
+                    unionOrder.bidCurrencyId()
                 )
             )
         )
 
-        val result = getOrderBidsByItem(ethItemId, "${unionOrder.getBidCurrencyId()}:COMPLETED", 10)
+        val result = getOrderBidsByItem(ethItemId, "${unionOrder.bidCurrencyId()}:COMPLETED", 10)
 
         assertThat(result.continuation).isNull()
         assertThat(result.entities).hasSize(0)

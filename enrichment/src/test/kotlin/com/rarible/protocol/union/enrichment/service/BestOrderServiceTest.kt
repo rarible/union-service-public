@@ -84,7 +84,7 @@ class BestOrderServiceTest {
         )
         val item = randomShortItem(itemId)
             .copy(
-                bestSellOrders = mapOf(current.getSellCurrencyId() to ShortOrderConverter.convert(current)),
+                bestSellOrders = mapOf(current.sellCurrencyId() to ShortOrderConverter.convert(current)),
                 bestSellOrder = ShortOrderConverter.convert(current)
             )
 
@@ -106,7 +106,7 @@ class BestOrderServiceTest {
             makePrice = updated.makePrice!!.plus(BigDecimal.ONE)
         )
         val item = randomShortItem(itemId).copy(
-            bestSellOrders = mapOf(updated.getSellCurrencyId() to ShortOrderConverter.convert(current)),
+            bestSellOrders = mapOf(updated.sellCurrencyId() to ShortOrderConverter.convert(current)),
             bestSellOrder = ShortOrderConverter.convert(current)
         )
 
@@ -128,7 +128,7 @@ class BestOrderServiceTest {
             platform = PlatformDto.CRYPTO_PUNKS
         )
         val item = randomShortItem(itemId).copy(
-            bestSellOrders = mapOf(updated.getSellCurrencyId() to ShortOrderConverter.convert(current)),
+            bestSellOrders = mapOf(updated.sellCurrencyId() to ShortOrderConverter.convert(current)),
             bestSellOrder = ShortOrderConverter.convert(current)
         )
 
@@ -151,7 +151,7 @@ class BestOrderServiceTest {
         )
         val item = randomShortItem(itemId)
             .copy(
-                bestSellOrders = mapOf(updated.getSellCurrencyId() to ShortOrderConverter.convert(current)),
+                bestSellOrders = mapOf(updated.sellCurrencyId() to ShortOrderConverter.convert(current)),
                 bestSellOrder = ShortOrderConverter.convert(current)
             )
 
@@ -171,7 +171,7 @@ class BestOrderServiceTest {
             makePrice = updated.makePrice!!.minus(BigDecimal.ONE)
         )
         val item = randomShortItem(itemId).copy(
-            bestSellOrders = mapOf(updated.getSellCurrencyId() to ShortOrderConverter.convert(current)),
+            bestSellOrders = mapOf(updated.sellCurrencyId() to ShortOrderConverter.convert(current)),
             bestSellOrder = ShortOrderConverter.convert(current)
         )
         val updatedShortItem = bestOrderService.updateBestSellOrder(item, updated, emptyList())
@@ -207,7 +207,7 @@ class BestOrderServiceTest {
         val current = randomUnionSellOrder(itemId).copy(platform = PlatformDto.OPEN_SEA)
         val updated = randomUnionSellOrder(itemId).copy(status = UnionOrder.Status.INACTIVE)
         val item = randomShortItem(itemId).copy(
-            bestSellOrders = mapOf(updated.getSellCurrencyId() to ShortOrderConverter.convert(current)),
+            bestSellOrders = mapOf(updated.sellCurrencyId() to ShortOrderConverter.convert(current)),
             bestSellOrder = ShortOrderConverter.convert(current)
         )
 
@@ -223,7 +223,7 @@ class BestOrderServiceTest {
         val current = randomUnionBidOrder(itemId).copy(takePrice = updated.takePrice!!.minus(BigDecimal.ONE))
         val item = ShortItemConverter.convert(randomUnionItem(itemId))
             .copy(
-                bestBidOrders = mapOf(updated.getBidCurrencyId() to ShortOrderConverter.convert(current)),
+                bestBidOrders = mapOf(updated.bidCurrencyId() to ShortOrderConverter.convert(current)),
                 bestBidOrder = ShortOrderConverter.convert(current)
             )
 
@@ -237,7 +237,7 @@ class BestOrderServiceTest {
     fun `ownership best sell order - updated is dead, current is the same`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val updated = randomUnionSellOrder(itemId).copy(status = UnionOrder.Status.FILLED)
-        val currencyId = updated.getSellCurrencyId()
+        val currencyId = updated.sellCurrencyId()
         val current =
             updated.copy(makePriceUsd = randomBigDecimal(), status = UnionOrder.Status.ACTIVE)
         val fetched = randomUnionSellOrder(itemId)
@@ -274,9 +274,9 @@ class BestOrderServiceTest {
         val current = OriginOrders(
             origin = origin,
             bestSellOrder = shortCurrentSell,
-            bestSellOrders = mapOf(updatedSell.getSellCurrencyId() to shortCurrentSell),
+            bestSellOrders = mapOf(updatedSell.sellCurrencyId() to shortCurrentSell),
             bestBidOrder = shortCurrentBid,
-            bestBidOrders = mapOf(currentBid.getBidCurrencyId() to shortCurrentBid),
+            bestBidOrders = mapOf(currentBid.bidCurrencyId() to shortCurrentBid),
         )
 
         val item = randomShortItem(itemId).copy(originOrders = setOf(current))
@@ -304,7 +304,7 @@ class BestOrderServiceTest {
         val current = OriginOrders(
             origin = origin,
             bestBidOrder = shortCurrentBid,
-            bestBidOrders = mapOf(currentBid.getBidCurrencyId() to shortCurrentBid),
+            bestBidOrders = mapOf(currentBid.bidCurrencyId() to shortCurrentBid),
         )
 
         val item = randomShortItem(randomEthItemId()).copy(originOrders = setOf(current))
@@ -330,7 +330,7 @@ class BestOrderServiceTest {
         val current = OriginOrders(
             origin = origin,
             bestSellOrder = shortCurrentSell,
-            bestSellOrders = mapOf(updatedSell.getSellCurrencyId() to shortCurrentSell)
+            bestSellOrders = mapOf(updatedSell.sellCurrencyId() to shortCurrentSell)
         )
 
         val item = randomShortItem(itemId).copy(originOrders = setOf(current))

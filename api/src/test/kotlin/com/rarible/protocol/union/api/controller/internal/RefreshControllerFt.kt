@@ -96,8 +96,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val unionBestBid = ethOrderConverter.convert(ethBestBid, itemId.blockchain)
         val shortBestBid = ShortOrderConverter.convert(unionBestBid)
 
-        val bidCurrency = unionBestBid.getBidCurrencyId()
-        val sellCurrency = unionBestSell.getSellCurrencyId()
+        val bidCurrency = unionBestBid.bidCurrencyId()
+        val sellCurrency = unionBestSell.sellCurrencyId()
 
         // Amm order should be best sell, but it should not be an origin best sell order
         val ethAmmOrder = ethBestSell.copy(
@@ -182,8 +182,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         assertThat(savedShortItem.bestSellOrder!!.id).isEqualTo(shortAmmOrder.id)
         assertThat(savedShortItem.bestBidOrder!!.id).isEqualTo(shortBestBid.id)
-        assertThat(savedShortItem.bestSellOrders[unionBestSell.getSellCurrencyId()]!!.id).isEqualTo(shortAmmOrder.id)
-        assertThat(savedShortItem.bestBidOrders[unionBestBid.getBidCurrencyId()]!!.id).isEqualTo(shortBestBid.id)
+        assertThat(savedShortItem.bestSellOrders[unionBestSell.sellCurrencyId()]!!.id).isEqualTo(shortAmmOrder.id)
+        assertThat(savedShortItem.bestBidOrders[unionBestBid.bidCurrencyId()]!!.id).isEqualTo(shortBestBid.id)
         assertThat(savedShortItem.auctions).isEqualTo(setOf(auction.id))
         assertThat(savedShortItem.lastSale!!.date).isEqualTo(activity.date)
         assertThat(savedShortItem.poolSellOrders).hasSize(1)
@@ -194,7 +194,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         assertThat(savedShortOwnership.source).isEqualTo(OwnershipSourceDto.MINT)
         assertThat(savedShortOwnership.bestSellOrder!!.id).isEqualTo(shortAmmOrder.id)
-        assertThat(savedShortOwnership.bestSellOrders[unionBestSell.getSellCurrencyId()]!!.id).isEqualTo(shortAmmOrder.id)
+        assertThat(savedShortOwnership.bestSellOrders[unionBestSell.sellCurrencyId()]!!.id).isEqualTo(shortAmmOrder.id)
 
         assertThat(ownershipOriginOrders.bestSellOrder!!.id).isEqualTo(shortOriginBestSell.id)
 
@@ -247,7 +247,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, ethBestSell.take.assetType)
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(
             ethOwnershipId,
-            unionBestSell.getSellCurrencyId(),
+            unionBestSell.sellCurrencyId(),
             ethBestSell
         )
 
@@ -270,7 +270,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         assertThat(savedShortOwnership.source).isEqualTo(OwnershipSourceDto.MINT)
         assertThat(savedShortOwnership.bestSellOrder!!.id).isEqualTo(shortBestSell.id)
-        assertThat(savedShortOwnership.bestSellOrders[unionBestSell.getSellCurrencyId()]!!.id).isEqualTo(shortBestSell.id)
+        assertThat(savedShortOwnership.bestSellOrders[unionBestSell.sellCurrencyId()]!!.id).isEqualTo(shortBestSell.id)
 
         assertThat(reconciled.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
         assertThat(reconciled.auction).isEqualTo(auction)
@@ -336,14 +336,14 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, ethBestSell.take.assetType)
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(
             ethItemId,
-            unionBestSell.getSellCurrencyId(),
+            unionBestSell.sellCurrencyId(),
             ethBestSell
         )
 
         ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, ethBestBid.make.assetType)
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(
             ethItemId,
-            unionBestBid.getBidCurrencyId(),
+            unionBestBid.bidCurrencyId(),
             ethBestBid
         )
         mockLastSellActivity(ethItemId, null)
@@ -465,14 +465,14 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, ethBestSell.take.assetType)
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(
             ethItemId,
-            unionBestSell.getSellCurrencyId(),
+            unionBestSell.sellCurrencyId(),
             ethBestSell
         )
 
         ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, ethBestBid.make.assetType)
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(
             ethItemId,
-            unionBestBid.getBidCurrencyId(),
+            unionBestBid.bidCurrencyId(),
             ethBestBid
         )
         mockLastSellActivity(ethItemId, null)
@@ -550,7 +550,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, ethBestBid.make.assetType)
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(
             ethItemId,
-            unionBestBid.getBidCurrencyId(),
+            unionBestBid.bidCurrencyId(),
             ethBestBid
         )
         mockLastSellActivity(ethItemId, null)
@@ -563,7 +563,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         val savedShortItem = enrichmentItemService.get(shortItem.id)!!
         assertThat(savedShortItem.bestSellOrder!!.id).isEqualTo(shortBestSell.id)
-        assertThat(savedShortItem.bestSellOrders[unionBestSell.getSellCurrencyId()]!!.id).isEqualTo(shortBestSell.id)
+        assertThat(savedShortItem.bestSellOrders[unionBestSell.sellCurrencyId()]!!.id).isEqualTo(shortBestSell.id)
 
 
         coVerify {

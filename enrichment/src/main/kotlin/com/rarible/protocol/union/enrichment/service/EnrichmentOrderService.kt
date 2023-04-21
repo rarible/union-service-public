@@ -32,8 +32,8 @@ class EnrichmentOrderService(
 
     suspend fun enrich(order: UnionOrder): OrderDto {
         // We expect here only one of them != null
-        val itemId = order.getItemId()
-        val collectionId = order.getAssetCollectionId()
+        val itemId = order.itemId()
+        val collectionId = order.assetCollectionId()
 
         val customCollection = when {
             itemId != null -> customCollectionResolver.resolveCustomCollection(itemId)

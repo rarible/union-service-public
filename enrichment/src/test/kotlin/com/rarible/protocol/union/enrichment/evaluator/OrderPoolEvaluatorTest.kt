@@ -31,7 +31,7 @@ class OrderPoolEvaluatorTest {
         val currentShortOrder = shortOrder.copy(makePrice = randomBigDecimal())
 
         val item = randomShortItem().copy(
-            poolSellOrders = listOf(ShortPoolOrder(order.getSellCurrencyId(), currentShortOrder))
+            poolSellOrders = listOf(ShortPoolOrder(order.sellCurrencyId(), currentShortOrder))
         )
 
         val updated = OrderPoolEvaluator.updatePoolOrderSet(item, order, PoolItemAction.INCLUDED)
@@ -47,7 +47,7 @@ class OrderPoolEvaluatorTest {
         val shortOrder = ShortOrderConverter.convert(order)
 
         val item = randomShortItem().copy(
-            poolSellOrders = listOf(ShortPoolOrder(order.getSellCurrencyId(), shortOrder))
+            poolSellOrders = listOf(ShortPoolOrder(order.sellCurrencyId(), shortOrder))
         )
 
         val updated = OrderPoolEvaluator.updatePoolOrderSet(item, order, PoolItemAction.EXCLUDED)
@@ -61,7 +61,7 @@ class OrderPoolEvaluatorTest {
         val shortOrder = ShortOrderConverter.convert(order)
 
         val item = randomShortItem().copy(
-            poolSellOrders = listOf(ShortPoolOrder(order.getSellCurrencyId(), shortOrder))
+            poolSellOrders = listOf(ShortPoolOrder(order.sellCurrencyId(), shortOrder))
         )
 
         val updated = OrderPoolEvaluator.updatePoolOrderSet(item, randomUnionSellOrder(), PoolItemAction.EXCLUDED)

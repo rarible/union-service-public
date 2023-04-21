@@ -279,7 +279,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         val bestSellOrder = randomUnionSellOrder().copy(platform = PlatformDto.SUDOSWAP)
         val shortOrder = ShortOrderConverter.convert(bestSellOrder)
-        val poolShortOrder = ShortPoolOrder(bestSellOrder.getSellCurrencyId(), shortOrder)
+        val poolShortOrder = ShortPoolOrder(bestSellOrder.sellCurrencyId(), shortOrder)
 
         itemEventService.onPoolOrderUpdated(
             shortItem.id,
@@ -301,7 +301,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     fun `on best sell order updated - item removed from the pool`() = runBlocking<Unit> {
         val bestSellOrder = randomUnionSellOrder().copy(platform = PlatformDto.SUDOSWAP)
         val shortOrder = ShortOrderConverter.convert(bestSellOrder)
-        val poolShortOrder = ShortPoolOrder(bestSellOrder.getSellCurrencyId(), shortOrder)
+        val poolShortOrder = ShortPoolOrder(bestSellOrder.sellCurrencyId(), shortOrder)
 
         val itemId = randomEthItemId()
         val shortItem = randomShortItem(itemId).copy(
@@ -311,7 +311,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         )
         itemService.save(shortItem)
 
-        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.getSellCurrencyId())
+        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.sellCurrencyId())
 
         itemEventService.onPoolOrderUpdated(
             shortItem.id,
@@ -339,7 +339,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         )
         itemService.save(shortItem)
 
-        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.getSellCurrencyId())
+        ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, bestSellOrder.sellCurrencyId())
 
         itemEventService.onPoolOrderUpdated(
             shortItem.id,
@@ -369,7 +369,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
         ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
-        ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(itemId, unionBestBid.getBidCurrencyId())
+        ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(itemId, unionBestBid.bidCurrencyId())
 
         itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid, stubEventMark())
 

@@ -247,7 +247,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
                 continuation,
                 size,
                 emptyList(),
-                unionOrder.getBidCurrencyId(),
+                unionOrder.bidCurrencyId(),
                 null,
                 null
             )
@@ -257,7 +257,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testEthereumOrderApi.getCurrenciesByBidOrdersOfItem(contract, tokenId.toString())
         } returns OrderCurrenciesDto(
             OrderCurrenciesDto.OrderType.BID,
-            listOf(Erc20AssetTypeDto(Address.apply(unionOrder.getBidCurrencyId())))
+            listOf(Erc20AssetTypeDto(Address.apply(unionOrder.bidCurrencyId())))
         ).toMono()
 
         val orders = orderControllerClient.getOrderBidsByItem(
@@ -357,7 +357,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
                 continuation,
                 size,
                 emptyList(),
-                unionOrder.getSellCurrencyId()
+                unionOrder.sellCurrencyId()
             )
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
@@ -365,7 +365,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             testEthereumOrderApi.getCurrenciesBySellOrdersOfItem(contract, tokenId.toString())
         } returns OrderCurrenciesDto(
             OrderCurrenciesDto.OrderType.SELL,
-            listOf(Erc20AssetTypeDto(Address.apply(unionOrder.getSellCurrencyId())))
+            listOf(Erc20AssetTypeDto(Address.apply(unionOrder.sellCurrencyId())))
         ).toMono()
 
         val orders = orderControllerClient.getSellOrdersByItem(

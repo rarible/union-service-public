@@ -229,7 +229,7 @@ class EnrichmentRefreshService(
         }
         val itemDtoDeferred = async { itemService.fetch(shortItemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
-        val poolSellOrders = ammOrders.map { ShortPoolOrder(it.getSellCurrencyId(), ShortOrderConverter.convert(it)) }
+        val poolSellOrders = ammOrders.map { ShortPoolOrder(it.sellCurrencyId(), ShortOrderConverter.convert(it)) }
 
         // Reset pool sell orders before recalculations in order to avoid unnecessary getOrder() calls
         val shortItem = itemService.getOrEmpty(shortItemId).copy(poolSellOrders = emptyList())
@@ -431,7 +431,7 @@ class EnrichmentRefreshService(
         bestBidProviderFactory: BestOrderProviderFactory<*>,
         poolOrders: List<UnionOrder>
     ) = coroutineScope {
-        val poolOrdersByCurrency = poolOrders.groupBy { it.getSellCurrencyId() }
+        val poolOrdersByCurrency = poolOrders.groupBy { it.sellCurrencyId() }
         val originsDeferred = origins.map { origin ->
             async {
                 getBestOrders(
@@ -488,10 +488,10 @@ class EnrichmentRefreshService(
         val bestSellOrdersDto = bestSellOrdersDtoDeferred.awaitAll().filterNotNull()
         val bestBidOrdersDto = bestBidOrdersDtoDeferred.awaitAll().filterNotNull()
 
-        val bestSellOrders = bestSellOrdersDto.associateBy { it.getSellCurrencyId() }
+        val bestSellOrders = bestSellOrdersDto.associateBy { it.sellCurrencyId() }
             .mapValues { ShortOrderConverter.convert(it.value) }
 
-        val bestBidOrders = bestBidOrdersDto.associateBy { it.getBidCurrencyId() }
+        val bestBidOrders = bestBidOrdersDto.associateBy { it.bidCurrencyId() }
             .mapValues { ShortOrderConverter.convert(it.value) }
 
         val all = (bestSellOrdersDto + bestBidOrdersDto).associateBy { it.id }
