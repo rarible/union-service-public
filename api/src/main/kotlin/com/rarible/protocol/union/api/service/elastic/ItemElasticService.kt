@@ -93,18 +93,24 @@ class ItemElasticService(
             return ItemsDto()
         }
 
+        val start = System.currentTimeMillis()
+
         val filter = itemFilterConverter.getItemsByCollection(collection.fullId(), continuation)
         logger.info("Built filter: $filter")
         val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, safeSize)
         val items = getItems(queryResult.entities, null)
         val cursor = queryResult.continuation
 
+        val searchTime = System.currentTimeMillis()
+
+        val enriched = itemEnrichService.enrich(items)
+
+        val end = System.currentTimeMillis()
         logger.info(
             "Response for ES getItemsByCollection(collection={}, continuation={}, size={}):" +
-                " Page(size={}, continuation={})",
-            collection, continuation, size, items.size, cursor
+                " Page(size={}, continuation={}) Performance(searchTime={}, enrichTime={})",
+            collection, continuation, size, items.size, cursor, searchTime - start, end - searchTime
         )
-        val enriched = itemEnrichService.enrich(items)
 
         return ItemsDto(
             items = enriched,
