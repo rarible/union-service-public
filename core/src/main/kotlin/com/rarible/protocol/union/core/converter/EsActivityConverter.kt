@@ -136,6 +136,7 @@ class EsActivityConverter(
             userFrom = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -151,6 +152,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -166,6 +168,7 @@ class EsActivityConverter(
             userTo = source.owner.value,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -190,6 +193,7 @@ class EsActivityConverter(
             volumeUsd = volumeInfo.volumeUsd,
             volumeSell = volumeInfo.volumeSell,
             volumeNative = volumeInfo.volumeNative,
+            activityDto = source,
         )
     }
 
@@ -205,6 +209,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -220,6 +225,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -239,6 +245,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -258,6 +265,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -277,6 +285,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -292,6 +301,7 @@ class EsActivityConverter(
             userTo = source.bid.buyer.value,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -311,6 +321,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -330,6 +341,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -349,6 +361,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -364,6 +377,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -383,6 +397,7 @@ class EsActivityConverter(
             userTo = source.user.value,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 
@@ -398,6 +413,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = source,
         )
     }
 }

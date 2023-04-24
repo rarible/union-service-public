@@ -4,10 +4,11 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.flatMapAsync
 import com.rarible.protocol.union.api.metrics.ElasticMetricsFactory
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.model.UnionActivity
-import com.rarible.protocol.union.core.model.elastic.EsActivityCursor.Companion.fromActivityLite
-import com.rarible.protocol.union.core.model.elastic.EsActivityLite
+import com.rarible.protocol.union.core.model.elastic.EsActivity
+import com.rarible.protocol.union.core.model.elastic.EsActivityCursor.Companion.fromActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -55,6 +56,7 @@ class ActivityElasticService(
     private val enrichmentActivityService: EnrichmentActivityService,
     private val router: BlockchainRouter<ActivityService>,
     elasticMetricsFactory: ElasticMetricsFactory,
+    private val ff: FeatureFlagsProperties
 ) : ActivityQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -238,8 +240,11 @@ class ActivityElasticService(
         return result
     }
 
-    private suspend fun getActivities(esActivities: List<EsActivityLite>): List<ActivityDto> {
+    private suspend fun getActivities(esActivities: List<EsActivity>): List<ActivityDto> {
         if (esActivities.isEmpty()) return emptyList()
+        if (ff.enableEsActivitySource) {
+            return esActivities.mapNotNull { it.activityDto }
+        }
         val mapping = hashMapOf<BlockchainDto, MutableList<TypedActivityId>>()
 
         esActivities.forEach { activity ->
@@ -258,7 +263,7 @@ class ActivityElasticService(
 
         val activitiesIdMapping = activities.associateBy { it.id.fullId() }
         return esActivities.mapNotNull { esActivity ->
-            applyCursor(activitiesIdMapping[esActivity.activityId], esActivity.fromActivityLite().toString())
+            applyCursor(activitiesIdMapping[esActivity.activityId], esActivity.fromActivity().toString())
         }
     }
 

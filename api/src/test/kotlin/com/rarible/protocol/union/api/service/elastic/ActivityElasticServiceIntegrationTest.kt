@@ -1,7 +1,13 @@
 package com.rarible.protocol.union.api.service.elastic
 
+import com.rarible.core.common.nowMillis
+import com.rarible.core.test.data.randomDouble
+import com.rarible.core.test.data.randomString
+import com.rarible.protocol.dto.EthAssetTypeDto
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.api.metrics.ElasticMetricsFactory
+import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.model.elastic.EsActivity
@@ -11,7 +17,17 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ContractAddress
+import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
+import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
+import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
+import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
+import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
+import com.rarible.protocol.union.dto.MintActivityDto
+import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ActivityDtoConverter
@@ -20,6 +36,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityOrderList
+import com.rarible.protocol.union.enrichment.test.data.randomUnionAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.coEvery
 import io.mockk.every
@@ -30,6 +47,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.Instant
 
 @IntegrationTest
@@ -77,7 +96,10 @@ internal class ActivityElasticServiceIntegrationTest {
             repository,
             enrichmentActivityService,
             router,
-            metricsFactory
+            metricsFactory,
+            FeatureFlagsProperties(
+                enableEsActivitySource = true,
+            )
         )
 
         missingBefore = metricsFactory.missingActivitiesCounters.map { (k, v) -> k to v.count() }.toMap()
@@ -90,6 +112,13 @@ internal class ActivityElasticServiceIntegrationTest {
             blockchain = BlockchainDto.ETHEREUM,
             date = Instant.ofEpochMilli(5_000),
             userFrom = "0x112233",
+            activityDto = MintActivityDto(
+                id = ActivityIdDto(BlockchainDto.ETHEREUM, "1"),
+                date = Instant.ofEpochMilli(5_000),
+                owner = randomUnionAddress(),
+                value = BigInteger.ONE,
+                transactionHash = randomString()
+            )
         )
         two = randomEsActivity().copy(
             activityId = "ETHEREUM:2",
@@ -97,24 +126,77 @@ internal class ActivityElasticServiceIntegrationTest {
             blockchain = BlockchainDto.ETHEREUM,
             date = Instant.ofEpochMilli(4_900),
             collection = "123",
+            activityDto = OrderListActivityDto(
+                id = ActivityIdDto(BlockchainDto.ETHEREUM, "1"),
+                date = Instant.ofEpochMilli(4_900),
+                make = AssetDto(
+                    EthErc721AssetTypeDto(
+                        contract = ContractAddress(
+                            blockchain = BlockchainDto.ETHEREUM,
+                            value = "123",
+                        ),
+                        tokenId = BigInteger.ONE,
+                    ),
+                    BigDecimal.ONE,
+                ),
+                maker = randomUnionAddress(),
+                hash = randomString(),
+                price = BigDecimal.ONE,
+                take = AssetDto(
+                    EthEthereumAssetTypeDto(blockchain = BlockchainDto.ETHEREUM),
+                    BigDecimal.ONE,
+                )
+            )
         )
         three = randomEsActivity().copy(
             activityId = "FLOW:3",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.FLOW,
-            date = Instant.ofEpochMilli(4_800)
+            date = Instant.ofEpochMilli(4_800),
+            activityDto = MintActivityDto(
+                id = ActivityIdDto(BlockchainDto.FLOW, "3"),
+                date = Instant.ofEpochMilli(4_800),
+                owner = randomUnionAddress(),
+                value = BigInteger.ONE,
+                transactionHash = randomString()
+            )
         )
         four = randomEsActivity().copy(
             activityId = "FLOW:4",
             type = ActivityTypeDto.LIST,
             blockchain = BlockchainDto.FLOW,
-            date = Instant.ofEpochMilli(4_700)
+            date = Instant.ofEpochMilli(4_700),
+            activityDto = OrderListActivityDto(
+                id = ActivityIdDto(BlockchainDto.FLOW, "4"),
+                date = Instant.ofEpochMilli(4_700),
+                make = AssetDto(
+                    FlowAssetTypeNftDto(
+                        contract = ContractAddress(
+                            blockchain = BlockchainDto.FLOW,
+                            value = "123",
+                        ),
+                        tokenId = BigInteger.ONE,
+                    ),
+                    BigDecimal.ONE,
+                ),
+                maker = randomUnionAddress(),
+                hash = randomString(),
+                price = BigDecimal.ONE,
+                take = AssetDto(
+                    EthEthereumAssetTypeDto(blockchain = BlockchainDto.ETHEREUM),
+                    BigDecimal.ONE,
+                )
+            )
         )
         five = randomEsActivity().copy(
             activityId = "FLOW:5",
             type = ActivityTypeDto.AUCTION_STARTED,
             blockchain = BlockchainDto.FLOW,
-            date = Instant.ofEpochMilli(5_700)
+            date = Instant.ofEpochMilli(5_700),
+            activityDto = AuctionStartActivityDto(
+                id = ActivityIdDto(BlockchainDto.FLOW, "5"),
+                date = Instant.ofEpochMilli(5_700),
+            )
         )
         six = randomEsActivity().copy(
             activityId = "SOLANA:6",

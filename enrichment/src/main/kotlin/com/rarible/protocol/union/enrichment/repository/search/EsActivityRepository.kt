@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.elastic.ElasticActivityFilter
 import com.rarible.protocol.union.core.model.elastic.EsActivity
-import com.rarible.protocol.union.core.model.elastic.EsActivityCursor.Companion.fromActivityLite
-import com.rarible.protocol.union.core.model.elastic.EsActivityLite
+import com.rarible.protocol.union.core.model.elastic.EsActivityCursor.Companion.fromActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivityQueryResult
 import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import com.rarible.protocol.union.core.util.PageSize
@@ -52,7 +51,7 @@ class EsActivityRepository(
     }
 
     suspend fun search(query: NativeSearchQuery): EsActivityQueryResult {
-        val activities = esOperations.search(query, EsActivityLite::class.java, entityDefinition.searchIndexCoordinates)
+        val activities = esOperations.search(query, EsActivity::class.java, entityDefinition.searchIndexCoordinates)
             .collectList()
             .awaitFirst()
             .map { it.content }
@@ -60,7 +59,7 @@ class EsActivityRepository(
         val cursor = if (activities.isEmpty()) {
             null
         } else {
-            activities.last().fromActivityLite().toString()
+            activities.last().fromActivity().toString()
         }
 
         return EsActivityQueryResult(
