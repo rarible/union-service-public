@@ -120,9 +120,9 @@ class EnrichmentOwnershipService(
             existing = short.getAllBestOrders(),
             orders = orders
         )
-        val unionOwnership = fetchedOwnership.await()
 
-        val customCollection = customCollectionResolver.resolveCustomCollection(unionOwnership.id.getItemId())
+        val itemId = short.id.toDto().getItemId()
+        val customCollection = customCollectionResolver.resolveCustomCollection(itemId)
 
         val data = EnrichmentOwnershipData(
             shortOwnership = short,
@@ -131,7 +131,7 @@ class EnrichmentOwnershipService(
         )
 
         OwnershipDtoConverter.convert(
-            ownership = unionOwnership,
+            ownership = fetchedOwnership.await(),
             data = data
         )
     }
