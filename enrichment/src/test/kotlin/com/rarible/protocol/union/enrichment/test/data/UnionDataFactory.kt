@@ -79,6 +79,9 @@ import kotlinx.coroutines.runBlocking
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+val CUSTOM_COLLECTION = CollectionIdDto(BlockchainDto.ETHEREUM, "0x7777777777777777777777777777777777777777")
+val CUSTOM_COLLECTION_INCLUDE = CollectionIdDto(BlockchainDto.ETHEREUM, "0x8888888888888888888888888888888888888888")
+
 fun randomUnionAddress(): UnionAddress =
     UnionAddressConverter.convert(
         BlockchainDto.ETHEREUM,

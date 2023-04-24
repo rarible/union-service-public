@@ -12,6 +12,14 @@ common:
     enableRevertedActivityEventSending: false
     enableOwnershipSourceEnrichment: true
     enableItemLastSaleEnrichment: true
+    enableCustomCollections: true
+
+enrichment:
+  collection:
+    mappings:
+      - customCollection: "ETHEREUM:0x7777777777777777777777777777777777777777"
+        collections:
+          - "ETHEREUM:0x8888888888888888888888888888888888888888"
 
 rarible:
   core:

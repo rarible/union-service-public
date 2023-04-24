@@ -46,7 +46,7 @@ class PlatformBestSellOrderOwnershipCleanupJobIt {
         coEvery { listener.onEvent(any()) } returns Unit
         coEvery { ownershipService.enrichOwnership(any()) } answers {
             val shortOwnership = it.invocation.args[0] as ShortOwnership
-            OwnershipDtoConverter.convert(randomUnionOwnership(shortOwnership.id.toDto()), shortOwnership)
+            OwnershipDtoConverter.convert(randomUnionOwnership(shortOwnership.id.toDto()))
         }
     }
 

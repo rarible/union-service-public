@@ -54,8 +54,8 @@ class CustomCollectionJob(
                 val itemId = item.id
                 val eventTimeMarks = offchainEventMark("enrichment-in")
                 val message = KafkaEventFactory.internalItemEvent(UnionItemChangeEvent(itemId, eventTimeMarks))
-                updaters.forEach { it.update(item) }
                 eventProducer.getProducer(itemId.blockchain).send(message)
+                updaters.map { async { it.update(item) } }.awaitAll()
             }
         }.awaitAll()
     }
