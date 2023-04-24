@@ -1,17 +1,18 @@
 package com.rarible.protocol.union.worker.job.collection
 
-import com.rarible.protocol.union.core.converter.EsActivityConverter
+import com.rarible.core.kafka.KafkaMessage
+import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.core.model.UnionActivity
-import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.converter.ActivityDtoConverter
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
@@ -23,9 +24,9 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking
-import org.elasticsearch.action.support.WriteRequest
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,10 +42,7 @@ class CustomCollectionActivityUpdaterTest {
     lateinit var router: BlockchainRouter<ActivityService>
 
     @MockK
-    lateinit var repository: EsActivityRepository
-
-    @MockK
-    lateinit var converter: EsActivityConverter
+    lateinit var producer: RaribleKafkaProducer<ActivityDto>
 
     @MockK
     lateinit var enrichmentActivityService: EnrichmentActivityService
@@ -54,11 +52,10 @@ class CustomCollectionActivityUpdaterTest {
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(router, repository, enrichmentActivityService, activityService, converter)
+        clearMocks(router, enrichmentActivityService, activityService)
         every { router.getService(BlockchainDto.ETHEREUM) } returns activityService
-        coEvery { repository.bulk(any(), any(), any(), any()) } returns Unit
         coEvery { enrichmentActivityService.enrich(emptyList()) } returns emptyList()
-        coEvery { converter.batchConvert(emptyList()) } returns emptyList()
+        coEvery { producer.send(any<Collection<KafkaMessage<ActivityDto>>>()) } returns emptyFlow()
     }
 
     @Test
@@ -67,20 +64,34 @@ class CustomCollectionActivityUpdaterTest {
         val item = randomUnionItem(itemId)
         val activity1 = randomUnionActivityMint(itemId)
         val activity2 = randomUnionActivityMint(itemId).copy(reverted = true)
+        val activity3 = randomUnionActivityMint(itemId)
 
-        mockkGetActivities(itemId, null, "1", activity1)
-        mockkGetActivities(itemId, "1", "2", activity2)
+        mockkGetActivities(itemId, null, "1", activity1, activity2)
+        mockkGetActivities(itemId, "1", "2", activity3)
         mockkGetActivities(itemId, "2", null)
 
-        val dto = ActivityDtoConverter.convert(activity1)
-        val esDto = mockk<EsActivity>()
+        val dto1 = ActivityDtoConverter.convert(activity1)
+        val dto3 = ActivityDtoConverter.convert(activity3)
 
-        coEvery { enrichmentActivityService.enrich(listOf(activity1)) } returns listOf(dto)
-        coEvery { converter.batchConvert(listOf(dto)) } returns listOf(esDto)
+        coEvery { enrichmentActivityService.enrich(listOf(activity1)) } returns listOf(dto1)
+        coEvery { enrichmentActivityService.enrich(listOf(activity3)) } returns listOf(dto3)
 
         updater.update(item)
 
-        coVerify { repository.bulk(listOf(esDto), emptyList(), null, WriteRequest.RefreshPolicy.NONE) }
+        assertEvents(listOf(activity1.id))
+        assertEvents(listOf(activity3.id))
+    }
+
+    private fun assertEvents(
+        expected: List<ActivityIdDto>
+    ) {
+        coVerify {
+            producer.send(match<Collection<KafkaMessage<ActivityDto>>> { events ->
+                val received = events.map { it.value.id }
+                assertThat(received).isEqualTo(expected)
+                true
+            })
+        }
     }
 
     private fun mockkGetActivities(
