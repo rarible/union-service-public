@@ -419,6 +419,11 @@
                 <artifactId>spring-kafka</artifactId>
                 <version>2.9.3</version>
             </dependency>
+            <dependency>
+                <groupId>com.rarible.common</groupId>
+                <artifactId>rarible-elasticsearch-client</artifactId>
+                <version>1.2</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
