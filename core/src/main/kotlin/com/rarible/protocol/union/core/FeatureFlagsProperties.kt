@@ -38,5 +38,6 @@ data class FeatureFlagsProperties(
     val enableUnionCollections: Boolean = false,
 
     val enableSpringKafka: Boolean = true,
+    val enableElasticsearchCompatibilityMode: Boolean = false,
     val enableEsActivitySource: Boolean = false,
 )

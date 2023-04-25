@@ -1,23 +1,22 @@
 package com.rarible.protocol.union.worker.job.collection
 
-import com.rarible.protocol.union.core.converter.EsActivityConverter
+import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
-import org.elasticsearch.action.support.WriteRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class CustomCollectionActivityUpdater(
     private val router: BlockchainRouter<ActivityService>,
-    private val repository: EsActivityRepository,
-    private val converter: EsActivityConverter,
-    private val enrichmentActivityService: EnrichmentActivityService
+    private val enrichmentActivityService: EnrichmentActivityService,
+    private val eventProducer: RaribleKafkaProducer<ActivityDto>
 ) : CustomCollectionUpdater {
 
     private val batchSize = 200
@@ -47,15 +46,12 @@ class CustomCollectionActivityUpdater(
                 sort = ActivitySortDto.EARLIEST_FIRST
             )
 
-            val dto = enrichmentActivityService.enrich(page.entities.filter { it.reverted != true })
-            val toSave = converter.batchConvert(dto)
+            val messages = enrichmentActivityService.enrich(page.entities.filter { it.reverted != true })
+                .map { KafkaEventFactory.activityEvent(it) }
 
-            repository.bulk(
-                entitiesToSave = toSave,
-                idsToDelete = emptyList(),
-                refreshPolicy = WriteRequest.RefreshPolicy.NONE
-            )
-            logger.info("Updated {} activities for custom collection migration of Item {}", toSave.size, item.id)
+            eventProducer.send(messages)
+
+            logger.info("Updated {} activities for custom collection migration of Item {}", messages.size, item.id)
 
             continuation = page.continuation
         } while (continuation != null)

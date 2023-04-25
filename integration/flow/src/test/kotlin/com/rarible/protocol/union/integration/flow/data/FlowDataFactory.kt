@@ -146,8 +146,8 @@ fun randomFlowV1OrderDto(itemId: ItemIdDto): FlowOrderDto {
         amount = randomBigDecimal(),
         priceUsd = randomBigDecimal(),
         data = FlowOrderDataDto(
-            payouts = listOf(PayInfoDto(randomString(), randomBigDecimal(0, 2))),
-            originalFees = listOf(PayInfoDto(randomString(), randomBigDecimal(0, 2)))
+            payouts = listOf(PayInfoDto(randomString(), randomBigDecimal(3, 0))),
+            originalFees = listOf(PayInfoDto(randomString(), randomBigDecimal(3, 0)))
         ),
         collection = randomFlowContract(),
         lastUpdateAt = nowMillis(),
