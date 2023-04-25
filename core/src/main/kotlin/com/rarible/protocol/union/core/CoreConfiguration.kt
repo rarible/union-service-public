@@ -47,7 +47,6 @@ import org.springframework.web.reactive.function.client.WebClient
         EsProperties::class,
     ]
 )
-@Import(ElasticsearchConfiguration::class)
 class CoreConfiguration(
     val enabledBlockchains: List<BlockchainDto>,
     val featureFlagsProperties: FeatureFlagsProperties,
