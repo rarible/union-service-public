@@ -1,34 +1,41 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.core.common.nowMillis
-import com.rarible.core.test.data.randomDouble
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.rarible.core.test.data.randomBigDecimal
+import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.dto.EthAssetTypeDto
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.api.dto.applyCursor
 import com.rarible.protocol.union.api.metrics.ElasticMetricsFactory
 import com.rarible.protocol.union.core.FeatureFlagsProperties
-import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivityCursor
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.ContractAddress
-import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthEthereumAssetTypeDto
 import com.rarible.protocol.union.dto.FlowAssetTypeFtDto
 import com.rarible.protocol.union.dto.FlowAssetTypeNftDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
+import com.rarible.protocol.union.dto.SolanaFtAssetTypeDto
+import com.rarible.protocol.union.dto.SolanaNftAssetTypeDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ActivityDtoConverter
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
@@ -47,6 +54,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomAssetTypeDto
+import randomAuction
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
@@ -74,6 +83,9 @@ internal class ActivityElasticServiceIntegrationTest {
     @Autowired
     private lateinit var enrichmentActivityService: EnrichmentActivityService
 
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
     private lateinit var service: ActivityElasticService
 
     private lateinit var one: EsActivity
@@ -84,6 +96,14 @@ internal class ActivityElasticServiceIntegrationTest {
     private lateinit var six: EsActivity
     private lateinit var seven: EsActivity
 
+    private lateinit var dto1: ActivityDto
+    private lateinit var dto2: ActivityDto
+    private lateinit var dto3: ActivityDto
+    private lateinit var dto4: ActivityDto
+    private lateinit var dto5: ActivityDto
+    private lateinit var dto6: ActivityDto
+    private lateinit var dto7: ActivityDto
+
     private lateinit var missingBefore: Map<BlockchainDto, Double>
 
     @Autowired
@@ -91,33 +111,44 @@ internal class ActivityElasticServiceIntegrationTest {
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
-        service = ActivityElasticService(
-            filterConverter,
-            repository,
-            enrichmentActivityService,
-            router,
-            metricsFactory,
-            FeatureFlagsProperties(
-                enableEsActivitySource = true,
-            )
-        )
-
         missingBefore = metricsFactory.missingActivitiesCounters.map { (k, v) -> k to v.count() }.toMap()
 
         elasticsearchTestBootstrapper.bootstrap()
         // save some elastic activities
+        dto1 = MintActivityDto(
+            id = ActivityIdDto(BlockchainDto.ETHEREUM, "1"),
+            date = Instant.ofEpochMilli(5_000),
+            owner = randomUnionAddress(),
+            value = BigInteger.ONE,
+            transactionHash = randomString()
+        )
         one = randomEsActivity().copy(
             activityId = "ETHEREUM:1",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.ETHEREUM,
             date = Instant.ofEpochMilli(5_000),
             userFrom = "0x112233",
-            activityDto = MintActivityDto(
-                id = ActivityIdDto(BlockchainDto.ETHEREUM, "1"),
-                date = Instant.ofEpochMilli(5_000),
-                owner = randomUnionAddress(),
-                value = BigInteger.ONE,
-                transactionHash = randomString()
+            activityDto = objectMapper.writeValueAsString(dto1)
+        )
+        dto2 = OrderListActivityDto(
+            id = ActivityIdDto(BlockchainDto.ETHEREUM, "1"),
+            date = Instant.ofEpochMilli(4_900),
+            make = AssetDto(
+                EthErc721AssetTypeDto(
+                    contract = ContractAddress(
+                        blockchain = BlockchainDto.ETHEREUM,
+                        value = "123",
+                    ),
+                    tokenId = BigInteger.ONE,
+                ),
+                BigDecimal.ONE,
+            ),
+            maker = randomUnionAddress(),
+            hash = randomString(),
+            price = BigDecimal.ONE,
+            take = AssetDto(
+                EthEthereumAssetTypeDto(blockchain = BlockchainDto.ETHEREUM),
+                BigDecimal.ONE,
             )
         )
         two = randomEsActivity().copy(
@@ -126,39 +157,41 @@ internal class ActivityElasticServiceIntegrationTest {
             blockchain = BlockchainDto.ETHEREUM,
             date = Instant.ofEpochMilli(4_900),
             collection = "123",
-            activityDto = OrderListActivityDto(
-                id = ActivityIdDto(BlockchainDto.ETHEREUM, "1"),
-                date = Instant.ofEpochMilli(4_900),
-                make = AssetDto(
-                    EthErc721AssetTypeDto(
-                        contract = ContractAddress(
-                            blockchain = BlockchainDto.ETHEREUM,
-                            value = "123",
-                        ),
-                        tokenId = BigInteger.ONE,
-                    ),
-                    BigDecimal.ONE,
-                ),
-                maker = randomUnionAddress(),
-                hash = randomString(),
-                price = BigDecimal.ONE,
-                take = AssetDto(
-                    EthEthereumAssetTypeDto(blockchain = BlockchainDto.ETHEREUM),
-                    BigDecimal.ONE,
-                )
-            )
+            activityDto = objectMapper.writeValueAsString(dto2)
+        )
+        dto3 = MintActivityDto(
+            id = ActivityIdDto(BlockchainDto.FLOW, "3"),
+            date = Instant.ofEpochMilli(4_800),
+            owner = randomUnionAddress(),
+            value = BigInteger.ONE,
+            transactionHash = randomString()
         )
         three = randomEsActivity().copy(
             activityId = "FLOW:3",
             type = ActivityTypeDto.MINT,
             blockchain = BlockchainDto.FLOW,
             date = Instant.ofEpochMilli(4_800),
-            activityDto = MintActivityDto(
-                id = ActivityIdDto(BlockchainDto.FLOW, "3"),
-                date = Instant.ofEpochMilli(4_800),
-                owner = randomUnionAddress(),
-                value = BigInteger.ONE,
-                transactionHash = randomString()
+            activityDto = objectMapper.writeValueAsString(dto3)
+        )
+        dto4 = OrderListActivityDto(
+            id = ActivityIdDto(BlockchainDto.FLOW, "4"),
+            date = Instant.ofEpochMilli(4_700),
+            make = AssetDto(
+                FlowAssetTypeNftDto(
+                    contract = ContractAddress(
+                        blockchain = BlockchainDto.FLOW,
+                        value = "123",
+                    ),
+                    tokenId = BigInteger.ONE,
+                ),
+                BigDecimal.ONE,
+            ),
+            maker = randomUnionAddress(),
+            hash = randomString(),
+            price = BigDecimal.ONE,
+            take = AssetDto(
+                FlowAssetTypeFtDto(contract = ContractAddress(blockchain = BlockchainDto.FLOW, value = "123")),
+                BigDecimal.ONE,
             )
         )
         four = randomEsActivity().copy(
@@ -166,25 +199,28 @@ internal class ActivityElasticServiceIntegrationTest {
             type = ActivityTypeDto.LIST,
             blockchain = BlockchainDto.FLOW,
             date = Instant.ofEpochMilli(4_700),
-            activityDto = OrderListActivityDto(
-                id = ActivityIdDto(BlockchainDto.FLOW, "4"),
-                date = Instant.ofEpochMilli(4_700),
-                make = AssetDto(
-                    FlowAssetTypeNftDto(
-                        contract = ContractAddress(
-                            blockchain = BlockchainDto.FLOW,
-                            value = "123",
-                        ),
-                        tokenId = BigInteger.ONE,
+            activityDto = objectMapper.writeValueAsString(dto4)
+        )
+        dto5 = AuctionStartActivityDto(
+            id = ActivityIdDto(BlockchainDto.FLOW, "5"),
+            date = Instant.ofEpochMilli(5_700),
+            auction = randomAuction(
+                id = AuctionIdDto(BlockchainDto.FLOW, randomString().lowercase()),
+                contract = ContractAddress(BlockchainDto.FLOW, randomString().lowercase()),
+                minimalStep = BigDecimal.ONE,
+                buyPrice = BigDecimal.ONE,
+                buyPriceUsd = BigDecimal.ONE,
+                minimalPrice = BigDecimal.ONE,
+                seller = UnionAddress(BlockchainGroupDto.FLOW, randomString().lowercase()),
+                sell = AssetDto(
+                    FlowAssetTypeFtDto(
+                        contract = ContractAddress(BlockchainDto.FLOW, randomString().lowercase()),
                     ),
-                    BigDecimal.ONE,
+                    BigDecimal.ONE
                 ),
-                maker = randomUnionAddress(),
-                hash = randomString(),
-                price = BigDecimal.ONE,
-                take = AssetDto(
-                    EthEthereumAssetTypeDto(blockchain = BlockchainDto.ETHEREUM),
-                    BigDecimal.ONE,
+                buy = FlowAssetTypeNftDto(
+                    contract = ContractAddress(BlockchainDto.FLOW, randomString().lowercase()),
+                    tokenId = randomBigInt(),
                 )
             )
         )
@@ -193,16 +229,58 @@ internal class ActivityElasticServiceIntegrationTest {
             type = ActivityTypeDto.AUCTION_STARTED,
             blockchain = BlockchainDto.FLOW,
             date = Instant.ofEpochMilli(5_700),
-            activityDto = AuctionStartActivityDto(
-                id = ActivityIdDto(BlockchainDto.FLOW, "5"),
-                date = Instant.ofEpochMilli(5_700),
+            activityDto = objectMapper.writeValueAsString(dto5)
+        )
+        dto6 = OrderListActivityDto(
+            id = ActivityIdDto(BlockchainDto.SOLANA, "6"),
+            date = Instant.ofEpochMilli(6_700),
+            make = AssetDto(
+                SolanaNftAssetTypeDto(
+                    contract = ContractAddress(
+                        blockchain = BlockchainDto.SOLANA,
+                        value = "123",
+                    ),
+                    itemId = ItemIdDto(blockchain = BlockchainDto.SOLANA, value = "itemId")
+                ),
+                BigDecimal.ONE,
+            ),
+            maker = randomUnionAddress(),
+            hash = randomString(),
+            price = BigDecimal.ONE,
+            take = AssetDto(
+                SolanaFtAssetTypeDto(
+                    address = ContractAddress(
+                        blockchain = BlockchainDto.SOLANA,
+                        value = "321"
+                    )
+                ),
+                BigDecimal.ONE,
             )
         )
         six = randomEsActivity().copy(
             activityId = "SOLANA:6",
             type = ActivityTypeDto.LIST,
             blockchain = BlockchainDto.SOLANA,
-            date = Instant.ofEpochMilli(6_700)
+            date = Instant.ofEpochMilli(6_700),
+            activityDto = objectMapper.writeValueAsString(dto6)
+        )
+        dto7 = AuctionStartActivityDto(
+            id = ActivityIdDto(BlockchainDto.ETHEREUM, "7"),
+            date = Instant.ofEpochMilli(4_700),
+            auction = randomAuction(
+                id = AuctionIdDto(BlockchainDto.ETHEREUM, randomString().lowercase()),
+                minimalStep = BigDecimal.TEN,
+                contract = ContractAddress(BlockchainDto.ETHEREUM, randomString().lowercase()),
+                buyPrice = BigDecimal.TEN,
+                minimalPrice = BigDecimal.TEN,
+                sell = AssetDto(EthEthereumAssetTypeDto(blockchain = BlockchainDto.ETHEREUM), BigDecimal.TEN),
+                seller = UnionAddress(BlockchainGroupDto.ETHEREUM, randomString().lowercase()),
+                buyPriceUsd = BigDecimal.TEN,
+                buy = FlowAssetTypeNftDto(
+                    contract = ContractAddress(BlockchainDto.ETHEREUM, randomString().lowercase()),
+                    tokenId = randomBigInt(),
+                )
+            )
         )
         seven = randomEsActivity().copy(
             activityId = "ETHEREUM:7",
@@ -212,12 +290,28 @@ internal class ActivityElasticServiceIntegrationTest {
             item = "222:333",
             userFrom = "0",
             userTo = "0x223344",
+            activityDto = objectMapper.writeValueAsString(dto7)
         )
         repository.saveAll(listOf(one, two, three, four, five, six, seven).shuffled())
     }
 
     @Nested
     inner class GetAllActivitiesTest {
+
+        @BeforeEach
+        fun before() {
+            service = ActivityElasticService(
+                filterConverter,
+                repository,
+                enrichmentActivityService,
+                router,
+                metricsFactory,
+                FeatureFlagsProperties(
+                    enableEsActivitySource = false,
+                ),
+                objectMapper,
+            )
+        }
 
         @Test
         fun `should getAllActivities - happy path`() = runBlocking<Unit> {
@@ -317,7 +411,65 @@ internal class ActivityElasticServiceIntegrationTest {
     }
 
     @Nested
+    inner class GetAllActivitiesEsSourceTest {
+
+        @BeforeEach
+        fun before() {
+            service = ActivityElasticService(
+                filterConverter,
+                repository,
+                enrichmentActivityService,
+                router,
+                metricsFactory,
+                FeatureFlagsProperties(
+                    enableEsActivitySource = true,
+                ),
+                objectMapper,
+            )
+        }
+
+        @Test
+        fun `should getAllActivities - happy path`() = runBlocking<Unit> {
+            // given
+            val types = listOf(ActivityTypeDto.MINT, ActivityTypeDto.LIST)
+            val blockchains = listOf(BlockchainDto.ETHEREUM, BlockchainDto.FLOW)
+            val size = 3
+            val sort = ActivitySortDto.LATEST_FIRST
+            val cursor1 = buildCursor(one)
+            val cursor2 = buildCursor(two)
+            val cursor3 = buildCursor(three)
+
+            // when
+            val actual = service.getAllActivities(types, blockchains, null, null, size, sort)
+
+            // then
+            assertThat(actual.activities).containsExactly(
+                dto1.applyCursor(cursor1),
+                dto2.applyCursor(cursor2),
+                dto3.applyCursor(cursor3),
+            )
+            assertThat(actual.cursor).startsWith("4800_")
+            assertCounterChanges()
+        }
+    }
+
+    @Nested
     inner class GetActivitiesByCollectionTest {
+
+        @BeforeEach
+        fun before() {
+            service = ActivityElasticService(
+                filterConverter,
+                repository,
+                enrichmentActivityService,
+                router,
+                metricsFactory,
+                FeatureFlagsProperties(
+                    enableEsActivitySource = false,
+                ),
+                objectMapper,
+            )
+        }
 
         @Test
         fun `should getActivitiesByCollection - happy path`() = runBlocking<Unit> {
@@ -351,7 +503,60 @@ internal class ActivityElasticServiceIntegrationTest {
     }
 
     @Nested
+    inner class GetActivitiesByCollectionEsSourceTest {
+
+        @BeforeEach
+        fun before() {
+            service = ActivityElasticService(
+                filterConverter,
+                repository,
+                enrichmentActivityService,
+                router,
+                metricsFactory,
+                FeatureFlagsProperties(
+                    enableEsActivitySource = true,
+                ),
+                objectMapper,
+            )
+        }
+
+        @Test
+        fun `should getActivitiesByCollection - happy path`() = runBlocking<Unit> {
+            // given
+            val types = listOf(ActivityTypeDto.MINT, ActivityTypeDto.LIST)
+            val collection = IdParser.parseCollectionId("ETHEREUM:123")
+            val size = 3
+            val sort = ActivitySortDto.LATEST_FIRST
+            val cursor2 = buildCursor(two)
+            // when
+            val actual = service.getActivitiesByCollection(types, listOf(collection), null, null, size, sort)
+
+            // then
+            assertThat(actual.activities)
+                .containsExactly(dto2.applyCursor(cursor2))
+
+            assertThat(actual.cursor).startsWith("4900_")
+            assertCounterChanges()
+        }
+    }
+
+    @Nested
     inner class GetActivitiesByItemTest {
+
+        @BeforeEach
+        fun before() {
+            service = ActivityElasticService(
+                filterConverter,
+                repository,
+                enrichmentActivityService,
+                router,
+                metricsFactory,
+                FeatureFlagsProperties(
+                    enableEsActivitySource = false,
+                ),
+                objectMapper,
+            )
+        }
 
         @Test
         fun `should getActivitiesByItem - happy path`() = runBlocking<Unit> {
@@ -386,7 +591,61 @@ internal class ActivityElasticServiceIntegrationTest {
     }
 
     @Nested
+    inner class GetActivitiesByItemEsSourceTest {
+
+        @BeforeEach
+        fun before() {
+            service = ActivityElasticService(
+                filterConverter,
+                repository,
+                enrichmentActivityService,
+                router,
+                metricsFactory,
+                FeatureFlagsProperties(
+                    enableEsActivitySource = true,
+                ),
+                objectMapper,
+            )
+        }
+
+        @Test
+        fun `should getActivitiesByItem - happy path`() = runBlocking<Unit> {
+            // given
+            val types = listOf(ActivityTypeDto.MINT, ActivityTypeDto.LIST, ActivityTypeDto.AUCTION_STARTED)
+            val item = IdParser.parseItemId("ETHEREUM:222:333")
+            val size = 3
+            val sort = ActivitySortDto.LATEST_FIRST
+            val cursor7 = buildCursor(seven)
+
+            // when
+            val actual = service.getActivitiesByItem(types, item, null, null, size, sort)
+
+            // then
+            assertThat(actual.activities).hasSize(1)
+            assertThat(actual.activities[0]).isEqualTo(dto7.applyCursor(cursor7))
+
+            assertThat(actual.cursor).startsWith("4700_")
+            assertCounterChanges()
+        }
+    }
+
+    @Nested
     inner class GetActivitiesByUserTest {
+
+        @BeforeEach
+        fun before() {
+            service = ActivityElasticService(
+                filterConverter,
+                repository,
+                enrichmentActivityService,
+                router,
+                metricsFactory,
+                FeatureFlagsProperties(
+                    enableEsActivitySource = false,
+                ),
+                objectMapper,
+            )
+        }
 
         @Test
         fun `should getActivitiesByUser - happy path`() = runBlocking<Unit> {
@@ -436,6 +695,60 @@ internal class ActivityElasticServiceIntegrationTest {
                 ActivityDtoConverter.convert(eth1),
                 ActivityDtoConverter.convert(eth7)
             )
+            assertThat(actual.cursor).startsWith("4700_")
+            assertCounterChanges()
+        }
+    }
+
+    @Nested
+    inner class GetActivitiesByUserEsSourceTest {
+
+        @BeforeEach
+        fun before() {
+            service = ActivityElasticService(
+                filterConverter,
+                repository,
+                enrichmentActivityService,
+                router,
+                metricsFactory,
+                FeatureFlagsProperties(
+                    enableEsActivitySource = true,
+                ),
+                objectMapper,
+            )
+        }
+
+        @Test
+        fun `should getActivitiesByUser - happy path`() = runBlocking<Unit> {
+            // given
+            val types = listOf(UserActivityTypeDto.MINT, UserActivityTypeDto.AUCTION_STARTED)
+            val blockchains = listOf(BlockchainDto.ETHEREUM)
+            val size = 3
+            val sort = ActivitySortDto.LATEST_FIRST
+            val users = listOf(
+                IdParser.parseAddress("ETHEREUM:0x112233"),
+                IdParser.parseAddress("ETHEREUM:0x223344")
+            )
+            val cursor1 = buildCursor(one)
+            val cursor7 = buildCursor(seven)
+
+            // when
+            val actual = service.getActivitiesByUser(
+                types,
+                blockchains = blockchains,
+                continuation = null,
+                cursor = null,
+                size = size,
+                sort = sort,
+                user = users,
+                from = Instant.ofEpochMilli(4_700),
+                to = Instant.ofEpochMilli(5_150)
+            )
+
+            // then
+            assertThat(actual.activities).hasSize(2)
+            assertThat(actual.activities[0]).isEqualTo(dto1.applyCursor(cursor1))
+            assertThat(actual.activities[1]).isEqualTo(dto7.applyCursor(cursor7))
             assertThat(actual.cursor).startsWith("4700_")
             assertCounterChanges()
         }

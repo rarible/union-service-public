@@ -52,7 +52,7 @@ data class EsActivity(
     val volumeUsd: Double? = null,
     val volumeSell: Double? = null,
     val volumeNative: Double? = null,
-    val activityDto: ActivityDto? = null,
+    val activityDto: String? = null,
 ) : EsActivitySealed() {
     companion object {
         const val VERSION: Int = 2

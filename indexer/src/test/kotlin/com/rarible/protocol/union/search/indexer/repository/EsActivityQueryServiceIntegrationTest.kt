@@ -67,7 +67,7 @@ internal class EsActivityQueryServiceIntegrationTest {
         val actual = repository.search(filter, EsActivitySort(true), 3)
 
         // then
-        assertThat(actual.activities).containsExactly(toFind1.info, toFind2.info, toFind3.info)
+        assertThat(actual.activities).containsExactly(toFind1, toFind2, toFind3)
         val cursor = EsActivityCursor.fromString(actual.cursor!!)!!
         assertThat(cursor.date).isEqualTo(toFind3.date)
         assertThat(cursor.blockNumber).isEqualTo(toFind3.blockNumber)
@@ -97,9 +97,9 @@ internal class EsActivityQueryServiceIntegrationTest {
         val query4 = repository.search(filter, EsActivitySort(false), 2)
 
         // then
-        assertThat(query1.activities).containsExactly(first.info, second.info)
-        assertThat(query2.activities).containsExactly(third.info, fourth.info)
-        assertThat(query3.activities).containsExactly(fifth.info, sixth.info)
+        assertThat(query1.activities).containsExactly(first, second)
+        assertThat(query2.activities).containsExactly(third, fourth)
+        assertThat(query3.activities).containsExactly(fifth, sixth)
         assertThat(query4.activities).isEmpty()
         assertThat(query4.cursor).isNull()
     }
