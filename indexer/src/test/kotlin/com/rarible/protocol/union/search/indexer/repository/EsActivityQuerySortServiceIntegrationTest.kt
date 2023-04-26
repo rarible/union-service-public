@@ -6,7 +6,6 @@ import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQuerySortService
-import com.rarible.protocol.union.enrichment.test.data.info
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
@@ -58,7 +57,7 @@ internal class EsActivityQuerySortServiceIntegrationTest {
         val actual = repository.search(builder.build())
 
         // then
-        assertThat(actual.activities).containsExactly(first.info, second.info, third.info, fourth.info, fifth.info, sixth.info, seventh.info, eighth.info)
+        assertThat(actual.activities).containsExactly(first, second, third, fourth, fifth, sixth, seventh, eighth)
     }
 
     @Test
@@ -81,7 +80,7 @@ internal class EsActivityQuerySortServiceIntegrationTest {
         val actual = repository.search(builder.build())
 
         // then
-        assertThat(actual.activities).containsExactly(eighth.info, seventh.info, sixth.info, fifth.info, fourth.info, third.info, second.info, first.info)
+        assertThat(actual.activities).containsExactly(eighth, seventh, sixth, fifth, fourth, third, second, first)
     }
 
     private fun activityWithSortFields(dateMillis: Long, blockNumber: Long, logIndex: Int, salt: Long): EsActivity {

@@ -49,7 +49,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         val result = repository.search(filter, sort, null)
 
         // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 
     @Test
@@ -66,7 +66,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         val result = repository.search(filter, sort, null)
 
         // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 
     @Test
@@ -84,7 +84,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         val result = repository.search(filter, sort, null)
 
         // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 
     @Test
@@ -101,7 +101,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         val result = repository.search(filter, sort, null)
 
         // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 
     @Test
@@ -118,7 +118,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         val result = repository.search(filter, sort, null)
 
         // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 
     @Test
@@ -135,7 +135,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         val result = repository.search(filter, sort, null)
 
         // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 
     @Test
@@ -152,7 +152,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         val result = repository.search(filter, sort, null)
 
         // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 
     @Test
@@ -170,7 +170,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         val result = repository.search(filter, sort, null)
 
         // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 
     @Test
@@ -187,7 +187,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         val result = repository.search(filter, sort, null)
 
         // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 
     @Test
@@ -204,7 +204,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         val result = repository.search(filter, sort, null)
 
         // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 
     @Test
@@ -222,7 +222,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         val result = repository.search(filter, sort, null)
 
         // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 
     @Test
@@ -281,6 +281,6 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         val result = repository.search(filter, sort, null)
 
         // then
-        assertThat(result.activities).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 }

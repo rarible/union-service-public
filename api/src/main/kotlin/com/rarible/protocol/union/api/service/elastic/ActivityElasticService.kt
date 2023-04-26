@@ -1,13 +1,16 @@
 package com.rarible.protocol.union.api.service.elastic
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.flatMapAsync
+import com.rarible.protocol.union.api.dto.applyCursor
 import com.rarible.protocol.union.api.metrics.ElasticMetricsFactory
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.TypedActivityId
 import com.rarible.protocol.union.core.model.UnionActivity
-import com.rarible.protocol.union.core.model.elastic.EsActivityCursor.Companion.fromActivityLite
-import com.rarible.protocol.union.core.model.elastic.EsActivityLite
+import com.rarible.protocol.union.core.model.elastic.EsActivity
+import com.rarible.protocol.union.core.model.elastic.EsActivityCursor.Companion.fromActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -55,6 +58,8 @@ class ActivityElasticService(
     private val enrichmentActivityService: EnrichmentActivityService,
     private val router: BlockchainRouter<ActivityService>,
     elasticMetricsFactory: ElasticMetricsFactory,
+    private val ff: FeatureFlagsProperties,
+    private val objectMapper: ObjectMapper,
 ) : ActivityQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -238,8 +243,18 @@ class ActivityElasticService(
         return result
     }
 
-    private suspend fun getActivities(esActivities: List<EsActivityLite>): List<ActivityDto> {
+    private suspend fun getActivities(esActivities: List<EsActivity>): List<ActivityDto> {
         if (esActivities.isEmpty()) return emptyList()
+        if (ff.enableEsActivitySource) {
+            return esActivities.mapNotNull {
+                if (it.activityDto != null) {
+                    objectMapper.readValue(it.activityDto, ActivityDto::class.java)
+                        .applyCursor(it.fromActivity().toString())
+                } else {
+                    null
+                }
+            }
+        }
         val mapping = hashMapOf<BlockchainDto, MutableList<TypedActivityId>>()
 
         esActivities.forEach { activity ->
@@ -258,7 +273,7 @@ class ActivityElasticService(
 
         val activitiesIdMapping = activities.associateBy { it.id.fullId() }
         return esActivities.mapNotNull { esActivity ->
-            applyCursor(activitiesIdMapping[esActivity.activityId], esActivity.fromActivityLite().toString())
+            activitiesIdMapping[esActivity.activityId].applyCursor(esActivity.fromActivity().toString())
         }
     }
 
@@ -268,29 +283,6 @@ class ActivityElasticService(
             ActivitySortDto.EARLIEST_FIRST -> false
         }
         return EsActivitySort(latestFirst)
-    }
-
-    private fun applyCursor(activityDto: ActivityDto?, cursor: String): ActivityDto? {
-        if (activityDto == null) return null
-        return when (activityDto) {
-            is MintActivityDto -> activityDto.copy(cursor = cursor)
-            is BurnActivityDto -> activityDto.copy(cursor = cursor)
-            is TransferActivityDto -> activityDto.copy(cursor = cursor)
-            is OrderMatchSwapDto -> activityDto.copy(cursor = cursor)
-            is OrderMatchSellDto -> activityDto.copy(cursor = cursor)
-            is OrderBidActivityDto -> activityDto.copy(cursor = cursor)
-            is OrderListActivityDto -> activityDto.copy(cursor = cursor)
-            is OrderCancelBidActivityDto -> activityDto.copy(cursor = cursor)
-            is OrderCancelListActivityDto -> activityDto.copy(cursor = cursor)
-            is AuctionOpenActivityDto -> activityDto.copy(cursor = cursor)
-            is AuctionBidActivityDto -> activityDto.copy(cursor = cursor)
-            is AuctionFinishActivityDto -> activityDto.copy(cursor = cursor)
-            is AuctionCancelActivityDto -> activityDto.copy(cursor = cursor)
-            is AuctionStartActivityDto -> activityDto.copy(cursor = cursor)
-            is AuctionEndActivityDto -> activityDto.copy(cursor = cursor)
-            is L2DepositActivityDto -> activityDto.copy(cursor = cursor)
-            is L2WithdrawalActivityDto -> activityDto.copy(cursor = cursor)
-        }
     }
 
     private fun checkMissingIds(

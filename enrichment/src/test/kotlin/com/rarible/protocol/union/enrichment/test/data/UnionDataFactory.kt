@@ -85,7 +85,7 @@ val CUSTOM_COLLECTION_INCLUDE = CollectionIdDto(BlockchainDto.ETHEREUM, "0x88888
 fun randomUnionAddress(): UnionAddress =
     UnionAddressConverter.convert(
         BlockchainDto.ETHEREUM,
-        randomString()
+        randomString().lowercase()
     )
 
 fun randomUnionCollection(id: CollectionIdDto): UnionCollection =

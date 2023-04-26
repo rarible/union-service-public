@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.converter
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.EsActivityEnrichmentProperties
 import com.rarible.protocol.union.core.converter.helper.SellActivityEnricher
@@ -35,7 +36,8 @@ import org.springframework.stereotype.Component
 class EsActivityConverter(
     private val itemRouter: BlockchainRouter<ItemService>,
     private val sellActivityEnricher: SellActivityEnricher,
-    private val esActivityEnrichmentProperties: EsActivityEnrichmentProperties
+    private val esActivityEnrichmentProperties: EsActivityEnrichmentProperties,
+    private val objectMapper: ObjectMapper,
 ) {
 
     suspend fun batchConvert(source: List<ActivityDto>): List<EsActivity> {
@@ -136,6 +138,7 @@ class EsActivityConverter(
             userFrom = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -151,6 +154,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -166,6 +170,7 @@ class EsActivityConverter(
             userTo = source.owner.value,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -190,6 +195,7 @@ class EsActivityConverter(
             volumeUsd = volumeInfo.volumeUsd,
             volumeSell = volumeInfo.volumeSell,
             volumeNative = volumeInfo.volumeNative,
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -205,6 +211,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -220,6 +227,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -239,6 +247,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -258,6 +267,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -277,6 +287,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -292,6 +303,7 @@ class EsActivityConverter(
             userTo = source.bid.buyer.value,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -311,6 +323,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -330,6 +343,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -349,6 +363,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -364,6 +379,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -383,6 +399,7 @@ class EsActivityConverter(
             userTo = source.user.value,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 
@@ -398,6 +415,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
+            activityDto = objectMapper.writeValueAsString(source),
         )
     }
 }

@@ -31,7 +31,7 @@ data class EsActivityCursor(
             }
         }
 
-        fun EsActivityLite.fromActivityLite(): EsActivityCursor {
+        fun EsActivity.fromActivity(): EsActivityCursor {
             return EsActivityCursor(
                 date = this.date,
                 blockNumber = this.blockNumber ?: 0,
