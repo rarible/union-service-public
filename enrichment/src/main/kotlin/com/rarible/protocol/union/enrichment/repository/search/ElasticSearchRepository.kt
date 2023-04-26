@@ -42,8 +42,11 @@ abstract class ElasticSearchRepository<T>(
     @PostConstruct
     override fun init() = runBlocking {
         brokenEsState = try {
-            !EsHelper.existsIndexesForEntity(esOperations, entityDefinition.indexRootName)
-        } catch (_: Exception) {
+            val result = !EsHelper.existsIndexesForEntity(esOperations, entityDefinition.indexRootName)
+            logger.info("Index ${entityDefinition.indexRootName} exists: $result")
+            result
+        } catch (e: Exception) {
+            logger.error("Failed to get index state ${entityDefinition.indexRootName}: ${e.message}", e)
             true
         }
     }
