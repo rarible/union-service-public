@@ -106,16 +106,27 @@ class ActivityRepository(
             .on("_id", Sort.Direction.DESC)
             .background()
 
-        private val OWNERSHIP_SOURCE_DEFINITION = Index()
-            .on(EnrichmentActivity::activityType.name, Sort.Direction.ASC)
+        private val MINT_DEFINITION = Index()
+            .partial(PartialIndexFilter.of(EnrichmentActivity::activityType isEqualTo ActivityTypeDto.MINT))
             .on(EnrichmentActivity::itemId.name, Sort.Direction.ASC)
             .on(EnrichmentMintActivity::owner.name, Sort.Direction.ASC)
+            .background()
+
+        private val PURCHASE_DEFINITION = Index()
+            .partial(
+                PartialIndexFilter.of(
+                    where(EnrichmentActivity::activityType).isEqualTo(ActivityTypeDto.TRANSFER)
+                )
+            )
+            .on(EnrichmentActivity::itemId.name, Sort.Direction.ASC)
+            .on(EnrichmentTransferActivity::owner.name, Sort.Direction.ASC)
             .on(EnrichmentTransferActivity::purchase.name, Sort.Direction.ASC)
             .background()
 
         private val ALL_INDEXES = listOf(
             LAST_SALE_DEFINITION,
-            OWNERSHIP_SOURCE_DEFINITION,
+            MINT_DEFINITION,
+            PURCHASE_DEFINITION,
         )
     }
 }
