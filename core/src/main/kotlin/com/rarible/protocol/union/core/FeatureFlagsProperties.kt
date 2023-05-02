@@ -39,5 +39,6 @@ data class FeatureFlagsProperties(
 
     val enableSpringKafka: Boolean = true,
     val enableElasticsearchCompatibilityMode: Boolean = false,
-    val enableEsActivitySource: Boolean = false,
+    val enableMongoActivityWrite: Boolean = false,
+    val enableMongoActivityRead: Boolean = false,
 )

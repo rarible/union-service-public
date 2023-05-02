@@ -13,6 +13,8 @@ common:
     enableOwnershipSourceEnrichment: true
     enableItemLastSaleEnrichment: true
     enableCustomCollections: true
+    enableMongoActivityWrite: true
+    enableMongoActivityRead: true
 
 enrichment:
   collection:

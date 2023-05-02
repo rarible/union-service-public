@@ -2,7 +2,6 @@ package com.rarible.protocol.union.core.model.elastic
 
 import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig.loadMapping
 import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig.loadSettings
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
@@ -52,7 +51,6 @@ data class EsActivity(
     val volumeUsd: Double? = null,
     val volumeSell: Double? = null,
     val volumeNative: Double? = null,
-    val activityDto: String? = null,
 ) : EsActivitySealed() {
     companion object {
         const val VERSION: Int = 2

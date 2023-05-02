@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.flatMapAsync
@@ -18,31 +17,17 @@ import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
-import com.rarible.protocol.union.dto.AuctionBidActivityDto
-import com.rarible.protocol.union.dto.AuctionCancelActivityDto
-import com.rarible.protocol.union.dto.AuctionEndActivityDto
-import com.rarible.protocol.union.dto.AuctionFinishActivityDto
-import com.rarible.protocol.union.dto.AuctionOpenActivityDto
-import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.L2DepositActivityDto
-import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
-import com.rarible.protocol.union.dto.MintActivityDto
-import com.rarible.protocol.union.dto.OrderBidActivityDto
-import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
-import com.rarible.protocol.union.dto.OrderCancelListActivityDto
-import com.rarible.protocol.union.dto.OrderListActivityDto
-import com.rarible.protocol.union.dto.OrderMatchSellDto
-import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
-import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityDtoConverter
+import com.rarible.protocol.union.enrichment.model.EnrichmentActivityId
+import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.query.activity.ActivityQueryService
@@ -57,9 +42,9 @@ class ActivityElasticService(
     private val esActivityRepository: EsActivityRepository,
     private val enrichmentActivityService: EnrichmentActivityService,
     private val router: BlockchainRouter<ActivityService>,
+    private val activityRepository: ActivityRepository,
+    private val featureFlagsProperties: FeatureFlagsProperties,
     elasticMetricsFactory: ElasticMetricsFactory,
-    private val ff: FeatureFlagsProperties,
-    private val objectMapper: ObjectMapper,
 ) : ActivityQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -245,13 +230,13 @@ class ActivityElasticService(
 
     private suspend fun getActivities(esActivities: List<EsActivity>): List<ActivityDto> {
         if (esActivities.isEmpty()) return emptyList()
-        if (ff.enableEsActivitySource) {
+        if (featureFlagsProperties.enableMongoActivityRead) {
+            val enrichmentActivities = activityRepository.getAll(esActivities.map {
+                EnrichmentActivityId.of(it.activityId)
+            }).associateBy { it.id }
             return esActivities.mapNotNull {
-                if (it.activityDto != null) {
-                    objectMapper.readValue(it.activityDto, ActivityDto::class.java)
-                        .applyCursor(it.fromActivity().toString())
-                } else {
-                    null
+                enrichmentActivities[EnrichmentActivityId.of(it.activityId)]?.let { activity ->
+                    EnrichmentActivityDtoConverter.convert(source = activity, cursor = it.fromActivity().toString())
                 }
             }
         }
@@ -269,7 +254,7 @@ class ActivityElasticService(
                 checkMissingIds(blockchain, ids, response)
                 response
             } else emptyList()
-        }.let { enrichmentActivityService.enrich(it) }
+        }.let { enrichmentActivityService.enrichDeprecated(it) }
 
         val activitiesIdMapping = activities.associateBy { it.id.fullId() }
         return esActivities.mapNotNull { esActivity ->
