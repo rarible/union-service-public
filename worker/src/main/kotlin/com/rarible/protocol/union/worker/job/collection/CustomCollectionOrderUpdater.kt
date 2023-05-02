@@ -13,6 +13,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collect
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.UUID
@@ -106,7 +107,7 @@ class CustomCollectionOrderUpdater(
                 )
             )
         }
-        eventProducer.send(messages)
+        eventProducer.send(messages).collect()
         logger.info(
             "Updated {} {} orders for currency {} for custom collection migration of Item {}",
             messages.size, type, currencyId, itemId.fullId()
