@@ -116,6 +116,7 @@ class ActivityRepository(
             .partial(
                 PartialIndexFilter.of(
                     where(EnrichmentActivity::activityType).isEqualTo(ActivityTypeDto.TRANSFER)
+                        .and(EnrichmentTransferActivity::purchase).isEqualTo(true)
                 )
             )
             .on(EnrichmentActivity::itemId.name, Sort.Direction.ASC)
