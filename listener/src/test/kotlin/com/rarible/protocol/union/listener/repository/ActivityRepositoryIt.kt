@@ -15,11 +15,13 @@ import com.rarible.protocol.union.enrichment.model.EnrichmentActivityId
 import com.rarible.protocol.union.enrichment.model.EnrichmentBurnActivity
 import com.rarible.protocol.union.enrichment.model.EnrichmentMintActivity
 import com.rarible.protocol.union.enrichment.model.EnrichmentOrderMatchSell
+import com.rarible.protocol.union.enrichment.model.EnrichmentTransferActivity
 import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import scalether.domain.Address
@@ -251,6 +253,92 @@ class ActivityRepositoryIt : AbstractIntegrationTest() {
         activityRepository.delete(activity2.id)
 
         assertThat(activityRepository.findLastSale(itemIdDto())).isNull()
+    }
+
+    @Test
+    fun isMinter() = runBlocking<Unit> {
+        val itemId = itemIdDto()
+        val owner = UnionAddress(
+            blockchainGroup = BlockchainGroupDto.ETHEREUM,
+            value = Address.TWO().toString()
+        )
+        activityRepository.save(
+            EnrichmentMintActivity(
+                activityId = "1",
+                blockchain = BlockchainDto.ETHEREUM,
+                contract = ContractAddress(blockchain = BlockchainDto.ETHEREUM, value = Address.ONE().toString()),
+                collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2"),
+                itemId = itemId,
+                tokenId = BigInteger.ONE,
+                date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
+                owner = owner,
+                transactionHash = randomString(),
+                value = BigInteger.ONE,
+            )
+        )
+
+        assertThat(activityRepository.isMinter(itemId, owner)).isTrue()
+        assertThat(
+            activityRepository.isMinter(
+                itemId, UnionAddress(
+                    blockchainGroup = BlockchainGroupDto.ETHEREUM,
+                    value = Address.FOUR().toString()
+                )
+            )
+        ).isFalse()
+    }
+
+    @Test
+    fun isBuyer() = runBlocking<Unit> {
+        val itemId = itemIdDto()
+        val owner = UnionAddress(
+            blockchainGroup = BlockchainGroupDto.ETHEREUM,
+            value = Address.TWO().toString()
+        )
+        val owner2 = UnionAddress(blockchainGroup = BlockchainGroupDto.ETHEREUM, value = Address.THREE().toString())
+        activityRepository.save(
+            EnrichmentTransferActivity(
+                activityId = "1",
+                blockchain = BlockchainDto.ETHEREUM,
+                contract = ContractAddress(blockchain = BlockchainDto.ETHEREUM, value = Address.ONE().toString()),
+                collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2"),
+                itemId = itemId,
+                tokenId = BigInteger.ONE,
+                date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
+                owner = owner,
+                transactionHash = randomString(),
+                value = BigInteger.ONE,
+                purchase = true,
+                from = owner2
+            )
+        )
+        activityRepository.save(
+            EnrichmentTransferActivity(
+                activityId = "2",
+                blockchain = BlockchainDto.ETHEREUM,
+                contract = ContractAddress(blockchain = BlockchainDto.ETHEREUM, value = Address.ONE().toString()),
+                collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2"),
+                itemId = itemId,
+                tokenId = BigInteger.ONE,
+                date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
+                owner = owner2,
+                transactionHash = randomString(),
+                value = BigInteger.ONE,
+                purchase = false,
+                from = owner
+            )
+        )
+
+        assertThat(activityRepository.isBuyer(itemId, owner)).isTrue()
+        assertThat(
+            activityRepository.isBuyer(
+                itemId, UnionAddress(
+                    blockchainGroup = BlockchainGroupDto.ETHEREUM,
+                    value = Address.FOUR().toString()
+                )
+            )
+        ).isFalse()
+        assertThat(activityRepository.isBuyer(itemId, owner2)).isFalse()
     }
 
     private fun itemIdDto() = ItemIdDto(

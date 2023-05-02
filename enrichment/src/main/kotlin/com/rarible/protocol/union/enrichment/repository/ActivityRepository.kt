@@ -4,9 +4,11 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.model.EnrichmentActivity
 import com.rarible.protocol.union.enrichment.model.EnrichmentActivityId
-import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
+import com.rarible.protocol.union.enrichment.model.EnrichmentMintActivity
+import com.rarible.protocol.union.enrichment.model.EnrichmentTransferActivity
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -31,7 +33,7 @@ import org.springframework.stereotype.Component
 class ActivityRepository(
     private val template: ReactiveMongoTemplate
 ) {
-    private val collection: String = template.getCollectionName(EnrichmentCollection::class.java)
+    private val collection: String = template.getCollectionName(EnrichmentActivity::class.java)
 
     suspend fun createIndices() {
         ALL_INDEXES.forEach { index ->
@@ -68,6 +70,27 @@ class ActivityRepository(
             )
         ).awaitFirstOrNull()
 
+    suspend fun isMinter(itemId: ItemIdDto, owner: UnionAddress): Boolean =
+        template.exists(
+            Query(
+                where(EnrichmentActivity::itemId).isEqualTo(itemId)
+                    .and(EnrichmentActivity::activityType).isEqualTo(ActivityTypeDto.MINT)
+                    .and(EnrichmentMintActivity::owner).isEqualTo(owner)
+            ),
+            EnrichmentActivity::class.java
+        ).awaitFirst()
+
+    suspend fun isBuyer(itemId: ItemIdDto, owner: UnionAddress): Boolean =
+        template.exists(
+            Query(
+                where(EnrichmentActivity::itemId).isEqualTo(itemId)
+                    .and(EnrichmentActivity::activityType).isEqualTo(ActivityTypeDto.TRANSFER)
+                    .and(EnrichmentTransferActivity::purchase).isEqualTo(true)
+                    .and(EnrichmentTransferActivity::owner).isEqualTo(owner)
+            ),
+            EnrichmentActivity::class.java
+        ).awaitFirst()
+
     suspend fun delete(activityId: EnrichmentActivityId) {
         template.remove(Query(Criteria("_id").isEqualTo(activityId)), EnrichmentActivity::class.java)
             .awaitFirstOrNull()
@@ -83,8 +106,16 @@ class ActivityRepository(
             .on("_id", Sort.Direction.DESC)
             .background()
 
+        private val OWNERSHIP_SOURCE_DEFINITION = Index()
+            .on(EnrichmentActivity::activityType.name, Sort.Direction.ASC)
+            .on(EnrichmentActivity::itemId.name, Sort.Direction.ASC)
+            .on(EnrichmentMintActivity::owner.name, Sort.Direction.ASC)
+            .on(EnrichmentTransferActivity::purchase.name, Sort.Direction.ASC)
+            .background()
+
         private val ALL_INDEXES = listOf(
-            LAST_SALE_DEFINITION
+            LAST_SALE_DEFINITION,
+            OWNERSHIP_SOURCE_DEFINITION,
         )
     }
 }

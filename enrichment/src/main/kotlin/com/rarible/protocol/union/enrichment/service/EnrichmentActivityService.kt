@@ -76,16 +76,17 @@ class EnrichmentActivityService(
     suspend fun getOwnershipSource(ownershipId: OwnershipIdDto): OwnershipSourceDto {
         val itemId = ownershipId.getItemId()
 
-        val mint = getItemMint(itemId, ownershipId.owner)
-        if (mint != null) return OwnershipSourceDto.MINT
+        if (isItemMint(itemId, ownershipId.owner)) return OwnershipSourceDto.MINT
 
-        val purchase = getItemPurchase(itemId, ownershipId.owner)
-        if (purchase != null) return OwnershipSourceDto.PURCHASE
+        if (isItemPurchase(itemId, ownershipId.owner)) return OwnershipSourceDto.PURCHASE
 
         return OwnershipSourceDto.TRANSFER
     }
 
-    private suspend fun getItemMint(itemId: ItemIdDto, owner: UnionAddress): UnionActivity? {
+    private suspend fun isItemMint(itemId: ItemIdDto, owner: UnionAddress): Boolean {
+        if (featureFlagsProperties.enableMongoActivityRead) {
+            return activityRepository.isMinter(itemId, owner)
+        }
         // For item there should be only one mint
         val mint = activityRouter.getService(itemId.blockchain).getActivitiesByItem(
             types = listOf(ActivityTypeDto.MINT),
@@ -98,14 +99,17 @@ class EnrichmentActivityService(
         // Originally, there ALWAYS should be a mint
         if (mint == null || (mint as UnionMintActivity).owner != owner) {
             logger.info("Mint activity NOT found for Item [{}] and owner [{}]", itemId, owner.fullId())
-            return null
+            return false
         }
 
         logger.info("Mint Activity found for Item [{}] and owner [{}]: [{}]", itemId, owner.fullId(), mint.id)
-        return mint
+        return true
     }
 
-    private suspend fun getItemPurchase(itemId: ItemIdDto, owner: UnionAddress): UnionActivity? {
+    private suspend fun isItemPurchase(itemId: ItemIdDto, owner: UnionAddress): Boolean {
+        if (featureFlagsProperties.enableMongoActivityRead) {
+            return activityRepository.isBuyer(itemId, owner)
+        }
         // TODO not sure this is a good way to search transfer, ideally there should be filter by user
         var continuation: String? = null
         do {
@@ -126,13 +130,13 @@ class EnrichmentActivityService(
                     "Transfer (purchase) Activity found for Item [{}] and owner [{}]: [{}]",
                     itemId, owner.fullId(), purchase.id
                 )
-                return purchase
+                return true
             }
             continuation = response.continuation
         } while (continuation != null)
 
         logger.info("Transfer (purchase) activity NOT found for Item [{}] and owner [{}]", itemId, owner.fullId())
-        return null
+        return false
     }
 
     suspend fun getItemLastSale(itemId: ItemIdDto): ItemLastSale? =

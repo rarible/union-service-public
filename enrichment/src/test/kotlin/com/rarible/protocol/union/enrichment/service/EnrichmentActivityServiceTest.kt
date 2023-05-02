@@ -159,7 +159,7 @@ class EnrichmentActivityServiceTest {
     }
 
     @Test
-    fun `mint source`() = runBlocking<Unit> {
+    fun `mint source deprecated`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val activity = randomUnionActivityMint(itemId)
 
@@ -174,7 +174,28 @@ class EnrichmentActivityServiceTest {
     }
 
     @Test
-    fun `purchase source`() = runBlocking<Unit> {
+    fun `mint source`() = runBlocking<Unit> {
+        service = EnrichmentActivityService(
+            BlockchainRouter(listOf(activityService), listOf(blockchain)),
+            customCollectionResolver,
+            activityRepository,
+            FeatureFlagsProperties(enableMongoActivityRead = true)
+        )
+        val itemId = randomEthItemId()
+        val activity = randomUnionActivityMint(itemId)
+
+        // Mint found, owner matches
+        coEvery {
+            activityRepository.isMinter(itemId, activity.owner)
+        } returns true
+
+        val source = service.getOwnershipSource(itemId.toOwnership(activity.owner.value))
+
+        assertThat(source).isEqualTo(OwnershipSourceDto.MINT)
+    }
+
+    @Test
+    fun `purchase source deprecated`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val activity = randomUnionActivityTransfer(itemId).copy(purchase = true)
         val otherOwnerTransfer = randomUnionActivityTransfer(itemId)
@@ -196,7 +217,30 @@ class EnrichmentActivityServiceTest {
     }
 
     @Test
-    fun `transfer source - found`() = runBlocking<Unit> {
+    fun `purchase source`() = runBlocking<Unit> {
+        service = EnrichmentActivityService(
+            BlockchainRouter(listOf(activityService), listOf(blockchain)),
+            customCollectionResolver,
+            activityRepository,
+            FeatureFlagsProperties(enableMongoActivityRead = true)
+        )
+        val itemId = randomEthItemId()
+        val activity = randomUnionActivityTransfer(itemId).copy(purchase = true)
+
+        coEvery {
+            activityRepository.isMinter(itemId, activity.owner)
+        } returns false
+        coEvery {
+            activityRepository.isBuyer(itemId, activity.owner)
+        } returns true
+
+        val source = service.getOwnershipSource(itemId.toOwnership(activity.owner.value))
+
+        assertThat(source).isEqualTo(OwnershipSourceDto.PURCHASE)
+    }
+
+    @Test
+    fun `transfer source - found deprecated`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val activity = randomUnionActivityTransfer(itemId).copy(purchase = false)
 
@@ -216,7 +260,7 @@ class EnrichmentActivityServiceTest {
     }
 
     @Test
-    fun `transfer type - nothing found`() = runBlocking<Unit> {
+    fun `transfer type - nothing found deprecated`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
 
         // Mint not found
@@ -230,6 +274,29 @@ class EnrichmentActivityServiceTest {
         } returns Slice.empty()
 
         val source = service.getOwnershipSource(randomEthOwnershipId(itemId))
+
+        assertThat(source).isEqualTo(OwnershipSourceDto.TRANSFER)
+    }
+
+    @Test
+    fun `transfer type - nothing found`() = runBlocking<Unit> {
+        service = EnrichmentActivityService(
+            BlockchainRouter(listOf(activityService), listOf(blockchain)),
+            customCollectionResolver,
+            activityRepository,
+            FeatureFlagsProperties(enableMongoActivityRead = true)
+        )
+        val itemId = randomEthItemId()
+        val ownershipId = randomEthOwnershipId(itemId)
+
+        coEvery {
+            activityRepository.isMinter(itemId, ownershipId.owner)
+        } returns false
+        coEvery {
+            activityRepository.isBuyer(itemId, ownershipId.owner)
+        } returns false
+
+        val source = service.getOwnershipSource(ownershipId)
 
         assertThat(source).isEqualTo(OwnershipSourceDto.TRANSFER)
     }
