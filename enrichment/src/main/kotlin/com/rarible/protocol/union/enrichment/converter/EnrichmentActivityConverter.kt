@@ -1,8 +1,6 @@
 package com.rarible.protocol.union.enrichment.converter
 
 import com.rarible.protocol.union.core.model.UnionActivity
-import com.rarible.protocol.union.core.model.UnionAsset
-import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionAuctionBidActivity
 import com.rarible.protocol.union.core.model.UnionAuctionCancelActivity
 import com.rarible.protocol.union.core.model.UnionAuctionEndActivity
@@ -21,32 +19,8 @@ import com.rarible.protocol.union.core.model.UnionOrderListActivity
 import com.rarible.protocol.union.core.model.UnionOrderMatchSell
 import com.rarible.protocol.union.core.model.UnionOrderMatchSwap
 import com.rarible.protocol.union.core.model.UnionTransferActivity
-import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.dto.AssetDto
-import com.rarible.protocol.union.dto.AssetTypeDto
-import com.rarible.protocol.union.dto.AuctionBidActivityDto
-import com.rarible.protocol.union.dto.AuctionCancelActivityDto
-import com.rarible.protocol.union.dto.AuctionEndActivityDto
-import com.rarible.protocol.union.dto.AuctionFinishActivityDto
-import com.rarible.protocol.union.dto.AuctionOpenActivityDto
-import com.rarible.protocol.union.dto.AuctionStartActivityDto
-import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.ContractAddress
-import com.rarible.protocol.union.dto.L2DepositActivityDto
-import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
-import com.rarible.protocol.union.dto.MintActivityDto
-import com.rarible.protocol.union.dto.OrderActivityMatchSideDto
-import com.rarible.protocol.union.dto.OrderBidActivityDto
-import com.rarible.protocol.union.dto.OrderCancelBidActivityDto
-import com.rarible.protocol.union.dto.OrderCancelListActivityDto
-import com.rarible.protocol.union.dto.OrderListActivityDto
-import com.rarible.protocol.union.dto.OrderMatchSellDto
-import com.rarible.protocol.union.dto.OrderMatchSwapDto
-import com.rarible.protocol.union.dto.TransferActivityDto
-import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.converter.data.EnrichmentActivityData
-import com.rarible.protocol.union.enrichment.converter.data.EnrichmentAssetData
 import com.rarible.protocol.union.enrichment.model.EnrichmentActivity
 import com.rarible.protocol.union.enrichment.model.EnrichmentAuctionBidActivity
 import com.rarible.protocol.union.enrichment.model.EnrichmentAuctionCancelActivity
@@ -289,7 +263,6 @@ object EnrichmentActivityConverter {
             transactionHash = source.transactionHash,
             itemId = source.itemId(),
             collection = source.getEnrichedCollection(data),
-            contract = source.auction.sell.type.ext.collectionId?.toContractAddress(),
         )
     }
 
@@ -304,11 +277,13 @@ object EnrichmentActivityConverter {
             transactionHash = source.transactionHash,
             itemId = source.itemId(),
             collection = source.getEnrichedCollection(data),
-            contract = source.auction.sell.type.ext.collectionId?.toContractAddress(),
         )
     }
 
-    private fun convert(source: UnionAuctionFinishActivity, data: EnrichmentActivityData): EnrichmentAuctionFinishActivity {
+    private fun convert(
+        source: UnionAuctionFinishActivity,
+        data: EnrichmentActivityData
+    ): EnrichmentAuctionFinishActivity {
         return EnrichmentAuctionFinishActivity(
             activityId = source.id.value,
             blockchain = source.id.blockchain,
@@ -318,11 +293,13 @@ object EnrichmentActivityConverter {
             transactionHash = source.transactionHash,
             itemId = source.itemId(),
             collection = source.getEnrichedCollection(data),
-            contract = source.auction.sell.type.ext.collectionId?.toContractAddress(),
         )
     }
 
-    private fun convert(source: UnionAuctionCancelActivity, data: EnrichmentActivityData): EnrichmentAuctionCancelActivity {
+    private fun convert(
+        source: UnionAuctionCancelActivity,
+        data: EnrichmentActivityData
+    ): EnrichmentAuctionCancelActivity {
         return EnrichmentAuctionCancelActivity(
             activityId = source.id.value,
             blockchain = source.id.blockchain,
@@ -332,11 +309,13 @@ object EnrichmentActivityConverter {
             transactionHash = source.transactionHash,
             itemId = source.itemId(),
             collection = source.getEnrichedCollection(data),
-            contract = source.auction.sell.type.ext.collectionId?.toContractAddress(),
         )
     }
 
-    private fun convert(source: UnionAuctionStartActivity, data: EnrichmentActivityData): EnrichmentAuctionStartActivity {
+    private fun convert(
+        source: UnionAuctionStartActivity,
+        data: EnrichmentActivityData
+    ): EnrichmentAuctionStartActivity {
         return EnrichmentAuctionStartActivity(
             activityId = source.id.value,
             blockchain = source.id.blockchain,
@@ -345,7 +324,6 @@ object EnrichmentActivityConverter {
             auction = source.auction,
             itemId = source.itemId(),
             collection = source.getEnrichedCollection(data),
-            contract = source.auction.sell.type.ext.collectionId?.toContractAddress(),
         )
     }
 
@@ -358,7 +336,6 @@ object EnrichmentActivityConverter {
             auction = source.auction,
             itemId = source.itemId(),
             collection = source.getEnrichedCollection(data),
-            contract = source.auction.sell.type.ext.collectionId?.toContractAddress(),
         )
     }
 
@@ -373,11 +350,13 @@ object EnrichmentActivityConverter {
             itemId = source.itemId,
             value = source.value,
             collection = source.getEnrichedCollection(data),
-            contract = source.collection?.toContractAddress(),
         )
     }
 
-    private fun convert(source: UnionL2WithdrawalActivity, data: EnrichmentActivityData): EnrichmentL2WithdrawalActivity {
+    private fun convert(
+        source: UnionL2WithdrawalActivity,
+        data: EnrichmentActivityData
+    ): EnrichmentL2WithdrawalActivity {
         return EnrichmentL2WithdrawalActivity(
             activityId = source.id.value,
             blockchain = source.id.blockchain,
@@ -388,7 +367,6 @@ object EnrichmentActivityConverter {
             itemId = source.itemId,
             collection = source.getEnrichedCollection(data),
             value = source.value,
-            contract = source.collection?.toContractAddress(),
         )
     }
 
@@ -413,7 +391,4 @@ object EnrichmentActivityConverter {
     private fun UnionActivity.getEnrichedCollection(data: EnrichmentActivityData): CollectionIdDto? {
         return data.customCollection ?: this.collectionId()
     }
-
-    private fun CollectionIdDto.toContractAddress(): ContractAddress =
-        ContractAddress(blockchain = blockchain, value = value)
 }
