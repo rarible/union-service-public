@@ -258,7 +258,7 @@ class ActivityApiMergeService(
         return ActivitiesDto(
             continuation = null,
             cursor = slice.continuation,
-            activities = enrichmentActivityService.enrich(slice.entities)
+            activities = enrichmentActivityService.enrichDeprecated(slice.entities)
         )
     }
 
@@ -266,7 +266,7 @@ class ActivityApiMergeService(
         return ActivitiesDto(
             continuation = slice.continuation,
             cursor = slice.continuation,
-            activities = enrichmentActivityService.enrich(slice.entities)
+            activities = enrichmentActivityService.enrichDeprecated(slice.entities)
         )
     }
 
@@ -298,7 +298,7 @@ class ActivityApiMergeService(
         return ActivitiesDto(
             continuation = cont,
             cursor = finalSlice.continuation,
-            activities = enrichmentActivityService.enrich(finalSlice.entities)
+            activities = enrichmentActivityService.enrichDeprecated(finalSlice.entities)
         )
     }
 

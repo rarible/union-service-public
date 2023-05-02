@@ -1,8 +1,5 @@
 package com.rarible.protocol.union.core.converter.helper
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
@@ -79,7 +76,6 @@ class EsActivityConverterTest {
         router,
         enricher,
         EsActivityEnrichmentProperties(),
-        jacksonObjectMapper().registerModule(JavaTimeModule())
     )
 
     @Test

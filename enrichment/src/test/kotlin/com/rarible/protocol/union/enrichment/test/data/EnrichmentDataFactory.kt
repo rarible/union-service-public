@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.test.data
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
@@ -14,6 +15,10 @@ fun randomShortItem(id: ItemIdDto) = ShortItemConverter.convert(randomUnionItem(
 
 fun randomEnrichmentCollection(id: CollectionIdDto = randomEthCollectionId()) = EnrichmentCollectionConverter.convert(
     collection = randomUnionCollection(id)
+)
+
+fun randomEnrichmentMintActivity() = EnrichmentActivityConverter.convert(
+    source = randomUnionActivityMint(randomEthItemId())
 )
 
 fun randomShortOwnership() = ShortOwnershipConverter.convert(randomUnionOwnership())

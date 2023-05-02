@@ -7,6 +7,8 @@ import com.rarible.protocol.union.core.model.blockchainAndIndexerMarks
 import com.rarible.protocol.union.core.model.isBlockchainEvent
 import com.rarible.protocol.union.core.model.offchainAndIndexerMarks
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityDtoConverter
+import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import org.springframework.stereotype.Component
 
 @Component
@@ -15,7 +17,8 @@ class EnrichmentActivityEventService(
     private val enrichmentActivityService: EnrichmentActivityService,
     private val ownershipEventService: EnrichmentOwnershipEventService,
     private val itemEventService: EnrichmentItemEventService,
-    private val ff: FeatureFlagsProperties
+    private val activityRepository: ActivityRepository,
+    private val ff: FeatureFlagsProperties,
 ) {
 
     @Deprecated("keep UnionActivity only")
@@ -59,6 +62,18 @@ class EnrichmentActivityEventService(
             offchainAndIndexerMarks(activity.date)
         }.add("enrichment-in")
 
+        val activityDto = if (ff.enableMongoActivityWrite) {
+            val enrichmentActivity = enrichmentActivityService.enrich(activity)
+            if (activity.reverted == true) {
+                activityRepository.delete(enrichmentActivity.id)
+            } else {
+                activityRepository.save(enrichmentActivity)
+            }
+            EnrichmentActivityDtoConverter.convert(source = enrichmentActivity, reverted = activity.reverted ?: false)
+        } else {
+            enrichmentActivityService.enrichDeprecated(activity)
+        }
+
         if (ff.enableItemLastSaleEnrichment) {
             itemEventService.onActivity(
                 activity = activity,
@@ -77,8 +92,7 @@ class EnrichmentActivityEventService(
 
         val shouldSend = ff.enableRevertedActivityEventSending || activity.reverted != true
         if (shouldSend) {
-            val dto = enrichmentActivityService.enrich(activity)
-            activityEventListeners.onEach { it.onEvent(dto) }
+            activityEventListeners.onEach { it.onEvent(activityDto) }
         }
     }
 

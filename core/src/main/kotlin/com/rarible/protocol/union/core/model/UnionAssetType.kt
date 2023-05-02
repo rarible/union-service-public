@@ -44,6 +44,7 @@ sealed class UnionAssetType {
      * Item's collection id OR asset collection id (like "floor bid)
      */
     open fun collectionId(): CollectionIdDto? = null
+    open fun contract(): ContractAddress? = null
     open fun currencyId(): String? = null
 
 }
@@ -58,6 +59,7 @@ data class UnionFlowAssetTypeNft(
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
     override fun collectionId() = toCollectionId(this.contract)
+    override fun contract() = this.contract
 }
 
 data class UnionFlowAssetTypeFt(
@@ -66,6 +68,7 @@ data class UnionFlowAssetTypeFt(
 
     override fun isCurrency() = true
     override fun currencyId() = this.contract.value
+    override fun contract() = this.contract
 }
 
 //------------------ TEZOS ------------------//
@@ -86,6 +89,7 @@ data class UnionTezosFTAssetType(
 
     override fun isCurrency() = true
     override fun currencyId() = tokenId?.let { "${this.contract.value}:${it}" } ?: this.contract.value
+    override fun contract() = this.contract
 }
 
 data class UnionTezosNFTAssetType(
@@ -96,7 +100,7 @@ data class UnionTezosNFTAssetType(
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
     override fun collectionId() = toCollectionId(this.contract)
-
+    override fun contract() = this.contract
 }
 
 data class UnionTezosMTAssetType(
@@ -107,6 +111,7 @@ data class UnionTezosMTAssetType(
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
     override fun collectionId() = toCollectionId(this.contract)
+    override fun contract() = this.contract
 }
 
 //------------------ ETH ------------------//
@@ -125,7 +130,7 @@ data class UnionEthErc20AssetType(
 
     override fun isCurrency() = true
     override fun currencyId() = this.contract.value
-
+    override fun contract() = this.contract
 }
 
 data class UnionEthErc721AssetType(
@@ -136,6 +141,7 @@ data class UnionEthErc721AssetType(
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
     override fun collectionId() = toCollectionId(this.contract)
+    override fun contract() = this.contract
 }
 
 data class UnionEthErc721LazyAssetType(
@@ -150,6 +156,7 @@ data class UnionEthErc721LazyAssetType(
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
     override fun collectionId() = toCollectionId(this.contract)
+    override fun contract() = this.contract
 }
 
 data class UnionEthErc1155AssetType(
@@ -160,6 +167,7 @@ data class UnionEthErc1155AssetType(
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
     override fun collectionId() = toCollectionId(this.contract)
+    override fun contract() = this.contract
 }
 
 data class UnionEthErc1155LazyAssetType(
@@ -175,7 +183,7 @@ data class UnionEthErc1155LazyAssetType(
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId)
     override fun collectionId() = toCollectionId(this.contract)
-
+    override fun contract() = this.contract
 }
 
 data class UnionEthCryptoPunksAssetType(
@@ -186,6 +194,7 @@ data class UnionEthCryptoPunksAssetType(
     override fun isNft() = true
     override fun itemId() = toItemId(this.contract, this.tokenId.toBigInteger())
     override fun collectionId() = toCollectionId(this.contract)
+    override fun contract() = this.contract
 }
 
 data class UnionEthGenerativeArtAssetType(
@@ -194,6 +203,7 @@ data class UnionEthGenerativeArtAssetType(
 
     override fun isCollectionAsset() = true
     override fun collectionId() = toCollectionId(this.contract)
+    override fun contract() = this.contract
 }
 
 data class UnionEthCollectionAssetType(
@@ -203,7 +213,7 @@ data class UnionEthCollectionAssetType(
     override fun isNft() = true
     override fun isCollectionAsset() = true
     override fun collectionId() = toCollectionId(this.contract)
-
+    override fun contract() = this.contract
 }
 
 data class UnionEthAmmNftAssetType(
@@ -213,6 +223,7 @@ data class UnionEthAmmNftAssetType(
     override fun isNft() = true
     override fun isCollectionAsset() = true
     override fun collectionId() = toCollectionId(this.contract)
+    override fun contract() = this.contract
 }
 
 //------------------ SOLANA ------------------//
@@ -225,6 +236,7 @@ data class UnionSolanaNftAssetType(
     override fun isNft() = true
     override fun itemId() = itemId
     override fun collectionId() = contract?.let { toCollectionId(it) }
+    override fun contract() = this.contract
 }
 
 data class UnionSolanaFtAssetType(
@@ -233,6 +245,7 @@ data class UnionSolanaFtAssetType(
 
     override fun isCurrency() = true
     override fun currencyId() = address.value
+    override fun contract() = this.address
 }
 
 class UnionSolanaSolAssetType : UnionAssetType() {

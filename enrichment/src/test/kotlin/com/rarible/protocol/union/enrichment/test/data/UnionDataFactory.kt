@@ -16,6 +16,7 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.core.model.UnionMintActivity
+import com.rarible.protocol.union.core.model.UnionOrderBidActivity
 import com.rarible.protocol.union.core.model.UnionOrderListActivity
 import com.rarible.protocol.union.core.model.UnionOrderMatchSell
 import com.rarible.protocol.union.core.model.UnionTransferActivity
@@ -65,6 +66,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintAct
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemTransferActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderListActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
@@ -253,6 +255,14 @@ fun randomUnionActivityOrderList(blockchain: BlockchainDto) = runBlocking {
     val list = mockedEthActivityConverter.convert(
         randomEthOrderListActivity(), blockchain
     ) as UnionOrderListActivity
+
+    list
+}
+
+fun randomUnionActivityOrderBid(blockchain: BlockchainDto) = runBlocking {
+    val list = mockedEthActivityConverter.convert(
+        randomEthOrderBidActivity(), blockchain
+    ) as UnionOrderBidActivity
 
     list
 }
