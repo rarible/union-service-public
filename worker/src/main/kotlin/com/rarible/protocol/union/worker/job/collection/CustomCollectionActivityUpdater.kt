@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
+import kotlinx.coroutines.flow.collect
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -49,7 +50,7 @@ class CustomCollectionActivityUpdater(
             val messages = enrichmentActivityService.enrich(page.entities.filter { it.reverted != true })
                 .map { KafkaEventFactory.activityEvent(it) }
 
-            eventProducer.send(messages)
+            eventProducer.send(messages).collect()
 
             logger.info("Updated {} activities for custom collection migration of Item {}", messages.size, item.id)
 
