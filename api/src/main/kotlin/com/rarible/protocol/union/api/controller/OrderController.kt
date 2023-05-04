@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.service.select.OrderSourceSelectService
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
@@ -12,6 +13,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.dto.parser.CurrencyIdParser
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,6 +57,7 @@ class OrderController(
         maker: List<String>?,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencies: List<String>?,
         start: Long?,
         end: Long?,
         continuation: String?,
@@ -68,6 +71,7 @@ class OrderController(
             makers,
             origin,
             status,
+            currencies?.map { CurrencyIdParser.parse(it) },
             start,
             end,
             continuation,
@@ -83,6 +87,7 @@ class OrderController(
         platform: PlatformDto?,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencies: List<String>?,
         start: Long?,
         end: Long?,
         continuation: String?,
@@ -96,6 +101,7 @@ class OrderController(
             makers,
             origin,
             status,
+            currencies?.map { CurrencyIdParser.parse(it) },
             start,
             end,
             continuation,

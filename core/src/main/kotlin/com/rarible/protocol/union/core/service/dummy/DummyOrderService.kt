@@ -70,6 +70,7 @@ class DummyOrderService(
         maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencyAddresses: List<String>?,
         start: Long?,
         end: Long?,
         continuation: String?,

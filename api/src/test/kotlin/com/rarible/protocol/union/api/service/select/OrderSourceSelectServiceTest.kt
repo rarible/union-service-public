@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -48,6 +49,7 @@ class OrderSourceSelectServiceTest {
     private val status = listOf(mockk<OrderStatusDto>())
     private val itemId = randomEthItemId()
     private val platform = mockk<PlatformDto>()
+    private val currencies = mockk<List<CurrencyIdDto>>()
     private val maker = UnionAddress(BlockchainGroupDto.ETHEREUM, randomEthAddress())
     private val origin = "some origin"
     private val makers = listOf(UnionAddress(BlockchainGroupDto.ETHEREUM, randomEthAddress()))
@@ -202,12 +204,23 @@ class OrderSourceSelectServiceTest {
             // given
             every { featureFlagsProperties.enableOrderQueriesToElasticSearch } returns true
             coEvery {
-                orderElasticService.getOrderBidsByItem(itemId, platform, makers, origin, status, start, end, continuation, size)
+                orderElasticService.getOrderBidsByItem(
+                    itemId,
+                    platform,
+                    makers,
+                    origin,
+                    status,
+                    currencies,
+                    start,
+                    end,
+                    continuation,
+                    size
+                )
             } returns elasticOrdersResponse
 
             // when
             val actual = service.getOrderBidsByItem(
-                itemId, platform, makers, origin, status, start, end, continuation, size, null
+                itemId, platform, makers, origin, status, currencies, start, end, continuation, size, null
             )
 
             // then
@@ -219,12 +232,23 @@ class OrderSourceSelectServiceTest {
             // given
             every { featureFlagsProperties.enableOrderQueriesToElasticSearch } returns false
             coEvery {
-                orderApiService.getOrderBidsByItem(itemId, platform, makers, origin, status, start, end, continuation, size)
+                orderApiService.getOrderBidsByItem(
+                    itemId,
+                    platform,
+                    makers,
+                    origin,
+                    status,
+                    currencies,
+                    start,
+                    end,
+                    continuation,
+                    size
+                )
             } returns apiOrdersResponse
 
             // when
             val actual = service.getOrderBidsByItem(
-                itemId, platform, makers, origin, status, start, end, continuation, size, null
+                itemId, platform, makers, origin, status, currencies, start, end, continuation, size, null
             )
 
             // then
@@ -240,12 +264,23 @@ class OrderSourceSelectServiceTest {
             // given
             every { featureFlagsProperties.enableOrderQueriesToElasticSearch } returns true
             coEvery {
-                orderElasticService.getOrderBidsByMaker(blockchains, platform, listOf(maker), origin, status, start, end, continuation, size)
+                orderElasticService.getOrderBidsByMaker(
+                    blockchains,
+                    platform,
+                    listOf(maker),
+                    origin,
+                    status,
+                    currencies,
+                    start,
+                    end,
+                    continuation,
+                    size
+                )
             } returns elasticOrdersResponse
 
             // when
             val actual = service.getOrderBidsByMaker(
-                blockchains, platform, listOf(maker), origin, status, start, end, continuation, size, null
+                blockchains, platform, listOf(maker), origin, status, currencies, start, end, continuation, size, null
             )
 
             // then
@@ -257,12 +292,23 @@ class OrderSourceSelectServiceTest {
             // given
             every { featureFlagsProperties.enableOrderQueriesToElasticSearch } returns false
             coEvery {
-                orderApiService.getOrderBidsByMaker(blockchains, platform, listOf(maker), origin, status, start, end, continuation, size)
+                orderApiService.getOrderBidsByMaker(
+                    blockchains,
+                    platform,
+                    listOf(maker),
+                    origin,
+                    status,
+                    currencies,
+                    start,
+                    end,
+                    continuation,
+                    size
+                )
             } returns apiOrdersResponse
 
             // when
             val actual = service.getOrderBidsByMaker(
-                blockchains, platform, listOf(maker), origin, status, start, end, continuation, size, null
+                blockchains, platform, listOf(maker), origin, status, currencies, start, end, continuation, size, null
             )
 
             // then
@@ -311,7 +357,15 @@ class OrderSourceSelectServiceTest {
             // given
             every { featureFlagsProperties.enableOrderQueriesToElasticSearch } returns true
             coEvery {
-                orderElasticService.getSellOrdersByMaker(listOf(maker), blockchains, platform, origin, continuation, size, status)
+                orderElasticService.getSellOrdersByMaker(
+                    listOf(maker),
+                    blockchains,
+                    platform,
+                    origin,
+                    continuation,
+                    size,
+                    status
+                )
             } returns elasticOrdersResponse
 
             // when
@@ -328,7 +382,15 @@ class OrderSourceSelectServiceTest {
             // given
             every { featureFlagsProperties.enableOrderQueriesToElasticSearch } returns false
             coEvery {
-                orderApiService.getSellOrdersByMaker(listOf(maker), blockchains, platform, origin, continuation, size, status)
+                orderApiService.getSellOrdersByMaker(
+                    listOf(maker),
+                    blockchains,
+                    platform,
+                    origin,
+                    continuation,
+                    size,
+                    status
+                )
             } returns apiOrdersResponse
 
             // when

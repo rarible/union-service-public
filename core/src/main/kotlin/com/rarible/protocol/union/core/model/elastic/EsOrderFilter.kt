@@ -4,13 +4,18 @@ package com.rarible.protocol.union.core.model.elastic
 
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ContractAddress
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
+import org.elasticsearch.index.query.AbstractQueryBuilder
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.index.query.QueryBuilders.boolQuery
+import org.elasticsearch.index.query.QueryBuilders.existsQuery
+import org.elasticsearch.index.query.QueryBuilders.termQuery
 import org.elasticsearch.index.query.QueryBuilders.termsQuery
 import org.elasticsearch.search.sort.SortBuilders
 import org.elasticsearch.search.sort.SortOrder
@@ -189,6 +194,7 @@ data class EsOrderBidOrdersByItem(
     val maker: List<String>?,
     val origin: String?,
     val status: List<OrderStatusDto>?,
+    val currencies: List<CurrencyIdDto>?,
     val continuation: DateIdContinuation?,
     val size: Int
 ) : EsOrderFilter {
@@ -201,41 +207,49 @@ data class EsOrderBidOrdersByItem(
                     .should(
                         boolQuery()
                             .must(
-                                termsQuery(
+                                termQuery(
                                     "${EsOrder::take.name}.${EsOrder.Asset::token.name}",
                                     token
                                 )
                             )
                             .must(
-                                termsQuery(
+                                termQuery(
                                     "${EsOrder::take.name}.${EsOrder.Asset::tokenId.name}",
                                     tokenId
                                 )
                             )
                     )
                     .should(
-                        boolQuery().must(
-                            termsQuery(
-                                "${EsOrder::take.name}.${EsOrder.Asset::isNft.name}",
-                                true
+                        boolQuery()
+                            .must(
+                                termQuery(
+                                    "${EsOrder::take.name}.${EsOrder.Asset::isNft.name}",
+                                    true
+                                )
                             )
-                        ).mustNot(
-                            QueryBuilders.existsQuery(
-                                "${EsOrder::take.name}.${EsOrder.Asset::tokenId.name}"
+                            .must(
+                                termQuery(
+                                    "${EsOrder::take.name}.${EsOrder.Asset::token.name}",
+                                    token
+                                )
                             )
-                        )
+                            .mustNot(
+                                QueryBuilders.existsQuery(
+                                    "${EsOrder::take.name}.${EsOrder.Asset::tokenId.name}"
+                                )
+                            )
                     ).minimumShouldMatch(1)
             )
 
             add(
-                termsQuery(
+                termQuery(
                     EsOrder::type.name,
                     EsOrder.Type.BID.name
                 )
             )
 
             if (platform != null) {
-                add(termsQuery(EsOrder::platform.name, platform.name))
+                add(termQuery(EsOrder::platform.name, platform.name))
             }
 
             if (maker != null) {
@@ -243,13 +257,14 @@ data class EsOrderBidOrdersByItem(
             }
 
             if (origin != null) {
-                add(termsQuery(EsOrder::origins.name, origin))
+                add(termQuery(EsOrder::origins.name, origin))
             }
 
             if (status != null) {
                 add(termsQuery(EsOrder::status.name, status.map { it.name }))
             }
 
+            addCurrenciesQuery(currencies, EsOrder::make.name)
         }
 
         return genericBuild(continuation, size, EsOrderSort.MAKE_PRICE_ASC, *list.toTypedArray())
@@ -262,6 +277,7 @@ data class EsOrdersByMakers(
     val maker: List<String>?,
     val origin: String?,
     val status: List<OrderStatusDto>?,
+    val currencies: List<CurrencyIdDto>?,
     val continuation: DateIdContinuation?,
     val size: Int,
     val sort: EsOrderSort,
@@ -270,7 +286,7 @@ data class EsOrdersByMakers(
     override fun asQuery(): Query {
         val list = buildList {
             add(
-                termsQuery(
+                termQuery(
                     EsOrder::type.name,
                     type.name
                 )
@@ -281,7 +297,7 @@ data class EsOrdersByMakers(
             }
 
             if (platform != null) {
-                add(termsQuery(EsOrder::platform.name, platform.name))
+                add(termQuery(EsOrder::platform.name, platform.name))
             }
 
             if (maker != null) {
@@ -289,16 +305,58 @@ data class EsOrdersByMakers(
             }
 
             if (origin != null) {
-                add(termsQuery(EsOrder::origins.name, origin))
+                add(termQuery(EsOrder::origins.name, origin))
             }
 
             if (status != null) {
                 add(termsQuery(EsOrder::status.name, status.map { it.name }))
             }
 
+            if (type == EsOrder.Type.BID) {
+                addCurrenciesQuery(currencies, EsOrder::make.name)
+            } else {
+                addCurrenciesQuery(currencies, EsOrder::take.name)
+            }
         }
 
         return genericBuild(continuation, size, sort, *list.toTypedArray())
+    }
+}
+
+private fun MutableList<AbstractQueryBuilder<*>>.addCurrenciesQuery(
+    currencies: List<CurrencyIdDto>?,
+    side: String
+) {
+    if (!currencies.isNullOrEmpty()) {
+        val currenciesQuery = boolQuery()
+        currencies.forEach { currency ->
+            val currencyQuery = boolQuery()
+                .must(
+                    termQuery(
+                        "$side.${EsOrder.Asset::token.name}",
+                        ContractAddress(
+                            blockchain = currency.blockchain,
+                            value = currency.contract
+                        ).fullId()
+                    )
+                )
+            if (currency.tokenId != null) {
+                currencyQuery.must(
+                    termQuery(
+                        "$side.${EsOrder.Asset::tokenId.name}",
+                        currency.tokenId
+                    )
+                )
+            } else {
+                currencyQuery.mustNot(
+                    existsQuery(
+                        "$side.${EsOrder.Asset::tokenId.name}",
+                    )
+                )
+            }
+            currenciesQuery.should(currencyQuery)
+        }
+        add(currenciesQuery)
     }
 }
 

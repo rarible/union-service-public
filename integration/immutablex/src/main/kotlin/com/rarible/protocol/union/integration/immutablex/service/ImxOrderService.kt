@@ -114,6 +114,7 @@ class ImxOrderService(
         maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencyAddresses: List<String>?,
         start: Long?, // Not supported for bids by IMX
         end: Long?, // Not supported for bids by IMX
         continuation: String?,

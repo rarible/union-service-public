@@ -14,6 +14,7 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -102,6 +103,7 @@ class OrderElasticService(
         makers: List<UnionAddress>?,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencies: List<CurrencyIdDto>?,
         start: Long?,
         end: Long?,
         continuation: String?,
@@ -120,7 +122,8 @@ class OrderElasticService(
             origin = origin,
             status = status,
             continuation = DateIdContinuation.parse(continuation),
-            size = safeSize
+            size = safeSize,
+            currencies = currencies,
         )
         return fetchOrders(orderFilter)
     }
@@ -131,6 +134,7 @@ class OrderElasticService(
         makers: List<UnionAddress>,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencies: List<CurrencyIdDto>?,
         start: Long?,
         end: Long?,
         continuation: String?,
@@ -156,7 +160,8 @@ class OrderElasticService(
             continuation = DateIdContinuation.parse(continuation),
             size = safeSize,
             sort = EsOrderSort.LAST_UPDATE_DESC,
-            type = EsOrder.Type.BID
+            type = EsOrder.Type.BID,
+            currencies = currencies,
         )
         return fetchOrders(orderFilter)
     }
@@ -216,7 +221,8 @@ class OrderElasticService(
             continuation = DateIdContinuation.parse(continuation),
             size = safeSize,
             sort = EsOrderSort.LAST_UPDATE_DESC,
-            type = EsOrder.Type.SELL
+            type = EsOrder.Type.SELL,
+            currencies = null,
         )
         return fetchOrders(orderFilter)
     }
@@ -246,6 +252,5 @@ class OrderElasticService(
                 date = last.lastUpdatedAt
             ).toString()
         )
-
     }
 }

@@ -3,6 +3,7 @@ package com.rarible.protocol.union.core.converter
 import com.rarible.protocol.union.core.model.elastic.EsOrder
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AssetDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
 import com.rarible.protocol.union.dto.EthErc1155AssetTypeDto
@@ -67,10 +68,10 @@ object EsOrderConverter {
             blockchain = source.id.blockchain,
             platform = source.platform,
             maker = source.maker.fullId(),
-            make = asset(source.make),
+            make = asset(source.make, source.id.blockchain),
             makePrice = source.makePrice?.toDouble(),
             makePriceUsd = source.makePriceUsd?.toDouble(),
-            take = asset(source.take),
+            take = asset(source.take, source.id.blockchain),
             takePrice = source.takePrice?.toDouble(),
             takePriceUsd = source.takePriceUsd?.toDouble(),
             taker = source.taker?.fullId(),
@@ -116,12 +117,15 @@ object EsOrderConverter {
         }.map { it.fullId() }
     }
 
-    fun asset(assetDto: AssetDto): EsOrder.Asset {
+    fun asset(assetDto: AssetDto, blockchain: BlockchainDto): EsOrder.Asset {
 
         val pair = if (assetDto.type.ext.itemId != null) {
             assetDto.type.ext.itemId?.fullId()?.let {
                 CompositeItemIdParser.splitWithBlockchain(it)
             }
+        } else if (assetDto.type.ext.isCurrency) {
+            val currencyId = assetDto.type.ext.currencyAddress()
+            CompositeItemIdParser.splitWithBlockchain("$blockchain:$currencyId")
         } else {
             assetDto.type.ext.collectionId.toString() to null
         }

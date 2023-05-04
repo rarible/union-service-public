@@ -87,6 +87,7 @@ class OrderApiServiceTest {
             maker = null,
             origin = null,
             status = emptyList(),
+            currencies = null,
             start = null,
             end = null,
             continuation = continuation,

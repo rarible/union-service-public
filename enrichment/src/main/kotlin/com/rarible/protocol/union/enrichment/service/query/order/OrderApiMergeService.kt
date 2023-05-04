@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
@@ -164,6 +165,7 @@ class OrderApiMergeService(
         maker: List<UnionAddress>?,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencies: List<CurrencyIdDto>?,
         start: Long?,
         end: Long?,
         continuation: String?,
@@ -189,7 +191,7 @@ class OrderApiMergeService(
             return Slice.empty()
         }
 
-        val currencyContracts = router.getService(blockchain)
+        val currencyContracts = currencies?.map { it.value } ?: router.getService(blockchain)
             .getBidCurrencies(itemId.value)
             .map { it.currencyId()!! }
 
@@ -227,6 +229,7 @@ class OrderApiMergeService(
         makers: List<UnionAddress>,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencies: List<CurrencyIdDto>?,
         start: Long?,
         end: Long?,
         continuation: String?,
@@ -251,6 +254,7 @@ class OrderApiMergeService(
                     .map { address -> address.value },
                 originAddress?.value,
                 status,
+                currencies?.map { currency -> currency.value },
                 start,
                 end,
                 continuation,

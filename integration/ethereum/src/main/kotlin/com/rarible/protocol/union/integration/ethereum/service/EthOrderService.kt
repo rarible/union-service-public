@@ -118,6 +118,7 @@ open class EthOrderService(
         maker: List<String>,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencyAddresses: List<String>?,
         start: Long?,
         end: Long?,
         continuation: String?,
@@ -130,6 +131,7 @@ open class EthOrderService(
             continuation,
             size,
             ethOrderConverter.convert(status),
+            currencyAddresses?.map { EthConverter.convertToAddress(it) },
             start,
             end
         ).awaitFirst()

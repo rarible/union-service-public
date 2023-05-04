@@ -4,6 +4,7 @@ import com.rarible.protocol.union.api.service.elastic.OrderElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
@@ -79,6 +80,7 @@ class OrderSourceSelectService(
         maker: List<UnionAddress>?,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencies: List<CurrencyIdDto>?,
         start: Long?,
         end: Long?,
         continuation: String?,
@@ -91,6 +93,7 @@ class OrderSourceSelectService(
             maker,
             origin,
             status,
+            currencies,
             start,
             end,
             continuation,
@@ -104,6 +107,7 @@ class OrderSourceSelectService(
         maker: List<UnionAddress>,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencies: List<CurrencyIdDto>?,
         start: Long?,
         end: Long?,
         continuation: String?,
@@ -116,6 +120,7 @@ class OrderSourceSelectService(
             maker,
             origin,
             status,
+            currencies,
             start,
             end,
             continuation,

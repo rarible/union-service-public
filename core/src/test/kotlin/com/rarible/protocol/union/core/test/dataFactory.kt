@@ -161,7 +161,7 @@ fun randomAssetTypeDto(blockchain: BlockchainDto): AssetTypeDto = EthErc721Asset
     tokenId = randomBigInt(),
 )
 
-fun randomAssetTypeErc20Dto(blockchain: BlockchainDto): AssetTypeDto = EthErc20AssetTypeDto(
+fun randomAssetTypeErc20Dto(blockchain: BlockchainDto): EthErc20AssetTypeDto = EthErc20AssetTypeDto(
     contract = ContractAddress(blockchain, randomString()),
 )
 
