@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.service.query.order
 
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -43,6 +44,7 @@ interface OrderQueryService {
         makers: List<UnionAddress>?,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencies: List<CurrencyIdDto>?,
         start: Long?,
         end: Long?,
         continuation: String?,
@@ -55,6 +57,7 @@ interface OrderQueryService {
         makers: List<UnionAddress>,
         origin: String?,
         status: List<OrderStatusDto>?,
+        currencies: List<CurrencyIdDto>?,
         start: Long?,
         end: Long?,
         continuation: String?,

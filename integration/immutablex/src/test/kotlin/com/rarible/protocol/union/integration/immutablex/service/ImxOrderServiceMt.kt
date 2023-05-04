@@ -198,6 +198,7 @@ class ImxOrderServiceMt : ImxManualTest() {
             null,
             null,
             null,
+            null,
             2
         )
 
@@ -208,6 +209,7 @@ class ImxOrderServiceMt : ImxManualTest() {
             listOf(user),
             null,
             listOf(OrderStatusDto.CANCELLED, OrderStatusDto.FILLED),
+            null,
             null,
             null,
             page1.continuation,
@@ -222,6 +224,7 @@ class ImxOrderServiceMt : ImxManualTest() {
             listOf(user),
             null,
             listOf(OrderStatusDto.CANCELLED, OrderStatusDto.FILLED),
+            null,
             null,
             null,
             null,
