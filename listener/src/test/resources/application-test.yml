@@ -15,6 +15,7 @@ common:
     enableCustomCollections: true
     enableMongoActivityWrite: true
     enableMongoActivityRead: true
+    enableItemBestBidsByCurrency: true
 
 enrichment:
   collection:
@@ -22,7 +23,10 @@ enrichment:
       - customCollection: "ETHEREUM:0x7777777777777777777777777777777777777777"
         collections:
           - "ETHEREUM:0x8888888888888888888888888888888888888888"
-
+  currencies:
+    bestBidByCurrencyWhitelist:
+      - ETHEREUM:0xc778417e063141139fce010982780140aa0cd5ab
+      - POLYGON:0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa
 rarible:
   core:
     apm:

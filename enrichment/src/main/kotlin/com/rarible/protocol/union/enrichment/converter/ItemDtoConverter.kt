@@ -56,6 +56,8 @@ object ItemDtoConverter {
             // Enrichment data
             bestSellOrder = shortItem?.bestSellOrder?.let { orders[it.dtoId] },
             bestBidOrder = shortItem?.bestBidOrder?.let { orders[it.dtoId] },
+            bestBidOrdersByCurrency = shortItem?.bestBidOrders?.values?.filter { it.id != shortItem.bestBidOrder?.id }
+                ?.mapNotNull { orders[it.dtoId] }?.ifEmpty { null },
             originOrders = shortItem?.originOrders?.let { OriginOrdersConverter.convert(it, orders) } ?: emptyList(),
             ammOrders = AmmOrdersDto(shortItem?.poolSellOrders?.map { it.order.dtoId } ?: emptyList()),
             auctions = shortItem?.auctions?.mapNotNull { auctions[it] } ?: emptyList(),
@@ -75,5 +77,4 @@ object ItemDtoConverter {
             price = lastSale.price
         )
     }
-
 }
