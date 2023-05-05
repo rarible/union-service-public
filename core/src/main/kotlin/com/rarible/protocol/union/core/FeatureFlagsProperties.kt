@@ -31,6 +31,7 @@ data class FeatureFlagsProperties(
     var enableItemQueriesToElasticSearch: Boolean = false,
     var enableSearchItems: Boolean = false,
     var enableItemSaveImmediateToElasticSearch: Boolean = false,
+    val enableItemBestBidsByCurrency: Boolean = true,
 
     val enableCustomCollections: Boolean = false,
 

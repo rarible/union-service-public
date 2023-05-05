@@ -32,6 +32,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConve
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -45,6 +46,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import scalether.domain.Address
 import java.time.Instant
 
 @IntegrationTest
@@ -102,19 +104,31 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
         val bestSellOrder = randomEthSellOrderDto(itemId)
-        val bestBidOrder = randomEthSellOrderDto(itemId)
+        val bestBidOrder = randomEthBidOrderDto(itemId)
         val unionBestSell = ethOrderConverter.convert(bestSellOrder, itemId.blockchain)
         val unionBestBid = ethOrderConverter.convert(bestBidOrder, itemId.blockchain)
+
+        val whitelistedBidOrder = randomEthBidOrderDto(itemId).copy(
+            make = randomEthAssetErc20(Address.apply("0xc778417e063141139fce010982780140aa0cd5ab"))
+        )
+        val notWhitelistedBidOrder = randomEthBidOrderDto(itemId)
+        val unionWhitelistedBidOrder = ethOrderConverter.convert(whitelistedBidOrder, itemId.blockchain)
+        val unionNotWhitelistedBidOrder = ethOrderConverter.convert(notWhitelistedBidOrder, itemId.blockchain)
 
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         val shortItem = ShortItemConverter.convert(unionItem).copy(
             bestSellOrder = ShortOrderConverter.convert(unionBestSell),
-            bestBidOrder = ShortOrderConverter.convert(unionBestBid)
+            bestBidOrder = ShortOrderConverter.convert(unionBestBid),
+            bestBidOrders = listOf(
+                unionBestBid,
+                unionWhitelistedBidOrder,
+                unionNotWhitelistedBidOrder
+            ).associate { it.bidCurrencyId() to ShortOrderConverter.convert(it) }
         )
 
         itemService.save(shortItem)
 
-        ethereumOrderControllerApiMock.mockGetByIds(bestSellOrder, bestBidOrder)
+        ethereumOrderControllerApiMock.mockGetByIds(bestSellOrder, bestBidOrder, whitelistedBidOrder)
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
 
         itemEventService.onItemUpdated(UnionItemUpdateEvent(unionItem, stubEventMark()))
@@ -122,7 +136,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val expected = ItemDtoConverter.convert(unionItem)
             .copy(
                 bestSellOrder = OrderDtoConverter.convert(unionBestSell),
-                bestBidOrder = OrderDtoConverter.convert(unionBestBid)
+                bestBidOrder = OrderDtoConverter.convert(unionBestBid),
+                bestBidOrdersByCurrency = listOf(OrderDtoConverter.convert(unionWhitelistedBidOrder))
             )
 
         val saved = itemService.get(shortItem.id)!!
@@ -138,6 +153,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].value.item.id).isEqualTo(expected.id)
             assertThat(messages[0].value.item.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
             assertThat(messages[0].value.item.bestBidOrder!!.id).isEqualTo(expected.bestBidOrder!!.id)
+            assertThat(messages[0].value.item.bestBidOrdersByCurrency!!.map { it.id })
+                .isEqualTo(expected.bestBidOrdersByCurrency!!.map { it.id })
         }
     }
 

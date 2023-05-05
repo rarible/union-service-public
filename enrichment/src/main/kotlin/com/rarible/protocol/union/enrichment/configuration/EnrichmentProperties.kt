@@ -6,7 +6,12 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConstructorBinding
 @ConfigurationProperties(prefix = "enrichment")
 class EnrichmentProperties(
-    val collection: EnrichmentCollectionProperties = EnrichmentCollectionProperties()
+    val collection: EnrichmentCollectionProperties = EnrichmentCollectionProperties(),
+    val currencies: EnrichmentCurrenciesProperties = EnrichmentCurrenciesProperties(),
+)
+
+data class EnrichmentCurrenciesProperties(
+    val bestBidByCurrencyWhitelist: List<String> = emptyList(),
 )
 
 data class EnrichmentCollectionProperties(

@@ -4,3 +4,7 @@ enrichment:
       - customCollection: "ETHEREUM:0xe2de2249cf1c9d76eaf24257b85bbe83bd218a0b"
         collections:
           - "ETHEREUM:0xc8ec13089712ee09b651a41bd8a01245628e58d4"
+  currencies:
+    bestBidByCurrencyWhitelist:
+      - ETHEREUM:0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6
+      - POLYGON:0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa
