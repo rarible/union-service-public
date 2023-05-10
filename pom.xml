@@ -55,7 +55,7 @@
         <rarible.protocol.solana.version>1.41.0</rarible.protocol.solana.version>
         <rarible.protocol.tezos.api.version>1.39.19</rarible.protocol.tezos.api.version>
 
-        <rarible.protocol.union.version>1.48.2</rarible.protocol.union.version>
+        <rarible.protocol.union.version>1.48.3</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>

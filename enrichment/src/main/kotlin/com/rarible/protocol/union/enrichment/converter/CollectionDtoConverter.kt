@@ -40,7 +40,10 @@ object CollectionDtoConverter {
             bestSellOrder = enrichmentCollection?.bestSellOrder?.let { orders[it.dtoId] },
             bestBidOrder = enrichmentCollection?.bestBidOrder?.let { orders[it.dtoId] },
             originOrders = enrichmentCollection?.originOrders?.let { OriginOrdersConverter.convert(it, orders) }
-                ?: emptyList()
+                ?: emptyList(),
+            bestBidOrdersByCurrency = enrichmentCollection?.bestBidOrders?.values
+                ?.filter { it.id != enrichmentCollection.bestBidOrder?.id }
+                ?.mapNotNull { orders[it.dtoId] }?.ifEmpty { null },
         )
     }
 
@@ -65,7 +68,10 @@ object CollectionDtoConverter {
             meta = meta?.let { MetaDtoConverter.convert(it) },
             bestSellOrder = collection.bestSellOrder?.let { orders[it.dtoId] },
             bestBidOrder = collection.bestBidOrder?.let { orders[it.dtoId] },
-            originOrders = OriginOrdersConverter.convert(collection.originOrders, orders)
+            originOrders = OriginOrdersConverter.convert(collection.originOrders, orders),
+            bestBidOrdersByCurrency = collection.bestBidOrders.values
+                .filter { it.id != collection.bestBidOrder?.id }
+                .mapNotNull { orders[it.dtoId] }.ifEmpty { null },
         )
     }
 
@@ -121,5 +127,4 @@ object CollectionDtoConverter {
             UnionCollection.Status.ERROR -> CollectionDto.Status.ERROR
         }
     }
-
 }

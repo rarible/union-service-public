@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderOwner
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
+import com.rarible.protocol.union.enrichment.evaluator.BlockchainAware
 import org.springframework.data.annotation.AccessType
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
@@ -21,7 +22,7 @@ import java.time.Instant
  */
 @Document("enrichment_collection")
 data class EnrichmentCollection(
-    val blockchain: BlockchainDto,
+    override val blockchain: BlockchainDto,
     val collectionId: String,
 
     val name: String?,
@@ -51,7 +52,8 @@ data class EnrichmentCollection(
 
     @Version
     val version: Long? = null
-) : BestSellOrderOwner<EnrichmentCollection>, BestBidOrderOwner<EnrichmentCollection>, OriginOrdersOwner {
+) : BestSellOrderOwner<EnrichmentCollection>, BestBidOrderOwner<EnrichmentCollection>, OriginOrdersOwner,
+    BlockchainAware {
 
     fun withCalculatedFieldsAndUpdatedAt(): EnrichmentCollection {
         return this.copy(

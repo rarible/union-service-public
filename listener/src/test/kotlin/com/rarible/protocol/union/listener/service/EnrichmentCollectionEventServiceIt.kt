@@ -13,6 +13,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollection
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionAsset
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
@@ -26,6 +27,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
+import java.math.BigDecimal
+import java.math.BigInteger
 
 @IntegrationTest
 class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
@@ -148,12 +151,36 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         val enrichmentCollection = randomEnrichmentCollection(collectionId)
         val ethItem = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
         val unionCollection = EthCollectionConverter.convert(ethItem, collectionId.blockchain)
-        collectionService.save(enrichmentCollection)
 
         val bestBidOrder = randomEthBidOrderDto().copy(
-            take = randomEthCollectionAsset(Address.apply(collectionId.value))
+            take = randomEthCollectionAsset(Address.apply(collectionId.value)),
         )
         val unionBestBid = ethOrderConverter.convert(bestBidOrder, collectionId.blockchain)
+        val whitelistedBidOrder = randomEthBidOrderDto().copy(
+            take = randomEthCollectionAsset(Address.apply(collectionId.value)),
+            make = randomEthAssetErc20(Address.apply("0xc778417e063141139fce010982780140aa0cd5ab")).copy(
+                value = BigInteger.ZERO,
+                valueDecimal = BigDecimal.ZERO,
+            ),
+        )
+        val notWhitelistedBidOrder = randomEthBidOrderDto().copy(
+            take = randomEthCollectionAsset(Address.apply(collectionId.value)),
+            make = randomEthAssetErc20().copy(
+                value = BigInteger.ZERO,
+                valueDecimal = BigDecimal.ZERO,
+            ),
+        )
+        val unionWhitelistedBidOrder = ethOrderConverter.convert(whitelistedBidOrder, collectionId.blockchain)
+        val unionNotWhitelistedBidOrder = ethOrderConverter.convert(notWhitelistedBidOrder, collectionId.blockchain)
+
+        collectionService.save(enrichmentCollection.copy(
+            bestBidOrders = listOf(
+                unionWhitelistedBidOrder,
+                unionNotWhitelistedBidOrder
+            ).associate { it.bidCurrencyId() to ShortOrderConverter.convert(it) }
+        ))
+
+        ethereumOrderControllerApiMock.mockGetByIds(whitelistedBidOrder)
 
         coEvery { testEthereumCollectionApi.getNftCollectionById(collectionId.value) } returns ethItem.toMono()
 
@@ -161,7 +188,10 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         // In result event for Item we expect updated bestSellOrder
         val expected = CollectionDtoConverter.convertLegacy(unionCollection)
-            .copy(bestBidOrder = OrderDtoConverter.convert(unionBestBid))
+            .copy(
+                bestBidOrder = OrderDtoConverter.convert(unionBestBid),
+                bestBidOrdersByCurrency = listOf(OrderDtoConverter.convert(unionWhitelistedBidOrder)),
+            )
 
         val saved = collectionService.get(enrichmentCollection.id)!!
         assertThat(saved.bestBidOrder).isEqualTo(ShortOrderConverter.convert(unionBestBid))
@@ -173,6 +203,8 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].value.collection.id).isEqualTo(expected.id)
             assertThat(messages[0].value.collection.bestBidOrder!!.id).isEqualTo(expected.bestBidOrder!!.id)
             assertThat(messages[0].value.collection.bestSellOrder).isNull()
+            assertThat(messages[0].value.collection.bestBidOrdersByCurrency!!.map { it.id })
+                .isEqualTo(expected.bestBidOrdersByCurrency!!.map { it.id })
         }
     }
 }

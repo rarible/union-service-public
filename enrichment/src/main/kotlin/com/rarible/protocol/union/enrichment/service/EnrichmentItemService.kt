@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.service
 
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -12,11 +11,9 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.enrichment.configuration.EnrichmentProperties
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
@@ -46,8 +43,7 @@ class EnrichmentItemService(
     private val originService: OriginService,
     private val customCollectionResolver: CustomCollectionResolver,
     private val metrics: ItemMetaMetrics,
-    private val featureFlagsProperties: FeatureFlagsProperties,
-    private val enrichmentProperties: EnrichmentProperties,
+    private val enrichmentHelperService: EnrichmentHelperService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -123,7 +119,7 @@ class EnrichmentItemService(
         onMetaEntry(itemId, metaPipeline, metaEntry)
 
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
-            existing = getExistingOrdersForItem(shortItem),
+            existing = enrichmentHelperService.getExistingOrders(shortItem),
             orders = orders
         )
 
@@ -148,19 +144,6 @@ class EnrichmentItemService(
         )
     }
 
-    private fun getExistingOrdersForItem(shortItem: ShortItem?) =
-        if (featureFlagsProperties.enableItemBestBidsByCurrency) {
-            val bestOrders = shortItem?.getAllBestOrders() ?: emptyList()
-            val bestBidsByCurrency = shortItem?.bestBidOrders?.entries
-                ?.filter {
-                    "${shortItem.blockchain}:${it.key}" in enrichmentProperties.currencies.bestBidByCurrencyWhitelist
-                }
-                ?.map { it.value } ?: emptyList()
-            (bestOrders + bestBidsByCurrency).toSet().toList()
-        } else {
-            shortItem?.getAllBestOrders()
-        } ?: emptyList()
-
     suspend fun enrichItems(
         unionItems: List<UnionItem>,
         metaPipeline: ItemMetaPipeline
@@ -177,7 +160,7 @@ class EnrichmentItemService(
 
             // Looking for full orders for existing items in order-indexer
             val shortOrderIds = shortItems.values
-                .map { getExistingOrdersForItem(it) }
+                .map { enrichmentHelperService.getExistingOrders(it) }
                 .flatten()
                 .map { it.dtoId }
 
