@@ -37,7 +37,8 @@ class EnrichmentCollectionService(
     private val orderApiService: OrderApiMergeService,
     private val collectionMetaService: CollectionMetaService,
     private val metrics: CollectionMetaMetrics,
-    private val ff: FeatureFlagsProperties
+    private val ff: FeatureFlagsProperties,
+    private val enrichmentHelperService: EnrichmentHelperService,
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionService::class.java)
@@ -116,7 +117,7 @@ class EnrichmentCollectionService(
         val metaEntry = enrichmentCollection.metaEntry
 
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
-            existing = enrichmentCollection.getAllBestOrders(),
+            existing = enrichmentHelperService.getExistingOrders(enrichmentCollection),
             orders = orders
         )
 
@@ -144,7 +145,7 @@ class EnrichmentCollectionService(
         }
 
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
-            existing = enrichmentCollection?.getAllBestOrders() ?: emptyList(),
+            existing = enrichmentHelperService.getExistingOrders(enrichmentCollection),
             orders = orders
         )
 
@@ -185,7 +186,7 @@ class EnrichmentCollectionService(
         }
 
         val shortOrderIds = enrichmentCollections
-            .map { it.getAllBestOrders() }
+            .map { enrichmentHelperService.getExistingOrders(it) }
             .flatten()
             .map { it.dtoId }
 
@@ -219,7 +220,7 @@ class EnrichmentCollectionService(
         metaPipeline: CollectionMetaPipeline
     ): List<CollectionDto> {
         val shortOrderIds = enrichmentCollections.values
-            .map { it.getAllBestOrders() }
+            .map { enrichmentHelperService.getExistingOrders(it) }
             .flatten()
             .map { it.dtoId }
 

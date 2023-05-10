@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderOwner
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
+import com.rarible.protocol.union.enrichment.evaluator.BlockchainAware
 import org.springframework.data.annotation.AccessType
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
@@ -18,7 +19,7 @@ import java.time.Instant
 @Document(ShortItem.COLLECTION)
 data class ShortItem(
 
-    val blockchain: BlockchainDto,
+    override val blockchain: BlockchainDto,
     val itemId: String,
     val collectionId: String? = null,
 
@@ -47,7 +48,7 @@ data class ShortItem(
 
     @Version
     val version: Long? = null
-) : BestSellOrderOwner<ShortItem>, BestBidOrderOwner<ShortItem>, OriginOrdersOwner {
+) : BestSellOrderOwner<ShortItem>, BestBidOrderOwner<ShortItem>, OriginOrdersOwner, BlockchainAware {
 
     @Transient
     private val _id: ShortItemId = ShortItemId(blockchain, itemId)
