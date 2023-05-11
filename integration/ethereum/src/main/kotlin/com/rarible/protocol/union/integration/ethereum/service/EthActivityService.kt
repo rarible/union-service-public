@@ -60,7 +60,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
 import org.slf4j.LoggerFactory
-import scalether.domain.Address
 import java.time.Instant
 
 open class EthActivityService(
@@ -259,14 +258,15 @@ open class EthActivityService(
         size: Int,
         sort: ActivitySortDto?
     ): Slice<UnionActivity> {
+        val ethCollection = EthConverter.convertToAddress(collection)
         val nftFilter = ethActivityConverter.convertToNftCollectionTypes(types)?.let {
-            NftActivityFilterByCollectionDto(Address.apply(collection), it)
+            NftActivityFilterByCollectionDto(ethCollection, it)
         }
         val orderFilter = ethActivityConverter.convertToOrderCollectionTypes(types)?.let {
-            OrderActivityFilterByCollectionDto(Address.apply(collection), it)
+            OrderActivityFilterByCollectionDto(ethCollection, it)
         }
         val auctionFilter = ethActivityConverter.convertToAuctionCollectionTypes(types)?.let {
-            AuctionActivityFilterByCollectionDto(Address.apply(collection), it)
+            AuctionActivityFilterByCollectionDto(ethCollection, it)
         }
         return getEthereumActivities(nftFilter, orderFilter, auctionFilter, continuation, size, sort)
     }
@@ -279,14 +279,15 @@ open class EthActivityService(
         sort: ActivitySortDto?
     ): Slice<UnionActivity> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        val ethContract = EthConverter.convertToAddress(contract)
         val nftFilter = ethActivityConverter.convertToNftItemTypes(types)?.let {
-            NftActivityFilterByItemDto(Address.apply(contract), tokenId, it)
+            NftActivityFilterByItemDto(ethContract, tokenId, it)
         }
         val orderFilter = ethActivityConverter.convertToOrderItemTypes(types)?.let {
-            OrderActivityFilterByItemDto(Address.apply(contract), tokenId, it)
+            OrderActivityFilterByItemDto(ethContract, tokenId, it)
         }
         val auctionFilter = ethActivityConverter.convertToAuctionItemTypes(types)?.let {
-            AuctionActivityFilterByItemDto(Address.apply(contract), tokenId, it)
+            AuctionActivityFilterByItemDto(ethContract, tokenId, it)
         }
         return getEthereumActivities(nftFilter, orderFilter, auctionFilter, continuation, size, sort)
     }
@@ -300,8 +301,10 @@ open class EthActivityService(
         sort: ActivitySortDto?,
     ): Slice<UnionActivity> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        val ethContract = EthConverter.convertToAddress(contract)
+        val ethOwner = EthConverter.convertToAddress(owner)
         val nftFilter = ethActivityConverter.convertToNftItemAndOwnerTypes(types)?.let {
-            NftActivityFilterByItemAndOwnerDto(Address.apply(contract), tokenId, Address.apply(owner), it)
+            NftActivityFilterByItemAndOwnerDto(ethContract, tokenId, ethOwner, it)
         }
         return getEthereumActivities(nftFilter, null, null, continuation, size, sort)
     }
