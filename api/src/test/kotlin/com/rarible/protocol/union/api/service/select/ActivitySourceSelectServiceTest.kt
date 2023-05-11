@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
@@ -44,6 +45,7 @@ class ActivitySourceSelectServiceTest {
 
     private val type = listOf(mockk<ActivityTypeDto>())
     private val blockchains = listOf(mockk<BlockchainDto>())
+    private val bidCurrencies = listOf(mockk<CurrencyIdDto>())
     private val continuation = "some continuation"
     private val cursor = "some cursor"
     private val size = 42
@@ -119,24 +121,41 @@ class ActivitySourceSelectServiceTest {
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
         every { featureFlagsProperties.enableActivityAscQueriesWithApiMerge } returns ascQueriesFeatureFlag
         coEvery {
-            activityElasticService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
+            activityElasticService.getAllActivities(type, blockchains, bidCurrencies, continuation, cursor, size, sort)
         } returns elasticResponse
         coEvery {
-            activityApiMergeService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
+            activityApiMergeService.getAllActivities(type, blockchains, bidCurrencies, continuation, cursor, size, sort)
         } returns apiMergeResponse
 
         // when
-        val actual = service.getAllActivities(type, blockchains, continuation, cursor, size, sort, searchEngine)
+        val actual =
+            service.getAllActivities(type, blockchains, bidCurrencies, continuation, cursor, size, sort, searchEngine)
 
         // then
         assertThat(actual).isEqualTo(expectedResponse)
         if (expectedResponse == elasticResponse) {
             coVerify {
-                activityElasticService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
+                activityElasticService.getAllActivities(
+                    type,
+                    blockchains,
+                    bidCurrencies,
+                    continuation,
+                    cursor,
+                    size,
+                    sort
+                )
             }
         } else {
             coVerify {
-                activityApiMergeService.getAllActivities(type, blockchains, continuation, cursor, size, sort)
+                activityApiMergeService.getAllActivities(
+                    type,
+                    blockchains,
+                    bidCurrencies,
+                    continuation,
+                    cursor,
+                    size,
+                    sort
+                )
             }
         }
         confirmVerified(activityApiMergeService, activityElasticService)
@@ -155,26 +174,58 @@ class ActivitySourceSelectServiceTest {
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
         every { featureFlagsProperties.enableActivityAscQueriesWithApiMerge } returns ascQueriesFeatureFlag
         coEvery {
-            activityElasticService.getActivitiesByCollection(type, listOf(collection), continuation, cursor, size, sort)
+            activityElasticService.getActivitiesByCollection(
+                type,
+                listOf(collection),
+                bidCurrencies,
+                continuation,
+                cursor,
+                size,
+                sort
+            )
         } returns elasticResponse
         coEvery {
-            activityApiMergeService.getActivitiesByCollection(type, listOf(collection), continuation, cursor, size, sort)
+            activityApiMergeService.getActivitiesByCollection(
+                type,
+                listOf(collection),
+                bidCurrencies,
+                continuation,
+                cursor,
+                size,
+                sort
+            )
         } returns apiMergeResponse
 
         // when
         val actual = service.getActivitiesByCollection(
-            type, listOf(collection), continuation, cursor, size, sort, searchEngine
+            type, listOf(collection), bidCurrencies, continuation, cursor, size, sort, searchEngine
         )
 
         // then
         assertThat(actual).isEqualTo(expectedResponse)
         if (expectedResponse == elasticResponse) {
             coVerify {
-                activityElasticService.getActivitiesByCollection(type, listOf(collection), continuation, cursor, size, sort)
+                activityElasticService.getActivitiesByCollection(
+                    type,
+                    listOf(collection),
+                    bidCurrencies,
+                    continuation,
+                    cursor,
+                    size,
+                    sort
+                )
             }
         } else {
             coVerify {
-                activityApiMergeService.getActivitiesByCollection(type, listOf(collection), continuation, cursor, size, sort)
+                activityApiMergeService.getActivitiesByCollection(
+                    type,
+                    listOf(collection),
+                    bidCurrencies,
+                    continuation,
+                    cursor,
+                    size,
+                    sort
+                )
             }
         }
         confirmVerified(activityApiMergeService, activityElasticService)
@@ -193,24 +244,41 @@ class ActivitySourceSelectServiceTest {
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
         every { featureFlagsProperties.enableActivityAscQueriesWithApiMerge } returns ascQueriesFeatureFlag
         coEvery {
-            activityElasticService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
+            activityElasticService.getActivitiesByItem(type, itemId, bidCurrencies, continuation, cursor, size, sort)
         } returns elasticResponse
         coEvery {
-            activityApiMergeService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
+            activityApiMergeService.getActivitiesByItem(type, itemId, bidCurrencies, continuation, cursor, size, sort)
         } returns apiMergeResponse
 
         // when
-        val actual = service.getActivitiesByItem(type, itemId, continuation, cursor, size, sort, searchEngine)
+        val actual =
+            service.getActivitiesByItem(type, itemId, bidCurrencies, continuation, cursor, size, sort, searchEngine)
 
         // then
         assertThat(actual).isEqualTo(expectedResponse)
         if (expectedResponse == elasticResponse) {
             coVerify {
-                activityElasticService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
+                activityElasticService.getActivitiesByItem(
+                    type,
+                    itemId,
+                    bidCurrencies,
+                    continuation,
+                    cursor,
+                    size,
+                    sort
+                )
             }
         } else {
             coVerify {
-                activityApiMergeService.getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
+                activityApiMergeService.getActivitiesByItem(
+                    type,
+                    itemId,
+                    bidCurrencies,
+                    continuation,
+                    cursor,
+                    size,
+                    sort
+                )
             }
         }
         confirmVerified(activityApiMergeService, activityElasticService)
@@ -229,26 +297,70 @@ class ActivitySourceSelectServiceTest {
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
         every { featureFlagsProperties.enableActivityAscQueriesWithApiMerge } returns ascQueriesFeatureFlag
         coEvery {
-            activityElasticService.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
+            activityElasticService.getActivitiesByUser(
+                userType,
+                user,
+                blockchains,
+                bidCurrencies,
+                from,
+                to,
+                continuation,
+                cursor,
+                size,
+                sort
+            )
         } returns elasticResponse
         coEvery {
-            activityApiMergeService.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
+            activityApiMergeService.getActivitiesByUser(
+                userType,
+                user,
+                blockchains,
+                bidCurrencies,
+                from,
+                to,
+                continuation,
+                cursor,
+                size,
+                sort
+            )
         } returns apiMergeResponse
 
         // when
         val actual = service.getActivitiesByUser(
-            userType, user, blockchains, from, to, continuation, cursor, size, sort, searchEngine
+            userType, user, blockchains, bidCurrencies, from, to, continuation, cursor, size, sort, searchEngine
         )
 
         // then
         assertThat(actual).isEqualTo(expectedResponse)
         if (expectedResponse == elasticResponse) {
             coVerify {
-                activityElasticService.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
+                activityElasticService.getActivitiesByUser(
+                    userType,
+                    user,
+                    blockchains,
+                    bidCurrencies,
+                    from,
+                    to,
+                    continuation,
+                    cursor,
+                    size,
+                    sort
+                )
             }
         } else {
             coVerify {
-                activityApiMergeService.getActivitiesByUser(userType, user, blockchains, from, to, continuation, cursor, size, sort)
+                activityApiMergeService.getActivitiesByUser(
+                    userType,
+                    user,
+                    blockchains,
+                    bidCurrencies,
+                    from,
+                    to,
+                    continuation,
+                    cursor,
+                    size,
+                    sort
+                )
             }
         }
         confirmVerified(activityApiMergeService, activityElasticService)

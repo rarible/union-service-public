@@ -1,10 +1,9 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.model.elastic.ActivityByCollectionFilter
 import com.rarible.protocol.union.core.model.elastic.ElasticActivityFilter
-import com.rarible.protocol.union.core.model.elastic.ElasticActivityQueryGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivitySort
+import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.MatchQueryBuilder
@@ -25,58 +24,40 @@ class EsActivityQueryBuilderService(
         private val userFrom = EsActivity::userFrom.name
         private val userTo = EsActivity::userTo.name
         private val collection = EsActivity::collection.name
+        private val currency = EsActivity::currency.name
         private val item = EsActivity::item.name
+        private val blockchain = EsActivity::blockchain.name
+        private val type = EsActivity::type.name
+        private val bidActivities = listOf(ActivityTypeDto.BID.name, ActivityTypeDto.CANCEL_BID.name)
     }
 
     fun build(filter: ElasticActivityFilter, sort: EsActivitySort): NativeSearchQuery {
         val builder = NativeSearchQueryBuilder()
         val query = BoolQueryBuilder()
-        when (filter) {
-            is ElasticActivityQueryGenericFilter -> query.applyGenericFilter(filter)
-            is ActivityByCollectionFilter -> query.applyByCollectionFilter(filter)
+        query.mustMatchTerms(filter.blockchains, blockchain)
+        query.mustMatchTerms(filter.activityTypes, type)
+        query.anyMustMatchTerms(filter.anyUsers, userFrom, userTo)
+        query.mustMatchTerms(filter.usersFrom, userFrom)
+        query.mustMatchTerms(filter.usersTo, userTo)
+        if (filter.collections.isNotEmpty()) {
+            val collectionQuery = QueryBuilders.boolQuery()
+            filter.collections.forEach { (blockchain, address) ->
+                collectionQuery.should(
+                    matchCollection(blockchain, address)
+                )
+            }
+            query.must(collectionQuery)
         }
-        sortService.applySort(builder, sort)
-        cursorService.applyCursor(query, sort, filter.cursor)
-
-        builder.withQuery(query)
-        return builder.build()
-    }
-
-    private fun BoolQueryBuilder.applyByCollectionFilter(filter: ActivityByCollectionFilter) {
-        val collectionQuery = QueryBuilders.boolQuery()
-
-        filter.collections.forEach { (blockchain, address) ->
-            collectionQuery.should(
-                matchCollection(blockchain, address)
-            )
+        if (filter.bidCurrencies.isNotEmpty()) {
+            val currenciesQuery = QueryBuilders.boolQuery()
+            filter.bidCurrencies.forEach { (blockchain, value) ->
+                currenciesQuery.should(
+                    matchCurrency(blockchain, value)
+                )
+            }
+            query.must(currenciesQuery)
         }
-        must(collectionQuery)
-
-        mustMatchTerms(
-            filter.activityTypes.map { it.name }.toSet(),
-            EsActivity::type.name
-        )
-    }
-
-    private fun matchCollection(
-        blockchain: BlockchainDto,
-        address: String
-    ) = QueryBuilders
-        .boolQuery()
-        .must(
-            QueryBuilders.termQuery(EsActivity::blockchain.name, blockchain.name)
-        ).must(
-            QueryBuilders.termQuery(EsActivity::collection.name, address)
-        )
-
-    private fun BoolQueryBuilder.applyGenericFilter(filter: ElasticActivityQueryGenericFilter) {
-        mustMatchTerms(filter.blockchains, EsActivity::blockchain.name)
-        mustMatchTerms(filter.activityTypes, EsActivity::type.name)
-        anyMustMatchTerms(filter.anyUsers, userFrom, userTo)
-        mustMatchTerms(filter.usersFrom, userFrom)
-        mustMatchTerms(filter.usersTo, userTo)
-        mustMatchTerms(filter.collections, collection)
-        mustMatchKeyword(filter.item, item)
+        query.mustMatchKeyword(filter.item, item)
 
         if (filter.from != null || filter.to != null) {
             val rangeQueryBuilder = RangeQueryBuilder(EsActivity::date.name)
@@ -86,9 +67,42 @@ class EsActivityQueryBuilderService(
             if (filter.to != null) {
                 rangeQueryBuilder.lte(filter.to)
             }
-            must(rangeQueryBuilder)
+            query.must(rangeQueryBuilder)
         }
+        sortService.applySort(builder, sort)
+        cursorService.applyCursor(query, sort, filter.cursor)
+
+        builder.withQuery(query)
+        return builder.build()
     }
+
+    private fun matchCurrency(
+        blockchain: BlockchainDto,
+        value: String
+    ) = QueryBuilders
+        .boolQuery()
+        .should(
+            QueryBuilders.boolQuery().must(
+                QueryBuilders.termQuery(EsActivityQueryBuilderService.blockchain, blockchain.name)
+            ).must(
+                QueryBuilders.termQuery(currency, value)
+            ).must(QueryBuilders.termsQuery(type, bidActivities))
+        ).should(
+            QueryBuilders.boolQuery().mustNot(
+                QueryBuilders.termsQuery(type, bidActivities)
+            )
+        )
+
+    private fun matchCollection(
+        blockchain: BlockchainDto,
+        address: String
+    ) = QueryBuilders
+        .boolQuery()
+        .must(
+            QueryBuilders.termQuery(EsActivityQueryBuilderService.blockchain, blockchain.name)
+        ).must(
+            QueryBuilders.termQuery(collection, address)
+        )
 
     private fun BoolQueryBuilder.mustMatchTerms(terms: Set<*>, field: String) {
         if (terms.isNotEmpty()) {

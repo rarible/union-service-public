@@ -5,6 +5,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
@@ -17,6 +18,7 @@ interface ActivityQueryService {
     suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
+        bidCurrencies: List<CurrencyIdDto>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
@@ -42,6 +44,7 @@ interface ActivityQueryService {
     suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
         collection: List<CollectionIdDto>,
+        bidCurrencies: List<CurrencyIdDto>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
@@ -51,6 +54,7 @@ interface ActivityQueryService {
     suspend fun getActivitiesByItem(
         type: List<ActivityTypeDto>,
         itemId: ItemIdDto,
+        bidCurrencies: List<CurrencyIdDto>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
@@ -61,6 +65,7 @@ interface ActivityQueryService {
         type: List<UserActivityTypeDto>,
         user: List<UnionAddress>,
         blockchains: List<BlockchainDto>?,
+        bidCurrencies: List<CurrencyIdDto>?,
         from: Instant?,
         to: Instant?,
         continuation: String?,
