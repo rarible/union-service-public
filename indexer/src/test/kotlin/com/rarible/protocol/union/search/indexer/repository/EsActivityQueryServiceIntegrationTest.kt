@@ -1,13 +1,12 @@
 package com.rarible.protocol.union.search.indexer.repository
 
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.elastic.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.core.model.elastic.ElasticActivityFilter
 import com.rarible.protocol.union.core.model.elastic.EsActivityCursor
 import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.enrichment.test.data.info
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
@@ -38,7 +37,7 @@ internal class EsActivityQueryServiceIntegrationTest {
     @Test
     fun `should return up to 3 activities from query`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(
+        val filter = ElasticActivityFilter(
             blockchains = setOf(BlockchainDto.SOLANA, BlockchainDto.TEZOS)
         )
         val toFind1 = randomEsActivity().copy(
@@ -85,7 +84,7 @@ internal class EsActivityQueryServiceIntegrationTest {
         val fifth = randomEsActivity().copy(date = Instant.ofEpochMilli(500))
         val sixth = randomEsActivity().copy(date = Instant.ofEpochMilli(600))
         repository.saveAll(listOf(second, fourth, sixth, fifth, third, first))
-        var filter = ElasticActivityQueryGenericFilter()
+        var filter = ElasticActivityFilter()
 
         // when
         val query1 = repository.search(filter, EsActivitySort(false), 2)

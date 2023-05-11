@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.select.ActivitySourceSelectService
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.ActivitiesByUsersRequestDto
@@ -12,7 +11,9 @@ import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.dto.parser.CurrencyIdParser
 import com.rarible.protocol.union.dto.parser.IdParser
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
@@ -23,13 +24,14 @@ class ActivityController(
 ) : ActivityControllerApi {
 
     companion object {
-        private val logger by Logger()
+        private val logger = LoggerFactory.getLogger(ActivityController::class.java)
         private const val MAX_USERS_COUNT = 2000
     }
 
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
+        bidCurrencies: List<String>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
@@ -38,7 +40,14 @@ class ActivityController(
     ): ResponseEntity<ActivitiesDto> {
         logger.info("Got request to get all activities, parameters: $type, $blockchains, $continuation, $cursor, $size, $sort")
         val result = activitySourceSelector.getAllActivities(
-            type, blockchains, continuation, cursor, size, sort, searchEngine
+            type,
+            blockchains,
+            bidCurrencies?.map { CurrencyIdParser.parse(it) },
+            continuation,
+            cursor,
+            size,
+            sort,
+            searchEngine
         )
         return ResponseEntity.ok(result)
     }
@@ -58,6 +67,7 @@ class ActivityController(
     override suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
         collection: List<String>,
+        bidCurrencies: List<String>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
@@ -67,7 +77,14 @@ class ActivityController(
         if (collection.isEmpty()) throw UnionException("No any collection param in query")
         val collectionIds = collection.map(IdParser::parseCollectionId)
         val result = activitySourceSelector.getActivitiesByCollection(
-            type, collectionIds, continuation, cursor, size, sort, searchEngine
+            type,
+            collectionIds,
+            bidCurrencies?.map { CurrencyIdParser.parse(it) },
+            continuation,
+            cursor,
+            size,
+            sort,
+            searchEngine
         )
         return ResponseEntity.ok(result)
     }
@@ -75,6 +92,7 @@ class ActivityController(
     override suspend fun getActivitiesByItem(
         type: List<ActivityTypeDto>,
         itemId: String,
+        bidCurrencies: List<String>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
@@ -82,7 +100,14 @@ class ActivityController(
         searchEngine: SearchEngineDto?
     ): ResponseEntity<ActivitiesDto> {
         val result = activitySourceSelector.getActivitiesByItem(
-            type, IdParser.parseItemId(itemId), continuation, cursor, size, sort, searchEngine
+            type,
+            IdParser.parseItemId(itemId),
+            bidCurrencies?.map { CurrencyIdParser.parse(it) },
+            continuation,
+            cursor,
+            size,
+            sort,
+            searchEngine
         )
         return ResponseEntity.ok(result)
     }
@@ -91,6 +116,7 @@ class ActivityController(
         type: List<UserActivityTypeDto>,
         user: List<String>,
         blockchains: List<BlockchainDto>?,
+        bidCurrencies: List<String>?,
         from: Instant?,
         to: Instant?,
         continuation: String?,
@@ -101,7 +127,17 @@ class ActivityController(
     ): ResponseEntity<ActivitiesDto> {
         val userAddresses = user.map(IdParser::parseAddress)
         val result = activitySourceSelector.getActivitiesByUser(
-            type, userAddresses, blockchains, from, to, continuation, cursor, size, sort, searchEngine
+            type,
+            userAddresses,
+            blockchains,
+            bidCurrencies?.map { CurrencyIdParser.parse(it) },
+            from,
+            to,
+            continuation,
+            cursor,
+            size,
+            sort,
+            searchEngine
         )
         return ResponseEntity.ok(result)
     }
@@ -111,6 +147,7 @@ class ActivityController(
             activitiesByUsersRequestDto.types,
             activitiesByUsersRequestDto.users.take(MAX_USERS_COUNT),
             activitiesByUsersRequestDto.blockchains,
+            activitiesByUsersRequestDto.bidCurrencies,
             activitiesByUsersRequestDto.from,
             activitiesByUsersRequestDto.to,
             activitiesByUsersRequestDto.continuation,

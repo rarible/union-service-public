@@ -1,13 +1,14 @@
 package com.rarible.protocol.union.search.indexer.repository
 
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.elastic.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.core.model.elastic.ElasticActivityFilter
 import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.enrichment.test.data.info
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
@@ -17,6 +18,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.test.context.ContextConfiguration
+import scalether.domain.Address
+import scalether.domain.AddressFactory
 import java.time.Instant
 
 @IntegrationTest
@@ -40,7 +43,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query with empty filter`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter()
+        val filter = ElasticActivityFilter()
         val toFind1 = randomEsActivity()
         val toFind2 = randomEsActivity()
         repository.saveAll(listOf(toFind1, toFind2))
@@ -55,7 +58,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query by blockchain`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(blockchains = setOf(BlockchainDto.SOLANA, BlockchainDto.TEZOS))
+        val filter = ElasticActivityFilter(blockchains = setOf(BlockchainDto.SOLANA, BlockchainDto.TEZOS))
         val toFind1 = randomEsActivity().copy(blockchain = BlockchainDto.SOLANA)
         val toFind2 = randomEsActivity().copy(blockchain = BlockchainDto.TEZOS)
         val toSkip1 = randomEsActivity().copy(blockchain = BlockchainDto.ETHEREUM)
@@ -73,7 +76,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     fun `should query by activity type`() = runBlocking<Unit> {
         // given
         val filter =
-            ElasticActivityQueryGenericFilter(activityTypes = setOf(ActivityTypeDto.SELL, ActivityTypeDto.BURN))
+            ElasticActivityFilter(activityTypes = setOf(ActivityTypeDto.SELL, ActivityTypeDto.BURN))
         val toFind1 = randomEsActivity().copy(type = ActivityTypeDto.SELL)
         val toFind2 = randomEsActivity().copy(type = ActivityTypeDto.BURN)
         val toSkip1 = randomEsActivity().copy(type = ActivityTypeDto.BID)
@@ -90,7 +93,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query by any users`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(anyUsers = setOf("loupa", "poupa"))
+        val filter = ElasticActivityFilter(anyUsers = setOf("loupa", "poupa"))
         val toFind1 = randomEsActivity().copy(userFrom = "loupa", userTo = null)
         val toFind2 = randomEsActivity().copy(userFrom = "0x00", userTo = "poupa")
         val toSkip1 = randomEsActivity().copy(userFrom = "0x01", userTo = "0x00")
@@ -107,7 +110,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query by userFrom`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(usersFrom = setOf("loupa", "poupa"))
+        val filter = ElasticActivityFilter(usersFrom = setOf("loupa", "poupa"))
         val toFind1 = randomEsActivity().copy(userFrom = "loupa", userTo = null)
         val toFind2 = randomEsActivity().copy(userFrom = "poupa", userTo = "0x02")
         val toSkip1 = randomEsActivity().copy(userFrom = "0x01", userTo = "loupa")
@@ -124,7 +127,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query by userTo`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(usersTo = setOf("loupa", "poupa"))
+        val filter = ElasticActivityFilter(usersTo = setOf("loupa", "poupa"))
         val toFind1 = randomEsActivity().copy(userFrom = "0x01", userTo = "loupa")
         val toFind2 = randomEsActivity().copy(userFrom = "0x03", userTo = "poupa")
         val toSkip1 = randomEsActivity().copy(userFrom = "loupa", userTo = null)
@@ -141,12 +144,18 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query by collections`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(collections = setOf("boredApes", "cryptoPunks"))
-        val toFind1 = randomEsActivity().copy(collection = "boredApes")
-        val toFind2 = randomEsActivity().copy(collection = "cryptoPunks")
-        val toSkip1 = randomEsActivity().copy(collection = "cryptoKitties")
-        val toSkip2 = randomEsActivity().copy(collection = "cyberBrokers")
-        repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2))
+        val filter = ElasticActivityFilter(
+            collections = setOf(
+                CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "boredApes"),
+                CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "cryptoPunks")
+            )
+        )
+        val toFind1 = randomEsActivity().copy(collection = "boredApes", blockchain = BlockchainDto.ETHEREUM)
+        val toFind2 = randomEsActivity().copy(collection = "cryptoPunks", blockchain = BlockchainDto.ETHEREUM)
+        val toSkip1 = randomEsActivity().copy(collection = "cryptoKitties", blockchain = BlockchainDto.ETHEREUM)
+        val toSkip2 = randomEsActivity().copy(collection = "cyberBrokers", blockchain = BlockchainDto.ETHEREUM)
+        val toSkip3 = randomEsActivity().copy(collection = "cryptoPunks", blockchain = BlockchainDto.FLOW)
+        repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2, toSkip3))
 
         // when
         val result = repository.search(filter, sort, null)
@@ -158,7 +167,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query by any item`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(item = "0x01:111")
+        val filter = ElasticActivityFilter(item = "0x01:111")
         val toFind1 = randomEsActivity().copy(item = "0x01:111")
         val toFind2 = randomEsActivity().copy(item = "0x01:111")
         val toSkip1 = randomEsActivity().copy(item = "0x05:555")
@@ -176,7 +185,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query by from date`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(from = Instant.ofEpochMilli(500))
+        val filter = ElasticActivityFilter(from = Instant.ofEpochMilli(500))
         val toFind1 = randomEsActivity().copy(date = Instant.ofEpochMilli(500))
         val toFind2 = randomEsActivity().copy(date = Instant.ofEpochMilli(600))
         val toSkip1 = randomEsActivity().copy(date = Instant.ofEpochMilli(400))
@@ -193,7 +202,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query by to date`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(to = Instant.ofEpochMilli(500))
+        val filter = ElasticActivityFilter(to = Instant.ofEpochMilli(500))
         val toFind1 = randomEsActivity().copy(date = Instant.ofEpochMilli(400))
         val toFind2 = randomEsActivity().copy(date = Instant.ofEpochMilli(500))
         val toSkip1 = randomEsActivity().copy(date = Instant.ofEpochMilli(600))
@@ -211,7 +220,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     fun `should query between from and to`() = runBlocking<Unit> {
         // given
         val filter =
-            ElasticActivityQueryGenericFilter(from = Instant.ofEpochMilli(500), to = Instant.ofEpochMilli(1000))
+            ElasticActivityFilter(from = Instant.ofEpochMilli(500), to = Instant.ofEpochMilli(1000))
         val toFind1 = randomEsActivity().copy(date = Instant.ofEpochMilli(500))
         val toFind2 = randomEsActivity().copy(date = Instant.ofEpochMilli(1000))
         val toSkip1 = randomEsActivity().copy(date = Instant.ofEpochMilli(250))
@@ -228,11 +237,14 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should do compound query`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityQueryGenericFilter(
+        val filter = ElasticActivityFilter(
             blockchains = setOf(BlockchainDto.SOLANA, BlockchainDto.TEZOS),
             activityTypes = setOf(ActivityTypeDto.SELL, ActivityTypeDto.BURN),
             anyUsers = setOf("loupa", "poupa"),
-            collections = setOf("boredApes", "cryptoPunks"),
+            collections = setOf(
+                CollectionIdDto(blockchain = BlockchainDto.SOLANA, value = "boredApes"),
+                CollectionIdDto(blockchain = BlockchainDto.TEZOS, value = "cryptoPunks")
+            ),
             from = Instant.ofEpochMilli(500),
             to = Instant.ofEpochMilli(1000),
         )
@@ -261,7 +273,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
             date = Instant.ofEpochMilli(600),
         )
         val toSkip2 = randomEsActivity().copy(
-            blockchain = BlockchainDto.ETHEREUM,
+            blockchain = BlockchainDto.SOLANA,
             type = ActivityTypeDto.SELL,
             userFrom = "0x00",
             userTo = "poupa",
@@ -282,5 +294,69 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
 
         // then
         assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
+    }
+
+
+    @Test
+    fun `should do by bid currencies query`() = runBlocking<Unit> {
+        // given
+        val filter = ElasticActivityFilter(
+            bidCurrencies = setOf(
+                CurrencyIdDto(blockchain = BlockchainDto.ETHEREUM, contract = Address.ONE().toString(), tokenId = null),
+                CurrencyIdDto(blockchain = BlockchainDto.ETHEREUM, contract = Address.TWO().toString(), tokenId = null),
+            )
+        )
+        val toFind1 = randomEsActivity().copy(
+            blockchain = BlockchainDto.ETHEREUM,
+            type = ActivityTypeDto.BID,
+            userFrom = "loupa",
+            userTo = null,
+            collection = "boredApes",
+            currency =  Address.ONE().toString(),
+            date = Instant.ofEpochMilli(600),
+        )
+        val toFind2 = randomEsActivity().copy(
+            blockchain = BlockchainDto.ETHEREUM,
+            type = ActivityTypeDto.CANCEL_BID,
+            userFrom = "0x00",
+            userTo = null,
+            collection = "cryptoPunks",
+            currency =  Address.TWO().toString(),
+            date = Instant.ofEpochMilli(900),
+        )
+        val toFind3 = randomEsActivity().copy(
+            blockchain = BlockchainDto.SOLANA,
+            type = ActivityTypeDto.LIST,
+            userFrom = "loupa",
+            userTo = null,
+            collection = "boredApes",
+            currency = AddressFactory.create().toString(),
+            date = Instant.ofEpochMilli(600),
+        )
+        val toSkip1 = randomEsActivity().copy(
+            blockchain = BlockchainDto.SOLANA,
+            type = ActivityTypeDto.CANCEL_BID,
+            userFrom = "loupa",
+            userTo = null,
+            currency = AddressFactory.create().toString(),
+            collection = "ethDomains",
+            date = Instant.ofEpochMilli(600),
+        )
+        val toSkip2 = randomEsActivity().copy(
+            blockchain = BlockchainDto.SOLANA,
+            type = ActivityTypeDto.BID,
+            userFrom = "0x00",
+            userTo = null,
+            collection = "boredApes",
+            currency = AddressFactory.create().toString(),
+            date = Instant.ofEpochMilli(250),
+        )
+        repository.saveAll(listOf(toFind1, toFind2, toFind3, toSkip1, toSkip2))
+
+        // when
+        val result = repository.search(filter, sort, null)
+
+        // then
+        assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2, toFind3)
     }
 }

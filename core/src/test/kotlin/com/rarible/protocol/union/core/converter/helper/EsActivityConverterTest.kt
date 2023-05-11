@@ -335,7 +335,7 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isEqualTo(source.buyer.value)
         assertThat(actual.collection).isEqualTo(source.nft.type.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.nft.type.ext.itemId!!.value)
-        assertThat(actual.sellCurrency).isEqualTo(volumeInfo.sellCurrency)
+        assertThat(actual.currency).isEqualTo(volumeInfo.sellCurrency)
         assertThat(actual.volumeUsd).isEqualTo(volumeInfo.volumeUsd)
         assertThat(actual.volumeSell).isEqualTo(volumeInfo.volumeSell)
         assertThat(actual.volumeNative).isEqualTo(volumeInfo.volumeNative)

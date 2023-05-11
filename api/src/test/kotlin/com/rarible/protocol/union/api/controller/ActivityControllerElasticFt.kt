@@ -37,6 +37,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionStar
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
+import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderListActivity
 import com.rarible.protocol.union.integration.flow.data.randomFlowBurnDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowCancelBidActivityDto
 import com.rarible.protocol.union.integration.solana.data.randomSolanaMintActivity
@@ -53,6 +54,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
 import reactor.kotlin.core.publisher.toMono
+import scalether.domain.AddressFactory
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
@@ -60,11 +62,13 @@ import com.rarible.protocol.solana.dto.ActivitiesByIdRequestDto as SolanaActivit
 
 @FlowPreview
 @IntegrationTest
-@TestPropertySource(properties = [
-    "common.feature-flags.enableActivityQueriesToElasticSearch=true",
-    "common.feature-flags.enableActivityAscQueriesWithApiMerge=false",
-    "integration.tezos.dipdup.enabled=true",
-])
+@TestPropertySource(
+    properties = [
+        "common.feature-flags.enableActivityQueriesToElasticSearch=true",
+        "common.feature-flags.enableActivityAscQueriesWithApiMerge=false",
+        "integration.tezos.dipdup.enabled=true",
+    ]
+)
 class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null
@@ -112,25 +116,30 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val flowActivity1 = randomFlowBurnDto().copy(date = nowMillis().minusSeconds(13))
         val flowActivity2 = randomFlowCancelBidActivityDto().copy(date = nowMillis().minusSeconds(3))
         val solanaActivity1 = randomSolanaMintActivity().copy(date = nowMillis().minusSeconds(8))
-        val tezosActivity1 = randomTezosItemBurnActivity().copy(id = randomInt().toString(),
-            date = nowMillis().minusSeconds(9).atOffset(ZoneOffset.UTC))
+        val tezosActivity1 = randomTezosItemBurnActivity().copy(
+            id = randomInt().toString(),
+            date = nowMillis().minusSeconds(9).atOffset(ZoneOffset.UTC)
+        )
 
         val elasticEthOrderActivity1 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethOrderActivity1.id}",
             type = ActivityTypeDto.BID,
             date = ethOrderActivity1.date,
+            currency = AddressFactory.create().toString(),
             blockchain = BlockchainDto.ETHEREUM
         )
         val elasticEthOrderActivity2 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethOrderActivity2.id}",
             type = ActivityTypeDto.BID,
             date = ethOrderActivity2.date,
+            currency = AddressFactory.create().toString(),
             blockchain = BlockchainDto.ETHEREUM
         )
         val elasticEthOrderActivity3 = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethOrderActivity3.id}",
             type = ActivityTypeDto.BID,
             date = ethOrderActivity3.date,
+            currency = AddressFactory.create().toString(),
             blockchain = BlockchainDto.ETHEREUM
         )
         val elasticEthItemActivity1 = randomEsActivity().copy(
@@ -155,12 +164,14 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             activityId = "${BlockchainDto.POLYGON}:${polygonOrderActivity1.id}",
             type = ActivityTypeDto.BID,
             date = polygonOrderActivity1.date,
+            currency = AddressFactory.create().toString(),
             blockchain = BlockchainDto.POLYGON
         )
         val elasticPolygonOrderActivity2 = randomEsActivity().copy(
             activityId = "${BlockchainDto.POLYGON}:${polygonOrderActivity2.id}",
             type = ActivityTypeDto.BID,
             date = polygonOrderActivity2.date,
+            currency = AddressFactory.create().toString(),
             blockchain = BlockchainDto.POLYGON
         )
         val elasticPolygonItemActivity1 = randomEsActivity().copy(
@@ -185,6 +196,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             activityId = "${BlockchainDto.FLOW}:${flowActivity2.id}",
             type = ActivityTypeDto.CANCEL_BID,
             date = flowActivity2.date,
+            currency = AddressFactory.create().toString(),
             blockchain = BlockchainDto.FLOW,
         )
         val elasticSolanaActivity1 = randomEsActivity().copy(
@@ -264,7 +276,14 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns listOf(randomTzktItemBurnActivity(tezosActivity1.id))
 
         val activities = activityControllerApi.getAllActivities(
-            types, blockchains, null, null, size, com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST, null,
+            types,
+            blockchains,
+            null,
+            null,
+            null,
+            size,
+            com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST,
+            null,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(5)
@@ -282,34 +301,72 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         assertThat(fifthActivity.id.value).isEqualTo(solanaActivity1.id)
 
         assertThat(activities.cursor).isNotNull
+
+        val activities2 = activityControllerApi.getAllActivities(
+            listOf(ActivityTypeDto.BID),
+            blockchains,
+            listOf("${BlockchainDto.ETHEREUM}:${elasticEthOrderActivity3.currency}"),
+            null,
+            null,
+            size,
+            com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST,
+            null,
+        ).awaitFirst()
+        assertThat(activities2.activities.map { it.id.value }).containsExactlyInAnyOrder(ethOrderActivity3.id)
     }
 
     @Test
     fun `get activities by collection - ethereum`() = runBlocking<Unit> {
         // Here we expect only one query - to Order activities, since there is only order-related activity type
-        val types = listOf(ActivityTypeDto.SELL)
+        val types = listOf(ActivityTypeDto.SELL, ActivityTypeDto.BID)
         val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
-        val orderActivity = randomEthOrderBidActivity()
+        val now = nowMillis().truncatedToSeconds()
+        val orderActivity = randomEthOrderListActivity().copy(date = now)
+        val bidActivity1 = randomEthOrderBidActivity().copy(date = now.minusSeconds(5))
+        val bidActivity2 = randomEthOrderBidActivity().copy(date = now.minusSeconds(15))
         val elasticActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${orderActivity.id}",
-            type = types.first(),
+            type = ActivityTypeDto.SELL,
             blockchain = ethCollectionId.blockchain,
             collection = ethCollectionId.value,
+            date = orderActivity.date,
         )
-        repository.save(elasticActivity)
+        val elasticBidActivity1 = randomEsActivity().copy(
+            activityId = "${BlockchainDto.ETHEREUM}:${bidActivity1.id}",
+            type = ActivityTypeDto.BID,
+            blockchain = ethCollectionId.blockchain,
+            collection = ethCollectionId.value,
+            currency = AddressFactory.create().toString(),
+            date = bidActivity1.date,
+        )
+        val elasticBidActivity2 = randomEsActivity().copy(
+            activityId = "${BlockchainDto.ETHEREUM}:${bidActivity2.id}",
+            type = ActivityTypeDto.BID,
+            blockchain = ethCollectionId.blockchain,
+            collection = ethCollectionId.value,
+            currency = AddressFactory.create().toString(),
+            date = bidActivity2.date,
+        )
+        repository.saveAll(listOf(elasticActivity, elasticBidActivity1, elasticBidActivity2))
 
         coEvery {
             testEthereumActivityOrderApi.getOrderActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(orderActivity.id))
+                ActivitiesByIdRequestDto(ids = listOf(orderActivity.id, bidActivity1.id))
             )
-        } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
+        } returns OrderActivitiesDto(null, listOf(orderActivity, bidActivity1)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, listOf(ethCollectionId.fullId()), continuation, null, defaultSize, sort, null,
+            types,
+            listOf(ethCollectionId.fullId()),
+            listOf("${BlockchainDto.ETHEREUM}:${elasticBidActivity1.currency}"),
+            continuation,
+            null,
+            defaultSize,
+            sort,
+            null,
         ).awaitFirst()
 
-        assertThat(activities.activities).hasSize(1)
-        assertThat(activities.activities[0]).isInstanceOf(OrderBidActivityDto::class.java)
+        assertThat(activities.activities.map { it.id.value }).containsExactly(orderActivity.id, bidActivity1.id)
     }
 
     @Test
@@ -326,6 +383,14 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         )
         val itemActivity = randomEthItemMintActivity().copy(date = now.minusSeconds(5))
         val auctionActivity = randomEthAuctionStartActivity().copy(date = now.minusSeconds(15))
+        val bidActivity = randomEthOrderBidActivity().copy(
+            date = now.minusSeconds(25),
+            take = AssetDto(assetTypeDto, randomBigInt(), randomBigDecimal())
+        )
+        val bidActivity2 = randomEthOrderBidActivity().copy(
+            date = now.minusSeconds(35),
+            take = AssetDto(assetTypeDto, randomBigInt(), randomBigDecimal())
+        )
 
         val elasticOrderActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${orderActivity.id}",
@@ -348,14 +413,38 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             date = auctionActivity.date,
             item = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
         )
+        val elasticBidActivity1 = randomEsActivity().copy(
+            activityId = "${BlockchainDto.ETHEREUM}:${bidActivity.id}",
+            type = ActivityTypeDto.BID,
+            blockchain = BlockchainDto.ETHEREUM,
+            currency = AddressFactory.create().toString(),
+            date = bidActivity.date,
+            item = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
+        )
+        val elasticBidActivity2 = randomEsActivity().copy(
+            activityId = "${BlockchainDto.ETHEREUM}:${bidActivity2.id}",
+            type = ActivityTypeDto.BID,
+            blockchain = BlockchainDto.ETHEREUM,
+            date = bidActivity2.date,
+            currency = AddressFactory.create().toString(),
+            item = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
+        )
 
-        repository.saveAll(listOf(elasticOrderActivity, elasticItemActivity, elasticAuctionActivity))
+        repository.saveAll(
+            listOf(
+                elasticOrderActivity,
+                elasticItemActivity,
+                elasticAuctionActivity,
+                elasticBidActivity1,
+                elasticBidActivity2
+            )
+        )
 
         coEvery {
             testEthereumActivityOrderApi.getOrderActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(orderActivity.id))
+                ActivitiesByIdRequestDto(ids = listOf(orderActivity.id, bidActivity.id))
             )
-        } returns OrderActivitiesDto(null, listOf(orderActivity)).toMono()
+        } returns OrderActivitiesDto(null, listOf(orderActivity, bidActivity)).toMono()
 
         coEvery {
             testEthereumActivityAuctionApi.getAuctionActivitiesById(
@@ -370,13 +459,21 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), continuation, null, 100, sort, null,
+            types,
+            ethItemId.fullId(),
+            listOf("${BlockchainDto.ETHEREUM}:${elasticBidActivity1.currency}"),
+            continuation,
+            null,
+            100,
+            sort,
+            null,
         ).awaitFirst()
 
-        assertThat(activities.activities).hasSize(3)
+        assertThat(activities.activities).hasSize(4)
         assertThat(activities.activities[0]).isInstanceOf(OrderBidActivityDto::class.java)
         assertThat(activities.activities[1]).isInstanceOf(MintActivityDto::class.java)
         assertThat(activities.activities[2]).isInstanceOf(AuctionStartActivityDto::class.java)
+        assertThat(activities.activities[3].id.value).isEqualTo(bidActivity.id)
     }
 
     @Test
@@ -386,7 +483,9 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             UserActivityTypeDto.TRANSFER_FROM,
             UserActivityTypeDto.TRANSFER_TO,
             UserActivityTypeDto.MINT,
-            UserActivityTypeDto.SELL
+            UserActivityTypeDto.SELL,
+            UserActivityTypeDto.MAKE_BID,
+            UserActivityTypeDto.GET_BID,
         )
         // Flow and Ethereum user specified - request should be routed only for them, Polygon omitted
         val userEth = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
@@ -400,7 +499,11 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val polygonItemActivity = randomEthItemMintActivity()
             .copy(date = nowMillis().minusSeconds(7), id = "polygonitemactivity")
         val sameTypeDifferentRole = randomEthOrderActivityMatch()
-            .copy(date = Instant.now().minusSeconds(6), id = "sametypedifferentrole")
+            .copy(date = Instant.now().minusSeconds(8), id = "sametypedifferentrole")
+        val ethBidActivity1 = randomEthOrderBidActivity()
+            .copy(date = nowMillis().minusSeconds(9), id = "ethbidactivity1")
+        val ethBidActivity2 = randomEthOrderBidActivity()
+            .copy(date = nowMillis().minusSeconds(10), id = "ethbidactivity2")
 
         val elasticEthItemActivity = randomEsActivity().copy(
             activityId = "${BlockchainDto.ETHEREUM}:${ethItemActivity.id}",
@@ -432,9 +535,32 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             date = sameTypeDifferentRole.date,
             userTo = userEth.value,
         )
+        val elasticEthBidActivity1 = randomEsActivity().copy(
+            activityId = "${BlockchainDto.ETHEREUM}:${ethBidActivity1.id}",
+            type = ActivityTypeDto.BID,
+            blockchain = BlockchainDto.ETHEREUM,
+            date = ethBidActivity1.date,
+            userFrom = userEth.value,
+            currency = AddressFactory.create().toString(),
+        )
+        val elasticEthBidActivity2 = randomEsActivity().copy(
+            activityId = "${BlockchainDto.ETHEREUM}:${ethBidActivity2.id}",
+            type = ActivityTypeDto.BID,
+            blockchain = BlockchainDto.ETHEREUM,
+            date = ethBidActivity2.date,
+            userFrom = userEth.value,
+            currency = AddressFactory.create().toString(),
+        )
 
         repository.saveAll(
-            listOf(elasticEthItemActivity, elasticEthItemActivity2, elasticPolygonItemActivity, elasticEthItemActivity3)
+            listOf(
+                elasticEthItemActivity,
+                elasticEthItemActivity2,
+                elasticPolygonItemActivity,
+                elasticEthItemActivity3,
+                elasticEthBidActivity1,
+                elasticEthBidActivity2
+            )
         )
 
         coEvery {
@@ -448,9 +574,10 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         } answers {
             val argument = firstArg<ActivitiesByIdRequestDto>()
             val ids = argument.ids
-            val response = listOf(ethItemActivity2, sameTypeDifferentRole).filter { act ->
-                ids.contains(act.id)
-            }
+            val response =
+                listOf(ethItemActivity2, sameTypeDifferentRole, ethBidActivity1, ethBidActivity2).filter { act ->
+                    ids.contains(act.id)
+                }
             OrderActivitiesDto(null, response).toMono()
         }
 
@@ -463,19 +590,75 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val now = nowMillis()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,
+            types,
+            listOf(userEth.fullId()),
+            null,
+            listOf("${BlockchainDto.ETHEREUM}:${elasticEthBidActivity1.currency}"),
+            oneWeekAgo,
+            now,
+            null,
+            null,
+            size,
+            sort,
+            null,
         ).awaitFirst()
 
-        assertThat(activities.activities).hasSize(3)
+        assertThat(activities.activities.map { it.id.value }).containsExactly(
+            ethItemActivity.id,
+            ethItemActivity2.id,
+            polygonItemActivity.id
+        )
         assertThat(activities.cursor).isNotNull
 
+        val activities2 = activityControllerApi.getActivitiesByUser(
+            types,
+            listOf(userEth.fullId()),
+            null,
+            listOf("${BlockchainDto.ETHEREUM}:${elasticEthBidActivity1.currency}"),
+            oneWeekAgo,
+            now,
+            null,
+            null,
+            100,
+            sort,
+            null,
+        ).awaitFirst()
+
+        assertThat(activities2.activities.map { it.id.value }).containsExactly(
+            ethItemActivity.id,
+            ethItemActivity2.id,
+            polygonItemActivity.id,
+            sameTypeDifferentRole.id,
+            ethBidActivity1.id,
+        )
+
         val fromActivities = activityControllerApi.getActivitiesByUser(
-            listOf(UserActivityTypeDto.SELL), listOf(userEth.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,
+            listOf(UserActivityTypeDto.SELL),
+            listOf(userEth.fullId()),
+            null,
+            null,
+            oneWeekAgo,
+            now,
+            null,
+            null,
+            size,
+            sort,
+            null,
         ).awaitFirst()
         assertThat(fromActivities.activities).hasSize(1)
 
         val toActivities = activityControllerApi.getActivitiesByUser(
-            listOf(UserActivityTypeDto.TRANSFER_TO), listOf(userEth2.fullId()), null, oneWeekAgo, now, null, null, size, sort, null,
+            listOf(UserActivityTypeDto.TRANSFER_TO),
+            listOf(userEth2.fullId()),
+            null,
+            null,
+            oneWeekAgo,
+            now,
+            null,
+            null,
+            size,
+            sort,
+            null,
         ).awaitFirst()
         assertThat(toActivities.activities).hasSize(1)
     }

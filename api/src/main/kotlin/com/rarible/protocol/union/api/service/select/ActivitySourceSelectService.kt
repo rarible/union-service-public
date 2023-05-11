@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.SyncSortDto
@@ -28,13 +29,22 @@ class ActivitySourceSelectService(
     suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
+        bidCurrencies: List<CurrencyIdDto>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?,
         searchEngine: SearchEngineDto?
     ): ActivitiesDto {
-        return getQuerySource(searchEngine, sort).getAllActivities(type, blockchains, continuation, cursor, size, sort)
+        return getQuerySource(searchEngine, sort).getAllActivities(
+            type,
+            blockchains,
+            bidCurrencies,
+            continuation,
+            cursor,
+            size,
+            sort
+        )
     }
 
     suspend fun getAllActivitiesSync(
@@ -50,6 +60,7 @@ class ActivitySourceSelectService(
     suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
         collection: List<CollectionIdDto>,
+        bidCurrencies: List<CurrencyIdDto>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
@@ -57,26 +68,36 @@ class ActivitySourceSelectService(
         searchEngine: SearchEngineDto?
     ): ActivitiesDto {
         return getQuerySource(searchEngine, sort).getActivitiesByCollection(
-            type, collection, continuation, cursor, size, sort
+            type, collection, bidCurrencies, continuation, cursor, size, sort
         )
     }
 
     suspend fun getActivitiesByItem(
         type: List<ActivityTypeDto>,
         itemId: ItemIdDto,
+        bidCurrencies: List<CurrencyIdDto>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
         sort: ActivitySortDto?,
         searchEngine: SearchEngineDto?
     ): ActivitiesDto {
-        return getQuerySource(searchEngine, sort).getActivitiesByItem(type, itemId, continuation, cursor, size, sort)
+        return getQuerySource(searchEngine, sort).getActivitiesByItem(
+            type,
+            itemId,
+            bidCurrencies,
+            continuation,
+            cursor,
+            size,
+            sort
+        )
     }
 
     suspend fun getActivitiesByUser(
         type: List<UserActivityTypeDto>,
         user: List<UnionAddress>,
         blockchains: List<BlockchainDto>?,
+        bidCurrencies: List<CurrencyIdDto>?,
         from: Instant?,
         to: Instant?,
         continuation: String?,
@@ -86,7 +107,7 @@ class ActivitySourceSelectService(
         searchEngine: SearchEngineDto?
     ): ActivitiesDto {
         return getQuerySource(searchEngine, sort).getActivitiesByUser(
-            type, user, blockchains, from, to, continuation, cursor, size, sort
+            type, user, blockchains, bidCurrencies, from, to, continuation, cursor, size, sort
         )
     }
 

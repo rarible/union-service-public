@@ -19,6 +19,7 @@ import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
@@ -54,6 +55,7 @@ class ActivityElasticService(
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
+        bidCurrencies: List<CurrencyIdDto>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
@@ -65,7 +67,7 @@ class ActivityElasticService(
             logger.info("Unable to find enabled blockchains for getAllActivities(), blockchains={}", blockchains)
             return ActivitiesDto()
         }
-        val filter = filterConverter.convertGetAllActivities(type, enabledBlockchains, effectiveCursor)
+        val filter = filterConverter.convertGetAllActivities(type, enabledBlockchains, bidCurrencies, effectiveCursor)
         logger.info("Built filter: $filter")
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
 
@@ -114,6 +116,7 @@ class ActivityElasticService(
     override suspend fun getActivitiesByCollection(
         type: List<ActivityTypeDto>,
         collection: List<CollectionIdDto>,
+        bidCurrencies: List<CurrencyIdDto>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
@@ -128,6 +131,7 @@ class ActivityElasticService(
         val filter = filterConverter.convertGetActivitiesByCollection(
             type,
             filteredCollections.map { it.fullId() },
+            bidCurrencies,
             effectiveCursor
         )
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
@@ -152,6 +156,7 @@ class ActivityElasticService(
     override suspend fun getActivitiesByItem(
         type: List<ActivityTypeDto>,
         itemId: ItemIdDto,
+        bidCurrencies: List<CurrencyIdDto>?,
         continuation: String?,
         cursor: String?,
         size: Int?,
@@ -162,7 +167,7 @@ class ActivityElasticService(
             return ActivitiesDto()
         }
         val effectiveCursor = cursor ?: continuation
-        val filter = filterConverter.convertGetActivitiesByItem(type, itemId.fullId(), effectiveCursor)
+        val filter = filterConverter.convertGetActivitiesByItem(type, itemId.fullId(), bidCurrencies, effectiveCursor)
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
         val activities = getActivities(queryResult.activities)
 
@@ -184,6 +189,7 @@ class ActivityElasticService(
         type: List<UserActivityTypeDto>,
         user: List<UnionAddress>,
         blockchains: List<BlockchainDto>?,
+        bidCurrencies: List<CurrencyIdDto>?,
         from: Instant?,
         to: Instant?,
         continuation: String?,
@@ -205,6 +211,7 @@ class ActivityElasticService(
             type,
             user.map { it.fullId() },
             enabledBlockchains,
+            bidCurrencies,
             from,
             to,
             effectiveCursor

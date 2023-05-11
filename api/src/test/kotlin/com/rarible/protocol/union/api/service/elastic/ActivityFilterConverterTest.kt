@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.api.service.UserActivityTypeConverter
-import com.rarible.protocol.union.core.model.elastic.ActivityByCollectionFilter
-import com.rarible.protocol.union.core.model.elastic.ElasticActivityQueryGenericFilter
+import com.rarible.protocol.union.core.model.elastic.ElasticActivityFilter
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.SpyK
@@ -14,6 +14,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import scalether.domain.AddressFactory
 import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
@@ -25,7 +26,7 @@ class ActivityFilterConverterTest {
     @InjectMockKs
     private lateinit var converter: ActivityFilterConverter
 
-    private val emptyGenericFilter = ElasticActivityQueryGenericFilter()
+    private val emptyGenericFilter = ElasticActivityFilter()
 
     @Nested
     inner class ConvertGetAllActivitiesTest {
@@ -35,18 +36,25 @@ class ActivityFilterConverterTest {
             // given
             val types = listOf(ActivityTypeDto.MINT, ActivityTypeDto.BURN)
             val blockchains = listOf(BlockchainDto.POLYGON, BlockchainDto.SOLANA)
+            val bidCurrencies = listOf(
+                CurrencyIdDto(
+                    blockchain = BlockchainDto.ETHEREUM,
+                    contract = AddressFactory.create().toString(),
+                    tokenId = null
+                )
+            )
             val cursor = "some cursor"
 
             // when
-            val actual = converter.convertGetAllActivities(types, blockchains, cursor)
+            val actual = converter.convertGetAllActivities(types, blockchains, bidCurrencies, cursor)
 
             // then
             assertThat(actual).usingRecursiveComparison()
-                .ignoringFields("blockchains", "activityTypes", "cursor")
+                .ignoringFields("blockchains", "activityTypes", "cursor", "bidCurrencies")
                 .isEqualTo(emptyGenericFilter)
-            actual as ElasticActivityQueryGenericFilter
             assertThat(actual.blockchains).containsExactlyInAnyOrder(*blockchains.toTypedArray())
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(*types.toTypedArray())
+            assertThat(actual.bidCurrencies).isEqualTo(bidCurrencies.toSet())
             assertThat(actual.cursor).isEqualTo(cursor)
         }
 
@@ -57,13 +65,12 @@ class ActivityFilterConverterTest {
             val cursor = "some cursor"
 
             // when
-            val actual = converter.convertGetAllActivities(types, null, cursor)
+            val actual = converter.convertGetAllActivities(types, null, null, cursor)
 
             // then
             assertThat(actual).usingRecursiveComparison()
                 .ignoringFields("activityTypes", "cursor")
                 .isEqualTo(emptyGenericFilter)
-            actual as ElasticActivityQueryGenericFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(*types.toTypedArray())
             assertThat(actual.cursor).isEqualTo(cursor)
         }
@@ -78,18 +85,30 @@ class ActivityFilterConverterTest {
             val types = listOf(ActivityTypeDto.LIST, ActivityTypeDto.BID)
             val collection = "POLYGON:0x00000012345"
             val cursor = "some cursor"
+            val bidCurrencies = listOf(
+                CurrencyIdDto(
+                    blockchain = BlockchainDto.ETHEREUM,
+                    contract = AddressFactory.create().toString(),
+                    tokenId = null
+                )
+            )
 
             // when
-            val actual = converter.convertGetActivitiesByCollection(types, listOf(collection), cursor)
+            val actual = converter.convertGetActivitiesByCollection(types, listOf(collection), bidCurrencies, cursor)
 
             // then
             assertThat(actual).usingRecursiveComparison()
-                .ignoringFields("activityTypes", "collections", "blockchains", "cursor")
+                .ignoringFields("activityTypes", "collections", "blockchains", "cursor", "bidCurrencies")
                 .isEqualTo(emptyGenericFilter)
-            actual as ActivityByCollectionFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(*types.toTypedArray())
-            assertThat(actual.collections).containsExactly(CollectionIdDto(BlockchainDto.POLYGON, "0x00000012345"))
+            assertThat(actual.collections).containsExactly(
+                CollectionIdDto(
+                    BlockchainDto.POLYGON,
+                    "0x00000012345"
+                )
+            )
             assertThat(actual.cursor).isEqualTo(cursor)
+            assertThat(actual.bidCurrencies).isEqualTo(bidCurrencies.toSet())
         }
     }
 
@@ -102,19 +121,26 @@ class ActivityFilterConverterTest {
             val types = listOf(ActivityTypeDto.CANCEL_LIST, ActivityTypeDto.CANCEL_BID)
             val itemId = "TEZOS:0x00000012345"
             val cursor = "some cursor"
+            val bidCurrencies = listOf(
+                CurrencyIdDto(
+                    blockchain = BlockchainDto.ETHEREUM,
+                    contract = AddressFactory.create().toString(),
+                    tokenId = null
+                )
+            )
 
             // when
-            val actual = converter.convertGetActivitiesByItem(types, itemId, cursor)
+            val actual = converter.convertGetActivitiesByItem(types, itemId, bidCurrencies, cursor)
 
             // then
             assertThat(actual).usingRecursiveComparison()
-                .ignoringFields("activityTypes", "item", "blockchains", "cursor")
+                .ignoringFields("activityTypes", "item", "blockchains", "cursor", "bidCurrencies")
                 .isEqualTo(emptyGenericFilter)
-            actual as ElasticActivityQueryGenericFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(*types.toTypedArray())
             assertThat(actual.item).isEqualTo("0x00000012345")
             assertThat(actual.blockchains).containsExactly(BlockchainDto.TEZOS)
             assertThat(actual.cursor).isEqualTo(cursor)
+            assertThat(actual.bidCurrencies).isEqualTo(bidCurrencies.toSet())
         }
     }
 
@@ -124,21 +150,36 @@ class ActivityFilterConverterTest {
         @Test
         fun `should convert - happy path`() {
             // given
-            val userActivityTypes = listOf(UserActivityTypeDto.TRANSFER_FROM, UserActivityTypeDto.TRANSFER_TO, UserActivityTypeDto.BUY)
+            val userActivityTypes =
+                listOf(UserActivityTypeDto.TRANSFER_FROM, UserActivityTypeDto.TRANSFER_TO, UserActivityTypeDto.BUY)
             val users = listOf("SOLANA:loupa", "FLOW:poupa")
             val blockchains = listOf(BlockchainDto.SOLANA, BlockchainDto.FLOW)
             val from = Instant.ofEpochMilli(12345)
             val to = Instant.ofEpochMilli(67890)
             val cursor = "some cursor"
+            val bidCurrencies = listOf(
+                CurrencyIdDto(
+                    blockchain = BlockchainDto.ETHEREUM,
+                    contract = AddressFactory.create().toString(),
+                    tokenId = null
+                )
+            )
 
             // when
-            val actual = converter.convertGetActivitiesByUser(userActivityTypes, users, blockchains, from, to, cursor)
+            val actual = converter.convertGetActivitiesByUser(
+                userActivityTypes,
+                users,
+                blockchains,
+                bidCurrencies,
+                from,
+                to,
+                cursor
+            )
 
             // then
             assertThat(actual).usingRecursiveComparison()
-                .ignoringFields("activityTypes", "blockchains", "anyUsers", "from", "to", "cursor")
+                .ignoringFields("activityTypes", "blockchains", "anyUsers", "from", "to", "cursor", "bidCurrencies")
                 .isEqualTo(emptyGenericFilter)
-            actual as ElasticActivityQueryGenericFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(ActivityTypeDto.TRANSFER, ActivityTypeDto.SELL)
             assertThat(actual.blockchains).containsExactlyInAnyOrder(*blockchains.toTypedArray())
             assertThat(actual.anyUsers).containsExactlyInAnyOrder("loupa", "poupa")
@@ -147,6 +188,7 @@ class ActivityFilterConverterTest {
             assertThat(actual.from).isEqualTo(from)
             assertThat(actual.to).isEqualTo(to)
             assertThat(actual.cursor).isEqualTo(cursor)
+            assertThat(actual.bidCurrencies).isEqualTo(bidCurrencies.toSet())
         }
 
         @Test
@@ -160,10 +202,10 @@ class ActivityFilterConverterTest {
             val cursor = "some cursor"
 
             // when
-            val actual = converter.convertGetActivitiesByUser(userActivityTypes, users, blockchains, from, to, cursor)
+            val actual =
+                converter.convertGetActivitiesByUser(userActivityTypes, users, blockchains, null, from, to, cursor)
 
             // then
-            actual as ElasticActivityQueryGenericFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(ActivityTypeDto.TRANSFER, ActivityTypeDto.SELL)
             assertThat(actual.blockchains).containsExactlyInAnyOrder(*blockchains.toTypedArray())
             assertThat(actual.anyUsers).isEmpty()
@@ -184,10 +226,10 @@ class ActivityFilterConverterTest {
             val cursor = "some cursor"
 
             // when
-            val actual = converter.convertGetActivitiesByUser(userActivityTypes, users, blockchains, from, to, cursor)
+            val actual =
+                converter.convertGetActivitiesByUser(userActivityTypes, users, blockchains, null, from, to, cursor)
 
             // then
-            actual as ElasticActivityQueryGenericFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(ActivityTypeDto.TRANSFER, ActivityTypeDto.SELL)
             assertThat(actual.blockchains).containsExactlyInAnyOrder(*blockchains.toTypedArray())
             assertThat(actual.anyUsers).isEmpty()
@@ -208,10 +250,10 @@ class ActivityFilterConverterTest {
             val cursor = "some cursor"
 
             // when
-            val actual = converter.convertGetActivitiesByUser(userActivityTypes, users, blockchains, from, to, cursor)
+            val actual =
+                converter.convertGetActivitiesByUser(userActivityTypes, users, blockchains, null, from, to, cursor)
 
             // then
-            actual as ElasticActivityQueryGenericFilter
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(ActivityTypeDto.SELL)
             assertThat(actual.anyUsers).containsExactlyInAnyOrder("loupa", "poupa")
         }
@@ -219,14 +261,15 @@ class ActivityFilterConverterTest {
         @Test
         fun `should convert - null blockchains`() {
             // given
-            val userActivityTypes = listOf(UserActivityTypeDto.TRANSFER_FROM, UserActivityTypeDto.TRANSFER_TO, UserActivityTypeDto.BUY)
+            val userActivityTypes =
+                listOf(UserActivityTypeDto.TRANSFER_FROM, UserActivityTypeDto.TRANSFER_TO, UserActivityTypeDto.BUY)
             val users = listOf("SOLANA:loupa", "FLOW:poupa")
             val from = Instant.ofEpochMilli(12345)
             val to = Instant.ofEpochMilli(67890)
             val cursor = "some cursor"
 
             // when
-            val actual = converter.convertGetActivitiesByUser(userActivityTypes, users, null, from, to, cursor)
+            val actual = converter.convertGetActivitiesByUser(userActivityTypes, users, null, null, from, to, cursor)
 
             // then
             assertThat(actual).usingRecursiveComparison()

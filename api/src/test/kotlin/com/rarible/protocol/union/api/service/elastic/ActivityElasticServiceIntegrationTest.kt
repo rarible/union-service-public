@@ -377,7 +377,7 @@ internal class ActivityElasticServiceIntegrationTest {
             } returns listOf(flow1)
 
             // when
-            val actual = service.getAllActivities(types, blockchains, null, null, size, sort)
+            val actual = service.getAllActivities(types, blockchains, null, null, null, size, sort)
 
             // then
             assertThat(actual.activities).containsExactly(
@@ -420,7 +420,7 @@ internal class ActivityElasticServiceIntegrationTest {
             } returns emptyList()
 
             // when
-            val actual = service.getAllActivities(types, blockchains, null, null, size, sort)
+            val actual = service.getAllActivities(types, blockchains, null, null, null, size, sort)
 
             // then
             assertThat(actual.activities)
@@ -463,7 +463,7 @@ internal class ActivityElasticServiceIntegrationTest {
             val cursor3 = buildCursor(three)
 
             // when
-            val actual = service.getAllActivities(types, blockchains, null, null, size, sort)
+            val actual = service.getAllActivities(types, blockchains, null, null, null, size, sort)
 
             // then
             assertThat(actual.activities).containsExactly(
@@ -514,7 +514,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 )
             } returns listOf(eth2)
             // when
-            val actual = service.getActivitiesByCollection(types, listOf(collection), null, null, size, sort)
+            val actual = service.getActivitiesByCollection(types, listOf(collection), null, null, null, size, sort)
 
             // then
             assertThat(actual.activities)
@@ -552,7 +552,7 @@ internal class ActivityElasticServiceIntegrationTest {
             val sort = ActivitySortDto.LATEST_FIRST
             val cursor2 = buildCursor(two)
             // when
-            val actual = service.getActivitiesByCollection(types, listOf(collection), null, null, size, sort)
+            val actual = service.getActivitiesByCollection(types, listOf(collection), null, null, null, size, sort)
 
             // then
             assertThat(actual.activities)
@@ -602,7 +602,7 @@ internal class ActivityElasticServiceIntegrationTest {
             } returns listOf(eth7)
 
             // when
-            val actual = service.getActivitiesByItem(types, item, null, null, size, sort)
+            val actual = service.getActivitiesByItem(types, item, null, null, null, size, sort)
 
             // then
             assertThat(actual.activities)
@@ -641,7 +641,7 @@ internal class ActivityElasticServiceIntegrationTest {
             val cursor7 = buildCursor(seven)
 
             // when
-            val actual = service.getActivitiesByItem(types, item, null, null, size, sort)
+            val actual = service.getActivitiesByItem(types, item, null, null, null, size, sort)
 
             // then
             assertThat(actual.activities).hasSize(1)
@@ -704,6 +704,7 @@ internal class ActivityElasticServiceIntegrationTest {
             val actual = service.getActivitiesByUser(
                 types,
                 blockchains = blockchains,
+                bidCurrencies = null,
                 continuation = null,
                 cursor = null,
                 size = size,
@@ -759,6 +760,7 @@ internal class ActivityElasticServiceIntegrationTest {
             val actual = service.getActivitiesByUser(
                 types,
                 blockchains = blockchains,
+                bidCurrencies = null,
                 continuation = null,
                 cursor = null,
                 size = size,

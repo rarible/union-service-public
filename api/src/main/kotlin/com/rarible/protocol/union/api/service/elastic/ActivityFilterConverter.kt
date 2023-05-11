@@ -1,11 +1,10 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.api.service.UserActivityTypeConverter
-import com.rarible.protocol.union.core.model.elastic.ActivityByCollectionFilter
 import com.rarible.protocol.union.core.model.elastic.ElasticActivityFilter
-import com.rarible.protocol.union.core.model.elastic.ElasticActivityQueryGenericFilter
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import org.springframework.stereotype.Service
@@ -19,11 +18,13 @@ class ActivityFilterConverter(
     fun convertGetAllActivities(
         type: List<ActivityTypeDto>,
         blockchains: List<BlockchainDto>?,
+        bidCurrencies: List<CurrencyIdDto>?,
         cursor: String?,
     ): ElasticActivityFilter {
-        return ElasticActivityQueryGenericFilter(
+        return ElasticActivityFilter(
             blockchains = blockchains?.toSet().orEmpty(),
             activityTypes = type.toSet(),
+            bidCurrencies = bidCurrencies?.toSet().orEmpty(),
             cursor = cursor,
         )
     }
@@ -31,12 +32,14 @@ class ActivityFilterConverter(
     fun convertGetActivitiesByCollection(
         type: List<ActivityTypeDto>,
         collections: List<String>,
+        bidCurrencies: List<CurrencyIdDto>?,
         cursor: String?,
     ): ElasticActivityFilter {
         val cols = collections.map(IdParser::parseCollectionId)
-        return ActivityByCollectionFilter(
+        return ElasticActivityFilter(
             activityTypes = type.toSet(),
-            collections = cols,
+            collections = cols.toSet(),
+            bidCurrencies = bidCurrencies?.toSet().orEmpty(),
             cursor = cursor,
         )
     }
@@ -44,13 +47,15 @@ class ActivityFilterConverter(
     fun convertGetActivitiesByItem(
         type: List<ActivityTypeDto>,
         itemId: String,
+        bidCurrencies: List<CurrencyIdDto>?,
         cursor: String?,
     ): ElasticActivityFilter {
         val fullItemId = IdParser.parseItemId(itemId)
-        return ElasticActivityQueryGenericFilter(
+        return ElasticActivityFilter(
             blockchains = setOf(fullItemId.blockchain),
             activityTypes = type.toSet(),
             item = fullItemId.value,
+            bidCurrencies = bidCurrencies?.toSet().orEmpty(),
             cursor = cursor,
         )
     }
@@ -59,6 +64,7 @@ class ActivityFilterConverter(
         type: List<UserActivityTypeDto>,
         user: List<String>,
         blockchains: List<BlockchainDto>?,
+        bidCurrencies: List<CurrencyIdDto>?,
         from: Instant?,
         to: Instant?,
         cursor: String?,
@@ -67,10 +73,11 @@ class ActivityFilterConverter(
         val (userFilters, activityTypes) = activityTypeByUsers(type, parsedUsers)
         val finalUserFilters = userFilters.normalize()
 
-        return ElasticActivityQueryGenericFilter(
+        return ElasticActivityFilter(
             blockchains = blockchains?.toSet().orEmpty(),
             activityTypes = activityTypes, // isMaker is ignored for now
             anyUsers = finalUserFilters.anyUsers,
+            bidCurrencies = bidCurrencies?.toSet().orEmpty(),
             usersFrom = finalUserFilters.fromUsers,
             usersTo = finalUserFilters.toUsers,
             from = from,
@@ -113,9 +120,14 @@ private data class UserFilters(
      * E.g. for (SELL + BUY), anyUsers filter is used in ES
      */
     fun normalize(): UserFilters {
-        return if(fromUsers == toUsers && fromUsers.isNotEmpty()) this.copy(anyUsers = fromUsers, fromUsers = emptySet(), toUsers = emptySet())
+        return if (fromUsers == toUsers && fromUsers.isNotEmpty()) this.copy(
+            anyUsers = fromUsers,
+            fromUsers = emptySet(),
+            toUsers = emptySet()
+        )
         else this
     }
+
     companion object {
         fun anyUsers(users: Set<String>): UserFilters {
             return UserFilters(emptySet(), emptySet(), users)
