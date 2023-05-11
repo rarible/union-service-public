@@ -42,7 +42,8 @@ object OwnershipDtoConverter {
             // Enrichment data
             bestSellOrder = shortOwnership?.bestSellOrder?.let { data.orders[it.dtoId] },
             originOrders = shortOwnership?.originOrders?.let { OriginOrdersConverter.convert(it, data.orders) }
-                ?: emptyList()
+                ?: emptyList(),
+            source = data.shortOwnership?.source,
         )
     }
 }
