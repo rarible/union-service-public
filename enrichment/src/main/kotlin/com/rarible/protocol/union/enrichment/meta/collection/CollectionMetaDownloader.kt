@@ -15,10 +15,12 @@ import org.springframework.stereotype.Component
 @Component
 class CollectionMetaDownloader(
     private val router: BlockchainRouter<CollectionService>,
-    unionContentMetaLoader: ContentMetaDownloader,
+    contentMetaLoader: ContentMetaDownloader,
+    customizers: List<CollectionMetaCustomizer>,
     metrics: CollectionMetaMetrics
 ) : Downloader<UnionCollectionMeta>, MetaDownloader<CollectionIdDto, UnionCollectionMeta>(
-    unionContentMetaLoader,
+    contentMetaLoader,
+    customizers,
     metrics,
     "Collection"
 ) {

@@ -11,7 +11,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 
 abstract class MetaDownloader<K, T : ContentOwner<T>>(
-    private val unionContentMetaLoader: ContentMetaDownloader,
+    private val contentMetaLoader: ContentMetaDownloader,
+    private val customizers: List<MetaCustomizer<K, T>>,
     private val metrics: MetaMetrics,
     val type: String
 ) {
@@ -27,8 +28,10 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
 
         val sanitized = sanitizeContent(meta.content)
         val (id, blockchain) = generaliseKey(key)
-        val content = unionContentMetaLoader.enrichContent(id, blockchain, sanitized)
-        return meta.withContent(content)
+        val content = contentMetaLoader.enrichContent(id, blockchain, sanitized)
+        return customizers.fold(meta.withContent(content)) { current, customizer ->
+            customizer.customize(key, current)
+        }
     }
 
     private suspend fun getMeta(key: K): T? {
