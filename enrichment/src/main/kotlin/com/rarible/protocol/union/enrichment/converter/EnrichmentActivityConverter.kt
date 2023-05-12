@@ -77,9 +77,9 @@ object EnrichmentActivityConverter {
             lastUpdatedAt = source.lastUpdatedAt,
             owner = source.owner,
             contract = source.contract,
-            collection = source.getEnrichedCollection(data),
+            collection = source.getEnrichedCollection(data)?.fullId() ?: source.collection?.fullId(),
             tokenId = source.tokenId,
-            itemId = source.itemId!!,
+            itemId = source.itemId!!.fullId(),
             value = source.value,
             mintPrice = source.mintPrice,
             transactionHash = source.transactionHash,
@@ -95,9 +95,9 @@ object EnrichmentActivityConverter {
             lastUpdatedAt = source.lastUpdatedAt,
             owner = source.owner,
             contract = source.contract,
-            collection = source.getEnrichedCollection(data),
+            collection = source.getEnrichedCollection(data)?.fullId() ?: source.collection?.fullId(),
             tokenId = source.tokenId,
-            itemId = source.itemId!!,
+            itemId = source.itemId!!.fullId(),
             value = source.value,
             transactionHash = source.transactionHash,
             blockchainInfo = source.blockchainInfo
@@ -113,9 +113,9 @@ object EnrichmentActivityConverter {
             from = source.from,
             owner = source.owner,
             contract = source.contract,
-            collection = source.getEnrichedCollection(data),
+            collection = source.getEnrichedCollection(data)?.fullId() ?: source.collection?.fullId(),
             tokenId = source.tokenId,
-            itemId = source.itemId!!,
+            itemId = source.itemId!!.fullId(),
             value = source.value,
             purchase = source.purchase,
             transactionHash = source.transactionHash,
@@ -160,9 +160,9 @@ object EnrichmentActivityConverter {
             type = convert(source.type),
             sellMarketplaceMarker = source.sellMarketplaceMarker,
             buyMarketplaceMarker = source.buyMarketplaceMarker,
-            itemId = source.nft.type.itemId()!!,
+            itemId = source.nft.type.itemId()!!.fullId(),
             contract = source.nft.type.contract(),
-            collection = source.getEnrichedCollection(data),
+            collection = source.getEnrichedCollection(data)?.fullId(),
         )
     }
 
@@ -181,8 +181,8 @@ object EnrichmentActivityConverter {
             priceUsd = source.priceUsd,
             source = source.source,
             marketplaceMarker = source.marketplaceMarker,
-            itemId = source.itemId(),
-            collection = source.getEnrichedCollection(data),
+            itemId = source.itemId()?.fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
             contract = source.take.type.contract(),
         )
     }
@@ -201,8 +201,8 @@ object EnrichmentActivityConverter {
             price = source.price,
             priceUsd = source.priceUsd,
             source = source.source,
-            itemId = source.itemId()!!,
-            collection = source.getEnrichedCollection(data),
+            itemId = source.itemId()!!.fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
             contract = source.make.type.contract(),
         )
     }
@@ -224,8 +224,8 @@ object EnrichmentActivityConverter {
             source = source.source,
             transactionHash = source.transactionHash,
             blockchainInfo = source.blockchainInfo,
-            itemId = source.itemId(),
-            collection = source.getEnrichedCollection(data),
+            itemId = source.itemId()?.fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
             contract = source.take.contract(),
         )
     }
@@ -247,8 +247,8 @@ object EnrichmentActivityConverter {
             source = source.source,
             transactionHash = source.transactionHash,
             blockchainInfo = source.blockchainInfo,
-            itemId = source.itemId()!!,
-            collection = source.getEnrichedCollection(data),
+            itemId = source.itemId()!!.fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
             contract = source.make.contract(),
         )
     }
@@ -261,8 +261,8 @@ object EnrichmentActivityConverter {
             lastUpdatedAt = source.lastUpdatedAt,
             auction = source.auction,
             transactionHash = source.transactionHash,
-            itemId = source.itemId(),
-            collection = source.getEnrichedCollection(data),
+            itemId = source.itemId().fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
         )
     }
 
@@ -275,8 +275,8 @@ object EnrichmentActivityConverter {
             auction = source.auction,
             bid = source.bid,
             transactionHash = source.transactionHash,
-            itemId = source.itemId(),
-            collection = source.getEnrichedCollection(data),
+            itemId = source.itemId().fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
         )
     }
 
@@ -291,8 +291,8 @@ object EnrichmentActivityConverter {
             lastUpdatedAt = source.lastUpdatedAt,
             auction = source.auction,
             transactionHash = source.transactionHash,
-            itemId = source.itemId(),
-            collection = source.getEnrichedCollection(data),
+            itemId = source.itemId().fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
         )
     }
 
@@ -307,8 +307,8 @@ object EnrichmentActivityConverter {
             lastUpdatedAt = source.lastUpdatedAt,
             auction = source.auction,
             transactionHash = source.transactionHash,
-            itemId = source.itemId(),
-            collection = source.getEnrichedCollection(data),
+            itemId = source.itemId().fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
         )
     }
 
@@ -322,8 +322,8 @@ object EnrichmentActivityConverter {
             date = source.date,
             lastUpdatedAt = source.lastUpdatedAt,
             auction = source.auction,
-            itemId = source.itemId(),
-            collection = source.getEnrichedCollection(data),
+            itemId = source.itemId().fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
         )
     }
 
@@ -334,8 +334,8 @@ object EnrichmentActivityConverter {
             date = source.date,
             lastUpdatedAt = source.lastUpdatedAt,
             auction = source.auction,
-            itemId = source.itemId(),
-            collection = source.getEnrichedCollection(data),
+            itemId = source.itemId().fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
         )
     }
 
@@ -347,9 +347,9 @@ object EnrichmentActivityConverter {
             lastUpdatedAt = source.lastUpdatedAt,
             user = source.user,
             status = source.status,
-            itemId = source.itemId,
+            itemId = source.itemId.fullId(),
             value = source.value,
-            collection = source.getEnrichedCollection(data),
+            collection = source.getEnrichedCollection(data)?.fullId() ?: source.collection?.fullId(),
         )
     }
 
@@ -364,8 +364,8 @@ object EnrichmentActivityConverter {
             lastUpdatedAt = source.lastUpdatedAt,
             user = source.user,
             status = source.status,
-            itemId = source.itemId,
-            collection = source.getEnrichedCollection(data),
+            itemId = source.itemId.fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId() ?: source.collection?.fullId(),
             value = source.value,
         )
     }
