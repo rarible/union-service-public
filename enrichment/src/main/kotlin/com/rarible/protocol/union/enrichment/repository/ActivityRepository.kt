@@ -60,7 +60,7 @@ class ActivityRepository(
     suspend fun findLastSale(itemId: ItemIdDto): EnrichmentActivity? =
         template.find<EnrichmentActivity>(
             Query(
-                where(EnrichmentActivity::itemId).isEqualTo(itemId)
+                where(EnrichmentActivity::itemId).isEqualTo(itemId.fullId())
                     .and(EnrichmentActivity::activityType).isEqualTo(ActivityTypeDto.SELL)
             ).with(
                 Sort.by(
@@ -73,7 +73,7 @@ class ActivityRepository(
     suspend fun isMinter(itemId: ItemIdDto, owner: UnionAddress): Boolean =
         template.exists(
             Query(
-                where(EnrichmentActivity::itemId).isEqualTo(itemId)
+                where(EnrichmentActivity::itemId).isEqualTo(itemId.fullId())
                     .and(EnrichmentActivity::activityType).isEqualTo(ActivityTypeDto.MINT)
                     .and(EnrichmentMintActivity::owner).isEqualTo(owner)
             ),
@@ -83,7 +83,7 @@ class ActivityRepository(
     suspend fun isBuyer(itemId: ItemIdDto, owner: UnionAddress): Boolean =
         template.exists(
             Query(
-                where(EnrichmentActivity::itemId).isEqualTo(itemId)
+                where(EnrichmentActivity::itemId).isEqualTo(itemId.fullId())
                     .and(EnrichmentActivity::activityType).isEqualTo(ActivityTypeDto.TRANSFER)
                     .and(EnrichmentTransferActivity::purchase).isEqualTo(true)
                     .and(EnrichmentTransferActivity::owner).isEqualTo(owner)

@@ -23,6 +23,7 @@ import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OrderMatchSellDto
 import com.rarible.protocol.union.dto.OrderMatchSwapDto
 import com.rarible.protocol.union.dto.TransferActivityDto
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.data.EnrichmentAssetData
 import com.rarible.protocol.union.enrichment.model.EnrichmentActivity
 import com.rarible.protocol.union.enrichment.model.EnrichmentAuctionBidActivity
@@ -82,9 +83,9 @@ object EnrichmentActivityDtoConverter {
             reverted = reverted,
             owner = source.owner,
             contract = source.contract,
-            collection = source.collection,
+            collection = source.collection?.let { IdParser.parseCollectionId(it) },
             tokenId = source.tokenId,
-            itemId = source.itemId,
+            itemId = source.itemId.let { IdParser.parseItemId(source.itemId) },
             value = source.value,
             mintPrice = source.mintPrice,
             transactionHash = source.transactionHash,
@@ -101,9 +102,9 @@ object EnrichmentActivityDtoConverter {
             reverted = reverted,
             owner = source.owner,
             contract = source.contract,
-            collection = source.collection,
+            collection = source.collection?.let { IdParser.parseCollectionId(it) },
             tokenId = source.tokenId,
-            itemId = source.itemId,
+            itemId = source.itemId.let { IdParser.parseItemId(source.itemId) },
             value = source.value,
             transactionHash = source.transactionHash,
             blockchainInfo = source.blockchainInfo
@@ -120,9 +121,9 @@ object EnrichmentActivityDtoConverter {
             from = source.from,
             owner = source.owner,
             contract = source.contract,
-            collection = source.collection,
+            collection = source.collection?.let { IdParser.parseCollectionId(it) },
             tokenId = source.tokenId,
-            itemId = source.itemId,
+            itemId = source.itemId.let { IdParser.parseItemId(source.itemId) },
             value = source.value,
             purchase = source.purchase,
             transactionHash = source.transactionHash,
@@ -357,9 +358,9 @@ object EnrichmentActivityDtoConverter {
             reverted = reverted,
             user = source.user,
             status = source.status,
-            itemId = source.itemId,
+            itemId = source.itemId.let { IdParser.parseItemId(source.itemId) },
             value = source.value,
-            collection = source.collection,
+            collection = source.collection?.let { IdParser.parseCollectionId(it) },
         )
     }
 
@@ -376,8 +377,8 @@ object EnrichmentActivityDtoConverter {
             reverted = reverted,
             user = source.user,
             status = source.status,
-            itemId = source.itemId,
-            collection = source.collection,
+            itemId = source.itemId.let { IdParser.parseItemId(source.itemId) },
+            collection = source.collection?.let { IdParser.parseCollectionId(it) },
             value = source.value,
         )
     }
@@ -414,6 +415,9 @@ object EnrichmentActivityDtoConverter {
         source: UnionAssetType,
         activity: EnrichmentActivity
     ): AssetTypeDto {
-        return AssetDtoConverter.convert(source, EnrichmentAssetData(activity.collection))
+        return AssetDtoConverter.convert(
+            source,
+            EnrichmentAssetData(activity.collection?.let { IdParser.parseCollectionId(it) })
+        )
     }
 }

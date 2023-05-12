@@ -125,7 +125,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 owner = randomUnionAddress(),
                 value = BigInteger.ONE,
                 transactionHash = randomString(),
-                itemId = ItemIdDto(BlockchainDto.ETHEREUM, Address.ONE().toString(), BigInteger.ONE)
+                itemId = ItemIdDto(BlockchainDto.ETHEREUM, Address.ONE().toString(), BigInteger.ONE).fullId()
             )
         )
         one = randomEsActivity().copy(
@@ -157,7 +157,7 @@ internal class ActivityElasticServiceIntegrationTest {
                     UnionEthEthereumAssetType(blockchain = BlockchainDto.ETHEREUM),
                     BigDecimal.ONE,
                 ),
-                itemId = ItemIdDto(BlockchainDto.ETHEREUM, "123", BigInteger.ONE),
+                itemId = ItemIdDto(BlockchainDto.ETHEREUM, "123", BigInteger.ONE).fullId(),
             )
         )
         two = randomEsActivity().copy(
@@ -175,7 +175,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 owner = randomUnionAddress(),
                 value = BigInteger.ONE,
                 transactionHash = randomString(),
-                itemId = ItemIdDto(BlockchainDto.FLOW, "123", BigInteger.ONE),
+                itemId = ItemIdDto(BlockchainDto.FLOW, "123", BigInteger.ONE).fullId(),
             )
         )
         three = randomEsActivity().copy(
@@ -206,7 +206,7 @@ internal class ActivityElasticServiceIntegrationTest {
                     UnionFlowAssetTypeFt(contract = ContractAddress(blockchain = BlockchainDto.FLOW, value = "123")),
                     BigDecimal.ONE,
                 ),
-                itemId = ItemIdDto(BlockchainDto.FLOW, "123", BigInteger.ONE),
+                itemId = ItemIdDto(BlockchainDto.FLOW, "123", BigInteger.ONE).fullId(),
             )
         )
         four = randomEsActivity().copy(
@@ -239,7 +239,7 @@ internal class ActivityElasticServiceIntegrationTest {
                         tokenId = randomBigInt(),
                     )
                 ),
-                itemId = ItemIdDto(BlockchainDto.FLOW, "123", BigInteger.ONE),
+                itemId = ItemIdDto(BlockchainDto.FLOW, "123", BigInteger.ONE).fullId(),
             )
         )
         five = randomEsActivity().copy(
@@ -275,7 +275,7 @@ internal class ActivityElasticServiceIntegrationTest {
                     ),
                     BigDecimal.ONE,
                 ),
-                itemId = ItemIdDto(BlockchainDto.SOLANA, "itemId"),
+                itemId = ItemIdDto(BlockchainDto.SOLANA, "itemId").fullId(),
             )
         )
         six = randomEsActivity().copy(
@@ -303,7 +303,7 @@ internal class ActivityElasticServiceIntegrationTest {
                         tokenId = randomBigInt(),
                     )
                 ),
-                itemId = ItemIdDto(BlockchainDto.ETHEREUM, "123", BigInteger.ONE),
+                itemId = ItemIdDto(BlockchainDto.ETHEREUM, "123", BigInteger.ONE).fullId(),
             )
         )
         seven = randomEsActivity().copy(

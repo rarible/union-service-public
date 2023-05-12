@@ -21,7 +21,6 @@ import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import scalether.domain.Address
@@ -43,8 +42,8 @@ class ActivityRepositoryIt : AbstractIntegrationTest() {
                     activityId = "1",
                     blockchain = BlockchainDto.ETHEREUM,
                     contract = ContractAddress(blockchain = BlockchainDto.ETHEREUM, value = Address.ONE().toString()),
-                    collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2"),
-                    itemId = itemIdDto(),
+                    collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2").fullId(),
+                    itemId = itemIdDto().fullId(),
                     tokenId = BigInteger.ONE,
                     date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
                     owner = UnionAddress(
@@ -61,8 +60,8 @@ class ActivityRepositoryIt : AbstractIntegrationTest() {
                     activityId = "2",
                     blockchain = BlockchainDto.ETHEREUM,
                     contract = ContractAddress(blockchain = BlockchainDto.ETHEREUM, value = Address.ONE().toString()),
-                    collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2"),
-                    itemId = itemIdDto(),
+                    collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2").fullId(),
+                    itemId = itemIdDto().fullId(),
                     tokenId = BigInteger.ONE,
                     date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
                     owner = UnionAddress(
@@ -110,8 +109,8 @@ class ActivityRepositoryIt : AbstractIntegrationTest() {
                     activityId = "1",
                     blockchain = BlockchainDto.ETHEREUM,
                     contract = ContractAddress(blockchain = BlockchainDto.ETHEREUM, value = Address.ONE().toString()),
-                    collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2"),
-                    itemId = itemIdDto(),
+                    collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2").fullId(),
+                    itemId = itemIdDto().fullId(),
                     tokenId = BigInteger.ONE,
                     date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
                     owner = UnionAddress(
@@ -128,8 +127,8 @@ class ActivityRepositoryIt : AbstractIntegrationTest() {
                     activityId = "2",
                     blockchain = BlockchainDto.ETHEREUM,
                     contract = ContractAddress(blockchain = BlockchainDto.ETHEREUM, value = Address.ONE().toString()),
-                    collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2"),
-                    itemId = itemIdDto(),
+                    collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2").fullId(),
+                    itemId = itemIdDto().fullId(),
                     date = Instant.now().minusSeconds(60).truncatedTo(ChronoUnit.SECONDS),
                     transactionHash = randomString(),
                     buyer = UnionAddress(
@@ -167,8 +166,8 @@ class ActivityRepositoryIt : AbstractIntegrationTest() {
                     activityId = "3",
                     blockchain = BlockchainDto.ETHEREUM,
                     contract = ContractAddress(blockchain = BlockchainDto.ETHEREUM, value = Address.ONE().toString()),
-                    collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2"),
-                    itemId = itemIdDto(),
+                    collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2").fullId(),
+                    itemId = itemIdDto().fullId(),
                     date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
                     transactionHash = randomString(),
                     buyer = UnionAddress(
@@ -206,12 +205,12 @@ class ActivityRepositoryIt : AbstractIntegrationTest() {
                     activityId = "4",
                     blockchain = BlockchainDto.ETHEREUM,
                     contract = ContractAddress(blockchain = BlockchainDto.ETHEREUM, value = Address.ONE().toString()),
-                    collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2"),
+                    collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2").fullId(),
                     itemId = ItemIdDto(
                         blockchain = BlockchainDto.ETHEREUM,
                         contract = Address.ONE().toString(),
                         tokenId = BigInteger("2")
-                    ),
+                    ).fullId(),
                     date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
                     transactionHash = randomString(),
                     buyer = UnionAddress(
@@ -267,8 +266,8 @@ class ActivityRepositoryIt : AbstractIntegrationTest() {
                 activityId = "1",
                 blockchain = BlockchainDto.ETHEREUM,
                 contract = ContractAddress(blockchain = BlockchainDto.ETHEREUM, value = Address.ONE().toString()),
-                collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2"),
-                itemId = itemId,
+                collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2").fullId(),
+                itemId = itemId.fullId(),
                 tokenId = BigInteger.ONE,
                 date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
                 owner = owner,
@@ -301,8 +300,8 @@ class ActivityRepositoryIt : AbstractIntegrationTest() {
                 activityId = "1",
                 blockchain = BlockchainDto.ETHEREUM,
                 contract = ContractAddress(blockchain = BlockchainDto.ETHEREUM, value = Address.ONE().toString()),
-                collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2"),
-                itemId = itemId,
+                collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2").fullId(),
+                itemId = itemId.fullId(),
                 tokenId = BigInteger.ONE,
                 date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
                 owner = owner,
@@ -317,8 +316,8 @@ class ActivityRepositoryIt : AbstractIntegrationTest() {
                 activityId = "2",
                 blockchain = BlockchainDto.ETHEREUM,
                 contract = ContractAddress(blockchain = BlockchainDto.ETHEREUM, value = Address.ONE().toString()),
-                collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2"),
-                itemId = itemId,
+                collection = CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = "2").fullId(),
+                itemId = itemId.fullId(),
                 tokenId = BigInteger.ONE,
                 date = Instant.now().truncatedTo(ChronoUnit.SECONDS),
                 owner = owner2,
