@@ -165,6 +165,15 @@ worker:
   meta-collection-retry:
     enabled: true
     rate: PT15M
+  itemMetaCustomAttributesJob:
+    enabled: true
+    rate: PT24H
+    providers:
+      mocaXp:
+        enabled: false
+        baseUrl: ""
+        uri: ""
+        apiKey: ${MOCA_XP_API_KEY}
   search-reindex:
     activity:
       enabled: ${consul.worker.activity.enabled:true}

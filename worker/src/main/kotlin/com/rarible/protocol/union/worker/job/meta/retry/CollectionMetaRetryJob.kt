@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.worker.job
+package com.rarible.protocol.union.worker.job.meta.retry
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.DaemonWorkerProperties

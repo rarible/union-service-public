@@ -30,7 +30,7 @@ class ItemMetaCustomAttributesRepository(
         return template.findById<ItemMetaCustomAttributes>(itemId.fullId()).awaitFirstOrNull()
     }
 
-    suspend fun getAll(ids: List<ItemIdDto>): List<ItemMetaCustomAttributes> {
+    suspend fun getAll(ids: Collection<ItemIdDto>): List<ItemMetaCustomAttributes> {
         val criteria = Criteria("_id").inValues(ids.map { it.fullId() })
         return template.find<ItemMetaCustomAttributes>(Query(criteria)).collectList().awaitFirst()
     }

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.worker.job
+package com.rarible.protocol.union.worker.job.meta.retry
 
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
