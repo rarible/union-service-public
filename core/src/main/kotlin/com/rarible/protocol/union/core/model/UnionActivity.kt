@@ -60,6 +60,7 @@ sealed class UnionActivity {
     open fun ownershipId(): OwnershipIdDto? = null
     open fun source(): OwnershipSourceDto? = null
     open fun isBlockchainEvent() = false
+    open fun isValid(): Boolean = itemId() != null
 }
 
 data class UnionMintActivity(
@@ -160,6 +161,7 @@ data class UnionOrderMatchSwap(
 ) : UnionOrderMatchActivity() {
 
     override fun itemId() = null
+    override fun isValid(): Boolean = left.asset.type.isNft() && right.asset.type.isNft()
 }
 
 data class UnionOrderMatchSell(

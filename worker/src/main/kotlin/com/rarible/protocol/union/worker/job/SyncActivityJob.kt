@@ -39,6 +39,10 @@ class SyncActivityJob(
         }
 
         activities.forEach {
+            if (!it.isValid()) {
+                logger.info("Ignoring activity $it as it is not valid")
+                return@forEach
+            }
             activityRepository.save(enrichmentActivityService.enrich(it))
         }
 
