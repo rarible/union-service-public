@@ -369,6 +369,7 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isNull()
         assertThat(actual.collection).isEqualTo(source.take.type.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.take.type.ext.itemId!!.value)
+        assertThat(actual.currency).isEqualTo(source.make.type.ext.currencyAddress())
     }
 
     @Test
@@ -399,6 +400,7 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isNull()
         assertThat(actual.collection).isEqualTo(source.make.type.ext.collectionId!!.value)
         assertThat(actual.item).isEqualTo(source.make.type.ext.itemId!!.value)
+        assertThat(actual.currency).isEqualTo(source.take.type.ext.currencyAddress())
     }
 
     @Test
@@ -435,6 +437,7 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isNull()
         assertThat(actual.collection).isEqualTo(source.take.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.take.ext.itemId!!.value)
+        assertThat(actual.currency).isEqualTo(source.make.ext.currencyAddress())
     }
 
     @Test
@@ -471,6 +474,7 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isNull()
         assertThat(actual.collection).isEqualTo(source.make.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.make.ext.itemId!!.value)
+        assertThat(actual.currency).isEqualTo(source.take.ext.currencyAddress())
     }
 
     @Test
@@ -497,6 +501,7 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isNull()
         assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+        assertThat(actual.currency).isEqualTo(source.auction.buy.ext.currencyAddress())
     }
 
     @Test
@@ -524,6 +529,7 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isEqualTo(source.bid.buyer.value)
         assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+        assertThat(actual.currency).isEqualTo(source.auction.buy.ext.currencyAddress())
     }
 
     @Test
@@ -550,6 +556,7 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isNull()
         assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+        assertThat(actual.currency).isEqualTo(source.auction.buy.ext.currencyAddress())
     }
 
     @Test
@@ -576,6 +583,7 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isNull()
         assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+        assertThat(actual.currency).isEqualTo(source.auction.buy.ext.currencyAddress())
     }
 
     @Test
@@ -601,6 +609,7 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isNull()
         assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+        assertThat(actual.currency).isEqualTo(source.auction.buy.ext.currencyAddress())
     }
 
     @Test
@@ -626,6 +635,7 @@ class EsActivityConverterTest {
         assertThat(actual.userTo).isNull()
         assertThat(actual.collection).isEqualTo(source.auction.sell.type.ext.itemId!!.extractCollection())
         assertThat(actual.item).isEqualTo(source.auction.sell.type.ext.itemId!!.value)
+        assertThat(actual.currency).isEqualTo(source.auction.buy.ext.currencyAddress())
     }
 
     @Test

@@ -17,7 +17,6 @@ import com.rarible.protocol.union.dto.AuctionFinishActivityDto
 import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BurnActivityDto
-import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.L2DepositActivityDto
 import com.rarible.protocol.union.dto.L2WithdrawalActivityDto
@@ -32,7 +31,6 @@ import com.rarible.protocol.union.dto.TransferActivityDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.parser.IdParser
 import org.springframework.stereotype.Component
-import kotlin.contracts.contract
 
 @Component
 class EsActivityConverter(
@@ -208,7 +206,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
-            currency = getCurrencyAddressOrNull(source.id.blockchain, source.make),
+            currency = getCurrencyAddressOrNull(source.make),
         )
     }
 
@@ -224,7 +222,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
-            currency = getCurrencyAddressOrNull(source.id.blockchain, source.take),
+            currency = getCurrencyAddressOrNull(source.take),
         )
     }
 
@@ -244,7 +242,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
-            currency = getCurrencyAddressOrNull(source.id.blockchain, source.make),
+            currency = getCurrencyAddressOrNull(source.make),
         )
     }
 
@@ -264,7 +262,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
-            currency = getCurrencyAddressOrNull(source.id.blockchain, source.take),
+            currency = getCurrencyAddressOrNull(source.take),
         )
     }
 
@@ -284,7 +282,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
-            currency = getCurrencyAddressOrNull(source.id.blockchain, source.auction.buy),
+            currency = getCurrencyAddressOrNull(source.auction.buy),
         )
     }
 
@@ -300,7 +298,7 @@ class EsActivityConverter(
             userTo = source.bid.buyer.value,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
-            currency = getCurrencyAddressOrNull(source.id.blockchain, source.auction.buy),
+            currency = getCurrencyAddressOrNull(source.auction.buy),
         )
     }
 
@@ -320,7 +318,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
-            currency = getCurrencyAddressOrNull(source.id.blockchain, source.auction.buy),
+            currency = getCurrencyAddressOrNull(source.auction.buy),
         )
     }
 
@@ -340,7 +338,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
-            currency = getCurrencyAddressOrNull(source.id.blockchain, source.auction.buy),
+            currency = getCurrencyAddressOrNull(source.auction.buy),
         )
     }
 
@@ -360,7 +358,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
-            currency = getCurrencyAddressOrNull(source.id.blockchain, source.auction.buy),
+            currency = getCurrencyAddressOrNull(source.auction.buy),
         )
     }
 
@@ -376,7 +374,7 @@ class EsActivityConverter(
             userTo = null,
             collection = getCollection(source, itemId, collection),
             item = itemId?.value.orEmpty(),
-            currency = getCurrencyAddressOrNull(source.id.blockchain, source.auction.buy),
+            currency = getCurrencyAddressOrNull(source.auction.buy),
         )
     }
 

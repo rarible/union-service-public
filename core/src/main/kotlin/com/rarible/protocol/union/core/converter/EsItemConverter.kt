@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.core.converter
 
-import com.rarible.protocol.union.core.converter.helper.getCurrencyAddressOrNull
+import com.rarible.protocol.union.core.converter.helper.getCurrencyIdOrNull
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.dto.ItemDto
@@ -25,10 +25,10 @@ object EsItemConverter {
             traits = meta?.attributes?.map { EsTrait(it.key.take(MAX_TRAIT_LENGTH), it.value?.take(MAX_TRAIT_LENGTH)) } ?: emptyList(),
             self = self,
             bestSellAmount = this.bestSellOrder?.take?.value?.toDouble(),
-            bestSellCurrency = getCurrencyAddressOrNull(blockchain, this.bestSellOrder?.take),
+            bestSellCurrency = getCurrencyIdOrNull(blockchain, this.bestSellOrder?.take),
             bestSellMarketplace = this.bestSellOrder?.platform?.name, // getting marketplace may be more complicated
             bestBidAmount = this.bestBidOrder?.make?.value?.toDouble(),
-            bestBidCurrency = getCurrencyAddressOrNull(blockchain, this.bestBidOrder?.make),
+            bestBidCurrency = getCurrencyIdOrNull(blockchain, this.bestBidOrder?.make),
             bestBidMarketplace = this.bestBidOrder?.platform?.name, // getting marketplace may be more complicated
         )
     }
