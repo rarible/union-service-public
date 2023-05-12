@@ -8,9 +8,7 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AuctionBidDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ContractAddress
-import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderActivitySourceDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -30,8 +28,8 @@ sealed class EnrichmentActivity {
     abstract val activityId: String
     abstract val activityType: ActivityTypeDto
 
-    abstract val itemId: ItemIdDto?
-    abstract val collection: CollectionIdDto?
+    abstract val itemId: String?
+    abstract val collection: String?
     abstract val contract: ContractAddress?
 
     abstract val date: Instant
@@ -45,9 +43,9 @@ data class EnrichmentMintActivity(
     override val lastUpdatedAt: Instant? = null,
     val owner: UnionAddress,
     override val contract: ContractAddress? = null,
-    override val collection: CollectionIdDto? = null,
+    override val collection: String? = null,
     val tokenId: BigInteger? = null,
-    override val itemId: ItemIdDto,
+    override val itemId: String,
     val value: BigInteger,
     val mintPrice: BigDecimal? = null,
     val transactionHash: String,
@@ -75,9 +73,9 @@ data class EnrichmentBurnActivity(
     override val lastUpdatedAt: Instant? = null,
     val owner: UnionAddress,
     override val contract: ContractAddress? = null,
-    override val collection: CollectionIdDto? = null,
+    override val collection: String? = null,
     val tokenId: BigInteger? = null,
-    override val itemId: ItemIdDto,
+    override val itemId: String,
     val value: BigInteger,
     val transactionHash: String,
     val blockchainInfo: ActivityBlockchainInfoDto? = null,
@@ -105,9 +103,9 @@ data class EnrichmentTransferActivity(
     val from: UnionAddress,
     val owner: UnionAddress,
     override val contract: ContractAddress? = null,
-    override val collection: CollectionIdDto? = null,
+    override val collection: String? = null,
     val tokenId: BigInteger? = null,
-    override val itemId: ItemIdDto,
+    override val itemId: String,
     val value: BigInteger,
     val purchase: Boolean? = null,
     val transactionHash: String,
@@ -146,8 +144,8 @@ data class EnrichmentOrderMatchSwap(
     override val date: Instant,
     override val lastUpdatedAt: Instant? = null,
     override val contract: ContractAddress? = null,
-    override val collection: CollectionIdDto? = null,
-    override val itemId: ItemIdDto? = null,
+    override val collection: String? = null,
+    override val itemId: String? = null,
     val left: EnrichmentOrderActivityMatchSide,
     val right: EnrichmentOrderActivityMatchSide,
 ) : EnrichmentOrderMatchActivity() {
@@ -186,8 +184,8 @@ data class EnrichmentOrderMatchSell(
     val amountUsd: BigDecimal? = null,
     val type: Type,
     override val contract: ContractAddress? = null,
-    override val itemId: ItemIdDto,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String,
+    override val collection: String? = null,
     val sellMarketplaceMarker: String? = null,
     val buyMarketplaceMarker: String? = null,
 ) : EnrichmentOrderMatchActivity() {
@@ -226,8 +224,8 @@ data class EnrichmentOrderBidActivity(
     val source: OrderActivitySourceDto? = null,
     val marketplaceMarker: String? = null,
     override val contract: ContractAddress? = null,
-    override val itemId: ItemIdDto? = null,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String? = null,
+    override val collection: String? = null,
 ) : EnrichmentActivity() {
     @Transient
     private val _id: EnrichmentActivityId = EnrichmentActivityId(blockchain, activityId)
@@ -258,8 +256,8 @@ data class EnrichmentOrderListActivity(
     val priceUsd: BigDecimal? = null,
     val source: OrderActivitySourceDto? = null,
     override val contract: ContractAddress? = null,
-    override val itemId: ItemIdDto,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String,
+    override val collection: String? = null,
 ) : EnrichmentActivity() {
     @Transient
     private val _id: EnrichmentActivityId = EnrichmentActivityId(blockchain, activityId)
@@ -290,8 +288,8 @@ data class EnrichmentOrderCancelBidActivity(
     val transactionHash: String,
     val blockchainInfo: ActivityBlockchainInfoDto? = null,
     override val contract: ContractAddress? = null,
-    override val itemId: ItemIdDto? = null,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String? = null,
+    override val collection: String? = null,
 ) : EnrichmentActivity() {
     @Transient
     private val _id: EnrichmentActivityId = EnrichmentActivityId(blockchain, activityId)
@@ -322,8 +320,8 @@ data class EnrichmentOrderCancelListActivity(
     val transactionHash: String,
     val blockchainInfo: ActivityBlockchainInfoDto? = null,
     override val contract: ContractAddress? = null,
-    override val itemId: ItemIdDto,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String,
+    override val collection: String? = null,
 ) : EnrichmentActivity() {
     @Transient
     private val _id: EnrichmentActivityId = EnrichmentActivityId(blockchain, activityId)
@@ -348,8 +346,8 @@ data class EnrichmentAuctionOpenActivity(
     val auction: AuctionDto,
     val transactionHash: String,
     override val contract: ContractAddress? = null,
-    override val itemId: ItemIdDto,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String,
+    override val collection: String? = null,
 ) : EnrichmentActivity() {
     @Transient
     private val _id: EnrichmentActivityId = EnrichmentActivityId(blockchain, activityId)
@@ -375,8 +373,8 @@ data class EnrichmentAuctionBidActivity(
     val bid: AuctionBidDto,
     val transactionHash: String,
     override val contract: ContractAddress? = null,
-    override val itemId: ItemIdDto,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String,
+    override val collection: String? = null,
 ) : EnrichmentActivity() {
     @Transient
     private val _id: EnrichmentActivityId = EnrichmentActivityId(blockchain, activityId)
@@ -401,8 +399,8 @@ data class EnrichmentAuctionFinishActivity(
     val auction: AuctionDto,
     val transactionHash: String,
     override val contract: ContractAddress? = null,
-    override val itemId: ItemIdDto,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String,
+    override val collection: String? = null,
 ) : EnrichmentActivity() {
     @Transient
     private val _id: EnrichmentActivityId = EnrichmentActivityId(blockchain, activityId)
@@ -428,8 +426,8 @@ data class EnrichmentAuctionCancelActivity(
     val auction: AuctionDto,
     val transactionHash: String,
     override val contract: ContractAddress? = null,
-    override val itemId: ItemIdDto,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String,
+    override val collection: String? = null,
 ) : EnrichmentActivity() {
     @Transient
     private val _id: EnrichmentActivityId = EnrichmentActivityId(blockchain, activityId)
@@ -453,8 +451,8 @@ data class EnrichmentAuctionStartActivity(
     override val lastUpdatedAt: Instant? = null,
     val auction: AuctionDto,
     override val contract: ContractAddress? = null,
-    override val itemId: ItemIdDto,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String,
+    override val collection: String? = null,
 ) : EnrichmentActivity() {
     @Transient
     private val _id: EnrichmentActivityId = EnrichmentActivityId(blockchain, activityId)
@@ -478,8 +476,8 @@ data class EnrichmentAuctionEndActivity(
     override val lastUpdatedAt: Instant? = null,
     val auction: AuctionDto,
     override val contract: ContractAddress? = null,
-    override val itemId: ItemIdDto,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String,
+    override val collection: String? = null,
 ) : EnrichmentActivity() {
     @Transient
     private val _id: EnrichmentActivityId = EnrichmentActivityId(blockchain, activityId)
@@ -503,8 +501,8 @@ data class EnrichmentL2DepositActivity(
     override val lastUpdatedAt: Instant? = null,
     val user: UnionAddress,
     val status: String,
-    override val itemId: ItemIdDto,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String,
+    override val collection: String? = null,
     override val contract: ContractAddress? = null,
     val value: BigInteger? = null,
 ) : EnrichmentActivity() {
@@ -530,8 +528,8 @@ data class EnrichmentL2WithdrawalActivity(
     override val lastUpdatedAt: Instant? = null,
     val user: UnionAddress,
     val status: String,
-    override val itemId: ItemIdDto,
-    override val collection: CollectionIdDto? = null,
+    override val itemId: String,
+    override val collection: String? = null,
     override val contract: ContractAddress? = null,
     val value: BigInteger? = null,
 ) : EnrichmentActivity() {
