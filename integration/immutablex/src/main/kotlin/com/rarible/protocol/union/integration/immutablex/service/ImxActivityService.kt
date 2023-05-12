@@ -99,7 +99,7 @@ class ImxActivityService(
         val types = when (type) {
             SyncTypeDto.NFT -> listOf(ActivityType.TRANSFER, ActivityType.MINT)
             SyncTypeDto.ORDER -> listOf(ActivityType.TRADE)
-            else -> return Slice.empty()
+            else -> ActivityType.values().toList()
         }
         val result = getActivities(
             types = types,
@@ -347,5 +347,4 @@ class ImxActivityService(
             return DateIdContinuation(entity.timestamp, entity.activityId.value, true)
         }
     }
-
 }
