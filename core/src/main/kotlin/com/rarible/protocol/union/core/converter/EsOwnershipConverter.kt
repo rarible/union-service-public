@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.core.converter
 
-import com.rarible.protocol.union.core.converter.helper.getCurrencyAddressOrNull
+import com.rarible.protocol.union.core.converter.helper.getCurrencyIdOrNull
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
 import com.rarible.protocol.union.core.model.getAuctionOwnershipId
 import com.rarible.protocol.union.core.model.getItemId
@@ -24,7 +24,7 @@ object EsOwnershipConverter {
             auctionId = source.auction?.id?.fullId(),
             auctionOwnershipId = source.auction?.getAuctionOwnershipId()?.fullId(),
             bestSellAmount = source.bestSellOrder?.take?.value?.toDouble(),
-            bestSellCurrency = getCurrencyAddressOrNull(source.blockchain, source.bestSellOrder?.take),
+            bestSellCurrency = getCurrencyIdOrNull(source.blockchain, source.bestSellOrder?.take),
             bestSellMarketplace = source.bestSellOrder?.platform?.name, // getting marketplace may be more complicated
         )
     }
