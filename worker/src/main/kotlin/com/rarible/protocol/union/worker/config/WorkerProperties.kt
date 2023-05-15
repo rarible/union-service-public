@@ -122,6 +122,7 @@ class ItemMetaCustomAttributesProviderProperties(
 class MocaXpCustomAttributesProviderProperties(
     val enabled: Boolean,
     val baseUrl: String,
+    val collection: String,
     val uri: String,
-    val apiKey: String
+    val apiKey: String,
 )

@@ -171,6 +171,7 @@ worker:
     providers:
       mocaXp:
         enabled: false
+        collection: ""
         baseUrl: ""
         uri: ""
         apiKey: ${MOCA_XP_API_KEY}

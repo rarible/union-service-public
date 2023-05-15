@@ -1,10 +1,13 @@
 package com.rarible.protocol.union.worker.job.meta
 
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
+import com.rarible.protocol.union.dto.parser.IdParser
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class MocaXpCustomAttributesParserTest {
+
+    private val collectionId = IdParser.parseCollectionId("ETHEREUM:0x59325733eb952a92e069c87f0a6168b29e80627f")
 
     @Test
     fun `parse - ok`() {
@@ -15,7 +18,7 @@ class MocaXpCustomAttributesParserTest {
             ]
         """
 
-        val result = MocaXpCustomAttributesParser.parse(json)
+        val result = MocaXpCustomAttributesParser.parse(json, collectionId)
 
         assertThat(result[0].id.fullId()).isEqualTo("ETHEREUM:0x59325733eb952a92e069c87f0a6168b29e80627f:0")
         assertThat(result[0].attributes).isEqualTo(

@@ -1,0 +1,10 @@
+worker:
+  itemMetaCustomAttributesJob:
+    enabled: true
+    rate: PT24H
+    providers:
+      mocaXp:
+        enabled: true
+        collection: "ETHEREUM:0x759febe563dbb20e14d1c220dd10842a7d375137"
+        baseUrl: "https://api-dev.mocaverse.xyz"
+        uri: "/moca-xp/all_moca_xp.json"
