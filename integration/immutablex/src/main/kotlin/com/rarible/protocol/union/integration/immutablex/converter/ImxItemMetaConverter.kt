@@ -3,10 +3,10 @@ package com.rarible.protocol.union.integration.immutablex.converter
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset
 
@@ -35,7 +35,7 @@ object ImxItemMetaConverter {
             createdAt = asset.createdAt,
             content = getVideoContent(asset) + getImageContent(asset),
             attributes = asset.metadata?.filterKeys { it in attributes }?.map {
-                MetaAttributeDto(
+                UnionMetaAttribute(
                     key = it.key,
                     value = "${it.value}"
                 )

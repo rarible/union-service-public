@@ -23,6 +23,7 @@ import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionUnknownProperties
@@ -31,7 +32,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
@@ -131,7 +131,7 @@ object FlowItemConverter {
             externalUri = source.externalUri,
             originalMetaUri = source.originalMetaUri,
             attributes = source.attributes.orEmpty().map {
-                MetaAttributeDto(
+                UnionMetaAttribute(
                     key = it.key,
                     value = it.value,
                     type = it.type,

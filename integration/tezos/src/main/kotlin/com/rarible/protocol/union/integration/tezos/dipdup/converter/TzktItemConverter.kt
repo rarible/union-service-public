@@ -3,11 +3,11 @@ package com.rarible.protocol.union.integration.tezos.dipdup.converter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
@@ -88,8 +88,8 @@ object TzktItemConverter {
         )
     }
 
-    private fun convert(attr: TokenMeta.Attribute): MetaAttributeDto {
-        return MetaAttributeDto(
+    private fun convert(attr: TokenMeta.Attribute): UnionMetaAttribute {
+        return UnionMetaAttribute(
             key = attr.key,
             value = attr.value,
             type = attr.type,

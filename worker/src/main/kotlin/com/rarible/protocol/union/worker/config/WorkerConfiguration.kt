@@ -62,6 +62,11 @@ class WorkerConfiguration(
         return properties.searchReindex.ownership
     }
 
+    @Bean
+    fun mocaXpCustomAttributesProviderProperties(): MocaXpCustomAttributesProviderProperties {
+        return properties.itemMetaCustomAttributesJob.providers.mocaXp
+    }
+
     @FlowPreview
     @ExperimentalCoroutinesApi
     @Bean(initMethod = "bootstrap")

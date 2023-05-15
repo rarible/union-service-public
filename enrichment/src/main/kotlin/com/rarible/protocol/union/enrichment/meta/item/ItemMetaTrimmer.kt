@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.enrichment.meta.item
 
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.util.trimToLength
-import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.enrichment.configuration.ItemMetaTrimmingProperties
 import org.springframework.stereotype.Component
 
@@ -23,7 +23,7 @@ class ItemMetaTrimmer(
         )
     }
 
-    private fun trim(attribute: MetaAttributeDto): MetaAttributeDto {
+    private fun trim(attribute: UnionMetaAttribute): UnionMetaAttribute {
         return attribute.copy(
             key = trimToLength(attribute.key, properties.attributeNameLength, suffix)!!,
             value = trimToLength(attribute.value, properties.attributeValueLength, suffix)

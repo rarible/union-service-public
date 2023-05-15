@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.model
 
-import com.rarible.protocol.union.dto.MetaAttributeDto
 import java.time.Instant
 
 data class UnionMeta(
@@ -17,7 +16,7 @@ data class UnionMeta(
     val externalUri: String? = null,
     val originalMetaUri: String? = null,
 
-    val attributes: List<MetaAttributeDto> = emptyList(),
+    val attributes: List<UnionMetaAttribute> = emptyList(),
     override val content: List<UnionMetaContent> = emptyList(),
 
     @Deprecated("Not supported, should be removed")
