@@ -8,7 +8,6 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.ItemMetaCustomAttributes
 import com.rarible.protocol.union.enrichment.repository.ItemMetaCustomAttributesRepository
 import com.rarible.protocol.union.worker.config.WorkerProperties
-import com.rarible.protocol.union.worker.job.meta.retry.ItemMetaRetryJobHandler
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.time.delay
 import org.slf4j.LoggerFactory
@@ -17,7 +16,7 @@ import java.time.Duration
 
 @Component
 class ItemMetaCustomAttributesJob(
-    private val handler: ItemMetaRetryJobHandler,
+    private val handler: ItemMetaCustomAttributesJobHandler,
     properties: WorkerProperties,
     meterRegistry: MeterRegistry,
 ) : SequentialDaemonWorker(
