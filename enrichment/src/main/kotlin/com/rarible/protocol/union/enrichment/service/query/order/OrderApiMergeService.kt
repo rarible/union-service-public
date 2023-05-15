@@ -26,16 +26,21 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
+import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.util.BlockchainFilter
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class OrderApiMergeService(
-    private val router: BlockchainRouter<OrderService>
+    private val router: BlockchainRouter<OrderService>,
+    private val enrichmentItemService: EnrichmentItemService
 ) : OrderQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    private val onlyActiveOrdersFilter = listOf(OrderStatusDto.ACTIVE)
 
     suspend fun getOrderById(id: String): UnionOrder {
         val orderId = IdParser.parseOrderId(id)
@@ -87,9 +92,11 @@ class OrderApiMergeService(
             return Slice.empty()
         }
 
-        val currencyAssetTypes = router.getService(blockchain)
-            .getSellCurrencies(itemId.value)
-            .map { it.currencyId()!! }
+        val currencyAssetTypes = when (status) {
+            // For ACTIVE orders we don't need to fetch currencies - we can take them from item
+            onlyActiveOrdersFilter -> getSellCurrenciesFromItem(itemId)
+            else -> router.getService(blockchain).getSellCurrencies(itemId.value).map { it.currencyId()!! }
+        }
 
         if (currencyAssetTypes.isEmpty()) {
             return Slice.empty()
@@ -191,9 +198,12 @@ class OrderApiMergeService(
             return Slice.empty()
         }
 
-        val currencyContracts = currencies?.map { it.value } ?: router.getService(blockchain)
-            .getBidCurrencies(itemId.value)
-            .map { it.currencyId()!! }
+        val currencyContracts = when {
+            currencies != null -> currencies.map { it.value }
+            // For ACTIVE orders we don't need to fetch currencies - we can take them from item
+            status == onlyActiveOrdersFilter -> getBidCurrenciesFromItem(itemId)
+            else -> router.getService(blockchain).getBidCurrencies(itemId.value).map { it.currencyId()!! }
+        }
 
         if (currencyContracts.isEmpty()) {
             return Slice.empty()
@@ -418,5 +428,15 @@ class OrderApiMergeService(
     private fun ensureSameBlockchain(blockchains: Collection<BlockchainGroupDto?>): Boolean {
         val set = blockchains.filterNotNull().toSet()
         return set.size == 1
+    }
+
+    private suspend fun getSellCurrenciesFromItem(itemId: ItemIdDto): List<String> {
+        val item = enrichmentItemService.get(ShortItemId(itemId)) ?: return emptyList()
+        return item.bestSellOrders.keys.toList()
+    }
+
+    private suspend fun getBidCurrenciesFromItem(itemId: ItemIdDto): List<String> {
+        val item = enrichmentItemService.get(ShortItemId(itemId)) ?: return emptyList()
+        return item.bestBidOrders.keys.toList()
     }
 }

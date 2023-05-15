@@ -16,10 +16,13 @@ import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
+import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -280,6 +283,60 @@ class OrderControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `get order bids by item - only active`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+
+        val (contract, tokenId) = CompositeItemIdParser.split(ethItemId.value)
+        val maker = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
+
+        val order = randomEthBidOrderDto(ethItemId)
+        val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
+        val shortOrder = ShortOrderConverter.convert(unionOrder)
+
+        val ethOrders = listOf(order)
+
+        val shortItem = randomShortItem(ethItemId).copy(
+            bestBidOrder = shortOrder,
+            bestBidOrders = mapOf(unionOrder.bidCurrencyId() to shortOrder)
+        )
+        enrichmentItemService.save(shortItem)
+
+        coEvery {
+            testEthereumOrderApi.getOrderBidsByItemAndByStatus(
+                contract,
+                tokenId.toString(),
+                listOf(EthConverter.convertToAddress(maker.value)),
+                null,
+                ethPlatform,
+                continuation,
+                size,
+                listOf(com.rarible.protocol.dto.OrderStatusDto.ACTIVE),
+                unionOrder.bidCurrencyId(),
+                null,
+                null
+            )
+        } returns OrdersPaginationDto(ethOrders, continuation).toMono()
+
+        val orders = orderControllerClient.getOrderBidsByItem(
+            ethItemId.fullId(),
+            platform,
+            listOf(maker.fullId()),
+            null,
+            listOf(OrderStatusDto.ACTIVE),
+            null,
+            null,
+            null,
+            continuation,
+            size,
+            null
+        ).awaitFirst()
+
+        assertThat(orders.orders).hasSize(1)
+        assertThat(orders.orders[0]).isInstanceOf(OrderDto::class.java)
+        assertThat(orders.continuation).isNull()
+    }
+
+    @Test
     fun `get order bids by item - flow`() = runBlocking<Unit> {
         // TODO - implement when Flow support this method
     }
@@ -375,6 +432,54 @@ class OrderControllerFt : AbstractIntegrationTest() {
             maker.fullId(),
             null,
             null,
+            continuation,
+            size,
+            null
+        ).awaitFirst()
+
+        assertThat(orders.orders).hasSize(1)
+        assertThat(orders.orders[0]).isInstanceOf(OrderDto::class.java)
+        assertThat(orders.continuation).isNull()
+    }
+
+    @Test
+    fun `get sell orders by item - only active`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+
+        val (contract, tokenId) = CompositeItemIdParser.split(ethItemId.value)
+        val maker = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
+
+        val order = randomEthSellOrderDto(ethItemId)
+        val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
+        val shortOrder = ShortOrderConverter.convert(unionOrder)
+
+        val ethOrders = listOf(order)
+        val shortItem = randomShortItem(ethItemId).copy(
+            bestSellOrder = shortOrder,
+            bestSellOrders = mapOf(unionOrder.sellCurrencyId() to shortOrder)
+        )
+        enrichmentItemService.save(shortItem)
+
+        coEvery {
+            testEthereumOrderApi.getSellOrdersByItemAndByStatus(
+                contract,
+                tokenId.toString(),
+                maker.value,
+                null,
+                ethPlatform,
+                continuation,
+                size,
+                listOf(com.rarible.protocol.dto.OrderStatusDto.ACTIVE),
+                unionOrder.sellCurrencyId()
+            )
+        } returns OrdersPaginationDto(ethOrders, continuation).toMono()
+
+        val orders = orderControllerClient.getSellOrdersByItem(
+            ethItemId.fullId(),
+            platform,
+            maker.fullId(),
+            null,
+            listOf(OrderStatusDto.ACTIVE),
             continuation,
             size,
             null
