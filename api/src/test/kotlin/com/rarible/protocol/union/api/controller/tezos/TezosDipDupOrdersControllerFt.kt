@@ -6,6 +6,7 @@ import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.client.core.model.OrderStatus
 import com.rarible.dipdup.client.core.model.TezosPlatform
 import com.rarible.dipdup.client.exception.DipDupNotFound
+import com.rarible.dipdup.client.exception.WrongArgument
 import com.rarible.dipdup.client.model.DipDupOrdersPage
 import com.rarible.protocol.union.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
@@ -15,7 +16,10 @@ import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.SearchEngineDto
+import com.rarible.protocol.union.dto.UnionApiErrorBadRequestDto
 import com.rarible.protocol.union.dto.UnionApiErrorEntityNotFoundDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
@@ -87,6 +91,19 @@ class TezosDipDupOrdersControllerFt : AbstractIntegrationTest() {
             orderControllerClient.getOrderById(orderId.fullId()).awaitFirstOrNull()
         } catch (e: OrderControllerApi.ErrorGetOrderById) {
             assertThat(e.on404).isInstanceOf(UnionApiErrorEntityNotFoundDto::class.java)
+        }
+    }
+
+    @Test
+    fun `should send 400`() = runBlocking<Unit> {
+        coEvery {
+            testDipDupOrderClient.getOrdersAll(any(), any(), any(), any(), any(), any())
+        } throws WrongArgument("")
+
+        try {
+            orderControllerClient.getOrdersAll(listOf(BlockchainDto.TEZOS), "", 1, OrderSortDto.LAST_UPDATE_DESC, emptyList(), SearchEngineDto.V1)
+        } catch (e: OrderControllerApi.ErrorGetOrdersAll) {
+            assertThat(e.on400).isInstanceOf(UnionApiErrorBadRequestDto::class.java)
         }
     }
 
