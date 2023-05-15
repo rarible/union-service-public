@@ -11,7 +11,7 @@ class ItemMetaAttributeCustomizer(
     private val itemMetaCustomAttributeRepository: ItemMetaCustomAttributesRepository
 ) : ItemMetaCustomizer {
 
-    override fun customize(id: ItemIdDto, meta: UnionMeta): UnionMeta {
+    override suspend fun customize(id: ItemIdDto, meta: UnionMeta): UnionMeta {
         val customAttributes = itemMetaCustomAttributeRepository.getCustomAttributes(id)
         if (customAttributes.isEmpty()) {
             return meta

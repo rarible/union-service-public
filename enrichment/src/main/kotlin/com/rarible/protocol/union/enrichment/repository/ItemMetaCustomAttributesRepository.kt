@@ -18,8 +18,8 @@ class ItemMetaCustomAttributesRepository(
     private val template: ReactiveMongoTemplate
 ) {
 
-    fun getCustomAttributes(id: ItemIdDto): List<UnionMetaAttribute> {
-        return emptyList()
+    suspend fun getCustomAttributes(id: ItemIdDto): List<UnionMetaAttribute> {
+        return get(id)?.attributes ?: emptyList()
     }
 
     suspend fun save(attributes: ItemMetaCustomAttributes): ItemMetaCustomAttributes {

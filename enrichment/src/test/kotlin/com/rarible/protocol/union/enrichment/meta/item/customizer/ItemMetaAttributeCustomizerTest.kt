@@ -9,6 +9,7 @@ import io.mockk.coEvery
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -24,7 +25,7 @@ class ItemMetaAttributeCustomizerTest {
     lateinit var customizer: ItemMetaAttributeCustomizer
 
     @Test
-    fun `customize - ok, attributes added`() {
+    fun `customize - ok, attributes added`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val meta = randomUnionMeta()
         val extraAttribute = randomUnionMetaAttribute()
@@ -37,7 +38,7 @@ class ItemMetaAttributeCustomizerTest {
     }
 
     @Test
-    fun `customize - ok, attributes replaced`() {
+    fun `customize - ok, attributes replaced`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val meta = randomUnionMeta()
         val extraAttribute = meta.attributes[0].copy(value = randomString())
