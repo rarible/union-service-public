@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.client.WebClientFactory
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -20,7 +21,8 @@ import org.springframework.web.reactive.function.client.WebClient
 @Component
 @ConditionalOnProperty("worker.itemMetaCustomAttributesJob.providers.mocaXp.enabled", havingValue = "true")
 class MocaXpMetaCustomAttributesProvider(
-    properties: MocaXpCustomAttributesProviderProperties
+    properties: MocaXpCustomAttributesProviderProperties,
+    private val clientCustomizer: UnionWebClientCustomizer
 ) : MetaCustomAttributesProvider {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -51,9 +53,9 @@ class MocaXpMetaCustomAttributesProvider(
             mapOf("x-api-key" to apiKey)
         }
 
-        return WebClientFactory.createClient(baseUrl, headers)
-            .codecs { configurer -> configurer.defaultCodecs().maxInMemorySize(2 * 1024 * 1024) }
-            .build()
+        val builder = WebClientFactory.createClient(baseUrl, headers)
+        clientCustomizer.customize(builder)
+        return builder.build()
     }
 }
 
