@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionHtmlProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
@@ -13,6 +14,7 @@ import com.rarible.protocol.union.dto.AudioContentDto
 import com.rarible.protocol.union.dto.CollectionMetaDto
 import com.rarible.protocol.union.dto.HtmlContentDto
 import com.rarible.protocol.union.dto.ImageContentDto
+import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.Model3dContentDto
@@ -51,7 +53,7 @@ object MetaDtoConverter {
             rightsUri = meta.rightsUri,
             externalUri = meta.externalUri,
             originalMetaUri = meta.originalMetaUri,
-            attributes = meta.attributes,
+            attributes = meta.attributes.map(::convert),
             content = meta.content.map { convert(it) },
             restrictions = meta.restrictions.map { it.type }.distinct()
         )
@@ -71,7 +73,7 @@ object MetaDtoConverter {
             rightsUri = meta.rightsUri,
             externalUri = meta.externalUri,
             originalMetaUri = meta.originalMetaUri,
-            attributes = meta.attributes,
+            attributes = meta.attributes.map(::convert),
             content = meta.content.map { convert(it) },
             restrictions = meta.restrictions.map { it.type }.distinct()
         )
@@ -134,5 +136,14 @@ object MetaDtoConverter {
                 available = null,
             )
         }
+    }
+
+    fun convert(source: UnionMetaAttribute): MetaAttributeDto {
+        return MetaAttributeDto(
+            key = source.key,
+            value = source.value,
+            type = source.type,
+            format = source.format,
+        )
     }
 }

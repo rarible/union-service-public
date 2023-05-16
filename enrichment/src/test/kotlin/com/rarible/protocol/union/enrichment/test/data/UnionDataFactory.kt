@@ -13,6 +13,7 @@ import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.core.model.UnionMintActivity
@@ -35,7 +36,6 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.EthSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -158,8 +158,8 @@ fun randomUnionCollectionMeta(): UnionCollectionMeta {
     )
 }
 
-fun randomUnionMetaAttribute(): MetaAttributeDto {
-    return MetaAttributeDto(
+fun randomUnionMetaAttribute(): UnionMetaAttribute {
+    return UnionMetaAttribute(
         key = randomString(),
         value = randomString(),
         type = randomString(),

@@ -16,6 +16,7 @@ data class WorkerProperties(
     val reconcileMarks: ReconcileMarksProperties,
     val metaItemRetry: MetaRetry,
     val metaCollectionRetry: MetaRetry,
+    val itemMetaCustomAttributesJob: ItemMetaCustomAttributesJobProperties
 )
 
 data class SearchReindexProperties(
@@ -106,4 +107,22 @@ class ReconcileMarksProperties(
 class MetaRetry(
     val enabled: Boolean = true,
     val rate: Duration = Duration.ofMinutes(1)
+)
+
+class ItemMetaCustomAttributesJobProperties(
+    val enabled: Boolean = true,
+    val rate: Duration = Duration.ofDays(1),
+    val providers: ItemMetaCustomAttributesProviderProperties
+)
+
+class ItemMetaCustomAttributesProviderProperties(
+    val mocaXp: MocaXpCustomAttributesProviderProperties
+)
+
+class MocaXpCustomAttributesProviderProperties(
+    val enabled: Boolean,
+    val baseUrl: String,
+    val collection: String,
+    val uri: String,
+    val apiKey: String,
 )

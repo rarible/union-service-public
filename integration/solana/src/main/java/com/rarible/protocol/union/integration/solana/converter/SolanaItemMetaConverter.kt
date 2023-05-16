@@ -4,8 +4,8 @@ import com.rarible.protocol.solana.dto.TokenMetaAttributeDto
 import com.rarible.protocol.solana.dto.TokenMetaContentDto
 import com.rarible.protocol.solana.dto.TokenMetaDto
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
-import com.rarible.protocol.union.dto.MetaAttributeDto
 import com.rarible.protocol.union.dto.MetaContentDto
 
 object SolanaItemMetaConverter {
@@ -20,8 +20,8 @@ object SolanaItemMetaConverter {
             restrictions = emptyList()
         )
 
-    fun convert(source: TokenMetaAttributeDto): MetaAttributeDto {
-        return MetaAttributeDto(
+    fun convert(source: TokenMetaAttributeDto): UnionMetaAttribute {
+        return UnionMetaAttribute(
             key = source.key,
             value = source.value,
             type = source.type,
