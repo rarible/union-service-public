@@ -80,6 +80,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
     private val origin = "0xWhitelabel"
     private val ethOriginCollection = "0xf3348949db80297c78ec17d19611c263fc61f988" // from application.yaml
+    private val active = listOf(com.rarible.protocol.dto.OrderStatusDto.ACTIVE)
 
     @Test
     fun `reconcile item - full`() = runBlocking<Unit> {
@@ -139,7 +140,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(itemId, listOf(ethAuction))
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
         ethereumOrderControllerApiMock.mockGetAmmOrdersByItem(itemId, ethAmmOrder)
-        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(itemId, ethBestSell.take.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(itemId, active, ethBestSell.take.assetType)
         // Best sell for Item
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(itemId, sellCurrency, ethBestSell)
         // Same best sell for free Ownership
@@ -163,7 +164,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             mintActivity
         )
 
-        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(itemId, ethBestBid.make.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(itemId, active, ethBestBid.make.assetType)
         // Item best bid
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(itemId, bidCurrency, ethBestBid)
         // Item's origin best bid
@@ -244,7 +245,11 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             listOf(ethAuction)
         )
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(ethOwnershipId, ethOwnership)
-        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, ethBestSell.take.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(
+            ethItemId,
+            active,
+            ethBestSell.take.assetType
+        )
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(
             ethOwnershipId,
             unionBestSell.sellCurrencyId(),
@@ -300,7 +305,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         )
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIdNotFound(ethOwnershipId)
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(auctionOwnershipId, auctionOwnership)
-        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId)
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, active)
 
         val uri = "$baseUri/v0.1/refresh/ownership/${ethOwnershipId.fullId()}/reconcile"
         val result = testRestTemplate.postForEntity(uri, null, OwnershipEventDto::class.java).body!!
@@ -333,14 +338,18 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, emptyList())
         ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
         ethereumOrderControllerApiMock.mockGetAmmOrdersByItem(ethItemId)
-        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, ethBestSell.take.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(
+            ethItemId,
+            active,
+            ethBestSell.take.assetType
+        )
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(
             ethItemId,
             unionBestSell.sellCurrencyId(),
             ethBestSell
         )
 
-        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, ethBestBid.make.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, active, ethBestBid.make.assetType)
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(
             ethItemId,
             unionBestBid.bidCurrencyId(),
@@ -367,8 +376,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
         val fakeItemId = ItemIdDto(BlockchainDto.ETHEREUM, collectionId.value, BigInteger("-1"))
 
-        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(fakeItemId, currencyAsset.assetType)
-        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(fakeItemId, currencyAsset.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(fakeItemId, active, currencyAsset.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(fakeItemId, active, currencyAsset.assetType)
 
         val sellOrder = randomEthV2OrderDto().copy(
             make = randomEthCollectionAsset(Address.apply(collectionId.value))
@@ -417,8 +426,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val currencyAsset = randomEthAssetErc20()
         val currencyId = EthConverter.convert(currencyAsset, BlockchainDto.ETHEREUM).type.currencyId()!!
 
-        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(fakeItemId, currencyAsset.assetType)
-        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(fakeItemId, currencyAsset.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(fakeItemId, active, currencyAsset.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(fakeItemId, active, currencyAsset.assetType)
 
         val sellOrder = randomEthV2OrderDto()
         val bidOrder = randomEthV2OrderDto()
@@ -462,14 +471,18 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumAuctionControllerApiMock.mockGetAuctionsByItem(ethItemId, emptyList())
         ethereumItemControllerApiMock.mockGetNftItemById(ethItemId, ethItem)
         ethereumOrderControllerApiMock.mockGetAmmOrdersByItem(ethItemId)
-        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, ethBestSell.take.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(
+            ethItemId,
+            active,
+            ethBestSell.take.assetType
+        )
         ethereumOrderControllerApiMock.mockGetSellOrdersByItemAndByStatus(
             ethItemId,
             unionBestSell.sellCurrencyId(),
             ethBestSell
         )
 
-        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, ethBestBid.make.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, active, ethBestBid.make.assetType)
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(
             ethItemId,
             unionBestBid.bidCurrencyId(),
@@ -516,6 +529,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumOrderControllerApiMock.mockGetAmmOrdersByItem(ethItemId)
         ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(
             ethItemId,
+            active,
             ethBestSellWithTaker.take.assetType
         )
         val continuation = "continuation"
@@ -547,7 +561,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             )
         } returns Mono.just(OrdersPaginationDto(listOf(ethBestSell), continuation))
 
-        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, ethBestBid.make.assetType)
+        ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(ethItemId, active, ethBestBid.make.assetType)
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(
             ethItemId,
             unionBestBid.bidCurrencyId(),

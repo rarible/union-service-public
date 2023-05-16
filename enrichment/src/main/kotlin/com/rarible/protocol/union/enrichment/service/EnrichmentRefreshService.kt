@@ -24,6 +24,7 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderIdDto
+import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -381,7 +382,7 @@ class EnrichmentRefreshService(
 
     private suspend fun getBidCurrencies(itemId: ItemIdDto): List<String> {
         val result = orderServiceRouter.getService(itemId.blockchain)
-            .getBidCurrencies(itemId.value)
+            .getBidCurrencies(itemId.value, listOf(OrderStatusDto.ACTIVE))
 
         logger.info("Found Bid currencies for Item [{}] : {}", itemId.fullId(), result)
         return result.map { it.currencyId()!! }
@@ -389,7 +390,7 @@ class EnrichmentRefreshService(
 
     private suspend fun getSellCurrencies(itemId: ItemIdDto): List<String> {
         val result = orderServiceRouter.getService(itemId.blockchain)
-            .getSellCurrencies(itemId.value)
+            .getSellCurrencies(itemId.value, listOf(OrderStatusDto.ACTIVE))
 
         logger.info("Found Sell currencies for Item [{}] : {}", itemId.fullId(), result)
         return result.map { it.currencyId()!! }
@@ -398,7 +399,7 @@ class EnrichmentRefreshService(
 
     private suspend fun getBidCurrencies(collectionId: CollectionIdDto): List<String> {
         val result = orderServiceRouter.getService(collectionId.blockchain)
-            .getBidCurrenciesByCollection(collectionId.value)
+            .getBidCurrenciesByCollection(collectionId.value, listOf(OrderStatusDto.ACTIVE))
 
         logger.info("Found Bid currencies for Collection [{}] : {}", collectionId.fullId(), result)
         return result.map { it.currencyId()!! }
@@ -406,7 +407,7 @@ class EnrichmentRefreshService(
 
     private suspend fun getSellCurrencies(collectionId: CollectionIdDto): List<String> {
         val result = orderServiceRouter.getService(collectionId.blockchain)
-            .getSellCurrenciesByCollection(collectionId.value)
+            .getSellCurrenciesByCollection(collectionId.value, listOf(OrderStatusDto.ACTIVE))
 
         logger.info("Found Sell currencies for Collection [{}] : {}", collectionId.fullId(), result)
         return result.map { it.currencyId()!! }

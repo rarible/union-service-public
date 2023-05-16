@@ -257,7 +257,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
         coEvery {
-            testEthereumOrderApi.getCurrenciesByBidOrdersOfItem(contract, tokenId.toString())
+            testEthereumOrderApi.getCurrenciesByBidOrdersOfItem(contract, tokenId.toString(), emptyList())
         } returns OrderCurrenciesDto(
             OrderCurrenciesDto.OrderType.BID,
             listOf(Erc20AssetTypeDto(Address.apply(unionOrder.bidCurrencyId())))
@@ -414,13 +414,17 @@ class OrderControllerFt : AbstractIntegrationTest() {
                 ethPlatform,
                 continuation,
                 size,
-                emptyList(),
+                listOf(com.rarible.protocol.dto.OrderStatusDto.CANCELLED),
                 unionOrder.sellCurrencyId()
             )
         } returns OrdersPaginationDto(ethOrders, continuation).toMono()
 
         coEvery {
-            testEthereumOrderApi.getCurrenciesBySellOrdersOfItem(contract, tokenId.toString())
+            testEthereumOrderApi.getCurrenciesBySellOrdersOfItem(
+                contract,
+                tokenId.toString(),
+                listOf(com.rarible.protocol.dto.OrderStatusDto.CANCELLED)
+            )
         } returns OrderCurrenciesDto(
             OrderCurrenciesDto.OrderType.SELL,
             listOf(Erc20AssetTypeDto(Address.apply(unionOrder.sellCurrencyId())))
@@ -431,7 +435,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
             platform,
             maker.fullId(),
             null,
-            null,
+            listOf(OrderStatusDto.CANCELLED),
             continuation,
             size,
             null

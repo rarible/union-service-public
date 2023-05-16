@@ -42,11 +42,17 @@ class DummyOrderService(
         return emptyList()
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<UnionAssetType> {
+    override suspend fun getBidCurrencies(
+        itemId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         return emptyList()
     }
 
-    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
+    override suspend fun getBidCurrenciesByCollection(
+        collectionId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -79,11 +85,17 @@ class DummyOrderService(
         return Slice.empty()
     }
 
-    override suspend fun getSellCurrencies(itemId: String): List<UnionAssetType> {
+    override suspend fun getSellCurrencies(
+        itemId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         return emptyList()
     }
 
-    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
+    override suspend fun getSellCurrenciesByCollection(
+        collectionId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         return emptyList()
     }
 

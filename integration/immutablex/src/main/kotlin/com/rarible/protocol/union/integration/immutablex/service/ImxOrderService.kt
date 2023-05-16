@@ -72,10 +72,14 @@ class ImxOrderService(
         }
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<UnionAssetType> {
+    override suspend fun getBidCurrencies(
+        itemId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         // TODO we can miss some orders here if item have a lot of cancelled/filled orders with different currencies
         // TODO maybe split it into 2 queries to distinguish ETH/ERC20 currencies?
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
+        // TODO IMX add filter by status
         val orders = orderClient.getBuyOrdersByItem(token, tokenId, null, currencyProbeBatchSize)
         return orders.result.map { ImxOrderConverter.convert(it, blockchain).make.type }
             .toSet()
@@ -84,7 +88,10 @@ class ImxOrderService(
     }
 
     // IMX doesn't support floor orders
-    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
+    override suspend fun getBidCurrenciesByCollection(
+        collectionId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -127,7 +134,10 @@ class ImxOrderService(
         return Paging(UnionOrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
 
-    override suspend fun getSellCurrencies(itemId: String): List<UnionAssetType> {
+    override suspend fun getSellCurrencies(
+        itemId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         // TODO we can miss some orders here if item have a lot of cancelled/filled orders with different currencies
         // TODO maybe split it into 2 queries to distinguish ETH/ERC20 currencies?
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
@@ -140,6 +150,7 @@ class ImxOrderService(
             }
         }
 
+        // TODO IMX add filter by status
         val ordersWithAllStatuses = orderClient.getSellOrdersByItem(
             token, tokenId, null, null, currencyProbeBatchSize
         ).result + activeOrder.await().result
@@ -151,7 +162,10 @@ class ImxOrderService(
     }
 
     // IMX doesn't support floor orders
-    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
+    override suspend fun getSellCurrenciesByCollection(
+        collectionId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         return emptyList()
     }
 

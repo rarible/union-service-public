@@ -53,12 +53,19 @@ open class TezosOrderService(
         return orders
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<UnionAssetType> {
+    override suspend fun getBidCurrencies(
+        itemId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        // TODO TEZOS add filter by status
         return dipdupOrderService.getBidOrderCurrenciesByItem(contract, tokenId)
     }
 
-    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
+    override suspend fun getBidCurrenciesByCollection(
+        collectionId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         return dipdupOrderService.getBidOrderCurrenciesByCollection(collectionId)
     }
 
@@ -107,12 +114,19 @@ open class TezosOrderService(
         )
     }
 
-    override suspend fun getSellCurrencies(itemId: String): List<UnionAssetType> {
+    override suspend fun getSellCurrencies(
+        itemId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
+        // TODO TEZOS add filter by status
         return dipdupOrderService.getSellOrderCurrenciesByItem(contract, tokenId)
     }
 
-    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
+    override suspend fun getSellCurrenciesByCollection(
+        collectionId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         return dipdupOrderService.getSellOrderCurrenciesByCollection(collectionId)
     }
 

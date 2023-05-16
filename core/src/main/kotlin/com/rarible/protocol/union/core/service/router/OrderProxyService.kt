@@ -51,11 +51,17 @@ class OrderProxyService(
         return orderService.getOrdersByIds(orderIds)
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<UnionAssetType> {
-        return orderService.getBidCurrencies(itemId)
+    override suspend fun getBidCurrencies(
+        itemId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
+        return orderService.getBidCurrencies(itemId, status)
     }
 
-    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
+    override suspend fun getBidCurrenciesByCollection(
+        collectionId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -111,11 +117,17 @@ class OrderProxyService(
         )
     }
 
-    override suspend fun getSellCurrencies(itemId: String): List<UnionAssetType> {
-        return orderService.getSellCurrencies(itemId)
+    override suspend fun getSellCurrencies(
+        itemId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
+        return orderService.getSellCurrencies(itemId, status)
     }
 
-    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
+    override suspend fun getSellCurrenciesByCollection(
+        collectionId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         return emptyList()
     }
 

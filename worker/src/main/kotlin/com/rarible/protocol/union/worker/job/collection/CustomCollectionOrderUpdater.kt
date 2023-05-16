@@ -34,10 +34,10 @@ class CustomCollectionOrderUpdater(
         val itemId = item.id
         val service = router.getService(itemId.blockchain)
 
-        val sell = service.getSellCurrencies(itemId.value)
+        val sell = service.getSellCurrencies(itemId.value, emptyList())
             .map { async { updateSell(itemId, it.currencyId()!!) } }
 
-        val bid = service.getBidCurrencies(itemId.value)
+        val bid = service.getBidCurrencies(itemId.value, emptyList())
             .map { async { updateBid(itemId, it.currencyId()!!) } }
 
         sell.awaitAll()
