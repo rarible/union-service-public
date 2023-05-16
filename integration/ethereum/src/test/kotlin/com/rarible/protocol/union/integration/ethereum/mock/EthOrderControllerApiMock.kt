@@ -125,22 +125,32 @@ class EthOrderControllerApiMock(
         } returns Mono.just(OrdersPaginationDto(returnOrders.asList(), null))
     }
 
-    fun mockGetCurrenciesByBidOrdersOfItem(itemId: ItemIdDto, vararg returnTypes: AssetTypeDto) {
+    fun mockGetCurrenciesByBidOrdersOfItem(
+        itemId: ItemIdDto,
+        status: List<OrderStatusDto>,
+        vararg returnTypes: AssetTypeDto
+    ) {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             orderControllerApi.getCurrenciesByBidOrdersOfItem(
                 contract,
-                tokenId.toString()
+                tokenId.toString(),
+                status
             )
         } returns Mono.just(OrderCurrenciesDto(OrderCurrenciesDto.OrderType.BID, returnTypes.asList()))
     }
 
-    fun mockGetCurrenciesBySellOrdersOfItem(itemId: ItemIdDto, vararg returnTypes: AssetTypeDto) {
+    fun mockGetCurrenciesBySellOrdersOfItem(
+        itemId: ItemIdDto,
+        status: List<OrderStatusDto>,
+        vararg returnTypes: AssetTypeDto
+    ) {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         every {
             orderControllerApi.getCurrenciesBySellOrdersOfItem(
                 contract,
-                tokenId.toString()
+                tokenId.toString(),
+                status
             )
         } returns Mono.just(OrderCurrenciesDto(OrderCurrenciesDto.OrderType.SELL, returnTypes.asList()))
     }

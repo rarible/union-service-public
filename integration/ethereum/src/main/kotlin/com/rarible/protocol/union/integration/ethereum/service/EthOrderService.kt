@@ -66,19 +66,27 @@ open class EthOrderService(
         return orders.map { ethOrderConverter.convert(it, blockchain) }
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<UnionAssetType> {
+    override suspend fun getBidCurrencies(
+        itemId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(
             contract,
-            tokenId.toString()
+            tokenId.toString(),
+            ethOrderConverter.convert(status)
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
 
-    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
+    override suspend fun getBidCurrenciesByCollection(
+        collectionId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         val assetTypes = orderControllerApi.getCurrenciesByBidOrdersOfItem(
             collectionId,
-            "-1"
+            "-1",
+            ethOrderConverter.convert(status)
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
@@ -139,20 +147,26 @@ open class EthOrderService(
     }
 
     override suspend fun getSellCurrencies(
-        itemId: String
+        itemId: String,
+        status: List<OrderStatusDto>?
     ): List<UnionAssetType> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(
             contract,
-            tokenId.toString()
+            tokenId.toString(),
+            ethOrderConverter.convert(status),
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }
 
-    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
+    override suspend fun getSellCurrenciesByCollection(
+        collectionId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         val assetTypes = orderControllerApi.getCurrenciesBySellOrdersOfItem(
             collectionId,
-            "-1"
+            "-1",
+            ethOrderConverter.convert(status),
         ).awaitFirst()
         return assetTypes.currencies.map { EthConverter.convert(it, blockchain) }
     }

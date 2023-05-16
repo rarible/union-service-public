@@ -34,11 +34,13 @@ interface OrderService : BlockchainService {
     ): List<UnionOrder>
 
     suspend fun getBidCurrencies(
-        itemId: String
+        itemId: String,
+        status: List<OrderStatusDto>?
     ): List<UnionAssetType>
 
     suspend fun getBidCurrenciesByCollection(
-        collectionId: String
+        collectionId: String,
+        status: List<OrderStatusDto>?
     ): List<UnionAssetType>
 
     suspend fun getOrderBidsByItem(
@@ -67,11 +69,13 @@ interface OrderService : BlockchainService {
     ): Slice<UnionOrder>
 
     suspend fun getSellCurrencies(
-        itemId: String
+        itemId: String,
+        status: List<OrderStatusDto>?
     ): List<UnionAssetType>
 
     suspend fun getSellCurrenciesByCollection(
-        collectionId: String
+        collectionId: String,
+        status: List<OrderStatusDto>?
     ): List<UnionAssetType>
 
     suspend fun getSellOrders(

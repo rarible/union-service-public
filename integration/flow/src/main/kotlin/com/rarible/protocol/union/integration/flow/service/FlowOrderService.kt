@@ -67,13 +67,20 @@ open class FlowOrderService(
         return orders.map { flowOrderConverter.convert(it, blockchain) }
     }
 
-    override suspend fun getBidCurrencies(itemId: String): List<UnionAssetType> {
+    override suspend fun getBidCurrencies(
+        itemId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
+        // TODO FLOW add filter by status
         val assets = bidControllerApi.getBidCurrencies(itemId)
             .collectList().awaitFirst()
         return assets.map { FlowConverter.convert(it, blockchain).type }
     }
 
-    override suspend fun getBidCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
+    override suspend fun getBidCurrenciesByCollection(
+        collectionId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         return emptyList()
     }
 
@@ -128,13 +135,20 @@ open class FlowOrderService(
         return flowOrderConverter.convert(result, blockchain)
     }
 
-    override suspend fun getSellCurrencies(itemId: String): List<UnionAssetType> {
+    override suspend fun getSellCurrencies(
+        itemId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
+        // TODO FLOW add filter by status
         val assets = orderControllerApi.getSellCurrencies(itemId)
             .collectList().awaitFirst()
         return assets.map { FlowConverter.convert(it, blockchain).type }
     }
 
-    override suspend fun getSellCurrenciesByCollection(collectionId: String): List<UnionAssetType> {
+    override suspend fun getSellCurrenciesByCollection(
+        collectionId: String,
+        status: List<OrderStatusDto>?
+    ): List<UnionAssetType> {
         return emptyList()
     }
 

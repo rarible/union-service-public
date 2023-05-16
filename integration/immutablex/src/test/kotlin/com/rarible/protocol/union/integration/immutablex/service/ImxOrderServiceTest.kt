@@ -49,7 +49,7 @@ class ImxOrderServiceTest {
             orderClient.getSellOrdersByItem(token, tokenId, null, null, currencyProbeBatchSize)
         } returns ImmutablexOrdersPage(all)
 
-        val result = service.getSellCurrencies("$token:$tokenId")
+        val result = service.getSellCurrencies("$token:$tokenId", emptyList())
 
         // we are interested only in sell-orders currencies, swap/buy orders should be filtered
         assertThat(result).hasSize(1)
@@ -71,7 +71,7 @@ class ImxOrderServiceTest {
             orderClient.getBuyOrdersByItem(token, tokenId, null, currencyProbeBatchSize)
         } returns ImmutablexOrdersPage(all)
 
-        val result = service.getBidCurrencies("$token:$tokenId")
+        val result = service.getBidCurrencies("$token:$tokenId", emptyList())
 
         // we are interested only in buy-orders currencies, swap/sell orders should be filtered
         assertThat(result).hasSize(1)

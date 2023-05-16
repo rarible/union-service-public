@@ -281,7 +281,7 @@ class ImxOrderServiceMt : ImxManualTest() {
     @Test
     fun `getBidCurrencies by item`() = runBlocking<Unit> {
         val itemId = "0xefdd9c545f29ef2df128105b288c220fe916ee7b:572"
-        val currencies = service.getBidCurrencies(itemId)
+        val currencies = service.getBidCurrencies(itemId, emptyList())
 
         println(currencies)
         // There are several buy orders, but only 2 currencies - ETH and ERC20
@@ -291,7 +291,7 @@ class ImxOrderServiceMt : ImxManualTest() {
     @Test
     fun `getSellCurrencies by item`() = runBlocking<Unit> {
         val itemId = "0xefdd9c545f29ef2df128105b288c220fe916ee7b:572"
-        val currencies = service.getSellCurrencies(itemId)
+        val currencies = service.getSellCurrencies(itemId, emptyList())
 
         println(currencies)
         // There are several buy orders, but only 2 currencies - ETH and ERC20

@@ -43,7 +43,7 @@ class OrderApiServiceTest {
     @Test
     fun `get best bids - no currencies found`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        coEvery { orderService.getBidCurrencies(itemId.value) } returns emptyList()
+        coEvery { orderService.getBidCurrencies(itemId.value, emptyList()) } returns emptyList()
         val result = getOrderBidsByItem(itemId, null, 10)
 
         assertThat(result.continuation).isNull()
@@ -53,7 +53,7 @@ class OrderApiServiceTest {
     @Test
     fun `get best sells - no currencies found`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
-        coEvery { orderService.getSellCurrencies(itemId.value) } returns emptyList()
+        coEvery { orderService.getSellCurrencies(itemId.value, emptyList()) } returns emptyList()
         val result = getSellOrdersByItem(itemId, null, 10)
 
         assertThat(result.continuation).isNull()
@@ -67,7 +67,7 @@ class OrderApiServiceTest {
         val unionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
 
         coEvery {
-            orderService.getBidCurrencies(ethItemId.value)
+            orderService.getBidCurrencies(ethItemId.value, emptyList())
         } returns listOf(
             UnionEthErc20AssetType(
                 ContractAddressConverter.convert(
@@ -104,7 +104,7 @@ class OrderApiServiceTest {
             platform = PlatformDto.RARIBLE,
             maker = null,
             origin = null,
-            status = null,
+            status = emptyList(),
             continuation = continuation,
             size = size
         )

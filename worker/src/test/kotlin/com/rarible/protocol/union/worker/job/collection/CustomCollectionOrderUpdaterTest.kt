@@ -67,8 +67,11 @@ class CustomCollectionOrderUpdaterTest {
         val sellCurrency2 = randomUnionAssetTypeErc20(BlockchainDto.ETHEREUM)
         val bidCurrency = randomUnionAssetTypeErc20(BlockchainDto.ETHEREUM)
 
-        coEvery { orderService.getBidCurrencies(itemId.value) } returns listOf(bidCurrency)
-        coEvery { orderService.getSellCurrencies(itemId.value) } returns listOf(sellCurrency1, sellCurrency2)
+        coEvery { orderService.getBidCurrencies(itemId.value, emptyList()) } returns listOf(bidCurrency)
+        coEvery { orderService.getSellCurrencies(itemId.value, emptyList()) } returns listOf(
+            sellCurrency1,
+            sellCurrency2
+        )
 
         val sellOrder1 = randomUnionSellOrder(itemId)
         val sellOrder2 = randomUnionSellOrder(itemId)
