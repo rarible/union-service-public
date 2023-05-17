@@ -34,7 +34,7 @@
     </pluginRepositories>
 
     <properties>
-        <revision>1.46</revision>
+        <revision>1.49</revision>
         <maven.deploy.skip>true</maven.deploy.skip>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
