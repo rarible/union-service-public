@@ -22,12 +22,12 @@ class MocaXpCustomAttributesParserTest {
 
         assertThat(result[0].id.fullId()).isEqualTo("ETHEREUM:0x59325733eb952a92e069c87f0a6168b29e80627f:0")
         assertThat(result[0].attributes).isEqualTo(
-            listOf(UnionMetaAttribute("tribe", "connector"), UnionMetaAttribute("total_xp", "73.6"))
+            listOf(UnionMetaAttribute("total_xp", "73.6"))
         )
 
         assertThat(result[1].id.fullId()).isEqualTo("ETHEREUM:0x59325733eb952a92e069c87f0a6168b29e80627f:1")
         assertThat(result[1].attributes).isEqualTo(
-            listOf(UnionMetaAttribute("tribe", "something"), UnionMetaAttribute("total_xp", "56.1"))
+            listOf(UnionMetaAttribute("total_xp", "56.1"))
         )
     }
 
