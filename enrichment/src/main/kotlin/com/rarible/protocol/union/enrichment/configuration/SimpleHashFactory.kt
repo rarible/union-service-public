@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.enrichment.configuration
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.rarible.protocol.union.api.ApiClient
 import io.netty.handler.logging.LogLevel
 import org.springframework.http.MediaType
@@ -16,6 +18,7 @@ object SimpleHashFactory {
 
     fun createClient(props: SimpleHash): WebClient {
         val mapper = ApiClient.createDefaultObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
         val httpClient = HttpClient.create().wiretap(
             "reactor.netty.http.client.HttpClient",
             LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL
