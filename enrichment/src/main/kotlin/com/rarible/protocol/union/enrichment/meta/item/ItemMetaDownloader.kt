@@ -10,7 +10,6 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.MetaDownloader
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
-import com.rarible.protocol.union.enrichment.meta.provider.MetaProvider
 import org.springframework.stereotype.Component
 
 @Component
@@ -18,7 +17,7 @@ class ItemMetaDownloader(
     private val router: BlockchainRouter<ItemService>,
     contentMetaLoader: ContentMetaDownloader,
     customizers: List<ItemMetaCustomizer>,
-    providers: List<MetaProvider<ItemIdDto, UnionMeta>>,
+    providers: List<ItemMetaProvider>,
     metrics: ItemMetaMetrics
 ) : Downloader<UnionMeta>, MetaDownloader<ItemIdDto, UnionMeta>(
     contentMetaLoader,
