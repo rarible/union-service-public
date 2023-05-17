@@ -61,7 +61,7 @@ class MocaXpMetaCustomAttributesProvider(
 
 object MocaXpCustomAttributesParser {
 
-    private const val FIELD_TRIBE = "tribe"
+    //private const val FIELD_TRIBE = "tribe"
     private const val FIELD_XP = "total_xp"
     private const val FIELD_TOKEN_ID = "moca_id"
 
@@ -81,7 +81,7 @@ object MocaXpCustomAttributesParser {
 
     private fun toAttributes(node: JsonNode): List<UnionMetaAttribute> {
         return listOfNotNull(
-            node.get(FIELD_TRIBE)?.textValue()?.let { UnionMetaAttribute(FIELD_TRIBE, it) },
+            //node.get(FIELD_TRIBE)?.textValue()?.let { UnionMetaAttribute(FIELD_TRIBE, it) },
             node.get(FIELD_XP)?.decimalValue()?.let { UnionMetaAttribute(FIELD_XP, it.toPlainString()) }
         )
     }
