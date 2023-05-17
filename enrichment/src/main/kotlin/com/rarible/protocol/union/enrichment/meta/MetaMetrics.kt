@@ -16,6 +16,10 @@ open class MetaMetrics(
         increment(META_FETCH, type(type), tag(blockchain), status("ok"), reason("ok")) // TODO should be separate metric
     }
 
+    fun onMetaSimpleHash(blockchain: BlockchainDto) {
+        increment(META_SIMPLE_HASH, type(type), tag(blockchain), status("ok"), reason("ok"))
+    }
+
     fun onMetaFetchNotFound(blockchain: BlockchainDto) {
         increment(META_FETCH, type(type), tag(blockchain), status("fail"), reason("not_found"))
     }
@@ -57,6 +61,7 @@ open class MetaMetrics(
 
         const val META_FETCH = "meta_fetch"
         const val META_CACHE = "meta_cache"
+        const val META_SIMPLE_HASH = "meta_simple_hash"
     }
 
 }

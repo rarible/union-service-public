@@ -7,6 +7,8 @@ import com.rarible.protocol.union.core.model.ContentOwner
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaDownloader
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 
@@ -22,8 +24,14 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
     abstract fun generaliseKey(key: K): Pair<String, BlockchainDto>
     abstract suspend fun getRawMeta(key: K): T
 
+    protected open fun isSimpleHashSupported(key: K): Boolean = false
+    protected open suspend fun getSimpleHashMeta(key: K): T? = null
+
+    // By default, we always return raw meta
+    protected open fun mergeMeta(raw: T?, simpleHash: T?) = raw
+
     protected suspend fun load(key: K): T? {
-        val meta = getMeta(key)
+        val meta = fetchMeta(key)
         meta ?: return null
 
         val sanitized = sanitizeContent(meta.content)
@@ -34,7 +42,29 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
         }
     }
 
-    private suspend fun getMeta(key: K): T? {
+    private suspend fun fetchMeta(key: K): T? = coroutineScope {
+        val raw = async { fetchRawMeta(key) }
+        val simpleHash = async {
+            if (isSimpleHashSupported(key)) {
+                fetchSimpleHashMeta(key)
+            } else null
+        }
+        mergeMeta(raw.await(), simpleHash.await())
+    }
+
+    private suspend fun fetchSimpleHashMeta(key: K): T? {
+        val (id, blockchain) = generaliseKey(key)
+        try {
+            val result = getSimpleHashMeta(key)
+            metrics.onMetaSimpleHash(blockchain)
+            return result
+        } catch (e: Exception) {
+            logger.error("Meta fetching from simple hash failed for $id",e)
+        }
+        return null
+    }
+
+    private suspend fun fetchRawMeta(key: K): T? {
         val (id, blockchain) = generaliseKey(key)
         try {
             val result = getRawMeta(key)

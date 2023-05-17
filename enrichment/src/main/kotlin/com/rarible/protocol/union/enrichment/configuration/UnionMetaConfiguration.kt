@@ -18,6 +18,7 @@ import com.rarible.core.meta.resource.resolver.UrlResolver
 import com.rarible.protocol.union.core.util.safeSplit
 import com.rarible.protocol.union.enrichment.meta.UnionMetaPackage
 import io.micrometer.core.instrument.MeterRegistry
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -113,5 +114,9 @@ class UnionMetaConfiguration(
             contentDetector = contentDetector,
         )
     }
+
+    @Bean
+    @ConditionalOnProperty("meta.simpleHash.enabled", havingValue = "true")
+    fun simpleHashClient() = SimpleHashFactory.createClient(unionMetaProperties.simpleHash)
 
 }
