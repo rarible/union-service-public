@@ -57,7 +57,6 @@ open class MetaMetrics(
 
         const val META_FETCH = "meta_fetch"
         const val META_CACHE = "meta_cache"
-        const val META_SIMPLE_HASH = "meta_simple_hash"
     }
 
 }

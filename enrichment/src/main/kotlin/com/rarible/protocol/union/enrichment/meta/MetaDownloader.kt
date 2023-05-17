@@ -25,22 +25,19 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
     abstract suspend fun getRawMeta(key: K): T
 
     protected suspend fun load(key: K): T? {
-        val meta = fetchRawMeta(key) ?: providers.firstNotNullOfOrNull { it.fetch(key) }
+        val meta = getMeta(key) ?: providers.firstNotNullOfOrNull { it.fetch(key) }
         meta ?: return null
 
         val sanitized = sanitizeContent(meta.data.content)
         val (id, blockchain) = generaliseKey(key)
         val content = contentMetaLoader.enrichContent(id, blockchain, sanitized)
-        val initial = WrappedMeta(
-            source = meta.source,
-            data = meta.data.withContent(content)
-        )
+        val initial = meta.copy(data = meta.data.withContent(content))
         return customizers.fold(initial) { current, customizer ->
             customizer.customize(key, current)
         }.data
     }
 
-    private suspend fun fetchRawMeta(key: K): WrappedMeta<T>? {
+    private suspend fun getMeta(key: K): WrappedMeta<T>? {
         val (id, blockchain) = generaliseKey(key)
         try {
             val result = getRawMeta(key)
