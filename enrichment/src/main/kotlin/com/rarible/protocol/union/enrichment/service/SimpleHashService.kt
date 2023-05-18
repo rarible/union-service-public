@@ -5,8 +5,8 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.meta.MetaMetrics
 import com.rarible.protocol.union.enrichment.meta.MetaSource
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
 import kotlinx.coroutines.reactor.awaitSingle
@@ -20,7 +20,7 @@ import org.springframework.web.reactive.function.client.WebClient
 class SimpleHashService(
     private val props: UnionMetaProperties,
     private val simpleHashClient: WebClient,
-    private val metrics: MetaMetrics,
+    private val metrics: ItemMetaMetrics,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
