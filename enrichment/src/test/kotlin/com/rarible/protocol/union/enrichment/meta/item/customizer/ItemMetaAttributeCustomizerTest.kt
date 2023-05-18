@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.enrichment.meta.item.customizer
 
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.enrichment.meta.MetaSource
+import com.rarible.protocol.union.enrichment.meta.WrappedMeta
 import com.rarible.protocol.union.enrichment.repository.ItemMetaCustomAttributesRepository
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMetaAttribute
@@ -32,9 +34,9 @@ class ItemMetaAttributeCustomizerTest {
 
         coEvery { itemMetaCustomAttributeRepository.getCustomAttributes(itemId) } returns listOf(extraAttribute)
 
-        val result = customizer.customize(itemId, meta)
+        val result = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta))
 
-        assertThat(result.attributes).isEqualTo(meta.attributes + listOf(extraAttribute))
+        assertThat(result.data.attributes).isEqualTo(meta.attributes + listOf(extraAttribute))
     }
 
     @Test
@@ -45,9 +47,9 @@ class ItemMetaAttributeCustomizerTest {
 
         coEvery { itemMetaCustomAttributeRepository.getCustomAttributes(itemId) } returns listOf(extraAttribute)
 
-        val result = customizer.customize(itemId, meta)
+        val result = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta))
 
-        assertThat(result.attributes).isEqualTo(listOf(extraAttribute))
+        assertThat(result.data.attributes).isEqualTo(listOf(extraAttribute))
     }
 
 }

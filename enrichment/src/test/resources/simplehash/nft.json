@@ -1,0 +1,203 @@
+{
+  "nft_id": "ethereum.0x60e4d786628fea6478f785a6d7e704777c86a7c6.2691",
+  "chain": "ethereum",
+  "contract_address": "0x60E4d786628Fea6478F785A6d7e704777c86a7c6",
+  "token_id": "2691",
+  "name": null,
+  "description": null,
+  "previews": {
+    "image_small_url": "https://lh3.googleusercontent.com/Wfx7imCJSHlYEN2iXblNEc7WaR1u8PRvVdjtIfRnWmK8yHdhSwOxbBxp38Nx3d0pOPj3fTZJmP6-hGDfH96ObnL_DmlrVavfJG8=s250",
+    "image_medium_url": "https://lh3.googleusercontent.com/Wfx7imCJSHlYEN2iXblNEc7WaR1u8PRvVdjtIfRnWmK8yHdhSwOxbBxp38Nx3d0pOPj3fTZJmP6-hGDfH96ObnL_DmlrVavfJG8",
+    "image_large_url": "https://lh3.googleusercontent.com/Wfx7imCJSHlYEN2iXblNEc7WaR1u8PRvVdjtIfRnWmK8yHdhSwOxbBxp38Nx3d0pOPj3fTZJmP6-hGDfH96ObnL_DmlrVavfJG8=s1000",
+    "image_opengraph_url": "https://lh3.googleusercontent.com/Wfx7imCJSHlYEN2iXblNEc7WaR1u8PRvVdjtIfRnWmK8yHdhSwOxbBxp38Nx3d0pOPj3fTZJmP6-hGDfH96ObnL_DmlrVavfJG8=k-w1200-s2400-rj",
+    "blurhash": "UZEXt^V|CTtJX$bbn9f4I_r=w@SPXmbujEnO",
+    "predominant_color": "#5db9d9"
+  },
+  "image_url": "https://cdn.simplehash.com/assets/5f257b21cb948576f1f2cfdb05b2e4373ad25e7f5c441790cd5363e4ffc06552.png",
+  "image_properties": {
+    "width": 1262,
+    "height": 1262,
+    "size": 674801,
+    "mime_type": "image/png"
+  },
+  "video_url": null,
+  "video_properties": null,
+  "audio_url": null,
+  "audio_properties": null,
+  "model_url": null,
+  "model_properties": null,
+  "background_color": null,
+  "external_url": null,
+  "created_date": "2021-08-29T01:07:40",
+  "status": "minted",
+  "token_count": 1,
+  "owner_count": 1,
+  "owners": [
+    {
+      "owner_address": "0x01ADD8aB60c614cF6b81fC6b35AE80AB454a40c1",
+      "quantity": 1,
+      "first_acquired_date": "2023-05-15T18:54:35",
+      "last_acquired_date": "2023-05-15T18:54:35"
+    }
+  ],
+  "contract": {
+    "type": "ERC721",
+    "name": "MutantApeYachtClub",
+    "symbol": "MAYC",
+    "deployed_by": "0x9056D15C49B19dF52FfaD1E6C11627f035C0C960",
+    "deployed_via_contract": null
+  },
+  "collection": {
+    "collection_id": "5022732d9bb67c26a61932d3cd9816d8",
+    "name": "Mutant Ape Yacht Club",
+    "description": "The MUTANT APE YACHT CLUB is a collection of up to 20,000 Mutant Apes that can only be created by exposing an existing Bored Ape to a vial of MUTANT SERUM or by minting a Mutant Ape in the public sale.",
+    "image_url": "https://lh3.googleusercontent.com/z33Y-z7aURg8ZLwuukYoKmeC7zQW4suCNEljTK27tqdy632Yd3AHMuA5KZauhadoQJITR0YMsnnx517feAstoGc3kIuM14Jo2A",
+    "banner_image_url": "https://lh3.googleusercontent.com/fnlWinkrVjCyeBsx6sOj3WoxcVX3-_dM98ksclNY_z0BJ1EFOPVhGqwLbrber4wepQZVzmIrJ2Jrwy9qrfOAo25xXS07lW3zYg=w2500",
+    "category": "pfps",
+    "is_nsfw": false,
+    "external_url": null,
+    "twitter_username": null,
+    "discord_url": null,
+    "instagram_username": null,
+    "medium_username": null,
+    "telegram_url": null,
+    "marketplace_pages": [
+      {
+        "marketplace_id": "opensea",
+        "marketplace_name": "OpenSea",
+        "marketplace_collection_id": "mutant-ape-yacht-club",
+        "nft_url": "https://opensea.io/assets/ethereum/0x60e4d786628fea6478f785a6d7e704777c86a7c6/2691",
+        "collection_url": "https://opensea.io/collection/mutant-ape-yacht-club",
+        "verified": true
+      }
+    ],
+    "metaplex_mint": null,
+    "metaplex_first_verified_creator": null,
+    "floor_prices": [
+      {
+        "marketplace_id": "opensea",
+        "marketplace_name": "OpenSea",
+        "value": 10289000000000000000,
+        "payment_token": {
+          "payment_token_id": "ethereum.native",
+          "name": "Ether",
+          "symbol": "ETH",
+          "address": null,
+          "decimals": 18
+        }
+      },
+      {
+        "marketplace_id": "looksrare",
+        "marketplace_name": "LooksRare",
+        "value": 11488500000000000000,
+        "payment_token": {
+          "payment_token_id": "ethereum.native",
+          "name": "Ether",
+          "symbol": "ETH",
+          "address": null,
+          "decimals": 18
+        }
+      },
+      {
+        "marketplace_id": "x2y2",
+        "marketplace_name": "X2Y2",
+        "value": 15690000000000000000,
+        "payment_token": {
+          "payment_token_id": "ethereum.native",
+          "name": "Ether",
+          "symbol": "ETH",
+          "address": null,
+          "decimals": 18
+        }
+      }
+    ],
+    "distinct_owner_count": 11447,
+    "distinct_nft_count": 19471,
+    "total_quantity": 19471,
+    "top_contracts": [
+      "ethereum.0x60e4d786628fea6478f785a6d7e704777c86a7c6"
+    ]
+  },
+  "last_sale": {
+    "from_address": "0xbF97A37845DF73E9Fa842663ADC4B9352eEbC6d8",
+    "to_address": "0x39da41747a83aeE658334415666f3EF92DD0D541",
+    "quantity": 1,
+    "timestamp": "2023-05-15T18:54:35",
+    "transaction": "0xd7175a537e52540f99501f81ee0debc08be7fb45119d6b6d302adb49b48764af",
+    "marketplace_id": "blur",
+    "marketplace_name": "Blur",
+    "is_bundle_sale": false,
+    "payment_token": {
+      "payment_token_id": "ethereum.native",
+      "name": "Ether",
+      "symbol": "ETH",
+      "address": null,
+      "decimals": 18
+    },
+    "unit_price": 10150000000000000000,
+    "total_price": 10150000000000000000
+  },
+  "first_created": {
+    "minted_to": "0x6DbC2e0d9D8f24AEDeD1C8e81DF773A36EA7680B",
+    "quantity": 1,
+    "timestamp": "2021-08-29T01:07:40",
+    "block_number": 13117330,
+    "transaction": "0x68907b5207164ceb10acedf7f08ba3f5892ff191396ec4385c759d25952f16fa",
+    "transaction_initiator": "0x6DbC2e0d9D8f24AEDeD1C8e81DF773A36EA7680B"
+  },
+  "rarity": {
+    "rank": 13332,
+    "score": 0.891,
+    "unique_attributes": 0
+  },
+  "royalty": [
+    {
+      "source": "opensea",
+      "total_creator_fee_basis_points": 250,
+      "recipients": [
+        {
+          "address": "0xA858DDc0445d8131daC4d1DE01f834ffcbA52Ef1",
+          "percentage": 100,
+          "basis_points": 250
+        }
+      ]
+    }
+  ],
+  "extra_metadata": {
+    "attributes": [
+      {
+        "trait_type": "Background",
+        "value": "M1 Blue",
+        "display_type": null
+      },
+      {
+        "trait_type": "Fur",
+        "value": "M1 Dmt",
+        "display_type": null
+      },
+      {
+        "trait_type": "Eyes",
+        "value": "M1 Crazy",
+        "display_type": null
+      },
+      {
+        "trait_type": "Clothes",
+        "value": "M1 Black T",
+        "display_type": null
+      },
+      {
+        "trait_type": "Hat",
+        "value": "M1 Fisherman's Hat",
+        "display_type": null
+      },
+      {
+        "trait_type": "Mouth",
+        "value": "M1 Bored Unshaven",
+        "display_type": null
+      }
+    ],
+    "image_original_url": "ipfs://QmPkMSNK297yMrp73HMFisjjPnPzuvzgoEQM5UDPyTw1KQ",
+    "animation_original_url": null,
+    "metadata_original_url": "https://boredapeyachtclub.com/api/mutants/2691"
+  }
+}
