@@ -1,12 +1,11 @@
 package com.rarible.protocol.union.worker.job.collection
 
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMapping
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentCollectionProperties
 import org.springframework.stereotype.Component
 
 @Component
-class CustomCollectionItemFetcherProvider(
+class CustomCollectionItemFetcherFactory(
     private val customCollectionItemProvider: CustomCollectionItemProvider,
     enrichmentCollectionProperties: EnrichmentCollectionProperties
 ) {
@@ -22,14 +21,19 @@ class CustomCollectionItemFetcherProvider(
     private fun createFetchers(mapping: CustomCollectionMapping): List<CustomCollectionItemFetcher> {
         val result = ArrayList<CustomCollectionItemFetcher>(2)
 
-        val itemIds = mapping.items.map { IdParser.parseItemId(it) }
+        val itemIds = mapping.getItemIds().map { it.toDto() }
         if (itemIds.isNotEmpty()) {
             result.add(CustomCollectionItemFetcherByList(customCollectionItemProvider, itemIds))
         }
 
-        val collectionIds = mapping.collections.map { IdParser.parseCollectionId(it) }
+        val collectionIds = mapping.getCollectionIds().map { it.toDto() }
         if (collectionIds.isNotEmpty()) {
             result.add(CustomCollectionItemFetcherByCollection(customCollectionItemProvider, collectionIds))
+        }
+
+        val ranges = mapping.getRanges()
+        if (ranges.isNotEmpty()) {
+            result.add(CustomCollectionItemFetcherByRange(customCollectionItemProvider, ranges))
         }
         return result
     }

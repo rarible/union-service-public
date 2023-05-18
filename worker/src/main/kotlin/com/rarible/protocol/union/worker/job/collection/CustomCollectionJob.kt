@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 class CustomCollectionJob(
     private val eventProducer: UnionInternalBlockchainEventProducer,
-    private val customCollectionItemFetcherProvider: CustomCollectionItemFetcherProvider,
+    private val customCollectionItemFetcherProvider: CustomCollectionItemFetcherFactory,
     private val updaters: List<CustomCollectionUpdater>
 ) {
 

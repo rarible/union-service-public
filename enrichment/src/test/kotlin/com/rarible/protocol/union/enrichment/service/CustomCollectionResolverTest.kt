@@ -89,6 +89,44 @@ class CustomCollectionResolverTest {
     }
 
     @Test
+    fun `by range - ok`() = runBlocking<Unit> {
+        val customCollectionId = randomEthCollectionId()
+        val collectionId = randomEthCollectionId()
+
+        val itemId1 = ItemIdDto(collectionId.blockchain, "${collectionId.value}:1")
+        val itemId2 = ItemIdDto(collectionId.blockchain, "${collectionId.value}:3")
+        val itemId3 = ItemIdDto(collectionId.blockchain, "${collectionId.value}:5")
+        val itemId4 = ItemIdDto(collectionId.blockchain, "${collectionId.value}:10")
+
+        val resolver = createResolver(
+            customCollectionId,
+            ranges = listOf("${collectionId.fullId()}:1..5", "${collectionId.fullId()}:10..10")
+        )
+
+        assertThat(resolver.resolveCustomCollection(itemId1)).isEqualTo(customCollectionId)
+        assertThat(resolver.resolveCustomCollection(itemId2)).isEqualTo(customCollectionId)
+        assertThat(resolver.resolveCustomCollection(itemId3)).isEqualTo(customCollectionId)
+        assertThat(resolver.resolveCustomCollection(itemId4)).isEqualTo(customCollectionId)
+    }
+
+    @Test
+    fun `by range - not mapped`() = runBlocking<Unit> {
+        val customCollectionId = randomEthCollectionId()
+        val collectionId = randomEthCollectionId()
+
+        val itemId1 = ItemIdDto(collectionId.blockchain, "${collectionId.value}:5")
+        val itemId2 = ItemIdDto(collectionId.blockchain, "${collectionId.value}:8")
+
+        val resolver = createResolver(
+            customCollectionId,
+            ranges = listOf("${collectionId.fullId()}:6..7")
+        )
+
+        assertThat(resolver.resolveCustomCollection(itemId1)).isNull()
+        assertThat(resolver.resolveCustomCollection(itemId2)).isNull()
+    }
+
+    @Test
     fun `by collection - not mapped`() = runBlocking<Unit> {
         val customCollectionId = randomEthCollectionId()
         val collectionId = randomEthCollectionId()
@@ -102,12 +140,14 @@ class CustomCollectionResolverTest {
     private fun createResolver(
         customCollection: CollectionIdDto,
         items: List<ItemIdDto> = emptyList(),
-        collections: List<CollectionIdDto> = emptyList()
+        collections: List<CollectionIdDto> = emptyList(),
+        ranges: List<String> = emptyList()
     ): CustomCollectionResolver {
         val mapping = CustomCollectionMapping(
             customCollection = customCollection.fullId(),
             items = items.map { it.fullId() },
-            collections = collections.map { it.fullId() }
+            collections = collections.map { it.fullId() },
+            ranges = ranges
         )
         val properties = EnrichmentCollectionProperties(listOf(mapping))
 

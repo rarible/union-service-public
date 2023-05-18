@@ -1,5 +1,8 @@
 package com.rarible.protocol.union.enrichment.configuration
 
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.util.TokenRange
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
@@ -21,6 +24,13 @@ data class EnrichmentCollectionProperties(
 // Contains fully-qualified collection/item identifiers
 data class CustomCollectionMapping(
     val customCollection: String,
-    val items: List<String> = emptyList(),
-    val collections: List<String> = emptyList()
-)
+    private val items: List<String> = emptyList(),
+    private val collections: List<String> = emptyList(),
+    private val ranges: List<String> = emptyList()
+) {
+
+    fun getItemIds(): List<ShortItemId> = items.map { ShortItemId.of(it) }
+    fun getCollectionIds(): List<EnrichmentCollectionId> = collections.map { EnrichmentCollectionId.of(it) }
+    fun getRanges(): List<TokenRange> = ranges.map { TokenRange.of(it) }
+
+}
