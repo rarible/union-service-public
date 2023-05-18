@@ -66,6 +66,24 @@ class ItemMetaDownloaderTest {
     }
 
     @Test
+    fun `do not replace image - ok`() = runBlocking<Unit> {
+        val itemId = ItemIdDto(blockchain, randomString().lowercase(), randomBigInt())
+        val originalImage = UnionMetaContent(url = "ipfs://ipfs.com", representation = Representation.ORIGINAL)
+
+        coEvery { itemService.getItemMetaById(itemId.value) } returns randomUnionMeta(content = listOf(
+            originalImage
+        ))
+        coEvery { simpleHashService.fetch(itemId) } returns randomUnionMeta(content = listOf(
+            UnionMetaContent(url = "ipfs://ipfs.com/2", representation = Representation.ORIGINAL)
+        ))
+
+        val meta = downloader.download(itemId.toString())
+
+        assertThat(meta.content).hasSize(1)
+        assertThat(meta.content).contains(originalImage)
+    }
+
+    @Test
     fun `add additional attribute - ok`() = runBlocking<Unit> {
         val itemId = ItemIdDto(blockchain, randomString().lowercase(), randomBigInt())
 

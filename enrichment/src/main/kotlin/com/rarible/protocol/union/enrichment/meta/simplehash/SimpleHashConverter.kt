@@ -8,7 +8,7 @@ import java.time.ZoneOffset
 
 object SimpleHashConverter {
 
-    fun convert(source: SimpleHashNft): UnionMeta {
+    fun convert(source: SimpleHashItem): UnionMeta {
         return UnionMeta(
             name = source.name ?: "${source.collection?.name} #${source.tokenId}",
             collectionId = null,
@@ -27,7 +27,7 @@ object SimpleHashConverter {
         )
     }
 
-    private fun content(source: SimpleHashNft): List<UnionMetaContent> {
+    private fun content(source: SimpleHashItem): List<UnionMetaContent> {
         return listOfNotNull(
             source.previews?.imageLargeUrl?.let {
                 UnionMetaContent(
@@ -56,7 +56,7 @@ object SimpleHashConverter {
         )
     }
 
-    private fun attributes(source: SimpleHashNft): List<UnionMetaAttribute> {
+    private fun attributes(source: SimpleHashItem): List<UnionMetaAttribute> {
         return source.extraMetadata?.attributes?.map {
             UnionMetaAttribute(key = it.traitType, value = it.value)
         } ?: emptyList()

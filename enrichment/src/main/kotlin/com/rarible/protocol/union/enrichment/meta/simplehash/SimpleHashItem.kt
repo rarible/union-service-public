@@ -3,7 +3,7 @@ package com.rarible.protocol.union.enrichment.meta.simplehash
 import java.time.LocalDateTime
 
 
-data class SimpleHashNft(
+data class SimpleHashItem(
     val tokenId: String,
     val name: String?,
     val description: String?,

@@ -25,7 +25,7 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
     abstract suspend fun getRawMeta(key: K): T
 
     protected suspend fun load(key: K): T? {
-        val meta = getMeta(key) ?: providers.firstNotNullOfOrNull { it.fetch(key) }
+        val meta = getMeta(key) ?: getMetaFromProviders(key)
         meta ?: return null
 
         val sanitized = sanitizeContent(meta.data.content)
@@ -35,6 +35,11 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
         return customizers.fold(initial) { current, customizer ->
             customizer.customize(key, current)
         }.data
+    }
+
+    private suspend fun getMetaFromProviders(key: K): WrappedMeta<T>? {
+        logger.info("Meta fetching failed from original source trying other providers key: $key")
+        return providers.firstNotNullOfOrNull { it.fetch(key) }
     }
 
     private suspend fun getMeta(key: K): WrappedMeta<T>? {

@@ -8,7 +8,7 @@ import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.MetaMetrics
 import com.rarible.protocol.union.enrichment.meta.MetaSource
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
-import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashNft
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
 import kotlinx.coroutines.reactor.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -33,7 +33,7 @@ class SimpleHashService(
         try {
             val response = simpleHashClient.get()
                 .uri("/nfts/${key.blockchain.name.lowercase()}/${key.value.replace(":", "/")}")
-                .retrieve().bodyToMono(SimpleHashNft::class.java).awaitSingle()
+                .retrieve().bodyToMono(SimpleHashItem::class.java).awaitSingle()
             metrics.onMetaFetched(key.blockchain, MetaSource.SIMPLE_HASH)
             return SimpleHashConverter.convert(response)
         } catch (e: Exception) {

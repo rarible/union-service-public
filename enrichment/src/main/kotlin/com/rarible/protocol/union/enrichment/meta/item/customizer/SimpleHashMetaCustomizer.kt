@@ -10,6 +10,7 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaCustomizer
 import com.rarible.protocol.union.enrichment.meta.WrappedMeta
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
 import com.rarible.protocol.union.enrichment.util.sanitizeContent
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
@@ -20,8 +21,13 @@ class SimpleHashMetaCustomizer(
     val simpleHashService: SimpleHashService
 ) : ItemMetaCustomizer {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     override suspend fun customize(id: ItemIdDto, meta: WrappedMeta<UnionMeta>): WrappedMeta<UnionMeta> {
-        if (meta.source == MetaSource.SIMPLE_HASH) return meta
+        if (meta.source == MetaSource.SIMPLE_HASH) {
+            logger.info("Meta was fetched from simplehash, skipping customizer")
+            return meta
+        }
         val simpleHashMeta = simpleHashService.fetch(id) ?: return meta
 
         val sanitized = sanitizeContent(simpleHashMeta.content)
