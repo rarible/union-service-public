@@ -6,9 +6,11 @@ import com.rarible.protocol.union.enrichment.meta.MetaSource
 import com.rarible.protocol.union.enrichment.meta.WrappedMeta
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaProvider
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
+@ConditionalOnProperty("meta.simpleHash.enabled", havingValue = "true")
 class SimpleHashItemProvider(
     private val simpleHashService: SimpleHashService
 ) : ItemMetaProvider {
