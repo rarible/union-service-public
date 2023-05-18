@@ -10,11 +10,13 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 
 @Component
 class CustomCollectionJob(
     private val eventProducer: UnionInternalBlockchainEventProducer,
-    private val customCollectionItemFetcherProvider: CustomCollectionItemFetcherProvider,
+    private val customCollectionItemFetcherProvider: CustomCollectionItemFetcherFactory,
     private val updaters: List<CustomCollectionUpdater>
 ) {
 
@@ -29,18 +31,18 @@ class CustomCollectionJob(
     suspend fun migrate(name: String, continuation: String?): String? {
         val fetchers = customCollectionItemFetcherProvider.get(name)
         val state = continuation?.let { CustomCollectionJobState(it) }
-        var currentFetcher = state?.rule ?: 0
-        var currentState = state?.state
-        while (currentFetcher < fetchers.size) {
-            val fetcher = fetchers[currentFetcher]
-            val next = fetcher.next(currentState, batchSize)
+        val currentFetcher = AtomicInteger(state?.rule ?: 0)
+        val currentState = AtomicReference(state?.state)
+        while (currentFetcher.get() < fetchers.size) {
+            val fetcher = fetchers[currentFetcher.get()]
+            val next = fetcher.next(currentState.get(), batchSize)
             if (next.state != null) {
                 migrate(next.items)
                 logger.info("Moving {} Items to custom collection: {}", next.items.size, name)
-                return CustomCollectionJobState(currentFetcher, next.state).toString()
+                return CustomCollectionJobState(currentFetcher.get(), next.state).toString()
             }
-            currentFetcher++
-            currentState = null
+            currentFetcher.incrementAndGet()
+            currentState.set(null)
         }
         return null
     }

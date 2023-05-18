@@ -30,7 +30,7 @@ class CustomCollectionJobTest {
         mapOf(BlockchainDto.ETHEREUM to blockchainEventProducer)
     )
 
-    private val itemFetcherProvider: CustomCollectionItemFetcherProvider = mockk()
+    private val itemFetcherProvider: CustomCollectionItemFetcherFactory = mockk()
     private val updater: CustomCollectionUpdater = mockk {
         coEvery { update(any()) } returns Unit
     }

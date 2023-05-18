@@ -8,7 +8,7 @@ import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-class CustomCollectionItemFetcherProviderTest {
+class CustomCollectionItemFetcherFactoryTest {
 
     private val customCollectionItemProvider: CustomCollectionItemProvider = mockk()
 
@@ -24,7 +24,7 @@ class CustomCollectionItemFetcherProviderTest {
 
         val properties = EnrichmentCollectionProperties(listOf(mapping))
 
-        val provider = CustomCollectionItemFetcherProvider(customCollectionItemProvider, properties)
+        val provider = CustomCollectionItemFetcherFactory(customCollectionItemProvider, properties)
         val fetchers = provider.get(customCollection.fullId())
 
         assertThat(fetchers).hasSize(1)
@@ -43,7 +43,7 @@ class CustomCollectionItemFetcherProviderTest {
 
         val properties = EnrichmentCollectionProperties(listOf(mapping))
 
-        val provider = CustomCollectionItemFetcherProvider(customCollectionItemProvider, properties)
+        val provider = CustomCollectionItemFetcherFactory(customCollectionItemProvider, properties)
         val fetchers = provider.get(customCollection.fullId())
 
         assertThat(fetchers).hasSize(1)
@@ -64,7 +64,7 @@ class CustomCollectionItemFetcherProviderTest {
 
         val properties = EnrichmentCollectionProperties(listOf(mapping))
 
-        val provider = CustomCollectionItemFetcherProvider(customCollectionItemProvider, properties)
+        val provider = CustomCollectionItemFetcherFactory(customCollectionItemProvider, properties)
         val fetchers = provider.get(customCollection.fullId())
 
         assertThat(fetchers).hasSize(2)
@@ -82,7 +82,7 @@ class CustomCollectionItemFetcherProviderTest {
 
         val properties = EnrichmentCollectionProperties(listOf(mapping))
 
-        val provider = CustomCollectionItemFetcherProvider(customCollectionItemProvider, properties)
+        val provider = CustomCollectionItemFetcherFactory(customCollectionItemProvider, properties)
         val fetchers = provider.get(customCollection.fullId())
 
         assertThat(fetchers).isEmpty()
