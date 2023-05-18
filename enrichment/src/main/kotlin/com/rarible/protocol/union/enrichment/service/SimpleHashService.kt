@@ -32,7 +32,7 @@ class SimpleHashService(
     suspend fun fetch(key: ItemIdDto): UnionMeta? {
         try {
             val response = simpleHashClient.get()
-                .uri("/nfts/${key.blockchain.name.lowercase()}/${key.value.replace(":", "/")}")
+                .uri("/nfts/${network(key.blockchain)}/${key.value.replace(":", "/")}")
                 .retrieve().bodyToMono(SimpleHashItem::class.java).awaitSingle()
             metrics.onMetaFetched(key.blockchain, MetaSource.SIMPLE_HASH)
             return SimpleHashConverter.convert(response)
@@ -46,6 +46,10 @@ class SimpleHashService(
     suspend fun fetch(key: CollectionIdDto): UnionMeta? {
         // TODO: request from simplehash
         return null
+    }
+
+    private fun network(blockchain: BlockchainDto): String {
+        return props.simpleHash.mapping[blockchain.name.lowercase()] ?: blockchain.name.lowercase()
     }
 
 }

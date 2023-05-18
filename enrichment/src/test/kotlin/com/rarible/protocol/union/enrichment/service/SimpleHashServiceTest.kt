@@ -29,7 +29,8 @@ class SimpleHashServiceTest {
     private val mockServer = MockWebServer()
     private val simpleHashProps = SimpleHash(
         enabled = true,
-        endpoint = "http://localhost:${mockServer.port}"
+        endpoint = "http://localhost:${mockServer.port}",
+        mapping = mapOf("ethereum" to "ethereum-goerli")
     )
     private val props: UnionMetaProperties
         get() {
@@ -37,7 +38,6 @@ class SimpleHashServiceTest {
             every { mock.simpleHash } returns simpleHashProps
             return mock
         }
-//    private val client = WebClientFactory.createClient(simpleHashProps.endpoint, mapOf("X-API-KEY" to simpleHashProps.apiKey)).build()
     private val customizer: UnionWebClientCustomizer = mockk() {
         every { customize(any()) } returnsArgument 0
 }
@@ -95,7 +95,7 @@ class SimpleHashServiceTest {
         assertThat(fetched).isEqualTo(meta)
 
         val request: RecordedRequest = mockServer.takeRequest()
-        assertThat(request.path).isEqualTo("/nfts/ethereum/0x60e4d786628fea6478f785a6d7e704777c86a7c6/2691")
+        assertThat(request.path).isEqualTo("/nfts/ethereum-goerli/0x60e4d786628fea6478f785a6d7e704777c86a7c6/2691")
     }
 
 }
