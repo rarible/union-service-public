@@ -3,6 +3,8 @@ package com.rarible.protocol.union.worker.job.collection
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.util.TokenRange
 import java.math.BigInteger
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 
 class CustomCollectionItemFetcherByRange(
     private val customCollectionItemProvider: CustomCollectionItemProvider,
@@ -11,19 +13,19 @@ class CustomCollectionItemFetcherByRange(
 
     override suspend fun next(state: String?, batchSize: Int): CustomCollectionItemBatch {
         val current = state?.let { State(state) }
-        var currentRange = current?.range ?: 0
-        var lastTokenId = current?.state
-        while (currentRange < ranges.size) {
-            val range = ranges[currentRange]
+        val currentRange = AtomicInteger(current?.range ?: 0)
+        val lastTokenId = AtomicReference(current?.state)
+        while (currentRange.get() < ranges.size) {
+            val range = ranges[currentRange.get()]
             val collection = range.collection
-            val next = range.batch(lastTokenId, batchSize)
+            val next = range.batch(lastTokenId.get(), batchSize)
             if (next.isNotEmpty()) {
                 val itemIds = next.map { ItemIdDto(collection.blockchain, "${collection.collectionId}:${it}") }
                 val items = customCollectionItemProvider.fetch(itemIds)
-                return CustomCollectionItemBatch(State(currentRange, next.last()).toString(), items)
+                return CustomCollectionItemBatch(State(currentRange.get(), next.last()).toString(), items)
             }
-            currentRange++
-            lastTokenId = null
+            currentRange.incrementAndGet()
+            lastTokenId.set(null)
         }
         return CustomCollectionItemBatch(null, emptyList())
     }
