@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.protocol.union.core.UnionWebClientCustomizer
+import com.rarible.protocol.union.core.client.WebClientFactory
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
@@ -7,7 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.enrichment.configuration.SimpleHash
-import com.rarible.protocol.union.enrichment.configuration.SimpleHashFactory
+import com.rarible.protocol.union.enrichment.configuration.UnionMetaConfiguration
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.MetaMetrics
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
@@ -29,13 +31,17 @@ class SimpleHashServiceTest {
         enabled = true,
         endpoint = "http://localhost:${mockServer.port}"
     )
-    private val client = SimpleHashFactory.createClient(simpleHashProps)
     private val props: UnionMetaProperties
         get() {
             val mock = mockk<UnionMetaProperties>()
             every { mock.simpleHash } returns simpleHashProps
             return mock
         }
+//    private val client = WebClientFactory.createClient(simpleHashProps.endpoint, mapOf("X-API-KEY" to simpleHashProps.apiKey)).build()
+    private val customizer: UnionWebClientCustomizer = mockk() {
+        every { customize(any()) } returnsArgument 0
+}
+    private val client = UnionMetaConfiguration(props).simpleHashClient(customizer)
     private val metrics = MetaMetrics(SimpleMeterRegistry(), "")
     private val service = SimpleHashService(props, client, metrics)
 
