@@ -12,6 +12,7 @@ import com.rarible.protocol.union.enrichment.configuration.SimpleHash
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaConfiguration
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.MetaMetrics
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.every
 import io.mockk.mockk
@@ -42,7 +43,7 @@ class SimpleHashServiceTest {
         every { customize(any()) } returnsArgument 0
 }
     private val client = UnionMetaConfiguration(props).simpleHashClient(customizer)
-    private val metrics = MetaMetrics(SimpleMeterRegistry(), "")
+    private val metrics = ItemMetaMetrics(SimpleMeterRegistry())
     private val service = SimpleHashService(props, client, metrics)
 
 
