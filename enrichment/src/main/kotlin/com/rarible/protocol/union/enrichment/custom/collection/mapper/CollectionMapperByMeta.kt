@@ -35,8 +35,10 @@ class CollectionMapperByMeta(
 
         val missingFromDb = missing.filter { fromDb.containsKey(it) }
         val fromBlockchain = fetchMeta(missingFromDb)
+        val fromHint = hint.filter { it.value.metaEntry?.data != null }
+            .mapValues { it.value.metaEntry!!.data!! }
 
-        return (fromDb + fromBlockchain)
+        return (fromDb + fromBlockchain + fromHint)
             .filter { matches(it.value) }
             .mapValues { collectionId }
     }
