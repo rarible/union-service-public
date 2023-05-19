@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.service
+package com.rarible.protocol.union.enrichment.custom.collection
 
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.service.ItemService

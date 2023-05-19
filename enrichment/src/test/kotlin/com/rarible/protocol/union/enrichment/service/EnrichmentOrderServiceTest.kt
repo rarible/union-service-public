@@ -14,6 +14,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrder
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
@@ -28,7 +29,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 
-internal class EnrichmentOrderServiceUnitTest {
+internal class EnrichmentOrderServiceTest {
 
     private val customCollectionResolver: CustomCollectionResolver = mockk {
         coEvery { resolveCustomCollection(any<ItemIdDto>()) } returns null

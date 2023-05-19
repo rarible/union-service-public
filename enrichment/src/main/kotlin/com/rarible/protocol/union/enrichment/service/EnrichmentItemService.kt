@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline

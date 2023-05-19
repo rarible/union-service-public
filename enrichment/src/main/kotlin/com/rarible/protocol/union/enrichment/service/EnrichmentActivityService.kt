@@ -17,6 +17,7 @@ import com.rarible.protocol.union.enrichment.converter.ActivityDtoConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityConverter
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.converter.data.EnrichmentActivityData
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
 import com.rarible.protocol.union.enrichment.model.EnrichmentActivity
 import com.rarible.protocol.union.enrichment.model.ItemLastSale
 import com.rarible.protocol.union.enrichment.repository.ActivityRepository

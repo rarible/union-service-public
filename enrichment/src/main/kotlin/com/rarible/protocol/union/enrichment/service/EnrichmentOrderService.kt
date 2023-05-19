@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.converter.data.EnrichmentOrderData
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder

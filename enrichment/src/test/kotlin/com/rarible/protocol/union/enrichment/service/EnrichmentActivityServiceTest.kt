@@ -19,6 +19,7 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.converter.ActivityDtoConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityConverter
 import com.rarible.protocol.union.enrichment.converter.data.EnrichmentActivityData
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
 import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityOrderBid
