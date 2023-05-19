@@ -6,7 +6,7 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentCollectionProperties
-import com.rarible.protocol.union.worker.job.collection.CustomCollectionJob
+import com.rarible.protocol.union.worker.job.CustomCollectionJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Component

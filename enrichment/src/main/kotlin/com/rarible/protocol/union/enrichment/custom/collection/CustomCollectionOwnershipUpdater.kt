@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.worker.job.collection
+package com.rarible.protocol.union.enrichment.custom.collection
 
 import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.UnionItem

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.worker.job.collection
+package com.rarible.protocol.union.enrichment.custom.collection
 
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.worker.job.collection
+package com.rarible.protocol.union.enrichment.custom.collection
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
@@ -24,9 +24,7 @@ import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
-import io.mockk.impl.annotations.SpyK
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking

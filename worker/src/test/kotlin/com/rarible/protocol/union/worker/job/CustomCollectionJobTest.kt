@@ -1,14 +1,10 @@
-package com.rarible.protocol.union.worker.job.collection
+package com.rarible.protocol.union.worker.job
 
-import com.rarible.core.kafka.KafkaMessage
-import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
-import com.rarible.protocol.union.core.model.UnionInternalItemEvent
-import com.rarible.protocol.union.core.model.UnionItemChangeEvent
-import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemBatch
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemFetcher
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemFetcherFactory
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionMigrator
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.clearMocks
@@ -22,17 +18,9 @@ import org.junit.jupiter.api.Test
 
 class CustomCollectionJobTest {
 
-    private val blockchainEventProducer: RaribleKafkaProducer<UnionInternalBlockchainEvent> = mockk {
-        coEvery { send(any<KafkaMessage<UnionInternalBlockchainEvent>>()) } returns mockk()
-    }
-
-    private val eventProducer = UnionInternalBlockchainEventProducer(
-        mapOf(BlockchainDto.ETHEREUM to blockchainEventProducer)
-    )
-
     private val itemFetcherProvider: CustomCollectionItemFetcherFactory = mockk()
-    private val updater: CustomCollectionUpdater = mockk {
-        coEvery { update(any()) } returns Unit
+    private val customCollectionMigrator: CustomCollectionMigrator = mockk() {
+        coEvery { migrate(any()) } returns Unit
     }
 
     private val fetcher1: CustomCollectionItemFetcher = mockk()
@@ -42,9 +30,8 @@ class CustomCollectionJobTest {
     private val batchSize = 50
 
     private val job = CustomCollectionJob(
-        eventProducer,
         itemFetcherProvider,
-        listOf(updater)
+        customCollectionMigrator
     )
 
     @BeforeEach
@@ -87,23 +74,8 @@ class CustomCollectionJobTest {
         val continuation4 = job.migrate(name, continuation3)
         assertThat(continuation4).isNull()
 
-        verifyItemChangeEvent(item1.id)
-        verifyItemChangeEvent(item2.id)
-        verifyItemChangeEvent(item3.id)
-
-        coVerify { updater.update(item1) }
-        coVerify { updater.update(item2) }
-        coVerify { updater.update(item3) }
+        coVerify { customCollectionMigrator.migrate(listOf(item1)) }
+        coVerify { customCollectionMigrator.migrate(listOf(item2)) }
+        coVerify { customCollectionMigrator.migrate(listOf(item3)) }
     }
-
-    private fun verifyItemChangeEvent(itemId: ItemIdDto) {
-        coVerify {
-            blockchainEventProducer.send(match<KafkaMessage<UnionInternalBlockchainEvent>> {
-                val event = it.value
-                val changeEvent = (event as UnionInternalItemEvent).event as UnionItemChangeEvent
-                changeEvent.itemId == itemId
-            })
-        }
-    }
-
 }
