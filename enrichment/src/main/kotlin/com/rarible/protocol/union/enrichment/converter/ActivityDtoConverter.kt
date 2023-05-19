@@ -22,6 +22,7 @@ import com.rarible.protocol.union.core.model.UnionOrderMatchSell
 import com.rarible.protocol.union.core.model.UnionOrderMatchSwap
 import com.rarible.protocol.union.core.model.UnionTransferActivity
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.AuctionBidActivityDto
@@ -142,8 +143,8 @@ object ActivityDtoConverter {
             lastUpdatedAt = source.lastUpdatedAt,
             cursor = source.cursor,
             reverted = source.reverted,
-            left = convert(source.left, data),
-            right = convert(source.right, data)
+            left = convert(source.id, source.left, data),
+            right = convert(source.id, source.right, data)
         )
     }
 
@@ -158,8 +159,8 @@ object ActivityDtoConverter {
             lastUpdatedAt = source.lastUpdatedAt,
             cursor = source.cursor,
             reverted = source.reverted,
-            nft = convert(source.nft, data),
-            payment = convert(source.payment, data),
+            nft = convert(source.id, source.nft, data),
+            payment = convert(source.id, source.payment, data),
             buyer = source.buyer,
             seller = source.seller,
             buyerOrderHash = source.buyerOrderHash,
@@ -183,8 +184,8 @@ object ActivityDtoConverter {
             orderId = source.orderId,
             hash = source.hash,
             maker = source.maker,
-            make = convert(source.make, data),
-            take = convert(source.take, data),
+            make = convert(source.id, source.make, data),
+            take = convert(source.id, source.take, data),
             price = source.price,
             priceUsd = source.priceUsd,
             source = source.source,
@@ -202,8 +203,8 @@ object ActivityDtoConverter {
             orderId = source.orderId,
             hash = source.hash,
             maker = source.maker,
-            make = convert(source.make, data),
-            take = convert(source.take, data),
+            make = convert(source.id, source.make, data),
+            take = convert(source.id, source.take, data),
             price = source.price,
             priceUsd = source.priceUsd,
             source = source.source
@@ -223,8 +224,8 @@ object ActivityDtoConverter {
             orderId = source.orderId,
             hash = source.hash,
             maker = source.maker,
-            make = convert(source.make, data),
-            take = convert(source.take, data),
+            make = convert(source.id, source.make, data),
+            take = convert(source.id, source.take, data),
             source = source.source,
             transactionHash = source.transactionHash,
             blockchainInfo = source.blockchainInfo
@@ -244,8 +245,8 @@ object ActivityDtoConverter {
             orderId = source.orderId,
             hash = source.hash,
             maker = source.maker,
-            make = convert(source.make, data),
-            take = convert(source.take, data),
+            make = convert(source.id, source.make, data),
+            take = convert(source.id, source.take, data),
             source = source.source,
             transactionHash = source.transactionHash,
             blockchainInfo = source.blockchainInfo
@@ -365,35 +366,38 @@ object ActivityDtoConverter {
     }
 
     private fun convert(
+        id: ActivityIdDto,
         source: UnionOrderActivityMatchSideDto,
         data: EnrichmentActivityData
     ): OrderActivityMatchSideDto {
         return OrderActivityMatchSideDto(
             maker = source.maker,
             hash = source.hash,
-            asset = convert(source.asset, data)
+            asset = convert(id, source.asset, data)
         )
     }
 
     private fun convert(
+        id: ActivityIdDto,
         source: UnionAsset,
         data: EnrichmentActivityData
     ): AssetDto {
         return AssetDto(
-            type = convert(source.type, data),
+            type = convert(id, source.type, data),
             value = source.value
         )
     }
 
     private fun convert(
+        id: ActivityIdDto,
         source: UnionAssetType,
         data: EnrichmentActivityData
     ): AssetTypeDto {
-        return AssetDtoConverter.convert(source, EnrichmentAssetData(data.customCollection))
+        return AssetDtoConverter.convert(source, EnrichmentAssetData(data.customCollections[id]))
     }
 
     private fun UnionActivity.getEnrichedCollection(data: EnrichmentActivityData): CollectionIdDto? {
-        return data.customCollection ?: this.collectionId()
+        return data.customCollections[id]
     }
 
 }

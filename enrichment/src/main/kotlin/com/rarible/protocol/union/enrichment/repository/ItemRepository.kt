@@ -62,6 +62,7 @@ class ItemRepository(
     }
 
     suspend fun getAll(ids: List<ShortItemId>): List<ShortItem> {
+        if (ids.isEmpty()) return emptyList()
         val criteria = Criteria("_id").inValues(ids)
         return template.find<ShortItem>(Query(criteria)).collectList().awaitFirst()
     }

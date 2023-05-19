@@ -5,8 +5,14 @@ enrichment:
         collections:
           - "ETHEREUM:0xc8ec13089712ee09b651a41bd8a01245628e58d4"
       - customCollection: "FLOW:A.9f36754d9b38f155.HWGarageFFCardV2"
-        ranges:
-          - "FLOW:A.9f36754d9b38f155.HWGarageCardV2:216406..216600"
+        meta:
+          collections:
+            - "FLOW:A.9f36754d9b38f155.HWGarageCardV2"
+          attributes:
+            - name: "seriesName"
+              values:
+                "Fast & Furious"
+
   currencies:
     bestBidByCurrencyWhitelist:
       - ETHEREUM:0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6

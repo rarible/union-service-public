@@ -26,7 +26,8 @@ data class CustomCollectionMapping(
     val customCollection: String,
     private val items: List<String> = emptyList(),
     private val collections: List<String> = emptyList(),
-    private val ranges: List<String> = emptyList()
+    private val ranges: List<String> = emptyList(),
+    val meta: CustomCollectionMetaMapping = CustomCollectionMetaMapping()
 ) {
 
     fun getItemIds(): List<ShortItemId> = items.map { ShortItemId.of(it) }
@@ -34,3 +35,18 @@ data class CustomCollectionMapping(
     fun getRanges(): List<TokenRange> = ranges.map { TokenRange.of(it) }
 
 }
+
+data class CustomCollectionMetaMapping(
+    private val collections: List<String> = emptyList(),
+    val attributes: List<CustomCollectionMetaAttributeMapping> = emptyList()
+) {
+
+    fun getCollectionIds(): List<EnrichmentCollectionId> = collections.map { EnrichmentCollectionId.of(it) }
+    fun getAttributes(): Map<String, Set<String>> = attributes.associateBy({ it.name }, { it.values })
+
+}
+
+data class CustomCollectionMetaAttributeMapping(
+    val name: String,
+    val values: Set<String>
+)
