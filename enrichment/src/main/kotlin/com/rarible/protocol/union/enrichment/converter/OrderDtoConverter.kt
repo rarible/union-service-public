@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.OnChainAmmOrderDto
 import com.rarible.protocol.union.dto.OnChainOrderDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
@@ -42,8 +43,8 @@ object OrderDtoConverter {
             takePriceUsd = source.takePriceUsd,
             maker = source.maker,
             taker = source.taker,
-            make = convert(source.make, data),
-            take = convert(source.take, data),
+            make = convert(source.id, source.make, data),
+            take = convert(source.id, source.take, data),
             salt = source.salt,
             signature = source.signature,
             pending = source.pending?.map { convert(it, data) } ?: emptyList(),
@@ -73,8 +74,8 @@ object OrderDtoConverter {
     private fun convert(source: UnionPendingOrderCancel, data: EnrichmentOrderData): PendingOrderCancelDto {
         return PendingOrderCancelDto(
             id = source.id,
-            make = source.make?.let { convert(it, data) },
-            take = source.take?.let { convert(it, data) },
+            make = source.make?.let { convert(source.id, it, data) },
+            take = source.take?.let { convert(source.id, it, data) },
             date = source.date,
             maker = source.maker,
             owner = source.owner,
@@ -84,8 +85,8 @@ object OrderDtoConverter {
     private fun convert(source: UnionPendingOrderMatch, data: EnrichmentOrderData): PendingOrderMatchDto {
         return PendingOrderMatchDto(
             id = source.id,
-            make = source.make?.let { convert(it, data) },
-            take = source.take?.let { convert(it, data) },
+            make = source.make?.let { convert(source.id, it, data) },
+            take = source.take?.let { convert(source.id, it, data) },
             date = source.date,
             maker = source.maker,
             side = source.side?.let { convert(it) },
@@ -102,8 +103,8 @@ object OrderDtoConverter {
     private fun convert(source: UnionOnChainOrder, data: EnrichmentOrderData): OnChainOrderDto {
         return OnChainOrderDto(
             id = source.id,
-            make = source.make?.let { convert(it, data) },
-            take = source.take?.let { convert(it, data) },
+            make = source.make?.let { convert(source.id, it, data) },
+            take = source.take?.let { convert(source.id, it, data) },
             date = source.date,
             maker = source.maker
         )
@@ -112,8 +113,8 @@ object OrderDtoConverter {
     private fun convert(source: UnionOnChainAmmOrder, data: EnrichmentOrderData): OnChainAmmOrderDto {
         return OnChainAmmOrderDto(
             id = source.id,
-            make = source.make?.let { convert(it, data) },
-            take = source.take?.let { convert(it, data) },
+            make = source.make?.let { convert(source.id, it, data) },
+            take = source.take?.let { convert(source.id, it, data) },
             date = source.date,
             maker = source.maker
         )
@@ -127,20 +128,22 @@ object OrderDtoConverter {
     }
 
     private fun convert(
+        id: OrderIdDto,
         source: UnionAsset,
         data: EnrichmentOrderData
     ): AssetDto {
         return AssetDto(
-            type = convert(source.type, data),
+            type = convert(id, source.type, data),
             value = source.value
         )
     }
 
     private fun convert(
+        id: OrderIdDto,
         source: UnionAssetType,
         data: EnrichmentOrderData
     ): AssetTypeDto {
-        return AssetDtoConverter.convert(source, EnrichmentAssetData(data.customCollection))
+        return AssetDtoConverter.convert(source, EnrichmentAssetData(data.customCollections[id]))
     }
 
 }

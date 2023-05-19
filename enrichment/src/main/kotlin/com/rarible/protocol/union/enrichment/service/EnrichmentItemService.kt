@@ -15,6 +15,7 @@ import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolutionRequest
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
@@ -133,6 +134,11 @@ class EnrichmentItemService(
         }
 
         val resolvedItem = fetchedItem.await()
+        val itemHint = shortItem?.let { mapOf(itemId to it) } ?: emptyMap()
+        val customCollection = customCollectionResolver.resolve(
+            listOf(CustomCollectionResolutionRequest(itemId, itemId, null)),
+            itemHint
+        )[itemId]
 
         ItemDtoConverter.convert(
             item = resolvedItem,
@@ -141,7 +147,7 @@ class EnrichmentItemService(
             meta = contentMetaService.exposePublicUrls(trimmedMeta),
             orders = enrichmentOrderService.enrich(bestOrders),
             auctions = auctionsData.await(),
-            customCollection = customCollectionResolver.resolveCustomCollection(resolvedItem.id)
+            customCollection = customCollection
         )
     }
 

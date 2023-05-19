@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.protocol.union.core.model.UnionAsset
 import com.rarible.protocol.union.core.model.UnionEthCollectionAssetType
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -9,11 +10,13 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolutionRequest
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrder
@@ -32,8 +35,8 @@ import java.math.BigDecimal
 internal class EnrichmentOrderServiceTest {
 
     private val customCollectionResolver: CustomCollectionResolver = mockk {
-        coEvery { resolveCustomCollection(any<ItemIdDto>()) } returns null
-        coEvery { resolveCustomCollection(any<CollectionIdDto>()) } returns null
+        coEvery { resolve(any<List<CustomCollectionResolutionRequest<OrderIdDto>>>(), emptyMap()) } returns emptyMap()
+        coEvery { resolve(any<List<CustomCollectionResolutionRequest<OrderIdDto>>>(), emptyMap()) } returns emptyMap()
     }
     private val ethOrderService: EthOrderService = mockk()
     private val router: BlockchainRouter<OrderService> = mockk {
@@ -47,7 +50,7 @@ internal class EnrichmentOrderServiceTest {
         val itemId = randomEthItemId()
         val order = randomUnionSellOrder(itemId)
 
-        coEvery { customCollectionResolver.resolveCustomCollection(itemId) } returns null
+        mockCustomCollection(order, itemId, null, null)
 
         val result = service.enrich(order)
         val expected = OrderDtoConverter.convert(order)
@@ -61,7 +64,7 @@ internal class EnrichmentOrderServiceTest {
         val customCollection = randomEthCollectionId()
         val order = randomUnionSellOrder(itemId)
 
-        coEvery { customCollectionResolver.resolveCustomCollection(itemId) } returns customCollection
+        mockCustomCollection(order, itemId, null, customCollection)
 
         val result = service.enrich(order)
 
@@ -77,7 +80,7 @@ internal class EnrichmentOrderServiceTest {
 
         val order = randomUnionBidOrder().copy(take = collectionAsset)
 
-        coEvery { customCollectionResolver.resolveCustomCollection(collectionId) } returns customCollection
+        mockCustomCollection(order, null, collectionId, customCollection)
 
         val result = service.enrich(order)
 
@@ -174,5 +177,25 @@ internal class EnrichmentOrderServiceTest {
         assertThat(service.getBestSell(ShortItemId(randomEthItemId()), "USD", null))
             .hasFieldOrPropertyWithValue(OrderDto::takePriceUsd.name, BigDecimal(1337))
             .hasFieldOrPropertyWithValue(OrderDto::platform.name, PlatformDto.OPEN_SEA)
+    }
+
+    private fun mockCustomCollection(
+        order: UnionOrder,
+        itemId: ItemIdDto? = null,
+        collectionId: CollectionIdDto? = null,
+        result: CollectionIdDto?
+    ) {
+        coEvery {
+            customCollectionResolver.resolve(
+                listOf(
+                    CustomCollectionResolutionRequest(
+                        entityId = order.id,
+                        itemId = itemId,
+                        collectionId = collectionId
+                    )
+                ),
+                emptyMap()
+            )
+        } returns (result?.let { mapOf(order.id to result) } ?: emptyMap())
     }
 }

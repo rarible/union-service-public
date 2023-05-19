@@ -1,11 +1,14 @@
 package com.rarible.protocol.union.api.controller.internal
 
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionMigrator
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
@@ -15,7 +18,9 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class RefreshController(
-    private val refreshService: EnrichmentRefreshService
+    private val refreshService: EnrichmentRefreshService,
+    private val customCollectionMigrator: CustomCollectionMigrator,
+    private val router: BlockchainRouter<ItemService>
 ) {
     @PostMapping(
         value = ["/v0.1/refresh/collection/{collectionId}/reconcile"],
@@ -53,6 +58,23 @@ class RefreshController(
         val result = refreshService.reconcileOwnership(unionOwnershipId)
             ?: throw UnionNotFoundException("Ownership $ownershipId not found")
         return ResponseEntity.ok(result)
+    }
+
+    @PostMapping(
+        value = ["/v0.1/refresh/item/{itemId}/migrate/collection"],
+        produces = ["application/json"]
+    )
+    suspend fun migrateCustomCollection(
+        @PathVariable("itemId") itemId: String
+    ): ResponseEntity<Unit> {
+        val unionItemId = IdParser.parseItemId(itemId)
+        customCollectionMigrator.migrate(
+            listOf(
+                router.getService(unionItemId.blockchain).getItemById(unionItemId.value)
+            )
+        )
+
+        return ResponseEntity.noContent().build()
     }
 
 }

@@ -202,6 +202,14 @@ class ItemsSearchByRequestIt {
                 }
             }
 
+            coEvery { ethereumService.getItemCollectionId(any()) } answers {
+                it.invocation.args[0].toString().substringBefore(":")
+            }
+
+            coEvery { flowService.getItemCollectionId(any()) } answers {
+                it.invocation.args[0].toString().substringBefore(":")
+            }
+
             clearMocks(currencyControllerApiMock)
             every { currencyControllerApiMock.allCurrencies } returns CurrenciesDto(nativeTestCurrencies()).toMono()
         }

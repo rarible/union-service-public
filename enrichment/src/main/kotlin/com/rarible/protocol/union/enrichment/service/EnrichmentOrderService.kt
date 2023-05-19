@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.converter.data.EnrichmentOrderData
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolutionRequest
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -32,22 +33,14 @@ class EnrichmentOrderService(
     private val logger = LoggerFactory.getLogger(EnrichmentOrderService::class.java)
 
     suspend fun enrich(order: UnionOrder): OrderDto {
-        // We expect here only one of them != null
-        val itemId = order.itemId()
-        val collectionId = order.assetCollectionId()
-
-        val customCollection = when {
-            itemId != null -> customCollectionResolver.resolveCustomCollection(itemId)
-            collectionId != null -> customCollectionResolver.resolveCustomCollection(collectionId)
-            else -> null
-        }
-
-        val data = EnrichmentOrderData(customCollection)
-        return OrderDtoConverter.convert(order, data)
+        return enrich(listOf(order)).first()
     }
 
     suspend fun enrich(orders: List<UnionOrder>): List<OrderDto> {
-        return orders.map { enrich(it) }
+        val request = orders.map { CustomCollectionResolutionRequest(it.id, it.itemId(), it.assetCollectionId()) }
+        val customCollections = customCollectionResolver.resolve(request, emptyMap())
+        val data = EnrichmentOrderData(customCollections)
+        return orders.map { OrderDtoConverter.convert(it, data) }
     }
 
     suspend fun enrich(orders: Map<OrderIdDto, UnionOrder>): Map<OrderIdDto, OrderDto> {

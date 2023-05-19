@@ -1,13 +1,22 @@
 package com.rarible.protocol.union.enrichment.custom.collection
 
+import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMapping
+import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMetaAttributeMapping
+import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMetaMapping
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentCollectionProperties
+import com.rarible.protocol.union.enrichment.custom.collection.mapper.CollectionMapperIndex
+import com.rarible.protocol.union.enrichment.repository.ItemRepository
+import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
+import com.rarible.protocol.union.enrichment.test.data.randomShortItem
+import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.coEvery
@@ -25,15 +34,20 @@ class CustomCollectionResolverTest {
 
     private val router: BlockchainRouter<ItemService> = mockk() {
         every { getService(BlockchainDto.ETHEREUM) } returns itemService
+        every { getService(BlockchainDto.POLYGON) } returns itemService
     }
+
+    private val itemRepository: ItemRepository = mockk() { coEvery { getAll(emptyList()) } returns emptyList() }
+
+    private lateinit var resolver: CustomCollectionResolver
 
     @Test
     fun `by item - ok, via item list`() = runBlocking<Unit> {
         val customCollectionId = randomEthCollectionId()
         val itemId = randomEthItemId()
 
-        val resolver = createResolver(customCollectionId, items = listOf(itemId))
-        val collection = resolver.resolveCustomCollection(itemId)
+        resolver = createResolver(customCollectionId, items = listOf(itemId))
+        val collection = resolveByItem(randomString(), itemId)
 
         assertThat(collection).isEqualTo(customCollectionId)
     }
@@ -43,9 +57,9 @@ class CustomCollectionResolverTest {
         val customCollectionId = randomEthCollectionId()
         val itemId = randomEthItemId()
 
-        val resolver = createResolver(customCollectionId, items = listOf(itemId))
-        val collection1 = resolver.resolveCustomCollection(randomEthItemId())
-        val collection2 = resolver.resolveCustomCollection(itemId.copy(blockchain = BlockchainDto.POLYGON))
+        resolver = createResolver(customCollectionId, items = listOf(itemId))
+        val collection1 = resolveByItem("a", randomEthItemId())
+        val collection2 = resolveByItem(randomString(), itemId.copy(blockchain = BlockchainDto.POLYGON))
 
         assertThat(collection1).isNull()
         assertThat(collection2).isNull()
@@ -57,8 +71,8 @@ class CustomCollectionResolverTest {
         val collectionId = randomEthCollectionId()
         val itemId = ItemIdDto(collectionId.blockchain, "${collectionId.value}:1")
 
-        val resolver = createResolver(customCollectionId, collections = listOf(collectionId))
-        val collection = resolver.resolveCustomCollection(itemId)
+        resolver = createResolver(customCollectionId, collections = listOf(collectionId))
+        val collection = resolveByItem(randomString(), itemId)
 
         assertThat(collection).isEqualTo(customCollectionId)
     }
@@ -69,9 +83,9 @@ class CustomCollectionResolverTest {
         val collectionId = randomEthCollectionId()
         val itemId = ItemIdDto(BlockchainDto.POLYGON, "${collectionId.value}:1")
 
-        val resolver = createResolver(customCollectionId, items = listOf(itemId))
-        val collection1 = resolver.resolveCustomCollection(randomEthItemId())
-        val collection2 = resolver.resolveCustomCollection(randomEthItemId())
+        resolver = createResolver(customCollectionId, items = listOf(itemId))
+        val collection1 = resolveByItem(randomString(), randomEthItemId())
+        val collection2 = resolveByItem(randomString(), randomEthItemId())
 
         assertThat(collection1).isNull()
         assertThat(collection2).isNull()
@@ -82,8 +96,8 @@ class CustomCollectionResolverTest {
         val customCollectionId = randomEthCollectionId()
         val collectionId = randomEthCollectionId()
 
-        val resolver = createResolver(customCollectionId, collections = listOf(collectionId))
-        val collection = resolver.resolveCustomCollection(collectionId)
+        resolver = createResolver(customCollectionId, collections = listOf(collectionId))
+        val collection = resolveByCollection(randomString(), collectionId)
 
         assertThat(collection).isEqualTo(customCollectionId)
     }
@@ -98,15 +112,15 @@ class CustomCollectionResolverTest {
         val itemId3 = ItemIdDto(collectionId.blockchain, "${collectionId.value}:5")
         val itemId4 = ItemIdDto(collectionId.blockchain, "${collectionId.value}:10")
 
-        val resolver = createResolver(
+        resolver = createResolver(
             customCollectionId,
             ranges = listOf("${collectionId.fullId()}:1..5", "${collectionId.fullId()}:10..10")
         )
 
-        assertThat(resolver.resolveCustomCollection(itemId1)).isEqualTo(customCollectionId)
-        assertThat(resolver.resolveCustomCollection(itemId2)).isEqualTo(customCollectionId)
-        assertThat(resolver.resolveCustomCollection(itemId3)).isEqualTo(customCollectionId)
-        assertThat(resolver.resolveCustomCollection(itemId4)).isEqualTo(customCollectionId)
+        assertThat(resolveByItem(randomString(), itemId1)).isEqualTo(customCollectionId)
+        assertThat(resolveByItem(randomString(), itemId2)).isEqualTo(customCollectionId)
+        assertThat(resolveByItem(randomString(), itemId3)).isEqualTo(customCollectionId)
+        assertThat(resolveByItem(randomString(), itemId4)).isEqualTo(customCollectionId)
     }
 
     @Test
@@ -117,13 +131,13 @@ class CustomCollectionResolverTest {
         val itemId1 = ItemIdDto(collectionId.blockchain, "${collectionId.value}:5")
         val itemId2 = ItemIdDto(collectionId.blockchain, "${collectionId.value}:8")
 
-        val resolver = createResolver(
+        resolver = createResolver(
             customCollectionId,
             ranges = listOf("${collectionId.fullId()}:6..7")
         )
 
-        assertThat(resolver.resolveCustomCollection(itemId1)).isNull()
-        assertThat(resolver.resolveCustomCollection(itemId2)).isNull()
+        assertThat(resolveByItem(randomString(), itemId1)).isNull()
+        assertThat(resolveByItem(randomString(), itemId2)).isNull()
     }
 
     @Test
@@ -131,27 +145,93 @@ class CustomCollectionResolverTest {
         val customCollectionId = randomEthCollectionId()
         val collectionId = randomEthCollectionId()
 
-        val resolver = createResolver(customCollectionId, collections = listOf(collectionId))
-        val collection = resolver.resolveCustomCollection(randomEthCollectionId())
+        resolver = createResolver(customCollectionId, collections = listOf(collectionId))
+        val collection = resolveByCollection(randomString(), randomEthCollectionId())
 
         assertThat(collection).isNull()
+    }
+
+    @Test
+    fun `by meta - ok`() = runBlocking<Unit> {
+        val customCollectionId = randomEthCollectionId()
+        val collectionId = randomEthCollectionId()
+        val itemId = ItemIdDto(collectionId.blockchain, "${collectionId.value}:1")
+
+        val meta = randomUnionMeta().copy(attributes = listOf(UnionMetaAttribute("a", "b")))
+        val item = randomShortItem(itemId).copy(metaEntry = randomItemMetaDownloadEntry().copy(data = meta))
+        coEvery { itemRepository.getAll(listOf(item.id)) } returns listOf(item)
+
+        val customMetaMapping = CustomCollectionMetaMapping(
+            listOf(collectionId.fullId()),
+            listOf(CustomCollectionMetaAttributeMapping("a", setOf("b")))
+        )
+
+        resolver = createResolver(customCollectionId, meta = customMetaMapping)
+
+        assertThat(resolveByItem(itemId, itemId)).isEqualTo(customCollectionId)
+    }
+
+    @Test
+    fun `by meta - not mapped`() = runBlocking<Unit> {
+        val customCollectionId = randomEthCollectionId()
+        val collectionId = randomEthCollectionId()
+        val itemId = ItemIdDto(collectionId.blockchain, "${collectionId.value}:1")
+
+        val meta = randomUnionMeta().copy(attributes = listOf(UnionMetaAttribute("key1", "b")))
+        val item = randomShortItem(itemId).copy(metaEntry = randomItemMetaDownloadEntry().copy(data = meta))
+        coEvery { itemRepository.getAll(listOf(item.id)) } returns listOf(item)
+
+        val customMetaMapping = CustomCollectionMetaMapping(
+            listOf(collectionId.fullId()),
+            listOf(
+                CustomCollectionMetaAttributeMapping("key1", setOf("c")),
+                CustomCollectionMetaAttributeMapping("key2", setOf("b"))
+            )
+        )
+
+        resolver = createResolver(customCollectionId, meta = customMetaMapping)
+
+        assertThat(resolveByItem(itemId, itemId)).isNull()
     }
 
     private fun createResolver(
         customCollection: CollectionIdDto,
         items: List<ItemIdDto> = emptyList(),
         collections: List<CollectionIdDto> = emptyList(),
-        ranges: List<String> = emptyList()
+        ranges: List<String> = emptyList(),
+        meta: CustomCollectionMetaMapping = CustomCollectionMetaMapping()
     ): CustomCollectionResolver {
         val mapping = CustomCollectionMapping(
             customCollection = customCollection.fullId(),
             items = items.map { it.fullId() },
             collections = collections.map { it.fullId() },
-            ranges = ranges
+            ranges = ranges,
+            meta = meta
         )
         val properties = EnrichmentCollectionProperties(listOf(mapping))
+        val index = CollectionMapperIndex(
+            router,
+            itemRepository,
+            FeatureFlagsProperties(enableCustomCollections = true),
+            properties
+        )
 
-        return CustomCollectionResolver(router, properties, FeatureFlagsProperties(enableCustomCollections = true))
+        return CustomCollectionResolver(
+            router,
+            index
+        )
+    }
+
+    private suspend fun <T> resolveByItem(key: T, itemId: ItemIdDto): CollectionIdDto? {
+        val request = listOf(CustomCollectionResolutionRequest(key, itemId, null))
+        return resolver.resolve(request)
+            .get(key)
+    }
+
+    private suspend fun <T> resolveByCollection(key: T, collectionId: CollectionIdDto): CollectionIdDto? {
+        val request = listOf(CustomCollectionResolutionRequest(key, null, collectionId))
+        return resolver.resolve(request)
+            .get(key)
     }
 
 }
