@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Component
 @ConditionalOnProperty("worker.itemMetaCustomAttributesJob.providers.mocaXp.enabled", havingValue = "true")
@@ -61,9 +63,13 @@ class MocaXpMetaCustomAttributesProvider(
 
 object MocaXpCustomAttributesParser {
 
-    //private const val FIELD_TRIBE = "tribe"
+    private const val FIELD_TRIBE = "tribe"
     private const val FIELD_XP = "total_xp"
     private const val FIELD_TOKEN_ID = "moca_id"
+
+    private const val ATTRIBUTE_XP_PERCENTAGE = "total_xp_percentage"
+
+    private val hundred = BigDecimal("100")
 
     private val mapper = ObjectMapper().registerKotlinModule()
         .enable(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature())
@@ -71,10 +77,17 @@ object MocaXpCustomAttributesParser {
     fun parse(json: String, collectionId: CollectionIdDto): List<MetaCustomAttributes> {
         val array = mapper.readTree(json) as ArrayNode
 
-        return array.map { node ->
+        var collectionXp = BigDecimal(0)
+        val parsed = array.map {
+            val mocaXpAttributes = MocaXpAttributes(it, collectionId)
+            collectionXp = mocaXpAttributes.xp?.add(collectionXp) ?: collectionXp
+            mocaXpAttributes
+        }
+
+        return parsed.map {
             MetaCustomAttributes(
-                id = getItemId(node, collectionId),
-                attributes = toAttributes(node)
+                id = it.id,
+                attributes = it.toAttributes(collectionXp)
             )
         }
     }
@@ -86,8 +99,29 @@ object MocaXpCustomAttributesParser {
         )
     }
 
-    private fun getItemId(node: JsonNode, collectionId: CollectionIdDto): ItemIdDto {
-        val tokenId = node.get(FIELD_TOKEN_ID).textValue()
-        return ItemIdDto(collectionId.blockchain, "${collectionId.value}:$tokenId")
+    private fun percentage(collectionXp: BigDecimal, itemXp: BigDecimal): BigDecimal {
+        return itemXp.multiply(hundred).divide(collectionXp, 3, RoundingMode.HALF_UP)
     }
+
+    private data class MocaXpAttributes(
+        val id: ItemIdDto,
+        val xp: BigDecimal?,
+        val tribe: String?
+    ) {
+
+        constructor(node: JsonNode, collectionId: CollectionIdDto) : this(
+            id = ItemIdDto(collectionId.blockchain, "${collectionId.value}:${node.get(FIELD_TOKEN_ID).textValue()}"),
+            xp = node.get(FIELD_XP)?.decimalValue(),
+            tribe = node.get(FIELD_TRIBE)?.asText()
+        )
+
+        fun toAttributes(collectionXp: BigDecimal): List<UnionMetaAttribute> {
+            return listOfNotNull(
+                //tribe?.let { UnionMetaAttribute(FIELD_TRIBE, it) },
+                xp?.let { UnionMetaAttribute(FIELD_XP, it.toPlainString()) },
+                xp?.let { UnionMetaAttribute(ATTRIBUTE_XP_PERCENTAGE, percentage(collectionXp, it).toPlainString()) }
+            )
+        }
+    }
+
 }
