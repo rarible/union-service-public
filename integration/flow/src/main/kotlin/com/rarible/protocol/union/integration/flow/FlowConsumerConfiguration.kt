@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.flow
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.protocol.dto.FlowActivityDto
+import com.rarible.protocol.dto.FlowCollectionEventDto
 import com.rarible.protocol.dto.FlowNftItemEventDto
 import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOwnershipEventDto
@@ -11,12 +12,14 @@ import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.UnionActivity
+import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.integration.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.integration.flow.event.FlowActivityEventHandler
+import com.rarible.protocol.union.integration.flow.event.FlowCollectionEventHandler
 import com.rarible.protocol.union.integration.flow.event.FlowItemEventHandler
 import com.rarible.protocol.union.integration.flow.event.FlowOrderEventHandler
 import com.rarible.protocol.union.integration.flow.event.FlowOwnershipEventHandler
@@ -52,13 +55,10 @@ class FlowConsumerConfiguration(
         return FlowOwnershipEventHandler(handler)
     }
 
-    // TODO FLOW not supported yet
-    /*
     @Bean
-    fun flowCollectionEventHandler(handler: IncomingEventHandler<CollectionEventDto>): FlowCollectionEventHandler {
+    fun flowCollectionEventHandler(handler: IncomingEventHandler<UnionCollectionEvent>): FlowCollectionEventHandler {
         return FlowCollectionEventHandler(handler)
     }
-     */
 
     @Bean
     fun flowOrderEventHandler(
@@ -102,6 +102,15 @@ class FlowConsumerConfiguration(
     ): KafkaConsumerWorker<FlowOwnershipEventDto> {
         val consumer = factory.createOwnershipEventsConsumer(consumerFactory.ownershipGroup)
         return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers, batchSize)
+    }
+
+    @Bean
+    fun flowCollectionWorker(
+        factory: FlowNftIndexerEventsConsumerFactory,
+        handler: BlockchainEventHandler<FlowCollectionEventDto, UnionCollectionEvent>
+    ): KafkaConsumerWorker<FlowCollectionEventDto> {
+        val consumer = factory.createCollectionEventsConsumer(consumerFactory.collectionGroup)
+        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers, batchSize)
     }
 
     @Bean
