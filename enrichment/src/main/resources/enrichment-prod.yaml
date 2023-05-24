@@ -56,14 +56,14 @@ enrichment:
         mattel:
           # Contain rarible/mattel contracts
           barbieCard:
-            - "FLOW:A.e5bf4d436ca23932:BBxBarbieCard"
+            - "FLOW:A.e5bf4d436ca23932.BBxBarbieCard"
           barbieToken:
-            - "FLOW:A.e5bf4d436ca23932:BBxBarbieToken"
+            - "FLOW:A.e5bf4d436ca23932.BBxBarbieToken"
           barbiePack:
-            - "FLOW:A.e5bf4d436ca23932:BBxBarbiePack"
+            - "FLOW:A.e5bf4d436ca23932.BBxBarbiePack"
           hwCard:
-            - "FLOW:A.d0bcefdf1e67ea85:HWGarageCard"
-            - "FLOW:A.d0bcefdf1e67ea85:HWGarageCardV2"
+            - "FLOW:A.d0bcefdf1e67ea85.HWGarageCard"
+            - "FLOW:A.d0bcefdf1e67ea85.HWGarageCardV2"
           hwPack:
-            - "FLOW:A.d0bcefdf1e67ea85:HWGaragePack"
-            - "FLOW:A.d0bcefdf1e67ea85:HWGaragePackV2"
+            - "FLOW:A.d0bcefdf1e67ea85.HWGaragePack"
+            - "FLOW:A.d0bcefdf1e67ea85.HWGaragePackV2"
