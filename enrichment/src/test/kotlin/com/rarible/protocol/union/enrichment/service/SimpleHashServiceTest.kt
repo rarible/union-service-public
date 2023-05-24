@@ -1,19 +1,22 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.protocol.union.core.UnionWebClientCustomizer
-import com.rarible.protocol.union.core.client.WebClientFactory
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.enrichment.configuration.SimpleHash
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaConfiguration
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.meta.MetaMetrics
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
+import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -22,6 +25,7 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.math.BigInteger
 import java.time.Instant
 
 
@@ -41,10 +45,14 @@ class SimpleHashServiceTest {
         }
     private val customizer: UnionWebClientCustomizer = mockk() {
         every { customize(any()) } returnsArgument 0
-}
+    }
+    private val itemService: ItemService = mockk()
+    private val router: BlockchainRouter<ItemService> = mockk() {
+        every { getService(any()) } returns itemService
+    }
     private val client = UnionMetaConfiguration(props).simpleHashClient(customizer)
     private val metrics = ItemMetaMetrics(SimpleMeterRegistry())
-    private val service = SimpleHashService(props, client, metrics)
+    private val service = SimpleHashService(props, client, metrics, router)
 
 
     @Test
@@ -54,6 +62,7 @@ class SimpleHashServiceTest {
             contract = "0x60e4d786628fea6478f785a6d7e704777c86a7c6",
             tokenId = 2691.toBigInteger()
         )
+        coEvery { itemService.getItemById(itemId.value) } returns randomUnionItem(itemId).copy(lazySupply = BigInteger.ZERO)
         val meta = UnionMeta(
             name = "Mutant Ape Yacht Club #2691",
             description = "The MUTANT APE YACHT CLUB is a collection of up to 20,000 Mutant Apes that can only be created by exposing an existing Bored Ape to a vial of MUTANT SERUM or by minting a Mutant Ape in the public sale.",
@@ -97,6 +106,22 @@ class SimpleHashServiceTest {
 
         val request: RecordedRequest = mockServer.takeRequest()
         assertThat(request.path).isEqualTo("/nfts/ethereum-goerli/0x60e4d786628fea6478f785a6d7e704777c86a7c6/2691")
+    }
+
+    @Test
+    fun `ignore getting item meta - ok`() = runBlocking<Unit> {
+        val itemId = ItemIdDto(
+            blockchain = BlockchainDto.ETHEREUM,
+            contract = "0x60e4d786628fea6478f785a6d7e704777c86a7c6",
+            tokenId = 2691.toBigInteger()
+        )
+        coEvery { itemService.getItemById(itemId.value) } returns randomUnionItem(itemId).copy(lazySupply = BigInteger.ONE)
+
+        val fetched = service.fetch(itemId)
+        assertThat(fetched).isNull()
+
+        coVerify(exactly = 1) { itemService.getItemById(itemId.value) }
+        assertThat(mockServer.requestCount).isEqualTo(0)
     }
 
 }
