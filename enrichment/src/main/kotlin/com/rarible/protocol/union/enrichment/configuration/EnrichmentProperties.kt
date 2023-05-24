@@ -11,6 +11,28 @@ import org.springframework.boot.context.properties.ConstructorBinding
 class EnrichmentProperties(
     val collection: EnrichmentCollectionProperties = EnrichmentCollectionProperties(),
     val currencies: EnrichmentCurrenciesProperties = EnrichmentCurrenciesProperties(),
+    val meta: EnrichmentMetaProperties = EnrichmentMetaProperties()
+)
+
+data class EnrichmentMetaProperties(
+    val item: EnrichmentItemMetaProperties = EnrichmentItemMetaProperties()
+    // TODO add for collections if needed
+)
+
+class EnrichmentItemMetaProperties(
+    val customizers: EnrichmentItemMetaCustomizerProperties = EnrichmentItemMetaCustomizerProperties()
+)
+
+class EnrichmentItemMetaCustomizerProperties(
+    val mattel: EnrichmentMattelMetaCustomizerProperties = EnrichmentMattelMetaCustomizerProperties()
+)
+
+class EnrichmentMattelMetaCustomizerProperties(
+    val barbieCard: List<String> = emptyList(),
+    val barbieToken: List<String> = emptyList(),
+    val barbiePack: List<String> = emptyList(),
+    val hwCard: List<String> = emptyList(),
+    val hwPack: List<String> = emptyList(),
 )
 
 data class EnrichmentCurrenciesProperties(

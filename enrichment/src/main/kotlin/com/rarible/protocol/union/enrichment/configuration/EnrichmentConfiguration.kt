@@ -39,4 +39,8 @@ class EnrichmentConfiguration(
     @Bean
     fun enrichmentCollectionProperties(): EnrichmentCollectionProperties = properties.collection
 
+    @Bean
+    fun enrichmentMattelMetaCustomizerProperties(): EnrichmentMattelMetaCustomizerProperties =
+        properties.meta.item.customizers.mattel
+
 }
