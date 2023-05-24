@@ -109,7 +109,7 @@ class SimpleHashServiceTest {
     }
 
     @Test
-    fun `ignore getting item meta - ok`() = runBlocking<Unit> {
+    fun `ignore getting item meta for lazy item - ok`() = runBlocking<Unit> {
         val itemId = ItemIdDto(
             blockchain = BlockchainDto.ETHEREUM,
             contract = "0x60e4d786628fea6478f785a6d7e704777c86a7c6",
@@ -121,6 +121,21 @@ class SimpleHashServiceTest {
         assertThat(fetched).isNull()
 
         coVerify(exactly = 1) { itemService.getItemById(itemId.value) }
+        assertThat(mockServer.requestCount).isEqualTo(0)
+    }
+
+    @Test
+    fun `ignore getting item meta for unsupported - ok`() = runBlocking<Unit> {
+        val itemId = ItemIdDto(
+            blockchain = BlockchainDto.IMMUTABLEX,
+            contract = "0x60e4d786628fea6478f785a6d7e704777c86a7c6",
+            tokenId = 2691.toBigInteger()
+        )
+
+        val fetched = service.fetch(itemId)
+        assertThat(fetched).isNull()
+
+        coVerify(exactly = 0) { itemService.getItemById(itemId.value) }
         assertThat(mockServer.requestCount).isEqualTo(0)
     }
 

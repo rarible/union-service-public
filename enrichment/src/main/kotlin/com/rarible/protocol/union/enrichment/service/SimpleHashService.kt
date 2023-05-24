@@ -35,7 +35,9 @@ class SimpleHashService(
 
     suspend fun fetch(key: ItemIdDto): UnionMeta? {
         try {
-            if (isLazy(key)) {
+            if (!isSupported(key.blockchain)) {
+                logger.info("Skipped to fetch from simplehash $key because ${key.blockchain} isn't supported")
+            } else if (isLazy(key)) {
                 logger.info("Skipped to fetch from simplehash $key because it's lazy item")
             } else {
                 val response = simpleHashClient.get()
