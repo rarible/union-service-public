@@ -34,7 +34,7 @@ class SimpleHashMetaCustomizer(
         }
         val simpleHashMeta = simpleHashService.fetch(id) ?: return wrappedMeta
 
-        logger.info("Customizing meta for Item {} with {}", id.fullId(), this::class.java.simpleName)
+        logger.info("Customizing meta for Item {} with {}", id.fullId(), javaClass.simpleName)
 
         val sanitized = sanitizeContent(simpleHashMeta.content)
         val content = contentMetaLoader.enrichContent(id.value, id.blockchain, sanitized)

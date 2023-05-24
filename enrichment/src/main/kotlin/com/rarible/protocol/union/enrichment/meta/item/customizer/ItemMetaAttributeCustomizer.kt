@@ -26,7 +26,7 @@ class ItemMetaAttributeCustomizer(
         logger.info(
             "Customizing meta for Item {} with {} (attributes={})",
             id.fullId(),
-            this::class.java.simpleName,
+            javaClass.simpleName,
             customAttributes
         )
 
