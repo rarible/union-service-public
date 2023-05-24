@@ -37,8 +37,8 @@ class SimpleHashService(
         try {
             if (!isSupported(key.blockchain)) {
                 logger.info("Skipped to fetch from simplehash $key because ${key.blockchain} isn't supported")
-            } else if (isLazy(key)) {
-                logger.info("Skipped to fetch from simplehash $key because it's lazy item")
+            } else if (isLazyOtNotExisted(key)) {
+                logger.info("Skipped to fetch from simplehash $key because it's lazy item or it wasn't found")
             } else {
                 val response = simpleHashClient.get()
                     .uri("/nfts/${network(key.blockchain)}/${key.value.replace(":", "/")}")
@@ -62,9 +62,14 @@ class SimpleHashService(
         return props.simpleHash.mapping[blockchain.name.lowercase()] ?: blockchain.name.lowercase()
     }
 
-    private suspend fun isLazy(key: ItemIdDto): Boolean {
-        val item = itemServiceRouter.getService(key.blockchain).getItemById(key.value)
-        return item?.lazySupply > BigInteger.ZERO
+    private suspend fun isLazyOtNotExisted(key: ItemIdDto): Boolean {
+        val item = try {
+            itemServiceRouter.getService(key.blockchain).getItemById(key.value)
+        } catch (e: Exception) {
+            logger.warn("Item $key wasn't found: ", e)
+            null
+        }
+        return item?.lazySupply?.let { it > BigInteger.ZERO } ?: true
     }
 
 }

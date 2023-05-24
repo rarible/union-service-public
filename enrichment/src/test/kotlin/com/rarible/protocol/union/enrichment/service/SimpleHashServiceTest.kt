@@ -139,4 +139,19 @@ class SimpleHashServiceTest {
         assertThat(mockServer.requestCount).isEqualTo(0)
     }
 
+    @Test
+    fun `ignore getting item meta for non-existed - ok`() = runBlocking<Unit> {
+        val itemId = ItemIdDto(
+            blockchain = BlockchainDto.ETHEREUM,
+            contract = "0x60e4d786628fea6478f785a6d7e704777c86a7c6",
+            tokenId = 2691.toBigInteger()
+        )
+        coEvery { itemService.getItemById(itemId.value) } throws RuntimeException("not found")
+
+        val fetched = service.fetch(itemId)
+        assertThat(fetched).isNull()
+
+        coVerify(exactly = 1) { itemService.getItemById(itemId.value) }
+        assertThat(mockServer.requestCount).isEqualTo(0)
+    }
 }
