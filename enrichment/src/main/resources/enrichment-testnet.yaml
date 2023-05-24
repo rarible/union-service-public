@@ -12,6 +12,30 @@ enrichment:
             - name: "seriesName"
               values:
                 - "Fast & Furious"
+  meta:
+    item:
+      customizers:
+        mattel:
+          # Contain rarible/mattel contracts
+          barbieCard:
+            - "FLOW:A.eff462cf475a0c02:BBxBarbieCard"
+            - "FLOW:A.80102bce1de42dc4:BBxBarbieCard"
+          barbieToken:
+            - "FLOW:A.eff462cf475a0c02:BBxBarbieToken"
+            - "FLOW:A.80102bce1de42dc4:BBxBarbieToken"
+          barbiePack:
+            - "FLOW:A.eff462cf475a0c02:BBxBarbiePack"
+            - "FLOW:A.80102bce1de42dc4:BBxBarbiePack"
+          hwCard:
+            - "FLOW:A.6f6702697b205c18:HWGarageCard"
+            - "FLOW:A.6f6702697b205c18:HWGarageCardV2"
+            - "FLOW:A.80102bce1de42dc4:HWGarageCard"
+            - "FLOW:A.80102bce1de42dc4:HWGarageCardV2"
+          hwPack:
+            - "FLOW:A.d0bcefdf1e67ea85:HWGaragePack"
+            - "FLOW:A.d0bcefdf1e67ea85:HWGaragePackV2"
+            - "FLOW:A.80102bce1de42dc4:HWGaragePack"
+            - "FLOW:A.80102bce1de42dc4:HWGaragePackV2"
 
   currencies:
     bestBidByCurrencyWhitelist:

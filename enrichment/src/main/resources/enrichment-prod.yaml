@@ -50,3 +50,20 @@ enrichment:
           - "ETHEREUM:0xd07dc4262bcdbf85190c01c996b4c06a461d2430:506982"
           - "ETHEREUM:0xd07dc4262bcdbf85190c01c996b4c06a461d2430:506988"
           - "ETHEREUM:0x2438a0eeffa36cb738727953d35047fb89c81417:5"
+  meta:
+    item:
+      customizers:
+        mattel:
+          # Contain rarible/mattel contracts
+          barbieCard:
+            - "FLOW:A.e5bf4d436ca23932:BBxBarbieCard"
+          barbieToken:
+            - "FLOW:A.e5bf4d436ca23932:BBxBarbieToken"
+          barbiePack:
+            - "FLOW:A.e5bf4d436ca23932:BBxBarbiePack"
+          hwCard:
+            - "FLOW:A.d0bcefdf1e67ea85:HWGarageCard"
+            - "FLOW:A.d0bcefdf1e67ea85:HWGarageCardV2"
+          hwPack:
+            - "FLOW:A.d0bcefdf1e67ea85:HWGaragePack"
+            - "FLOW:A.d0bcefdf1e67ea85:HWGaragePackV2"
