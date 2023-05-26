@@ -172,6 +172,9 @@ class EnrichmentRefreshService(
     ) = coroutineScope {
         logger.info("Starting to reconcile Collection [{}]", enrichmentCollectionId)
         val current = enrichmentCollectionService.get(enrichmentCollectionId)
+        if (current == null) {
+            logger.info("Didn't find collection in union database during reconciliation: $enrichmentCollectionId")
+        }
         val artificial = current != null && current.structure != UnionCollection.Structure.REGULAR
 
         val unionCollection = if (artificial) {
