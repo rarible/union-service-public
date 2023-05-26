@@ -1,9 +1,13 @@
 package com.rarible.protocol.union.integration.flow.converter
 
+import com.rarible.protocol.dto.FlowCollectionEventDto
+import com.rarible.protocol.dto.FlowCollectionUpdateEventDto
 import com.rarible.protocol.dto.FlowNftCollectionDto
 import com.rarible.protocol.dto.FlowNftCollectionsDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionEvent
+import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
@@ -54,4 +58,13 @@ object FlowCollectionConverter {
         return features.map(this::convert)
     }
 
+    fun convert(event: FlowCollectionEventDto, blockchain: BlockchainDto): UnionCollectionEvent? {
+        val marks = FlowConverter.convert(event.eventTimeMarks)
+        return when (event) {
+            is FlowCollectionUpdateEventDto -> {
+                val unionCollection = convert(event.collection, blockchain)
+                UnionCollectionUpdateEvent(unionCollection, marks)
+            }
+        }
+    }
 }
