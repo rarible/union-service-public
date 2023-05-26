@@ -2,9 +2,9 @@ package com.rarible.protocol.union.enrichment.configuration
 
 import com.rarible.core.mongo.configuration.EnableRaribleMongo
 import com.rarible.protocol.union.core.CoreConfiguration
-import com.rarible.protocol.union.core.event.OutgoingItemEventListener
-import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
-import com.rarible.protocol.union.enrichment.repository.ItemRepository
+import com.rarible.protocol.union.enrichment.converter.EnrichmentConverterPackage
+import com.rarible.protocol.union.enrichment.custom.EnrichmentCustomComponentsPackage
+import com.rarible.protocol.union.enrichment.repository.EnrichmentRepositoryPackage
 import com.rarible.protocol.union.enrichment.service.EnrichmentServicePackage
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -17,9 +17,9 @@ import org.springframework.context.annotation.PropertySource
 @ComponentScan(
     basePackageClasses = [
         EnrichmentServicePackage::class,
-        ItemRepository::class,
-        OutgoingItemEventListener::class,
-        ItemDtoConverter::class
+        EnrichmentRepositoryPackage::class,
+        EnrichmentConverterPackage::class,
+        EnrichmentCustomComponentsPackage::class
     ]
 )
 @PropertySource(
@@ -38,5 +38,9 @@ class EnrichmentConfiguration(
 
     @Bean
     fun enrichmentCollectionProperties(): EnrichmentCollectionProperties = properties.collection
+
+    @Bean
+    fun enrichmentMattelMetaCustomizerProperties(): EnrichmentMattelMetaCustomizerProperties =
+        properties.meta.item.customizers.mattel
 
 }

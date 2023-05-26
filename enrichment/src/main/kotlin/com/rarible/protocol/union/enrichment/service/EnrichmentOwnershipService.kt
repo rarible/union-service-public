@@ -18,6 +18,8 @@ import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.converter.data.EnrichmentOwnershipData
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolutionRequest
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -121,8 +123,13 @@ class EnrichmentOwnershipService(
             orders = orders
         )
 
-        val itemId = short.id.toDto().getItemId()
-        val customCollection = customCollectionResolver.resolveCustomCollection(itemId)
+        val ownershipId = short.id.toDto()
+        val itemId = ownershipId.getItemId()
+        // TODO ideally there should be batch, but requires a lot of refactoring
+        val customCollection = customCollectionResolver.resolve(
+            listOf(CustomCollectionResolutionRequest(ownershipId, itemId, null)),
+            emptyMap()
+        )[ownershipId]
 
         val data = EnrichmentOwnershipData(
             shortOwnership = short,

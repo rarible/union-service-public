@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.configuration
 
+import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import java.time.Duration
@@ -15,6 +16,7 @@ data class UnionMetaProperties(
     val embedded: EmbeddedContentProperties,
     val trimming: ItemMetaTrimmingProperties = ItemMetaTrimmingProperties(),
     val httpClient: HttpClient = HttpClient(),
+    val simpleHash: SimpleHash = SimpleHash(),
     private val retries: String = "" //  TODO not sure it should be here
 ) {
 
@@ -58,4 +60,14 @@ data class ItemMetaTrimmingProperties(
     val attributesSize: Int = 200,
     val attributeNameLength: Int = 500,
     val attributeValueLength: Int = 2000
+)
+
+data class SimpleHash(
+    val enabled: Boolean = false,
+    val endpoint: String = "https://api.simplehash.com/api/v0",
+    val apiKey: String = "",
+    val supported: Set<BlockchainDto> = setOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW),
+
+    // this is needed to mapping for test networks
+    val mapping: Map<String, String> = emptyMap()
 )

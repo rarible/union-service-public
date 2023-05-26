@@ -17,10 +17,12 @@ class ItemMetaDownloader(
     private val router: BlockchainRouter<ItemService>,
     contentMetaLoader: ContentMetaDownloader,
     customizers: List<ItemMetaCustomizer>,
+    providers: List<ItemMetaProvider>,
     metrics: ItemMetaMetrics
 ) : Downloader<UnionMeta>, MetaDownloader<ItemIdDto, UnionMeta>(
     contentMetaLoader,
     customizers,
+    providers,
     metrics,
     "Item"
 ) {

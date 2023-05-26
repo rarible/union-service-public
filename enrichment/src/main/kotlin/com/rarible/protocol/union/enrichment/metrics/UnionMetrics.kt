@@ -29,6 +29,10 @@ abstract class UnionMetrics(
         return tag("reason", reason)
     }
 
+    protected fun source(value: String): Tag {
+        return tag("source", value)
+    }
+
     protected fun increment(name: String, vararg tags: Tag) {
         return meterRegistry.counter(name, tags.toList()).increment()
     }

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionAsset
 import com.rarible.protocol.union.core.model.UnionEthCollectionAssetType
 import com.rarible.protocol.union.core.service.ActivityService
@@ -12,6 +13,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderListActivityDto
 import com.rarible.protocol.union.dto.OwnershipSourceDto
@@ -19,6 +21,8 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.converter.ActivityDtoConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityConverter
 import com.rarible.protocol.union.enrichment.converter.data.EnrichmentActivityData
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolutionRequest
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
 import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityOrderBid
@@ -67,7 +71,7 @@ class EnrichmentActivityServiceTest {
         val itemId = randomEthItemId()
         val activity = randomUnionActivityMint(itemId)
 
-        coEvery { customCollectionResolver.resolveCustomCollection(itemId) } returns null
+        mockCustomCollection(activity, itemId, null, null)
 
         val result = service.enrich(activity)
         val expected = EnrichmentActivityConverter.convert(activity)
@@ -80,7 +84,7 @@ class EnrichmentActivityServiceTest {
         val itemId = randomEthItemId()
         val activity = randomUnionActivityMint(itemId)
 
-        coEvery { customCollectionResolver.resolveCustomCollection(itemId) } returns null
+        mockCustomCollection(activity, itemId, null, null)
 
         val result = service.enrichDeprecated(activity)
         val expected = ActivityDtoConverter.convert(activity)
@@ -94,7 +98,7 @@ class EnrichmentActivityServiceTest {
         val customCollection = randomEthCollectionId()
         val activity = randomUnionActivityMint(itemId)
 
-        coEvery { customCollectionResolver.resolveCustomCollection(itemId) } returns customCollection
+        mockCustomCollection(activity, itemId, null, customCollection)
 
         val result = service.enrichDeprecated(activity)
         val expected = (ActivityDtoConverter.convert(activity) as MintActivityDto)
@@ -109,11 +113,13 @@ class EnrichmentActivityServiceTest {
         val customCollection = randomEthCollectionId()
         val activity = randomUnionActivityMint(itemId)
 
-        coEvery { customCollectionResolver.resolveCustomCollection(itemId) } returns customCollection
+        mockCustomCollection(activity, itemId, null, customCollection)
 
         val result = service.enrich(activity)
-        val expected =
-            EnrichmentActivityConverter.convert(activity, EnrichmentActivityData(customCollection = customCollection))
+        val expected = EnrichmentActivityConverter.convert(
+            activity,
+            EnrichmentActivityData(mapOf(activity.id to customCollection))
+        )
 
         assertThat(result).isEqualTo(expected)
     }
@@ -128,7 +134,7 @@ class EnrichmentActivityServiceTest {
         val activity = randomUnionActivityOrderList(BlockchainDto.ETHEREUM)
             .copy(make = collectionAsset)
 
-        coEvery { customCollectionResolver.resolveCustomCollection(collectionId) } returns customCollection
+        mockCustomCollection(activity, null, collectionId, customCollection)
 
         val result = service.enrichDeprecated(activity)
         val expected = (ActivityDtoConverter.convert(activity) as OrderListActivityDto)
@@ -147,12 +153,12 @@ class EnrichmentActivityServiceTest {
         val activity = randomUnionActivityOrderBid(BlockchainDto.ETHEREUM)
             .copy(take = collectionAsset)
 
-        coEvery { customCollectionResolver.resolveCustomCollection(collectionId) } returns customCollection
+        mockCustomCollection(activity, null, collectionId, customCollection)
 
         val result = service.enrich(activity)
         val expected = EnrichmentActivityConverter.convert(
             activity,
-            EnrichmentActivityData(customCollection = customCollection)
+            EnrichmentActivityData(mapOf(activity.id to customCollection))
         )
 
         assertThat(result).isEqualTo(expected)
@@ -299,5 +305,25 @@ class EnrichmentActivityServiceTest {
         val source = service.getOwnershipSource(ownershipId)
 
         assertThat(source).isEqualTo(OwnershipSourceDto.TRANSFER)
+    }
+
+    private fun mockCustomCollection(
+        activity: UnionActivity,
+        itemId: ItemIdDto? = null,
+        collectionId: CollectionIdDto? = null,
+        result: CollectionIdDto?
+    ) {
+        coEvery {
+            customCollectionResolver.resolve(
+                listOf(
+                    CustomCollectionResolutionRequest(
+                        entityId = activity.id,
+                        itemId = itemId,
+                        collectionId = collectionId
+                    )
+                ),
+                emptyMap()
+            )
+        } returns (result?.let { mapOf(activity.id to result) } ?: emptyMap())
     }
 }

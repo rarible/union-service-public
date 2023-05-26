@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.select.CollectionSourceSelectService
-import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.service.CollectionService
@@ -10,11 +10,8 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
-import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,8 +27,6 @@ import org.springframework.web.bind.annotation.RestController
 class CollectionController(
     private val router: BlockchainRouter<CollectionService>,
     private val collectionSourceSelector: CollectionSourceSelectService,
-    private val itemSourceSelectService: ItemSourceSelectService,
-    private val itemMetaService: ItemMetaService,
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val ff: FeatureFlagsProperties
 ) : CollectionControllerApi {
@@ -73,13 +68,15 @@ class CollectionController(
     }
 
     override suspend fun refreshCollectionMeta(collection: String): ResponseEntity<Unit> {
-        val collectionId = IdParser.parseCollectionId(collection)
+        throw UnionException(message = "Deprecated")
+
+        /*val collectionId = IdParser.parseCollectionId(collection)
         logger.info("Refreshing collection meta for '{}'", collection)
         router.getService(collectionId.blockchain).refreshCollectionMeta(collectionId.value)
         itemSourceSelectService.getAllItemIdsByCollection(collectionId, SearchEngineDto.LEGACY).collect {
             itemMetaService.schedule(it, ItemMetaPipeline.REFRESH, true)
         }
-        return ResponseEntity.ok().build()
+        return ResponseEntity.ok().build()*/
     }
 
     override suspend fun getCollectionsByOwner(

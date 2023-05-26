@@ -17,6 +17,8 @@ import com.rarible.protocol.union.enrichment.converter.ActivityDtoConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityConverter
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.converter.data.EnrichmentActivityData
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolutionRequest
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
 import com.rarible.protocol.union.enrichment.model.EnrichmentActivity
 import com.rarible.protocol.union.enrichment.model.ItemLastSale
 import com.rarible.protocol.union.enrichment.repository.ActivityRepository
@@ -35,42 +37,26 @@ class EnrichmentActivityService(
 
     @Deprecated("remove after enabling ff.enableMongoActivityWrite")
     suspend fun enrichDeprecated(activities: List<UnionActivity>): List<ActivityDto> {
-        return activities.map { enrichDeprecated(it) }
+        val request = activities.map { CustomCollectionResolutionRequest(it.id, it.itemId(), it.collectionId()) }
+        val customCollections = customCollectionResolver.resolve(request, emptyMap())
+        val data = EnrichmentActivityData(customCollections)
+        return activities.map { ActivityDtoConverter.convert(it, data) }
     }
 
     @Deprecated("remove after enabling ff.enableMongoActivityWrite")
     suspend fun enrichDeprecated(activity: UnionActivity): ActivityDto {
-        // We expect here only one of them != null
-        val itemId = activity.itemId()
-        val collectionId = activity.collectionId()
-
-        val customCollection = when {
-            itemId != null -> customCollectionResolver.resolveCustomCollection(itemId)
-            collectionId != null -> customCollectionResolver.resolveCustomCollection(collectionId)
-            else -> null
-        }
-
-        val data = EnrichmentActivityData(customCollection)
-        return ActivityDtoConverter.convert(activity, data)
+        return enrichDeprecated(listOf(activity)).first()
     }
 
     suspend fun enrich(activity: UnionActivity): EnrichmentActivity {
-        // We expect here only one of them != null
-        val itemId = activity.itemId()
-        val collectionId = activity.collectionId()
-
-        val customCollection = when {
-            itemId != null -> customCollectionResolver.resolveCustomCollection(itemId)
-            collectionId != null -> customCollectionResolver.resolveCustomCollection(collectionId)
-            else -> null
-        }
-
-        val data = EnrichmentActivityData(customCollection)
-        return EnrichmentActivityConverter.convert(activity, data)
+        return enrich(listOf(activity)).first()
     }
 
     suspend fun enrich(activities: List<UnionActivity>): List<EnrichmentActivity> {
-        return activities.map { enrich(it) }
+        val request = activities.map { CustomCollectionResolutionRequest(it.id, it.itemId(), it.collectionId()) }
+        val customCollections = customCollectionResolver.resolve(request, emptyMap())
+        val data = EnrichmentActivityData(customCollections)
+        return activities.map { EnrichmentActivityConverter.convert(it, data) }
     }
 
     suspend fun getOwnershipSource(ownershipId: OwnershipIdDto): OwnershipSourceDto {

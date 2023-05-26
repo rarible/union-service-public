@@ -12,8 +12,8 @@ open class MetaMetrics(
     //-------------------- Meta fetch -----------------------//
     // Set of metrics to gather statistics for meta fetching from blockchains
 
-    fun onMetaFetched(blockchain: BlockchainDto) {
-        increment(META_FETCH, type(type), tag(blockchain), status("ok"), reason("ok")) // TODO should be separate metric
+    fun onMetaFetched(blockchain: BlockchainDto, source: MetaSource = MetaSource.ORIGINAL) {
+        increment(META_FETCH, type(type), tag(blockchain), status("ok"), reason("ok"), source(source.value)) // TODO should be separate metric
     }
 
     fun onMetaFetchNotFound(blockchain: BlockchainDto) {
@@ -25,8 +25,8 @@ open class MetaMetrics(
         increment(META_FETCH, type(type), tag(blockchain), status("fail"), reason("timeout"))
     }
 
-    fun onMetaError(blockchain: BlockchainDto) {
-        increment(META_FETCH, type(type), tag(blockchain), status("fail"), reason("error"))
+    fun onMetaError(blockchain: BlockchainDto, source: MetaSource = MetaSource.ORIGINAL) {
+        increment(META_FETCH, type(type), tag(blockchain), status("fail"), reason("error"), source(source.value))
     }
 
     fun onMetaCorruptedUrlError(blockchain: BlockchainDto) {

@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.event.OutgoingCollectionEventListener
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
@@ -170,7 +171,14 @@ class EnrichmentRefreshService(
         bidCurrencies: List<String>
     ) = coroutineScope {
         logger.info("Starting to reconcile Collection [{}]", enrichmentCollectionId)
-        val unionCollectionDeferred = async { enrichmentCollectionService.fetch(enrichmentCollectionId) }
+        val current = enrichmentCollectionService.get(enrichmentCollectionId)
+        val artificial = current != null && current.structure != UnionCollection.Structure.REGULAR
+
+        val unionCollection = if (artificial) {
+            null
+        } else {
+            enrichmentCollectionService.fetch(enrichmentCollectionId)
+        }
 
         val bestSellProviderFactory =
             CollectionBestSellOrderProvider.Factory(enrichmentCollectionId, enrichmentOrderService)
@@ -183,12 +191,14 @@ class EnrichmentRefreshService(
             origins, sellCurrencies, bidCurrencies, bestSellProviderFactory, bestBidProviderFactory, emptyList()
         )
 
-        val unionCollection = unionCollectionDeferred.await()
-
         val updatedCollection = optimisticLock {
 
-            val exist = enrichmentCollectionService.get(enrichmentCollectionId)?.withData(unionCollection)
-                ?: EnrichmentCollectionConverter.convert(unionCollection)
+            val exist = if (artificial) {
+                enrichmentCollectionService.get(enrichmentCollectionId)!!
+            } else {
+                enrichmentCollectionService.get(enrichmentCollectionId)?.withData(unionCollection!!)
+                    ?: EnrichmentCollectionConverter.convert(unionCollection!!)
+            }
 
             val enrichmentCollection = exist.copy(
                 bestSellOrders = bestOrders.global.bestSellOrders,
