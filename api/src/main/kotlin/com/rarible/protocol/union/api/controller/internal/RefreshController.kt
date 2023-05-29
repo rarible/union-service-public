@@ -2,7 +2,7 @@ package com.rarible.protocol.union.api.controller.internal
 
 import com.rarible.protocol.union.api.dto.HookEventType
 import com.rarible.protocol.union.api.dto.SimpleHashItemIdDeserializer
-import com.rarible.protocol.union.api.dto.SimpleHashNftMetadataUpdateDto
+import com.rarible.protocol.union.api.dto.SimpleHashNftMetadataUpdateDtoDeserializer
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -95,16 +95,20 @@ class RefreshController(
      */
     @PostMapping(value = ["/v0.1/refresh/items/simplehash/metaUpdateWebhook"])
     suspend fun simpleHashMetaUpdateWebhook(
-        @RequestBody update: SimpleHashNftMetadataUpdateDto
+        @RequestBody update: String
     ): ResponseEntity<Unit> {
-        when (update.type) {
+        val updateDto = SimpleHashNftMetadataUpdateDtoDeserializer.safeParse(update) ?: run {
+            logger.error("Unable to parse SimpleHash webhook event: $update")
+            return ResponseEntity.noContent().build()
+        }
+        when (updateDto.type) {
             is HookEventType.ChainNftMetadataUpdate -> {
-                update.nfts.forEach { nft ->
+                updateDto.nfts.forEach { nft ->
                     scheduleWebHookMetaRefresh(nft.itemId)
                 }
             }
             is HookEventType.Unknown -> {
-                logger.warn("Unknown webhook event type: ${update.type.value}")
+                logger.warn("Unknown webhook event type: ${updateDto.type.value}")
             }
         }
         return ResponseEntity.noContent().build()
