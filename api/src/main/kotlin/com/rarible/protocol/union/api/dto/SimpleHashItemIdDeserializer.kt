@@ -10,3 +10,4 @@ object SimpleHashItemIdDeserializer {
         return IdParser.parseItemId(toUnionFormat)
     }
 }
+

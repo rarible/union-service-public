@@ -597,7 +597,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `handle simpleHash nft meta update webhook`() = runBlocking<Unit> {
+    fun `handle simpleHash nft meta update webhook - ok`() = runBlocking<Unit> {
         val eventJsom = getResource("/json/simplehash/nft_metadata_update.json")
         val eventDto = jacksonObjectMapper().readValue(eventJsom, SimpleHashNftMetadataUpdateDto::class.java)
         val uri = "$baseUri/v0.1/refresh/items/simplehash/metaUpdateWebhook"
@@ -612,6 +612,17 @@ class RefreshControllerFt : AbstractIntegrationTest() {
                 val task = it[0].value
                 assertThat(task.id).isEqualTo("ETHEREUM:0x8943c7bac1914c9a7aba750bf2b6b09fd21037e0:5903")
             })
+        }
+    }
+
+    @Test
+    fun `handle simpleHash nft meta update webhook - false`() = runBlocking<Unit> {
+        val uri = "$baseUri/v0.1/refresh/items/simplehash/metaUpdateWebhook"
+        val code = testRestTemplate.postForEntity(uri, "other", Unit::class.java).statusCode
+        assertThat(code).isEqualTo(HttpStatus.NO_CONTENT)
+
+        coVerify(exactly = 0) {
+            testDownloadTaskProducer.send(any<List<KafkaMessage<DownloadTask>>>())
         }
     }
 
