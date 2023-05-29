@@ -117,7 +117,7 @@ class RefreshController(
     private suspend fun scheduleWebHookMetaRefresh(itemId: String) {
         try {
             val itemIdDto = SimpleHashItemIdDeserializer.parse(itemId)
-            itemMetaService.schedule(itemIdDto, ItemMetaPipeline.API, false)
+            itemMetaService.schedule(itemIdDto, ItemMetaPipeline.REFRESH, true)
         } catch (e: Exception) {
             logger.error("Error processing webhook event for item $itemId", e)
         }
