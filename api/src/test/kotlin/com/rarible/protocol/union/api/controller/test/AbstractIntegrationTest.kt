@@ -19,6 +19,7 @@ import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
@@ -41,6 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
@@ -71,6 +73,10 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     protected lateinit var testCollectionEventProducer: RaribleKafkaProducer<CollectionEventDto>
+
+    @Autowired
+    @Qualifier("download.scheduler.task.producer.item-meta")
+    protected lateinit var testDownloadTaskProducer: RaribleKafkaProducer<DownloadTask>
 
     //--------------------- CURRENCY ---------------------//
 
@@ -256,7 +262,8 @@ abstract class AbstractIntegrationTest {
             testFlowOrderApi,
 
             testItemEventProducer,
-            testOwnershipEventProducer
+            testOwnershipEventProducer,
+            testDownloadTaskProducer,
         )
         ethereumItemControllerApiMock = EthItemControllerApiMock(testEthereumItemApi)
         ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)
@@ -292,6 +299,14 @@ abstract class AbstractIntegrationTest {
         } returns KafkaSendResult.Success("")
 
         coEvery {
+            testDownloadTaskProducer.send(any() as List<KafkaMessage<DownloadTask>>)
+        } answers {
+            @Suppress("UNCHECKED_CAST")
+            val tasks = it.invocation.args[0] as List<KafkaMessage<DownloadTask>>
+            tasks.map { KafkaSendResult.Success("") }.asFlow()
+        }
+
+        coEvery {
             testCurrencyApi.getCurrencyRate(any(), any(), any())
         } returns CurrencyRateDto(
             date = nowMillis(),
@@ -321,5 +336,11 @@ abstract class AbstractIntegrationTest {
             ownershipJob?.cancelAndJoin()
         }
         result
+    }
+
+    protected fun getResource(resource: String): String {
+        return this.javaClass
+            .getResourceAsStream(resource)!!
+            .bufferedReader().use { it.readText() }
     }
 }

@@ -1,6 +1,9 @@
 package com.rarible.protocol.union.api.controller.internal
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rarible.core.kafka.KafkaMessage
+import com.rarible.core.kafka.KafkaSendResult
+import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.ActivitySortDto
@@ -10,6 +13,8 @@ import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.api.dto.SimpleHashNftMetadataUpdateDto
+import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -26,6 +31,7 @@ import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaTaskPublisher
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
@@ -52,11 +58,14 @@ import io.daonomic.rpc.domain.Word
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
@@ -583,6 +592,25 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         coVerify {
             testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
                 message.value is ItemUpdateEventDto && message.value.itemId == ethItemId
+            })
+        }
+    }
+
+    @Test
+    fun `handle simpleHash nft meta update webhook`() = runBlocking<Unit> {
+        val eventJsom = getResource("/json/simplehash/nft_metadata_update.json")
+        val eventDto = jacksonObjectMapper().readValue(eventJsom, SimpleHashNftMetadataUpdateDto::class.java)
+        val uri = "$baseUri/v0.1/refresh/items/simplehash/metaUpdateWebhook"
+
+        val code = testRestTemplate.postForEntity(uri, eventDto, Unit::class.java).statusCode
+        assertThat(code).isEqualTo(HttpStatus.NO_CONTENT)
+
+        coVerify(exactly = 1) {
+            testDownloadTaskProducer.send(withArg<List<KafkaMessage<DownloadTask>>> {
+                assertThat(it).hasSize(1)
+                assertThat(it[0].value).isInstanceOf(DownloadTask::class.java)
+                val task = it[0].value
+                assertThat(task.id).isEqualTo("ETHEREUM:0x8943c7bac1914c9a7aba750bf2b6b09fd21037e0:5903")
             })
         }
     }

@@ -5,6 +5,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.currency.dto.CurrenciesDto
+import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
@@ -49,7 +50,7 @@ import java.time.Duration
 import kotlin.random.Random
 
 @IntegrationTest
-class ItemsSearchByRequestIt {
+class ItemsSearchByRequestIt : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var repository: EsItemRepository
