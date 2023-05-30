@@ -12,7 +12,7 @@ import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
-import com.rarible.protocol.union.worker.task.search.RateLimiter
+import com.rarible.protocol.union.worker.task.search.EsRateLimiter
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -73,7 +73,7 @@ class OrderReindexServiceUnitTest {
         } returns counter
     }
 
-    private val rateLimiter = mockk<RateLimiter> {
+    private val rateLimiter = mockk<EsRateLimiter> {
         coEvery { waitIfNecessary(any()) } just runs
     }
 

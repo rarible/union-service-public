@@ -10,7 +10,7 @@ import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.service.query.activity.ActivityApiMergeService
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
-import com.rarible.protocol.union.worker.task.search.RateLimiter
+import com.rarible.protocol.union.worker.task.search.EsRateLimiter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.elasticsearch.action.support.WriteRequest
@@ -22,7 +22,7 @@ class ActivityReindexService(
     private val esActivityRepository: EsActivityRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
     private val converter: EsActivityConverter,
-    private val rateLimiter: RateLimiter,
+    private val rateLimiter: EsRateLimiter,
 ) {
     companion object {
         val logger by Logger()

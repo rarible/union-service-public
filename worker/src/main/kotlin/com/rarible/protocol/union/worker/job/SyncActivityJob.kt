@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
+// TODO ATM we have running migration, refactor this job when it done
+@Deprecated("Refactor it using AbstractSyncJob as base class")
 class SyncActivityJob(
     private val activityServiceRouter: BlockchainRouter<ActivityService>,
     private val enrichmentActivityService: EnrichmentActivityService,

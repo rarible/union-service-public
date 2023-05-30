@@ -7,14 +7,13 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.data.Offset
-import org.assertj.core.data.Percentage
 import org.junit.jupiter.api.Test
 import kotlin.system.measureTimeMillis
 
 
 class RateLimiterTest {
 
-    private val rateLimiter = RateLimiter(RateLimiterProperties(100, 10))
+    private val rateLimiter = EsRateLimiter(RateLimiterProperties(100, 10))
 
     @Test
     fun `should wait when limit is reached`() = runBlocking<Unit> {

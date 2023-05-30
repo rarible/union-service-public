@@ -16,6 +16,7 @@ data class UnionEventTimeMarks(
     }
 
     fun addOut() = add("enrichment-out")
+    fun addIn() = add("enrichment-in")
     fun toDto() = EventTimeMarksDto(source, marks.map { EventTimeMarkDto(it.name, it.date) })
 
 }

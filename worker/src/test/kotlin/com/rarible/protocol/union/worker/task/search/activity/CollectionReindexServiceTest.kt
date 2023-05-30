@@ -8,7 +8,7 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
-import com.rarible.protocol.union.worker.task.search.RateLimiter
+import com.rarible.protocol.union.worker.task.search.EsRateLimiter
 import com.rarible.protocol.union.worker.task.search.collection.CollectionReindexService
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -43,7 +43,7 @@ class CollectionReindexServiceTest {
         } answers { arg(0) }
     }
 
-    private val rateLimiter = mockk<RateLimiter> {
+    private val rateLimiter = mockk<EsRateLimiter> {
         coEvery { waitIfNecessary(any()) } just runs
     }
 
