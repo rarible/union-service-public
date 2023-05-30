@@ -24,6 +24,7 @@ class MocaXpCustomAttributesParserTest {
         assertThat(result[0].id.fullId()).isEqualTo("${collectionId.fullId()}:0")
         assertThat(result[0].attributes).isEqualTo(
             listOf(
+                UnionMetaAttribute("Token ID", "0"),
                 UnionMetaAttribute("total_xp", "1000000.0"),
                 UnionMetaAttribute("total_xp_percentage", "99.900")
             )
@@ -32,6 +33,7 @@ class MocaXpCustomAttributesParserTest {
         assertThat(result[1].id.fullId()).isEqualTo("${collectionId.fullId()}:1")
         assertThat(result[1].attributes).isEqualTo(
             listOf(
+                UnionMetaAttribute("Token ID", "1"),
                 UnionMetaAttribute("total_xp", "1000.0"),
                 UnionMetaAttribute("total_xp_percentage", "0.100")
             )
@@ -40,6 +42,7 @@ class MocaXpCustomAttributesParserTest {
         assertThat(result[2].id.fullId()).isEqualTo("${collectionId.fullId()}:2")
         assertThat(result[2].attributes).isEqualTo(
             listOf(
+                UnionMetaAttribute("Token ID", "2"),
                 UnionMetaAttribute("total_xp", "1.0"),
                 UnionMetaAttribute("total_xp_percentage", "0.000")
             )
