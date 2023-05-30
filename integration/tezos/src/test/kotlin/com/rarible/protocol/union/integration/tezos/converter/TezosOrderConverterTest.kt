@@ -72,7 +72,7 @@ class TezosOrderConverterTest {
                     contract = "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton",
                     tokenId = 603126.toBigInteger()
                 ),
-                assetValue = BigDecimal.ZERO
+                assetValue = BigDecimal.ONE
             ),
             makePrice = 3.3.toBigDecimal(),
             taker = null,
@@ -81,12 +81,16 @@ class TezosOrderConverterTest {
             salt = 27871898.toBigInteger(),
             originFees = emptyList(),
             payouts = emptyList(),
-            legacyData = null
+            legacyData = null,
+            makeStock = null
         )
 
         val converted = tezosOrderConverter.convert(dto, BlockchainDto.TEZOS)
         assertThat(converted.makePrice).isEqualTo(3.3.toBigDecimal())
         assertThat(converted.takePrice).isNull()
+
+        // if makeStock is missed we use "old" way
+        assertThat(converted.makeStock).isEqualTo(BigDecimal.ONE)
     }
 
     @Test
@@ -112,6 +116,7 @@ class TezosOrderConverterTest {
                 ),
                 assetValue = 1.toBigDecimal()
             ),
+            makeStock = 1.toBigDecimal(),
             makePrice = null,
             taker = null,
             take = Asset(assetType = Asset.XTZ(assetClass = "XTZ"), assetValue = 0.1.toBigDecimal()),
@@ -125,6 +130,7 @@ class TezosOrderConverterTest {
         val converted = tezosOrderConverter.convert(dto, BlockchainDto.TEZOS)
         assertThat(converted.makePrice).isEqualTo(0.1.toBigDecimal().setScale(18))
         assertThat(converted.takePrice).isNull()
+        assertThat(converted.makeStock).isEqualTo(1.toBigDecimal())
     }
 
 }

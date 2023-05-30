@@ -235,7 +235,8 @@ class TezosOrderServiceTest {
             takePrice = null,
             cancelled = false,
             salt = BigInteger.ONE,
-            legacyData = null
+            legacyData = null,
+            makeStock = BigDecimal.ONE
         )
     }
 }

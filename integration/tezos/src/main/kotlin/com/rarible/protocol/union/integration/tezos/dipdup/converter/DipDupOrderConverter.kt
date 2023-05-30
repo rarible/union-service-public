@@ -87,7 +87,7 @@ class DipDupOrderConverter(
             fill = order.fill,
             startedAt = order.startAt?.toInstant(),
             endedAt = order.endAt?.toInstant(),
-            makeStock = makeStock(order.make, order.fill),
+            makeStock = order.makeStock ?: makeStock(order.make, order.fill),
             cancelled = order.cancelled,
             createdAt = order.createdAt.toInstant(),
             lastUpdatedAt = order.lastUpdatedAt.toInstant(),
@@ -101,6 +101,7 @@ class DipDupOrderConverter(
         )
     }
 
+    @Deprecated("It must be deleted, after order migration")
     fun makeStock(asset: Asset, fill: BigDecimal): BigDecimal {
         return asset.assetValue - fill
     }
