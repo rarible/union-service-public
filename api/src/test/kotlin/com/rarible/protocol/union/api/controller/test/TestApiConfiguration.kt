@@ -19,6 +19,7 @@ import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
+import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
@@ -71,6 +72,11 @@ class TestApiConfiguration {
     @Bean
     @Primary
     fun testOwnershipEventProducer(): RaribleKafkaProducer<OwnershipEventDto> = mockk()
+
+    @Bean
+    @Primary
+    @Qualifier("download.scheduler.task.producer.item-meta")
+    fun testDownloadTaskProducer(): RaribleKafkaProducer<DownloadTask> = mockk()
 
     @Bean
     @Primary

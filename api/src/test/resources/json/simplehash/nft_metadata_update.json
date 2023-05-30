@@ -1,0 +1,11 @@
+{
+  "type": "chain.nft_metadata_update",
+  "nfts": [
+    {
+      "nft_id": "ethereum.0x8943c7bac1914c9a7aba750bf2b6b09fd21037e0.5903"
+    },
+    {
+      "nft_id": "unrecognized_nft_id"
+    }
+  ]
+}

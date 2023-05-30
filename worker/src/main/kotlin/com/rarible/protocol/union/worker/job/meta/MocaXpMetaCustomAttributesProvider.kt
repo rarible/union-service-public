@@ -68,6 +68,7 @@ object MocaXpCustomAttributesParser {
     private const val FIELD_TOKEN_ID = "moca_id"
 
     private const val ATTRIBUTE_XP_PERCENTAGE = "total_xp_percentage"
+    private const val ATTRIBUTE_XP_TOKEN_ID = "Token ID"
 
     private val hundred = BigDecimal("100")
 
@@ -92,24 +93,19 @@ object MocaXpCustomAttributesParser {
         }
     }
 
-    private fun toAttributes(node: JsonNode): List<UnionMetaAttribute> {
-        return listOfNotNull(
-            //node.get(FIELD_TRIBE)?.textValue()?.let { UnionMetaAttribute(FIELD_TRIBE, it) },
-            node.get(FIELD_XP)?.decimalValue()?.let { UnionMetaAttribute(FIELD_XP, it.toPlainString()) }
-        )
-    }
-
     private fun percentage(collectionXp: BigDecimal, itemXp: BigDecimal): BigDecimal {
         return itemXp.multiply(hundred).divide(collectionXp, 3, RoundingMode.HALF_UP)
     }
 
     private data class MocaXpAttributes(
+        val tokenId: String,
         val id: ItemIdDto,
         val xp: BigDecimal?,
         val tribe: String?
     ) {
 
         constructor(node: JsonNode, collectionId: CollectionIdDto) : this(
+            tokenId = node.get(FIELD_TOKEN_ID).textValue(),
             id = ItemIdDto(collectionId.blockchain, "${collectionId.value}:${node.get(FIELD_TOKEN_ID).textValue()}"),
             xp = node.get(FIELD_XP)?.decimalValue(),
             tribe = node.get(FIELD_TRIBE)?.asText()
@@ -118,6 +114,7 @@ object MocaXpCustomAttributesParser {
         fun toAttributes(collectionXp: BigDecimal): List<UnionMetaAttribute> {
             return listOfNotNull(
                 //tribe?.let { UnionMetaAttribute(FIELD_TRIBE, it) },
+                UnionMetaAttribute(ATTRIBUTE_XP_TOKEN_ID, tokenId),
                 xp?.let { UnionMetaAttribute(FIELD_XP, it.toPlainString()) },
                 xp?.let { UnionMetaAttribute(ATTRIBUTE_XP_PERCENTAGE, percentage(collectionXp, it).toPlainString()) }
             )
