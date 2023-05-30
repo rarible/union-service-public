@@ -6,7 +6,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.service.query.collection.CollectionApiMergeService
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
-import com.rarible.protocol.union.worker.task.search.RateLimiter
+import com.rarible.protocol.union.worker.task.search.EsRateLimiter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.elasticsearch.action.support.WriteRequest
@@ -17,7 +17,7 @@ class CollectionReindexService(
     private val collectionApiMergeService: CollectionApiMergeService,
     private val repository: EsCollectionRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
-    private val rateLimiter: RateLimiter,
+    private val rateLimiter: EsRateLimiter,
 ) {
 
     fun reindex(

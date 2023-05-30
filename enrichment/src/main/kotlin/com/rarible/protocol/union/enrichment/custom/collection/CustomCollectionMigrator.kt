@@ -1,10 +1,7 @@
 package com.rarible.protocol.union.enrichment.custom.collection
 
-import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.UnionItem
-import com.rarible.protocol.union.core.model.UnionItemChangeEvent
-import com.rarible.protocol.union.core.model.offchainEventMark
-import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
+import com.rarible.protocol.union.core.producer.UnionInternalItemEventProducer
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -13,7 +10,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class CustomCollectionMigrator(
-    private val eventProducer: UnionInternalBlockchainEventProducer,
+    private val eventProducer: UnionInternalItemEventProducer,
     private val updaters: List<CustomCollectionUpdater>
 ) {
 
@@ -28,10 +25,7 @@ class CustomCollectionMigrator(
         // only if we have items in Union
         items.map { item ->
             async {
-                val itemId = item.id
-                val eventTimeMarks = offchainEventMark("enrichment-in")
-                val message = KafkaEventFactory.internalItemEvent(UnionItemChangeEvent(itemId, eventTimeMarks))
-                eventProducer.getProducer(itemId.blockchain).send(message)
+                eventProducer.sendChangeEvent(item.id)
                 updaters.map { async { it.update(item) } }.awaitAll()
             }
         }.awaitAll()

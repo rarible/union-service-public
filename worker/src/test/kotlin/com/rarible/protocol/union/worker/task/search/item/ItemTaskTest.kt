@@ -19,8 +19,8 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
+import com.rarible.protocol.union.worker.task.search.EsRateLimiter
 import com.rarible.protocol.union.worker.task.search.ParamFactory
-import com.rarible.protocol.union.worker.task.search.RateLimiter
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.coEvery
 import io.mockk.coVerifyAll
@@ -73,7 +73,7 @@ internal class ItemTaskTest {
 
     private val paramFactory = ParamFactory(jacksonObjectMapper().registerKotlinModule())
 
-    private val rateLimiter = mockk<RateLimiter> {
+    private val rateLimiter = mockk<EsRateLimiter> {
         coEvery { waitIfNecessary(any()) } just runs
     }
 

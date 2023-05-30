@@ -2,18 +2,18 @@ package com.rarible.protocol.union.listener.handler
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
-import com.rarible.protocol.union.core.event.KafkaEventFactory
+import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionAuctionEvent
-import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
-import com.rarible.protocol.union.listener.handler.internal.IncomingBlockchainEventHandler
+import com.rarible.protocol.union.core.producer.UnionInternalAuctionEventProducer
 import org.springframework.stereotype.Component
 
 @Component
 @CaptureSpan(type = SpanType.EVENT)
 class UnionAuctionEventHandler(
-    eventProducer: UnionInternalBlockchainEventProducer
-) : IncomingBlockchainEventHandler<UnionAuctionEvent>(eventProducer) {
+    private val producer: UnionInternalAuctionEventProducer
+) : IncomingEventHandler<UnionAuctionEvent> {
 
-    override fun toMessage(event: UnionAuctionEvent) = KafkaEventFactory.internalAuctionEvent(event)
-    override fun getBlockchain(event: UnionAuctionEvent) = event.auction.id.blockchain
+    override suspend fun onEvent(event: UnionAuctionEvent) = producer.send(event)
+    override suspend fun onEvents(events: Collection<UnionAuctionEvent>) = producer.send(events)
+
 }

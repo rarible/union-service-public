@@ -11,7 +11,7 @@ import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
-import com.rarible.protocol.union.worker.task.search.RateLimiter
+import com.rarible.protocol.union.worker.task.search.EsRateLimiter
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -54,7 +54,7 @@ internal class ActivityReindexServiceTest {
         coEvery { batchConvert(any()) } returns listOf(mockk())
     }
 
-    private val rateLimiter = mockk<RateLimiter> {
+    private val rateLimiter = mockk<EsRateLimiter> {
         coEvery { waitIfNecessary(any()) } just runs
     }
 

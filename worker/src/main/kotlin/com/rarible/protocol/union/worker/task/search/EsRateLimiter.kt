@@ -1,26 +1,27 @@
 package com.rarible.protocol.union.worker.task.search
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.worker.config.RateLimiterProperties
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
 import kotlin.system.measureTimeMillis
 
 @Service
-class RateLimiter(
+class EsRateLimiter(
     private val props: RateLimiterProperties,
 ) {
 
-    private val logger by Logger()
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private val lock = Mutex()
 
     @Volatile
     private var nextPeriodReset = Instant.EPOCH
+
     @Volatile
     private var remainingEntities = 0
 

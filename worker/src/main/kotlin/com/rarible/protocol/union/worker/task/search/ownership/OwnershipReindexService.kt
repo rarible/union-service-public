@@ -10,7 +10,7 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
-import com.rarible.protocol.union.worker.task.search.RateLimiter
+import com.rarible.protocol.union.worker.task.search.EsRateLimiter
 import com.rarible.protocol.union.worker.task.search.activity.TimePeriodContinuationHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -23,7 +23,7 @@ class OwnershipReindexService(
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
     private val rawOwnershipClient: RawOwnershipClient,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
-    private val rateLimiter: RateLimiter,
+    private val rateLimiter: EsRateLimiter,
 ) {
 
     fun reindex(

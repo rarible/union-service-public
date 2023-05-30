@@ -2,22 +2,20 @@ package com.rarible.protocol.union.listener.handler
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
-import com.rarible.protocol.union.core.event.KafkaEventFactory
+import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
-import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
-import com.rarible.protocol.union.listener.handler.internal.IncomingBlockchainEventHandler
+import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
 import org.springframework.stereotype.Component
 
 @Component
 @CaptureSpan(type = SpanType.EVENT)
 class UnionCollectionEventHandler(
-    eventProducer: UnionInternalBlockchainEventProducer
-) : IncomingBlockchainEventHandler<UnionCollectionEvent>(eventProducer) {
+    private val producer: UnionInternalCollectionEventProducer
+) : IncomingEventHandler<UnionCollectionEvent> {
 
-    override fun getBlockchain(event: UnionCollectionEvent) = event.collectionId.blockchain
-    override fun toMessage(event: UnionCollectionEvent) = KafkaEventFactory.internalCollectionEvent(
-        event.addTimeMark("enrichment-in")
-    )
+    override suspend fun onEvent(event: UnionCollectionEvent) = producer.send(addIn(event))
+    override suspend fun onEvents(events: Collection<UnionCollectionEvent>) = producer.send(events.map(::addIn))
+    private fun addIn(event: UnionCollectionEvent) = event.addTimeMark("enrichment-in")
 
 }
 

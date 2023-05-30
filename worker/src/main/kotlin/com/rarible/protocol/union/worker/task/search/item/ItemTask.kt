@@ -14,8 +14,8 @@ import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
+import com.rarible.protocol.union.worker.task.search.EsRateLimiter
 import com.rarible.protocol.union.worker.task.search.ParamFactory
-import com.rarible.protocol.union.worker.task.search.RateLimiter
 import com.rarible.protocol.union.worker.task.search.activity.TimePeriodContinuationHelper
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -35,7 +35,7 @@ class ItemTask(
     private val repository: EsItemRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
     private val taskRepository: TaskRepository,
-    private val rateLimiter: RateLimiter,
+    private val rateLimiter: EsRateLimiter,
 ) : TaskHandler<String> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
