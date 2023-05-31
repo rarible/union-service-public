@@ -18,7 +18,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import java.math.BigDecimal
-import java.math.RoundingMode
 
 @Component
 @ConditionalOnProperty("worker.itemMetaCustomAttributesJob.providers.mocaXp.enabled", havingValue = "true")
@@ -78,23 +77,10 @@ object MocaXpCustomAttributesParser {
     fun parse(json: String, collectionId: CollectionIdDto): List<MetaCustomAttributes> {
         val array = mapper.readTree(json) as ArrayNode
 
-        var collectionXp = BigDecimal(0)
-        val parsed = array.map {
+        return array.map {
             val mocaXpAttributes = MocaXpAttributes(it, collectionId)
-            collectionXp = mocaXpAttributes.xp?.add(collectionXp) ?: collectionXp
-            mocaXpAttributes
+            MetaCustomAttributes(mocaXpAttributes.id, mocaXpAttributes.toAttributes())
         }
-
-        return parsed.map {
-            MetaCustomAttributes(
-                id = it.id,
-                attributes = it.toAttributes(collectionXp)
-            )
-        }
-    }
-
-    private fun percentage(collectionXp: BigDecimal, itemXp: BigDecimal): BigDecimal {
-        return itemXp.multiply(hundred).divide(collectionXp, 3, RoundingMode.HALF_UP)
     }
 
     private data class MocaXpAttributes(
@@ -113,7 +99,7 @@ object MocaXpCustomAttributesParser {
             rank = node.get(FIELD_RANK)?.asText(),
         )
 
-        fun toAttributes(collectionXp: BigDecimal): List<UnionMetaAttribute> {
+        fun toAttributes(): List<UnionMetaAttribute> {
             return listOfNotNull(
                 //tribe?.let { UnionMetaAttribute(FIELD_TRIBE, it) },
                 UnionMetaAttribute(ATTRIBUTE_XP_TOKEN_ID, tokenId),
