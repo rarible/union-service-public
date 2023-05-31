@@ -234,7 +234,8 @@ fun randomTezosOrderDto(make: Asset, maker: String, take: Asset): DipDupOrder {
         takePrice = null,
         cancelled = false,
         salt = BigInteger.ONE,
-        legacyData = null
+        legacyData = null,
+        makeStock = make.assetValue
     )
 }
 

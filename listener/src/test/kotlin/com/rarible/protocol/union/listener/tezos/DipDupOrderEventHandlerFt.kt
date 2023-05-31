@@ -126,7 +126,8 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
             takePrice = null,
             cancelled = false,
             salt = BigInteger.ONE,
-            legacyData = null
+            legacyData = null,
+            makeStock = null
         )
     }
 }
