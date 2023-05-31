@@ -11,6 +11,7 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaTaskPublisher
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
+import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -33,6 +34,8 @@ class DownloadServiceTest {
         }
     }
 
+    private val rawMetaCacheRepository: RawMetaCacheRepository = mockk()
+
     private val publisher: ItemMetaTaskPublisher = mockk { coEvery { publish(any()) } returns Unit }
     private val notifier: ItemMetaNotifier = mockk { coEvery { notify(any()) } returns Unit }
 
@@ -41,6 +44,7 @@ class DownloadServiceTest {
     private val downloader: ItemMetaDownloader = mockk() { every { type } returns "Item" }
 
     private val downloadService = ItemMetaService(
+        rawMetaCacheRepository,
         repository,
         publisher,
         downloader,

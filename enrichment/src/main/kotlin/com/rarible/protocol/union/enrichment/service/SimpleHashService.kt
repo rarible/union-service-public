@@ -11,6 +11,7 @@ import com.rarible.protocol.union.enrichment.meta.MetaSource
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
+import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import kotlinx.coroutines.reactor.awaitSingle
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -23,6 +24,7 @@ import java.math.BigInteger
 class SimpleHashService(
     private val props: UnionMetaProperties,
     private val simpleHashClient: WebClient,
+    private val metaCacheRepository: RawMetaCacheRepository,
     private val metrics: ItemMetaMetrics,
     private val itemServiceRouter: BlockchainRouter<ItemService>,
 ) {
@@ -34,6 +36,10 @@ class SimpleHashService(
     }
 
     suspend fun fetch(key: ItemIdDto): UnionMeta? {
+        val cacheMeta = metaCacheRepository.get(SimpleHashConverter.cacheId(key))
+        if (cacheMeta != null && !cacheMeta.hasExpired(props.simpleHash.cacheExpiration)) {
+            return SimpleHashConverter.convertRawToUnionMeta(cacheMeta.data)
+        }
         try {
             if (!isSupported(key.blockchain)) {
                 logger.info("Skipped to fetch from simplehash $key because ${key.blockchain} isn't supported")
