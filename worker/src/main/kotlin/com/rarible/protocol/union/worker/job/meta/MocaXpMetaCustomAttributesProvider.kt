@@ -18,7 +18,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import java.math.BigDecimal
-import java.math.RoundingMode
 
 @Component
 @ConditionalOnProperty("worker.itemMetaCustomAttributesJob.providers.mocaXp.enabled", havingValue = "true")
@@ -65,9 +64,9 @@ object MocaXpCustomAttributesParser {
 
     private const val FIELD_TRIBE = "tribe"
     private const val FIELD_XP = "total_xp"
+    private const val FIELD_RANK = "rank"
     private const val FIELD_TOKEN_ID = "moca_id"
 
-    private const val ATTRIBUTE_XP_PERCENTAGE = "total_xp_percentage"
     private const val ATTRIBUTE_XP_TOKEN_ID = "Token ID"
 
     private val hundred = BigDecimal("100")
@@ -78,45 +77,34 @@ object MocaXpCustomAttributesParser {
     fun parse(json: String, collectionId: CollectionIdDto): List<MetaCustomAttributes> {
         val array = mapper.readTree(json) as ArrayNode
 
-        var collectionXp = BigDecimal(0)
-        val parsed = array.map {
+        return array.map {
             val mocaXpAttributes = MocaXpAttributes(it, collectionId)
-            collectionXp = mocaXpAttributes.xp?.add(collectionXp) ?: collectionXp
-            mocaXpAttributes
+            MetaCustomAttributes(mocaXpAttributes.id, mocaXpAttributes.toAttributes())
         }
-
-        return parsed.map {
-            MetaCustomAttributes(
-                id = it.id,
-                attributes = it.toAttributes(collectionXp)
-            )
-        }
-    }
-
-    private fun percentage(collectionXp: BigDecimal, itemXp: BigDecimal): BigDecimal {
-        return itemXp.multiply(hundred).divide(collectionXp, 3, RoundingMode.HALF_UP)
     }
 
     private data class MocaXpAttributes(
         val tokenId: String,
         val id: ItemIdDto,
         val xp: BigDecimal?,
-        val tribe: String?
+        val tribe: String?,
+        val rank: String?
     ) {
 
         constructor(node: JsonNode, collectionId: CollectionIdDto) : this(
             tokenId = node.get(FIELD_TOKEN_ID).textValue(),
             id = ItemIdDto(collectionId.blockchain, "${collectionId.value}:${node.get(FIELD_TOKEN_ID).textValue()}"),
             xp = node.get(FIELD_XP)?.decimalValue(),
-            tribe = node.get(FIELD_TRIBE)?.asText()
+            tribe = node.get(FIELD_TRIBE)?.asText(),
+            rank = node.get(FIELD_RANK)?.asText(),
         )
 
-        fun toAttributes(collectionXp: BigDecimal): List<UnionMetaAttribute> {
+        fun toAttributes(): List<UnionMetaAttribute> {
             return listOfNotNull(
                 //tribe?.let { UnionMetaAttribute(FIELD_TRIBE, it) },
                 UnionMetaAttribute(ATTRIBUTE_XP_TOKEN_ID, tokenId),
                 xp?.let { UnionMetaAttribute(FIELD_XP, it.toPlainString()) },
-                xp?.let { UnionMetaAttribute(ATTRIBUTE_XP_PERCENTAGE, percentage(collectionXp, it).toPlainString()) }
+                rank?.let { UnionMetaAttribute(FIELD_RANK, it) },
             )
         }
     }

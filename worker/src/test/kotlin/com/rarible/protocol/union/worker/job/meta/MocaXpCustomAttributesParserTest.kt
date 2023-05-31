@@ -14,8 +14,7 @@ class MocaXpCustomAttributesParserTest {
         val json = """
             [
                 {"moca_id": "0", "moca_name": "#6475", "tribe": "connector", "total_xp": 1000000.0, "rank": 1277},
-                {"moca_id": "1", "moca_name": "#6478", "tribe": "something", "total_xp": 1000.0, "rank": 1277},
-                {"moca_id": "2", "moca_name": "#6479", "tribe": "something", "total_xp": 1.0, "rank": 1277}
+                {"moca_id": "1", "moca_name": "#6478", "tribe": "something", "total_xp": 1000.0, "rank": 1278}
             ]
         """
 
@@ -26,7 +25,7 @@ class MocaXpCustomAttributesParserTest {
             listOf(
                 UnionMetaAttribute("Token ID", "0"),
                 UnionMetaAttribute("total_xp", "1000000.0"),
-                UnionMetaAttribute("total_xp_percentage", "99.900")
+                UnionMetaAttribute("rank", "1277"),
             )
         )
 
@@ -35,16 +34,7 @@ class MocaXpCustomAttributesParserTest {
             listOf(
                 UnionMetaAttribute("Token ID", "1"),
                 UnionMetaAttribute("total_xp", "1000.0"),
-                UnionMetaAttribute("total_xp_percentage", "0.100")
-            )
-        )
-
-        assertThat(result[2].id.fullId()).isEqualTo("${collectionId.fullId()}:2")
-        assertThat(result[2].attributes).isEqualTo(
-            listOf(
-                UnionMetaAttribute("Token ID", "2"),
-                UnionMetaAttribute("total_xp", "1.0"),
-                UnionMetaAttribute("total_xp_percentage", "0.000")
+                UnionMetaAttribute("rank", "1278")
             )
         )
     }
