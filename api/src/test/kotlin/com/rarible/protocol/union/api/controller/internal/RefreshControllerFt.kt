@@ -2,8 +2,6 @@ package com.rarible.protocol.union.api.controller.internal
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rarible.core.kafka.KafkaMessage
-import com.rarible.core.kafka.KafkaSendResult
-import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.ActivitySortDto
@@ -13,7 +11,7 @@ import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.api.dto.SimpleHashNftMetadataUpdateDto
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashNftMetadataUpdate
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -28,11 +26,15 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipSourceDto
 import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.dto.ext
+import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaTaskPublisher
+import com.rarible.protocol.union.enrichment.meta.MetaSource
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
+import com.rarible.protocol.union.enrichment.model.RawMetaCache
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
@@ -58,9 +60,7 @@ import io.daonomic.rpc.domain.Word
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -86,6 +86,9 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var enrichmentOwnershipService: EnrichmentOwnershipService
+
+    @Autowired
+    lateinit var rawMetaCacheRepository: RawMetaCacheRepository
 
     private val origin = "0xWhitelabel"
     private val ethOriginCollection = "0xf3348949db80297c78ec17d19611c263fc61f988" // from application.yaml
@@ -599,7 +602,11 @@ class RefreshControllerFt : AbstractIntegrationTest() {
     @Test
     fun `handle simpleHash nft meta update webhook - ok`() = runBlocking<Unit> {
         val eventJsom = getResource("/json/simplehash/nft_metadata_update.json")
-        val eventDto = jacksonObjectMapper().readValue(eventJsom, SimpleHashNftMetadataUpdateDto::class.java)
+        val eventDto = jacksonObjectMapper().readValue(eventJsom, SimpleHashNftMetadataUpdate::class.java)
+
+        val expectedItemId = "ethereum.0x8943c7bac1914c9a7aba750bf2b6b09fd21037e0.5903"
+        val expectedItemIdDtp = IdParser.parseItemId(expectedItemId.replace(".", ":").uppercase())
+
         val uri = "$baseUri/v0.1/refresh/items/simplehash/metaUpdateWebhook"
 
         val code = testRestTemplate.postForEntity(uri, eventDto, Unit::class.java).statusCode
@@ -610,9 +617,14 @@ class RefreshControllerFt : AbstractIntegrationTest() {
                 assertThat(it).hasSize(1)
                 assertThat(it[0].value).isInstanceOf(DownloadTask::class.java)
                 val task = it[0].value
-                assertThat(task.id).isEqualTo("ETHEREUM:0x8943c7bac1914c9a7aba750bf2b6b09fd21037e0:5903")
+                assertThat(task.id).isEqualTo(expectedItemIdDtp.fullId())
             })
         }
+        val cache = rawMetaCacheRepository.get(SimpleHashConverter.cacheId(expectedItemIdDtp))
+        assertThat(cache).isNotNull
+        assertThat(cache!!.source).isEqualTo(MetaSource.SIMPLE_HASH)
+        assertThat(cache.entityId).isEqualTo(expectedItemIdDtp.fullId())
+        assertThat(SimpleHashConverter.convertRawToSimpleHashItem(cache.data).nftId).isEqualTo(expectedItemId)
     }
 
     @Test

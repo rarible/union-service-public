@@ -69,5 +69,6 @@ data class SimpleHash(
     val supported: Set<BlockchainDto> = setOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.FLOW),
 
     // this is needed to mapping for test networks
-    val mapping: Map<String, String> = emptyMap()
+    val mapping: Map<String, String> = emptyMap(),
+    val cacheExpiration: Duration = Duration.ofMinutes(10)
 )

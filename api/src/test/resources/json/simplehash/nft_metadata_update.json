@@ -2,10 +2,112 @@
   "type": "chain.nft_metadata_update",
   "nfts": [
     {
-      "nft_id": "ethereum.0x8943c7bac1914c9a7aba750bf2b6b09fd21037e0.5903"
+      "nft_id": "ethereum.0x8943c7bac1914c9a7aba750bf2b6b09fd21037e0.5903",
+      "name": "#5903",
+      "description": "Lazy Lions",
+      "image_url": "https://cdn.simplehash.com/assets/ab011a63a526ba533a868fe361b69004a70fcceb2b0c1c1bb3f6d92dbab95039.jpg",
+      "video_url": null,
+      "audio_url": null,
+      "model_url": null,
+      "previews": {
+        "image_small_url": "https://lh3.googleusercontent.com/9MwgePRAM6ZteqhFiJr5nBJw16ptq7zCgZTlw8RwNJJO67XfyF945KL7RP4GmdDuWXcRsYo1yoDjYYQoveOpGYFKm3DG5b7nyw=s250",
+        "image_medium_url": "https://lh3.googleusercontent.com/9MwgePRAM6ZteqhFiJr5nBJw16ptq7zCgZTlw8RwNJJO67XfyF945KL7RP4GmdDuWXcRsYo1yoDjYYQoveOpGYFKm3DG5b7nyw",
+        "image_large_url": "https://lh3.googleusercontent.com/9MwgePRAM6ZteqhFiJr5nBJw16ptq7zCgZTlw8RwNJJO67XfyF945KL7RP4GmdDuWXcRsYo1yoDjYYQoveOpGYFKm3DG5b7nyw=s1000",
+        "image_opengraph_url": "https://lh3.googleusercontent.com/9MwgePRAM6ZteqhFiJr5nBJw16ptq7zCgZTlw8RwNJJO67XfyF945KL7RP4GmdDuWXcRsYo1yoDjYYQoveOpGYFKm3DG5b7nyw=k-w1200-s2400-rj",
+        "blurhash": "USE.IOjb0ik9XKWBV}t6x[ofM|V@i|aeW;of"
+      },
+      "extra_metadata": {
+        "attributes": [
+          {
+            "trait_type": "Background",
+            "value": "Iron"
+          },
+          {
+            "trait_type": "Body",
+            "value": "Black"
+          },
+          {
+            "trait_type": "Bodygear",
+            "value": "Purple Fur Coat"
+          },
+          {
+            "trait_type": "Earring",
+            "value": "Nothing"
+          },
+          {
+            "trait_type": "Eyes",
+            "value": "Stoner"
+          },
+          {
+            "trait_type": "Headgear",
+            "value": "Bucket Hat"
+          },
+          {
+            "trait_type": "Mane",
+            "value": "Brown"
+          },
+          {
+            "trait_type": "Mouth",
+            "value": "Yelling"
+          }
+        ],
+        "image_original_url": "ipfs://QmVHxVJeJ8HseTjnhke29irvaQvehjgLqVTJ3R1UUtZKR6",
+        "animation_original_url": null
+      }
     },
     {
-      "nft_id": "unrecognized_nft_id"
+      "nft_id": "other_id_format",
+      "name": "#5903",
+      "description": "Lazy Lions",
+      "image_url": "https://cdn.simplehash.com/assets/ab011a63a526ba533a868fe361b69004a70fcceb2b0c1c1bb3f6d92dbab95039.jpg",
+      "video_url": null,
+      "audio_url": null,
+      "model_url": null,
+      "previews": {
+        "image_small_url": "https://lh3.googleusercontent.com/9MwgePRAM6ZteqhFiJr5nBJw16ptq7zCgZTlw8RwNJJO67XfyF945KL7RP4GmdDuWXcRsYo1yoDjYYQoveOpGYFKm3DG5b7nyw=s250",
+        "image_medium_url": "https://lh3.googleusercontent.com/9MwgePRAM6ZteqhFiJr5nBJw16ptq7zCgZTlw8RwNJJO67XfyF945KL7RP4GmdDuWXcRsYo1yoDjYYQoveOpGYFKm3DG5b7nyw",
+        "image_large_url": "https://lh3.googleusercontent.com/9MwgePRAM6ZteqhFiJr5nBJw16ptq7zCgZTlw8RwNJJO67XfyF945KL7RP4GmdDuWXcRsYo1yoDjYYQoveOpGYFKm3DG5b7nyw=s1000",
+        "image_opengraph_url": "https://lh3.googleusercontent.com/9MwgePRAM6ZteqhFiJr5nBJw16ptq7zCgZTlw8RwNJJO67XfyF945KL7RP4GmdDuWXcRsYo1yoDjYYQoveOpGYFKm3DG5b7nyw=k-w1200-s2400-rj",
+        "blurhash": "USE.IOjb0ik9XKWBV}t6x[ofM|V@i|aeW;of"
+      },
+      "extra_metadata": {
+        "attributes": [
+          {
+            "trait_type": "Background",
+            "value": "Iron"
+          },
+          {
+            "trait_type": "Body",
+            "value": "Black"
+          },
+          {
+            "trait_type": "Bodygear",
+            "value": "Purple Fur Coat"
+          },
+          {
+            "trait_type": "Earring",
+            "value": "Nothing"
+          },
+          {
+            "trait_type": "Eyes",
+            "value": "Stoner"
+          },
+          {
+            "trait_type": "Headgear",
+            "value": "Bucket Hat"
+          },
+          {
+            "trait_type": "Mane",
+            "value": "Brown"
+          },
+          {
+            "trait_type": "Mouth",
+            "value": "Yelling"
+          }
+        ],
+        "image_original_url": "ipfs://QmVHxVJeJ8HseTjnhke29irvaQvehjgLqVTJ3R1UUtZKR6",
+        "animation_original_url": null
+      }
     }
   ]
 }
