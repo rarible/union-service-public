@@ -1,17 +1,11 @@
-package com.rarible.protocol.union.api.dto
+package com.rarible.protocol.union.enrichment.meta.simplehash
 
 import com.fasterxml.jackson.annotation.JsonCreator
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
 
-data class SimpleHashNftMetadataUpdateDto(
+data class SimpleHashNftMetadataUpdate(
     val type: HookEventType,
-    val nfts: List<SimpleHashNft>
-)
-
-data class SimpleHashNft(
-    @JsonProperty("nft_id")
-    val itemId: String
+    val nfts: List<SimpleHashItem>
 )
 
 sealed class HookEventType(@get:JsonValue val value: String) {

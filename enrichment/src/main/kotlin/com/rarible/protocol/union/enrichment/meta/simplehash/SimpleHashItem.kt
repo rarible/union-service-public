@@ -1,10 +1,18 @@
 package com.rarible.protocol.union.enrichment.meta.simplehash
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 import java.time.LocalDateTime
 
-
+/**
+ * https://docs.simplehash.com/reference/nft-model
+ */
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class SimpleHashItem(
-    val tokenId: String,
+    val nftId: String,
+    val tokenId: String?,
     val name: String?,
     val description: String?,
     val previews: Preview?,
@@ -14,23 +22,30 @@ data class SimpleHashItem(
     val externalUrl: String?,
     val metadataOriginalUrl: String?,
 ) {
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class Preview(
         val imageSmallUrl: String?,
         val imageMediumUrl: String?,
         val imageLargeUrl: String?,
-        val imageOpengraphUrl: String?
+        val imageOpengraphUrl: String?,
     )
 
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class ExtraMetadata(
         val imageOriginalUrl: String?,
         val attributes: List<Attribute> = emptyList()
     )
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class Collection(
         val name: String?,
         val description: String?
     )
 
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class Attribute(
         val traitType: String,
         val value: String?,

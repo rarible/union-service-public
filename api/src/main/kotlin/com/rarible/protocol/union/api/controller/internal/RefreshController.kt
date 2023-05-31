@@ -1,8 +1,5 @@
 package com.rarible.protocol.union.api.controller.internal
 
-import com.rarible.protocol.union.api.dto.HookEventType
-import com.rarible.protocol.union.api.dto.SimpleHashItemIdDeserializer
-import com.rarible.protocol.union.api.dto.SimpleHashNftMetadataUpdateDtoDeserializer
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -12,11 +9,8 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionMigrator
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -82,10 +76,8 @@ class RefreshController(
                 router.getService(unionItemId.blockchain).getItemById(unionItemId.value)
             )
         )
-
         return ResponseEntity.noContent().build()
     }
-
 
     /**
      * https://docs.simplehash.com/reference/webhook-events
@@ -97,33 +89,7 @@ class RefreshController(
     suspend fun simpleHashMetaUpdateWebhook(
         @RequestBody update: String
     ): ResponseEntity<Unit> {
-        val updateDto = SimpleHashNftMetadataUpdateDtoDeserializer.safeParse(update) ?: run {
-            logger.error("Unable to parse SimpleHash webhook event: $update")
-            return ResponseEntity.noContent().build()
-        }
-        when (updateDto.type) {
-            is HookEventType.ChainNftMetadataUpdate -> {
-                updateDto.nfts.forEach { nft ->
-                    scheduleWebHookMetaRefresh(nft.itemId)
-                }
-            }
-            is HookEventType.Unknown -> {
-                logger.warn("Unknown webhook event type: ${updateDto.type.value}")
-            }
-        }
+        itemMetaService.handleSimpleHashWebhook(update)
         return ResponseEntity.noContent().build()
-    }
-
-    private suspend fun scheduleWebHookMetaRefresh(itemId: String) {
-        try {
-            val itemIdDto = SimpleHashItemIdDeserializer.parse(itemId)
-            itemMetaService.schedule(itemIdDto, ItemMetaPipeline.REFRESH, true)
-        } catch (e: Exception) {
-            logger.error("Error processing webhook event for item $itemId", e)
-        }
-    }
-
-    companion object {
-        private val logger: Logger = LoggerFactory.getLogger(RefreshController::class.java)
     }
 }
