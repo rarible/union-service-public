@@ -26,6 +26,7 @@ class ImxOrderService(
 
     // TODO move out to configuration
     private val currencyProbeBatchSize = 64
+    private val supportedPlatforms = setOf(PlatformDto.IMMUTABLEX)
 
     override suspend fun getOrdersAll(
         continuation: String?,
@@ -107,6 +108,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
     ): Slice<UnionOrder> {
+        if (!isPlatformSupported(platform)) return Slice.empty()
         origin?.let { return Slice.empty() }
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
         val orders = orderClient
@@ -127,6 +129,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
     ): Slice<UnionOrder> {
+        if (!isPlatformSupported(platform)) return Slice.empty()
         origin?.let { return Slice.empty() }
         val orders = orderClient.getBuyOrdersByMaker(maker, status, continuation, size)
             .map { ImxOrderConverter.convert(it, blockchain) }
@@ -175,6 +178,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
     ): Slice<UnionOrder> {
+        if (!isPlatformSupported(platform)) return Slice.empty()
         origin?.let { return Slice.empty() }
         val orders = orderClient.getSellOrders(continuation, size).map {
             ImxOrderConverter.convert(it, blockchain)
@@ -189,6 +193,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
     ): Slice<UnionOrder> {
+        if (!isPlatformSupported(platform)) return Slice.empty()
         origin?.let { return Slice.empty() }
         val orders = orderClient.getSellOrdersByCollection(collection, continuation, size).map {
             ImxOrderConverter.convert(it, blockchain)
@@ -206,8 +211,15 @@ class ImxOrderService(
 
     // IMX doesn't support floor orders
     override suspend fun getOrderFloorBidsByCollection(
-        platform: PlatformDto?, collectionId: String, origin: String?, status: List<OrderStatusDto>?, start: Long?,
-        end: Long?, currencyAddress: String, continuation: String?, size: Int
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        start: Long?,
+        end: Long?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int,
     ): Slice<UnionOrder> {
         return Slice.empty()
     }
@@ -222,6 +234,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
+        if (!isPlatformSupported(platform)) return Slice.empty()
         origin?.let { return Slice.empty() }
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
         val orders = orderClient.getSellOrdersByItem(
@@ -245,6 +258,7 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
     ): Slice<UnionOrder> {
+        if (!isPlatformSupported(platform)) return Slice.empty()
         origin?.let { return Slice.empty() }
         val orders = orderClient.getSellOrdersByMaker(maker, status, continuation, size).map {
             ImxOrderConverter.convert(it, blockchain)
@@ -274,5 +288,12 @@ class ImxOrderService(
         size: Int
     ): Slice<UnionOrder> {
         return Slice.empty()
+    }
+
+    private fun isPlatformSupported(platform: PlatformDto?): Boolean {
+        if (platform == null) {
+            return true
+        }
+        return supportedPlatforms.contains(platform)
     }
 }

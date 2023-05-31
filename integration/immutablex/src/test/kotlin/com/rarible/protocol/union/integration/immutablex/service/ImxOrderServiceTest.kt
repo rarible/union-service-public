@@ -5,6 +5,7 @@ import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.integration.data.randomImxOrder
 import com.rarible.protocol.union.integration.data.randomImxOrderBuySide
 import com.rarible.protocol.union.integration.data.randomImxOrderSellSide
@@ -152,6 +153,22 @@ class ImxOrderServiceTest {
             50
         )
         assertThat(slice.entities).isEmpty()
+    }
+
+    @Test
+    fun `return empty if unsupported platform`() = runBlocking<Unit> {
+        val slice = service.getSellOrdersByItem(
+            PlatformDto.CRYPTO_PUNKS,
+            randomItemId(BlockchainDto.IMMUTABLEX).value,
+            null,
+            null,
+            null,
+            "currency",
+            null,
+            50
+            )
+
+        assertThat(slice.entities).hasSize(0)
     }
 
     @Test
