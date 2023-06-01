@@ -1,0 +1,11 @@
+{
+  "webhook_url": "https://api.rarible.org/v0.1/refresh/items/simplehash/metaUpdateWebhook",
+  "event_types": [
+    "chain.nft_metadata_update"
+  ],
+  "chains": [
+    "ethereum",
+    "polygon",
+    "flow"
+  ]
+}
