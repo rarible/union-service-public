@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.config
 
 import com.rarible.core.daemon.DaemonWorkerProperties
+import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
@@ -15,11 +16,13 @@ data class UnionListenerProperties(
 
 class InternalConsumerProperties(
     val brokerReplicaSet: String,
-    val workers: Map<String, Int>,
-    val blockchainWorkers: Map<String, Int> = emptyMap(),
-    val batchSize: Int = 100,
-    val concurrency: Int = 5,
-)
+    private val workers: Map<String, BlockchainWorkerProperties> = emptyMap()
+) {
+
+    fun getWorkerProperties(blockchain: BlockchainDto): BlockchainWorkerProperties {
+        return workers[blockchain.name.lowercase()] ?: BlockchainWorkerProperties()
+    }
+}
 
 data class MetricsProperties(
     val rootPath: String = "protocol.union.listener"
@@ -33,4 +36,9 @@ data class MetaSchedulingProperties(
 data class MetaEntrySchedulingProperties(
     val workers: Int = 3,
     val batchSize: Int = 500
+)
+
+data class BlockchainWorkerProperties(
+    val concurrency: Int = 3,
+    val batchSize: Int = 32
 )

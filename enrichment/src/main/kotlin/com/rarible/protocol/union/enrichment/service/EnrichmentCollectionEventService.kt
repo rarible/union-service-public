@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
-import com.rarible.protocol.union.core.event.OutgoingCollectionEventListener
+import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionChangeEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OriginService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
+import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
@@ -22,7 +23,7 @@ import java.util.UUID
 
 @Component
 class EnrichmentCollectionEventService(
-    private val itemEventListeners: List<OutgoingCollectionEventListener>,
+    private val collectionEventListeners: List<OutgoingEventListener<CollectionEventDto>>,
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val reconciliationEventService: ReconciliationEventService,
     private val bestOrderService: BestOrderService,
@@ -177,7 +178,7 @@ class EnrichmentCollectionEventService(
         if (!EntityValidator.isValid(event.collection)) {
             reconciliationEventService.onCorruptedCollection(event.collection.id)
         } else {
-            itemEventListeners.forEach { it.onEvent(event) }
+            collectionEventListeners.forEach { it.onEvent(event) }
         }
     }
 }

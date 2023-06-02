@@ -9,7 +9,6 @@ import com.rarible.protocol.union.core.handler.InternalBatchEventHandler
 import com.rarible.protocol.union.core.handler.InternalBatchEventHandlerWrapper
 import com.rarible.protocol.union.core.handler.InternalEventHandler
 import com.rarible.protocol.union.core.handler.InternalEventHandlerWrapper
-import com.rarible.protocol.union.dto.BlockchainDto
 import io.micrometer.core.instrument.MeterRegistry
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -22,7 +21,6 @@ class InternalConsumerFactory(
     companion object {
 
         const val RECONCILIATION = "reconciliation"
-        const val DEFAULT_BLOCKCHAIN_WORKER_COUNT = 16
     }
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -35,31 +33,6 @@ class InternalConsumerFactory(
     ): ConsumerWorkerGroup<T> {
         logger.info("Creating {} reconciliation mark consumers", workers)
         return createInternalBatchedConsumerWorker(consumer, handler, daemon, workers, RECONCILIATION)
-    }
-
-    fun <T> createInternalBlockchainEventConsumer(
-        consumer: (i: Int) -> RaribleKafkaConsumer<T>,
-        handler: InternalEventHandler<T>,
-        daemon: DaemonWorkerProperties,
-        workers: Map<String, Int>,
-        blockchain: BlockchainDto
-    ): ConsumerWorkerGroup<T> {
-        val type = blockchain.name.lowercase()
-        val workerCount = workers[type] ?: DEFAULT_BLOCKCHAIN_WORKER_COUNT
-
-        logger.info("Creating internal {} consumers for blockchain {}", workerCount, blockchain)
-        return createInternalBatchedConsumerWorker(consumer, handler, daemon, workerCount, type)
-    }
-
-    @Deprecated("Should be replaced by createInternalBlockchainEventConsumer()")
-    fun <T> createWrappedEventConsumer(
-        consumer: (i: Int) -> RaribleKafkaConsumer<T>,
-        handler: InternalEventHandler<T>,
-        daemon: DaemonWorkerProperties,
-        workers: Int
-    ): ConsumerWorkerGroup<T> {
-        logger.info("Creating {} wrapped event consumers (SHOULD BE REMOVED)", workers)
-        return createInternalBatchedConsumerWorker(consumer, handler, daemon, workers, "wrapped")
     }
 
     fun <T> createInternalBatchedConsumerWorker(

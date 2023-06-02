@@ -38,7 +38,6 @@ data class FeatureFlagsProperties(
     // Union data
     val enableUnionCollections: Boolean = false,
 
-    val enableSpringKafka: Boolean = true,
     val enableElasticsearchCompatibilityMode: Boolean = false,
     val enableMongoActivityWrite: Boolean = false,
     val enableMongoActivityRead: Boolean = false,
