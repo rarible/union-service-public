@@ -64,77 +64,39 @@ class UnionListenerConfiguration(
     private val clientIdPrefix = "$env.$host.${UUID.randomUUID()}"
     private val properties = listenerProperties.consumer
 
-    @Deprecated("Replaced by blockchain topics")
-    private fun createUnionWrappedEventConsumer(index: Int): RaribleKafkaConsumer<UnionInternalBlockchainEvent> {
-        return RaribleKafkaConsumer(
-            clientId = "$clientIdPrefix.union-wrapped-event-consumer-$index",
-            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = UnionInternalBlockchainEvent::class.java,
-            consumerGroup = consumerGroup("wrapped"),
-            defaultTopic = UnionInternalTopicProvider.getWrappedTopic(env),
-            bootstrapServers = properties.brokerReplicaSet,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST
-        )
-    }
-
-    private fun createUnionBlockchainEventConsumer(
-        index: Int, blockchain: BlockchainDto
-    ): RaribleKafkaConsumer<UnionInternalBlockchainEvent> {
-        return RaribleKafkaConsumer(
-            clientId = "$clientIdPrefix.union-blockchain-event-consumer-$index",
-            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = UnionInternalBlockchainEvent::class.java,
-            consumerGroup = consumerGroup("blockchain.${blockchain.name.lowercase()}"),
-            defaultTopic = UnionInternalTopicProvider.getInternalBlockchainTopic(env, blockchain),
-            bootstrapServers = properties.brokerReplicaSet,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST
-        )
-    }
-
     @Bean
     fun unionBlockchainEventWorker(
-        handler: InternalEventHandler<UnionInternalBlockchainEvent>,
-        unionInternalEventContainerFactory: ConcurrentKafkaListenerContainerFactory<String, UnionInternalBlockchainEvent>
-    ): KafkaConsumerWorker<UnionInternalBlockchainEvent> =
-        if (ff.enableSpringKafka) {
-            logger.info("Will use Spring Kafka for internal message consuming")
-            val containers = blockchains.map { blockchain ->
-                val container = unionInternalEventContainerFactory.createContainer(
-                    UnionInternalTopicProvider.getInternalBlockchainTopic(env, blockchain)
-                )
-                container.setupMessageListener(MessageListenerEventHandlerAdapter(InternalEventHandlerWrapper(handler)))
-                container.containerProperties.groupId = consumerGroup("blockchain.${blockchain.name.lowercase()}")
-                container.containerProperties.clientId = "$clientIdPrefix.union-blockchain-event-consumer"
-                container
-            }
-            MessageListenerContainerGroup(containers)
-        } else {
-            logger.info("Will use Rarible Kafka for internal message consuming")
-            val consumers = blockchains.map { blockchain ->
-                consumerFactory.createInternalBlockchainEventConsumer(
-                    consumer = { index -> createUnionBlockchainEventConsumer(index, blockchain) },
-                    handler = handler,
-                    daemon = listenerProperties.monitoringWorker,
-                    workers = properties.blockchainWorkers,
-                    blockchain = blockchain
-                )
-            }
-            val workers = consumers.flatMap { it.workers }
-            ConsumerWorkerGroup(workers)
+        handler: InternalEventHandler<UnionInternalBlockchainEvent>
+    ): KafkaConsumerWorker<UnionInternalBlockchainEvent> {
+        val containers = blockchains.map { blockchain ->
+            val workers = properties.getWorkerProperties(blockchain)
+            val factory = containerFactory(
+                valueClass = UnionInternalBlockchainEvent::class.java,
+                concurrency = workers.concurrency,
+                batchSize = workers.batchSize
+            )
+            logger.info("Created Kafka consumer for blockchain {} with params: {}", blockchain, workers)
+            val container = factory.createContainer(
+                UnionInternalTopicProvider.getInternalBlockchainTopic(env, blockchain)
+            )
+            container.setupMessageListener(MessageListenerEventHandlerAdapter(InternalEventHandlerWrapper(handler)))
+            container.containerProperties.groupId = consumerGroup("blockchain.${blockchain.name.lowercase()}")
+            container.containerProperties.clientId = "$clientIdPrefix.union-blockchain-event-consumer"
+            container
         }
-
-    @Bean
-    fun unionInternalEventContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, UnionInternalBlockchainEvent> =
-        containerFactory(UnionInternalBlockchainEvent::class.java)
+        return MessageListenerContainerGroup(containers)
+    }
 
     private fun <T> containerFactory(
         valueClass: Class<T>,
+        concurrency: Int,
+        batchSize: Int
     ): ConcurrentKafkaListenerContainerFactory<String, T> {
         return RaribleKafkaListenerContainerFactory(
             valueClass = valueClass,
-            concurrency = properties.concurrency,
+            concurrency = concurrency,
             kafkaBootstrapServers = properties.brokerReplicaSet,
-            batchSize = properties.batchSize,
+            batchSize = batchSize,
             offsetResetStrategy = OffsetResetStrategy.EARLIEST,
         )
     }
@@ -275,6 +237,7 @@ class UnionListenerConfiguration(
     }
 
     companion object {
+
         private val logger = LoggerFactory.getLogger(UnionListenerConfiguration::class.java)
     }
 }
