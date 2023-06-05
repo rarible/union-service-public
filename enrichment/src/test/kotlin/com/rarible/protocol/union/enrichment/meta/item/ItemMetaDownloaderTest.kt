@@ -13,6 +13,8 @@ import com.rarible.protocol.union.enrichment.meta.content.ContentMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.item.customizer.SimpleHashMetaCustomizer
 import com.rarible.protocol.union.enrichment.meta.provider.SimpleHashItemProvider
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
+import com.rarible.protocol.union.enrichment.test.data.randomUnionImageProperties
+import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
@@ -63,6 +65,43 @@ class ItemMetaDownloaderTest {
         val meta = downloader.download(itemId.toString())
 
         assertThat(meta.content).hasSize(2)
+    }
+
+    @Test
+    fun `add additional image content properties - ok, full`() = runBlocking<Unit> {
+        val itemId = ItemIdDto(blockchain, randomString().lowercase(), randomBigInt())
+        val properties = randomUnionImageProperties()
+
+        coEvery { itemService.getItemMetaById(itemId.value) } returns randomUnionMeta(content = listOf(
+            UnionMetaContent(url = "ipfs://ipfs.com", representation = Representation.ORIGINAL)
+        ))
+        coEvery { simpleHashService.fetch(itemId) } returns randomUnionMeta(content = listOf(
+            UnionMetaContent(url = "ipfs://ipfs.com", representation = Representation.ORIGINAL, properties = properties)
+        ))
+
+        val meta = downloader.download(itemId.toString())
+
+        assertThat(meta.content.single().properties).isEqualTo(properties)
+    }
+
+    @Test
+    fun `add additional image content properties - ok, partly`() = runBlocking<Unit> {
+        val itemId = ItemIdDto(blockchain, randomString().lowercase(), randomBigInt())
+        val existedProperties = randomUnionImageProperties().copy(height = null, width = null)
+        val extraProperties = randomUnionImageProperties()
+
+        coEvery { itemService.getItemMetaById(itemId.value) } returns randomUnionMeta(content = listOf(
+            UnionMetaContent(url = "ipfs://ipfs.com", representation = Representation.ORIGINAL, properties = existedProperties)
+        ))
+        coEvery { simpleHashService.fetch(itemId) } returns randomUnionMeta(content = listOf(
+            UnionMetaContent(url = "ipfs://ipfs.com", representation = Representation.ORIGINAL, properties = extraProperties)
+        ))
+
+        val meta = downloader.download(itemId.toString())
+
+        assertThat(meta.content.single().properties).isEqualTo(
+            existedProperties.copy(width = extraProperties.width, height = extraProperties.height)
+        )
     }
 
     @Test

@@ -18,7 +18,7 @@ import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 
 // Targeted, collection-oriented customizers should be checked last
-@Order(1000)
+@Order(CustomizerOrder.MATTEL_META)
 @Component
 class MattelMetaCustomizer(
     mattelCollectionMetaCustomizers: List<MattelCollectionMetaCustomizer>

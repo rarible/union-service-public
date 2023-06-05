@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component
 
 // Should be the first in customizer list since data received here might also be modified by other customizers
 // TODO ideally, refactor it not as customizer, but maybe contributor/extender which are called BEFORE customizers
-@Order(0)
+@Order(CustomizerOrder.SIMPLE_HASH_META)
 @Component
 @ConditionalOnProperty("meta.simpleHash.enabled", havingValue = "true")
 class SimpleHashMetaCustomizer(
@@ -37,13 +37,13 @@ class SimpleHashMetaCustomizer(
         logger.info("Customizing meta for Item {} with {}", id.fullId(), javaClass.simpleName)
 
         val sanitized = sanitizeContent(simpleHashMeta.content)
-        val content = contentMetaLoader.enrichContent(id.value, id.blockchain, sanitized)
+        val enriched = contentMetaLoader.enrichContent(id.value, id.blockchain, sanitized)
 
         return WrappedMeta(
             source = wrappedMeta.source,
             data = wrappedMeta.data.copy(
                 description = wrappedMeta.data.description ?: simpleHashMeta.description,
-                content = mergeContent(wrappedMeta.data, content),
+                content = mergeContent(wrappedMeta.data, enriched).mergeContentProperties(simpleHashMeta),
                 attributes = mergeAttrs(wrappedMeta.data, simpleHashMeta.attributes),
                 createdAt = wrappedMeta.data.createdAt ?: simpleHashMeta.createdAt,
                 externalUri = wrappedMeta.data.externalUri ?: simpleHashMeta.externalUri,
@@ -52,9 +52,9 @@ class SimpleHashMetaCustomizer(
         )
     }
 
-    private fun mergeContent(meta: UnionMeta, content: List<UnionMetaContent>): List<UnionMetaContent> {
+    private fun mergeContent(meta: UnionMeta, simpleHashContent: List<UnionMetaContent>): List<UnionMetaContent> {
         val existed = meta.content.map { it.representation }.toSet()
-        val adding = content.filterNot { it.representation in existed }
+        val adding = simpleHashContent.filterNot { it.representation in existed }
         return meta.content + adding
     }
 
@@ -62,5 +62,20 @@ class SimpleHashMetaCustomizer(
         val existed = meta.attributes.map { it.key }.toSet()
         val adding = attrs.filterNot { it.key in existed }
         return meta.attributes + adding
+    }
+
+    private fun List<UnionMetaContent>.mergeContentProperties(simpleHashMeta: UnionMeta): List<UnionMetaContent> {
+        return map {
+            val properties = simpleHashMeta.content
+                .firstOrNull { fromSimpleHash -> fromSimpleHash.url == it.url }
+                ?.properties
+
+            if (properties != null) {
+                val merged = it.properties?.merge(properties) ?: properties
+                it.copy(properties = merged)
+            } else {
+                it
+            }
+        }
     }
 }

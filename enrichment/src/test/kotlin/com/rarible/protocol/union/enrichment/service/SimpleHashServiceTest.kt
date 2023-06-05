@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.protocol.union.core.UnionWebClientCustomizer
+import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
@@ -16,21 +17,18 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.model.RawMetaCache
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
-import com.rarible.protocol.union.enrichment.test.data.randomItemDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import randomItemId
 import java.math.BigInteger
 import java.time.Instant
 
@@ -207,7 +205,13 @@ class SimpleHashServiceTest {
             ),
             UnionMetaContent(
                 url = "ipfs://QmPkMSNK297yMrp73HMFisjjPnPzuvzgoEQM5UDPyTw1KQ",
-                representation = MetaContentDto.Representation.ORIGINAL
+                representation = MetaContentDto.Representation.ORIGINAL,
+                properties = UnionImageProperties(
+                    mimeType = "image/png",
+                    size = 674801,
+                    width = 1262,
+                    height = 1262,
+                )
             )
         ),
         restrictions = emptyList()
