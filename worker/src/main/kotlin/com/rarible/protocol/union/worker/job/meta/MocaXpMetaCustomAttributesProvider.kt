@@ -66,10 +66,9 @@ object MocaXpCustomAttributesParser {
     private const val FIELD_XP = "total_xp"
     private const val FIELD_RANK = "rank"
     private const val FIELD_TOKEN_ID = "moca_id"
+    private const val FIELD_TREASURY = "treasury"
 
     private const val ATTRIBUTE_XP_TOKEN_ID = "Token ID"
-
-    private val hundred = BigDecimal("100")
 
     private val mapper = ObjectMapper().registerKotlinModule()
         .enable(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature())
@@ -88,7 +87,8 @@ object MocaXpCustomAttributesParser {
         val id: ItemIdDto,
         val xp: BigDecimal?,
         val tribe: String?,
-        val rank: String?
+        val rank: String?,
+        val treasure: Boolean?
     ) {
 
         constructor(node: JsonNode, collectionId: CollectionIdDto) : this(
@@ -97,6 +97,7 @@ object MocaXpCustomAttributesParser {
             xp = node.get(FIELD_XP)?.decimalValue(),
             tribe = node.get(FIELD_TRIBE)?.asText(),
             rank = node.get(FIELD_RANK)?.asText(),
+            treasure = node.get(FIELD_TREASURY)?.asBoolean()
         )
 
         fun toAttributes(): List<UnionMetaAttribute> {
@@ -105,6 +106,7 @@ object MocaXpCustomAttributesParser {
                 UnionMetaAttribute(ATTRIBUTE_XP_TOKEN_ID, tokenId),
                 xp?.let { UnionMetaAttribute(FIELD_XP, it.toPlainString()) },
                 rank?.let { UnionMetaAttribute(FIELD_RANK, it) },
+                treasure?.let { UnionMetaAttribute(FIELD_TREASURY, it.toString()) },
             )
         }
     }
