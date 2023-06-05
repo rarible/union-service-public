@@ -14,6 +14,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.OwnershipSourceDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.dto.ext
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
@@ -52,10 +53,9 @@ sealed class UnionActivity {
     abstract fun itemId(): ItemIdDto?
 
     /**
-     * Returns associated collectionId for this activity (if applicable).
-     * If Activity associated with specific itemId, should return null
+     * Returns associated collectionId for this activity (if applicable)
      */
-    open fun collectionId(): CollectionIdDto? = null
+    abstract fun collectionId(): CollectionIdDto?
 
     open fun ownershipId(): OwnershipIdDto? = null
     open fun source(): OwnershipSourceDto? = null
@@ -81,6 +81,7 @@ data class UnionMintActivity(
 ) : UnionActivity() {
 
     override fun itemId() = itemId
+    override fun collectionId() = collection
     override fun ownershipId() = this.itemId?.toOwnership(this.owner.value)
     override fun source(): OwnershipSourceDto = OwnershipSourceDto.MINT
     override fun isBlockchainEvent() = this.blockchainInfo != null
@@ -105,6 +106,7 @@ data class UnionBurnActivity(
 
     override fun itemId() = itemId
     override fun isBlockchainEvent() = this.blockchainInfo != null
+    override fun collectionId() = collection
 
 }
 
@@ -136,6 +138,7 @@ data class UnionTransferActivity(
     }
 
     override fun isBlockchainEvent() = this.blockchainInfo != null
+    override fun collectionId() = collection
 }
 
 sealed class UnionOrderMatchActivity : UnionActivity() {
@@ -162,6 +165,7 @@ data class UnionOrderMatchSwap(
 
     override fun itemId() = null
     override fun isValid(): Boolean = left.asset.type.isNft() && right.asset.type.isNft()
+    override fun collectionId() = null
 }
 
 data class UnionOrderMatchSell(
@@ -293,6 +297,7 @@ data class UnionAuctionOpenActivity(
 ) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
+    override fun collectionId() = auction.sell.type.ext.collectionId
 
 }
 
@@ -309,6 +314,7 @@ data class UnionAuctionBidActivity(
 
     override fun itemId() = this.auction.getItemId()
     override fun ownershipId() = null
+    override fun collectionId() = auction.sell.type.ext.collectionId
 
 }
 
@@ -323,6 +329,7 @@ data class UnionAuctionFinishActivity(
 ) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
+    override fun collectionId() = auction.sell.type.ext.collectionId
 
 }
 
@@ -337,6 +344,7 @@ data class UnionAuctionCancelActivity(
 ) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
+    override fun collectionId() = auction.sell.type.ext.collectionId
 
 }
 
@@ -350,6 +358,7 @@ data class UnionAuctionStartActivity(
 ) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
+    override fun collectionId() = auction.sell.type.ext.collectionId
 
 }
 
@@ -363,6 +372,7 @@ data class UnionAuctionEndActivity(
 ) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
+    override fun collectionId() = auction.sell.type.ext.collectionId
 
 }
 
@@ -380,6 +390,7 @@ data class UnionL2DepositActivity(
 ) : UnionActivity() {
 
     override fun itemId() = this.itemId
+    override fun collectionId() = collection
 }
 
 data class UnionL2WithdrawalActivity(
@@ -396,6 +407,7 @@ data class UnionL2WithdrawalActivity(
 ) : UnionActivity() {
 
     override fun itemId() = this.itemId
+    override fun collectionId() = collection
 
 }
 

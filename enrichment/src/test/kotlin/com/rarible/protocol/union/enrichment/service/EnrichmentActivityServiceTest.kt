@@ -71,7 +71,7 @@ class EnrichmentActivityServiceTest {
         val itemId = randomEthItemId()
         val activity = randomUnionActivityMint(itemId)
 
-        mockCustomCollection(activity, itemId, null, null)
+        mockCustomCollection(activity, itemId, activity.collection, null)
 
         val result = service.enrich(activity)
         val expected = EnrichmentActivityConverter.convert(activity)
@@ -84,7 +84,7 @@ class EnrichmentActivityServiceTest {
         val itemId = randomEthItemId()
         val activity = randomUnionActivityMint(itemId)
 
-        mockCustomCollection(activity, itemId, null, null)
+        mockCustomCollection(activity, itemId, activity.collection, null)
 
         val result = service.enrichDeprecated(activity)
         val expected = ActivityDtoConverter.convert(activity)
@@ -98,7 +98,7 @@ class EnrichmentActivityServiceTest {
         val customCollection = randomEthCollectionId()
         val activity = randomUnionActivityMint(itemId)
 
-        mockCustomCollection(activity, itemId, null, customCollection)
+        mockCustomCollection(activity, itemId, activity.collection, customCollection)
 
         val result = service.enrichDeprecated(activity)
         val expected = (ActivityDtoConverter.convert(activity) as MintActivityDto)
@@ -113,7 +113,7 @@ class EnrichmentActivityServiceTest {
         val customCollection = randomEthCollectionId()
         val activity = randomUnionActivityMint(itemId)
 
-        mockCustomCollection(activity, itemId, null, customCollection)
+        mockCustomCollection(activity, itemId, activity.collection, customCollection)
 
         val result = service.enrich(activity)
         val expected = EnrichmentActivityConverter.convert(
