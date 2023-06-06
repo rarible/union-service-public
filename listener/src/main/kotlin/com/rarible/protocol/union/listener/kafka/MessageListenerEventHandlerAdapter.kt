@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.listener.kafka
 
+import com.rarible.core.logging.asyncWithTraceId
+import com.rarible.core.logging.withBatchId
 import com.rarible.protocol.union.core.handler.InternalEventHandler
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
@@ -12,13 +14,15 @@ class MessageListenerEventHandlerAdapter<T>(
     private val handler: InternalEventHandler<T>
 ) : BatchMessageListener<String, T> {
     override fun onMessage(records: List<ConsumerRecord<String, T>>) = runBlocking<Unit>(NonCancellable) {
-        val recordsByKey = records.groupBy { it.key() }
-        recordsByKey.values.map { group ->
-            async {
-                group.forEach {
-                    handler.handle(it.value())
+        withBatchId {
+            val recordsByKey = records.groupBy { it.key() }
+            recordsByKey.values.map { group ->
+                asyncWithTraceId {
+                    group.forEach {
+                        handler.handle(it.value())
+                    }
                 }
-            }
-        }.awaitAll()
+            }.awaitAll()
+        }
     }
 }

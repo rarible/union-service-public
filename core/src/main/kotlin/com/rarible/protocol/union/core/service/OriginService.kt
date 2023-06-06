@@ -6,14 +6,16 @@ import com.rarible.protocol.union.core.util.safeSplit
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import org.springframework.stereotype.Component
+import java.util.Collections
+import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class OriginService(
     properties: List<DefaultBlockchainProperties>
 ) {
 
-    private val collectionOrigins: MutableMap<CollectionIdDto, MutableSet<String>> = HashMap()
-    private val globalOrigins: MutableSet<String> = HashSet()
+    private val collectionOrigins: MutableMap<CollectionIdDto, MutableSet<String>> = ConcurrentHashMap()
+    private val globalOrigins: MutableSet<String> = Collections.newSetFromMap(ConcurrentHashMap())
 
     init {
         properties.forEach {
@@ -38,7 +40,8 @@ class OriginService(
     private fun addCollectionOrigins(blockchain: BlockchainDto, origin: String, collections: List<String>) {
         collections.forEach { collection ->
             val collectionId = CollectionIdDto(blockchain, collection)
-            collectionOrigins.computeIfAbsent(collectionId) { HashSet() }.add(origin)
+            collectionOrigins.computeIfAbsent(collectionId) { Collections.newSetFromMap(ConcurrentHashMap()) }
+                .add(origin)
         }
     }
 
@@ -46,5 +49,4 @@ class OriginService(
         val collectionOrigins = collectionId?.let { collectionOrigins[collectionId] } ?: emptySet()
         return (globalOrigins + collectionOrigins).toList()
     }
-
 }
