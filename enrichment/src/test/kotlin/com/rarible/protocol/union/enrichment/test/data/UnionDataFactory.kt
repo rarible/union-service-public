@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.test.data
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigInt
+import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
@@ -11,6 +12,7 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionBurnActivity
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
@@ -431,4 +433,14 @@ fun randomSudoSwapAmmDataV1Dto(): EthSudoSwapAmmDataV1Dto {
 
 fun randomMarketplace(): PlatformDto {
     return PlatformDto.values().random()
+}
+
+fun randomUnionImageProperties(): UnionImageProperties {
+    return UnionImageProperties(
+        mimeType = randomString(),
+        size = randomLong(),
+        available = randomBoolean(),
+        width = randomInt(),
+        height = randomInt()
+    )
 }

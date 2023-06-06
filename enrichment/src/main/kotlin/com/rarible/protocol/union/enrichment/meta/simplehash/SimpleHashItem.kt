@@ -16,6 +16,7 @@ data class SimpleHashItem(
     val name: String?,
     val description: String?,
     val previews: Preview?,
+    val imageProperties: ImageProperties?,
     val extraMetadata: ExtraMetadata?,
     val collection: Collection?,
     val createdDate: LocalDateTime?,
@@ -50,5 +51,14 @@ data class SimpleHashItem(
         val traitType: String,
         val value: String?,
         val displayType: String?
+    )
+
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    data class ImageProperties(
+        val width: Int?,
+        val height: Int?,
+        val size: Long?,
+        val mimeType: String?
     )
 }

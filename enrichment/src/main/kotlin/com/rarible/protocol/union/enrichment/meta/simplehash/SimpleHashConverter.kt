@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
@@ -79,7 +80,7 @@ object SimpleHashConverter {
         return IdParser.parseItemId(toUnionFormat)
     }
 
-    fun safeParseTokenId(nftId: String): String? {
+    private fun safeParseTokenId(nftId: String): String? {
         return try {
             val itemIdDto = parseNftId(nftId)
             val parts = IdParser.split(itemIdDto.value, 2)
@@ -112,7 +113,16 @@ object SimpleHashConverter {
             source.extraMetadata?.imageOriginalUrl?.let {
                 UnionMetaContent(
                     url = it,
-                    representation = MetaContentDto.Representation.ORIGINAL
+                    representation = MetaContentDto.Representation.ORIGINAL,
+                    // Supposed that SimpleHash item meta property "image_properties" applies to "extra_metadata.image_original_url"
+                    properties = source.imageProperties?.let { properties ->
+                        UnionImageProperties(
+                            size = properties.size,
+                            width = properties.width,
+                            height = properties.height,
+                            mimeType = properties.mimeType
+                        )
+                    }
                 )
             }
         )
