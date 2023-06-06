@@ -24,7 +24,12 @@ sealed class UnionMetaContentProperties {
 
     abstract fun withAvailable(available: Boolean): UnionMetaContentProperties
 
-    abstract fun merge(other: UnionMetaContentProperties): UnionMetaContentProperties
+    fun merge(other: UnionMetaContentProperties): UnionMetaContentProperties {
+        if (this.javaClass != other.javaClass) return this
+        return doMerge(other)
+    }
+
+    protected abstract fun doMerge(other: UnionMetaContentProperties): UnionMetaContentProperties
 }
 
 data class UnionImageProperties(
@@ -46,8 +51,8 @@ data class UnionImageProperties(
 
     override fun withAvailable(available: Boolean): UnionImageProperties = copy(available = available)
 
-    override fun merge(other: UnionMetaContentProperties): UnionImageProperties {
-        if (other !is UnionImageProperties) return this
+    override fun doMerge(other: UnionMetaContentProperties): UnionImageProperties {
+        other as UnionImageProperties
         return copy(
             mimeType = mimeType ?: other.mimeType,
             size = size ?: other.size,
@@ -77,8 +82,8 @@ data class UnionVideoProperties(
 
     override fun withAvailable(available: Boolean): UnionVideoProperties = copy(available = available)
 
-    override fun merge(other: UnionMetaContentProperties): UnionVideoProperties {
-        if (other !is UnionVideoProperties) return this
+    override fun doMerge(other: UnionMetaContentProperties): UnionVideoProperties {
+        other as UnionVideoProperties
         return copy(
             mimeType = mimeType ?: other.mimeType,
             size = size ?: other.size,
@@ -101,8 +106,8 @@ data class UnionAudioProperties(
 
     override fun withAvailable(available: Boolean): UnionAudioProperties = copy(available = available)
 
-    override fun merge(other: UnionMetaContentProperties): UnionAudioProperties {
-        if (other !is UnionAudioProperties) return this
+    override fun doMerge(other: UnionMetaContentProperties): UnionAudioProperties {
+        other as UnionAudioProperties
         return copy(
             mimeType = mimeType ?: other.mimeType,
             size = size ?: other.size,
@@ -123,8 +128,8 @@ data class UnionModel3dProperties(
 
     override fun withAvailable(available: Boolean): UnionModel3dProperties = copy(available = available)
 
-    override fun merge(other: UnionMetaContentProperties): UnionModel3dProperties {
-        if (other !is UnionModel3dProperties) return this
+    override fun doMerge(other: UnionMetaContentProperties): UnionModel3dProperties {
+        other as UnionModel3dProperties
         return copy(
             mimeType = mimeType ?: other.mimeType,
             size = size ?: other.size,
@@ -145,8 +150,8 @@ data class UnionHtmlProperties(
 
     override fun withAvailable(available: Boolean): UnionHtmlProperties = copy(available = available)
 
-    override fun merge(other: UnionMetaContentProperties): UnionHtmlProperties {
-        if (other !is UnionHtmlProperties) return this
+    override fun doMerge(other: UnionMetaContentProperties): UnionHtmlProperties {
+        other as UnionHtmlProperties
         return copy(
             mimeType = mimeType ?: other.mimeType,
             size = size ?: other.size,
@@ -167,8 +172,8 @@ data class UnionUnknownProperties(
 
     override fun withAvailable(available: Boolean): UnionUnknownProperties = copy(available = available)
 
-    override fun merge(other: UnionMetaContentProperties): UnionUnknownProperties {
-        if (other !is UnionUnknownProperties) return this
+    override fun doMerge(other: UnionMetaContentProperties): UnionUnknownProperties {
+        other as UnionUnknownProperties
         return copy(
             mimeType = mimeType ?: other.mimeType,
             size = size ?: other.size,
