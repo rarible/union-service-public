@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.kafka
 
 import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.core.logging.withBatchId
+import com.rarible.core.logging.withTraceId
 import com.rarible.protocol.union.core.handler.InternalEventHandler
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
@@ -17,9 +18,11 @@ class MessageListenerEventHandlerAdapter<T>(
         withBatchId {
             val recordsByKey = records.groupBy { it.key() }
             recordsByKey.values.map { group ->
-                asyncWithTraceId {
-                    group.forEach {
-                        handler.handle(it.value())
+                asyncWithTraceId(context = NonCancellable) {
+                    withTraceId {
+                        group.forEach {
+                            handler.handle(it.value())
+                        }
                     }
                 }
             }.awaitAll()
