@@ -56,6 +56,7 @@ class UnionInternalOrderEventHandler(
                 )
             }
         } catch (e: Throwable) {
+            logger.warn("Failed to handle order event: $event", e)
             // TODO PT-1151 not really sure how to perform reconciliation for AMM orders
             val order = when (event) {
                 is UnionOrderUpdateEvent -> event.order
