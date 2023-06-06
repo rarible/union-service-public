@@ -397,7 +397,7 @@ object ActivityDtoConverter {
     }
 
     private fun UnionActivity.getEnrichedCollection(data: EnrichmentActivityData): CollectionIdDto? {
-        return data.customCollections[id]
+        return data.customCollections[id] ?: this.collectionId()
     }
 
 }
