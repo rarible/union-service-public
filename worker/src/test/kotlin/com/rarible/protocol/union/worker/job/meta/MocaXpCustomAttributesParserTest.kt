@@ -13,7 +13,7 @@ class MocaXpCustomAttributesParserTest {
     fun `parse - ok`() {
         val json = """
             [
-                {"moca_id": "0", "moca_name": "#6475", "tribe": "connector", "total_xp": 1000000.0, "rank": 1277},
+                {"moca_id": "0", "moca_name": "#6475", "tribe": "connector", "total_xp": 1000000.0, "rank": 1277, "treasury" : true},
                 {"moca_id": "1", "moca_name": "#6478", "tribe": "something", "total_xp": 1000.0, "rank": 1278}
             ]
         """
@@ -26,6 +26,7 @@ class MocaXpCustomAttributesParserTest {
                 UnionMetaAttribute("Token ID", "0"),
                 UnionMetaAttribute("total_xp", "1000000.0"),
                 UnionMetaAttribute("rank", "1277"),
+                UnionMetaAttribute("treasury", "true"),
             )
         )
 

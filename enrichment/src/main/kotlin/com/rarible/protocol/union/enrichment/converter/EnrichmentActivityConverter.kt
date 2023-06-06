@@ -77,7 +77,7 @@ object EnrichmentActivityConverter {
             lastUpdatedAt = source.lastUpdatedAt,
             owner = source.owner,
             contract = source.contract,
-            collection = source.getEnrichedCollection(data)?.fullId() ?: source.collection?.fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
             tokenId = source.tokenId,
             itemId = source.itemId!!.fullId(),
             value = source.value,
@@ -95,7 +95,7 @@ object EnrichmentActivityConverter {
             lastUpdatedAt = source.lastUpdatedAt,
             owner = source.owner,
             contract = source.contract,
-            collection = source.getEnrichedCollection(data)?.fullId() ?: source.collection?.fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
             tokenId = source.tokenId,
             itemId = source.itemId!!.fullId(),
             value = source.value,
@@ -113,7 +113,7 @@ object EnrichmentActivityConverter {
             from = source.from,
             owner = source.owner,
             contract = source.contract,
-            collection = source.getEnrichedCollection(data)?.fullId() ?: source.collection?.fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
             tokenId = source.tokenId,
             itemId = source.itemId!!.fullId(),
             value = source.value,
@@ -349,7 +349,7 @@ object EnrichmentActivityConverter {
             status = source.status,
             itemId = source.itemId.fullId(),
             value = source.value,
-            collection = source.getEnrichedCollection(data)?.fullId() ?: source.collection?.fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
         )
     }
 
@@ -365,7 +365,7 @@ object EnrichmentActivityConverter {
             user = source.user,
             status = source.status,
             itemId = source.itemId.fullId(),
-            collection = source.getEnrichedCollection(data)?.fullId() ?: source.collection?.fullId(),
+            collection = source.getEnrichedCollection(data)?.fullId(),
             value = source.value,
         )
     }
@@ -389,6 +389,6 @@ object EnrichmentActivityConverter {
     }
 
     private fun UnionActivity.getEnrichedCollection(data: EnrichmentActivityData): CollectionIdDto? {
-        return data.customCollections[id]
+        return data.customCollections[id] ?: this.collectionId()
     }
 }
