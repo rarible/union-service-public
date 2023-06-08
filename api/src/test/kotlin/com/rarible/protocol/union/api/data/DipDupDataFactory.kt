@@ -15,8 +15,9 @@ import com.rarible.tzkt.model.TypedTokenActivity
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
+import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.*
+import java.util.UUID
 
 fun randomDipDupListActivity(activityId: String, date: Instant): DipDupActivity {
     return DipDupOrderListActivity(
@@ -39,7 +40,7 @@ fun randomDipDupListActivity(activityId: String, date: Instant): DipDupActivity 
             assetValue = BigDecimal.ONE
         ),
         source = TezosPlatform.RARIBLE_V2,
-        dbUpdatedAt = null
+        dbUpdatedAt = OffsetDateTime.now()
     )
 }
 

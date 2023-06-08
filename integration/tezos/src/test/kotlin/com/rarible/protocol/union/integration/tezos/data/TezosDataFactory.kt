@@ -260,7 +260,7 @@ fun randomTezosOrderListActivity(): DipDupActivity {
             assetType = Asset.XTZ(),
             assetValue = BigDecimal.ONE
         ),
-        dbUpdatedAt = null
+        dbUpdatedAt = OffsetDateTime.now()
     )
 }
 
@@ -285,7 +285,7 @@ fun randomTezosOrderActivityCancelList(): DipDupOrderCancelActivity {
             assetType = Asset.XTZ(),
             assetValue = BigDecimal.ONE
         ),
-        dbUpdatedAt = null
+        dbUpdatedAt = OffsetDateTime.now()
     )
 }
 
@@ -300,7 +300,7 @@ fun randomTezosItemMintActivity(): DipDupMintActivity {
         transactionId = randomString(),
         reverted = false,
         transferId = BigInteger.ONE.toString(),
-        dbUpdatedAt = null
+        dbUpdatedAt = OffsetDateTime.now()
     )
 }
 
@@ -315,7 +315,7 @@ fun randomTezosItemBurnActivity(): DipDupBurnActivity {
         transactionId = randomString(),
         reverted = false,
         transferId = BigInteger.ONE.toString(),
-        dbUpdatedAt = null
+        dbUpdatedAt = OffsetDateTime.now()
     )
 }
 
@@ -331,7 +331,7 @@ fun randomTezosItemTransferActivity(): DipDupTransferActivity {
         reverted = false,
         transferId = BigInteger.ONE.toString(),
         from = randomString(),
-        dbUpdatedAt = null
+        dbUpdatedAt = OffsetDateTime.now()
     )
 }
 
