@@ -20,7 +20,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
-import java.util.*
+import java.util.UUID
 
 fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
     return DipDupOrderListActivity(
@@ -43,7 +43,7 @@ fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
         ),
         operationCounter = randomInt(),
         source = TezosPlatform.RARIBLE_V2,
-        dbUpdatedAt = null
+        dbUpdatedAt = OffsetDateTime.now()
     )
 }
 
@@ -58,7 +58,7 @@ fun randomDipDupActivityMintEvent(): DipDupMintActivity {
         date = OffsetDateTime.now(),
         reverted = false,
         transactionId = randomString(),
-        dbUpdatedAt = null
+        dbUpdatedAt = OffsetDateTime.now()
     )
 }
 
@@ -74,7 +74,7 @@ fun randomDipDupActivityTransferEvent(): DipDupTransferActivity {
         date = OffsetDateTime.now(),
         reverted = false,
         transactionId = randomString(),
-        dbUpdatedAt = null
+        dbUpdatedAt = OffsetDateTime.now()
     )
 }
 
@@ -89,7 +89,7 @@ fun randomDipDupActivityBurnEvent(): DipDupBurnActivity {
         date = OffsetDateTime.now(),
         reverted = false,
         transactionId = randomString(),
-        dbUpdatedAt = null
+        dbUpdatedAt = OffsetDateTime.now()
     )
 }
 

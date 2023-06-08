@@ -43,7 +43,7 @@ fun randomDipDupActivityOrderListEvent(activityId: String): DipDupActivity {
             assetValue = BigDecimal.ONE
         ),
         source = TezosPlatform.RARIBLE_V2,
-        dbUpdatedAt = null
+        dbUpdatedAt = OffsetDateTime.now()
     )
 }
 
@@ -58,7 +58,7 @@ fun randomDipDupActivityMint(activityId: String): DipDupMintActivity {
         value = BigDecimal.ONE,
         transactionId = randomLong().toString(),
         owner = UUID.randomUUID().toString(),
-        dbUpdatedAt = null
+        dbUpdatedAt = OffsetDateTime.now()
     )
 }
 
