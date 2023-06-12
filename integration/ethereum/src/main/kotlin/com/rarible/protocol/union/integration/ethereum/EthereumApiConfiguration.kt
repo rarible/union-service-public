@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.ethereum
 
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
+import com.rarible.protocol.nft.api.client.NftDomainControllerApi
 import com.rarible.protocol.nft.api.client.NftIndexerApiClientFactory
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
@@ -18,6 +19,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConvert
 import com.rarible.protocol.union.integration.ethereum.service.EthActivityService
 import com.rarible.protocol.union.integration.ethereum.service.EthAuctionService
 import com.rarible.protocol.union.integration.ethereum.service.EthCollectionService
+import com.rarible.protocol.union.integration.ethereum.service.EthDomainService
 import com.rarible.protocol.union.integration.ethereum.service.EthItemService
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import com.rarible.protocol.union.integration.ethereum.service.EthOwnershipService
@@ -25,10 +27,12 @@ import com.rarible.protocol.union.integration.ethereum.service.EthSignatureServi
 import com.rarible.protocol.union.integration.ethereum.service.EthereumActivityService
 import com.rarible.protocol.union.integration.ethereum.service.EthereumAuctionService
 import com.rarible.protocol.union.integration.ethereum.service.EthereumCollectionService
+import com.rarible.protocol.union.integration.ethereum.service.EthereumDomainService
 import com.rarible.protocol.union.integration.ethereum.service.EthereumItemService
 import com.rarible.protocol.union.integration.ethereum.service.EthereumOrderService
 import com.rarible.protocol.union.integration.ethereum.service.EthereumOwnershipService
 import com.rarible.protocol.union.integration.ethereum.service.EthereumSignatureService
+import com.rarible.protocol.union.integration.ethereum.service.PolygonDomainService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -137,6 +141,13 @@ class EthereumApiConfiguration {
         @Qualifier("ethereum.signature.api") controllerApi: OrderSignatureControllerApi
     ): EthSignatureService {
         return EthereumSignatureService(controllerApi)
+    }
+
+    @Bean
+    fun ethereumDomainService(
+        @Qualifier("ethereum.domain.api") controllerApi: NftDomainControllerApi,
+    ): EthDomainService {
+        return EthereumDomainService(controllerApi)
     }
 
     @Bean
