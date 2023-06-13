@@ -7,6 +7,7 @@ import com.rarible.protocol.union.enrichment.meta.downloader.DownloadService
 import com.rarible.protocol.union.enrichment.meta.simplehash.HookEventType
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashNftMetadataUpdate
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import org.slf4j.Logger
@@ -52,6 +53,7 @@ class ItemMetaService(
         }
         when (updateDto.type) {
             is HookEventType.ChainNftMetadataUpdate -> {
+                logHook(updateDto)
                 updateDto.nfts.forEach { nft ->
                     scheduleWebHookMetaRefresh(nft)
                 }
@@ -71,6 +73,17 @@ class ItemMetaService(
             schedule(itemIdDto, ItemMetaPipeline.REFRESH, true)
         } catch (e: Exception) {
             logger.error("Error processing webhook event for item ${item.nftId}", e)
+        }
+    }
+
+    private fun logHook(updateDto: SimpleHashNftMetadataUpdate) {
+        try {
+            val itemOIds = updateDto.nfts.joinToString {
+                SimpleHashConverter.parseNftId(it.nftId).fullId()
+            }
+            logger.info("Received webhook event: ${updateDto.type.value}, items=$itemOIds")
+        } catch (ex: Throwable) {
+            logger.error("Error logging webhook event: ${updateDto.type.value}", ex)
         }
     }
 
