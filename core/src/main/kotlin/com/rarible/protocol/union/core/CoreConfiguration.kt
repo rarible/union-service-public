@@ -7,6 +7,7 @@ import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.CollectionService
+import com.rarible.protocol.union.core.service.DomainService
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.OwnershipService
@@ -14,6 +15,7 @@ import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.dummy.DummyActivityService
 import com.rarible.protocol.union.core.service.dummy.DummyAuctionService
 import com.rarible.protocol.union.core.service.dummy.DummyCollectionService
+import com.rarible.protocol.union.core.service.dummy.DummyDomainService
 import com.rarible.protocol.union.core.service.dummy.DummyItemService
 import com.rarible.protocol.union.core.service.dummy.DummyOrderService
 import com.rarible.protocol.union.core.service.dummy.DummyOwnershipService
@@ -149,6 +151,17 @@ class CoreConfiguration(
         disabled.forEach {
             result.add(DummySignatureService(it))
             logger.info("SignatureService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
+        }
+        return BlockchainRouter(result, enabledBlockchains)
+    }
+
+    @Bean
+    fun domainServiceRouter(services: List<DomainService>): BlockchainRouter<DomainService> {
+        val result = ArrayList(services)
+        val disabled = getDisabledBlockchains(services)
+        disabled.forEach {
+            result.add(DummyDomainService(it))
+            logger.info("DomainService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
         }
         return BlockchainRouter(result, enabledBlockchains)
     }

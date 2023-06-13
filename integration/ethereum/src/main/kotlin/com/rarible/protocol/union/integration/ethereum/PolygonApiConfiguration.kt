@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.ethereum
 
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
+import com.rarible.protocol.nft.api.client.NftDomainControllerApi
 import com.rarible.protocol.nft.api.client.NftIndexerApiClientFactory
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
@@ -18,6 +19,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConvert
 import com.rarible.protocol.union.integration.ethereum.service.EthActivityService
 import com.rarible.protocol.union.integration.ethereum.service.EthAuctionService
 import com.rarible.protocol.union.integration.ethereum.service.EthCollectionService
+import com.rarible.protocol.union.integration.ethereum.service.EthDomainService
 import com.rarible.protocol.union.integration.ethereum.service.EthItemService
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import com.rarible.protocol.union.integration.ethereum.service.EthOwnershipService
@@ -25,6 +27,7 @@ import com.rarible.protocol.union.integration.ethereum.service.EthSignatureServi
 import com.rarible.protocol.union.integration.ethereum.service.PolygonActivityService
 import com.rarible.protocol.union.integration.ethereum.service.PolygonAuctionService
 import com.rarible.protocol.union.integration.ethereum.service.PolygonCollectionService
+import com.rarible.protocol.union.integration.ethereum.service.PolygonDomainService
 import com.rarible.protocol.union.integration.ethereum.service.PolygonItemService
 import com.rarible.protocol.union.integration.ethereum.service.PolygonOrderService
 import com.rarible.protocol.union.integration.ethereum.service.PolygonOwnershipService
@@ -137,6 +140,13 @@ class PolygonApiConfiguration {
         @Qualifier("polygon.signature.api") controllerApi: OrderSignatureControllerApi
     ): EthSignatureService {
         return PolygonSignatureService(controllerApi)
+    }
+
+    @Bean
+    fun polygonDomainService(
+        @Qualifier("polygon.domain.api") controllerApi: NftDomainControllerApi,
+    ): EthDomainService {
+        return PolygonDomainService(controllerApi)
     }
 
     @Bean
