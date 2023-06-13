@@ -13,8 +13,8 @@ class DomainController(
     private val router: BlockchainRouter<DomainService>
 ) : DomainControllerApi {
 
-    override suspend fun resolve(blockchain: BlockchainDto, name: String): ResponseEntity<DomainResolveResultDto> {
-        val result = router.getService(blockchain).resolve(name)
+    override suspend fun resolve(domain: String): ResponseEntity<DomainResolveResultDto> {
+        val result = router.getService(BlockchainDto.ETHEREUM).resolve(domain)
         return ResponseEntity.ok(ResolveDomainResultDtoConverter.convert(result))
     }
 }
