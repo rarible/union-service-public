@@ -52,6 +52,8 @@ api:
     workers:
       item: 4
       ownership: 4
+  domains:
+    ethereum: eth
 
 integration:
   ethereum:

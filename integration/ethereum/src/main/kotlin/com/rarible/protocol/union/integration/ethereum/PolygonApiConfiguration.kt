@@ -82,6 +82,11 @@ class PolygonApiConfiguration {
         factory.createOrderSignatureApiClient(polygon)
 
     @Bean
+    @Qualifier("polygon.domain.api")
+    fun polygonDomainApi(factory: NftIndexerApiClientFactory): NftDomainControllerApi =
+        factory.createNftDomainApiClient(polygon)
+
+    @Bean
     @Qualifier("polygon.activity.api.item")
     fun polygonActivityItemApi(factory: NftIndexerApiClientFactory): NftActivityControllerApi =
         factory.createNftActivityApiClient(polygon)

@@ -83,6 +83,11 @@ class EthereumApiConfiguration {
         factory.createOrderSignatureApiClient(ethereum)
 
     @Bean
+    @Qualifier("ethereum.domain.api")
+    fun ethereumDomainApi(factory: NftIndexerApiClientFactory): NftDomainControllerApi =
+        factory.createNftDomainApiClient(ethereum)
+
+    @Bean
     @Qualifier("ethereum.activity.api.item")
     fun ethereumActivityItemApi(factory: NftIndexerApiClientFactory): NftActivityControllerApi =
         factory.createNftActivityApiClient(ethereum)

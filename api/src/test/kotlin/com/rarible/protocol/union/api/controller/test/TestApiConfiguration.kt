@@ -102,6 +102,9 @@ class TestApiConfiguration {
     fun testSignatureControllerApi(factory: UnionApiClientFactory) = factory.createSignatureApiClient()
 
     @Bean
+    fun testDomainControllerApi(factory: UnionApiClientFactory) = factory.createDomainApiClient()
+
+    @Bean
     fun testCollectionControllerApi(factory: UnionApiClientFactory) = factory.createCollectionApiClient()
 
     @Bean
@@ -146,6 +149,11 @@ class TestApiConfiguration {
     @Primary
     @Qualifier("ethereum.signature.api")
     fun testEthereumSignatureApi(): com.rarible.protocol.order.api.client.OrderSignatureControllerApi = mockk()
+
+    @Bean
+    @Primary
+    @Qualifier("ethereum.domain.api")
+    fun testEthereumDomainApi(): com.rarible.protocol.nft.api.client.NftDomainControllerApi = mockk()
 
     @Bean
     @Primary

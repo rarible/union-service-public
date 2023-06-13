@@ -22,7 +22,10 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 @Configuration
 @EnableRaribleCorsWebFilter
 @Import(EnrichmentApiConfiguration::class)
-@EnableConfigurationProperties(value = [OpenapiProperties::class])
+@EnableConfigurationProperties(value = [
+    OpenapiProperties::class,
+    DomainProperties::class
+])
 class ApiConfiguration {
 
     @Bean
