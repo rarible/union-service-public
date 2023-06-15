@@ -111,8 +111,8 @@ abstract class ElasticSearchRepository<T>(
     }
 
     suspend fun bulk(
-        entitiesToSave: List<T>,
-        idsToDelete: List<String>,
+        entitiesToSave: List<T> = emptyList(),
+        idsToDelete: List<String> = emptyList(),
         indexName: String? = null,
         refreshPolicy: WriteRequest.RefreshPolicy = WriteRequest.RefreshPolicy.IMMEDIATE,
     ) {

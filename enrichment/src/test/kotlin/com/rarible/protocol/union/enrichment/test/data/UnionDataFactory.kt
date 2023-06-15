@@ -62,6 +62,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemBurnActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
@@ -327,24 +328,27 @@ fun randomEsCollection() = EsCollection(
     ),
 )
 
-fun randomEsItem() = EsItem(
-    id = randomString(),
-    itemId = randomString(),
-    blockchain = BlockchainDto.values().random(),
-    collection = randomString(),
-    name = randomString(),
-    description = randomString(),
-    traits = listOf(EsTrait(randomString(), randomInt().toString()), EsTrait(randomString(), randomString())),
-    creators = listOf(randomString()),
-    mintedAt = nowMillis(),
-    lastUpdatedAt = nowMillis(),
-    bestSellAmount = randomDouble(),
-    bestSellCurrency = randomString(),
-    bestSellMarketplace = randomMarketplace().name,
-    bestBidAmount = randomDouble(),
-    bestBidCurrency = randomString(),
-    bestBidMarketplace = randomMarketplace().name,
-)
+fun randomEsItem(): EsItem {
+    val itemId = randomEthItemId()
+    return EsItem(
+        id = itemId.value,
+        itemId = itemId.fullId(),
+        blockchain = itemId.blockchain,
+        collection = randomEthCollectionId().fullId(),
+        name = randomString(),
+        description = randomString(),
+        traits = listOf(EsTrait(randomString(), randomInt().toString()), EsTrait(randomString(), randomString())),
+        creators = listOf(randomString()),
+        mintedAt = nowMillis(),
+        lastUpdatedAt = nowMillis(),
+        bestSellAmount = randomDouble(),
+        bestSellCurrency = randomString(),
+        bestSellMarketplace = randomMarketplace().name,
+        bestBidAmount = randomDouble(),
+        bestBidCurrency = randomString(),
+        bestBidMarketplace = randomMarketplace().name,
+    )
+}
 
 val EsActivity.info: EsActivityLite
     get() = EsActivityLite(activityId, blockchain, type, date, blockNumber, logIndex, salt)
