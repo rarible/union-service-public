@@ -81,7 +81,7 @@ internal class CollectionMetaRefreshServiceTest {
 
         whenever(
             itemMetaService.download(itemId = itemId1, pipeline = ItemMetaPipeline.REFRESH, force = true)
-        ).thenReturn(meta1)
+        ).thenReturn(null)
         whenever(
             itemMetaService.download(itemId = itemId2, pipeline = ItemMetaPipeline.REFRESH, force = true)
         ).thenReturn(meta2.copy(createdAt = Instant.now()))

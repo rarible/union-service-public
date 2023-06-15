@@ -36,7 +36,8 @@ class CollectionMetaRefreshService(
                 val idDto = IdParser.parseItemId(esItem.itemId)
                 val oldItem = itemRepository.get(ShortItemId(idDto)) ?: return@forEach
                 val meta = itemMetaService.download(itemId = idDto, pipeline = ItemMetaPipeline.REFRESH, force = true)
-                if (oldItem.metaEntry?.data?.copy(createdAt = null) != meta?.copy(createdAt = null)) {
+                    ?: return@forEach
+                if (oldItem.metaEntry?.data?.copy(createdAt = null) != meta.copy(createdAt = null)) {
                     logger.info("Meta changed for item $idDto from ${oldItem.metaEntry?.data} to $meta " +
                         "will allow meta refresh for collection")
                     return true
