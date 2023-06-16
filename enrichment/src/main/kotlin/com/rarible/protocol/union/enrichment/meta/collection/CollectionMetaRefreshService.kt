@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.meta.collection
 
+import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
@@ -7,6 +8,9 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -31,20 +35,27 @@ class CollectionMetaRefreshService(
             )
             return false
         }
-        esItemRepository.getRandomItemsFromCollection(collectionId = collectionFullId, size = RANDOM_ITEMS_TO_CHECK)
-            .forEach { esItem ->
-                val idDto = IdParser.parseItemId(esItem.itemId)
-                val oldItem = itemRepository.get(ShortItemId(idDto)) ?: return@forEach
-                val meta = itemMetaService.download(itemId = idDto, pipeline = ItemMetaPipeline.REFRESH, force = true)
-                    ?: return@forEach
-                if (oldItem.metaEntry?.data?.copy(createdAt = null) != meta.copy(createdAt = null)) {
-                    logger.info("Meta changed for item $idDto from ${oldItem.metaEntry?.data} to $meta " +
-                        "will allow meta refresh for collection")
-                    return true
-                }
-            }
-        logger.info("Didn't find any item with changed meta for collection $collectionFullId. Refresh is not allowed")
-        return false
+        return coroutineScope {
+            esItemRepository.getRandomItemsFromCollection(collectionId = collectionFullId, size = RANDOM_ITEMS_TO_CHECK)
+                .map { esItem ->
+                    asyncWithTraceId {
+                        val idDto = IdParser.parseItemId(esItem.itemId)
+                        val oldItem = itemRepository.get(ShortItemId(idDto)) ?: return@asyncWithTraceId false
+                        val meta =
+                            itemMetaService.download(itemId = idDto, pipeline = ItemMetaPipeline.REFRESH, force = true)
+                                ?: return@asyncWithTraceId false
+                        if (oldItem.metaEntry?.data?.copy(createdAt = null) != meta.copy(createdAt = null)) {
+                            logger.info(
+                                "Meta changed for item $idDto from ${oldItem.metaEntry?.data} to $meta " +
+                                    "will allow meta refresh for collection"
+                            )
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                }.awaitAll()
+        }.any { it }
     }
 
     companion object {

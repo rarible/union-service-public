@@ -26,8 +26,8 @@ class ReconciliationMarkEventHandlerIt : AbstractIntegrationTest() {
     fun `marks saved`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId()
-        assertThat(findAllMarks(ReconciliationMarkType.ITEM)).hasSize(0)
-        assertThat(findAllMarks(ReconciliationMarkType.OWNERSHIP)).hasSize(0)
+        assertThat(reconciliationMarkRepository.get(itemId.fullId())).isNull()
+        assertThat(reconciliationMarkRepository.get(ownershipId.fullId())).isNull()
 
         val itemEvent1 = ReconciliationMarkEvent(itemId.fullId(), ReconciliationMarkType.ITEM)
         val ownershipEvent1 = ReconciliationMarkEvent(ownershipId.fullId(), ReconciliationMarkType.OWNERSHIP)

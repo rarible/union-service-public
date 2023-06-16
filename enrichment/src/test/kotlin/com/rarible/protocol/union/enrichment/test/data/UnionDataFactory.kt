@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.test.data
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomDouble
@@ -62,7 +63,6 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc721
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemBurnActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
@@ -329,12 +329,12 @@ fun randomEsCollection() = EsCollection(
 )
 
 fun randomEsItem(): EsItem {
-    val itemId = randomEthItemId()
+    val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed(), randomBigInt())
     return EsItem(
         id = itemId.value,
         itemId = itemId.fullId(),
         blockchain = itemId.blockchain,
-        collection = randomEthCollectionId().fullId(),
+        collection = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed()).fullId(),
         name = randomString(),
         description = randomString(),
         traits = listOf(EsTrait(randomString(), randomInt().toString()), EsTrait(randomString(), randomString())),
