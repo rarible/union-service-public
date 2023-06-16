@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.test.data
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomDouble
@@ -327,24 +328,27 @@ fun randomEsCollection() = EsCollection(
     ),
 )
 
-fun randomEsItem() = EsItem(
-    id = randomString(),
-    itemId = randomString(),
-    blockchain = BlockchainDto.values().random(),
-    collection = randomString(),
-    name = randomString(),
-    description = randomString(),
-    traits = listOf(EsTrait(randomString(), randomInt().toString()), EsTrait(randomString(), randomString())),
-    creators = listOf(randomString()),
-    mintedAt = nowMillis(),
-    lastUpdatedAt = nowMillis(),
-    bestSellAmount = randomDouble(),
-    bestSellCurrency = randomString(),
-    bestSellMarketplace = randomMarketplace().name,
-    bestBidAmount = randomDouble(),
-    bestBidCurrency = randomString(),
-    bestBidMarketplace = randomMarketplace().name,
-)
+fun randomEsItem(): EsItem {
+    val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed(), randomBigInt())
+    return EsItem(
+        id = itemId.value,
+        itemId = itemId.fullId(),
+        blockchain = itemId.blockchain,
+        collection = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed()).fullId(),
+        name = randomString(),
+        description = randomString(),
+        traits = listOf(EsTrait(randomString(), randomInt().toString()), EsTrait(randomString(), randomString())),
+        creators = listOf(randomString()),
+        mintedAt = nowMillis(),
+        lastUpdatedAt = nowMillis(),
+        bestSellAmount = randomDouble(),
+        bestSellCurrency = randomString(),
+        bestSellMarketplace = randomMarketplace().name,
+        bestBidAmount = randomDouble(),
+        bestBidCurrency = randomString(),
+        bestBidMarketplace = randomMarketplace().name,
+    )
+}
 
 val EsActivity.info: EsActivityLite
     get() = EsActivityLite(activityId, blockchain, type, date, blockNumber, logIndex, salt)

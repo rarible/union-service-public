@@ -11,7 +11,9 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsEntitySearchAfterCursorService
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
+import org.elasticsearch.index.query.QueryBuilders.functionScoreQuery
 import org.elasticsearch.index.query.QueryBuilders.termQuery
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.SearchHit
@@ -63,7 +65,7 @@ class EsItemRepository(
         return esOperations.search(query, EsItemLite::class.java, entityDefinition.searchIndexCoordinates)
             .collectList()
             .awaitFirst()
-            //.apply { logger.debug(this.map { it.score }.joinToString()) }
+        //.apply { logger.debug(this.map { it.score }.joinToString()) }
     }
 
     suspend fun countItemsInCollection(collectionId: String): Long {
@@ -75,6 +77,26 @@ class EsItemRepository(
                 EsItem::class.java,
                 entityDefinition.searchIndexCoordinates
             )
+            .awaitFirst()
+    }
+
+    suspend fun getRandomItemsFromCollection(collectionId: String, size: Int): List<EsItem> {
+        val query = NativeSearchQuery(
+            functionScoreQuery(
+                termQuery(EsItem::collection.name, collectionId),
+                ScoreFunctionBuilders.randomFunction().seed(System.currentTimeMillis())
+            )
+        )
+        return esOperations
+            .search(
+                query,
+                EsItem::class.java,
+                entityDefinition.searchIndexCoordinates
+            )
+            .map {
+                it.content
+            }
+            .collectList()
             .awaitFirst()
     }
 }

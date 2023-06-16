@@ -13,10 +13,12 @@ import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.core.model.elastic.TraitFilter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import io.mockk.coEvery
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.BoolQueryBuilder
@@ -44,7 +46,6 @@ internal class EsItemRepositoryFt {
 
     @Autowired
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
-
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
@@ -314,11 +315,34 @@ internal class EsItemRepositoryFt {
         assertThat(result[0].itemId).isEqualTo(esItem.itemId)
     }
 
-    fun randomEsItem() = EsItem(
+    @Test
+    fun `get random items from collection`() = runBlocking<Unit> {
+        val collectionId =
+            CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = randomAddress().toString()).fullId()
+        val otherCollectionId =
+            CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = randomAddress().toString()).fullId()
+        val esItem1 = randomEsItem(collectionId = collectionId)
+        val esItem2 = randomEsItem(collectionId = collectionId)
+        val esItem3 = randomEsItem(collectionId = collectionId)
+        val esItem4 = randomEsItem(collectionId = otherCollectionId)
+
+        repository.bulk(entitiesToSave = listOf(esItem1, esItem2, esItem3, esItem4))
+
+        val result1 = repository.getRandomItemsFromCollection(collectionId = collectionId,  size = 3)
+        delay(10)
+        val result2 = repository.getRandomItemsFromCollection(collectionId = collectionId, size = 3)
+        assertThat(result1).containsExactlyInAnyOrder(esItem1, esItem2, esItem3)
+        assertThat(result1).containsExactlyInAnyOrder(*result2.toTypedArray())
+        assertThat(result1).isNotEqualTo(result2)
+    }
+
+    fun randomEsItem(
+        collectionId: String = randomAddress().toString(),
+    ) = EsItem(
         id = randomString(),
         itemId = randomAddress().toString(),
         blockchain = BlockchainDto.values().random(),
-        collection = randomAddress().toString(),
+        collection = collectionId,
         name = randomString(),
         description = randomString(),
         traits = listOf(
