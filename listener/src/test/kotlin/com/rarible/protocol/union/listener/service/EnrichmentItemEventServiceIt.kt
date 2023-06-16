@@ -206,7 +206,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         itemService.save(shortItem)
 
         val bestSellOrder1 = randomUnionSellOrder(itemId).copy(makeStock = 20.toBigDecimal())
-        val ownership1 = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder1))
+        val oldOwnership1 = randomShortOwnership(itemId)
+        val ownership1 = oldOwnership1.copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder1))
         ownershipService.save(ownership1)
 
         val bestSellOrder2 = randomUnionSellOrder(itemId).copy(makeStock = 10.toBigDecimal())
@@ -216,16 +217,21 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         ethereumItemControllerApiMock.mockGetNftItemById(itemId, ethItem)
         ethereumItemControllerApiMock.mockGetNftItemMetaById(itemId, ethMeta)
 
-        itemEventService.onOwnershipUpdated(ownership1.id, bestSellOrder1, stubEventMark())
+        itemEventService.onOwnershipUpdated(
+            oldOwnership = oldOwnership1,
+            newOwnership = ownership1,
+            order = bestSellOrder1,
+            eventTimeMarks = stubEventMark()
+        )
 
         val saved = itemService.get(shortItem.id)!!
-        assertThat(saved.sellers).isEqualTo(2)
-        assertThat(saved.totalStock).isEqualTo(30.toBigInteger())
+        assertThat(saved.sellers).isEqualTo(4)
+        assertThat(saved.totalStock).isEqualTo(40.toBigInteger())
 
         // In result event for item we expect updated totalStock/sellers
         val expected = ItemDtoConverter.convert(unionItem, saved, meta = unionMeta).copy(
-            sellers = 2,
-            totalStock = 30.toBigInteger()
+            sellers = 4,
+            totalStock = 40.toBigInteger()
         )
 
         waitAssert {
@@ -247,7 +253,12 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val ownership = randomShortOwnership(itemId).copy(bestSellOrder = ShortOrderConverter.convert(bestSellOrder))
         ownershipService.save(ownership)
 
-        itemEventService.onOwnershipUpdated(ownership.id, bestSellOrder, stubEventMark())
+        itemEventService.onOwnershipUpdated(
+            oldOwnership = ownership,
+            newOwnership = ownership,
+            order = bestSellOrder,
+            eventTimeMarks = stubEventMark()
+        )
 
         val saved = itemService.get(expectedItem.id)!!
 

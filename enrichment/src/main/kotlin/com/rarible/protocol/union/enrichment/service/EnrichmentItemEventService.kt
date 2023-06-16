@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.core.model.UnionActivity
@@ -28,6 +29,7 @@ import com.rarible.protocol.union.enrichment.model.ItemLastSale
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
@@ -41,7 +43,9 @@ class EnrichmentItemEventService(
     private val enrichmentActivityService: EnrichmentActivityService,
     private val itemEventListeners: List<OutgoingEventListener<ItemEventDto>>,
     private val bestOrderService: BestOrderService,
-    private val reconciliationEventService: ReconciliationEventService
+    private val reconciliationEventService: ReconciliationEventService,
+    private val enrichmentItemSellStatsService: EnrichmentItemSellStatsService,
+    private val featureFlagsProperties: FeatureFlagsProperties,
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemEventService::class.java)
@@ -83,11 +87,13 @@ class EnrichmentItemEventService(
     // also, we can specify here Order which triggered this update - ItemService
     // can use this full Order to avoid unnecessary getOrderById calls
     suspend fun onOwnershipUpdated(
-        ownershipId: ShortOwnershipId,
+        oldOwnership: ShortOwnership?,
+        newOwnership: ShortOwnership?,
         order: UnionOrder?,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
+        val ownershipId = oldOwnership?.id ?: newOwnership!!.id
         val itemId = ShortItemId(ownershipId.blockchain, ownershipId.itemId)
         optimisticLock {
             val item = enrichmentItemService.get(itemId)
@@ -97,7 +103,15 @@ class EnrichmentItemEventService(
                     itemId, ownershipId
                 )
             } else {
-                val refreshedSellStats = enrichmentOwnershipService.getItemSellStats(itemId)
+                val refreshedSellStats = if (featureFlagsProperties.enableIncrementalItemStats) {
+                    enrichmentItemSellStatsService.incrementSellStats(
+                        item = item,
+                        oldOwnership = oldOwnership,
+                        newOwnership = newOwnership
+                    )
+                } else {
+                    enrichmentOwnershipService.getItemSellStats(itemId)
+                }
                 val currentSellStats = ItemSellStats(item.sellers, item.totalStock)
                 if (refreshedSellStats != currentSellStats) {
                     val updatedItem = item.copy(

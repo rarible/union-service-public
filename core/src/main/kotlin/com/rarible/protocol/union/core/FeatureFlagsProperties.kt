@@ -32,6 +32,7 @@ data class FeatureFlagsProperties(
     var enableSearchItems: Boolean = false,
     var enableItemSaveImmediateToElasticSearch: Boolean = false,
     val enableItemBestBidsByCurrency: Boolean = true,
+    val enableIncrementalItemStats: Boolean = true,
 
     val enableCustomCollections: Boolean = false,
 

@@ -85,7 +85,8 @@ class EnrichmentOwnershipEventService(
                 eventTimeMarks = eventTimeMarks
             )
             enrichmentItemEventService.onOwnershipUpdated(
-                ownershipId = ownership.id,
+                oldOwnership = ownership,
+                newOwnership = updated,
                 order = null,
                 eventTimeMarks = eventTimeMarks
             )
@@ -120,7 +121,13 @@ class EnrichmentOwnershipEventService(
 
         if (short != updated && (exist || updated.isNotEmpty())) {
             saveAndNotify(updated, notificationEnabled, null, null, order, eventTimeMarks)
-            enrichmentItemEventService.onOwnershipUpdated(ownershipId, order, eventTimeMarks, notificationEnabled)
+            enrichmentItemEventService.onOwnershipUpdated(
+                oldOwnership = current,
+                newOwnership = updated,
+                order = order,
+                eventTimeMarks = eventTimeMarks,
+                notificationEnabled = notificationEnabled
+            )
         } else {
             logger.info("Ownership [{}] not changed after order updated, event won't be published", ownershipId)
         }
@@ -132,7 +139,7 @@ class EnrichmentOwnershipEventService(
         val ownershipAuctionDeferred = async { enrichmentAuctionService.fetchOwnershipAuction(shortOwnershipId) }
 
         logger.debug("Deleting Ownership [{}] since it was removed from NFT-Indexer", shortOwnershipId)
-        val deleted = deleteOwnership(shortOwnershipId)
+        val deleted = enrichmentOwnershipService.delete(shortOwnershipId)
         val auction = ownershipAuctionDeferred.await()
         if (auction != null) {
             // In case such ownership is belongs to auction, we have to do not send delete event
@@ -140,13 +147,14 @@ class EnrichmentOwnershipEventService(
             dto?.let { sendUpdate(buildUpdateEvent(dto, event.eventTimeMarks)) }
         } else {
             sendDelete(buildDeleteEvent(ShortOwnershipId(ownershipId), event.eventTimeMarks))
-            if (deleted) {
+            if (deleted != null) {
                 logger.info(
                     "Ownership [{}] deleted (removed from NFT-Indexer), refreshing sell stats",
                     shortOwnershipId
                 )
                 enrichmentItemEventService.onOwnershipUpdated(
-                    ownershipId = shortOwnershipId,
+                    oldOwnership = deleted,
+                    newOwnership = null,
                     order = null,
                     eventTimeMarks = event.eventTimeMarks
                 )
@@ -190,7 +198,7 @@ class EnrichmentOwnershipEventService(
                 "Received Auction [{}] event with status {}, existing seller Ownership [{}] not found - deleting it",
                 auction.id, auction.status, ownershipId
             )
-            deleteOwnership(ownershipId)
+            enrichmentOwnershipService.delete(ownershipId)
             sendDelete(buildDeleteEvent(ownershipId, null))
         }
         // If status = CANCELLED, nothing to do here, we'll receive updated via OwnershipEvents
@@ -282,11 +290,6 @@ class EnrichmentOwnershipEventService(
                 )
             }
         }
-    }
-
-    private suspend fun deleteOwnership(ownershipId: ShortOwnershipId): Boolean {
-        val result = enrichmentOwnershipService.delete(ownershipId)
-        return result != null && result.deletedCount > 0
     }
 
     private suspend fun saveAndNotify(

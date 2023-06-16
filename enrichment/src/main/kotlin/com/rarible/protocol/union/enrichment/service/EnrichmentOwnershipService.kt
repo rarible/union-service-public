@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.service
 
-import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
@@ -63,9 +62,9 @@ class EnrichmentOwnershipService(
         return ownershipRepository.save(ownership.withCalculatedFields())
     }
 
-    suspend fun delete(ownershipId: ShortOwnershipId): DeleteResult? {
+    suspend fun delete(ownershipId: ShortOwnershipId): ShortOwnership? {
         val result = ownershipRepository.delete(ownershipId)
-        logger.debug("Deleted Ownership [{}], deleted: {}", ownershipId, result?.deletedCount)
+        logger.debug("Deleted Ownership [{}], deleted: {}", ownershipId, result != null)
         return result
     }
 
