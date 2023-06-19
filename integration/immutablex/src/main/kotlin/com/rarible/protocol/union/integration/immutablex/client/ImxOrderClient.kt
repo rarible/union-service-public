@@ -47,6 +47,8 @@ class ImxOrderClient(
             val safeSort = sort ?: OrderSortDto.LAST_UPDATE_DESC
             getOrders {
                 it.pageSize(size)
+                // TODO bids disabled for IMX
+                it.sellTokenType("ERC721")
                 it.continuationByUpdatedAt(safeSort, continuation)
                 it.status(status)
             }
