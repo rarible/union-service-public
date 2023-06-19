@@ -33,7 +33,7 @@ object ItemDtoConverter {
             null
         }
 
-        return ItemDto(
+        val result = ItemDto(
             id = item.id,
             blockchain = item.id.blockchain,
             collection = customCollection ?: item.collection,
@@ -65,6 +65,13 @@ object ItemDtoConverter {
             sellers = shortItem?.sellers ?: 0,
             lastSale = shortItem?.lastSale?.let { convert(it) },
         )
+
+        // TODO remove when IMX bids will be supported
+        return if (item.id.blockchain == BlockchainDto.IMMUTABLEX) {
+            result.copy(bestBidOrder = null, bestBidOrdersByCurrency = emptyList())
+        } else {
+            result
+        }
     }
 
     private fun convert(lastSale: ItemLastSale): ItemLastSaleDto {

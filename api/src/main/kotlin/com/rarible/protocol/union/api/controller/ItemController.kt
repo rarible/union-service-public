@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.elastic.ItemTraitService
 import com.rarible.protocol.union.api.service.elastic.toApiDto
 import com.rarible.protocol.union.api.service.elastic.toInner
@@ -14,6 +13,7 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
+import com.rarible.protocol.union.core.util.checkNullIds
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ExtendedTraitPropertiesDto
 import com.rarible.protocol.union.dto.ItemDto
@@ -36,6 +36,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.time.withTimeout
+import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -58,9 +59,10 @@ class ItemController(
     private val itemTraitService: ItemTraitService,
 ) : ItemControllerApi {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     companion object {
 
-        private val logger by Logger()
         private val timeoutSyncLoadingMeta: Duration = Duration.ofSeconds(30)
     }
 
@@ -136,6 +138,7 @@ class ItemController(
     }
 
     override suspend fun getItemByIds(itemIdsDto: ItemIdsDto): ResponseEntity<ItemsDto> {
+        checkNullIds(itemIdsDto.ids) // It's possible to send request like {"ids": [null]}
         val items = itemSourceSelectService.getItemsByIds(itemIdsDto.ids)
         return ResponseEntity.ok(ItemsDto(items = items, total = items.size.toLong()))
     }
