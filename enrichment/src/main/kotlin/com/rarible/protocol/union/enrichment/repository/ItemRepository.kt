@@ -166,7 +166,7 @@ class ItemRepository(
             .awaitFirst()
     }
 
-    suspend fun findAll(fromIdExcluded: ShortItemId? = null): Flow<ShortItem> = template.find(
+    fun findAll(fromIdExcluded: ShortItemId? = null): Flow<ShortItem> = template.find(
         Query(Criteria().apply {
             fromIdExcluded?.let { and(ShortItem::id).gt(fromIdExcluded) }
         }).with(Sort.by(ShortItem::id.name)),

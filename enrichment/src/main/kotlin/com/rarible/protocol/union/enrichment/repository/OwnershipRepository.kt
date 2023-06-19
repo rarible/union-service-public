@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.repository
 
-import com.mongodb.client.result.DeleteResult
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.mongo.util.div
@@ -94,9 +93,9 @@ class OwnershipRepository(
         return template.find(query, ShortOwnership::class.java).asFlow()
     }
 
-    suspend fun delete(ownershipId: ShortOwnershipId): DeleteResult? {
+    suspend fun delete(ownershipId: ShortOwnershipId): ShortOwnership? {
         val criteria = Criteria("_id").isEqualTo(ownershipId)
-        return template.remove(Query(criteria), collection).awaitFirstOrNull()
+        return template.findAndRemove(Query(criteria), ShortOwnership::class.java).awaitFirstOrNull()
     }
 
     suspend fun getItemSellStats(itemId: ShortItemId): ItemSellStats {
