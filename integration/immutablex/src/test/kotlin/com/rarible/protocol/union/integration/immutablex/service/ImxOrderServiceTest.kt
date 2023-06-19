@@ -17,6 +17,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import randomItemId
 
@@ -58,6 +59,8 @@ class ImxOrderServiceTest {
     }
 
     @Test
+    // TODO bids disabled for IMX
+    @Disabled
     fun `get bid currencies`() = runBlocking<Unit> {
         val token = randomAddress().prefixed()
         val tokenId = randomBigInt().toString()

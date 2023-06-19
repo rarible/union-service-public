@@ -77,6 +77,9 @@ class ImxOrderService(
         itemId: String,
         status: List<OrderStatusDto>?
     ): List<UnionAssetType> {
+        // TODO bids disabled for IMX
+        return emptyList()
+        /*
         // TODO we can miss some orders here if item have a lot of cancelled/filled orders with different currencies
         // TODO maybe split it into 2 queries to distinguish ETH/ERC20 currencies?
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
@@ -86,6 +89,7 @@ class ImxOrderService(
             .toSet()
             .filter { it.isCurrency() }
             .toList()
+        */
     }
 
     // IMX doesn't support floor orders
@@ -108,6 +112,9 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
     ): Slice<UnionOrder> {
+        // TODO bids disabled for IMX
+        return Slice.empty()
+        /*
         if (!isPlatformSupported(platform)) return Slice.empty()
         origin?.let { return Slice.empty() }
         val (token, tokenId) = IdParser.split(TokenIdDecoder.decodeItemId(itemId), 2)
@@ -116,6 +123,7 @@ class ImxOrderService(
             .map { ImxOrderConverter.convert(it, blockchain) }
 
         return Paging(UnionOrderContinuation.ByBidPriceUsdAndIdDesc, orders).getSlice(size)
+        */
     }
 
     override suspend fun getOrderBidsByMaker(
@@ -129,12 +137,16 @@ class ImxOrderService(
         continuation: String?,
         size: Int,
     ): Slice<UnionOrder> {
+        // TODO bids disabled for IMX
+        return Slice.empty()
+        /*
         if (!isPlatformSupported(platform)) return Slice.empty()
         origin?.let { return Slice.empty() }
         val orders = orderClient.getBuyOrdersByMaker(maker, status, continuation, size)
             .map { ImxOrderConverter.convert(it, blockchain) }
 
         return Paging(UnionOrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
+        */
     }
 
     override suspend fun getSellCurrencies(
