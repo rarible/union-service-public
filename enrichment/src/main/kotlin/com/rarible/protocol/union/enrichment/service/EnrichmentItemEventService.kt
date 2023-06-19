@@ -18,6 +18,7 @@ import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDeleteEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -30,11 +31,10 @@ import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
-import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class EnrichmentItemEventService(
@@ -45,7 +45,7 @@ class EnrichmentItemEventService(
     private val bestOrderService: BestOrderService,
     private val reconciliationEventService: ReconciliationEventService,
     private val enrichmentItemSellStatsService: EnrichmentItemSellStatsService,
-    private val featureFlagsProperties: FeatureFlagsProperties,
+    private val ff: FeatureFlagsProperties,
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentItemEventService::class.java)
@@ -103,7 +103,7 @@ class EnrichmentItemEventService(
                     itemId, ownershipId
                 )
             } else {
-                val refreshedSellStats = if (featureFlagsProperties.enableIncrementalItemStats) {
+                val refreshedSellStats = if (ff.enableIncrementalItemStats) {
                     enrichmentItemSellStatsService.incrementSellStats(
                         item = item,
                         oldOwnership = oldOwnership,
@@ -263,6 +263,11 @@ class EnrichmentItemEventService(
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
+        // TODO remove when we start to support IMX bids
+        if (itemId.blockchain == BlockchainDto.IMMUTABLEX && !ff.enableImxBids) {
+            logger.info("IMX best bid update skipped for Order [{}], disabled", order.id.fullId())
+            return
+        }
         updateOrder(itemId, order, notificationEnabled, eventTimeMarks) { item ->
             val origins = enrichmentItemService.getItemOrigins(itemId)
             bestOrderService.updateBestBidOrder(item, order, origins)

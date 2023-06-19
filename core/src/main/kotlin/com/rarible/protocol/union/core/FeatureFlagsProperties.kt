@@ -42,4 +42,5 @@ data class FeatureFlagsProperties(
     val enableElasticsearchCompatibilityMode: Boolean = false,
     val enableMongoActivityWrite: Boolean = false,
     val enableMongoActivityRead: Boolean = false,
+    val enableImxBids: Boolean = false
 )
