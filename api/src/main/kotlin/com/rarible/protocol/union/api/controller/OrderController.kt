@@ -2,8 +2,8 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.select.OrderSourceSelectService
 import com.rarible.protocol.union.core.model.UnionOrder
+import com.rarible.protocol.union.core.util.checkNullIds
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
@@ -118,6 +118,7 @@ class OrderController(
 
     // TODO UNION add tests
     override suspend fun getOrdersByIds(orderIdsDto: OrderIdsDto): ResponseEntity<OrdersDto> {
+        checkNullIds(orderIdsDto.ids) // It's possible to send request like {"ids": [null]}
         val orders = orderSourceSelector.getByIds(orderIdsDto)
         val result = OrdersDto(orders = enrichmentOrderService.enrich(orders))
         return ResponseEntity.ok(result)

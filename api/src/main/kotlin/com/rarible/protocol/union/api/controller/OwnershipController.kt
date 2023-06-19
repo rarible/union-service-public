@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.select.OwnershipSourceSelectService
 import com.rarible.protocol.union.core.util.PageSize
+import com.rarible.protocol.union.core.util.checkNullIds
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdsDto
 import com.rarible.protocol.union.dto.OwnershipSearchRequestDto
@@ -32,6 +33,7 @@ class OwnershipController(
     }
 
     override suspend fun getOwnershipsByIds(ownershipIdsDto: OwnershipIdsDto): ResponseEntity<OwnershipsDto> {
+        checkNullIds(ownershipIdsDto.ids) // It's possible to send request like {"ids": [null]}
         val result = ownershipSourceSelectService.getOwnershipsByIds(ownershipIdsDto.ids)
         return ResponseEntity.ok(OwnershipsDto(0, null, result))
     }
