@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.service
 
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionAsset
 import com.rarible.protocol.union.core.model.UnionEthCollectionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -44,7 +43,7 @@ internal class EnrichmentOrderServiceTest {
         coEvery { getService(BlockchainDto.ETHEREUM) } returns ethOrderService
     }
 
-    private val service = EnrichmentOrderService(router, customCollectionResolver, FeatureFlagsProperties())
+    private val service = EnrichmentOrderService(router, customCollectionResolver)
 
     @Test
     fun `enrich - ok`() = runBlocking<Unit> {

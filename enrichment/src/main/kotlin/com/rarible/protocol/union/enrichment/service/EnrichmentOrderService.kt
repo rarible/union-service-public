@@ -3,11 +3,9 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.flatMapAsync
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -29,8 +27,7 @@ import org.springframework.stereotype.Component
 @Component
 class EnrichmentOrderService(
     private val orderServiceRouter: BlockchainRouter<OrderService>,
-    private val customCollectionResolver: CustomCollectionResolver,
-    private val ff: FeatureFlagsProperties
+    private val customCollectionResolver: CustomCollectionResolver
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentOrderService::class.java)
@@ -151,10 +148,6 @@ class EnrichmentOrderService(
     }
 
     suspend fun getBestBid(id: ShortItemId, currencyId: String, origin: String?): UnionOrder? {
-        // TODO remove when we start to support IMX bids
-        if (id.blockchain == BlockchainDto.IMMUTABLEX && !ff.enableImxBids) {
-            return null
-        }
         val now = nowMillis()
         val result = withPreferredRariblePlatform(
             id, OrderType.BID, OrderFilters.ITEM
