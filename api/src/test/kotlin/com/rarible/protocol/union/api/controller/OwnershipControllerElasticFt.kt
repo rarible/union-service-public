@@ -1,10 +1,13 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.core.test.data.randomBigInt
 import com.rarible.protocol.union.api.client.OwnershipControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
@@ -15,6 +18,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
@@ -316,5 +320,55 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
         ).awaitFirst()
 
         assertThat(ownerships.ownerships).hasSize(1)
+    }
+
+    @Test
+    fun `get ownerships by collection - ethereum, partially enriched`() = runBlocking<Unit> {
+        // Enriched ownership
+        val ethCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
+        val ethItemId = ItemIdDto(BlockchainDto.ETHEREUM, ethCollectionId.value, randomBigInt())
+        val ethOwnership = randomEthOwnershipDto(ethItemId)
+            .copy(date = Instant.ofEpochSecond(100))
+        val ethUnionOwnership = EthOwnershipConverter.convert(ethOwnership, ethItemId.blockchain)
+        val ethOrder = randomEthV2OrderDto(ethItemId)
+        val ethUnionOrder = ethOrderConverter.convert(ethOrder, ethItemId.blockchain)
+        val ethShortOwnership = ShortOwnershipConverter.convert(ethUnionOwnership)
+            .copy(bestSellOrder = ShortOrderConverter.convert(ethUnionOrder))
+        enrichmentOwnershipService.save(ethShortOwnership)
+
+        val emptyEthOwnership = randomEthOwnershipDto(ethItemId)
+            .copy(date = Instant.ofEpochSecond(200))
+        val emptyUnionOwnership = EthOwnershipConverter.convert(emptyEthOwnership, ethItemId.blockchain)
+
+        val esOwnership = convertUnionOwnershipToEsOwnership(ethUnionOwnership)
+        val emptyEsOwnership = convertUnionOwnershipToEsOwnership(emptyUnionOwnership)
+        ownershipRepository.bulk(
+            listOf(
+                esOwnership,
+                emptyEsOwnership,
+            )
+        )
+
+        ethereumOwnershipControllerApiMock.mockGetNftOwnershipByIds(
+            listOf(
+                OwnershipIdParser.parseFull(emptyEsOwnership.ownershipId).value,
+                OwnershipIdParser.parseFull(esOwnership.ownershipId).value,
+            ),
+            listOf(emptyEthOwnership, ethOwnership)
+        )
+        ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
+
+        val ownerships = ownershipControllerClient.getOwnershipsByCollection(
+            ethCollectionId.fullId(), continuation, size
+        ).awaitFirst()
+
+        val resultEmptyOwnership = ownerships.ownerships[0]
+        val resultEnrichedOwnership = ownerships.ownerships[1]
+
+        assertThat(resultEmptyOwnership.id.value).isEqualTo(emptyEthOwnership.id)
+        assertThat(resultEmptyOwnership.bestSellOrder).isEqualTo(null)
+
+        assertThat(resultEnrichedOwnership.id).isEqualTo(ethUnionOwnership.id)
+        assertThat(resultEnrichedOwnership.bestSellOrder!!.id).isEqualTo(ethUnionOrder.id)
     }
 }

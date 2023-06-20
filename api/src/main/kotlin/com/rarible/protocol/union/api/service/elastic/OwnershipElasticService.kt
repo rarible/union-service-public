@@ -5,6 +5,7 @@ import com.rarible.protocol.union.api.service.OwnershipQueryService
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -59,6 +60,27 @@ class OwnershipElasticService(
                     continuation = cursor,
                     entities = apiHelper.merge(ownerships),
                 )
+            }
+        )
+    }
+
+    suspend fun getOwnershipsByCollection(collectionId: CollectionIdDto, continuation: String?, size: Int): OwnershipsDto {
+        if (!router.isBlockchainEnabled(collectionId.blockchain)) {
+            logger.info("Unable to find enabled blockchains for getOwnershipsByCollection(), collectionId={}", collectionId)
+            return OwnershipsDto()
+        }
+        val (cursor, entities) = elasticHelper.getRawOwnershipsByCollection(collectionId, continuation, size)
+        return apiHelper.getEnrichedOwnerships(
+            continuation,
+            size,
+            // TODO auctions are disabled
+            { emptyList() },
+            { entities },
+            { ownerships ->
+                OwnershipsDto(
+                    null,
+                    cursor,
+                    apiHelper.enrich(ownerships))
             }
         )
     }

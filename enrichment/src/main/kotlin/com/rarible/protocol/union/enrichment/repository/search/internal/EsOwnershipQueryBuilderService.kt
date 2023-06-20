@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipByCollectionFilter
 import com.rarible.protocol.union.core.model.elastic.EsOwnershipByItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsOwnershipByOwnerFilter
 import com.rarible.protocol.union.core.model.elastic.EsOwnershipFilter
@@ -44,6 +45,7 @@ class EsOwnershipQueryBuilderService(
         query as BoolQueryBuilder
 
         when (filter) {
+            is EsOwnershipByCollectionFilter -> query.applyByCollectionFilter(filter)
             is EsOwnershipByItemFilter -> query.applyByItemFilter(filter)
             is EsOwnershipByOwnerFilter -> query.applyByOwnerFilter(filter)
             is EsOwnershipsSearchFilter -> {
@@ -62,6 +64,10 @@ class EsOwnershipQueryBuilderService(
         val resultQuery = builder.build()
         resultQuery.searchAfter = cursorService.buildSearchAfterClause(filter.cursor, 2)
         return resultQuery
+    }
+
+    private fun BoolQueryBuilder.applyByCollectionFilter(filter: EsOwnershipByCollectionFilter) {
+        mustMatchTerm(filter.collectionId.fullId(), EsOwnership::collection.name)
     }
 
     private fun BoolQueryBuilder.applyByItemFilter(filter: EsOwnershipByItemFilter) {
@@ -103,6 +109,7 @@ class EsOwnershipQueryBuilderService(
                     filter.beforeDate
                 ).gt(filter.afterDate)
             )
+
             filter.beforeDate != null -> must(RangeQueryBuilder(EsOwnership::date.name).lt(filter.beforeDate))
             filter.afterDate != null -> must(RangeQueryBuilder(EsOwnership::date.name).gt(filter.afterDate))
         }
