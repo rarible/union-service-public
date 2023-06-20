@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -155,6 +156,8 @@ class EnrichmentItemService(
         unionItems: List<UnionItem>,
         metaPipeline: ItemMetaPipeline
     ): List<ItemDto> {
+        val start = nowMillis().toEpochMilli()
+        logger.info("Starting to enrich {} items", unionItems.size)
         if (unionItems.isEmpty()) {
             return emptyList()
         }
@@ -164,6 +167,8 @@ class EnrichmentItemService(
             val shortItems: Map<ItemIdDto, ShortItem> = findAll(unionItems
                 .map { ShortItemId(it.id) })
                 .associateBy { it.id.toDto() }
+            val itemsDone = nowMillis().toEpochMilli()
+            logger.info("Found {} short items ({}ms)", unionItems.size, itemsDone - start)
 
             // Looking for full orders for existing items in order-indexer
             val shortOrderIds = shortItems.values
@@ -173,8 +178,10 @@ class EnrichmentItemService(
 
             val orders = enrichmentOrderService.getByIds(shortOrderIds)
                 .associateBy { it.id }
+            val ordersDone = nowMillis().toEpochMilli()
+            logger.info("Fetched {} orders ({}ms)", shortOrderIds.size, ordersDone - itemsDone)
 
-            unionItems.map {
+            val result = unionItems.map {
                 val shortItem = shortItems[it.id]
                 enrichItem(
                     shortItem = shortItem,
@@ -183,8 +190,11 @@ class EnrichmentItemService(
                     metaPipeline = metaPipeline
                 )
             }
+            logger.info("DTO ready for {} items ({}ms)", unionItems.size, nowMillis().toEpochMilli() - ordersDone)
+            result
         }
 
+        logger.info("Enrichment for {} items finished ({}ms)", unionItems.size, nowMillis().toEpochMilli() - start)
         return enrichedItems
     }
 
