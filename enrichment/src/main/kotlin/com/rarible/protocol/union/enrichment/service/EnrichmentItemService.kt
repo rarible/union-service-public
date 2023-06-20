@@ -102,6 +102,8 @@ class EnrichmentItemService(
         }
     }
 
+    private val debugCollection = "ETHEREUM:0xfa402365b9b0436bbafe729b57309c573d9ef90a"
+
     // [orders] is a set of already fetched orders that can be used as cache to avoid unnecessary 'getById' calls
     suspend fun enrichItem(
         shortItem: ShortItem?,
@@ -114,23 +116,53 @@ class EnrichmentItemService(
         require(shortItem != null || item != null)
         val itemId = shortItem?.id?.toDto() ?: item!!.id
 
+        val start = System.currentTimeMillis()
+        val debug = itemId.fullId().startsWith(debugCollection)
+        if (debug) {
+            logger.info("DEBUG ENRICH: Enriching item: {}", itemId.fullId())
+        }
+
         val fetchedItem = async { item ?: fetch(ShortItemId(itemId)) }
 
         val metaEntry = shortItem?.metaEntry
         val meta = metaEntry?.data
         onMetaEntry(itemId, metaPipeline, metaEntry)
 
+        val existingOrders = enrichmentHelperService.getExistingOrders(shortItem)
+        val beforeOrders = System.currentTimeMillis()
+        if (debug) {
+            logger.info(
+                "DEBUG ENRICH: Starting to fetch missing orders for {} ({}ms)",
+                itemId.fullId(),
+                beforeOrders - start
+            )
+            val existingIds = existingOrders.map { it.dtoId }
+            if (!orders.keys.containsAll(existingIds)) {
+                val missing = existingIds.filter { !orders.keys.contains(it) }
+                logger.info("Found missing orders for {}: {}", itemId.fullId(), missing.map { it.fullId() })
+            }
+        }
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
-            existing = enrichmentHelperService.getExistingOrders(shortItem),
+            existing = existingOrders,
             orders = orders
         )
+
+        val ordersFetched = System.currentTimeMillis()
+        if (debug) {
+            logger.info("DEBUG ENRICH: Missing orders for {} fetched ({}ms)", itemId, ordersFetched - beforeOrders)
+        }
 
         val auctionIds = shortItem?.auctions ?: emptySet()
         val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
 
         val trimmedMeta = itemMetaTrimmer.trim(meta)
         if (meta != trimmedMeta) {
-            logger.info("Received Item with large meta: $itemId")
+            logger.info("DEBUG ENRICH: Received Item with large meta: $itemId")
+        }
+
+        val metaTrimmed = System.currentTimeMillis()
+        if (debug) {
+            logger.info("DEBUG ENRICH: Meta trimmed for {} ({}ms)", itemId, metaTrimmed - ordersFetched)
         }
 
         val resolvedItem = fetchedItem.await()
@@ -140,7 +172,12 @@ class EnrichmentItemService(
             itemHint
         )[itemId]
 
-        ItemDtoConverter.convert(
+        val collectionResolved = System.currentTimeMillis()
+        if (debug) {
+            logger.info("DEBUG ENRICH: Collection resolved for {} ({}ms)", itemId, collectionResolved - metaTrimmed)
+        }
+
+        val result = ItemDtoConverter.convert(
             item = resolvedItem,
             shortItem = shortItem,
             // replacing inner IPFS urls with public urls
@@ -149,6 +186,12 @@ class EnrichmentItemService(
             auctions = auctionsData.await(),
             customCollection = customCollection
         )
+
+        if (debug) {
+            logger.info("DEBUG ENRICH: DTO built {} ({}ms)", itemId, System.currentTimeMillis() - collectionResolved)
+        }
+
+        result
     }
 
     suspend fun enrichItems(
