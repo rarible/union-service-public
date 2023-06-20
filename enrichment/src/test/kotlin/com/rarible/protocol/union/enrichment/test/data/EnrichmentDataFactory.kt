@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
+import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -24,3 +25,6 @@ fun randomEnrichmentMintActivity() = EnrichmentActivityConverter.convert(
 fun randomShortOwnership() = ShortOwnershipConverter.convert(randomUnionOwnership())
 fun randomShortOwnership(id: ItemIdDto) = ShortOwnershipConverter.convert(randomUnionOwnership(id))
 fun randomShortOwnership(id: OwnershipIdDto) = ShortOwnershipConverter.convert(randomUnionOwnership(id))
+
+fun randomShortSellOrder() = ShortOrderConverter.convert(randomUnionSellOrder())
+fun randomShortBidOrder() = ShortOrderConverter.convert(randomUnionBidOrder())
