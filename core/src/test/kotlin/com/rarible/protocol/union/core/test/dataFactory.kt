@@ -1,5 +1,6 @@
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomBoolean
@@ -47,6 +48,11 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+
+fun randomContractAddress(
+    blockchain: BlockchainDto = BlockchainDto.ETHEREUM,
+    value: String = randomAddress().hex()
+) = ContractAddress(blockchain, value)
 
 fun randomOwnershipId(
     blockchain: BlockchainDto = BlockchainDto.values().random(),

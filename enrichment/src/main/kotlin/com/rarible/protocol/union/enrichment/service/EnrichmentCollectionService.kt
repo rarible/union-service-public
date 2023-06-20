@@ -144,10 +144,12 @@ class EnrichmentCollectionService(
             collection ?: fetch(EnrichmentCollectionId(collectionId))
         }
 
+        val collectionOrders = enrichmentHelperService.getExistingOrders(enrichmentCollection)
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
-            existing = enrichmentHelperService.getExistingOrders(enrichmentCollection),
+            existing = collectionOrders,
             orders = orders
         )
+        val itemBestOrders = collectionOrders.mapNotNull { bestOrders[it.dtoId] }.associateBy { it.id }
 
         val unionCollection = fetchedCollection.await()
         val metaEntry = enrichmentCollection?.metaEntry
@@ -160,7 +162,7 @@ class EnrichmentCollectionService(
             // replacing inner IPFS urls with public urls
             meta = contentMetaService.exposePublicUrls(meta),
             enrichmentCollection = enrichmentCollection,
-            orders = enrichmentOrderService.enrich(bestOrders)
+            orders = enrichmentOrderService.enrich(itemBestOrders)
         )
     }
 
@@ -185,9 +187,7 @@ class EnrichmentCollectionService(
             return enrichCollections(enrichmentCollectionsById, unionCollections, metaPipeline)
         }
 
-        val shortOrderIds = enrichmentCollections
-            .map { enrichmentHelperService.getExistingOrders(it) }
-            .flatten()
+        val shortOrderIds = enrichmentHelperService.getExistingOrders(enrichmentCollections)
             .map { it.dtoId }
 
         val orders = orderApiService.getByIds(shortOrderIds)
@@ -219,9 +219,7 @@ class EnrichmentCollectionService(
         unionCollections: List<UnionCollection>,
         metaPipeline: CollectionMetaPipeline
     ): List<CollectionDto> {
-        val shortOrderIds = enrichmentCollections.values
-            .map { enrichmentHelperService.getExistingOrders(it) }
-            .flatten()
+        val shortOrderIds = enrichmentHelperService.getExistingOrders(enrichmentCollections.values)
             .map { it.dtoId }
 
         val orders = orderApiService.getByIds(shortOrderIds)
