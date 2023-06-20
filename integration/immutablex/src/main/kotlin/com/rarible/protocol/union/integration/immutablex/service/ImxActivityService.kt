@@ -99,6 +99,7 @@ class ImxActivityService(
         val types = when (type) {
             SyncTypeDto.NFT -> listOf(ActivityType.TRANSFER, ActivityType.MINT)
             SyncTypeDto.ORDER -> listOf(ActivityType.TRADE)
+            SyncTypeDto.AUCTION -> return Slice.empty() // Not supported in IMX
             else -> ActivityType.values().toList()
         }
         val result = getActivities(
