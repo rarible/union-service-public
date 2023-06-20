@@ -45,7 +45,7 @@ class EsOwnershipQueryBuilderService(
         query as BoolQueryBuilder
 
         when (filter) {
-            is EsOwnershipByCollectionFilter -> query.applyByItemFilter(filter)
+            is EsOwnershipByCollectionFilter -> query.applyByCollectionFilter(filter)
             is EsOwnershipByItemFilter -> query.applyByItemFilter(filter)
             is EsOwnershipByOwnerFilter -> query.applyByOwnerFilter(filter)
             is EsOwnershipsSearchFilter -> {
@@ -66,7 +66,7 @@ class EsOwnershipQueryBuilderService(
         return resultQuery
     }
 
-    private fun BoolQueryBuilder.applyByItemFilter(filter: EsOwnershipByCollectionFilter) {
+    private fun BoolQueryBuilder.applyByCollectionFilter(filter: EsOwnershipByCollectionFilter) {
         mustMatchTerm(filter.collectionId.fullId(), EsOwnership::collection.name)
     }
 
@@ -109,6 +109,7 @@ class EsOwnershipQueryBuilderService(
                     filter.beforeDate
                 ).gt(filter.afterDate)
             )
+
             filter.beforeDate != null -> must(RangeQueryBuilder(EsOwnership::date.name).lt(filter.beforeDate))
             filter.afterDate != null -> must(RangeQueryBuilder(EsOwnership::date.name).gt(filter.afterDate))
         }
