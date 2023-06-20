@@ -5,7 +5,6 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
-import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.subchains
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -48,28 +47,6 @@ class EnrichmentAuctionService(
         }
 
         return auctions + fetched.associateBy { it.id }
-    }
-
-    suspend fun findByCollection(collection: CollectionIdDto): List<AuctionDto> {
-        var continuation: String? = null
-        val result = ArrayList<AuctionDto>()
-
-        do {
-            val page = auctionServiceRouter.getService(collection.blockchain).getAuctionsByCollection(
-                collection.value,
-                null,
-                null,
-                listOf(AuctionStatusDto.ACTIVE),
-                null,
-                continuation,
-                FETCH_SIZE
-            )
-            result.addAll(page.entities)
-            continuation = page.continuation
-        } while (continuation != null)
-
-        logger.info("Fetched {} auctions for collection [{}]", result.size, collection)
-        return result
     }
 
     suspend fun findByItem(itemId: ShortItemId): List<AuctionDto> {
