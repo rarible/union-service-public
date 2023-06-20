@@ -5,6 +5,7 @@ import com.rarible.protocol.union.api.service.api.OwnershipApiQueryService
 import com.rarible.protocol.union.api.service.elastic.OwnershipElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionOwnership
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -35,6 +36,10 @@ class OwnershipSourceSelectService(
         size: Int
     ): Slice<UnionOwnership> {
         return getQuerySource().getOwnershipByOwner(owner, continuation, size)
+    }
+
+    suspend fun getOwnershipsByCollection(collectionId: CollectionIdDto, continuation: String?, size: Int): OwnershipsDto {
+        return ownershipElasticService.getOwnershipsByCollection(collectionId, continuation, size)
     }
 
     suspend fun getOwnershipsByItem(itemId: ItemIdDto, continuation: String?, size: Int): OwnershipsDto {

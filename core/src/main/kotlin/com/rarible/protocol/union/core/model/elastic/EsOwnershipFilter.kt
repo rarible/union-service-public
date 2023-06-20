@@ -19,6 +19,12 @@ data class EsOwnershipByOwnerFilter(
     override val cursor: String? = null
 ) : EsOwnershipFilter
 
+data class EsOwnershipByCollectionFilter(
+    val collectionId: CollectionIdDto,
+    override val cursor: String? = null,
+    override val blockchains: Set<BlockchainDto>? = setOf(collectionId.blockchain)
+) : EsOwnershipFilter
+
 data class EsOwnershipByItemFilter(
     val itemId: ItemIdDto,
     override val cursor: String? = null,
