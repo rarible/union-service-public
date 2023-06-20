@@ -73,7 +73,8 @@ class OwnershipElasticService(
         return apiHelper.getEnrichedOwnerships(
             continuation,
             size,
-            { enrichmentAuctionService.findByCollection(collectionId) },
+            // TODO auctions are disabled
+            { emptyList() },
             { entities },
             { ownerships ->
                 OwnershipsDto(
