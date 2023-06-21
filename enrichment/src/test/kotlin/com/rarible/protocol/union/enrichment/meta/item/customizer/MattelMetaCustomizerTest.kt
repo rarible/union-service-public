@@ -162,10 +162,26 @@ class MattelMetaCustomizerTest {
 
     @Test
     fun `customize - barbie token`() = runBlocking<Unit> {
-        val whitListAttributes = listOf(UnionMetaAttribute("type", "type_value"))
+        val whitListAttributes = listOf(
+            UnionMetaAttribute("type", "type_value"),
+            UnionMetaAttribute("drop", "drop_value"),
+            UnionMetaAttribute("rarity", "rarity_value"),
+            UnionMetaAttribute("series", "series_value"),
+            UnionMetaAttribute("splits", "splits_value"),
+            UnionMetaAttribute("collection", "collection_value"),
+            UnionMetaAttribute("redeemable", "redeemable_value"),
+            UnionMetaAttribute("seriesName", "seriesName_value"),
+            UnionMetaAttribute("tokenMintID", "tokenMintID_value"),
+            UnionMetaAttribute("tokenNumber", "tokenNumber_value"),
+            UnionMetaAttribute("tokenSerial", "tokenSerial_value"),
+            UnionMetaAttribute("tokenExpireDate", "tokenExpireDate_value"),
+            UnionMetaAttribute("tokenReleaseDate", "tokenReleaseDate_value"),
+            UnionMetaAttribute("originalCardSerial", "originalCardSerial_value")
+        )
         val attributes = listOf(
-            UnionMetaAttribute("imageUrl", "imageUrl_value"),
-            UnionMetaAttribute("licensorLegal", "licensorLegal_value"),
+            UnionMetaAttribute("tokenImageHash", "imageUrl_value"),
+            UnionMetaAttribute("eula", "eula_value"),
+            UnionMetaAttribute("legal", "legal_value"),
             UnionMetaAttribute("name", "name_value"),
             UnionMetaAttribute("cardId", "cardId_value")
         ) + whitListAttributes
@@ -177,7 +193,8 @@ class MattelMetaCustomizerTest {
         val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
 
         assertThat(customized.name).isEqualTo("name_value #cardId_value")
-        assertThat(customized.rights).isEqualTo("licensorLegal_value")
+        assertThat(customized.rights).isEqualTo("legal_value")
+        assertThat(customized.rightsUri).isEqualTo("eula_value")
         assertThat(customized.attributes).isEqualTo(whitListAttributes)
     }
 
@@ -188,7 +205,7 @@ class MattelMetaCustomizerTest {
             content = listOf(UnionMetaContent("imageUrl_value", MetaContentDto.Representation.ORIGINAL))
         )
 
-        val customizer = MattelMetaCustomizer(listOf(BarbieTokenMetaCustomizer(properties)))
+        val customizer = MattelMetaCustomizer(listOf(BarbieCardMetaCustomizer(properties)))
 
         val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
 
@@ -208,7 +225,7 @@ class MattelMetaCustomizerTest {
             )
         )
 
-        val customizer = MattelMetaCustomizer(listOf(BarbieTokenMetaCustomizer(properties)))
+        val customizer = MattelMetaCustomizer(listOf(BarbieCardMetaCustomizer(properties)))
 
         val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
 
@@ -268,5 +285,4 @@ class MattelMetaCustomizerTest {
 
         assertThat(customized.content[0].properties).isInstanceOf(UnionImageProperties::class.java)
     }
-
 }
