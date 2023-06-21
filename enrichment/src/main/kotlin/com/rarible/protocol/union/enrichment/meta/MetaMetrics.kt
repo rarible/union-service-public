@@ -13,28 +13,70 @@ open class MetaMetrics(
     // Set of metrics to gather statistics for meta fetching from blockchains
 
     fun onMetaFetched(blockchain: BlockchainDto, source: MetaSource = MetaSource.ORIGINAL) {
-        increment(META_FETCH, type(type), tag(blockchain), status("ok"), reason("ok"), source(source.value)) // TODO should be separate metric
+        increment(
+            META_FETCH,
+            type(type),
+            tag(blockchain),
+            status("ok"),
+            reason("ok"),
+            source(source.value)
+        ) // TODO should be separate metric
     }
 
-    fun onMetaFetchNotFound(blockchain: BlockchainDto) {
-        increment(META_FETCH, type(type), tag(blockchain), status("fail"), reason("not_found"))
+    fun onMetaFetchNotFound(blockchain: BlockchainDto, source: MetaSource = MetaSource.ORIGINAL) {
+        increment(
+            META_FETCH,
+            type(type),
+            tag(blockchain),
+            status("fail"),
+            reason("not_found"),
+            source(source.value)
+        )
     }
 
     // TODO not sure it is possible to detect timeouts ATM
-    fun onMetaFetchTimeout(blockchain: BlockchainDto) {
-        increment(META_FETCH, type(type), tag(blockchain), status("fail"), reason("timeout"))
+    fun onMetaFetchTimeout(blockchain: BlockchainDto, source: MetaSource = MetaSource.ORIGINAL) {
+        increment(
+            META_FETCH,
+            type(type),
+            tag(blockchain),
+            status("fail"),
+            reason("timeout"),
+            source(source.value)
+        )
     }
 
     fun onMetaError(blockchain: BlockchainDto, source: MetaSource = MetaSource.ORIGINAL) {
-        increment(META_FETCH, type(type), tag(blockchain), status("fail"), reason("error"), source(source.value))
+        increment(
+            META_FETCH,
+            type(type),
+            tag(blockchain),
+            status("fail"),
+            reason("error"),
+            source(source.value)
+        )
     }
 
-    fun onMetaCorruptedUrlError(blockchain: BlockchainDto) {
-        increment(META_FETCH, type(type), tag(blockchain), status("fail"), reason("corrupted_url"))
+    fun onMetaCorruptedUrlError(blockchain: BlockchainDto, source: MetaSource = MetaSource.ORIGINAL) {
+        increment(
+            META_FETCH,
+            type(type),
+            tag(blockchain),
+            status("fail"),
+            reason("corrupted_url"),
+            source(source.value)
+        )
     }
 
-    fun onMetaCorruptedDataError(blockchain: BlockchainDto) {
-        increment(META_FETCH, type(type), tag(blockchain), status("fail"), reason("corrupted_data"))
+    fun onMetaCorruptedDataError(blockchain: BlockchainDto, source: MetaSource = MetaSource.ORIGINAL) {
+        increment(
+            META_FETCH,
+            type(type),
+            tag(blockchain),
+            status("fail"),
+            reason("corrupted_data"),
+            source(source.value)
+        )
     }
 
     //--------------------- Meta cache ----------------------//
@@ -58,5 +100,4 @@ open class MetaMetrics(
         const val META_FETCH = "meta_fetch"
         const val META_CACHE = "meta_cache"
     }
-
 }
