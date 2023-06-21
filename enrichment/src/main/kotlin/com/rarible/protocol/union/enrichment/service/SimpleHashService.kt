@@ -46,18 +46,15 @@ class SimpleHashService(
             return SimpleHashConverter.convertRawToUnionMeta(cacheMeta.data)
         }
         try {
-            if (!isSupported(key.blockchain)) {
-                logger.info("Skipped to fetch from simplehash $key because ${key.blockchain} isn't supported")
-            } else if (isLazyOtNotExisted(key)) {
-                logger.info("Skipped to fetch from simplehash $key because it's lazy item or it wasn't found")
-            } else {
-
-                val json = simpleHashClient.get()
-                    .uri("/nfts/${network(key.blockchain)}/${key.value.replace(":", "/")}")
-                    .retrieve().bodyToMono(String::class.java).awaitSingle()
-
-                return parse(key, json)
+            if (!isSupported(key.blockchain) || isLazyOrNotFound(key)) {
+                return null
             }
+
+            val json = simpleHashClient.get()
+                .uri("/nfts/${network(key.blockchain)}/${key.value.replace(":", "/")}")
+                .retrieve().bodyToMono(String::class.java).awaitSingle()
+
+            return parse(key, json)
         } catch (e: Exception) {
             metrics.onMetaError(key.blockchain, MetaSource.SIMPLE_HASH)
             logger.error("Failed to fetch from simplehash $key", e)
@@ -66,6 +63,10 @@ class SimpleHashService(
     }
 
     private fun parse(key: ItemIdDto, json: String): UnionMeta? {
+        if (json == "{}") {
+            metrics.onMetaFetchNotFound(key.blockchain, MetaSource.SIMPLE_HASH)
+            return null
+        }
         return try {
             val result = objectMapper.readValue(json, SimpleHashItem::class.java)
             metrics.onMetaFetched(key.blockchain, MetaSource.SIMPLE_HASH)
@@ -86,7 +87,7 @@ class SimpleHashService(
         return props.simpleHash.mapping[blockchain.name.lowercase()] ?: blockchain.name.lowercase()
     }
 
-    private suspend fun isLazyOtNotExisted(key: ItemIdDto): Boolean {
+    private suspend fun isLazyOrNotFound(key: ItemIdDto): Boolean {
         val item = try {
             itemServiceRouter.getService(key.blockchain).getItemById(key.value)
         } catch (e: Exception) {
