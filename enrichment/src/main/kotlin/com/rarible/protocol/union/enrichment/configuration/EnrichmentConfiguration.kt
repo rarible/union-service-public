@@ -40,7 +40,9 @@ class EnrichmentConfiguration(
     fun enrichmentCollectionProperties(): EnrichmentCollectionProperties = properties.collection
 
     @Bean
+    fun enrichmentCurrencyProperties(): EnrichmentCurrenciesProperties = properties.currencies
+
+    @Bean
     fun enrichmentMattelMetaCustomizerProperties(): EnrichmentMattelMetaCustomizerProperties =
         properties.meta.item.customizers.mattel
-
 }

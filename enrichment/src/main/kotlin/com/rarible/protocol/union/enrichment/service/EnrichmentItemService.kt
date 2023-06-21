@@ -120,10 +120,12 @@ class EnrichmentItemService(
         val meta = metaEntry?.data
         onMetaEntry(itemId, metaPipeline, metaEntry)
 
+        val itemOrders = enrichmentHelperService.getExistingOrders(shortItem)
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
-            existing = enrichmentHelperService.getExistingOrders(shortItem),
+            existing = itemOrders,
             orders = orders
         )
+        val itemBestOrders = itemOrders.mapNotNull { bestOrders[it.dtoId] }.associateBy { it.id }
 
         val auctionIds = shortItem?.auctions ?: emptySet()
         val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
@@ -145,7 +147,7 @@ class EnrichmentItemService(
             shortItem = shortItem,
             // replacing inner IPFS urls with public urls
             meta = contentMetaService.exposePublicUrls(trimmedMeta),
-            orders = enrichmentOrderService.enrich(bestOrders),
+            orders = enrichmentOrderService.enrich(itemBestOrders),
             auctions = auctionsData.await(),
             customCollection = customCollection
         )
@@ -166,15 +168,13 @@ class EnrichmentItemService(
                 .associateBy { it.id.toDto() }
 
             // Looking for full orders for existing items in order-indexer
-            val shortOrderIds = shortItems.values
-                .map { enrichmentHelperService.getExistingOrders(it) }
-                .flatten()
+            val shortOrderIds = enrichmentHelperService.getExistingOrders(shortItems.values)
                 .map { it.dtoId }
 
             val orders = enrichmentOrderService.getByIds(shortOrderIds)
                 .associateBy { it.id }
 
-            unionItems.map {
+            val result = unionItems.map {
                 val shortItem = shortItems[it.id]
                 enrichItem(
                     shortItem = shortItem,
@@ -183,6 +183,7 @@ class EnrichmentItemService(
                     metaPipeline = metaPipeline
                 )
             }
+            result
         }
 
         return enrichedItems

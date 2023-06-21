@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -31,6 +33,9 @@ class SimpleHashService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    private val objectMapper = ApiClient.createDefaultObjectMapper()
+        .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+
     fun isSupported(blockchain: BlockchainDto): Boolean {
         return blockchain in props.simpleHash.supported
     }
@@ -46,17 +51,30 @@ class SimpleHashService(
             } else if (isLazyOtNotExisted(key)) {
                 logger.info("Skipped to fetch from simplehash $key because it's lazy item or it wasn't found")
             } else {
-                val response = simpleHashClient.get()
+
+                val json = simpleHashClient.get()
                     .uri("/nfts/${network(key.blockchain)}/${key.value.replace(":", "/")}")
-                    .retrieve().bodyToMono(SimpleHashItem::class.java).awaitSingle()
-                metrics.onMetaFetched(key.blockchain, MetaSource.SIMPLE_HASH)
-                return SimpleHashConverter.convert(response)
+                    .retrieve().bodyToMono(String::class.java).awaitSingle()
+
+                return parse(key, json)
             }
         } catch (e: Exception) {
             metrics.onMetaError(key.blockchain, MetaSource.SIMPLE_HASH)
             logger.error("Failed to fetch from simplehash $key", e)
         }
         return null
+    }
+
+    private fun parse(key: ItemIdDto, json: String): UnionMeta? {
+        return try {
+            val result = objectMapper.readValue(json, SimpleHashItem::class.java)
+            metrics.onMetaFetched(key.blockchain, MetaSource.SIMPLE_HASH)
+            SimpleHashConverter.convert(result)
+        } catch (e: Exception) {
+            logger.error("Failed to parse meta from simplehash {}: {}", key, json)
+            metrics.onMetaCorruptedDataError(key.blockchain, MetaSource.SIMPLE_HASH)
+            null
+        }
     }
 
     suspend fun fetch(key: CollectionIdDto): UnionMeta? {

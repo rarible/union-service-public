@@ -79,6 +79,9 @@ class EnrichmentOrderService(
         }
 
         val fetched = getByIds(notNull)
+        if (fetched.isEmpty()) {
+            return orders
+        }
 
         // Merging with already known orders
         return fetched.associateBy { it.id } + orders

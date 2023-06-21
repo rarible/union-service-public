@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.api.service.select.OwnershipSourceSelectService
 import com.rarible.protocol.union.core.util.PageSize
+import com.rarible.protocol.union.core.util.checkNullIds
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdsDto
 import com.rarible.protocol.union.dto.OwnershipSearchRequestDto
@@ -22,7 +23,7 @@ class OwnershipController(
     }
 
     override suspend fun getOwnershipById(
-        ownershipId: String
+        ownershipId: String,
     ): ResponseEntity<OwnershipDto> {
         val fullOwnershipId = OwnershipIdParser.parseFull(ownershipId)
 
@@ -32,14 +33,38 @@ class OwnershipController(
     }
 
     override suspend fun getOwnershipsByIds(ownershipIdsDto: OwnershipIdsDto): ResponseEntity<OwnershipsDto> {
+        checkNullIds(ownershipIdsDto.ids) // It's possible to send request like {"ids": [null]}
         val result = ownershipSourceSelectService.getOwnershipsByIds(ownershipIdsDto.ids)
         return ResponseEntity.ok(OwnershipsDto(0, null, result))
+    }
+
+    override suspend fun getOwnershipsByCollection(
+        collection: String,
+        continuation: String?,
+        size: Int?,
+    ): ResponseEntity<OwnershipsDto> {
+        val safeSize = PageSize.OWNERSHIP.limit(size)
+        val collectionId = IdParser.parseCollectionId(collection)
+        val result = ownershipSourceSelectService.getOwnershipsByCollection(collectionId, continuation, safeSize)
+
+        logger.info(
+            "Response for getOwnershipsByCollection(collectionId={}, continuation={}, size={}):" +
+                " Slice(size={}, continuation={}) ",
+            collectionId.fullId(),
+            continuation,
+            size,
+            result.ownerships.size,
+            result.continuation
+        )
+
+        return ResponseEntity.ok(result)
+
     }
 
     override suspend fun getOwnershipsByItem(
         itemId: String,
         continuation: String?,
-        size: Int?
+        size: Int?,
     ): ResponseEntity<OwnershipsDto> {
         val safeSize = PageSize.OWNERSHIP.limit(size)
         val fullItemId = IdParser.parseItemId(itemId)
@@ -59,7 +84,7 @@ class OwnershipController(
     }
 
     override suspend fun searchOwnerships(
-        ownershipSearchRequestDto: OwnershipSearchRequestDto
+        ownershipSearchRequestDto: OwnershipSearchRequestDto,
     ): ResponseEntity<OwnershipsDto> {
         return ResponseEntity.ok(ownershipSourceSelectService.search(ownershipSearchRequestDto))
     }

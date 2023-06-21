@@ -4,6 +4,7 @@ import com.rarible.core.common.mapAsync
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
+import com.rarible.protocol.union.core.model.elastic.EsOwnershipByCollectionFilter
 import com.rarible.protocol.union.core.model.elastic.EsOwnershipByItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsOwnershipByOwnerFilter
 import com.rarible.protocol.union.core.model.elastic.EsOwnershipSort
@@ -11,6 +12,7 @@ import com.rarible.protocol.union.core.model.elastic.EsOwnershipsSearchFilter
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipSearchRequestDto
 import com.rarible.protocol.union.dto.OwnershipSearchSortDto
@@ -33,6 +35,15 @@ class OwnershipElasticHelper(
         size: Int
     ): Slice<UnionOwnership> {
         val filter = EsOwnershipByOwnerFilter(owner, blockchains, cursor = continuation)
+        val ownerships = repository.search(filter, EsOwnershipSort.DEFAULT, size)
+        return Slice(
+            continuation = ownerships.continuation,
+            entities = getOwnerships(ownerships.entities)
+        )
+    }
+
+    suspend fun getRawOwnershipsByCollection(collectionId: CollectionIdDto, continuation: String?, size: Int): Slice<UnionOwnership> {
+        val filter = EsOwnershipByCollectionFilter(collectionId, cursor = continuation)
         val ownerships = repository.search(filter, EsOwnershipSort.DEFAULT, size)
         return Slice(
             continuation = ownerships.continuation,
