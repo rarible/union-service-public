@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 
 @Component
-@ConditionalOnProperty("worker.collectionMetaRefresh.enabled", havingValue = "true")
+@ConditionalOnProperty(name = ["worker.metaRefresh.enabled"], havingValue = "true")
 class RefreshMetaTaskSchedulingJob(
     properties: WorkerProperties,
     meterRegistry: MeterRegistry,
@@ -35,8 +35,8 @@ class RefreshMetaTaskSchedulingJob(
 ) : SequentialDaemonWorker(
     meterRegistry = meterRegistry,
     properties = DaemonWorkerProperties().copy(
-        pollingPeriod = properties.collectionMetaRefresh.rate,
-        errorDelay = properties.collectionMetaRefresh.rate,
+        pollingPeriod = properties.metaRefresh.rate,
+        errorDelay = properties.metaRefresh.rate,
     ),
     workerName = "meta_refresh_request_job"
 ) {
@@ -58,10 +58,10 @@ class RefreshMetaTaskSchedulingJobHandler(
     properties: WorkerProperties,
     private val metaRefreshRequestRepository: MetaRefreshRequestRepository,
     private val lagService: LagService,
-    private val collectionMetaRefreshSchedulingService: CollectionMetaRefreshSchedulingService,
+    private val metaRefreshSchedulingService: MetaRefreshSchedulingService,
     private val metaRefreshMetrics: MetaRefreshMetrics,
 ) : JobHandler {
-    private val concurrency: Int = properties.collectionMetaRefresh.concurrency
+    private val concurrency: Int = properties.metaRefresh.concurrency
 
     override suspend fun handle() {
         val runningTasks = taskRepository.findByRunning(true)
@@ -83,7 +83,7 @@ class RefreshMetaTaskSchedulingJobHandler(
         val tasksToStart = concurrency - runningTasks.size
         val collections = metaRefreshRequestRepository.findToScheduleAndUpdate(tasksToStart)
         collections.forEach {
-            collectionMetaRefreshSchedulingService.scheduleTask(it)
+            metaRefreshSchedulingService.scheduleTask(it)
         }
         deleteFinishedTasks()
     }

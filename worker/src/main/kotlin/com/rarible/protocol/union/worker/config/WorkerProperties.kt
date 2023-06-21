@@ -13,9 +13,8 @@ data class WorkerProperties(
     val reconciliation: ReconciliationProperties = ReconciliationProperties(),
     val platformBestSellCleanup: PlatformBestSellCleanUpProperties = PlatformBestSellCleanUpProperties(),
     val priceUpdate: PriceUpdateProperties = PriceUpdateProperties(),
-    val collectionMetaRefreshRequestCleanup: CollectionMetaRefreshRequestCleanupProperties =
-        CollectionMetaRefreshRequestCleanupProperties(),
-    val collectionMetaRefresh: CollectionMetaRefreshProperties = CollectionMetaRefreshProperties(),
+    val metaRefreshRequestCleanup: MetaRefreshRequestCleanupProperties = MetaRefreshRequestCleanupProperties(),
+    val metaRefresh: MetaRefreshProperties = MetaRefreshProperties(),
     val reconcileMarks: ReconcileMarksProperties = ReconcileMarksProperties(),
     val metaItemRetry: MetaRetry = MetaRetry(),
     val metaCollectionRetry: MetaRetry = MetaRetry(),
@@ -102,12 +101,12 @@ class PriceUpdateProperties(
     val rate: Duration = Duration.ofMinutes(5)
 )
 
-class CollectionMetaRefreshRequestCleanupProperties(
+class MetaRefreshRequestCleanupProperties(
     val enabled: Boolean = true,
     val rate: Duration = Duration.ofMinutes(5)
 )
 
-class CollectionMetaRefreshProperties(
+class MetaRefreshProperties(
     val enabled: Boolean = true,
     val maxKafkaLag: Long = 1000,
     val concurrency: Int = 10,

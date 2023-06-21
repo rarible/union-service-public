@@ -40,6 +40,6 @@ class KafkaConsumerConfiguration(
             applicationEnvironmentInfo.name,
             ItemMetaPipeline.REFRESH.pipeline
         ),
-        maxLag = workerProperties.collectionMetaRefresh.maxKafkaLag,
+        maxLag = workerProperties.metaRefresh.maxKafkaLag,
     )
 }

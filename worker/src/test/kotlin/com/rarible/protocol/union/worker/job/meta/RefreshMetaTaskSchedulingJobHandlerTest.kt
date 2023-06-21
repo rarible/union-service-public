@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
-import com.rarible.protocol.union.worker.task.meta.RefreshMetaTask
-import com.rarible.protocol.union.worker.task.meta.RefreshMetaTaskParam
 import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.worker.AbstractIntegrationTest
@@ -13,6 +11,8 @@ import com.rarible.protocol.union.worker.IntegrationTest
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import com.rarible.protocol.union.worker.kafka.LagService
 import com.rarible.protocol.union.worker.metrics.MetaRefreshMetrics
+import com.rarible.protocol.union.worker.task.meta.RefreshMetaTask
+import com.rarible.protocol.union.worker.task.meta.RefreshMetaTaskParam
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.flow.toList
@@ -30,7 +30,7 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
     private lateinit var taskRepository: TaskRepository
 
     @Autowired
-    private lateinit var collectionMetaRefreshSchedulingService: CollectionMetaRefreshSchedulingService
+    private lateinit var metaRefreshSchedulingService: MetaRefreshSchedulingService
 
     @Autowired
     private lateinit var metaRefreshRequestRepository: MetaRefreshRequestRepository
@@ -53,7 +53,7 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
             properties = WorkerProperties(),
             metaRefreshRequestRepository = metaRefreshRequestRepository,
             lagService = lagService,
-            collectionMetaRefreshSchedulingService = collectionMetaRefreshSchedulingService,
+            metaRefreshSchedulingService = metaRefreshSchedulingService,
             metaRefreshMetrics = metaRefreshMetrics,
         )
     }

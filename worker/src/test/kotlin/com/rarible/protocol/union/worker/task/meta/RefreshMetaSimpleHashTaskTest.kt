@@ -6,7 +6,7 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
-import com.rarible.protocol.union.worker.job.meta.CollectionMetaRefreshSchedulingService
+import com.rarible.protocol.union.worker.job.meta.MetaRefreshSchedulingService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.impl.annotations.InjectMockKs
@@ -30,7 +30,7 @@ internal class RefreshMetaSimpleHashTaskTest {
     private lateinit var simpleHashService: SimpleHashService
 
     @MockK
-    private lateinit var collectionMetaRefreshSchedulingService: CollectionMetaRefreshSchedulingService
+    private lateinit var metaRefreshSchedulingService: MetaRefreshSchedulingService
 
     @Test
     fun `run simplehash contract refresh`() = runTest {
@@ -47,7 +47,7 @@ internal class RefreshMetaSimpleHashTaskTest {
         } returns Unit
 
         coEvery {
-            collectionMetaRefreshSchedulingService.scheduleTask(match {
+            metaRefreshSchedulingService.scheduleTask(match {
                 it.collectionId == c1 && !it.withSimpleHash && it.full && !it.scheduled
             })
         } returns Unit
@@ -68,7 +68,7 @@ internal class RefreshMetaSimpleHashTaskTest {
                     value = address.toString()
                 )
             )
-            collectionMetaRefreshSchedulingService.scheduleTask(match {
+            metaRefreshSchedulingService.scheduleTask(match {
                 it.collectionId == c1 && !it.withSimpleHash && it.full && !it.scheduled
             })
         }

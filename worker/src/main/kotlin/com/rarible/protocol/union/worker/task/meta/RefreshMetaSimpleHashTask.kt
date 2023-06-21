@@ -6,7 +6,7 @@ import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
-import com.rarible.protocol.union.worker.job.meta.CollectionMetaRefreshSchedulingService
+import com.rarible.protocol.union.worker.job.meta.MetaRefreshSchedulingService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -20,7 +20,7 @@ import kotlin.time.Duration.Companion.seconds
 class RefreshMetaSimpleHashTask(
     private val objectMapper: ObjectMapper,
     private val simpleHashService: SimpleHashService,
-    private val collectionMetaRefreshSchedulingService: CollectionMetaRefreshSchedulingService,
+    private val metaRefreshSchedulingService: MetaRefreshSchedulingService,
 ) : TaskHandler<Unit> {
     override val type = META_REFRESH_SIMPLEHASH_TASK
 
@@ -29,7 +29,7 @@ class RefreshMetaSimpleHashTask(
         val parsedParam = objectMapper.readValue(param, RefreshSimpleHashTaskParam::class.java)
         simpleHashService.refreshContract(IdParser.parseCollectionId(parsedParam.collectionId))
         delay(30.seconds)
-        collectionMetaRefreshSchedulingService.scheduleTask(
+        metaRefreshSchedulingService.scheduleTask(
             MetaRefreshRequest(
                 collectionId = parsedParam.collectionId,
                 full = true,

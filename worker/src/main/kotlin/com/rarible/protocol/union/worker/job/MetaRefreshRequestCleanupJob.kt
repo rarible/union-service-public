@@ -16,8 +16,8 @@ class MetaRefreshRequestCleanupJob(
 ) : SequentialDaemonWorker(
     meterRegistry = meterRegistry,
     properties = DaemonWorkerProperties().copy(
-        pollingPeriod = properties.collectionMetaRefreshRequestCleanup.rate,
-        errorDelay = properties.collectionMetaRefreshRequestCleanup.rate
+        pollingPeriod = properties.metaRefreshRequestCleanup.rate,
+        errorDelay = properties.metaRefreshRequestCleanup.rate
     ),
     workerName = "meta_refresh_request_cleanup_job"
 ) {

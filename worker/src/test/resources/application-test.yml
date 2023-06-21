@@ -50,7 +50,7 @@ worker:
     enabled: false
   meta-collection-retry:
     enabled: false
-  collectionMetaRefresh:
+  metaRefresh:
     enabled: false
   search-reindex:
     activity:
