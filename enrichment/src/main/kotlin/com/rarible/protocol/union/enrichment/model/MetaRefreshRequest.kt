@@ -5,8 +5,8 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
-@Document("collection_meta_refresh_request")
-data class CollectionMetaRefreshRequest(
+@Document("meta_refresh_request")
+data class MetaRefreshRequest(
     @Id
     val id: String = ObjectId().toHexString(),
     val collectionId: String,

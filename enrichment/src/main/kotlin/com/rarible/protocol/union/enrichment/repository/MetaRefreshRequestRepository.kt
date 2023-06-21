@@ -2,7 +2,7 @@ package com.rarible.protocol.union.enrichment.repository
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
-import com.rarible.protocol.union.enrichment.model.CollectionMetaRefreshRequest
+import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -25,10 +25,10 @@ import java.time.Instant
 
 @Component
 @CaptureSpan(type = SpanType.DB)
-class CollectionMetaRefreshRequestRepository(
+class MetaRefreshRequestRepository(
     private val template: ReactiveMongoTemplate
 ) {
-    private val collection: String = template.getCollectionName(CollectionMetaRefreshRequest::class.java)
+    private val collection: String = template.getCollectionName(MetaRefreshRequest::class.java)
 
     suspend fun createIndices() {
         ALL_INDEXES.forEach { index ->
@@ -38,75 +38,75 @@ class CollectionMetaRefreshRequestRepository(
     }
 
     suspend fun deleteCreatedBefore(date: Instant) {
-        template.remove<CollectionMetaRefreshRequest>(
+        template.remove<MetaRefreshRequest>(
             Query(
-                where(CollectionMetaRefreshRequest::createdAt).lt(date)
-                    .and(CollectionMetaRefreshRequest::scheduled).isEqualTo(true)
+                where(MetaRefreshRequest::createdAt).lt(date)
+                    .and(MetaRefreshRequest::scheduled).isEqualTo(true)
             )
         )
             .awaitSingleOrNull()
     }
 
     suspend fun deleteAll() {
-        template.remove<CollectionMetaRefreshRequest>(Query()).awaitSingleOrNull()
+        template.remove<MetaRefreshRequest>(Query()).awaitSingleOrNull()
     }
 
     suspend fun countForCollectionId(collectionId: String): Long =
-        template.count<CollectionMetaRefreshRequest>(
+        template.count<MetaRefreshRequest>(
             Query(
-                where(CollectionMetaRefreshRequest::collectionId).isEqualTo(collectionId)
+                where(MetaRefreshRequest::collectionId).isEqualTo(collectionId)
             )
         ).awaitSingle()
 
     suspend fun countNotScheduledForCollectionId(collectionId: String): Long =
-        template.count<CollectionMetaRefreshRequest>(
+        template.count<MetaRefreshRequest>(
             Query(
-                where(CollectionMetaRefreshRequest::collectionId).isEqualTo(collectionId)
-                    .and(CollectionMetaRefreshRequest::scheduled).isEqualTo(false)
+                where(MetaRefreshRequest::collectionId).isEqualTo(collectionId)
+                    .and(MetaRefreshRequest::scheduled).isEqualTo(false)
             )
         ).awaitSingle()
 
     suspend fun countNotScheduled(): Long =
-        template.count<CollectionMetaRefreshRequest>(
+        template.count<MetaRefreshRequest>(
             Query(
-                where(CollectionMetaRefreshRequest::scheduled).isEqualTo(false)
+                where(MetaRefreshRequest::scheduled).isEqualTo(false)
             )
         ).awaitSingle()
 
-    suspend fun save(request: CollectionMetaRefreshRequest) {
+    suspend fun save(request: MetaRefreshRequest) {
         template.save(request).awaitSingle()
     }
 
-    suspend fun findToScheduleAndUpdate(size: Int): List<CollectionMetaRefreshRequest> {
+    suspend fun findToScheduleAndUpdate(size: Int): List<MetaRefreshRequest> {
         val requests = template.find(
             Query(
-                where(CollectionMetaRefreshRequest::scheduled).isEqualTo(false)
-                    .and(CollectionMetaRefreshRequest::scheduledAt).lt(Instant.now())
+                where(MetaRefreshRequest::scheduled).isEqualTo(false)
+                    .and(MetaRefreshRequest::scheduledAt).lt(Instant.now())
             ).with(
                 Sort.by(
-                    CollectionMetaRefreshRequest::createdAt.name
+                    MetaRefreshRequest::createdAt.name
                 )
             ).limit(size),
-            CollectionMetaRefreshRequest::class.java
+            MetaRefreshRequest::class.java
         ).asFlow().toList()
         template.updateMulti(
-            Query(where(CollectionMetaRefreshRequest::id).inValues(requests.map { it.id })),
-            Update().set(CollectionMetaRefreshRequest::scheduled.name, true),
-            CollectionMetaRefreshRequest::class.java
+            Query(where(MetaRefreshRequest::id).inValues(requests.map { it.id })),
+            Update().set(MetaRefreshRequest::scheduled.name, true),
+            MetaRefreshRequest::class.java
         ).awaitSingle()
         return requests
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(CollectionMetaRefreshRequestRepository::class.java)
+        private val logger = LoggerFactory.getLogger(MetaRefreshRequestRepository::class.java)
 
         private val SCHEDULED_CREATED_AT_DEFINITION = Index()
-            .on(CollectionMetaRefreshRequest::scheduled.name, Sort.Direction.ASC)
-            .on(CollectionMetaRefreshRequest::createdAt.name, Sort.Direction.ASC)
+            .on(MetaRefreshRequest::scheduled.name, Sort.Direction.ASC)
+            .on(MetaRefreshRequest::createdAt.name, Sort.Direction.ASC)
             .background()
 
         private val COLLECTION_ID_DEFINITION = Index()
-            .on(CollectionMetaRefreshRequest::collectionId.name, Sort.Direction.ASC)
+            .on(MetaRefreshRequest::collectionId.name, Sort.Direction.ASC)
             .background()
 
         private val ALL_INDEXES = listOf(

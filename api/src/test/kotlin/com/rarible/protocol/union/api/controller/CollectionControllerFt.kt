@@ -13,7 +13,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
-import com.rarible.protocol.union.enrichment.repository.CollectionMetaRefreshRequestRepository
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
@@ -59,7 +59,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     lateinit var enrichmentCollectionService: EnrichmentCollectionService
 
     @Autowired
-    lateinit var collectionMetaRefreshRequestRepository: CollectionMetaRefreshRequestRepository
+    lateinit var metaRefreshRequestRepository: MetaRefreshRequestRepository
 
     @LocalServerPort
     var port: Int = 0
@@ -217,7 +217,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
         collectionControllerClient.refreshCollectionMeta(unionCollection.id.fullId()).awaitSingleOrNull()
 
-        val requests = collectionMetaRefreshRequestRepository.countForCollectionId(unionCollection.id.fullId())
+        val requests = metaRefreshRequestRepository.countForCollectionId(unionCollection.id.fullId())
         assertThat(requests).isEqualTo(1)
     }
 }

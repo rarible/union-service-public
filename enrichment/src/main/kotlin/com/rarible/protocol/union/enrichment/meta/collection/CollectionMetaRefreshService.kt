@@ -6,10 +6,9 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.repository.CollectionMetaRefreshRequestRepository
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
-import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -20,7 +19,7 @@ class CollectionMetaRefreshService(
     private val esItemRepository: EsItemRepository,
     private val itemRepository: ItemRepository,
     private val itemMetaService: ItemMetaService,
-    private val collectionMetaRefreshRequestRepository: CollectionMetaRefreshRequestRepository,
+    private val metaRefreshRequestRepository: MetaRefreshRequestRepository,
 ) {
 
     suspend fun shouldRefresh(collectionId: CollectionIdDto): Boolean {
@@ -37,12 +36,12 @@ class CollectionMetaRefreshService(
             )
             return false
         }
-        val refreshCount = collectionMetaRefreshRequestRepository.countForCollectionId(collectionFullId)
+        val refreshCount = metaRefreshRequestRepository.countForCollectionId(collectionFullId)
         if (refreshCount >= MAX_COLLECTION_REFRESH_COUNT) {
             logger.info("Collection refresh count $refreshCount gte $MAX_COLLECTION_REFRESH_COUNT. Will not refresh")
             return false
         }
-        val scheduledCount = collectionMetaRefreshRequestRepository.countNotScheduledForCollectionId(collectionFullId)
+        val scheduledCount = metaRefreshRequestRepository.countNotScheduledForCollectionId(collectionFullId)
         if (scheduledCount > 0) {
             logger.info("Collection refresh already pending for $collectionFullId. Will not refresh")
             return false

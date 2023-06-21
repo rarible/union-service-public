@@ -2,7 +2,6 @@ package com.rarible.protocol.union.worker.task.meta
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.service.ItemService
@@ -12,10 +11,11 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
-import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
+import com.rarible.protocol.union.enrichment.test.data.randomShortItem
+import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -29,8 +29,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import java.math.BigInteger
-import java.time.Instant
 
 @ExtendWith(MockKExtension::class)
 internal class RefreshMetaTaskTest {
@@ -73,7 +71,7 @@ internal class RefreshMetaTaskTest {
         } returns Page(
             total = 0,
             continuation = "continuation2",
-            entities = listOf(createUnionItem(id = itemId1))
+            entities = listOf(randomUnionItem(id = itemId1))
         )
         coEvery {
             itemService.getItemsByCollection(
@@ -85,13 +83,13 @@ internal class RefreshMetaTaskTest {
         } returns Page(
             total = 0,
             continuation = null,
-            entities = listOf(createUnionItem(id = itemId2))
+            entities = listOf(randomUnionItem(id = itemId2))
         )
         coEvery { itemRepository.getAll(listOf(ShortItemId(itemId1))) } returns listOf(createShortItem(id = itemId1))
         coEvery { itemRepository.getAll(listOf(ShortItemId(itemId2))) } returns listOf(
             createShortItem(
                 id = itemId2,
-                meta = createMeta()
+                meta = randomItemMetaDownloadEntry()
             )
         )
         coEvery {
@@ -146,7 +144,7 @@ internal class RefreshMetaTaskTest {
         } returns Page(
             total = 0,
             continuation = "continuation2",
-            entities = listOf(createUnionItem(id = itemId1))
+            entities = listOf(randomUnionItem(id = itemId1))
         )
         coEvery {
             itemService.getItemsByCollection(
@@ -158,12 +156,12 @@ internal class RefreshMetaTaskTest {
         } returns Page(
             total = 0,
             continuation = null,
-            entities = listOf(createUnionItem(id = itemId2))
+            entities = listOf(randomUnionItem(id = itemId2))
         )
         coEvery { itemRepository.getAll(listOf(ShortItemId(itemId1))) } returns listOf(
             createShortItem(
                 id = itemId1,
-                meta = createMeta()
+                meta = randomItemMetaDownloadEntry()
             )
         )
         coEvery { itemRepository.getAll(listOf(ShortItemId(itemId2))) } returns listOf(createShortItem(id = itemId2))
@@ -199,27 +197,7 @@ internal class RefreshMetaTaskTest {
             )
         }
     }
+
+    private fun createShortItem(id: ItemIdDto, meta: DownloadEntry<UnionMeta>? = null) =
+        randomShortItem(id).copy(metaEntry = meta)
 }
-
-fun createMeta(): DownloadEntry<UnionMeta> = randomItemMetaDownloadEntry()
-
-fun createUnionItem(id: ItemIdDto) = UnionItem(
-    id = id,
-    collection = null,
-    deleted = false,
-    lastUpdatedAt = Instant.now(),
-    lazySupply = BigInteger.ZERO,
-    mintedAt = Instant.now(),
-    supply = BigInteger.ONE,
-    meta = null
-)
-
-fun createShortItem(id: ItemIdDto, meta: DownloadEntry<UnionMeta>? = null) = ShortItem(
-    itemId = id.value,
-    blockchain = id.blockchain,
-    lastUpdatedAt = Instant.now(),
-    metaEntry = meta,
-    bestBidOrders = emptyMap(),
-    bestSellOrders = emptyMap(),
-    totalStock = BigInteger.ZERO,
-)

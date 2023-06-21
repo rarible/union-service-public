@@ -19,9 +19,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-internal class RefreshSimpleHashTaskTest {
+internal class RefreshMetaSimpleHashTaskTest {
     @InjectMockKs
-    private lateinit var refreshSimpleHashTask: RefreshSimpleHashTask
+    private lateinit var refreshMetaSimpleHashTask: RefreshMetaSimpleHashTask
 
     @SpyK
     private var objectMapper: ObjectMapper = jacksonObjectMapper()
@@ -52,7 +52,7 @@ internal class RefreshSimpleHashTaskTest {
             })
         } returns Unit
 
-        refreshSimpleHashTask.runLongTask(
+        refreshMetaSimpleHashTask.runLongTask(
             from = null,
             param = objectMapper.writeValueAsString(
                 RefreshSimpleHashTaskParam(

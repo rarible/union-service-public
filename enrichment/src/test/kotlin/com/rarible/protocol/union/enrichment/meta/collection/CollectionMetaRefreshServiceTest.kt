@@ -5,7 +5,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.repository.CollectionMetaRefreshRequestRepository
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomEsItem
@@ -40,7 +40,7 @@ internal class CollectionMetaRefreshServiceTest {
     private lateinit var itemMetaService: ItemMetaService
 
     @Mock
-    private lateinit var collectionMetaRefreshRequestRepository: CollectionMetaRefreshRequestRepository
+    private lateinit var metaRefreshRequestRepository: MetaRefreshRequestRepository
 
     @Test
     fun `collection size is small`() = runBlocking<Unit> {
@@ -62,7 +62,7 @@ internal class CollectionMetaRefreshServiceTest {
     fun `attempts exceeded`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         whenever(esItemRepository.countItemsInCollection(collectionId.fullId())).thenReturn(1000 + randomLong(1000))
-        whenever(collectionMetaRefreshRequestRepository.countForCollectionId(collectionId.fullId())).thenReturn(3)
+        whenever(metaRefreshRequestRepository.countForCollectionId(collectionId.fullId())).thenReturn(3)
 
         assertThat(collectionMetaRefreshService.shouldRefresh(collectionId)).isFalse()
     }
@@ -71,8 +71,8 @@ internal class CollectionMetaRefreshServiceTest {
     fun `already scheduled`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         whenever(esItemRepository.countItemsInCollection(collectionId.fullId())).thenReturn(1000 + randomLong(1000))
-        whenever(collectionMetaRefreshRequestRepository.countForCollectionId(collectionId.fullId())).thenReturn(1)
-        whenever(collectionMetaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId.fullId()))
+        whenever(metaRefreshRequestRepository.countForCollectionId(collectionId.fullId())).thenReturn(1)
+        whenever(metaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId.fullId()))
             .thenReturn(1)
 
         assertThat(collectionMetaRefreshService.shouldRefresh(collectionId)).isFalse()
@@ -82,8 +82,8 @@ internal class CollectionMetaRefreshServiceTest {
     fun `check random no changes`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         whenever(esItemRepository.countItemsInCollection(collectionId.fullId())).thenReturn(1000 + randomLong(1000))
-        whenever(collectionMetaRefreshRequestRepository.countForCollectionId(collectionId.fullId())).thenReturn(2)
-        whenever(collectionMetaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId.fullId()))
+        whenever(metaRefreshRequestRepository.countForCollectionId(collectionId.fullId())).thenReturn(2)
+        whenever(metaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId.fullId()))
             .thenReturn(0)
 
         val esItem1 = randomEsItem()
@@ -120,8 +120,8 @@ internal class CollectionMetaRefreshServiceTest {
     fun `check random meta changed`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         whenever(esItemRepository.countItemsInCollection(collectionId.fullId())).thenReturn(1000 + randomLong(1000))
-        whenever(collectionMetaRefreshRequestRepository.countForCollectionId(collectionId.fullId())).thenReturn(0)
-        whenever(collectionMetaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId.fullId()))
+        whenever(metaRefreshRequestRepository.countForCollectionId(collectionId.fullId())).thenReturn(0)
+        whenever(metaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId.fullId()))
             .thenReturn(0)
 
         val esItem1 = randomEsItem()

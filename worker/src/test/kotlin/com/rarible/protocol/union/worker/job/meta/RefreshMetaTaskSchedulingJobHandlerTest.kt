@@ -3,12 +3,11 @@ package com.rarible.protocol.union.worker.job.meta
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
-import com.rarible.core.task.TaskService
 import com.rarible.core.task.TaskStatus
 import com.rarible.protocol.union.worker.task.meta.RefreshMetaTask
 import com.rarible.protocol.union.worker.task.meta.RefreshMetaTaskParam
-import com.rarible.protocol.union.enrichment.model.CollectionMetaRefreshRequest
-import com.rarible.protocol.union.enrichment.repository.CollectionMetaRefreshRequestRepository
+import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.worker.AbstractIntegrationTest
 import com.rarible.protocol.union.worker.IntegrationTest
 import com.rarible.protocol.union.worker.config.WorkerProperties
@@ -34,7 +33,7 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
     private lateinit var collectionMetaRefreshSchedulingService: CollectionMetaRefreshSchedulingService
 
     @Autowired
-    private lateinit var collectionMetaRefreshRequestRepository: CollectionMetaRefreshRequestRepository
+    private lateinit var metaRefreshRequestRepository: MetaRefreshRequestRepository
 
     @Autowired
     private lateinit var metaRefreshMetrics: MetaRefreshMetrics
@@ -52,8 +51,7 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
         refreshMetaTaskSchedulingJobHandler = RefreshMetaTaskSchedulingJobHandler(
             taskRepository = taskRepository,
             properties = WorkerProperties(),
-            collectionMetaRefreshRequestRepository = collectionMetaRefreshRequestRepository,
-            objectMapper = objectMapper,
+            metaRefreshRequestRepository = metaRefreshRequestRepository,
             lagService = lagService,
             collectionMetaRefreshSchedulingService = collectionMetaRefreshSchedulingService,
             metaRefreshMetrics = metaRefreshMetrics,
@@ -71,8 +69,8 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
                 )
             ).awaitSingle()
         }
-        collectionMetaRefreshRequestRepository.save(
-            CollectionMetaRefreshRequest(
+        metaRefreshRequestRepository.save(
+            MetaRefreshRequest(
                 collectionId = "test",
                 full = true
             )
@@ -81,7 +79,7 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
         refreshMetaTaskSchedulingJobHandler.handle()
 
         assertThat(taskRepository.count().awaitSingle()).isEqualTo(10)
-        assertThat(collectionMetaRefreshRequestRepository.findToScheduleAndUpdate(1)).isNotEmpty
+        assertThat(metaRefreshRequestRepository.findToScheduleAndUpdate(1)).isNotEmpty
     }
 
     @Test
@@ -106,22 +104,22 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
             )
         ).awaitSingle()
 
-        collectionMetaRefreshRequestRepository.save(
-            CollectionMetaRefreshRequest(
+        metaRefreshRequestRepository.save(
+            MetaRefreshRequest(
                 collectionId = "test1",
                 full = true
             )
         )
 
-        collectionMetaRefreshRequestRepository.save(
-            CollectionMetaRefreshRequest(
+        metaRefreshRequestRepository.save(
+            MetaRefreshRequest(
                 collectionId = "test2",
                 full = false
             )
         )
 
-        collectionMetaRefreshRequestRepository.save(
-            CollectionMetaRefreshRequest(
+        metaRefreshRequestRepository.save(
+            MetaRefreshRequest(
                 collectionId = "test3",
                 full = false
             )
@@ -131,7 +129,7 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
 
         assertThat(taskRepository.count().awaitSingle()).isEqualTo(10)
         assertThat(
-            collectionMetaRefreshRequestRepository.findToScheduleAndUpdate(1)[0].collectionId
+            metaRefreshRequestRepository.findToScheduleAndUpdate(1)[0].collectionId
         ).isEqualTo("test3")
         val tasks = taskRepository.findAll().asFlow().toList()
         assertThat(tasks).containsAll(runningTasks)
@@ -156,8 +154,8 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
     @Test
     fun `lag is too big`() = runBlocking<Unit> {
         coEvery { lagService.isLagOk() } returns false
-        collectionMetaRefreshRequestRepository.save(
-            CollectionMetaRefreshRequest(
+        metaRefreshRequestRepository.save(
+            MetaRefreshRequest(
                 collectionId = "test",
                 full = true
             )
@@ -166,6 +164,6 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
         refreshMetaTaskSchedulingJobHandler.handle()
 
         assertThat(taskRepository.count().awaitSingle()).isEqualTo(0)
-        assertThat(collectionMetaRefreshRequestRepository.findToScheduleAndUpdate(1)).isNotEmpty
+        assertThat(metaRefreshRequestRepository.findToScheduleAndUpdate(1)).isNotEmpty
     }
 }

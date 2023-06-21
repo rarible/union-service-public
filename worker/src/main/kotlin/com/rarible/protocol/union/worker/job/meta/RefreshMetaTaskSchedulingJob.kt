@@ -1,30 +1,23 @@
 package com.rarible.protocol.union.worker.job.meta
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.daemon.job.JobHandler
 import com.rarible.core.daemon.sequential.SequentialDaemonWorker
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
-import com.rarible.core.task.TaskService
 import com.rarible.core.task.TaskStatus
-import com.rarible.protocol.union.worker.task.meta.RefreshMetaTask
-import com.rarible.protocol.union.worker.task.meta.RefreshMetaTaskParam
-import com.rarible.protocol.union.worker.task.meta.RefreshSimpleHashTask
-import com.rarible.protocol.union.worker.task.meta.RefreshSimpleHashTaskParam
-import com.rarible.protocol.union.enrichment.model.CollectionMetaRefreshRequest
-import com.rarible.protocol.union.enrichment.repository.CollectionMetaRefreshRequestRepository
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import com.rarible.protocol.union.worker.kafka.LagService
 import com.rarible.protocol.union.worker.metrics.MetaRefreshMetrics
+import com.rarible.protocol.union.worker.task.meta.RefreshMetaSimpleHashTask
+import com.rarible.protocol.union.worker.task.meta.RefreshMetaTask
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.time.delay
 import kotlinx.coroutines.withContext
@@ -45,7 +38,7 @@ class RefreshMetaTaskSchedulingJob(
         pollingPeriod = properties.collectionMetaRefresh.rate,
         errorDelay = properties.collectionMetaRefresh.rate,
     ),
-    workerName = "item-meta-refresh-task-scheduling-job"
+    workerName = "meta_refresh_request_job"
 ) {
     override suspend fun handle() {
         withContext(NonCancellable) {
@@ -63,8 +56,7 @@ class RefreshMetaTaskSchedulingJob(
 class RefreshMetaTaskSchedulingJobHandler(
     private val taskRepository: TaskRepository,
     properties: WorkerProperties,
-    private val collectionMetaRefreshRequestRepository: CollectionMetaRefreshRequestRepository,
-    private val objectMapper: ObjectMapper,
+    private val metaRefreshRequestRepository: MetaRefreshRequestRepository,
     private val lagService: LagService,
     private val collectionMetaRefreshSchedulingService: CollectionMetaRefreshSchedulingService,
     private val metaRefreshMetrics: MetaRefreshMetrics,
@@ -76,7 +68,7 @@ class RefreshMetaTaskSchedulingJobHandler(
             .filterTasks()
             .asFlow().toList()
         metaRefreshMetrics.runningSize(runningTasks.size)
-        metaRefreshMetrics.queueSize(collectionMetaRefreshRequestRepository.countNotScheduled())
+        metaRefreshMetrics.queueSize(metaRefreshRequestRepository.countNotScheduled())
         if (runningTasks.size >= concurrency) {
             logger.info(
                 "Too many tasks are running already ${runningTasks.size}. Concurrency: $concurrency. " +
@@ -89,7 +81,7 @@ class RefreshMetaTaskSchedulingJobHandler(
             return
         }
         val tasksToStart = concurrency - runningTasks.size
-        val collections = collectionMetaRefreshRequestRepository.findToScheduleAndUpdate(tasksToStart)
+        val collections = metaRefreshRequestRepository.findToScheduleAndUpdate(tasksToStart)
         collections.forEach {
             collectionMetaRefreshSchedulingService.scheduleTask(it)
         }
@@ -111,6 +103,6 @@ class RefreshMetaTaskSchedulingJobHandler(
     companion object {
         private val logger = LoggerFactory.getLogger(RefreshMetaTaskSchedulingJobHandler::class.java)
         private val TASKS_TYPES =
-            setOf(RefreshMetaTask.META_REFRESH_TASK, RefreshSimpleHashTask.REFRESH_SIMPLEHASH_TASK)
+            setOf(RefreshMetaTask.META_REFRESH_TASK, RefreshMetaSimpleHashTask.META_REFRESH_SIMPLEHASH_TASK)
     }
 }

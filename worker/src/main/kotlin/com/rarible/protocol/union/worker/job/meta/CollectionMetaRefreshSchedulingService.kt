@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskService
-import com.rarible.protocol.union.enrichment.model.CollectionMetaRefreshRequest
+import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.worker.task.meta.RefreshMetaTask
 import com.rarible.protocol.union.worker.task.meta.RefreshMetaTaskParam
-import com.rarible.protocol.union.worker.task.meta.RefreshSimpleHashTask
+import com.rarible.protocol.union.worker.task.meta.RefreshMetaSimpleHashTask
 import com.rarible.protocol.union.worker.task.meta.RefreshSimpleHashTaskParam
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
@@ -21,12 +21,12 @@ class CollectionMetaRefreshSchedulingService(
     private val taskService: TaskService,
 ) {
 
-    suspend fun scheduleTask(collection: CollectionMetaRefreshRequest) {
+    suspend fun scheduleTask(collection: MetaRefreshRequest) {
         logger.info("Scheduling collection refresh $collection")
         val (jobParam, type) = when {
             collection.withSimpleHash -> Pair(
                 RefreshSimpleHashTaskParam(collectionId = collection.collectionId),
-                RefreshSimpleHashTask.REFRESH_SIMPLEHASH_TASK
+                RefreshMetaSimpleHashTask.META_REFRESH_SIMPLEHASH_TASK
             )
             else -> Pair(
                 RefreshMetaTaskParam(collectionId = collection.collectionId, full = collection.full),

@@ -6,13 +6,14 @@ import com.rarible.core.logging.withTraceId
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.model.CollectionMetaRefreshRequest
-import com.rarible.protocol.union.enrichment.repository.CollectionMetaRefreshRequestRepository
+import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
@@ -21,58 +22,44 @@ import java.time.Instant
 
 @RestController
 class MetaRefreshController(
-    private val collectionMetaRefreshRequestRepository: CollectionMetaRefreshRequestRepository,
+    private val metaRefreshRequestRepository: MetaRefreshRequestRepository,
     private val unionMetaProperties: UnionMetaProperties,
     private val taskRepository: TaskRepository,
     private val objectMapper: ObjectMapper,
 ) {
 
     @PostMapping(
-        value = ["/maintenance/meta/collections/refresh/full"],
+        value = ["/maintenance/items/meta/refresh/{mode}"],
         produces = ["application/json"]
     )
     suspend fun fullRefresh(
+        @PathVariable mode: String,
         @RequestParam(required = false) scheduledAt: Instant?,
         @RequestBody body: String,
         @RequestParam(value = "withSimpleHash", required = false, defaultValue = "false") withSimpleHash: Boolean
     ): Unit = withTraceId {
         scheduleRefresh(
             collections = parseCollectionsFromBody(body),
-            full = true,
+            full = "full" == mode,
             scheduledAt = scheduledAt ?: nowMillis(),
             withSimpleHash = withSimpleHash && unionMetaProperties.simpleHash.enabled
         )
     }
 
-    @PostMapping(
-        value = ["/maintenance/meta/collections/refresh/emptyOnly"],
-        produces = ["application/json"]
-    )
-    suspend fun emptyOnlyRefresh(
-        @RequestParam(required = false) scheduledAt: Instant?,
-        @RequestBody body: String
-    ): Unit = withTraceId {
-        scheduleRefresh(
-            collections = parseCollectionsFromBody(body),
-            full = false,
-            scheduledAt = scheduledAt ?: nowMillis()
-        )
-    }
-
     @DeleteMapping(
-        value = ["/maintenance/meta/collections/refresh/cancel"],
+        value = ["/maintenance/items/meta/refresh/cancel"],
         produces = ["application/json"]
     )
     suspend fun cancelRefresh(): Unit = withTraceId {
         logger.info("Cancelling refresh")
-        collectionMetaRefreshRequestRepository.deleteAll()
+        metaRefreshRequestRepository.deleteAll()
     }
 
-    @GetMapping(value = ["/maintenance/meta/collections/refresh/status"], produces = ["text/plain"])
+    @GetMapping(value = ["/maintenance/items/meta/refresh/status"], produces = ["text/plain"])
     suspend fun status(): String {
-        val queueSize = collectionMetaRefreshRequestRepository.countNotScheduled()
+        val queueSize = metaRefreshRequestRepository.countNotScheduled()
         val processing = taskRepository.findByRunning(true)
-            .filter { it.type in setOf("META_REFRESH_TASK", "REFRESH_SIMPLEHASH_TASK") }
+            .filter { it.type in setOf("META_REFRESH_TASK", "META_REFRESH_SIMPLEHASH_TASK") }
             .asFlow().toList()
             .joinToString(", ") { objectMapper.readValue(it.param, Map::class.java)["collectionId"].toString() }
         return """Queue size: $queueSize
@@ -96,10 +83,10 @@ Currently processing: $processing""".trimIndent()
     ) {
         collections.map { id ->
             try {
-                if (collectionMetaRefreshRequestRepository.countNotScheduledForCollectionId(id) == 0L) {
+                if (metaRefreshRequestRepository.countNotScheduledForCollectionId(id) == 0L) {
                     logger.info("Scheduling refresh for $id, full=$full at $scheduledAt")
-                    collectionMetaRefreshRequestRepository.save(
-                        CollectionMetaRefreshRequest(
+                    metaRefreshRequestRepository.save(
+                        MetaRefreshRequest(
                             collectionId = id,
                             full = full,
                             scheduledAt = scheduledAt,

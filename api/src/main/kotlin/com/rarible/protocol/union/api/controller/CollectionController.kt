@@ -14,9 +14,9 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaRefreshService
-import com.rarible.protocol.union.enrichment.model.CollectionMetaRefreshRequest
+import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
-import com.rarible.protocol.union.enrichment.repository.CollectionMetaRefreshRequestRepository
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
@@ -33,7 +33,7 @@ class CollectionController(
     private val collectionSourceSelector: CollectionSourceSelectService,
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val collectionMetaRefreshService: CollectionMetaRefreshService,
-    private val collectionMetaRefreshRequestRepository: CollectionMetaRefreshRequestRepository,
+    private val metaRefreshRequestRepository: MetaRefreshRequestRepository,
     private val unionMetaProperties: UnionMetaProperties,
     private val ff: FeatureFlagsProperties
 ) : CollectionControllerApi {
@@ -78,8 +78,8 @@ class CollectionController(
         logger.info("Received request to refresh meta for collection: $collection")
         val collectionId = IdParser.parseCollectionId(collection)
         if (collectionMetaRefreshService.shouldRefresh(collectionId)) {
-            collectionMetaRefreshRequestRepository.save(
-                CollectionMetaRefreshRequest(
+            metaRefreshRequestRepository.save(
+                MetaRefreshRequest(
                     collectionId = collection,
                     full = true,
                     withSimpleHash = unionMetaProperties.simpleHash.enabled,

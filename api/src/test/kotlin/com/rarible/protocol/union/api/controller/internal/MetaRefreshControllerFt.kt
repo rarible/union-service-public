@@ -7,8 +7,8 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.util.truncatedToSeconds
-import com.rarible.protocol.union.enrichment.model.CollectionMetaRefreshRequest
-import com.rarible.protocol.union.enrichment.repository.CollectionMetaRefreshRequestRepository
+import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -28,7 +28,7 @@ import java.time.Instant
 @IntegrationTest
 internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
     @Autowired
-    private lateinit var collectionMetaRefreshRequestRepository: CollectionMetaRefreshRequestRepository
+    private lateinit var metaRefreshRequestRepository: MetaRefreshRequestRepository
 
     @Autowired
     private lateinit var template: ReactiveMongoTemplate
@@ -41,8 +41,8 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
     @ParameterizedTest
     @MethodSource("testCases")
     fun `schedule full refresh - without scheduledAt`(testCase: TestCase) = runBlocking<Unit> {
-        collectionMetaRefreshRequestRepository.save(
-            CollectionMetaRefreshRequest(
+        metaRefreshRequestRepository.save(
+            MetaRefreshRequest(
                 collectionId = "ETHEREUM:${Address.ONE()}",
                 full = testCase.existingFull
             )
@@ -55,7 +55,7 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
         )
         assertThat(result.statusCode).isEqualTo(HttpStatus.OK)
 
-        val collections = collectionMetaRefreshRequestRepository.findToScheduleAndUpdate(10)
+        val collections = metaRefreshRequestRepository.findToScheduleAndUpdate(10)
         assertThat(collections).hasSize(3)
         assertThat(collections[0].collectionId).isEqualTo("ETHEREUM:${Address.ONE()}")
         assertThat(collections[0].full).isEqualTo(testCase.existingFull)
@@ -72,13 +72,13 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
         val c2 = "POLYGON:${randomAddress()}"
         val scheduledAt = nowMillis().plusSeconds(100).truncatedToSeconds()
 
-        val exist = CollectionMetaRefreshRequest(
+        val exist = MetaRefreshRequest(
             collectionId = c2,
             full = testCase.existingFull,
             createdAt = Instant.now().truncatedToSeconds(),
             scheduledAt = Instant.now().truncatedToSeconds(),
         )
-        collectionMetaRefreshRequestRepository.save(exist)
+        metaRefreshRequestRepository.save(exist)
 
         val result = restTemplate.postForEntity(
             "$baseUri/${testCase.url}?scheduledAt=$scheduledAt",
@@ -88,14 +88,14 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
         assertThat(result.statusCode).isEqualTo(HttpStatus.OK)
 
         // Existing Polygon record is NOT modified - so can be scheduled
-        val collections = collectionMetaRefreshRequestRepository.findToScheduleAndUpdate(10)
+        val collections = metaRefreshRequestRepository.findToScheduleAndUpdate(10)
         assertThat(collections).hasSize(1)
         assertThat(collections[0]).isEqualTo(exist)
 
         // New Ethereum inserted, but not triggered yet
         val scheduled = template.findOne(
-            Query(where(CollectionMetaRefreshRequest::collectionId).isEqualTo(c1)),
-            CollectionMetaRefreshRequest::class.java
+            Query(where(MetaRefreshRequest::collectionId).isEqualTo(c1)),
+            MetaRefreshRequest::class.java
         ).awaitSingle()
         assertThat(scheduled.collectionId).isEqualTo(c1)
         assertThat(scheduled.full).isEqualTo(testCase.newFull)
@@ -106,15 +106,15 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
     fun `schedule full refresh - with simplehash`() = runBlocking<Unit> {
         val c1 = "ETHEREUM:${randomAddress()}"
         val result = restTemplate.postForEntity(
-            "$baseUri/maintenance/meta/collections/refresh/full?withSimpleHash=true",
+            "$baseUri/maintenance/items/meta/refresh/full?withSimpleHash=true",
             c1,
             Void::class.java
         )
         assertThat(result.statusCode).isEqualTo(HttpStatus.OK)
 
         val scheduled = template.findOne(
-            Query(where(CollectionMetaRefreshRequest::collectionId).isEqualTo(c1)),
-            CollectionMetaRefreshRequest::class.java
+            Query(where(MetaRefreshRequest::collectionId).isEqualTo(c1)),
+            MetaRefreshRequest::class.java
         ).awaitSingle()
         assertThat(scheduled.collectionId).isEqualTo(c1)
         assertThat(scheduled.full).isEqualTo(true)
@@ -124,24 +124,24 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
     @Test
     fun `cancel refresh`() {
         runBlocking {
-            collectionMetaRefreshRequestRepository.save(
-                CollectionMetaRefreshRequest(
+            metaRefreshRequestRepository.save(
+                MetaRefreshRequest(
                     collectionId = "ETHEREUM:0xaaa",
                     full = true
                 )
             )
-            collectionMetaRefreshRequestRepository.save(
-                CollectionMetaRefreshRequest(
+            metaRefreshRequestRepository.save(
+                MetaRefreshRequest(
                     collectionId = "ETHEREUM:0x000",
                     full = true
                 )
             )
         }
 
-        restTemplate.delete("$baseUri/maintenance/meta/collections/refresh/cancel")
+        restTemplate.delete("$baseUri/maintenance/items/meta/refresh/cancel")
 
         runBlocking {
-            assertThat(collectionMetaRefreshRequestRepository.countNotScheduled()).isEqualTo(0)
+            assertThat(metaRefreshRequestRepository.countNotScheduled()).isEqualTo(0)
         }
     }
 
@@ -149,7 +149,7 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
     fun statistics() {
         assertThat(
             restTemplate.getForObject(
-                "$baseUri/maintenance/meta/collections/refresh/status",
+                "$baseUri/maintenance/items/meta/refresh/status",
                 String::class.java
             )
         ).isEqualTo(
@@ -157,14 +157,14 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
             |Currently processing: """.trimMargin()
         )
         runBlocking {
-            collectionMetaRefreshRequestRepository.save(
-                CollectionMetaRefreshRequest(
+            metaRefreshRequestRepository.save(
+                MetaRefreshRequest(
                     collectionId = "collection1",
                     full = true
                 )
             )
-            collectionMetaRefreshRequestRepository.save(
-                CollectionMetaRefreshRequest(
+            metaRefreshRequestRepository.save(
+                MetaRefreshRequest(
                     collectionId = "collection2",
                     full = false
                 )
@@ -173,7 +173,7 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
 
         assertThat(
             restTemplate.getForObject(
-                "$baseUri/maintenance/meta/collections/refresh/status",
+                "$baseUri/maintenance/items/meta/refresh/status",
                 String::class.java
             )
         ).isEqualTo(
@@ -200,7 +200,7 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
 
         assertThat(
             testRestTemplate.getForObject(
-                "$baseUri/maintenance/meta/collections/refresh/status",
+                "$baseUri/maintenance/items/meta/refresh/status",
                 String::class.java
             )
         ).isEqualTo(
@@ -213,12 +213,12 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
         @JvmStatic
         fun testCases() = listOf(
             TestCase(
-                url = "/maintenance/meta/collections/refresh/full",
+                url = "/maintenance/items/meta/refresh/full",
                 existingFull = false,
                 newFull = true
             ),
             TestCase(
-                url = "/maintenance/meta/collections/refresh/emptyOnly",
+                url = "/maintenance/items/meta/refresh/emptyOnly",
                 existingFull = true,
                 newFull = false
             )
