@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.configuration
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.rarible.core.content.meta.loader.ApacheHttpContentReceiver
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.core.content.meta.loader.ContentReceiver
@@ -16,7 +15,6 @@ import com.rarible.core.meta.resource.resolver.IpfsGatewayResolver
 import com.rarible.core.meta.resource.resolver.LegacyIpfsGatewaySubstitutor
 import com.rarible.core.meta.resource.resolver.RandomGatewayProvider
 import com.rarible.core.meta.resource.resolver.UrlResolver
-import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.client.WebClientFactory
 import com.rarible.protocol.union.core.util.safeSplit
@@ -26,11 +24,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
-import org.springframework.http.MediaType
-import org.springframework.http.codec.ClientCodecConfigurer
-import org.springframework.http.codec.json.Jackson2JsonDecoder
-import org.springframework.http.codec.json.Jackson2JsonEncoder
-import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 
 @EnableConfigurationProperties(UnionMetaProperties::class)
@@ -129,17 +122,8 @@ class UnionMetaConfiguration(
     @ConditionalOnProperty("meta.simpleHash.enabled", havingValue = "true")
     fun simpleHashClient(webClientCustomizer: UnionWebClientCustomizer): WebClient {
         val props = unionMetaProperties.simpleHash
-        val mapper = ApiClient.createDefaultObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
         val webClient = WebClientFactory.createClient(props.endpoint, mapOf("X-API-KEY" to props.apiKey))
-        val strategies = ExchangeStrategies
-            .builder()
-            .codecs { configurer: ClientCodecConfigurer ->
-                configurer.defaultCodecs().jackson2JsonEncoder(Jackson2JsonEncoder(mapper, MediaType.APPLICATION_JSON))
-                configurer.defaultCodecs().jackson2JsonDecoder(Jackson2JsonDecoder(mapper, MediaType.APPLICATION_JSON))
-            }.build()
         webClientCustomizer.customize(webClient)
-        return webClient.exchangeStrategies(strategies).build()
+        return webClient.build()
     }
-
 }
