@@ -31,7 +31,7 @@ class SimpleHashService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun isSupported(blockchain: BlockchainDto) : Boolean {
+    fun isSupported(blockchain: BlockchainDto): Boolean {
         return blockchain in props.simpleHash.supported
     }
 
@@ -78,4 +78,12 @@ class SimpleHashService(
         return item?.lazySupply?.let { it > BigInteger.ZERO } ?: true
     }
 
+    suspend fun refreshContract(collectionId: CollectionIdDto) {
+        val url = "/nfts/refresh/${network(collectionId.blockchain)}/${collectionId.value}"
+        logger.info("Sending request to simplehash for refresh: $url")
+        val response = simpleHashClient.post()
+            .uri(url)
+            .retrieve().toBodilessEntity().awaitSingle()
+        logger.info("Collection=$collectionId was refreshed with status=${response.statusCode}")
+    }
 }

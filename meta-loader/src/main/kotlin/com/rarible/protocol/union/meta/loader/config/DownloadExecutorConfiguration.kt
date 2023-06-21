@@ -6,6 +6,9 @@ import com.rarible.core.daemon.sequential.ConsumerBatchWorker
 import com.rarible.core.kafka.RaribleKafkaConsumer
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
+import com.rarible.protocol.union.core.kafka.KafkaGroupFactory
+import com.rarible.protocol.union.core.kafka.KafkaGroupFactory.Companion.COLLECTION_TYPE
+import com.rarible.protocol.union.core.kafka.KafkaGroupFactory.Companion.ITEM_TYPE
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadTask
@@ -43,6 +46,7 @@ class DownloadExecutorConfiguration(
     private val metaProperties: UnionMetaProperties,
     private val metaLoaderProperties: UnionMetaLoaderProperties,
     private val meterRegistry: MeterRegistry,
+    private val kafkaGroupFactory: KafkaGroupFactory,
     applicationEnvironmentInfo: ApplicationEnvironmentInfo
 ) {
 
@@ -52,12 +56,6 @@ class DownloadExecutorConfiguration(
     private val host = applicationEnvironmentInfo.host
 
     private val clientIdPrefix = "$env.$host.${UUID.randomUUID()}"
-
-    companion object {
-
-        const val COLLECTION_TYPE = "collection"
-        const val ITEM_TYPE = "item"
-    }
 
     @Bean
     @Qualifier("item.meta.download.executor.manager")
@@ -168,11 +166,10 @@ class DownloadExecutorConfiguration(
         type: String,
         handler: DownloadExecutorHandler
     ): ConsumerWorkerGroup<UnionMeta> {
-        val consumerGroupSuffix = "meta.$type"
         val clientIdSuffix = "$type-meta-task-executor"
         val workerSet = (1..workers).map {
             ConsumerBatchWorker(
-                consumer = createDownloadExecutorConsumer(it, clientIdSuffix, consumerGroupSuffix, type, pipeline),
+                consumer = createDownloadExecutorConsumer(it, clientIdSuffix, type, pipeline),
                 properties = DaemonWorkerProperties(consumerBatchSize = batchSize),
                 eventHandler = handler,
                 meterRegistry = meterRegistry,
@@ -188,7 +185,6 @@ class DownloadExecutorConfiguration(
     private fun createDownloadExecutorConsumer(
         index: Int,
         clientIdSuffix: String,
-        consumerGroupSuffix: String,
         type: String,
         pipeline: String
     ): RaribleKafkaConsumer<DownloadTask> {
@@ -201,14 +197,10 @@ class DownloadExecutorConfiguration(
             clientId = "$clientIdPrefix.union-$clientIdSuffix.$pipeline-$index",
             valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
             valueClass = DownloadTask::class.java,
-            consumerGroup = consumerGroup("download.executor.$consumerGroupSuffix"),
+            consumerGroup = kafkaGroupFactory.metaDownloadExecutorGroup(type),
             defaultTopic = topic,
             bootstrapServers = metaLoaderProperties.brokerReplicaSet,
             offsetResetStrategy = OffsetResetStrategy.EARLIEST
         )
-    }
-
-    private fun consumerGroup(suffix: String): String {
-        return "${env}.protocol.union.${suffix}"
     }
 }

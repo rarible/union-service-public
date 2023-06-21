@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.repository.CollectionMetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
@@ -32,6 +33,7 @@ import com.rarible.tzkt.model.Page
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -55,6 +57,9 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var enrichmentCollectionService: EnrichmentCollectionService
+
+    @Autowired
+    lateinit var collectionMetaRefreshRequestRepository: CollectionMetaRefreshRequestRepository
 
     @LocalServerPort
     var port: Int = 0
@@ -82,7 +87,9 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         enrichmentCollectionService.save(enrichmentCollection)
 
         ethereumOrderControllerApiMock.mockGetByIds(ethOrder)
-        coEvery { testEthereumCollectionApi.getNftCollectionById(collectionIdFull.value) } returns ethCollectionDto.copy(isRaribleContract = true).toMono()
+        coEvery { testEthereumCollectionApi.getNftCollectionById(collectionIdFull.value) } returns ethCollectionDto.copy(
+            isRaribleContract = true
+        ).toMono()
 
         val unionCollection = collectionControllerClient.getCollectionById(collectionIdFull.fullId()).awaitFirst()
 
@@ -201,5 +208,16 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
         assertThat(unionCollections.collections).hasSize(6)
         assertThat(unionCollections.continuation).isNull()
+    }
+
+    @Test
+    fun refreshCollectionMeta() = runBlocking<Unit> {
+        val unionCollection = EthCollectionConverter.convert(randomEthCollectionDto(), BlockchainDto.ETHEREUM)
+        enrichmentCollectionService.save(EnrichmentCollectionConverter.convert(unionCollection))
+
+        collectionControllerClient.refreshCollectionMeta(unionCollection.id.fullId()).awaitSingleOrNull()
+
+        val requests = collectionMetaRefreshRequestRepository.countForCollectionId(unionCollection.id.fullId())
+        assertThat(requests).isEqualTo(1)
     }
 }

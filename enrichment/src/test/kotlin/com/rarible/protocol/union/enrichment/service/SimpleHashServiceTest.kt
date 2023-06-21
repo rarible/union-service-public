@@ -18,6 +18,7 @@ import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.model.RawMetaCache
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -31,7 +32,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import java.time.Instant
-
 
 class SimpleHashServiceTest {
 
@@ -175,6 +175,19 @@ class SimpleHashServiceTest {
 
         coVerify(exactly = 1) { itemService.getItemById(itemId.value) }
         assertThat(mockServer.requestCount).isEqualTo(0)
+    }
+
+    @Test
+    fun `refresh contract`() = runBlocking<Unit> {
+        mockServer.enqueue(MockResponse()
+            .setHeader("Content-Type", "application/json")
+            .setBody("")
+        )
+        val collectionId = randomEthCollectionId()
+        service.refreshContract(collectionId)
+        val request = mockServer.takeRequest()
+        assertThat(request.path).isEqualTo("/nfts/refresh/ethereum-goerli/${collectionId.value}")
+        assertThat(request.method).isEqualTo("POST")
     }
 
     // Converted UnionMeta from test resource file '/simplehash/nft.json'

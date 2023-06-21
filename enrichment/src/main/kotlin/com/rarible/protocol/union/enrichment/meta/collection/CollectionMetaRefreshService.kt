@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.repository.CollectionMetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import kotlinx.coroutines.async
@@ -19,6 +20,7 @@ class CollectionMetaRefreshService(
     private val esItemRepository: EsItemRepository,
     private val itemRepository: ItemRepository,
     private val itemMetaService: ItemMetaService,
+    private val collectionMetaRefreshRequestRepository: CollectionMetaRefreshRequestRepository,
 ) {
 
     suspend fun shouldRefresh(collectionId: CollectionIdDto): Boolean {
@@ -33,6 +35,16 @@ class CollectionMetaRefreshService(
             logger.info(
                 "Collection size $collectionSize is bigger than $BIG_COLLECTION_SIZE_THRESHOLD will not do refresh"
             )
+            return false
+        }
+        val refreshCount = collectionMetaRefreshRequestRepository.countForCollectionId(collectionFullId)
+        if (refreshCount >= MAX_COLLECTION_REFRESH_COUNT) {
+            logger.info("Collection refresh count $refreshCount gte $MAX_COLLECTION_REFRESH_COUNT. Will not refresh")
+            return false
+        }
+        val scheduledCount = collectionMetaRefreshRequestRepository.countNotScheduledForCollectionId(collectionFullId)
+        if (scheduledCount > 0) {
+            logger.info("Collection refresh already pending for $collectionFullId. Will not refresh")
             return false
         }
         return coroutineScope {
@@ -62,6 +74,7 @@ class CollectionMetaRefreshService(
         private const val COLLECTION_SIZE_THRESHOLD = 1000
         private const val BIG_COLLECTION_SIZE_THRESHOLD = 40000
         private const val RANDOM_ITEMS_TO_CHECK = 100
+        private const val MAX_COLLECTION_REFRESH_COUNT = 3
         private val logger = LoggerFactory.getLogger(CollectionMetaRefreshService::class.java)
     }
 }

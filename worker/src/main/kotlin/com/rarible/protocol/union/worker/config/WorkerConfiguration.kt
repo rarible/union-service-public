@@ -8,8 +8,10 @@ import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBoot
 import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
+import com.rarible.protocol.union.enrichment.repository.CollectionMetaRefreshRequestRepository
 import com.rarible.protocol.union.worker.job.BestOrderCheckJob
 import com.rarible.protocol.union.worker.job.BestOrderCheckJobHandler
+import com.rarible.protocol.union.worker.job.CollectionMetaRefreshRequestCleanupJob
 import com.rarible.protocol.union.worker.job.ReconciliationMarkJob
 import com.rarible.protocol.union.worker.job.ReconciliationMarkJobHandler
 import com.rarible.protocol.union.worker.task.search.ReindexService
@@ -29,7 +31,8 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 @Import(
     value = [
         EnrichmentApiConfiguration::class,
-        SearchConfiguration::class
+        SearchConfiguration::class,
+        KafkaConsumerConfiguration::class,
     ]
 )
 @EnableRaribleTask
@@ -108,5 +111,15 @@ class WorkerConfiguration(
         meterRegistry: MeterRegistry,
     ): ReconciliationMarkJob {
         return ReconciliationMarkJob(handler, properties, meterRegistry)
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = ["worker.collection-meta-refresh-request-cleanup.enabled"], havingValue = "true")
+    fun collectionMetaRefreshRequestCleanupJob(
+        collectionMetaRefreshRequestRepository: CollectionMetaRefreshRequestRepository,
+        properties: WorkerProperties,
+        meterRegistry: MeterRegistry,
+    ): CollectionMetaRefreshRequestCleanupJob {
+        return CollectionMetaRefreshRequestCleanupJob(collectionMetaRefreshRequestRepository, properties, meterRegistry)
     }
 }
