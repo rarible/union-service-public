@@ -46,6 +46,7 @@ class MattelMetaCustomizer(
             name = customizer.getName(helper) ?: meta.name,
             description = helper.attribute(*customizer.fieldDescription),
             rights = helper.attribute(*customizer.fieldRights),
+            rightsUri = helper.attribute(*customizer.fieldRightsUri),
             attributes = helper.filterAttributes(customizer.attributesWhiteList),
             content = fixContentType(meta.content, helper.attribute(*customizer.fieldContentUrl))
         )
@@ -83,7 +84,6 @@ class MattelMetaCustomizer(
             }
         }
     }
-
 }
 
 abstract class MattelCollectionMetaCustomizer {
@@ -94,6 +94,7 @@ abstract class MattelCollectionMetaCustomizer {
     abstract val fieldDescription: Array<String>
     abstract val fieldContentUrl: Array<String>
     abstract val fieldRights: Array<String>
+    abstract val fieldRightsUri: Array<String>
     abstract val attributesWhiteList: Set<String>
 
     protected fun fields(vararg fields: String): Array<String> {
@@ -117,6 +118,7 @@ class HotWheelsCardMetaCustomizer(
     override val fieldDescription = fields()
     override val fieldContentUrl = fields("imageUrl")
     override val fieldRights = fields("licensorLegal")
+    override val fieldRightsUri = fields()
 
     override val attributesWhiteList = setOf(
         "seriesName",
@@ -129,7 +131,6 @@ class HotWheelsCardMetaCustomizer(
         "cardId",
         "miniCollection"
     )
-
 }
 
 @Component
@@ -148,6 +149,7 @@ class HotWheelsPackMetaCustomizer(
     override val fieldDescription = fields("packDescription")
     override val fieldContentUrl = fields("thumbnailCID")
     override val fieldRights = fields()
+    override val fieldRightsUri = fields()
 
     override val attributesWhiteList = setOf(
         // for v1
@@ -176,6 +178,7 @@ class BarbieCardMetaCustomizer(
     override val fieldDescription = fields()
     override val fieldContentUrl = fields("imageUrl")
     override val fieldRights = fields("eula")
+    override val fieldRightsUri = fields()
 
     override val attributesWhiteList = setOf(
         "lips",
@@ -229,6 +232,7 @@ class BarbiePackMetaCustomizer(
     override val fieldDescription = fields("packDescription")
     override val fieldContentUrl = fields("thumbnailCID")
     override val fieldRights = fields()
+    override val fieldRightsUri = fields()
 
     override val attributesWhiteList = setOf(
         "type",
@@ -250,13 +254,26 @@ class BarbieTokenMetaCustomizer(
         return "$name #$cardId"
     }
 
-    override val fieldDescription = fields()
-    override val fieldContentUrl = fields("imageUrl")
-    override val fieldRights = fields("licensorLegal")
+    override val fieldDescription = fields("description")
+    override val fieldContentUrl = fields("tokenImageHash")
+    override val fieldRights = fields("legal")
+    override val fieldRightsUri = fields("eula")
 
     override val attributesWhiteList = setOf(
         "type",
+        "drop",
+        "rarity",
+        "series",
+        "splits",
+        "collection",
+        "redeemable",
+        "seriesName",
+        "tokenMintID",
+        "tokenNumber",
+        "tokenSerial",
+        "tokenExpireDate",
+        "tokenReleaseDate",
+        "originalCardSerial"
     )
-
 }
 
