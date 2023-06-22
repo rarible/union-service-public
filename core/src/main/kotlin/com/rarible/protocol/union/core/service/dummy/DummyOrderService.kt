@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.service.dummy
 
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -190,5 +191,9 @@ class DummyOrderService(
         size: Int
     ): Slice<ItemIdDto> {
         return Slice.empty()
+    }
+
+    override suspend fun cancelOrder(id: String): UnionOrder {
+        throw UnionException("Can't cancel order $id, ${blockchain.name} is not available")
     }
 }

@@ -275,6 +275,10 @@ class OrderProxyService(
         return orderService.getAmmOrderItemIds(id, continuation, size)
     }
 
+    override suspend fun cancelOrder(id: String): UnionOrder {
+        return orderService.cancelOrder(id)
+    }
+
     private fun isPlatformSupported(platform: PlatformDto?): Boolean {
         if (platform == null) {
             return true
