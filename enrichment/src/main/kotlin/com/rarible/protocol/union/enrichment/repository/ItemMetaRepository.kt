@@ -3,6 +3,9 @@ package com.rarible.protocol.union.enrichment.repository
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
+import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Component
 @Component
 class ItemMetaRepository(
     private val itemRepository: ItemRepository,
+    private val blockchainRouter: BlockchainRouter<ItemService>
 ) : DownloadEntryRepository<UnionMeta> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -24,8 +28,16 @@ class ItemMetaRepository(
         val itemId = ShortItemId.of(entryId)
         val item = itemRepository.get(itemId) ?: ShortItem.empty(itemId)
         if (isUpdateRequired(item.metaEntry)) {
-            val updated = updateEntry(item.metaEntry)
-            logger.info("Updating Item [{}] with meta entry having status {}", entryId, updated.status)
+            val updated = LogUtils.addToMdc(itemId.toDto(), blockchainRouter) {
+                val result = updateEntry(item.metaEntry)
+                logger.info("Updating Item [{}] with meta entry having status {}", entryId, result.status)
+                if (result.data?.toComparable() != item.metaEntry?.data?.toComparable()) {
+                    logger.info("Metadata has changed after refresh for item $itemId")
+                } else {
+                    logger.info("Metadata has not changed after refresh for item $itemId")
+                }
+                result
+            }
             itemRepository.save(item.withMeta(updated))
             updated
         } else {

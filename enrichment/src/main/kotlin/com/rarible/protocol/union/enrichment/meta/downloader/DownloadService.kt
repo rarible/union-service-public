@@ -5,6 +5,8 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
+import com.rarible.protocol.union.core.model.download.DownloadTaskSource
+import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.slf4j.LoggerFactory
 
@@ -44,12 +46,12 @@ abstract class DownloadService<K, T>(
 
         // If data isn't downloaded and sync download required, downloading it right here
         if (sync) {
-            return download(key, pipeline, false)
+            return download(key, pipeline, false, DownloadTaskSource.INTERNAL)
         }
 
         // There is no current entry, async scheduling should be performed
         if (current == null) {
-            schedule(key, pipeline, false)
+            schedule(key, pipeline, false, DownloadTaskSource.INTERNAL)
         }
         return null
     }
@@ -59,7 +61,7 @@ abstract class DownloadService<K, T>(
      * 1. If data downloaded, it will be saved and notification will be sent
      * 2. If data download failed, download task will be scheduled (with 'force' or not) if there is no entry in DB
      */
-    protected suspend fun download(key: K, pipeline: String, force: Boolean): T? {
+    protected suspend fun download(key: K, pipeline: String, force: Boolean, source: DownloadTaskSource): T? {
         val id = toId(key)
         val blockchain = getBlockchain(key)
         val data = try {
@@ -79,13 +81,15 @@ abstract class DownloadService<K, T>(
                     "Direct download of {} with ID [{}] failed, scheduling download: {}",
                     type, id, e.message
                 )
-                schedule(key, pipeline, force)
+                schedule(key, pipeline, force, source)
             }
             return null
         }
 
         logger.info("Direct download of {} with ID [{}] succeeded, saving entry", type, id)
-        updateSuccessful(id, blockchain, data)
+        LogUtils.addToMdc(Pair("source", source.name)) {
+            updateSuccessful(id, blockchain, data)
+        }
         return data
     }
 
@@ -93,8 +97,8 @@ abstract class DownloadService<K, T>(
      * Schedule async task to download data. If task is forced, it will be executed anyway.
      * Otherwise, task will be executed only if there is no entry in DB (with any status)
      */
-    protected suspend fun schedule(key: K, pipeline: String, force: Boolean) {
-        schedule(listOf(key), pipeline, force)
+    protected suspend fun schedule(key: K, pipeline: String, force: Boolean, source: DownloadTaskSource) {
+        schedule(listOf(key), pipeline, force, source)
     }
 
     /**
@@ -106,14 +110,15 @@ abstract class DownloadService<K, T>(
         updateSuccessful(toId(key), getBlockchain(key), data)
     }
 
-    private suspend fun schedule(ids: Collection<K>, pipeline: String, force: Boolean) {
+    private suspend fun schedule(ids: Collection<K>, pipeline: String, force: Boolean, source: DownloadTaskSource) {
         val tasks = ids.map { key ->
             metrics.onTaskScheduled(getBlockchain(key), type, pipeline, force)
             DownloadTask(
                 id = toId(key),
                 pipeline = pipeline,
                 force = force,
-                scheduledAt = nowMillis()
+                scheduledAt = nowMillis(),
+                source = source,
             )
         }
         if (tasks.isNotEmpty()) {

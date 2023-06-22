@@ -9,6 +9,13 @@ data class DownloadTask(
     val pipeline: String,
     // Execute this task without any debouncing/status checks
     val force: Boolean,
+    // Where from task was called
+    val source: DownloadTaskSource = DownloadTaskSource.INTERNAL,
     // Date when task has been created
     val scheduledAt: Instant,
 )
+
+enum class DownloadTaskSource {
+    INTERNAL,
+    EXTERNAL
+}

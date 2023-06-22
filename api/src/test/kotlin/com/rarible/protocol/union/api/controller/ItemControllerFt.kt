@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
@@ -15,6 +16,8 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionVideoProperties
+import com.rarible.protocol.union.core.model.download.DownloadTask
+import com.rarible.protocol.union.core.model.download.DownloadTaskSource
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -27,6 +30,7 @@ import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -54,6 +58,7 @@ import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemIdFullValue
 import com.rarible.protocol.union.integration.tezos.data.randomTezosTzktItemDto
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.verify
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
@@ -224,6 +229,17 @@ class ItemControllerFt : AbstractIntegrationTest() {
         itemControllerClient.resetItemMeta(itemId.fullId(), false).awaitFirstOrNull()
 
         verify(exactly = 1) { testEthereumItemApi.resetNftItemMetaById(itemId.value) }
+        coVerify {
+            testDownloadTaskProducer.send(match<Collection<KafkaMessage<DownloadTask>>> { events ->
+                assertThat(events).hasSize(1)
+                val task = events.first().value
+                assertThat(task.id).isEqualTo(itemId.fullId())
+                assertThat(task.force).isTrue()
+                assertThat(task.pipeline).isEqualTo(ItemMetaPipeline.REFRESH.pipeline)
+                assertThat(task.source).isEqualTo(DownloadTaskSource.EXTERNAL)
+                true
+            })
+        }
     }
 
     @Test

@@ -26,7 +26,6 @@ object LogUtils {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @ExperimentalCoroutinesApi
     suspend fun <T> addToMdc(vararg values: Pair<String, String>, block: suspend CoroutineScope.() -> T): T {
         return addToMdc(values.toList(), block)
     }
