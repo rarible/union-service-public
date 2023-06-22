@@ -19,7 +19,7 @@ class AdminController(
         value = ["/admin/orders/{orderId}/cancel"],
         produces = ["application/json"]
     )
-    suspend fun cancelCollection(
+    suspend fun cancelOrder(
         @PathVariable("orderId") orderId: String
     ): ResponseEntity<OrderDto> {
         val unionOrderId = IdParser.parseOrderId(orderId)

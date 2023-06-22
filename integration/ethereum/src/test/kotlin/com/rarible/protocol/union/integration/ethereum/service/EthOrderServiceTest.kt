@@ -139,4 +139,18 @@ class EthOrderServiceTest {
 
         assertThat(result.entities).isEqualTo(listOf(itemId))
     }
+
+    @Test
+    fun `cancel order - ok`() = runBlocking<Unit> {
+        val orderId = randomWord()
+        val canceledOrder = randomEthV2OrderDto()
+
+        coEvery {
+            orderAdminControllerApi.changeState(orderId, any())
+        } returns canceledOrder
+
+        val result = service.cancelOrder(orderId)
+
+        assertThat(result.id.value).isEqualTo(EthConverter.convert(canceledOrder.hash))
+    }
 }
