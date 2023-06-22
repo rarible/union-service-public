@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
+import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaDownloader
@@ -67,11 +68,13 @@ sealed class DownloadExecutor<T>(
     private suspend fun onSuccess(started: Instant, task: DownloadTask, data: T) {
         // For successful case we should rewrite current data anyway
         var retry = 0
-        val saved = repository.update(task.id) { exist ->
-            val current = exist ?: getDefault(task)
-            // If current.status == success, there is no sense to count its previous retries
-            retry = if (current.status != DownloadStatus.SUCCESS) current.retries else 0
-            current.withSuccessInc(data)
+        val saved = LogUtils.addToMdc(Pair("source", task.source.name)) {
+            repository.update(task.id) { exist ->
+                val current = exist ?: getDefault(task)
+                // If current.status == success, there is no sense to count its previous retries
+                retry = if (current.status != DownloadStatus.SUCCESS) current.retries else 0
+                current.withSuccessInc(data)
+            }
         }
 
         saved?.let { notifier.notify(saved) }

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.meta.collection
 
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.download.DownloadTaskSource
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadMetrics
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadService
@@ -30,12 +31,12 @@ class CollectionMetaService(
         collectionId: CollectionIdDto,
         pipeline: CollectionMetaPipeline,
         force: Boolean
-    ) = download(collectionId, pipeline.pipeline, force)
+    ) = download(collectionId, pipeline.pipeline, force, DownloadTaskSource.INTERNAL)
 
     suspend fun schedule(
         collectionId: CollectionIdDto,
         pipeline: CollectionMetaPipeline,
         force: Boolean
-    ) = schedule(collectionId, pipeline.pipeline, force)
+    ) = schedule(collectionId, pipeline.pipeline, force, DownloadTaskSource.INTERNAL)
 
 }

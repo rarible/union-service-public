@@ -55,7 +55,7 @@ class CollectionMetaRefreshService(
                         val meta =
                             itemMetaService.download(itemId = idDto, pipeline = ItemMetaPipeline.REFRESH, force = true)
                                 ?: return@asyncWithTraceId false
-                        if (oldItem.metaEntry?.data?.copy(createdAt = null) != meta.copy(createdAt = null)) {
+                        if (oldItem.metaEntry?.data?.toComparable() != meta.toComparable()) {
                             logger.info(
                                 "Meta changed for item $idDto from ${oldItem.metaEntry?.data} to $meta " +
                                     "will allow meta refresh for collection"

@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
+import com.rarible.protocol.union.core.model.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 
 fun randomMetaEntry(itemId: String, meta: UnionMeta = randomUnionMeta()): DownloadEntry<UnionMeta> {
@@ -50,5 +51,11 @@ fun randomTask(
     itemId: String,
     force: Boolean = false
 ): DownloadTask {
-    return DownloadTask(itemId, "test", force, nowMillis())
+    return DownloadTask(
+        id = itemId,
+        pipeline = "test",
+        force = force,
+        scheduledAt = nowMillis(),
+        source = DownloadTaskSource.INTERNAL
+    )
 }

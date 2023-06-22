@@ -57,7 +57,12 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Test
     fun `not forced task - entry doesn't exist`() = runBlocking {
         val id = randomEthItemId().fullId()
-        val task = DownloadTask(id, "api", false, nowMillis())
+        val task = DownloadTask(
+            id = id,
+            pipeline = "api",
+            force = false,
+            scheduledAt = nowMillis()
+        )
 
         scheduler.schedule(task)
 
@@ -74,7 +79,12 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Test
     fun `not forced task - entry exists`() = runBlocking {
         val exist = save(randomItemMetaDownloadEntry())
-        val task = DownloadTask(exist.id, "api", false, nowMillis())
+        val task = DownloadTask(
+            id = exist.id,
+            pipeline = "api",
+            force = false,
+            scheduledAt = nowMillis()
+        )
 
         scheduler.schedule(task)
 
@@ -89,9 +99,24 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Test
     fun `not forced task - several tasks for same non-existing entry`() = runBlocking {
         val id = randomEthItemId().fullId()
-        val task1 = DownloadTask(id, "api", false, nowMillis())
-        val task2 = DownloadTask(id, "api", false, nowMillis())
-        val task3 = DownloadTask(id, "listener", false, nowMillis())
+        val task1 = DownloadTask(
+            id = id,
+            pipeline = "api",
+            force = false,
+            scheduledAt = nowMillis()
+        )
+        val task2 = DownloadTask(
+            id = id,
+            pipeline = "api",
+            force = false,
+            scheduledAt = nowMillis()
+        )
+        val task3 = DownloadTask(
+            id = id,
+            pipeline = "listener",
+            force = false,
+            scheduledAt = nowMillis()
+        )
 
         scheduler.schedule(listOf(task1, task2, task3))
 
@@ -106,7 +131,12 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Test
     fun `forced task - entry exists`() = runBlocking {
         val exist = save(randomItemMetaDownloadEntry())
-        val task = DownloadTask(exist.id, "api", true, nowMillis())
+        val task = DownloadTask(
+            id = exist.id,
+            pipeline = "api",
+            force = true,
+            scheduledAt = nowMillis()
+        )
 
         scheduler.schedule(task)
 
@@ -121,8 +151,18 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Test
     fun `mixed tasks - entry exists`() = runBlocking {
         val exist = save(randomItemMetaDownloadEntry())
-        val task1 = DownloadTask(exist.id, "api", true, nowMillis())
-        val task2 = DownloadTask(exist.id, "listener", false, nowMillis())
+        val task1 = DownloadTask(
+            id = exist.id,
+            pipeline = "api",
+            force = true,
+            scheduledAt = nowMillis()
+        )
+        val task2 = DownloadTask(
+            id = exist.id,
+            pipeline = "listener",
+            force = false,
+            scheduledAt = nowMillis()
+        )
 
         scheduler.schedule(listOf(task1, task2))
 
