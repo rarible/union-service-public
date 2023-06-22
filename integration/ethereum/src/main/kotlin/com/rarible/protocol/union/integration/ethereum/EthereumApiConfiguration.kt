@@ -9,6 +9,7 @@ import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.order.api.client.OrderAdminControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
@@ -83,6 +84,11 @@ class EthereumApiConfiguration {
         factory.createOrderSignatureApiClient(ethereum)
 
     @Bean
+    @Qualifier("ethereum.admin.api.order")
+    fun ethereumOrderAdminApi(factory: OrderIndexerApiClientFactory): OrderAdminControllerApi =
+        factory.createOrderAdminApiClient(ethereum)
+
+    @Bean
     @Qualifier("ethereum.domain.api")
     fun ethereumDomainApi(factory: NftIndexerApiClientFactory): NftDomainControllerApi =
         factory.createNftDomainApiClient(ethereum)
@@ -128,9 +134,10 @@ class EthereumApiConfiguration {
     @Bean
     fun ethereumOrderService(
         @Qualifier("ethereum.order.api") controllerApi: OrderControllerApi,
+        @Qualifier("ethereum.admin.api.order") adminControllerApi: OrderAdminControllerApi,
         converter: EthOrderConverter
     ): EthOrderService {
-        return EthereumOrderService(controllerApi, converter)
+        return EthereumOrderService(controllerApi, adminControllerApi, converter)
     }
 
     @Bean

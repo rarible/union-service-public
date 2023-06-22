@@ -152,4 +152,8 @@ interface OrderService : BlockchainService {
         continuation: String?,
         size: Int
     ): Slice<ItemIdDto>
+
+    suspend fun cancelOrder(
+        id: String,
+    ): UnionOrder
 }

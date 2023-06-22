@@ -9,6 +9,7 @@ import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
+import com.rarible.protocol.order.api.client.OrderAdminControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
@@ -82,6 +83,11 @@ class PolygonApiConfiguration {
         factory.createOrderSignatureApiClient(polygon)
 
     @Bean
+    @Qualifier("polygon.admin.api.order")
+    fun ethereumOrderAdminApi(factory: OrderIndexerApiClientFactory): OrderAdminControllerApi =
+        factory.createOrderAdminApiClient(polygon)
+
+    @Bean
     @Qualifier("polygon.domain.api")
     fun polygonDomainApi(factory: NftIndexerApiClientFactory): NftDomainControllerApi =
         factory.createNftDomainApiClient(polygon)
@@ -127,9 +133,10 @@ class PolygonApiConfiguration {
     @Bean
     fun polygonOrderService(
         @Qualifier("polygon.order.api") controllerApi: OrderControllerApi,
+        @Qualifier("polygon.admin.api.order") adminControllerApi: OrderAdminControllerApi,
         converter: EthOrderConverter
     ): EthOrderService {
-        return PolygonOrderService(controllerApi, converter)
+        return PolygonOrderService(controllerApi, adminControllerApi, converter)
     }
 
     @Bean
