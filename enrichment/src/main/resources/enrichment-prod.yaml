@@ -1,8 +1,14 @@
 enrichment:
   currencies:
     bestBidByCurrencyWhitelist:
-      - ETHEREUM:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2
-      - POLYGON:0x7ceb23fd6bc0add59e62ac25578270cff1b9f619
+      - ETHEREUM:0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2 # weth
+      - ETHEREUM:0xfca59cd816ab1ead66534d82bc21e7515ce441cf # rari
+      - ETHEREUM:0x7ea2be2df7ba6e54b1a9c70676f668455e329d29 # usdc
+      - ETHEREUM:0x6b175474e89094c44da98b954eedeac495271d0f # dai
+      - POLYGON:0x7ceb23fd6bc0add59e62ac25578270cff1b9f619 # weth
+      - POLYGON:0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270 # wmatic
+      - POLYGON:0x2791bca1f2de4661ed88a30c99a7a9449aa84174 # usdc
+      - POLYGON:0x8f3cf7ad23cd3cadbd9735aff958023239c6a063 # dai
   collection:
     # Custom collections mappings
     mappings:
