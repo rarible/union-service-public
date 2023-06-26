@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.service
 
 import com.rarible.protocol.union.core.model.UnionCollectionChangeEvent
+import com.rarible.protocol.union.core.model.UnionCollectionSetBaseUriEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
@@ -8,6 +9,7 @@ import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConve
 import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollection
@@ -22,6 +24,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDt
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,6 +44,9 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var collectionEventService: EnrichmentCollectionEventService
+
+    @Autowired
+    private lateinit var metaRefreshRequestRepository: MetaRefreshRequestRepository
 
     @Test
     fun `on collection changed - ok`() = runWithKafka {
@@ -206,5 +212,22 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
             assertThat(messages[0].value.collection.bestBidOrdersByCurrency!!.map { it.id })
                 .isEqualTo(expected.bestBidOrdersByCurrency!!.map { it.id })
         }
+    }
+
+    @Test
+    fun `on collection setBaseUri - ok, refresh scheduled`() = runBlocking<Unit> {
+        val collectionId = randomEthCollectionId()
+
+        collectionEventService.onCollectionSetBaseUri(
+            UnionCollectionSetBaseUriEvent(
+                collectionId = collectionId,
+                eventTimeMarks = stubEventMark()
+            )
+        )
+
+        val refreshRequest = metaRefreshRequestRepository.findToScheduleAndUpdate(1).first()
+
+        assertThat(refreshRequest.collectionId).isEqualTo(collectionId.fullId())
+        assertThat(refreshRequest.full).isTrue
     }
 }

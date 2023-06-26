@@ -4,6 +4,7 @@ import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionChangeEvent
+import com.rarible.protocol.union.core.model.UnionCollectionSetBaseUriEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -12,9 +13,12 @@ import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
+import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -27,7 +31,9 @@ class EnrichmentCollectionEventService(
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val reconciliationEventService: ReconciliationEventService,
     private val bestOrderService: BestOrderService,
-    private val originService: OriginService
+    private val originService: OriginService,
+    private val metaRefreshRequestRepository: MetaRefreshRequestRepository,
+    private val unionMetaProperties: UnionMetaProperties,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -51,6 +57,17 @@ class EnrichmentCollectionEventService(
             eventTimeMarks = update.eventTimeMarks
         )
         sendUpdate(updateEvent)
+    }
+
+    suspend fun onCollectionSetBaseUri(event: UnionCollectionSetBaseUriEvent) {
+        val collectionId = event.collectionId
+        metaRefreshRequestRepository.save(
+            MetaRefreshRequest(
+                collectionId = collectionId.fullId(),
+                full = true,
+                withSimpleHash = unionMetaProperties.simpleHash.enabled,
+            )
+        )
     }
 
     suspend fun onCollectionBestSellOrderUpdate(

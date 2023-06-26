@@ -8,7 +8,8 @@ import java.time.Instant
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes(
     JsonSubTypes.Type(name = "UPDATE", value = UnionCollectionUpdateEvent::class),
-    JsonSubTypes.Type(name = "CHANGE", value = UnionCollectionChangeEvent::class)
+    JsonSubTypes.Type(name = "CHANGE", value = UnionCollectionChangeEvent::class),
+    JsonSubTypes.Type(name = "SET_BASE_URI", value = UnionCollectionSetBaseUriEvent::class),
 )
 
 sealed class UnionCollectionEvent {
@@ -44,3 +45,11 @@ data class UnionCollectionChangeEvent(
     }
 }
 
+data class UnionCollectionSetBaseUriEvent(
+    override val collectionId: CollectionIdDto,
+    override val eventTimeMarks: UnionEventTimeMarks?,
+) : UnionCollectionEvent() {
+    override fun addTimeMark(name: String, date: Instant?): UnionCollectionSetBaseUriEvent {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
+}
