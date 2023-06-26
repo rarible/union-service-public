@@ -1,11 +1,15 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.NftCollectionDto
+import com.rarible.protocol.dto.NftCollectionSetBaseUriEventDto
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthEventTimeMarks
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import scalether.domain.Address
+import java.util.UUID
 
 class EthCollectionConverterTest {
 
@@ -56,6 +60,21 @@ class EthCollectionConverterTest {
         val converted = EthCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.owner).isNull()
+    }
+
+    @Test
+    fun `setBaseUri event`() {
+        val event = NftCollectionSetBaseUriEventDto(
+            eventId = UUID.randomUUID().toString(),
+            id = Address.ONE(),
+            eventTimeMarks = randomEthEventTimeMarks(),
+        )
+
+        val result = EthCollectionConverter.convert(event, BlockchainDto.ETHEREUM)
+
+        assertThat(result.collectionId.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+        assertThat(result.collectionId.value).isEqualTo(Address.ONE().toString())
+        assertThat(result.eventTimeMarks).isNotNull
     }
 
     /*

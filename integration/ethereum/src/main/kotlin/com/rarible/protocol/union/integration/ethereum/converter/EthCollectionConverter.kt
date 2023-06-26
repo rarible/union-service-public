@@ -2,12 +2,14 @@ package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.NftCollectionDto
 import com.rarible.protocol.dto.NftCollectionEventDto
+import com.rarible.protocol.dto.NftCollectionSetBaseUriEventDto
 import com.rarible.protocol.dto.NftCollectionUpdateEventDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.dto.NftTokenIdDto
 import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
+import com.rarible.protocol.union.core.model.UnionCollectionSetBaseUriEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -32,6 +34,13 @@ object EthCollectionConverter {
             is NftCollectionUpdateEventDto -> {
                 UnionCollectionUpdateEvent(
                     collection = convert(source.collection, blockchain),
+                    eventTimeMarks = EthConverter.convert(source.eventTimeMarks)
+                )
+            }
+            is NftCollectionSetBaseUriEventDto -> {
+                val contract = EthConverter.convert(source.id)
+                UnionCollectionSetBaseUriEvent(
+                    collectionId = CollectionIdDto(blockchain, contract),
                     eventTimeMarks = EthConverter.convert(source.eventTimeMarks)
                 )
             }
