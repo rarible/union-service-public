@@ -6,6 +6,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.HoldNftItemIdsDto
 import com.rarible.protocol.dto.OrdersPaginationDto
+import com.rarible.protocol.order.api.client.OrderAdminControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -29,8 +30,9 @@ import reactor.kotlin.core.publisher.toMono
 class EthOrderServiceTest {
 
     private val orderControllerApi: OrderControllerApi = mockk()
+    private val orderAdminControllerApi: OrderAdminControllerApi = mockk()
     private val converter = EthOrderConverter(CurrencyMock.currencyServiceMock)
-    private val service = EthereumOrderService(orderControllerApi, converter)
+    private val service = EthereumOrderService(orderControllerApi, orderAdminControllerApi, converter)
 
     @Test
     fun `ethereum get all`() = runBlocking<Unit> {
@@ -136,5 +138,19 @@ class EthOrderServiceTest {
         val result = service.getAmmOrderItemIds(orderId, continuation, size)
 
         assertThat(result.entities).isEqualTo(listOf(itemId))
+    }
+
+    @Test
+    fun `cancel order - ok`() = runBlocking<Unit> {
+        val orderId = randomWord()
+        val canceledOrder = randomEthV2OrderDto()
+
+        coEvery {
+            orderAdminControllerApi.changeState(orderId, any())
+        } returns canceledOrder
+
+        val result = service.cancelOrder(orderId)
+
+        assertThat(result.id.value).isEqualTo(EthConverter.convert(canceledOrder.hash))
     }
 }

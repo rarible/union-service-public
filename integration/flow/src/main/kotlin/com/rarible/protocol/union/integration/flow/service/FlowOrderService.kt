@@ -4,6 +4,7 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.FlowOrderIdsDto
 import com.rarible.protocol.flow.nft.api.client.FlowBidOrderControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
@@ -265,6 +266,10 @@ open class FlowOrderService(
         size: Int
     ): Slice<ItemIdDto> {
         return Slice.empty()
+    }
+
+    override suspend fun cancelOrder(id: String): UnionOrder {
+        throw UnionException("Operation is not supported for this blockchain")
     }
 
     override suspend fun getAmmOrdersAll(

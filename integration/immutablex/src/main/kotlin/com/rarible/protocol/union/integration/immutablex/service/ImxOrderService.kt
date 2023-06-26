@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.service
 
 import com.rarible.protocol.union.core.continuation.UnionOrderContinuation
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
@@ -292,6 +293,10 @@ class ImxOrderService(
         size: Int
     ): Slice<ItemIdDto> {
         return Slice.empty()
+    }
+
+    override suspend fun cancelOrder(id: String): UnionOrder {
+        throw UnionException("Operation is not supported for this blockchain")
     }
 
     override suspend fun getAmmOrdersAll(

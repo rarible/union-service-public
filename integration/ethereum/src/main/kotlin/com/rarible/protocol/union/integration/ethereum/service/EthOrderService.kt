@@ -2,6 +2,8 @@ package com.rarible.protocol.union.integration.ethereum.service
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.OrderIdsDto
+import com.rarible.protocol.dto.OrderStateDto
+import com.rarible.protocol.order.api.client.OrderAdminControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -22,6 +24,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 open class EthOrderService(
     override val blockchain: BlockchainDto,
     private val orderControllerApi: OrderControllerApi,
+    private val orderAdminControllerApi: OrderAdminControllerApi,
     private val ethOrderConverter: EthOrderConverter
 ) : AbstractBlockchainService(blockchain), OrderService {
 
@@ -330,6 +333,12 @@ open class EthOrderService(
         return Slice(continuation, itemIds)
     }
 
+    override suspend fun cancelOrder(id: String): UnionOrder {
+        val state = OrderStateDto(canceled = true)
+        val order = orderAdminControllerApi.changeState(id, state)
+        return ethOrderConverter.convert(order, blockchain)
+    }
+
     override suspend fun getAmmOrdersAll(
         status: List<OrderStatusDto>?,
         continuation: String?,
@@ -361,19 +370,23 @@ open class EthOrderService(
 @CaptureSpan(type = "blockchain")
 open class EthereumOrderService(
     orderControllerApi: OrderControllerApi,
+    orderAdminControllerApi: OrderAdminControllerApi,
     ethOrderConverter: EthOrderConverter
 ) : EthOrderService(
     BlockchainDto.ETHEREUM,
     orderControllerApi,
+    orderAdminControllerApi,
     ethOrderConverter
 )
 
 @CaptureSpan(type = "blockchain")
 open class PolygonOrderService(
     orderControllerApi: OrderControllerApi,
+    orderAdminControllerApi: OrderAdminControllerApi,
     ethOrderConverter: EthOrderConverter
 ) : EthOrderService(
     BlockchainDto.POLYGON,
     orderControllerApi,
+    orderAdminControllerApi,
     ethOrderConverter
 )
