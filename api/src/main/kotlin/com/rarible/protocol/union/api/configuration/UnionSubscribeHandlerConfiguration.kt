@@ -1,92 +1,92 @@
 package com.rarible.protocol.union.api.configuration
 
+import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.RaribleKafkaConsumerFactory
+import com.rarible.core.kafka.RaribleKafkaConsumerSettings
+import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaEventHandler
 import com.rarible.protocol.union.api.handler.UnionSubscribeItemEventHandler
 import com.rarible.protocol.union.api.handler.UnionSubscribeOrderEventHandler
 import com.rarible.protocol.union.api.handler.UnionSubscribeOwnershipEventHandler
-import com.rarible.protocol.union.core.event.ConsumerFactory
-import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
-import com.rarible.protocol.union.subscriber.UnionEventsConsumerFactory
-import org.springframework.boot.CommandLineRunner
+import com.rarible.protocol.union.dto.UnionEventTopicProvider
+import com.rarible.protocol.union.subscriber.autoconfigure.UnionEventsSubscriberProperties
+import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.util.*
+import java.util.UUID
 
 @Configuration
 @EnableConfigurationProperties(value = [SubscribeProperties::class])
 class UnionSubscribeHandlerConfiguration(
-    private val unionEventsConsumerFactory: UnionEventsConsumerFactory,
-    private val consumerFactory: ConsumerFactory,
-    private val properties: SubscribeProperties
+    private val kafkaConsumerFactory: RaribleKafkaConsumerFactory,
+    private val properties: SubscribeProperties,
+    private val unionSubscriberProperties: UnionEventsSubscriberProperties,
+    applicationEnvironmentInfo: ApplicationEnvironmentInfo
 ) {
-    private val unionWorkerType = "subscribe"
+
+    private val env = applicationEnvironmentInfo.name
 
     @Bean
     fun unionSubscribeItemWorker(
-        unionItemEventHandler: UnionSubscribeItemEventHandler
-    ): ConsumerWorkerGroup<ItemEventDto> {
-        val group = "${consumerFactory.unionSubscribeItemGroup}.${UUID.randomUUID()}"
-        val consumer = unionEventsConsumerFactory.createItemConsumer(group)
-        return consumerFactory.createUnionItemConsumerWorkerGroup(
-            consumer = consumer,
-            handler = unionItemEventHandler,
-            daemonWorkerProperties = properties.daemon,
-            workers = properties.workers,
-            type = unionWorkerType
+        handler: UnionSubscribeItemEventHandler
+    ): RaribleKafkaConsumerWorker<ItemEventDto> {
+        return createSubscribeWorker(
+            type = EventType.ITEM,
+            topic = UnionEventTopicProvider.getItemTopic(env),
+            handler = handler,
+            valueClass = ItemEventDto::class.java
         )
     }
 
     @Bean
     fun unionSubscribeOwnershipWorker(
-        unionOwnershipEventHandler: UnionSubscribeOwnershipEventHandler
-    ): ConsumerWorkerGroup<OwnershipEventDto> {
-        val group = "${consumerFactory.unionSubscribeOwnershipGroup}.${UUID.randomUUID()}"
-        val consumer = unionEventsConsumerFactory.createOwnershipConsumer(group)
-        return consumerFactory.createUnionOwnershipConsumerWorkerGroup(
-            consumer = consumer,
-            handler = unionOwnershipEventHandler,
-            daemonWorkerProperties = properties.daemon,
-            workers = properties.workers,
-            type = unionWorkerType
+        handler: UnionSubscribeOwnershipEventHandler
+    ): RaribleKafkaConsumerWorker<OwnershipEventDto> {
+        return createSubscribeWorker(
+            type = EventType.OWNERSHIP,
+            topic = UnionEventTopicProvider.getOwnershipTopic(env),
+            handler = handler,
+            valueClass = OwnershipEventDto::class.java
         )
     }
 
     @Bean
     fun unionSubscribeOrderWorker(
         handler: UnionSubscribeOrderEventHandler
-    ): ConsumerWorkerGroup<OrderEventDto> {
-        val group = "${consumerFactory.unionSubscribeOrderGroup}.${UUID.randomUUID()}"
-        val consumer = unionEventsConsumerFactory.createOrderConsumer(group)
-        return consumerFactory.createUnionOrderConsumerWorkerGroup(
-            consumer = consumer,
+    ): RaribleKafkaConsumerWorker<OrderEventDto> {
+        return createSubscribeWorker(
+            type = EventType.ORDER,
+            topic = UnionEventTopicProvider.getOrderTopic(env),
             handler = handler,
-            daemonWorkerProperties = properties.daemon,
-            workers = properties.workers,
-            type = unionWorkerType
+            valueClass = OrderEventDto::class.java
         )
     }
 
-    @Bean
-    fun unionSubscriberItemWorkerStartup(
-        unionSubscribeItemWorker: ConsumerWorkerGroup<ItemEventDto>
-    ): CommandLineRunner = CommandLineRunner {
-        unionSubscribeItemWorker.start()
+    private fun <T> createSubscribeWorker(
+        type: EventType,
+        topic: String,
+        handler: RaribleKafkaEventHandler<T>,
+        valueClass: Class<T>
+    ): RaribleKafkaConsumerWorker<T> {
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = unionSubscriberProperties.brokerReplicaSet,
+            topic = topic,
+            group = "${subscribeConsumerGroup(type)}.${UUID.randomUUID()}",
+            concurrency = properties.workers.getOrDefault(type.value, 1),
+            batchSize = 100,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.LATEST,
+            valueClass = valueClass
+        )
+        return kafkaConsumerFactory.createWorker(settings, handler)
     }
 
-    @Bean
-    fun unionSubscriberOrderWorkerStartup(
-        unionSubscribeOrderWorker: ConsumerWorkerGroup<OrderEventDto>
-    ): CommandLineRunner = CommandLineRunner {
-        unionSubscribeOrderWorker.start()
-    }
-
-    @Bean
-    fun unionSubscriberOwnershipWorkerStartup(
-        unionSubscribeOwnershipWorker: ConsumerWorkerGroup<OwnershipEventDto>
-    ): CommandLineRunner = CommandLineRunner {
-        unionSubscribeOwnershipWorker.start()
+    private fun subscribeConsumerGroup(type: EventType): String {
+        return "protocol.union.subscribe.${type.value}"
     }
 }
