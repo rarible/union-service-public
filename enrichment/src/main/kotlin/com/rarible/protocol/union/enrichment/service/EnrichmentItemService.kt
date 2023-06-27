@@ -21,7 +21,7 @@ import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaTrimmer
+import com.rarible.protocol.union.enrichment.meta.item.MetaTrimmer
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -40,7 +40,7 @@ class EnrichmentItemService(
     private val enrichmentOrderService: EnrichmentOrderService,
     private val enrichmentAuctionService: EnrichmentAuctionService,
     private val itemMetaService: ItemMetaService,
-    private val itemMetaTrimmer: ItemMetaTrimmer,
+    private val itemMetaTrimmer: MetaTrimmer,
     private val contentMetaService: ContentMetaService,
     private val originService: OriginService,
     private val customCollectionResolver: CustomCollectionResolver,

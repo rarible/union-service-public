@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.enrichment.meta.item
 
-import com.rarible.protocol.union.enrichment.configuration.ItemMetaTrimmingProperties
+import com.rarible.protocol.union.enrichment.configuration.MetaTrimmingProperties
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMetaAttribute
 import org.assertj.core.api.Assertions.assertThat
@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 
 class ItemMetaTrimmerTest {
 
-    private val properties = ItemMetaTrimmingProperties(
+    private val properties = MetaTrimmingProperties(
         nameLength = 5,
         descriptionLength = 10,
         attributesSize = 2,
@@ -16,7 +16,7 @@ class ItemMetaTrimmerTest {
         attributeValueLength = 6
     )
 
-    private val trimmer = ItemMetaTrimmer(properties)
+    private val trimmer = MetaTrimmer(properties)
 
     @Test
     fun `data trimmed`() {
