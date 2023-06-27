@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller.internal
 import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import io.mockk.coEvery
 import io.mockk.every
@@ -24,7 +25,7 @@ class AdminControllerTest {
 
     @Test
     fun `cancel order - ok`() = runBlocking<Unit> {
-        val orderId = randomOrderId()
+        val orderId = randomOrderId(blockchain = BlockchainDto.TEZOS)
         val canceledUnionOrder = randomUnionOrder()
         val canceledDtoOrder = randomOrderDto()
 

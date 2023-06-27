@@ -84,7 +84,7 @@ class PolygonApiConfiguration {
 
     @Bean
     @Qualifier("polygon.admin.api.order")
-    fun ethereumOrderAdminApi(factory: OrderIndexerApiClientFactory): OrderAdminControllerApi =
+    fun polygonOrderAdminApi(factory: OrderIndexerApiClientFactory): OrderAdminControllerApi =
         factory.createOrderAdminApiClient(polygon)
 
     @Bean
