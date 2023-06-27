@@ -168,7 +168,7 @@ integration:
         order: 1
     auctionContracts:
   immutablex:
-    enabled: ${consul.immutablex.enabled:true}
+    enabled: ${consul.immutablex.enabled:false}
     client:
       url: ${consul.immutablex.api.baseUrl:}
       byIdsChunkSize: 16

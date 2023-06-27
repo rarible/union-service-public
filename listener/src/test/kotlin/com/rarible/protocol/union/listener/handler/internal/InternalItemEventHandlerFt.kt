@@ -7,16 +7,15 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.Disabled
+import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 @IntegrationTest
 class InternalItemEventHandlerFt : AbstractIntegrationTest() {
 
     @Test
-    @Disabled("Works locally, fix under PT-953")
-    fun `internal item event`() = runWithKafka {
+    fun `internal item event`() = runBlocking {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
 
@@ -33,10 +32,8 @@ class InternalItemEventHandlerFt : AbstractIntegrationTest() {
 
         waitAssert {
             val messages = findItemUpdates(itemId.value)
-            Assertions.assertThat(messages).hasSize(1)
-            Assertions.assertThat(messages[0].key).isEqualTo(itemId.fullId())
-            Assertions.assertThat(messages[0].id).isEqualTo(itemId.fullId())
-            Assertions.assertThat(messages[0].value.itemId).isEqualTo(itemId)
+            assertThat(messages).hasSize(1)
+            assertThat(messages[0].itemId).isEqualTo(itemId)
         }
     }
 

@@ -31,6 +31,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -54,7 +55,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
     private lateinit var reconciliationMarkRepository: ReconciliationMarkRepository
 
     @Test
-    fun `update event - ownership doesn't exist`() = runWithKafka {
+    fun `update event - ownership doesn't exist`() = runBlocking {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId(itemId)
         val ownershipDto = randomUnionOwnership(ownershipId)
@@ -73,18 +74,15 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         // But there should be single Ownership event "as is"
         waitAssert {
-            assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].key).isEqualTo(itemId.fullId())
-            assertThat(messages[0].id).isEqualTo(itemId.fullId())
-            assertThat(messages[0].value.ownershipId).isEqualTo(ownershipId)
-            assertThat(messages[0].value.ownership).isEqualTo(expected)
+            assertThat(messages[0].ownershipId).isEqualTo(ownershipId)
+            assertThat(messages[0].ownership).isEqualTo(expected)
         }
     }
 
     @Test
-    fun `update event - existing ownership updated`() = runWithKafka {
+    fun `update event - existing ownership updated`() = runBlocking {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId(itemId)
         val ethOwnership = randomEthOwnershipDto(ownershipId)
@@ -113,18 +111,15 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         // We don't have related item in enrichment DB, so expect only Ownership update
         waitAssert {
-            assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].key).isEqualTo(itemId.fullId())
-            assertThat(messages[0].id).isEqualTo(itemId.fullId())
-            assertThat(messages[0].value.ownershipId).isEqualTo(ownershipId)
-            assertThat(messages[0].value.ownership.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
+            assertThat(messages[0].ownershipId).isEqualTo(ownershipId)
+            assertThat(messages[0].ownership.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
         }
     }
 
     @Test
-    fun `update event - existing ownership updated, order corrupted`() = runWithKafka {
+    fun `update event - existing ownership updated, order corrupted`() = runBlocking {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId(itemId)
         val ethOwnership = randomEthOwnershipDto(ownershipId)
@@ -160,7 +155,7 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `on order updated - ownership exists`() = runWithKafka {
+    fun `on order updated - ownership exists`() = runBlocking {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId(itemId)
         val ethOwnership = randomEthOwnershipDto(ownershipId)
@@ -185,16 +180,15 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         // Since Item doesn't exist in Enrichment DB, we expect only Ownership event
         waitAssert {
-            assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.ownershipId).isEqualTo(ownershipId)
-            assertThat(messages[0].value.ownership.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
+            assertThat(messages[0].ownershipId).isEqualTo(ownershipId)
+            assertThat(messages[0].ownership.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
         }
     }
 
     @Test
-    fun `on auction updated - ownership fetched, auction is active`() = runWithKafka {
+    fun `on auction updated - ownership fetched, auction is active`() = runBlocking {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId(itemId)
         val ethOwnership = randomEthOwnershipDto(ownershipId)
@@ -213,15 +207,14 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         // Auction should be attached to the Ownership
         waitAssert {
-            assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.ownership).isEqualTo(expected)
+            assertThat(messages[0].ownership).isEqualTo(expected)
         }
     }
 
     @Test
-    fun `on auction updated - ownership fetched, auction is cancelled`() = runWithKafka {
+    fun `on auction updated - ownership fetched, auction is cancelled`() = runBlocking {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId(itemId)
         val ethOwnership = randomEthOwnershipDto(ownershipId)
@@ -239,15 +232,14 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         // Auction should be NOT attached to the Ownership since it is cancelled
         waitAssert {
-            assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.ownership).isEqualTo(expected)
+            assertThat(messages[0].ownership).isEqualTo(expected)
         }
     }
 
     @Test
-    fun `on auction updated - ownership not fetched, auction is active`() = runWithKafka {
+    fun `on auction updated - ownership not fetched, auction is active`() = runBlocking {
         val itemId = randomEthItemId()
         val auction = randomUnionAuctionDto(itemId)
         val ownershipId = auction.getSellerOwnershipId()
@@ -262,16 +254,15 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         // Auction should be converted to disguised ownership
         waitAssert {
-            assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.ownership.id).isEqualTo(ownershipId)
-            assertThat(messages[0].value.ownership.auction).isEqualTo(auction)
+            assertThat(messages[0].ownership.id).isEqualTo(ownershipId)
+            assertThat(messages[0].ownership.auction).isEqualTo(auction)
         }
     }
 
     @Test
-    fun `on auction updated - ownership not fetched, auction is finished`() = runWithKafka {
+    fun `on auction updated - ownership not fetched, auction is finished`() = runBlocking {
         val itemId = randomEthItemId()
         val auction = randomUnionAuctionDto(itemId).copy(status = AuctionStatusDto.FINISHED)
         val ownershipId = auction.getSellerOwnershipId()
@@ -282,15 +273,14 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         // Seller's ownership should be deleted
         waitAssert {
-            assertThat(ownershipEvents).hasSize(1)
             val messages = findOwnershipDeletions(ownershipId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.ownershipId).isEqualTo(ownershipId)
+            assertThat(messages[0].ownershipId).isEqualTo(ownershipId)
         }
     }
 
     @Test
-    fun `delete event - existing ownership deleted`() = runWithKafka {
+    fun `delete event - existing ownership deleted`() = runBlocking {
         val itemId = randomEthItemId()
         val ownership = ownershipService.save(randomShortOwnership(itemId))
         val ownershipId = ownership.id.toDto()
@@ -305,14 +295,12 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findOwnershipDeletions(ownershipId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].key).isEqualTo(itemId.fullId())
-            assertThat(messages[0].id).isEqualTo(itemId.fullId())
-            assertThat(messages[0].value.ownershipId).isEqualTo(ownershipId)
+            assertThat(messages[0].ownershipId).isEqualTo(ownershipId)
         }
     }
 
     @Test
-    fun `delete event - ownership doesn't exist`() = runWithKafka {
+    fun `delete event - ownership doesn't exist`() = runBlocking {
         val itemId = randomEthItemId()
         val shortOwnershipId = randomShortOwnership(itemId).id
         val ownershipId = shortOwnershipId.toDto()
@@ -326,14 +314,12 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findOwnershipDeletions(ownershipId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].key).isEqualTo(itemId.fullId())
-            assertThat(messages[0].id).isEqualTo(itemId.fullId())
-            assertThat(messages[0].value.ownershipId).isEqualTo(ownershipId)
+            assertThat(messages[0].ownershipId).isEqualTo(ownershipId)
         }
     }
 
     @Test
-    fun `delete event - fully auctioned ownership`() = runWithKafka {
+    fun `delete event - fully auctioned ownership`() = runBlocking {
         val itemId = randomEthItemId()
         val auction = randomEthAuctionDto(itemId)
         val unionAuction = ethAuctionConverter.convert(auction, BlockchainDto.ETHEREUM)
@@ -353,8 +339,8 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findOwnershipUpdates(ownershipId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.ownership.id).isEqualTo(ownershipId)
-            assertThat(messages[0].value.ownership.auction).isEqualTo(unionAuction)
+            assertThat(messages[0].ownership.id).isEqualTo(ownershipId)
+            assertThat(messages[0].ownership.auction).isEqualTo(unionAuction)
         }
     }
 }

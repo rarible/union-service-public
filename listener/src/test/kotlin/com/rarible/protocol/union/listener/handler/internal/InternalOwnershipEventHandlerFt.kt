@@ -13,8 +13,8 @@ import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.verify
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import reactor.core.publisher.Mono
 
@@ -22,8 +22,7 @@ import reactor.core.publisher.Mono
 class InternalOwnershipEventHandlerFt : AbstractIntegrationTest() {
 
     @Test
-    @Disabled("Works locally, fix under PT-953")
-    fun `internal ownership event`() = runWithKafka {
+    fun `internal ownership event`() = runBlocking {
         val itemId = randomEthItemId()
         val ownershipId = randomEthOwnershipId(itemId)
         val ownership = randomEthOwnershipDto(ownershipId)
@@ -45,9 +44,7 @@ class InternalOwnershipEventHandlerFt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findOwnershipUpdates(ownershipId.value)
             Assertions.assertThat(messages).hasSize(1)
-            Assertions.assertThat(messages[0].key).isEqualTo(itemId.fullId())
-            Assertions.assertThat(messages[0].id).isEqualTo(itemId.fullId())
-            Assertions.assertThat(messages[0].value.ownership.id).isEqualTo(ownershipId)
+            Assertions.assertThat(messages[0].ownership.id).isEqualTo(ownershipId)
         }
         val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
         verify {

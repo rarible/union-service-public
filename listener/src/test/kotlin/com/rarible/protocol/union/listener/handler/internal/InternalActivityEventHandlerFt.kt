@@ -22,6 +22,7 @@ import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.daonomic.rpc.domain.Word
 import io.mockk.every
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,7 +40,7 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
     private lateinit var itemRepository: ItemRepository
 
     @Test
-    fun `internal activity event`() = runWithKafka {
+    fun `internal activity event`() = runBlocking<Unit> {
 
         val activity = randomEthItemBurnActivity()
 
@@ -57,7 +58,7 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `revert sell activity`() = runWithKafka<Unit> {
+    fun `revert sell activity`() = runBlocking<Unit> {
         val buyer = UnionAddress(blockchainGroup = BlockchainGroupDto.ETHEREUM, value = Address.THREE().toString())
         val seller = UnionAddress(blockchainGroup = BlockchainGroupDto.ETHEREUM, value = Address.TWO().toString())
         val saleDate = Instant.now().truncatedTo(ChronoUnit.SECONDS)
@@ -84,7 +85,7 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
                 )
             )
 
-        itemEvents?.clear()
+        testItemEventHandler.events.clear()
         ethActivityProducer.send(
             KafkaMessage(
                 key = "1",
@@ -102,7 +103,7 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemUpdates(itemId)
             assertThat(messages).hasSize(1)
-            val updatedItem = messages[0].value.item
+            val updatedItem = messages[0].item
             assertThat(updatedItem.lastSale).isEqualTo(
                 ItemLastSaleDto(
                     date = saleDate.minus(1, ChronoUnit.HOURS),
@@ -115,7 +116,7 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
             )
         }
 
-        itemEvents?.clear()
+        testItemEventHandler.events.clear()
         ethActivityProducer.send(
             KafkaMessage(
                 key = "1",
@@ -133,7 +134,7 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemUpdates(itemId)
             assertThat(messages).hasSize(1)
-            val updatedItem = messages[0].value.item
+            val updatedItem = messages[0].item
             assertThat(updatedItem.lastSale).isEqualTo(
                 ItemLastSaleDto(
                     date = saleDate,
@@ -146,7 +147,7 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
             )
         }
 
-        itemEvents?.clear()
+        testItemEventHandler.events.clear()
         ethActivityProducer.send(
             KafkaMessage(
                 key = "1",
@@ -164,7 +165,7 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemUpdates(itemId)
             assertThat(messages).hasSize(1)
-            val updatedItem = messages[0].value.item
+            val updatedItem = messages[0].item
             assertThat(updatedItem.lastSale).isEqualTo(
                 ItemLastSaleDto(
                     date = saleDate.minus(1, ChronoUnit.HOURS),

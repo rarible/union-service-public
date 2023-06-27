@@ -1,13 +1,13 @@
 package com.rarible.protocol.union.meta.loader
 
-import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
 class UnionMetaLoaderApplication(
-    private val kafkaConsumers: List<KafkaConsumerWorker<*>>
+    private val kafkaConsumers: List<RaribleKafkaConsumerWorker<*>>
 ) : CommandLineRunner {
 
     override fun run(vararg args: String?) {

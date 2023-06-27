@@ -1,9 +1,19 @@
 package com.rarible.protocol.union.api.controller.test
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.RaribleKafkaConsumerFactory
+import com.rarible.core.kafka.RaribleKafkaConsumerSettings
+import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
+import com.rarible.protocol.dto.NftItemEventDto
+import com.rarible.protocol.dto.NftItemEventTopicProvider
+import com.rarible.protocol.dto.NftOwnershipEventDto
+import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
@@ -19,27 +29,84 @@ import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
+import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
+import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
+import com.rarible.protocol.union.core.elasticsearch.EsRepository
+import com.rarible.protocol.union.core.elasticsearch.IndexService
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.download.DownloadTask
+import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig
+import com.rarible.protocol.union.core.test.TestUnionEventHandler
 import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.dto.FakeSubscriptionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.SubscriptionEventDto
+import com.rarible.protocol.union.dto.SubscriptionRequestDto
+import com.rarible.protocol.union.dto.UnionEventTopicProvider
+import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
+import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
+import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.elasticsearch.action.support.IndicesOptions
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+import org.springframework.boot.web.context.WebServerInitializedEvent
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
+import org.springframework.data.elasticsearch.client.ClientConfiguration
+import org.springframework.data.elasticsearch.client.reactive.DefaultReactiveElasticsearchClient
+import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
+import org.springframework.data.elasticsearch.core.ReactiveElasticsearchTemplate
+import org.springframework.data.elasticsearch.core.RefreshPolicy
+import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.reactive.socket.WebSocketMessage
+import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
+import reactor.core.publisher.Sinks
 import java.net.URI
+import java.util.concurrent.LinkedBlockingQueue
 import com.rarible.protocol.solana.api.client.ActivityControllerApi as SolanaActivityControllerApi
 import com.rarible.protocol.solana.api.client.CollectionControllerApi as SolanaCollectionControllerApi
 
 @Lazy
 @Configuration
-class TestApiConfiguration {
+@EnableAutoConfiguration
+@Import(WebSocketConfiguration::class)
+class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    private val host = "test.com"
+    private val env = "test"
+    private val applicationEnvironmentInfo = ApplicationEnvironmentInfo(env, host)
+
+    private val kafkaConsumerFactory = RaribleKafkaConsumerFactory(env, host, UnionKafkaJsonDeserializer::class.java)
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
+    @Bean
+    fun shutdownMono(): Sinks.One<Void> = Sinks.one()
+
+    @Bean
+    fun webSocketEventsQueue() = LinkedBlockingQueue<SubscriptionEventDto>()
+
+    @Bean
+    fun webSocketRequests(): Sinks.Many<List<SubscriptionRequestDto>> = Sinks.many().unicast().onBackpressureBuffer()
 
     @Bean
     @Qualifier("testLocalhostUri")
@@ -48,9 +115,7 @@ class TestApiConfiguration {
     }
 
     @Bean
-    fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
-        return ApplicationEnvironmentInfo("test", "test.com")
-    }
+    fun applicationEnvironmentInfo() = applicationEnvironmentInfo
 
     @Bean
     fun testRestTemplate(mapper: ObjectMapper): RestTemplate {
@@ -277,8 +342,162 @@ class TestApiConfiguration {
     @Primary
     fun testSignatureClient(): com.rarible.tzkt.client.SignatureClient = mockk()
 
+    //---------------------- KAFKA ---------------------//
+    @Bean
+    fun testItemHandler() = TestUnionEventHandler<ItemEventDto>()
+
+    @Bean
+    fun testItemConsumer(
+        handler: TestUnionEventHandler<ItemEventDto>
+    ): RaribleKafkaConsumerWorker<ItemEventDto> {
+        val topic = UnionEventTopicProvider.getItemTopic(applicationEnvironmentInfo.name)
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
+            topic = topic,
+            group = "test-union-item-group",
+            concurrency = 1,
+            batchSize = 10,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = ItemEventDto::class.java
+        )
+        return kafkaConsumerFactory.createWorker(settings, handler)
+    }
+
+    @Bean
+    fun testOwnershipHandler() = TestUnionEventHandler<OwnershipEventDto>()
+
+    @Bean
+    fun testOwnershipConsumer(
+        handler: TestUnionEventHandler<OwnershipEventDto>
+    ): RaribleKafkaConsumerWorker<OwnershipEventDto> {
+        val topic = UnionEventTopicProvider.getOwnershipTopic(applicationEnvironmentInfo.name)
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
+            topic = topic,
+            group = "test-union-ownership-group",
+            concurrency = 1,
+            batchSize = 10,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = OwnershipEventDto::class.java
+        )
+        return kafkaConsumerFactory.createWorker(settings, handler)
+    }
+
+    @Bean
+    fun testEthereumItemEventProducer(): RaribleKafkaProducer<NftItemEventDto> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.ethereum.item",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = NftItemEventDto::class.java,
+            defaultTopic = NftItemEventTopicProvider.getTopic(applicationEnvironmentInfo.name, "ethereum"),
+            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    fun testEthereumOwnershipEventProducer(): RaribleKafkaProducer<NftOwnershipEventDto> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.ethereum.ownership",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = NftOwnershipEventDto::class.java,
+            defaultTopic = NftOwnershipEventTopicProvider.getTopic(applicationEnvironmentInfo.name, "ethereum"),
+            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    @Bean
+    @Qualifier("item.producer.api")
+    fun unionItemEventProducer(): RaribleKafkaProducer<ItemEventDto> {
+        val itemTopic = UnionEventTopicProvider.getItemTopic("test")
+        return createUnionProducer("item", itemTopic, ItemEventDto::class.java)
+    }
+
+    @Bean
+    @Qualifier("order.producer.api")
+    fun unionOrderEventProducer(): RaribleKafkaProducer<OrderUpdateEventDto> {
+        val orderTopic = UnionEventTopicProvider.getOrderTopic("test")
+        return createUnionProducer("order", orderTopic, OrderUpdateEventDto::class.java)
+    }
+
+    private fun <T> createUnionProducer(clientSuffix: String, topic: String, type: Class<T>): RaribleKafkaProducer<T> {
+        return RaribleKafkaProducer(
+            clientId = "test.protocol-union-service.${clientSuffix}",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = type,
+            defaultTopic = topic,
+            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
+        )
+    }
+
+    //---------------------- ES -----------------------//
+
     @Bean
     @Primary
     fun testDipDupTokenClient(): com.rarible.dipdup.client.TokenClient = mockk()
 
+    @Bean(initMethod = "bootstrap")
+    @ConditionalOnMissingBean
+    fun elasticsearchBootstrap(
+        @Qualifier("esOperationsWithTimeout") reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
+        restHighLevelClient: ReactiveElasticsearchClient,
+        esNameResolver: EsNameResolver,
+        indexService: IndexService,
+        repositories: List<EsRepository>,
+    ): ElasticsearchTestBootstrapper {
+
+        return ElasticsearchTestBootstrapper(
+            esNameResolver = esNameResolver,
+            esOperations = reactiveElasticSearchOperations,
+            restHighLevelClient,
+            entityDefinitions = EsEntitiesConfig.createEsEntities(),
+            repositories = repositories
+        )
+    }
+
+    @Primary
+    @Bean("esOperationsWithTimeout")
+    fun elasticSearchOperations(
+        clientConfiguration: ClientConfiguration,
+        converter: ElasticsearchConverter,
+    ): ReactiveElasticsearchOperations {
+        val configWithTimeout = ClientConfiguration.builder()
+            .connectedTo(*clientConfiguration.endpoints.toTypedArray())
+            .withConnectTimeout(15000)
+            .withSocketTimeout(15000)
+            .build()
+        val client = DefaultReactiveElasticsearchClient.create(configWithTimeout)
+
+        val template = ReactiveElasticsearchTemplate(client, converter)
+        template.setIndicesOptions(IndicesOptions.strictExpandOpenAndForbidClosed())
+        template.refreshPolicy = RefreshPolicy.IMMEDIATE
+        return template
+    }
+
+    override fun onApplicationEvent(event: WebServerInitializedEvent) {
+        val typeRef = object : TypeReference<List<SubscriptionRequestDto>>() {}
+        val port = event.webServer.port
+
+        ReactorNettyWebSocketClient().execute(URI("ws://127.0.0.1:$port/v0.1/subscribe")) { session ->
+            logger.info("Connected to ws")
+            session.receive().map { notification ->
+                logger.info("received from ws: {}", notification.payloadAsText)
+                val evt: SubscriptionEventDto = objectMapper.readValue(notification.payloadAsText)
+                if (evt !is FakeSubscriptionEventDto) {
+                    webSocketEventsQueue().offer(evt)
+                }
+            }.subscribe()
+
+            session.send(webSocketRequests().asFlux().map {
+                val bytes = objectMapper.writerFor(typeRef).writeValueAsBytes(it)
+                logger.info("sending to ws: {}", String(bytes))
+                WebSocketMessage(
+                    WebSocketMessage.Type.TEXT, DefaultDataBufferFactory().wrap(bytes)
+                )
+            }).doOnSubscribe { logger.info("subscribed to ws") }
+                .subscribe({}, { logger.error("ws error", it) }, { logger.info("disconnected from ws") })
+            shutdownMono().asMono()
+        }.subscribe()
+    }
 }
