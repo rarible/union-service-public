@@ -44,14 +44,13 @@ class DownloadExecutorConfiguration(
     private val metaProperties: UnionMetaProperties,
     private val metaLoaderProperties: UnionMetaLoaderProperties,
     private val kafkaGroupFactory: KafkaGroupFactory,
-    applicationEnvironmentInfo: ApplicationEnvironmentInfo
+    private val kafkaConsumerFactory: RaribleKafkaConsumerFactory,
+    applicationEnvironmentInfo: ApplicationEnvironmentInfo,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val env = applicationEnvironmentInfo.name
-    private val host = applicationEnvironmentInfo.host
-    private val kafkaConsumerFactory = RaribleKafkaConsumerFactory(env = env, host = host)
 
     @Bean
     @Qualifier("item.meta.download.executor.manager")

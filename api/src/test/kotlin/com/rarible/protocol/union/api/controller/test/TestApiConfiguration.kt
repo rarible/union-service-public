@@ -45,7 +45,6 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.SubscriptionEventDto
 import com.rarible.protocol.union.dto.SubscriptionRequestDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
-import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
@@ -93,8 +92,6 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     private val host = "test.com"
     private val env = "test"
     private val applicationEnvironmentInfo = ApplicationEnvironmentInfo(env, host)
-
-    private val kafkaConsumerFactory = RaribleKafkaConsumerFactory(env, host, UnionKafkaJsonDeserializer::class.java)
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
@@ -348,7 +345,8 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
 
     @Bean
     fun testItemConsumer(
-        handler: TestUnionEventHandler<ItemEventDto>
+        handler: TestUnionEventHandler<ItemEventDto>,
+        kafkaConsumerFactory: RaribleKafkaConsumerFactory
     ): RaribleKafkaConsumerWorker<ItemEventDto> {
         val topic = UnionEventTopicProvider.getItemTopic(applicationEnvironmentInfo.name)
         val settings = RaribleKafkaConsumerSettings(
@@ -369,7 +367,8 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
 
     @Bean
     fun testOwnershipConsumer(
-        handler: TestUnionEventHandler<OwnershipEventDto>
+        handler: TestUnionEventHandler<OwnershipEventDto>,
+        kafkaConsumerFactory: RaribleKafkaConsumerFactory
     ): RaribleKafkaConsumerWorker<OwnershipEventDto> {
         val topic = UnionEventTopicProvider.getOwnershipTopic(applicationEnvironmentInfo.name)
         val settings = RaribleKafkaConsumerSettings(

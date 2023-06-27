@@ -1,18 +1,18 @@
 package com.rarible.protocol.union.search.indexer.metrics
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
+import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
 import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.dto.BlockchainDto
 import java.time.Instant
 
 class MetricsConsumerBatchEventHandlerWrapper<T>(
     metricFactory: IndexerMetricFactory,
-    private val delegate: ConsumerBatchEventHandler<T>,
+    private val delegate: RaribleKafkaBatchEventHandler<T>,
     private val esEntity: EsEntity,
     private val eventTimestamp: (T) -> Instant,
     private val eventBlockchain: (T) -> BlockchainDto
-) : ConsumerBatchEventHandler<T> {
+) : RaribleKafkaBatchEventHandler<T> {
 
     private val counters = BlockchainDto.values().associateWith {
         metricFactory.createEventHandlerCountMetric(esEntity, it)
