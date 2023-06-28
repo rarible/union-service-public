@@ -2,17 +2,23 @@ package com.rarible.protocol.union.integration.tezos.dipdup
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.RaribleKafkaConsumerFactory
+import com.rarible.core.kafka.RaribleKafkaConsumerSettings
+import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.dipdup.client.core.model.DipDupActivity
 import com.rarible.dipdup.client.core.model.DipDupOrder
+import com.rarible.dipdup.listener.config.DipDupDeserializer
 import com.rarible.dipdup.listener.config.DipDupEventsConsumerFactory
+import com.rarible.dipdup.listener.config.DipDupTopicProvider
 import com.rarible.dipdup.listener.model.DipDupCollectionEvent
 import com.rarible.dipdup.listener.model.DipDupItemEvent
 import com.rarible.dipdup.listener.model.DipDupItemMetaEvent
 import com.rarible.dipdup.listener.model.DipDupOwnershipEvent
 import com.rarible.protocol.union.core.event.ConsumerFactory
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
+import com.rarible.protocol.union.core.handler.BlockchainEventHandlerWrapper
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
-import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
@@ -31,6 +37,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupTransfers
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
+import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -76,9 +83,14 @@ class DipDupConsumerConfiguration(
     fun dipDupOrderEventWorker(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupOrderEventHandler
-    ): KafkaConsumerWorker<DipDupOrder> {
-        val consumer = factory.createOrderConsumer(consumerFactory.orderGroup)
-        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<DipDupOrder> {
+        return createConsumer(
+            topic = DipDupTopicProvider.getOrderTopic(env),
+            handler = handler,
+            valueClass = DipDupOrder::class.java,
+            eventType = EventType.ORDER,
+            deserializer = DipDupDeserializer.OrderJsonSerializer::class.java
+        )
     }
 
     @Bean
@@ -106,10 +118,14 @@ class DipDupConsumerConfiguration(
     fun dipDupActivityEventWorker(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupActivityEventHandler
-    ): KafkaConsumerWorker<DipDupActivity> {
-        val consumer = factory.createActivityConsumer(consumerFactory.activityGroup)
-        logger.info("Use ${workers} worker config for listening dipdup events")
-        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<DipDupActivity> {
+        return createConsumer(
+            topic = DipDupTopicProvider.getActivityTopic(env),
+            handler = handler,
+            valueClass = DipDupActivity::class.java,
+            eventType = EventType.ACTIVITY,
+            deserializer = DipDupDeserializer.ActivityJsonSerializer::class.java
+        )
     }
 
     @Bean
@@ -126,9 +142,14 @@ class DipDupConsumerConfiguration(
     fun dipDupCollectionEventWorker(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupCollectionEventHandler
-    ): KafkaConsumerWorker<DipDupCollectionEvent> {
-        val consumer = factory.createCollectionConsumer(consumerFactory.collectionGroup)
-        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<DipDupCollectionEvent> {
+        return createConsumer(
+            topic = DipDupTopicProvider.getCollectionTopic(env),
+            handler = handler,
+            valueClass = DipDupCollectionEvent::class.java,
+            eventType = EventType.COLLECTION,
+            deserializer = DipDupDeserializer.CollectionJsonSerializer::class.java
+        )
     }
 
     @Bean
@@ -143,9 +164,14 @@ class DipDupConsumerConfiguration(
     fun dipDupItemEventWorker(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupItemEventHandler
-    ): KafkaConsumerWorker<DipDupItemEvent> {
-        val consumer = factory.createItemConsumer(consumerFactory.itemGroup)
-        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<DipDupItemEvent> {
+        return createConsumer(
+            topic = DipDupTopicProvider.getItemTopic(env),
+            handler = handler,
+            valueClass = DipDupItemEvent::class.java,
+            eventType = EventType.ITEM,
+            deserializer = DipDupDeserializer.ItemEventJsonSerializer::class.java
+        )
     }
 
     @Bean
@@ -157,9 +183,14 @@ class DipDupConsumerConfiguration(
     fun dipDupItemMetaEventWorker(
         factory: DipDupEventsConsumerFactory,
         handler: BlockchainEventHandler<DipDupItemMetaEvent, UnionItemMetaEvent>
-    ): KafkaConsumerWorker<DipDupItemMetaEvent> {
-        val consumer = factory.createItemMetaConsumer(consumerFactory.itemMetaGroup)
-        return consumerFactory.createItemMetaConsumer(consumer, handler, daemon, workers)
+    ): RaribleKafkaConsumerWorker<DipDupItemMetaEvent> {
+        return createConsumer(
+            topic = DipDupTopicProvider.getItemMetaTopic(env),
+            handler = handler,
+            valueClass = DipDupItemMetaEvent::class.java,
+            eventType = EventType.ITEM_META,
+            deserializer = DipDupDeserializer.ItemMetaEventJsonSerializer::class.java
+        )
     }
 
     @Bean
@@ -174,9 +205,34 @@ class DipDupConsumerConfiguration(
     fun dipDupOwnershipEventWorker(
         factory: DipDupEventsConsumerFactory,
         handler: DipDupOwnershipEventHandler
-    ): KafkaConsumerWorker<DipDupOwnershipEvent> {
-        val consumer = factory.createOwnershipConsumer(consumerFactory.itemGroup)
-        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<DipDupOwnershipEvent> {
+        return createConsumer(
+            topic = DipDupTopicProvider.getOwnershipTopic(env),
+            handler = handler,
+            valueClass = DipDupOwnershipEvent::class.java,
+            eventType = EventType.OWNERSHIP,
+            deserializer = DipDupDeserializer.OwnershipEventJsonSerializer::class.java
+        )
     }
 
+    private fun <B, U> createConsumer(
+        topic: String,
+        handler: BlockchainEventHandler<B, U>,
+        valueClass: Class<B>,
+        eventType: EventType,
+        deserializer: Class<*>
+    ): RaribleKafkaConsumerWorker<B> {
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = consumer.brokerReplicaSet!!,
+            topic = topic,
+            group = consumerFactory.consumerGroup(eventType),
+            concurrency = workers.getOrDefault(eventType.value, 1),
+            batchSize = batchSize,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = valueClass
+        )
+        val kafkaConsumerFactory = RaribleKafkaConsumerFactory(env, host, deserializer)
+        return kafkaConsumerFactory.createWorker(settings, BlockchainEventHandlerWrapper(handler))
+    }
 }

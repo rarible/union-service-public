@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.core
 
+import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.protocol.currency.api.client.CurrencyApiClientFactory
 import com.rarible.protocol.currency.api.client.CurrencyApiServiceUriProvider
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
@@ -23,6 +25,7 @@ import com.rarible.protocol.union.core.service.dummy.DummySignatureService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -49,6 +52,7 @@ import org.springframework.web.reactive.function.client.WebClient
     ]
 )
 class CoreConfiguration(
+    val applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     val enabledBlockchains: List<BlockchainDto>,
     val featureFlagsProperties: FeatureFlagsProperties,
 ) {
@@ -61,6 +65,13 @@ class CoreConfiguration(
     fun setMapKeyDotReplacement(mappingMongoConverter: MappingMongoConverter) {
         mappingMongoConverter.setMapKeyDotReplacement("__DOT__")
     }
+
+    @Bean
+    fun raribleKafkaConsumerFactory() = RaribleKafkaConsumerFactory(
+        applicationEnvironmentInfo.name,
+        applicationEnvironmentInfo.host,
+        UnionKafkaJsonDeserializer::class.java
+    )
 
     @Bean
     fun webClient(webClientCustomizer: UnionWebClientCustomizer): WebClient {

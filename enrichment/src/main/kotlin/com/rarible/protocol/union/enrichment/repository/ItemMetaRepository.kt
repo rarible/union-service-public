@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
+import com.rarible.protocol.union.enrichment.meta.item.MetaTrimmer
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import org.slf4j.LoggerFactory
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class ItemMetaRepository(
+    private val itemMetaTrimmer: MetaTrimmer,
     private val itemRepository: ItemRepository,
     private val blockchainRouter: BlockchainRouter<ItemService>
 ) : DownloadEntryRepository<UnionMeta> {
@@ -38,7 +40,11 @@ class ItemMetaRepository(
                 }
                 result
             }
-            itemRepository.save(item.withMeta(updated))
+            val trimmedMeta = itemMetaTrimmer.trim(updated.data)
+            if (trimmedMeta != updated.data) {
+                logger.info("Item with large meta was trimmed: $itemId")
+            }
+            itemRepository.save(item.withMeta(updated.withData(trimmedMeta)))
             updated
         } else {
             null

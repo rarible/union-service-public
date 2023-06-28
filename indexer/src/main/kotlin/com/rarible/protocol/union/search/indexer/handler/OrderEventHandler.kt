@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.search.indexer.handler
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
+import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsOrderConverter
 import com.rarible.protocol.union.core.model.elastic.EsEntity
@@ -19,7 +19,7 @@ class OrderEventHandler(
     private val featureFlagsProperties: FeatureFlagsProperties,
     private val repository: EsOrderRepository,
     metricFactory: IndexerMetricFactory,
-) : ConsumerBatchEventHandler<OrderEventDto> {
+) : RaribleKafkaBatchEventHandler<OrderEventDto> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

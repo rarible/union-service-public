@@ -1,19 +1,10 @@
 package com.rarible.protocol.union.search.indexer.test
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
-import com.rarible.core.kafka.RaribleKafkaProducer
-import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsActivityConverter
-import com.rarible.protocol.union.dto.ActivityDto
-import com.rarible.protocol.union.dto.CollectionEventDto
-import com.rarible.protocol.union.dto.ItemEventDto
-import com.rarible.protocol.union.dto.OrderEventDto
-import com.rarible.protocol.union.dto.OwnershipEventDto
-import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
@@ -27,7 +18,6 @@ import com.rarible.protocol.union.search.indexer.handler.OrderEventHandler
 import com.rarible.protocol.union.search.indexer.handler.OwnershipEventHandler
 import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
 import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEventHandlerFactory
-import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.mockk
@@ -38,11 +28,11 @@ import org.springframework.context.annotation.Primary
 
 @Lazy
 @Configuration
-class TestIndexerConfiguration {
-    @Bean
-    fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
-        return ApplicationEnvironmentInfo("test", "test.com")
-    }
+class TestIndexerConfiguration(
+    private val applicationEnvironmentInfo: ApplicationEnvironmentInfo
+) {
+
+    private val env = applicationEnvironmentInfo.name
 
     @Bean
     fun meterRegistry(): MeterRegistry {
@@ -65,93 +55,38 @@ class TestIndexerConfiguration {
         repository: EsActivityRepository,
         converter: EsActivityConverter,
         indexerMetricFactory: IndexerMetricFactory
-    ): ConsumerBatchEventHandler<ActivityDto> {
+    ): ActivityEventHandler {
         return ActivityEventHandler(featureFlagsProperties, repository, converter, indexerMetricFactory)
     }
 
     @Bean
-    fun orderHandler(repository: EsOrderRepository, metricFactory: IndexerMetricFactory): ConsumerBatchEventHandler<OrderEventDto> {
-        return OrderEventHandler(FeatureFlagsProperties(enableOrderSaveImmediateToElasticSearch = true), repository, metricFactory)
+    fun orderHandler(repository: EsOrderRepository, metricFactory: IndexerMetricFactory): OrderEventHandler {
+        return OrderEventHandler(
+            FeatureFlagsProperties(enableOrderSaveImmediateToElasticSearch = true),
+            repository,
+            metricFactory
+        )
     }
 
     @Bean
     fun collectionHandler(
         repository: EsCollectionRepository,
         indexerMetricFactory: IndexerMetricFactory
-    ): ConsumerBatchEventHandler<CollectionEventDto> {
+    ): CollectionEventHandler {
         return CollectionEventHandler(FeatureFlagsProperties(), repository, indexerMetricFactory)
     }
 
     @Bean
-    fun ownershipHandler(repository: EsOwnershipRepository, metricFactory: IndexerMetricFactory): ConsumerBatchEventHandler<OwnershipEventDto> {
+    fun ownershipHandler(
+        repository: EsOwnershipRepository,
+        metricFactory: IndexerMetricFactory
+    ): OwnershipEventHandler {
         return OwnershipEventHandler(FeatureFlagsProperties(), repository, metricFactory)
     }
 
     @Bean
-    fun itemHandler(repository: EsItemRepository, metricFactory: IndexerMetricFactory): ConsumerBatchEventHandler<ItemEventDto> {
+    fun itemHandler(repository: EsItemRepository, metricFactory: IndexerMetricFactory): ItemEventHandler {
         return ItemEventHandler(FeatureFlagsProperties(), repository, metricFactory)
-    }
-
-    //---------------- UNION producers ----------------//
-
-    @Bean
-    @Primary
-    fun testUnionActivityEventProducer(): RaribleKafkaProducer<ActivityDto> {
-        return RaribleKafkaProducer(
-            clientId = "test.union.activity",
-            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-            valueClass = ActivityDto::class.java,
-            defaultTopic = UnionEventTopicProvider.getActivityTopic(applicationEnvironmentInfo().name),
-            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
-        )
-    }
-
-    @Bean
-    @Primary
-    fun testUnionOrderEventProducer(): RaribleKafkaProducer<OrderEventDto> {
-        return RaribleKafkaProducer(
-            clientId = "test.union.order",
-            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-            valueClass = OrderEventDto::class.java,
-            defaultTopic = UnionEventTopicProvider.getOrderTopic(applicationEnvironmentInfo().name),
-            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
-        )
-    }
-
-    @Bean
-    @Primary
-    fun testUnionCollectionEventProducer(): RaribleKafkaProducer<CollectionEventDto> {
-        return RaribleKafkaProducer(
-            clientId = "test.union.collection",
-            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-            valueClass = CollectionEventDto::class.java,
-            defaultTopic = UnionEventTopicProvider.getCollectionTopic(applicationEnvironmentInfo().name),
-            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
-        )
-    }
-
-    @Bean
-    @Primary
-    fun testUnionItemEventProducer(): RaribleKafkaProducer<ItemEventDto> {
-        return RaribleKafkaProducer(
-            clientId = "test.union.item",
-            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-            valueClass = ItemEventDto::class.java,
-            defaultTopic = UnionEventTopicProvider.getItemTopic(applicationEnvironmentInfo().name),
-            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
-        )
-    }
-
-    @Bean
-    @Primary
-    fun testUnionOwnershipEventProducer(): RaribleKafkaProducer<OwnershipEventDto> {
-        return RaribleKafkaProducer(
-            clientId = "test.union.ownership",
-            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-            valueClass = OwnershipEventDto::class.java,
-            defaultTopic = UnionEventTopicProvider.getOwnershipTopic(applicationEnvironmentInfo().name),
-            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
-        )
     }
 
     // --- APIs ---

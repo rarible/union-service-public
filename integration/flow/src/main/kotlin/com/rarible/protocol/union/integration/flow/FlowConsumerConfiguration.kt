@@ -1,16 +1,21 @@
 package com.rarible.protocol.union.integration.flow
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.protocol.dto.FlowActivityDto
+import com.rarible.protocol.dto.FlowActivityEventTopicProvider
 import com.rarible.protocol.dto.FlowCollectionEventDto
+import com.rarible.protocol.dto.FlowNftCollectionEventTopicProvider
 import com.rarible.protocol.dto.FlowNftItemEventDto
+import com.rarible.protocol.dto.FlowNftItemEventTopicProvider
+import com.rarible.protocol.dto.FlowNftOwnershipEventTopicProvider
 import com.rarible.protocol.dto.FlowOrderEventDto
+import com.rarible.protocol.dto.FlowOrderEventTopicProvider
 import com.rarible.protocol.dto.FlowOwnershipEventDto
-import com.rarible.protocol.flow.nft.api.subscriber.FlowNftIndexerEventsConsumerFactory
 import com.rarible.protocol.union.core.event.ConsumerFactory
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
-import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
@@ -35,10 +40,8 @@ class FlowConsumerConfiguration(
 ) {
 
     private val env = applicationEnvironmentInfo.name
-    private val host = applicationEnvironmentInfo.host
 
     private val consumer = properties.consumer!!
-    private val daemon = properties.daemon
 
     private val workers = consumer.workers
     private val batchSize = consumer.batchSize
@@ -79,55 +82,79 @@ class FlowConsumerConfiguration(
     //-------------------- Workers --------------------//
 
     @Bean
-    fun flowNftIndexerConsumerFactory(): FlowNftIndexerEventsConsumerFactory {
-        val replicaSet = consumer.brokerReplicaSet
-        return FlowNftIndexerEventsConsumerFactory(replicaSet!!, host, env)
-    }
-
-    @Bean
     fun flowItemWorker(
-        factory: FlowNftIndexerEventsConsumerFactory,
         handler: BlockchainEventHandler<FlowNftItemEventDto, UnionItemEvent>
-    ): KafkaConsumerWorker<FlowNftItemEventDto> {
-        val consumer = factory.createItemEventsConsumer(consumerFactory.itemGroup)
-        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<FlowNftItemEventDto> {
+        return createConsumer(
+            topic = FlowNftItemEventTopicProvider.getTopic(env),
+            handler = handler,
+            valueClass = FlowNftItemEventDto::class.java,
+            eventType = EventType.ITEM,
+        )
     }
-
-    // TODO: Flow will support events on collections => create a worker here.
 
     @Bean
     fun flowOwnershipWorker(
-        factory: FlowNftIndexerEventsConsumerFactory,
         handler: BlockchainEventHandler<FlowOwnershipEventDto, UnionOwnershipEvent>
-    ): KafkaConsumerWorker<FlowOwnershipEventDto> {
-        val consumer = factory.createOwnershipEventsConsumer(consumerFactory.ownershipGroup)
-        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<FlowOwnershipEventDto> {
+        return createConsumer(
+            topic = FlowNftOwnershipEventTopicProvider.getTopic(env),
+            handler = handler,
+            valueClass = FlowOwnershipEventDto::class.java,
+            eventType = EventType.OWNERSHIP,
+        )
     }
 
     @Bean
     fun flowCollectionWorker(
-        factory: FlowNftIndexerEventsConsumerFactory,
         handler: BlockchainEventHandler<FlowCollectionEventDto, UnionCollectionEvent>
-    ): KafkaConsumerWorker<FlowCollectionEventDto> {
-        val consumer = factory.createCollectionEventsConsumer(consumerFactory.collectionGroup)
-        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<FlowCollectionEventDto> {
+        return createConsumer(
+            topic = FlowNftCollectionEventTopicProvider.getTopic(env),
+            handler = handler,
+            valueClass = FlowCollectionEventDto::class.java,
+            eventType = EventType.COLLECTION,
+        )
     }
 
     @Bean
     fun flowOrderWorker(
-        factory: FlowNftIndexerEventsConsumerFactory,
         handler: BlockchainEventHandler<FlowOrderEventDto, UnionOrderEvent>
-    ): KafkaConsumerWorker<FlowOrderEventDto> {
-        val consumer = factory.createOrderEventsConsumer(consumerFactory.orderGroup)
-        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<FlowOrderEventDto> {
+        return createConsumer(
+            topic = FlowOrderEventTopicProvider.getTopic(env),
+            handler = handler,
+            valueClass = FlowOrderEventDto::class.java,
+            eventType = EventType.ORDER,
+        )
     }
 
     @Bean
     fun flowActivityWorker(
-        factory: FlowNftIndexerEventsConsumerFactory,
         handler: BlockchainEventHandler<FlowActivityDto, UnionActivity>
-    ): KafkaConsumerWorker<FlowActivityDto> {
-        val consumer = factory.createAcitivityEventsConsumer(consumerFactory.activityGroup)
-        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<FlowActivityDto> {
+        return createConsumer(
+            topic = FlowActivityEventTopicProvider.getTopic(env),
+            handler = handler,
+            valueClass = FlowActivityDto::class.java,
+            eventType = EventType.ACTIVITY,
+        )
+    }
+
+    private fun <B, U> createConsumer(
+        topic: String,
+        handler: BlockchainEventHandler<B, U>,
+        valueClass: Class<B>,
+        eventType: EventType
+    ): RaribleKafkaConsumerWorker<B> {
+        return consumerFactory.createBlockchainConsumerWorkerGroup(
+            hosts = consumer.brokerReplicaSet!!,
+            topic = topic,
+            handler = handler,
+            valueClass = valueClass,
+            workers = workers,
+            eventType = eventType,
+            batchSize = batchSize
+        )
     }
 }

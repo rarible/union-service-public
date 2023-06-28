@@ -16,6 +16,7 @@ import com.rarible.tzkt.model.Token
 import com.rarible.tzkt.model.TokenBalance
 import com.rarible.tzkt.model.TokenInfo
 import io.mockk.coEvery
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -29,7 +30,7 @@ class DipDupOrderEventHandlerFt : AbstractDipDupIntegrationTest() {
 
     @Test
     @Disabled("Works locally, fix under PT-953")
-    fun `should send dipdup order to outgoing topic`() = runWithKafka {
+    fun `should send dipdup order to outgoing topic`() = runBlocking {
 
         // Order without item, we don't need to check Enrichment here
         val order = randomTezosOrderDto()

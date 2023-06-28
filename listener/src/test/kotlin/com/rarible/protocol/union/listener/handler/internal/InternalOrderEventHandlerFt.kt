@@ -10,9 +10,8 @@ import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.verify
-import org.assertj.core.api.Assertions
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import reactor.kotlin.core.publisher.toMono
 
@@ -20,8 +19,7 @@ import reactor.kotlin.core.publisher.toMono
 class InternalOrderEventHandlerFt : AbstractIntegrationTest() {
 
     @Test
-    @Disabled("Works locally, fix under PT-953")
-    fun `internal order event`() = runWithKafka {
+    fun `internal order event`() = runBlocking {
 
         // Order without item, we don't need to check Enrichment here
         val order = randomEthBidOrderDto()

@@ -1,20 +1,20 @@
 package com.rarible.protocol.union.search.indexer
 
-import com.rarible.core.daemon.sequential.ConsumerWorkerHolder
+import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class UnionSearchIndexerAppplication(
-    private val consumerWorkers: List<ConsumerWorkerHolder<*>>,
+class UnionSearchIndexerApplication(
+    private val kafkaConsumers: List<RaribleKafkaConsumerWorker<*>>,
 ) : CommandLineRunner {
 
     override fun run(vararg args: String?) {
-        consumerWorkers.forEach { it.start() }
+        kafkaConsumers.forEach { it.start() }
     }
 }
 
 fun main(args: Array<String>) {
-    runApplication<UnionSearchIndexerAppplication>(*args)
+    runApplication<UnionSearchIndexerApplication>(*args)
 }

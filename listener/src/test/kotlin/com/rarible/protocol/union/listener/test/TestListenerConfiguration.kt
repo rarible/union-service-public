@@ -2,7 +2,9 @@ package com.rarible.protocol.union.listener.test
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
-import com.rarible.core.kafka.RaribleKafkaConsumer
+import com.rarible.core.kafka.RaribleKafkaConsumerFactory
+import com.rarible.core.kafka.RaribleKafkaConsumerSettings
+import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
 import com.rarible.dipdup.client.core.model.DipDupActivity
@@ -36,13 +38,13 @@ import com.rarible.protocol.solana.api.client.TokenControllerApi
 import com.rarible.protocol.solana.dto.SolanaEventTopicProvider
 import com.rarible.protocol.solana.dto.TokenMetaEventDto
 import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.core.test.TestUnionEventHandler
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
-import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
@@ -55,12 +57,12 @@ import org.springframework.context.annotation.Primary
 
 @TestConfiguration
 @Import(CoreConfiguration::class)
-class TestListenerConfiguration {
+class TestListenerConfiguration(
+    applicationEnvironmentInfo: ApplicationEnvironmentInfo,
+    private val kafkaConsumerFactory: RaribleKafkaConsumerFactory
+) {
 
-    @Bean
-    fun applicationEnvironmentInfo(): ApplicationEnvironmentInfo {
-        return ApplicationEnvironmentInfo("test", "test.com")
-    }
+    private val env = applicationEnvironmentInfo.name
 
     @Bean
     @Primary
@@ -71,73 +73,106 @@ class TestListenerConfiguration {
     // Test consumers with EARLIEST offset
 
     @Bean
-    fun testCollectionConsumer(): RaribleKafkaConsumer<CollectionEventDto> {
-        val topic = UnionEventTopicProvider.getCollectionTopic(applicationEnvironmentInfo().name)
-        return RaribleKafkaConsumer(
-            clientId = "test-union-collection-consumer",
-            consumerGroup = "test-union-collection-group",
-            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = CollectionEventDto::class.java,
-            defaultTopic = topic,
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST
+    fun testCollectionHandler() = TestUnionEventHandler<CollectionEventDto>()
+
+    @Bean
+    fun testCollectionConsumer(
+        handler: TestUnionEventHandler<CollectionEventDto>
+    ): RaribleKafkaConsumerWorker<CollectionEventDto> {
+        val topic = UnionEventTopicProvider.getCollectionTopic(env)
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = kafkaContainer.kafkaBoostrapServers(),
+            topic = topic,
+            group = "test-union-collection-group",
+            concurrency = 1,
+            batchSize = 10,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = CollectionEventDto::class.java
         )
+        return kafkaConsumerFactory.createWorker(settings, handler)
     }
 
     @Bean
-    fun testItemConsumer(): RaribleKafkaConsumer<ItemEventDto> {
-        val topic = UnionEventTopicProvider.getItemTopic(applicationEnvironmentInfo().name)
-        return RaribleKafkaConsumer(
-            clientId = "test-union-item-consumer",
-            consumerGroup = "test-union-item-group",
-            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = ItemEventDto::class.java,
-            defaultTopic = topic,
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST
+    fun testItemHandler() = TestUnionEventHandler<ItemEventDto>()
+
+    @Bean
+    fun testItemConsumer(
+        handler: TestUnionEventHandler<ItemEventDto>
+    ): RaribleKafkaConsumerWorker<ItemEventDto> {
+        val topic = UnionEventTopicProvider.getItemTopic(env)
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = kafkaContainer.kafkaBoostrapServers(),
+            topic = topic,
+            group = "test-union-item-group",
+            concurrency = 1,
+            batchSize = 10,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = ItemEventDto::class.java
         )
+        return kafkaConsumerFactory.createWorker(settings, handler)
     }
 
     @Bean
-    fun testOwnershipConsumer(): RaribleKafkaConsumer<OwnershipEventDto> {
-        val topic = UnionEventTopicProvider.getOwnershipTopic(applicationEnvironmentInfo().name)
-        return RaribleKafkaConsumer(
-            clientId = "test-union-ownership-consumer",
-            consumerGroup = "test-union-ownership-group",
-            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = OwnershipEventDto::class.java,
-            defaultTopic = topic,
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST
+    fun testOwnershipHandler() = TestUnionEventHandler<OwnershipEventDto>()
+
+    @Bean
+    fun testOwnershipConsumer(
+        handler: TestUnionEventHandler<OwnershipEventDto>
+    ): RaribleKafkaConsumerWorker<OwnershipEventDto> {
+        val topic = UnionEventTopicProvider.getOwnershipTopic(env)
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = kafkaContainer.kafkaBoostrapServers(),
+            topic = topic,
+            group = "test-union-ownership-group",
+            concurrency = 1,
+            batchSize = 10,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = OwnershipEventDto::class.java
         )
+        return kafkaConsumerFactory.createWorker(settings, handler)
     }
 
     @Bean
-    fun testOrderConsumer(): RaribleKafkaConsumer<OrderEventDto> {
-        val topic = UnionEventTopicProvider.getOrderTopic(applicationEnvironmentInfo().name)
-        return RaribleKafkaConsumer(
-            clientId = "test-union-order-consumer",
-            consumerGroup = "test-union-order-group",
-            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = OrderEventDto::class.java,
-            defaultTopic = topic,
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST
+    fun testOrderHandler() = TestUnionEventHandler<OrderEventDto>()
+
+    @Bean
+    fun testOrderConsumer(
+        handler: TestUnionEventHandler<OrderEventDto>
+    ): RaribleKafkaConsumerWorker<OrderEventDto> {
+        val topic = UnionEventTopicProvider.getOrderTopic(env)
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = kafkaContainer.kafkaBoostrapServers(),
+            topic = topic,
+            group = "test-union-order-group",
+            concurrency = 1,
+            batchSize = 10,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = OrderEventDto::class.java
         )
+        return kafkaConsumerFactory.createWorker(settings, handler)
     }
 
     @Bean
-    fun testActivityConsumer(): RaribleKafkaConsumer<ActivityDto> {
-        val topic = UnionEventTopicProvider.getActivityTopic(applicationEnvironmentInfo().name)
-        return RaribleKafkaConsumer(
-            clientId = "test-union-activity-consumer",
-            consumerGroup = "test-union-activity-group",
-            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = ActivityDto::class.java,
-            defaultTopic = topic,
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST
+    fun testActivityHandler() = TestUnionEventHandler<ActivityDto>()
+
+    @Bean
+    fun testActivityConsumer(handler: TestUnionEventHandler<ActivityDto>): RaribleKafkaConsumerWorker<ActivityDto> {
+        val topic = UnionEventTopicProvider.getActivityTopic(env)
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = kafkaContainer.kafkaBoostrapServers(),
+            topic = topic,
+            group = "test-union-activity-group",
+            concurrency = 1,
+            batchSize = 10,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = ActivityDto::class.java
         )
+        return kafkaConsumerFactory.createWorker(settings, handler)
     }
 
     //---------------- ETHEREUM producers ----------------//
@@ -148,7 +183,7 @@ class TestListenerConfiguration {
             clientId = "test.union.ethereum.item",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = NftItemEventDto::class.java,
-            defaultTopic = NftItemEventTopicProvider.getTopic(applicationEnvironmentInfo().name, "ethereum"),
+            defaultTopic = NftItemEventTopicProvider.getTopic(env, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -159,7 +194,7 @@ class TestListenerConfiguration {
             clientId = "test.union.ethereum.ownership",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = NftOwnershipEventDto::class.java,
-            defaultTopic = NftOwnershipEventTopicProvider.getTopic(applicationEnvironmentInfo().name, "ethereum"),
+            defaultTopic = NftOwnershipEventTopicProvider.getTopic(env, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -170,7 +205,7 @@ class TestListenerConfiguration {
             clientId = "test.union.ethereum.order",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = com.rarible.protocol.dto.OrderEventDto::class.java,
-            defaultTopic = OrderIndexerTopicProvider.getOrderUpdateTopic(applicationEnvironmentInfo().name, "ethereum"),
+            defaultTopic = OrderIndexerTopicProvider.getOrderUpdateTopic(env, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -225,7 +260,7 @@ class TestListenerConfiguration {
             clientId = "test.union.ethereum.activity",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = com.rarible.protocol.dto.NftCollectionEventDto::class.java,
-            defaultTopic = NftCollectionEventTopicProvider.getTopic(applicationEnvironmentInfo().name, "ethereum"),
+            defaultTopic = NftCollectionEventTopicProvider.getTopic(env, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -236,7 +271,7 @@ class TestListenerConfiguration {
             clientId = "test.union.ethereum.activity",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = com.rarible.protocol.dto.ActivityDto::class.java,
-            defaultTopic = ActivityTopicProvider.getTopic(applicationEnvironmentInfo().name, "ethereum"),
+            defaultTopic = ActivityTopicProvider.getTopic(env, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -249,7 +284,7 @@ class TestListenerConfiguration {
             clientId = "test.union.flow.item",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = FlowNftItemEventDto::class.java,
-            defaultTopic = FlowNftItemEventTopicProvider.getTopic(applicationEnvironmentInfo().name),
+            defaultTopic = FlowNftItemEventTopicProvider.getTopic(env),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -260,7 +295,7 @@ class TestListenerConfiguration {
             clientId = "test.union.flow.ownership",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = FlowOwnershipEventDto::class.java,
-            defaultTopic = FlowNftOwnershipEventTopicProvider.getTopic(applicationEnvironmentInfo().name),
+            defaultTopic = FlowNftOwnershipEventTopicProvider.getTopic(env),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -271,7 +306,7 @@ class TestListenerConfiguration {
             clientId = "test.union.flow.order",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = FlowOrderEventDto::class.java,
-            defaultTopic = FlowOrderEventTopicProvider.getTopic(applicationEnvironmentInfo().name),
+            defaultTopic = FlowOrderEventTopicProvider.getTopic(env),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -282,7 +317,7 @@ class TestListenerConfiguration {
             clientId = "test.union.flow.activity",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = FlowActivityDto::class.java,
-            defaultTopic = FlowActivityEventTopicProvider.getTopic(applicationEnvironmentInfo().name),
+            defaultTopic = FlowActivityEventTopicProvider.getTopic(env),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -295,7 +330,7 @@ class TestListenerConfiguration {
             clientId = "test.union.solana.token.meta",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = TokenMetaEventDto::class.java,
-            defaultTopic = SolanaEventTopicProvider.getTokenMetaTopic(applicationEnvironmentInfo().name),
+            defaultTopic = SolanaEventTopicProvider.getTokenMetaTopic(env),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -336,7 +371,6 @@ class TestListenerConfiguration {
     @Primary
     @Qualifier("ethereum.auction.api")
     fun testEthereumAuctionApi(): com.rarible.protocol.order.api.client.AuctionControllerApi = mockk()
-
 
     //--------------------- FLOW ---------------------//
     @Bean

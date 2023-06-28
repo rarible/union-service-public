@@ -1,12 +1,11 @@
 package com.rarible.protocol.union.core.handler
 
-import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
-import com.rarible.core.daemon.sequential.ConsumerEventHandler
+import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
 import org.slf4j.LoggerFactory
 
 class BlockchainEventHandlerWrapper<B, U>(
     private val blockchainHandler: BlockchainEventHandler<B, U>
-) : BlockchainEventHandler<B, U>, ConsumerEventHandler<B>, ConsumerBatchEventHandler<B> {
+) : BlockchainEventHandler<B, U>, /*RaribleKafkaEventHandler<B>,*/ RaribleKafkaBatchEventHandler<B> {
 
     override val eventType = blockchainHandler.eventType
     override val blockchain = blockchainHandler.blockchain
