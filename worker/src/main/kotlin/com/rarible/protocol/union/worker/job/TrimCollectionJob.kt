@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.worker.job
 
-import com.rarible.core.kafka.chunked
 import com.rarible.protocol.union.enrichment.meta.item.MetaTrimmer
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
@@ -8,11 +7,8 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.dao.OptimisticLockingFailureException
@@ -20,21 +16,8 @@ import org.springframework.stereotype.Component
 
 abstract class AbstractTrimJob<Entity> {
 
-    fun trim(from: String?) = flow<String> {
-        coroutineScope {
-            getEntityFrom(from)
-                .chunked(CHUNK_SIZE)
-                .collect { entities ->
-                    entities
-                        .map { entity ->
-                            async {
-                                trimWithOptimisticLock(entity)
-                            }
-                        }
-                        .awaitAll()
-                        .onEach { entityId -> emit(entityId) }
-                }
-        }
+    fun trim(from: String?) = getEntityFrom(from).map { entity ->
+        trimWithOptimisticLock(entity)
     }
 
     private suspend fun trimWithOptimisticLock(entity: Entity): String {
@@ -65,10 +48,6 @@ abstract class AbstractTrimJob<Entity> {
     protected abstract suspend fun getLatestEntityVersion(entity: Entity): Pair<String, Entity?>
 
     protected abstract suspend fun trim(entity: Entity): String
-
-    companion object {
-        private const val CHUNK_SIZE = 1000
-    }
 }
 
 @Component
