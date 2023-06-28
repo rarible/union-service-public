@@ -26,32 +26,17 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConvert
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ContextConfiguration
 import reactor.core.publisher.Sinks
 import java.math.BigInteger
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = [
-        "application.environment = test",
-        "spring.cloud.consul.config.enabled = false",
-        "spring.cloud.service-registry.auto-registration.enabled = false",
-        "spring.cloud.discovery.enabled = false",
-        "logging.logstash.tcp-socket.enabled = false",
-        "local.server.port = 9090",
-        "local.server.host = localhost"
-    ]
-)
-
 @IntegrationTest
-@ContextConfiguration
 internal class SubscriptionEventFt : AbstractIntegrationTest() {
 
     @Autowired
@@ -64,7 +49,7 @@ internal class SubscriptionEventFt : AbstractIntegrationTest() {
     protected lateinit var webSocketRequests: Sinks.Many<List<SubscriptionRequestDto>>
 
     @Test
-    fun `item event websocket test`() = runWithKafka {
+    fun `item event websocket test`() = runBlocking {
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed(), randomBigInt())
 
         val itemEventDto = ItemUpdateEventDto(
@@ -107,7 +92,7 @@ internal class SubscriptionEventFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `order event websocket test by itemId`() = runWithKafka {
+    fun `order event websocket test by itemId`() = runBlocking {
         val order = ethOrderConverter.convert(randomEthV2OrderDto(), BlockchainDto.ETHEREUM)
         val type = (order.make.type as UnionEthErc721AssetType)
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, type.contract.value, type.tokenId)
@@ -117,9 +102,16 @@ internal class SubscriptionEventFt : AbstractIntegrationTest() {
 
         val orderEventDto = OrderUpdateEventDto(order.id, "eventId", stubEventMark().toDto(), dto)
 
-        webSocketRequests.tryEmitNext(listOf(OrdersByItemSubscriptionRequestDto(SubscriptionActionDto.SUBSCRIBE, itemId)))
+        webSocketRequests.tryEmitNext(
+            listOf(
+                OrdersByItemSubscriptionRequestDto(
+                    SubscriptionActionDto.SUBSCRIBE,
+                    itemId
+                )
+            )
+        )
 
-        delay(1000)
+        //delay(1000)
         webSocketEventsQueue.clear()
 
         val kafkaMessage = KafkaMessage(

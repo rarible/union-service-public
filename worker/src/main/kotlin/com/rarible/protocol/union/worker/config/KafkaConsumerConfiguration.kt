@@ -14,8 +14,11 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class KafkaConsumerConfiguration(
+    private val applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     private val producerProperties: ProducerProperties
 ) {
+
+    private val env = applicationEnvironmentInfo.name
 
     @Bean(destroyMethod = "close")
     fun kafkaConsumer(): KafkaConsumer<String, String> = KafkaConsumer(
@@ -35,7 +38,7 @@ class KafkaConsumerConfiguration(
     ): LagService = LagService(
         kafkaConsumer = kafkaConsumer,
         bootstrapServers = producerProperties.brokerReplicaSet,
-        metaConsumerGroup = kafkaGroupFactory.metaDownloadExecutorGroup(KafkaGroupFactory.ITEM_TYPE),
+        metaConsumerGroup = "$env.${kafkaGroupFactory.metaDownloadExecutorGroup(KafkaGroupFactory.ITEM_TYPE)}",
         refreshTopic = UnionInternalTopicProvider.getItemMetaDownloadTaskExecutorTopic(
             applicationEnvironmentInfo.name,
             ItemMetaPipeline.REFRESH.pipeline

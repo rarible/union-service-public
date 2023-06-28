@@ -8,7 +8,8 @@ import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.tzkt.client.CollectionClient
 import com.rarible.tzkt.model.CollectionType
 import io.mockk.coEvery
-import org.assertj.core.api.Assertions
+import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,7 +22,7 @@ class DipDupCollectionEventHandlerFt : AbstractDipDupIntegrationTest() {
 
     @Test
     @Disabled("Works locally, fix under PT-953")
-    fun `should send collection event to outgoing topic`() = runWithKafka {
+    fun `should send collection event to outgoing topic`() = runBlocking {
 
         val collectionId = randomString()
         val collectionEvent = randomDipDupCollectionEvent(collectionId)
@@ -39,7 +40,7 @@ class DipDupCollectionEventHandlerFt : AbstractDipDupIntegrationTest() {
 
         waitAssert {
             val messages = findCollectionUpdates(collectionId)
-            Assertions.assertThat(messages).hasSize(1)
+            assertThat(messages).hasSize(1)
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.search.indexer.metrics
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
+import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
 import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 class MetricConsumerBatchEventHandlerFactory(
     private val metricFactory: IndexerMetricFactory
 ) {
-    fun wrapActivity(handler: ConsumerBatchEventHandler<ActivityDto>): ConsumerBatchEventHandler<ActivityDto> {
+    fun wrapActivity(handler: RaribleKafkaBatchEventHandler<ActivityDto>): RaribleKafkaBatchEventHandler<ActivityDto> {
         return MetricsConsumerBatchEventHandlerWrapper(
             metricFactory = metricFactory,
             delegate = handler,
@@ -24,7 +24,7 @@ class MetricConsumerBatchEventHandlerFactory(
         )
     }
 
-    fun wrapCollection(handler: ConsumerBatchEventHandler<CollectionEventDto>): ConsumerBatchEventHandler<CollectionEventDto> {
+    fun wrapCollection(handler: RaribleKafkaBatchEventHandler<CollectionEventDto>): RaribleKafkaBatchEventHandler<CollectionEventDto> {
         return MetricsConsumerBatchEventHandlerWrapper(
             metricFactory = metricFactory,
             delegate = handler,
@@ -34,7 +34,7 @@ class MetricConsumerBatchEventHandlerFactory(
         )
     }
 
-    fun wrapOrder(handler: ConsumerBatchEventHandler<OrderEventDto>): ConsumerBatchEventHandler<OrderEventDto> {
+    fun wrapOrder(handler: RaribleKafkaBatchEventHandler<OrderEventDto>): RaribleKafkaBatchEventHandler<OrderEventDto> {
         return MetricsConsumerBatchEventHandlerWrapper(
             metricFactory = metricFactory,
             delegate = handler,
@@ -44,7 +44,7 @@ class MetricConsumerBatchEventHandlerFactory(
         )
     }
 
-    fun wrapItem(handler: ConsumerBatchEventHandler<ItemEventDto>): ConsumerBatchEventHandler<ItemEventDto> {
+    fun wrapItem(handler: RaribleKafkaBatchEventHandler<ItemEventDto>): RaribleKafkaBatchEventHandler<ItemEventDto> {
         return MetricsConsumerBatchEventHandlerWrapper(
             metricFactory = metricFactory,
             delegate = handler,
@@ -54,7 +54,7 @@ class MetricConsumerBatchEventHandlerFactory(
         )
     }
 
-    fun wrapOwnership(handler: ConsumerBatchEventHandler<OwnershipEventDto>): ConsumerBatchEventHandler<OwnershipEventDto> {
+    fun wrapOwnership(handler: RaribleKafkaBatchEventHandler<OwnershipEventDto>): RaribleKafkaBatchEventHandler<OwnershipEventDto> {
         return MetricsConsumerBatchEventHandlerWrapper(
             metricFactory = metricFactory,
             delegate = handler,

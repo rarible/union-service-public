@@ -71,7 +71,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     private lateinit var itemReconciliationMarkRepository: ReconciliationMarkRepository
 
     @Test
-    fun `update event - item doesn't exist`() = runWithKafka {
+    fun `update event - item doesn't exist`() = runBlocking {
         val itemId = randomEthItemId()
         val unionItem = randomUnionItem(itemId)
 
@@ -88,19 +88,13 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].key).isEqualTo(itemId.fullId())
-            assertThat(messages[0].id).isEqualTo(itemId.fullId())
-            assertThat(messages[0].value.itemId).isEqualTo(itemId)
-
-            // TODO: see CHARLIE-158: here we ensure that meta is taken from the blockchain's Item.
-            assertThat(messages[0].value.item).isEqualTo(
-                ItemDtoConverter.convert(unionItem, meta = unionItem.meta)
-            )
+            assertThat(messages[0].itemId).isEqualTo(itemId)
+            assertThat(messages[0].item).isEqualTo(ItemDtoConverter.convert(unionItem, meta = unionItem.meta))
         }
     }
 
     @Test
-    fun `update event - existing item updated`() = runWithKafka {
+    fun `update event - existing item updated`() = runBlocking {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
         val bestSellOrder = randomEthSellOrderDto(itemId)
@@ -147,19 +141,17 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].key).isEqualTo(itemId.fullId())
-            assertThat(messages[0].id).isEqualTo(itemId.fullId())
-            assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item.id).isEqualTo(expected.id)
-            assertThat(messages[0].value.item.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
-            assertThat(messages[0].value.item.bestBidOrder!!.id).isEqualTo(expected.bestBidOrder!!.id)
-            assertThat(messages[0].value.item.bestBidOrdersByCurrency!!.map { it.id })
+            assertThat(messages[0].itemId).isEqualTo(itemId)
+            assertThat(messages[0].item.id).isEqualTo(expected.id)
+            assertThat(messages[0].item.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
+            assertThat(messages[0].item.bestBidOrder!!.id).isEqualTo(expected.bestBidOrder!!.id)
+            assertThat(messages[0].item.bestBidOrdersByCurrency!!.map { it.id })
                 .isEqualTo(expected.bestBidOrdersByCurrency!!.map { it.id })
         }
     }
 
     @Test
-    fun `update event - existing item updated, order corrupted`() = runWithKafka {
+    fun `update event - existing item updated, order corrupted`() = runBlocking {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
 
@@ -192,7 +184,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `on ownership updated`() = runWithKafka {
+    fun `on ownership updated`() = runBlocking {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
         val ethMeta = randomEthItemMeta()
@@ -237,13 +229,13 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item).isEqualTo(expected)
+            assertThat(messages[0].itemId).isEqualTo(itemId)
+            assertThat(messages[0].item).isEqualTo(expected)
         }
     }
 
     @Test
-    fun `on ownership updated - sell stats not changed`() = runWithKafka<Unit> {
+    fun `on ownership updated - sell stats not changed`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
         val shortItem = randomShortItem(itemId).copy(sellers = 1, totalStock = 20.toBigInteger())
         // Item should not be changed - we'll check version
@@ -266,7 +258,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `on best sell order updated - item exists`() = runWithKafka {
+    fun `on best sell order updated - item exists`() = runBlocking {
         val itemId = randomEthItemId()
         val shortItem = randomShortItem(itemId)
         val ethItem = randomEthNftItemDto(itemId)
@@ -292,10 +284,10 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item.id).isEqualTo(expected.id)
-            assertThat(messages[0].value.item.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
-            assertThat(messages[0].value.item.bestBidOrder).isNull()
+            assertThat(messages[0].itemId).isEqualTo(itemId)
+            assertThat(messages[0].item.id).isEqualTo(expected.id)
+            assertThat(messages[0].item.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
+            assertThat(messages[0].item.bestBidOrder).isNull()
         }
     }
 
@@ -384,7 +376,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `on best bid order updated - item exists with same order, order cancelled`() = runWithKafka {
+    fun `on best bid order updated - item exists with same order, order cancelled`() = runBlocking {
         val itemId = randomEthItemId()
 
         val bestBidOrder = randomEthBidOrderDto(itemId).copy(status = OrderStatusDto.CANCELLED)
@@ -408,13 +400,13 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item.bestBidOrder).isNull()
+            assertThat(messages[0].itemId).isEqualTo(itemId)
+            assertThat(messages[0].item.bestBidOrder).isNull()
         }
     }
 
     @Test
-    fun `on best bid order updated - item doesn't exists, order cancelled`() = runWithKafka {
+    fun `on best bid order updated - item doesn't exists, order cancelled`() = runBlocking {
         val itemId = randomEthItemId()
         val shortItem = randomShortItem(itemId)
         val ethItem = randomEthNftItemDto(itemId)
@@ -433,13 +425,13 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item.bestBidOrder).isNull()
+            assertThat(messages[0].itemId).isEqualTo(itemId)
+            assertThat(messages[0].item.bestBidOrder).isNull()
         }
     }
 
     @Test
-    fun `delete event - existing item deleted`() = runWithKafka {
+    fun `delete event - existing item deleted`() = runBlocking {
         val item = itemService.save(randomShortItem())
         delay(10) // To ensure updatedAt is changed
         val itemId = item.id.toDto()
@@ -453,14 +445,12 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemDeletions(itemId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].key).isEqualTo(itemId.fullId())
-            assertThat(messages[0].id).isEqualTo(itemId.fullId())
-            assertThat(messages[0].value.itemId).isEqualTo(itemId)
+            assertThat(messages[0].itemId).isEqualTo(itemId)
         }
     }
 
     @Test
-    fun `delete event - item doesn't exist`() = runWithKafka {
+    fun `delete event - item doesn't exist`() = runBlocking {
         val shortItemId = randomShortItem().id
         val itemId = shortItemId.toDto()
 
@@ -471,9 +461,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemDeletions(itemId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].key).isEqualTo(itemId.fullId())
-            assertThat(messages[0].id).isEqualTo(itemId.fullId())
-            assertThat(messages[0].value.itemId).isEqualTo(itemId)
+            assertThat(messages[0].itemId).isEqualTo(itemId)
         }
     }
 
@@ -493,7 +481,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `on auction update`() = runWithKafka {
+    fun `on auction update`() = runBlocking {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
         val ethMeta = randomEthItemMeta()
@@ -514,13 +502,13 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item.auctions.size).isEqualTo(1)
+            assertThat(messages[0].itemId).isEqualTo(itemId)
+            assertThat(messages[0].item.auctions.size).isEqualTo(1)
         }
     }
 
     @Test
-    fun `on auction update - inactive removed`() = runWithKafka {
+    fun `on auction update - inactive removed`() = runBlocking {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
         val ethMeta = randomEthItemMeta()
@@ -545,13 +533,13 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item.auctions.size).isEqualTo(0)
+            assertThat(messages[0].itemId).isEqualTo(itemId)
+            assertThat(messages[0].item.auctions.size).isEqualTo(0)
         }
     }
 
     @Test
-    fun `on auction update - another auction fetched`() = runWithKafka {
+    fun `on auction update - another auction fetched`() = runBlocking {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
         val ethMeta = randomEthItemMeta()
@@ -578,15 +566,15 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(2)
 
-            messages.filter { it.value.item.auctions.size == 2 }.map { it.value }.forEach {
-                assertThat(messages[0].value.itemId).isEqualTo(itemId)
+            messages.filter { it.item.auctions.size == 2 }.forEach {
+                assertThat(messages[0].itemId).isEqualTo(itemId)
                 assertThat(it.item.auctions.size).isEqualTo(2)
             }
         }
     }
 
     @Test
-    fun `on auction delete`() = runWithKafka {
+    fun `on auction delete`() = runBlocking {
         val itemId = randomEthItemId()
         val ethItem = randomEthNftItemDto(itemId)
         val ethMeta = randomEthItemMeta()
@@ -617,8 +605,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findItemUpdates(itemId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.itemId).isEqualTo(itemId)
-            assertThat(messages[0].value.item.auctions).isEmpty()
+            assertThat(messages[0].itemId).isEqualTo(itemId)
+            assertThat(messages[0].item.auctions).isEmpty()
         }
     }
 }

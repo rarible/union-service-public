@@ -1,16 +1,12 @@
 package com.rarible.protocol.union.core.kafka
 
-import com.rarible.core.application.ApplicationEnvironmentInfo
 import org.springframework.stereotype.Component
 
 @Component
-class KafkaGroupFactory(
-    applicationEnvironmentInfo: ApplicationEnvironmentInfo
-) {
-    private val env = applicationEnvironmentInfo.name
+class KafkaGroupFactory {
 
     fun metaDownloadExecutorGroup(type: String): String {
-        return "$env.protocol.union.download.executor.meta.$type"
+        return "protocol.union.download.executor.meta.$type"
     }
 
     companion object {

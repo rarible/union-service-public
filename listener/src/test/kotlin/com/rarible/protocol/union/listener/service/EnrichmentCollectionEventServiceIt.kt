@@ -49,7 +49,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
     private lateinit var metaRefreshRequestRepository: MetaRefreshRequestRepository
 
     @Test
-    fun `on collection changed - ok`() = runWithKafka {
+    fun `on collection changed - ok`() = runBlocking {
         val collectionId = randomEthCollectionId()
         val ethCollection = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
         val unionCollection = EthCollectionConverter.convert(ethCollection, collectionId.blockchain)
@@ -65,14 +65,14 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
+            assertThat(messages[0].collectionId).isEqualTo(collectionId)
             // TODO COLLECTION update meta check after the migration
-            assertThat(messages[0].value.collection.copy(meta = null)).isEqualTo(expected)
+            assertThat(messages[0].collection.copy(meta = null)).isEqualTo(expected)
         }
     }
 
     @Test
-    fun `on collection updated - ok, collection inserted`() = runWithKafka {
+    fun `on collection updated - ok, collection inserted`() = runBlocking {
         val collectionId = randomEthCollectionId()
         val ethCollection = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
 
@@ -86,14 +86,14 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
+            assertThat(messages[0].collectionId).isEqualTo(collectionId)
             // TODO COLLECTION update meta check after the migration
-            assertThat(messages[0].value.collection.copy(meta = null)).isEqualTo(expected)
+            assertThat(messages[0].collection.copy(meta = null)).isEqualTo(expected)
         }
     }
 
     @Test
-    fun `on collection updated - ok, collection exists`() = runWithKafka {
+    fun `on collection updated - ok, collection exists`() = runBlocking {
         val collectionId = randomEthCollectionId()
         val enrichmentCollection = randomEnrichmentCollection(collectionId)
         val ethCollection = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
@@ -110,14 +110,14 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
+            assertThat(messages[0].collectionId).isEqualTo(collectionId)
             // TODO COLLECTION update meta check after the migration
-            assertThat(messages[0].value.collection.copy(meta = null)).isEqualTo(expected)
+            assertThat(messages[0].collection.copy(meta = null)).isEqualTo(expected)
         }
     }
 
     @Test
-    fun `on best sell order updated - collection exists`() = runWithKafka {
+    fun `on best sell order updated - collection exists`() = runBlocking {
         val collectionId = randomEthCollectionId()
         val enrichmentCollection = randomEnrichmentCollection(collectionId)
         val ethCollection = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
@@ -143,16 +143,16 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
-            assertThat(messages[0].value.collection.id).isEqualTo(expected.id)
-            assertThat(messages[0].value.collection.status).isEqualTo(expected.status)
-            assertThat(messages[0].value.collection.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
-            assertThat(messages[0].value.collection.bestBidOrder).isNull()
+            assertThat(messages[0].collectionId).isEqualTo(collectionId)
+            assertThat(messages[0].collection.id).isEqualTo(expected.id)
+            assertThat(messages[0].collection.status).isEqualTo(expected.status)
+            assertThat(messages[0].collection.bestSellOrder!!.id).isEqualTo(expected.bestSellOrder!!.id)
+            assertThat(messages[0].collection.bestBidOrder).isNull()
         }
     }
 
     @Test
-    fun `on best bid order updated - collection exists`() = runWithKafka {
+    fun `on best bid order updated - collection exists`() = runBlocking {
         val collectionId = randomEthCollectionId()
         val enrichmentCollection = randomEnrichmentCollection(collectionId)
         val ethItem = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
@@ -205,11 +205,11 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
-            assertThat(messages[0].value.collectionId).isEqualTo(collectionId)
-            assertThat(messages[0].value.collection.id).isEqualTo(expected.id)
-            assertThat(messages[0].value.collection.bestBidOrder!!.id).isEqualTo(expected.bestBidOrder!!.id)
-            assertThat(messages[0].value.collection.bestSellOrder).isNull()
-            assertThat(messages[0].value.collection.bestBidOrdersByCurrency!!.map { it.id })
+            assertThat(messages[0].collectionId).isEqualTo(collectionId)
+            assertThat(messages[0].collection.id).isEqualTo(expected.id)
+            assertThat(messages[0].collection.bestBidOrder!!.id).isEqualTo(expected.bestBidOrder!!.id)
+            assertThat(messages[0].collection.bestSellOrder).isNull()
+            assertThat(messages[0].collection.bestBidOrdersByCurrency!!.map { it.id })
                 .isEqualTo(expected.bestBidOrdersByCurrency!!.map { it.id })
         }
     }

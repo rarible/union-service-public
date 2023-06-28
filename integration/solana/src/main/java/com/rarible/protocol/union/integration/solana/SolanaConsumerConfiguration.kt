@@ -1,14 +1,16 @@
 package com.rarible.protocol.union.integration.solana
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.protocol.solana.dto.BalanceEventDto
+import com.rarible.protocol.solana.dto.SolanaEventTopicProvider
 import com.rarible.protocol.solana.dto.TokenEventDto
 import com.rarible.protocol.solana.dto.TokenMetaEventDto
 import com.rarible.protocol.solana.subscriber.SolanaEventsConsumerFactory
 import com.rarible.protocol.union.core.event.ConsumerFactory
+import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
-import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
@@ -38,7 +40,6 @@ class SolanaConsumerConfiguration(
     private val host = applicationEnvironmentInfo.host
 
     private val consumer = properties.consumer!!
-    private val daemon = properties.daemon
 
     private val workers = consumer.workers
     private val batchSize = consumer.batchSize
@@ -93,54 +94,94 @@ class SolanaConsumerConfiguration(
     fun solanaItemWorker(
         factory: SolanaEventsConsumerFactory,
         handler: BlockchainEventHandler<TokenEventDto, UnionItemEvent>
-    ): KafkaConsumerWorker<TokenEventDto> {
-        val consumer = factory.createTokenEventConsumer(consumerFactory.itemGroup)
-        return consumerFactory.createItemConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<TokenEventDto> {
+        return createConsumer(
+            topic = SolanaEventTopicProvider.getTokenTopic(env),
+            handler = handler,
+            valueClass = TokenEventDto::class.java,
+            eventType = EventType.ITEM_META,
+        )
     }
 
     @Bean
     fun solanaItemMetaWorker(
         factory: SolanaEventsConsumerFactory,
         handler: BlockchainEventHandler<TokenMetaEventDto, UnionItemMetaEvent>
-    ): KafkaConsumerWorker<TokenMetaEventDto> {
-        val consumer = factory.createTokenMetaEventConsumer(consumerFactory.itemMetaGroup)
-        return consumerFactory.createItemMetaConsumer(consumer, handler, daemon, workers)
+    ): RaribleKafkaConsumerWorker<TokenMetaEventDto> {
+        return createConsumer(
+            topic = SolanaEventTopicProvider.getTokenMetaTopic(env),
+            handler = handler,
+            valueClass = TokenMetaEventDto::class.java,
+            eventType = EventType.ITEM_META,
+        )
     }
 
     @Bean
     fun solanaOwnershipWorker(
         factory: SolanaEventsConsumerFactory,
         handler: BlockchainEventHandler<BalanceEventDto, UnionOwnershipEvent>
-    ): KafkaConsumerWorker<BalanceEventDto> {
-        val consumer = factory.createBalanceEventConsumer(consumerFactory.ownershipGroup)
-        return consumerFactory.createOwnershipConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<BalanceEventDto> {
+        return createConsumer(
+            topic = SolanaEventTopicProvider.getBalanceTopic(env),
+            handler = handler,
+            valueClass = BalanceEventDto::class.java,
+            eventType = EventType.OWNERSHIP,
+        )
     }
 
     @Bean
     fun solanaCollectionWorker(
         factory: SolanaEventsConsumerFactory,
         handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.CollectionEventDto, UnionCollectionEvent>
-    ): KafkaConsumerWorker<com.rarible.protocol.solana.dto.CollectionEventDto> {
-        val consumer = factory.createCollectionEventConsumer(consumerFactory.collectionGroup)
-        return consumerFactory.createCollectionConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<com.rarible.protocol.solana.dto.CollectionEventDto> {
+        return createConsumer(
+            topic = SolanaEventTopicProvider.getCollectionTopic(env),
+            handler = handler,
+            valueClass = com.rarible.protocol.solana.dto.CollectionEventDto::class.java,
+            eventType = EventType.COLLECTION,
+        )
     }
 
     @Bean
     fun solanaOrderWorker(
         factory: SolanaEventsConsumerFactory,
         handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.OrderEventDto, UnionOrderEvent>
-    ): KafkaConsumerWorker<com.rarible.protocol.solana.dto.OrderEventDto> {
-        val consumer = factory.createOrderEventConsumer(consumerFactory.orderGroup)
-        return consumerFactory.createOrderConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<com.rarible.protocol.solana.dto.OrderEventDto> {
+        return createConsumer(
+            topic = SolanaEventTopicProvider.getOrderTopic(env),
+            handler = handler,
+            valueClass = com.rarible.protocol.solana.dto.OrderEventDto::class.java,
+            eventType = EventType.ORDER,
+        )
     }
 
     @Bean
     fun solanaActivityWorker(
         factory: SolanaEventsConsumerFactory,
         handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.ActivityDto, UnionActivity>
-    ): KafkaConsumerWorker<com.rarible.protocol.solana.dto.ActivityDto> {
-        val consumer = factory.createActivityEventConsumer(consumerFactory.activityGroup)
-        return consumerFactory.createActivityConsumer(consumer, handler, daemon, workers, batchSize)
+    ): RaribleKafkaConsumerWorker<com.rarible.protocol.solana.dto.ActivityDto> {
+        return createConsumer(
+            topic = SolanaEventTopicProvider.getActivityTopic(env),
+            handler = handler,
+            valueClass = com.rarible.protocol.solana.dto.ActivityDto::class.java,
+            eventType = EventType.ACTIVITY,
+        )
     }
 
+    private fun <B, U> createConsumer(
+        topic: String,
+        handler: BlockchainEventHandler<B, U>,
+        valueClass: Class<B>,
+        eventType: EventType
+    ): RaribleKafkaConsumerWorker<B> {
+        return consumerFactory.createBlockchainConsumerWorkerGroup(
+            hosts = consumer.brokerReplicaSet!!,
+            topic = topic,
+            handler = handler,
+            valueClass = valueClass,
+            workers = workers,
+            eventType = eventType,
+            batchSize = batchSize
+        )
+    }
 }

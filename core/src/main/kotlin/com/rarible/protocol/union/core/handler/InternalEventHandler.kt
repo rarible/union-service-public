@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.core.handler
 
-interface InternalEventHandler<B> {
+import com.rarible.core.kafka.RaribleKafkaEventHandler
 
-    suspend fun handle(event: B)
-
-}
+interface InternalEventHandler<B> : RaribleKafkaEventHandler<B>

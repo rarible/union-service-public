@@ -12,7 +12,7 @@ import com.rarible.protocol.union.listener.test.IntegrationTest
 import com.rarible.tzkt.utils.Tezos
 import io.mockk.coEvery
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -28,7 +28,7 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
 
     @Test
     @Disabled("Works locally, fix under PT-953")
-    fun `should send dipdup orderlist activity to outgoing topic`() = runWithKafka {
+    fun `should send dipdup orderlist activity to outgoing topic`() = runBlocking {
 
         val activity = randomTezosOrderListActivity()
         val activityId = activity.id
@@ -42,13 +42,13 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
 
         waitAssert {
             val messages = findActivityUpdates(activityId, OrderListActivityDto::class.java)
-            Assertions.assertThat(messages).hasSize(1)
+            assertThat(messages).hasSize(1)
         }
     }
 
     @Test
     @Disabled("Works locally, fix under PT-953")
-    fun `should send dipdup mint activity to outgoing topic`() = runWithKafka {
+    fun `should send dipdup mint activity to outgoing topic`() = runBlocking {
 
         val activity = randomDipDupActivityMintEvent()
         val activityId = activity.transferId
@@ -71,20 +71,19 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
 
         waitAssert {
             val activities = findActivityUpdates(activityId, MintActivityDto::class.java)
-            Assertions.assertThat(activities).hasSize(1)
+            assertThat(activities).hasSize(1)
 
             val ownerships = findOwnershipUpdates(ownershipId.value)
-            Assertions.assertThat(ownerships)
-                .hasSizeGreaterThan(0) // We got 2 msg because the second msg is sent from enrichment
+            assertThat(ownerships).hasSizeGreaterThan(0) // We got 2 msg because the second msg is sent from enrichment
 
             val items = findItemUpdates(ownershipId.getItemId().value)
-            Assertions.assertThat(items).hasSize(1)
+            assertThat(items).hasSize(1)
         }
     }
 
     @Test
     @Disabled("Works locally, fix under PT-953")
-    fun `should send dipdup transfer activity to outgoing topic`() = runWithKafka {
+    fun `should send dipdup transfer activity to outgoing topic`() = runBlocking {
 
         val activity = randomDipDupActivityTransferEvent()
         val activityId = activity.transferId
@@ -113,19 +112,19 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
 
         waitAssert {
             val activities = findActivityUpdates(activityId, TransferActivityDto::class.java)
-            Assertions.assertThat(activities).hasSize(1)
+            assertThat(activities).hasSize(1)
 
             val ownershipsFrom = findOwnershipUpdates(ownershipIdFrom.value)
-            Assertions.assertThat(ownershipsFrom).hasSize(1)
+            assertThat(ownershipsFrom).hasSize(1)
 
             val ownershipsTo = findOwnershipUpdates(ownershipIdTo.value)
-            Assertions.assertThat(ownershipsTo).hasSize(1)
+            assertThat(ownershipsTo).hasSize(1)
         }
     }
 
     @Test
     @Disabled("Works locally, fix under PT-953")
-    fun `should send dipdup transfer burn activity to outgoing topic`() = runWithKafka {
+    fun `should send dipdup transfer burn activity to outgoing topic`() = runBlocking {
 
         val activity = randomDipDupActivityTransferEvent().copy(owner = Tezos.BURN_ADDRESS)
         val activityId = activity.transferId
@@ -148,19 +147,19 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
 
         waitAssert {
             val activities = findActivityUpdates(activityId, BurnActivityDto::class.java)
-            Assertions.assertThat(activities).hasSize(1)
+            assertThat(activities).hasSize(1)
 
             val ownerships = findOwnershipUpdates(ownershipId.value)
-            Assertions.assertThat(ownerships).hasSize(1)
+            assertThat(ownerships).hasSize(1)
 
             val items = findItemDeletions(ownershipId.getItemId().value)
-            Assertions.assertThat(items).hasSize(1)
+            assertThat(items).hasSize(1)
         }
     }
 
     @Test
     @Disabled("Works locally, fix under PT-953")
-    fun `should send dipdup burn activity to outgoing topic`() = runWithKafka {
+    fun `should send dipdup burn activity to outgoing topic`() = runBlocking {
 
         val activity = randomDipDupActivityBurnEvent()
         val activityId = activity.transferId
@@ -183,13 +182,13 @@ class DipDupActivityEventHandlerFt : AbstractDipDupIntegrationTest() {
 
         waitAssert {
             val activities = findActivityUpdates(activityId, BurnActivityDto::class.java)
-            Assertions.assertThat(activities).hasSize(1)
+            assertThat(activities).hasSize(1)
 
             val ownerships = findOwnershipUpdates(ownershipId.value)
-            Assertions.assertThat(ownerships).hasSize(1)
+            assertThat(ownerships).hasSize(1)
 
             val items = findItemDeletions(ownershipId.getItemId().value)
-            Assertions.assertThat(items).hasSize(1)
+            assertThat(items).hasSize(1)
         }
     }
 }

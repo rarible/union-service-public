@@ -2,16 +2,15 @@ package com.rarible.protocol.union.listener.config
 
 import com.github.cloudyrock.spring.v5.EnableMongock
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.core.daemon.DaemonWorkerProperties
-import com.rarible.core.kafka.RaribleKafkaConsumer
+import com.rarible.core.kafka.RaribleKafkaConsumerFactory
+import com.rarible.core.kafka.RaribleKafkaConsumerSettings
+import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaConsumerWorkerGroup
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.task.EnableRaribleTask
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
-import com.rarible.protocol.union.core.handler.ConsumerWorkerGroup
 import com.rarible.protocol.union.core.handler.InternalEventHandler
-import com.rarible.protocol.union.core.handler.InternalEventHandlerWrapper
-import com.rarible.protocol.union.core.handler.KafkaConsumerWorker
 import com.rarible.protocol.union.core.model.CompositeRegisteredTimer
 import com.rarible.protocol.union.core.model.ItemEventDelayMetric
 import com.rarible.protocol.union.core.model.OrderEventDelayMetric
@@ -27,9 +26,6 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.listener.downloader.MetaTaskRouter
 import com.rarible.protocol.union.listener.handler.internal.CollectionMetaTaskSchedulerHandler
 import com.rarible.protocol.union.listener.handler.internal.ItemMetaTaskSchedulerHandler
-import com.rarible.protocol.union.listener.kafka.MessageListenerContainerGroup
-import com.rarible.protocol.union.listener.kafka.MessageListenerEventHandlerAdapter
-import com.rarible.protocol.union.listener.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
@@ -40,8 +36,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
-import java.util.UUID
 
 @Configuration
 @EnableRaribleTask
@@ -51,7 +45,6 @@ import java.util.UUID
 class UnionListenerConfiguration(
     private val listenerProperties: UnionListenerProperties,
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-    private val consumerFactory: InternalConsumerFactory,
     private val meterRegistry: MeterRegistry,
     private val ff: FeatureFlagsProperties,
     activeBlockchains: List<BlockchainDto>,
@@ -59,90 +52,70 @@ class UnionListenerConfiguration(
 
     private val env = applicationEnvironmentInfo.name
     private val host = applicationEnvironmentInfo.host
+    private val kafkaConsumerFactory = RaribleKafkaConsumerFactory(
+        env = env,
+        host = host,
+        deserializer = UnionKafkaJsonDeserializer::class.java
+    )
     private val blockchains = activeBlockchains.toSet()
-
-    private val clientIdPrefix = "$env.$host.${UUID.randomUUID()}"
     private val properties = listenerProperties.consumer
 
     @Bean
     fun unionBlockchainEventWorker(
         handler: InternalEventHandler<UnionInternalBlockchainEvent>
-    ): KafkaConsumerWorker<UnionInternalBlockchainEvent> {
-        val containers = blockchains.map { blockchain ->
+    ): RaribleKafkaConsumerWorker<UnionInternalBlockchainEvent> {
+        val consumers = blockchains.map { blockchain ->
             val workers = properties.getWorkerProperties(blockchain)
-            val factory = containerFactory(
-                valueClass = UnionInternalBlockchainEvent::class.java,
+            val settings = RaribleKafkaConsumerSettings(
+                hosts = properties.brokerReplicaSet,
+                topic = UnionInternalTopicProvider.getInternalBlockchainTopic(env, blockchain),
+                group = consumerGroup("blockchain.${blockchain.name.lowercase()}"),
                 concurrency = workers.concurrency,
-                batchSize = workers.batchSize
+                batchSize = workers.batchSize,
+                async = true,
+                offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+                valueClass = UnionInternalBlockchainEvent::class.java
             )
-            logger.info("Created Kafka consumer for blockchain {} with params: {}", blockchain, workers)
-            val container = factory.createContainer(
-                UnionInternalTopicProvider.getInternalBlockchainTopic(env, blockchain)
-            )
-            container.setupMessageListener(MessageListenerEventHandlerAdapter(InternalEventHandlerWrapper(handler)))
-            container.containerProperties.groupId = consumerGroup("blockchain.${blockchain.name.lowercase()}")
-            container.containerProperties.clientId = "$clientIdPrefix.union-blockchain-event-consumer"
-            container
+            kafkaConsumerFactory.createWorker(settings, handler)
         }
-        return MessageListenerContainerGroup(containers)
-    }
-
-    private fun <T> containerFactory(
-        valueClass: Class<T>,
-        concurrency: Int,
-        batchSize: Int
-    ): ConcurrentKafkaListenerContainerFactory<String, T> {
-        return RaribleKafkaListenerContainerFactory(
-            valueClass = valueClass,
-            concurrency = concurrency,
-            kafkaBootstrapServers = properties.brokerReplicaSet,
-            batchSize = batchSize,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-        )
-    }
-
-    private fun createUnionReconciliationMarkEventConsumer(
-        index: Int
-    ): RaribleKafkaConsumer<ReconciliationMarkEvent> {
-        return RaribleKafkaConsumer(
-            clientId = "$clientIdPrefix.union-reconciliation-mark-consumer-$index",
-            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = ReconciliationMarkEvent::class.java,
-            consumerGroup = consumerGroup("reconciliation"),
-            defaultTopic = UnionInternalTopicProvider.getReconciliationMarkTopic(env),
-            bootstrapServers = properties.brokerReplicaSet,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST
-        )
+        return RaribleKafkaConsumerWorkerGroup(consumers)
     }
 
     @Bean
     fun unionReconciliationMarkEventWorker(
         handler: InternalEventHandler<ReconciliationMarkEvent>
-    ): KafkaConsumerWorker<ReconciliationMarkEvent> {
-        return consumerFactory.createReconciliationMarkEventConsumer(
-            consumer = { index -> createUnionReconciliationMarkEventConsumer(index) },
-            handler = handler,
-            daemon = listenerProperties.monitoringWorker,
-            workers = 1
+    ): RaribleKafkaConsumerWorker<ReconciliationMarkEvent> {
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = properties.brokerReplicaSet,
+            topic = UnionInternalTopicProvider.getReconciliationMarkTopic(env),
+            group = consumerGroup("reconciliation"),
+            concurrency = 1,
+            batchSize = 50,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = ReconciliationMarkEvent::class.java
         )
+        return kafkaConsumerFactory.createWorker(settings, handler)
     }
 
     // --------------- Meta 3.0 beans START
     @Bean
     fun itemMetaDownloadScheduleWorker(
         handler: ItemMetaTaskSchedulerHandler
-    ): ConsumerWorkerGroup<DownloadTask> {
-        val properties = listenerProperties.metaScheduling.item
+    ): RaribleKafkaConsumerWorker<DownloadTask> {
         val consumerGroupSuffix = "meta.item"
-        val clientIdSuffix = "item-meta-task-scheduler"
-        val topic = UnionInternalTopicProvider.getItemMetaDownloadTaskSchedulerTopic(env)
-        return consumerFactory.createInternalBatchedConsumerWorker(
-            consumer = { index -> createDownloadTaskConsumer(index, clientIdSuffix, consumerGroupSuffix, topic) },
-            handler = handler,
-            daemonWorkerProperties = DaemonWorkerProperties(consumerBatchSize = properties.batchSize),
-            workers = properties.workers,
-            type = "item-meta-task-scheduler"
+        val itemProperties = listenerProperties.metaScheduling.item
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = properties.brokerReplicaSet,
+            topic = UnionInternalTopicProvider.getItemMetaDownloadTaskSchedulerTopic(env),
+            group = consumerGroup("download.scheduler.$consumerGroupSuffix"),
+            concurrency = itemProperties.workers,
+            batchSize = itemProperties.batchSize,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = DownloadTask::class.java
         )
+        return kafkaConsumerFactory.createWorker(settings, handler)
     }
 
     @Bean
@@ -166,18 +139,21 @@ class UnionListenerConfiguration(
     @Bean
     fun collectionMetaDownloadScheduleWorker(
         handler: CollectionMetaTaskSchedulerHandler
-    ): ConsumerWorkerGroup<DownloadTask> {
-        val properties = listenerProperties.metaScheduling.collection
+    ): RaribleKafkaConsumerWorker<DownloadTask> {
+        val collectionProperties = listenerProperties.metaScheduling.collection
         val consumerGroupSuffix = "meta.collection"
-        val clientIdSuffix = "collection-meta-task-scheduler"
-        val topic = UnionInternalTopicProvider.getCollectionMetaDownloadTaskSchedulerTopic(env)
-        return consumerFactory.createInternalBatchedConsumerWorker(
-            consumer = { index -> createDownloadTaskConsumer(index, clientIdSuffix, consumerGroupSuffix, topic) },
-            handler = handler,
-            daemonWorkerProperties = DaemonWorkerProperties(consumerBatchSize = properties.batchSize),
-            workers = properties.workers,
-            type = "collection-meta-task-scheduler"
+
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = properties.brokerReplicaSet,
+            topic = UnionInternalTopicProvider.getCollectionMetaDownloadTaskSchedulerTopic(env),
+            group = consumerGroup("download.scheduler.$consumerGroupSuffix"),
+            concurrency = collectionProperties.workers,
+            batchSize = collectionProperties.batchSize,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = DownloadTask::class.java
         )
+        return kafkaConsumerFactory.createWorker(settings, handler)
     }
 
     @Bean
@@ -198,27 +174,10 @@ class UnionListenerConfiguration(
         return MetaTaskRouter(producers)
     }
 
-    private fun createDownloadTaskConsumer(
-        index: Int,
-        clientIdSuffix: String,
-        consumerGroupSuffix: String,
-        topic: String
-    ): RaribleKafkaConsumer<DownloadTask> {
-        return RaribleKafkaConsumer(
-            clientId = "$clientIdPrefix.union-$clientIdSuffix-$index",
-            valueDeserializerClass = UnionKafkaJsonDeserializer::class.java,
-            valueClass = DownloadTask::class.java,
-            consumerGroup = consumerGroup("download.scheduler.$consumerGroupSuffix"),
-            defaultTopic = topic,
-            bootstrapServers = properties.brokerReplicaSet,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST
-        )
-    }
-
     // --------------- Meta 3.0 beans END
 
     private fun consumerGroup(suffix: String): String {
-        return "${env}.protocol.union.${suffix}"
+        return "protocol.union.${suffix}"
     }
 
     @Bean
