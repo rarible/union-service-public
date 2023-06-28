@@ -52,7 +52,8 @@ class ItemMetaService(
             return
         }
         when (updateDto.type) {
-            is HookEventType.ChainNftMetadataUpdate -> {
+            is HookEventType.ChainNftMetadataUpdate,
+            is HookEventType.ContractNftMetadataUpdate -> {
                 logHook(updateDto)
                 updateDto.nfts.forEach { nft ->
                     scheduleWebHookMetaRefresh(nft)
