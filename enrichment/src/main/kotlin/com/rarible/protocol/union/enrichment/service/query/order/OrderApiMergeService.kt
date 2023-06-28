@@ -200,8 +200,8 @@ class OrderApiMergeService(
 
         val currencyContracts = when {
             currencies != null -> currencies.map { it.value }
-            // For ACTIVE orders we don't need to fetch currencies - we can take them from item
-            status == onlyActiveOrdersFilter -> getBidCurrenciesFromItem(itemId)
+            // We can't use item's currencies for ACTIVE bids - there can be Floor bids
+            // status == onlyActiveOrdersFilter -> getBidCurrenciesFromItem(itemId)
             else -> router.getService(blockchain).getBidCurrencies(itemId.value, status).map { it.currencyId()!! }
         }
 
