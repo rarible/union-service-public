@@ -16,12 +16,12 @@ class SyncActivityJob(
     private val activityServiceRouter: BlockchainRouter<ActivityService>,
     private val enrichmentActivityService: EnrichmentActivityService,
     private val activityRepository: ActivityRepository,
-) : AbstractReconciliationJob() {
+) : AbstractBlockchainBatchJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val batchSize = 50
 
-    override suspend fun reconcileBatch(continuation: String?, blockchain: BlockchainDto): String? {
+    override suspend fun handleBatch(continuation: String?, blockchain: BlockchainDto): String? {
         logger.info("Fetching Activities from {}: [{}]", blockchain.name, continuation)
         val page = activityServiceRouter.getService(blockchain).getAllActivitiesSync(
             continuation = continuation,

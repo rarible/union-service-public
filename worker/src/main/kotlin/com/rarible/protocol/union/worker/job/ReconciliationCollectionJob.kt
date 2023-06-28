@@ -8,22 +8,25 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class ReconciliationCollectionJob (
+class ReconciliationCollectionJob(
     private val collectionServiceRouter: BlockchainRouter<CollectionService>,
     private val enrichmentRefreshService: EnrichmentRefreshService,
     properties: WorkerProperties
-) : AbstractReconciliationJob() {
+) : AbstractBlockchainBatchJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val config = properties.reconciliation
 
-    override suspend fun reconcileBatch(continuation: String?, blockchain: BlockchainDto): String? {
+    override suspend fun handleBatch(continuation: String?, blockchain: BlockchainDto): String? {
         logger.info("Fetching Collections from {}: [{}]", blockchain.name, continuation)
         val page = collectionServiceRouter.getService(blockchain).getAllCollections(
             continuation,
