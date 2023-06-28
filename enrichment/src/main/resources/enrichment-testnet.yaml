@@ -46,8 +46,11 @@ enrichment:
 
   currencies:
     bestBidByCurrencyWhitelist:
-      - ETHEREUM:0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6
-      - POLYGON:0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa
+      - ETHEREUM:0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6 # weth
+      - ETHEREUM:0xcfaf03b6254363bca1a9d8e529270b5660bf3109 # usdc
+      - ETHEREUM:0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea # dai
+      - POLYGON:0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa # weth
+      - POLYGON:0xd6e804e7edb5b2aecb31d9ccc9d9f3940a7b4ce2 # usdc
 
 meta:
   simpleHash:
