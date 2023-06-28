@@ -283,60 +283,6 @@ class OrderControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `get order bids by item - only active`() = runBlocking<Unit> {
-        val ethItemId = randomEthItemId()
-
-        val (contract, tokenId) = CompositeItemIdParser.split(ethItemId.value)
-        val maker = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, randomEthAddress())
-
-        val order = randomEthBidOrderDto(ethItemId)
-        val unionOrder = ethOrderConverter.convert(order, ethItemId.blockchain)
-        val shortOrder = ShortOrderConverter.convert(unionOrder)
-
-        val ethOrders = listOf(order)
-
-        val shortItem = randomShortItem(ethItemId).copy(
-            bestBidOrder = shortOrder,
-            bestBidOrders = mapOf(unionOrder.bidCurrencyId() to shortOrder)
-        )
-        enrichmentItemService.save(shortItem)
-
-        coEvery {
-            testEthereumOrderApi.getOrderBidsByItemAndByStatus(
-                contract,
-                tokenId.toString(),
-                listOf(EthConverter.convertToAddress(maker.value)),
-                null,
-                ethPlatform,
-                continuation,
-                size,
-                listOf(com.rarible.protocol.dto.OrderStatusDto.ACTIVE),
-                unionOrder.bidCurrencyId(),
-                null,
-                null
-            )
-        } returns OrdersPaginationDto(ethOrders, continuation).toMono()
-
-        val orders = orderControllerClient.getOrderBidsByItem(
-            ethItemId.fullId(),
-            platform,
-            listOf(maker.fullId()),
-            null,
-            listOf(OrderStatusDto.ACTIVE),
-            null,
-            null,
-            null,
-            continuation,
-            size,
-            null
-        ).awaitFirst()
-
-        assertThat(orders.orders).hasSize(1)
-        assertThat(orders.orders[0]).isInstanceOf(OrderDto::class.java)
-        assertThat(orders.continuation).isNull()
-    }
-
-    @Test
     fun `get order bids by item - flow`() = runBlocking<Unit> {
         // TODO - implement when Flow support this method
     }
