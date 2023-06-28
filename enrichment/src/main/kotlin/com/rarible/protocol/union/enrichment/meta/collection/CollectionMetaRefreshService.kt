@@ -6,8 +6,8 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -46,6 +46,10 @@ class CollectionMetaRefreshService(
             logger.info("Collection refresh already pending for $collectionFullId. Will not refresh")
             return false
         }
+        return checkMetaChanges(collectionFullId)
+    }
+
+    private suspend fun checkMetaChanges(collectionFullId: String): Boolean {
         return coroutineScope {
             esItemRepository.getRandomItemsFromCollection(collectionId = collectionFullId, size = RANDOM_ITEMS_TO_CHECK)
                 .map { esItem ->
@@ -67,6 +71,27 @@ class CollectionMetaRefreshService(
                     }
                 }.awaitAll()
         }.any { it }
+    }
+
+    suspend fun shouldAutoRefresh(collectionId: String): Boolean {
+        val collectionSize = esItemRepository.countItemsInCollection(collectionId)
+        if (collectionSize > BIG_COLLECTION_SIZE_THRESHOLD) {
+            logger.info(
+                "Collection $collectionId size $collectionSize is bigger than $BIG_COLLECTION_SIZE_THRESHOLD " +
+                    "will not do auto refresh"
+            )
+            return false
+        }
+        val scheduledCount = metaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId)
+        if (scheduledCount > 0) {
+            logger.info("Collection refresh already pending for $collectionId. Will not auto refresh")
+            return false
+        }
+        if (!checkMetaChanges(collectionId)) {
+            logger.info("No meta changes found for sample items from $collectionId. Will not auto refresh")
+            return false
+        }
+        return true
     }
 
     companion object {

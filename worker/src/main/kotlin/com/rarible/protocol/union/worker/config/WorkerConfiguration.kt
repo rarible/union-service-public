@@ -8,9 +8,13 @@ import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBoot
 import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
+import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaRefreshService
+import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.worker.job.BestOrderCheckJob
 import com.rarible.protocol.union.worker.job.BestOrderCheckJobHandler
+import com.rarible.protocol.union.worker.job.MetaAutoRefreshJob
 import com.rarible.protocol.union.worker.job.MetaRefreshRequestCleanupJob
 import com.rarible.protocol.union.worker.job.ReconciliationMarkJob
 import com.rarible.protocol.union.worker.job.ReconciliationMarkJobHandler
@@ -114,12 +118,32 @@ class WorkerConfiguration(
     }
 
     @Bean
-    @ConditionalOnProperty(name = ["worker.collection-meta-refresh-request-cleanup.enabled"], havingValue = "true")
+    @ConditionalOnProperty(name = ["worker.metaRefreshRequestCleanup.enabled"], havingValue = "true")
     fun collectionMetaRefreshRequestCleanupJob(
         metaRefreshRequestRepository: MetaRefreshRequestRepository,
         properties: WorkerProperties,
         meterRegistry: MeterRegistry,
     ): MetaRefreshRequestCleanupJob {
         return MetaRefreshRequestCleanupJob(metaRefreshRequestRepository, properties, meterRegistry)
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = ["worker.metaAutoRefresh.enabled"], havingValue = "true")
+    fun collectionMetaAutoRefreshJob(
+        metaAutoRefreshStateRepository: MetaAutoRefreshStateRepository,
+        collectionMetaRefreshService: CollectionMetaRefreshService,
+        metaRefreshRequestRepository: MetaRefreshRequestRepository,
+        unionMetaProperties: UnionMetaProperties,
+        properties: WorkerProperties,
+        meterRegistry: MeterRegistry,
+    ): MetaAutoRefreshJob {
+        return MetaAutoRefreshJob(
+            metaAutoRefreshStateRepository = metaAutoRefreshStateRepository,
+            collectionMetaRefreshService = collectionMetaRefreshService,
+            metaRefreshRequestRepository = metaRefreshRequestRepository,
+            simpleHashEnabled = unionMetaProperties.simpleHash.enabled,
+            properties = properties,
+            meterRegistry = meterRegistry,
+        )
     }
 }

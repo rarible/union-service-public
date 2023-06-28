@@ -14,6 +14,7 @@ data class WorkerProperties(
     val platformBestSellCleanup: PlatformBestSellCleanUpProperties = PlatformBestSellCleanUpProperties(),
     val priceUpdate: PriceUpdateProperties = PriceUpdateProperties(),
     val metaRefreshRequestCleanup: MetaRefreshRequestCleanupProperties = MetaRefreshRequestCleanupProperties(),
+    val metaAutoRefresh: MetaAutoRefreshProperties = MetaAutoRefreshProperties(),
     val metaRefresh: MetaRefreshProperties = MetaRefreshProperties(),
     val reconcileMarks: ReconcileMarksProperties = ReconcileMarksProperties(),
     val metaItemRetry: MetaRetry = MetaRetry(),
@@ -104,6 +105,14 @@ class PriceUpdateProperties(
 class MetaRefreshRequestCleanupProperties(
     val enabled: Boolean = true,
     val rate: Duration = Duration.ofMinutes(5)
+)
+
+class MetaAutoRefreshProperties(
+    val enabled: Boolean = true,
+    val rate: Duration = Duration.ofHours(2),
+    val errorDelay: Duration = Duration.ofMinutes(1),
+    val createdPeriod: Duration = Duration.ofDays(30),
+    val refreshedPeriod: Duration = Duration.ofDays(14),
 )
 
 class MetaRefreshProperties(

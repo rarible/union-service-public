@@ -10,6 +10,7 @@ import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
+import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollection
@@ -24,6 +25,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDt
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.coEvery
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -32,6 +34,7 @@ import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.Instant
 
 @IntegrationTest
 class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
@@ -47,6 +50,9 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var metaRefreshRequestRepository: MetaRefreshRequestRepository
+
+    @Autowired
+    private lateinit var metaAutoRefreshStateRepository: MetaAutoRefreshStateRepository
 
     @Test
     fun `on collection changed - ok`() = runWithKafka {
@@ -72,7 +78,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `on collection updated - ok, collection inserted`() = runWithKafka {
+    fun `on collection updated - ok, collection inserted`() = runWithKafka<Unit> {
         val collectionId = randomEthCollectionId()
         val ethCollection = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
 
@@ -90,10 +96,12 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
             // TODO COLLECTION update meta check after the migration
             assertThat(messages[0].value.collection.copy(meta = null)).isEqualTo(expected)
         }
+        val refreshState = metaAutoRefreshStateRepository.loadToCheckCreated(Instant.now().minusSeconds(60)).toList()
+        assertThat(refreshState.map { it.id }).containsExactly(collectionId.fullId())
     }
 
     @Test
-    fun `on collection updated - ok, collection exists`() = runWithKafka {
+    fun `on collection updated - ok, collection exists`() = runWithKafka<Unit> {
         val collectionId = randomEthCollectionId()
         val enrichmentCollection = randomEnrichmentCollection(collectionId)
         val ethCollection = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
@@ -114,6 +122,8 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
             // TODO COLLECTION update meta check after the migration
             assertThat(messages[0].value.collection.copy(meta = null)).isEqualTo(expected)
         }
+        val refreshState = metaAutoRefreshStateRepository.loadToCheckCreated(Instant.now().minusSeconds(60)).toList()
+        assertThat(refreshState).isEmpty()
     }
 
     @Test
