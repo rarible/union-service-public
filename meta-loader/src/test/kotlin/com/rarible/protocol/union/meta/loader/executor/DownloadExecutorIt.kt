@@ -5,10 +5,12 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.configuration.MetaTrimmingProperties
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
@@ -36,6 +38,9 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var repository: ItemMetaRepository
+
+    @Autowired
+    lateinit var trimmingProperties: MetaTrimmingProperties
 
     @Autowired
     lateinit var itemRepository: ItemRepository
@@ -96,6 +101,31 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
         coVerify(exactly = 1) { notifier.notify(saved) }
         verifyItemUpdated(itemId, savedItem)
+    }
+
+    @Test
+    fun `initial task - success, trim`() = runBlocking<Unit> {
+        val task = randomTask(fullItemId)
+        createItem(itemId, null)
+        itemRepository.get(ShortItemId(itemId))!!
+
+        mockGetMeta(
+            fullItemId,
+            randomUnionMeta().copy(
+                name = IntRange(0, trimmingProperties.nameLength * 2).joinToString { "x" },
+                description = IntRange(0, trimmingProperties.descriptionLength * 2).joinToString { "x" }
+            )
+        )
+
+        downloadExecutor.execute(listOf(task))
+
+        val saved = repository.get(fullItemId)!!
+
+        assertThat(saved.data?.name?.length)
+            .isEqualTo(trimmingProperties.nameLength + trimmingProperties.suffix.length)
+
+        assertThat(saved.data?.description?.length)
+            .isEqualTo(trimmingProperties.descriptionLength  + trimmingProperties.suffix.length)
     }
 
     @Test

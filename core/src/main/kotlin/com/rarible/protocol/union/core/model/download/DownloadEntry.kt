@@ -57,6 +57,10 @@ data class DownloadEntry<T>(
         return status == DownloadStatus.SUCCESS && data != null
     }
 
+    fun withData(data: T?): DownloadEntry<T> {
+        return copy(data = data)
+    }
+
     companion object {
 
         const val MAX_ERROR_MESSAGE_LENGTH = 250

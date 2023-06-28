@@ -42,7 +42,7 @@ class UnionMetaConfiguration(
     }
 
     @Bean
-    fun itemMetaTrimmingProperties(): ItemMetaTrimmingProperties {
+    fun itemMetaTrimmingProperties(): MetaTrimmingProperties {
         return unionMetaProperties.trimming
     }
 

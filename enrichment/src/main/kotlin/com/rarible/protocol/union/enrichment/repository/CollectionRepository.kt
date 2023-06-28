@@ -21,6 +21,7 @@ import org.springframework.data.mongodb.core.index.PartialIndexFilter
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.and
+import org.springframework.data.mongodb.core.query.gt
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lt
@@ -101,6 +102,13 @@ class CollectionRepository(
 
         return template.find(query, EnrichmentCollection::class.java).asFlow()
     }
+
+    fun findAll(fromIdExcluded: EnrichmentCollectionId? = null): Flow<EnrichmentCollection> = template.find(
+        Query(Criteria().apply {
+            fromIdExcluded?.let { and(EnrichmentCollection::id).gt(fromIdExcluded) }
+        }).with(Sort.by(EnrichmentCollection::id.name)),
+        EnrichmentCollection::class.java
+    ).asFlow()
 
     companion object {
 
