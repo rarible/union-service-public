@@ -7,6 +7,7 @@ import com.rarible.protocol.union.worker.task.search.EsRateLimiter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
+import java.util.concurrent.atomic.AtomicReference
 
 abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
     private val entityName: String,
@@ -41,13 +42,11 @@ abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
     fun sync(param: String, state: String?): Flow<String> {
         val parsedParam = mapper.readValue(param, paramClass)
         return flow {
-            var next = state
+            val next = AtomicReference(state)
             do {
-                next = syncBatch(parsedParam, next)
-                if (next != null) {
-                    emit(next)
-                }
-            } while (next != null)
+                next.set(syncBatch(parsedParam, next.get()))
+                next.get()?.let { emit(it) }
+            } while (next.get() != null)
         }
     }
 
@@ -73,6 +72,13 @@ abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
             SyncScope.EVENT -> notify(param, enrichmentEntities)
         }
 
+        if (isDone(param, slice)) {
+            logger.info(
+                "Sync {} state for {}: {} entities updated, sync is finished by task conditions",
+                entityName, param, unionEntities.size
+            )
+        }
+
         val newState = slice.continuation
         logger.info(
             "Sync {} state for {}: {} entities updated, new state is [{}]",
@@ -80,4 +86,6 @@ abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
         )
         return newState
     }
+
+    open fun isDone(param: P, batch: Slice<U>): Boolean = false
 }

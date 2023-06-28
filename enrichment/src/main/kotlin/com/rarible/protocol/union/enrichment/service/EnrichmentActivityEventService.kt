@@ -8,7 +8,6 @@ import com.rarible.protocol.union.core.model.isBlockchainEvent
 import com.rarible.protocol.union.core.model.offchainAndIndexerMarks
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityDtoConverter
-import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import org.springframework.stereotype.Component
 
 @Component
@@ -17,7 +16,6 @@ class EnrichmentActivityEventService(
     private val enrichmentActivityService: EnrichmentActivityService,
     private val ownershipEventService: EnrichmentOwnershipEventService,
     private val itemEventService: EnrichmentItemEventService,
-    private val activityRepository: ActivityRepository,
     private val ff: FeatureFlagsProperties,
 ) {
 
@@ -63,12 +61,7 @@ class EnrichmentActivityEventService(
         }.add("enrichment-in")
 
         val activityDto = if (ff.enableMongoActivityWrite) {
-            val enrichmentActivity = enrichmentActivityService.enrich(activity)
-            if (activity.reverted == true) {
-                activityRepository.delete(enrichmentActivity.id)
-            } else {
-                activityRepository.save(enrichmentActivity)
-            }
+            val enrichmentActivity = enrichmentActivityService.update(activity)
             EnrichmentActivityDtoConverter.convert(source = enrichmentActivity, reverted = activity.reverted ?: false)
         } else {
             enrichmentActivityService.enrichDeprecated(activity)
