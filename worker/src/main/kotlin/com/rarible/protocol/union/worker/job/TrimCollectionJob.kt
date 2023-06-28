@@ -14,6 +14,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
+import org.springframework.dao.DuplicateKeyException
+import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.stereotype.Component
 
 abstract class AbstractTrimJob<Entity> {
@@ -25,7 +27,9 @@ abstract class AbstractTrimJob<Entity> {
                 .collect { entities ->
                     entities
                         .map { entity ->
-                            async { trim(entity) }
+                            async {
+                                trimWithOptimisticLock(entity)
+                            }
                         }
                         .awaitAll()
                         .onEach { entityId -> emit(entityId) }
@@ -33,7 +37,32 @@ abstract class AbstractTrimJob<Entity> {
         }
     }
 
+    private suspend fun trimWithOptimisticLock(entity: Entity): String {
+        val attempts: Long = 5
+        var retry = 0
+        var last: Throwable
+
+        var latestEntityVersion: Entity = entity
+        do {
+            last = try {
+                return trim(latestEntityVersion)
+            } catch (ex: OptimisticLockingFailureException) {
+                ex
+            } catch (ex: DuplicateKeyException) {
+                ex
+            }
+            val (entityId, latestEntity) = getLatestEntityVersion(entity)
+            if (latestEntity == null) return entityId
+
+            latestEntityVersion = latestEntity
+        } while (++retry < attempts)
+
+        throw last
+    }
+
     protected abstract fun getEntityFrom(from: String?): Flow<Entity>
+
+    protected abstract suspend fun getLatestEntityVersion(entity: Entity): Pair<String, Entity?>
 
     protected abstract suspend fun trim(entity: Entity): String
 
@@ -50,6 +79,10 @@ class TrimCollectionMetaJob(
 
     override fun getEntityFrom(from: String?): Flow<EnrichmentCollection> {
         return collectionRepository.findAll(from?.let { EnrichmentCollectionId.of(it) })
+    }
+
+    override suspend fun getLatestEntityVersion(entity: EnrichmentCollection): Pair<String, EnrichmentCollection?> {
+        return entity.id.toString() to collectionRepository.get(entity.id)
     }
 
     override suspend fun trim(entity: EnrichmentCollection): String {
@@ -78,15 +111,19 @@ class TrimItemMetaJob(
         return itemRepository.findAll(from?.let { ShortItemId.of(it) })
     }
 
-    override suspend fun trim(item: ShortItem): String {
-        val metaEntry = item.metaEntry
+    override suspend fun getLatestEntityVersion(entity: ShortItem): Pair<String, ShortItem?> {
+        return entity.id.toString() to itemRepository.get(entity.id)
+    }
+
+    override suspend fun trim(entity: ShortItem): String {
+        val metaEntry = entity.metaEntry
         val trimmedData = metaTrimmer.trim(metaEntry?.data)
         if (trimmedData != metaEntry?.data) {
-            val updatedCollection = item.copy(metaEntry = metaEntry?.withData(trimmedData))
-            logger.info("Item ${item.id} was trim into migration task")
-            itemRepository.save(updatedCollection)
+            val updatedItem = entity.copy(metaEntry = metaEntry?.withData(trimmedData))
+            logger.info("Item ${entity.id} was trim into migration task")
+            itemRepository.save(updatedItem)
         }
-        return item.id.toString()
+        return entity.id.toString()
     }
 
     companion object {
