@@ -9,7 +9,6 @@ import com.rarible.protocol.union.enrichment.model.EnrichmentActivity
 import com.rarible.protocol.union.enrichment.model.EnrichmentActivityId
 import com.rarible.protocol.union.enrichment.model.EnrichmentMintActivity
 import com.rarible.protocol.union.enrichment.model.EnrichmentTransferActivity
-import com.rarible.protocol.union.enrichment.model.ShortItem
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -60,9 +59,10 @@ class ActivityRepository(
 
     suspend fun findAll(fromIdExcluded: EnrichmentActivityId? = null, limit: Int): List<EnrichmentActivity> {
         val criteria = Criteria().apply {
-            fromIdExcluded?.let { and(ShortItem::id).gt(fromIdExcluded) }
+            fromIdExcluded?.let { and(EnrichmentActivity::id).gt(fromIdExcluded) }
         }
         val query = Query(criteria).limit(limit)
+            .with(Sort.by(EnrichmentActivity::id.name))
         return template.find<EnrichmentActivity>(query).collectList().awaitFirst()
     }
 
