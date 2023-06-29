@@ -27,7 +27,7 @@ class SyncActivityJob(
     private val converter: EsActivityConverter,
     esRateLimiter: EsRateLimiter
 ) : AbstractSyncJob<UnionActivity, EnrichmentActivity, SyncActivityJobParam>(
-    "Collection",
+    "Activity",
     SyncActivityJobParam::class.java,
     esRateLimiter
 ) {
@@ -37,7 +37,10 @@ class SyncActivityJob(
 
     override suspend fun getNext(param: SyncActivityJobParam, state: String?): Slice<UnionActivity> {
         val service = activityServiceRouter.getService(param.blockchain)
-        return service.getAllActivitiesSync(state, batchSize, SyncSortDto.DB_UPDATE_DESC, param.type)
+        return when {
+            param.reverted -> service.getAllRevertedActivitiesSync(state, batchSize, param.sort, param.type)
+            else -> service.getAllActivitiesSync(state, batchSize, param.sort, param.type)
+        }
     }
 
     override suspend fun updateDb(
@@ -68,7 +71,7 @@ class SyncActivityJob(
     }
 
     override suspend fun notify(param: SyncActivityJobParam, enrichmentEntities: List<EnrichmentActivity>) {
-        // Not needed for Activities
+        // TODO Not needed for Activities?
     }
 
     override fun isDone(param: SyncActivityJobParam, batch: Slice<UnionActivity>): Boolean {
@@ -90,5 +93,6 @@ data class SyncActivityJobParam(
     val type: SyncTypeDto,
     // With task state (which is 'continuation') and 'sort/to' combination we can reindex any time range
     val sort: SyncSortDto = SyncSortDto.DB_UPDATE_DESC,
-    val to: Instant? = null
+    val to: Instant? = null,
+    val reverted: Boolean = false
 ) : AbstractSyncJobParam()

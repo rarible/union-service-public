@@ -18,6 +18,7 @@ import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Service
 
 @Service
+@Deprecated("Replace with SyncOwnershipJob")
 class OwnershipReindexService(
     private val repository: EsOwnershipRepository,
     private val searchTaskMetricFactory: SearchTaskMetricFactory,

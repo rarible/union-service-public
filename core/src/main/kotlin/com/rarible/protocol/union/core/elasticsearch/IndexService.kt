@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.elasticsearch
 
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.getRealName
 import com.rarible.protocol.union.core.elasticsearch.EsHelper.moveAlias
 import com.rarible.protocol.union.core.model.elastic.CurrentEntityDefinition
@@ -8,6 +7,7 @@ import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
 import com.rarible.protocol.union.core.model.elastic.EsMetadata
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
+import org.slf4j.LoggerFactory
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.stereotype.Service
 
@@ -17,6 +17,9 @@ class IndexService(
     private val esMetadataRepository: EsMetadataRepository,
     esNameResolver: EsNameResolver
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     private val metadataIndexName: String = esNameResolver.metadataIndexName
 
     suspend fun updateMetadata(entityDefinition: EntityDefinitionExtended) {
@@ -88,7 +91,4 @@ class IndexService(
         updateMetadata(definition)
     }
 
-    companion object {
-        private val logger by Logger()
-    }
 }

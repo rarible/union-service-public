@@ -13,6 +13,7 @@ import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Component
 
 @Component
+@Deprecated("Replace with SyncCollectionJob")
 class CollectionReindexService(
     private val collectionApiMergeService: CollectionApiMergeService,
     private val repository: EsCollectionRepository,

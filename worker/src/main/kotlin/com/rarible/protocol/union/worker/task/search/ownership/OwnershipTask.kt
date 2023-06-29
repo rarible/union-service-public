@@ -13,6 +13,7 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Component
 
 @Component
+@Deprecated("Replace with SyncOwnershipTask")
 class OwnershipTask(
     private val properties: OwnershipReindexProperties,
     private val paramFactory: ParamFactory,

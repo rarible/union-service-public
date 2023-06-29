@@ -74,7 +74,6 @@ class SyncCollectionJob(
         val esCollections = enrichmentCollectionService.enrich(exist, CollectionMetaPipeline.SYNC)
             .map { EsCollectionConverter.convert(it) }
 
-        logger.info(esCollections.toString())
         esCollectionRepository.bulk(esCollections, deleted, param.esIndex, WriteRequest.RefreshPolicy.NONE)
     }
 
