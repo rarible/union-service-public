@@ -50,7 +50,7 @@ class ReconciliationAuctionTest {
         mockGetAuctionsAll("1_2", testPageSize, mockPagination(null, 10))
 
 
-        val result = auctionReconciliationService.reconcile(null, BlockchainDto.ETHEREUM).toList()
+        val result = auctionReconciliationService.handle(null, BlockchainDto.ETHEREUM.name).toList()
 
         assertEquals(2, result.size)
         assertEquals("1_1", result[0])
@@ -62,7 +62,7 @@ class ReconciliationAuctionTest {
         val nextContinuation = "1_1"
         mockGetAuctionsAll(null, testPageSize, mockPagination(nextContinuation, testPageSize))
 
-        val result = auctionReconciliationService.reconcileBatch(null, BlockchainDto.ETHEREUM)
+        val result = auctionReconciliationService.handleBatch(null, BlockchainDto.ETHEREUM)
 
         assertEquals(nextContinuation, result)
         coVerify(exactly = testPageSize) { auctionEventService.onAuctionUpdated(any()) }
@@ -74,7 +74,7 @@ class ReconciliationAuctionTest {
         val nextContinuation = "2_2"
         mockGetAuctionsAll(lastContinuation, testPageSize, mockPagination(nextContinuation, testPageSize))
 
-        val result = auctionReconciliationService.reconcileBatch(lastContinuation, BlockchainDto.ETHEREUM)
+        val result = auctionReconciliationService.handleBatch(lastContinuation, BlockchainDto.ETHEREUM)
 
         assertEquals(nextContinuation, result)
         coVerify(exactly = testPageSize) { auctionEventService.onAuctionUpdated(any()) }
@@ -86,7 +86,7 @@ class ReconciliationAuctionTest {
         val nextContinuation = null
         mockGetAuctionsAll(lastContinuation, testPageSize, mockPagination(nextContinuation, 50))
 
-        val result = auctionReconciliationService.reconcileBatch(lastContinuation, BlockchainDto.ETHEREUM)
+        val result = auctionReconciliationService.handleBatch(lastContinuation, BlockchainDto.ETHEREUM)
 
         assertNull(result)
         coVerify(exactly = 50) { auctionEventService.onAuctionUpdated(any()) }
@@ -96,7 +96,7 @@ class ReconciliationAuctionTest {
     fun `reconcile auctions - empty page`() = runBlocking {
         mockGetAuctionsAll(null, testPageSize, mockPagination("1_1", 0))
 
-        val result = auctionReconciliationService.reconcileBatch(null, BlockchainDto.ETHEREUM)
+        val result = auctionReconciliationService.handleBatch(null, BlockchainDto.ETHEREUM)
 
         assertNull(result)
         coVerify(exactly = 0) { auctionEventService.onAuctionUpdated(any()) }

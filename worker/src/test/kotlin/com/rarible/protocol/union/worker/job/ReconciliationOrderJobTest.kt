@@ -52,7 +52,7 @@ class ReconciliationOrderJobTest {
         mockGetOrdersAll("1_1", testPageSize, mockPagination("1_2", testPageSize))
         mockGetOrdersAll("1_2", testPageSize, mockPagination(null, 10))
 
-        val result = orderReconciliationService.reconcile(null, BlockchainDto.ETHEREUM).toList()
+        val result = orderReconciliationService.handle(null, BlockchainDto.ETHEREUM.name).toList()
 
         assertEquals(2, result.size)
         assertEquals("1_1", result[0])
@@ -64,7 +64,7 @@ class ReconciliationOrderJobTest {
         val nextContinuation = "1_1"
         mockGetOrdersAll(null, testPageSize, mockPagination(nextContinuation, testPageSize))
 
-        val result = orderReconciliationService.reconcileBatch(null, BlockchainDto.ETHEREUM)
+        val result = orderReconciliationService.handleBatch(null, BlockchainDto.ETHEREUM)
 
         assertEquals(nextContinuation, result)
         coVerify(exactly = testPageSize) { orderEventService.updateOrder(any(), any()) }
@@ -76,7 +76,7 @@ class ReconciliationOrderJobTest {
         val nextContinuation = "2_2"
         mockGetOrdersAll(lastContinuation, testPageSize, mockPagination(nextContinuation, testPageSize))
 
-        val result = orderReconciliationService.reconcileBatch(lastContinuation, BlockchainDto.ETHEREUM)
+        val result = orderReconciliationService.handleBatch(lastContinuation, BlockchainDto.ETHEREUM)
 
         assertEquals(nextContinuation, result)
         coVerify(exactly = testPageSize) { orderEventService.updateOrder(any(), any()) }
@@ -88,7 +88,7 @@ class ReconciliationOrderJobTest {
         val nextContinuation = null
         mockGetOrdersAll(lastContinuation, testPageSize, mockPagination(nextContinuation, 50))
 
-        val result = orderReconciliationService.reconcileBatch(lastContinuation, BlockchainDto.ETHEREUM)
+        val result = orderReconciliationService.handleBatch(lastContinuation, BlockchainDto.ETHEREUM)
 
         assertNull(result)
         coVerify(exactly = 50) { orderEventService.updateOrder(any(), any()) }
@@ -98,7 +98,7 @@ class ReconciliationOrderJobTest {
     fun `reconcile orders - empty page`() = runBlocking {
         mockGetOrdersAll(null, testPageSize, mockPagination("1_1", 0))
 
-        val result = orderReconciliationService.reconcileBatch(null, BlockchainDto.ETHEREUM)
+        val result = orderReconciliationService.handleBatch(null, BlockchainDto.ETHEREUM)
 
         assertNull(result)
         coVerify(exactly = 0) { orderEventService.updateOrder(any(), any()) }

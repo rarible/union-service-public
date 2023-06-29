@@ -24,13 +24,13 @@ class ReconciliationOrderJob(
     private val orderServiceRouter: BlockchainRouter<OrderService>,
     private val orderEventService: EnrichmentOrderEventService,
     properties: WorkerProperties,
-) : AbstractReconciliationJob() {
+) : AbstractBlockchainBatchJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val config = properties.reconciliation
 
-    override suspend fun reconcileBatch(continuation: String?, blockchain: BlockchainDto): String? {
+    override suspend fun handleBatch(continuation: String?, blockchain: BlockchainDto): String? {
         logger.info("Fetching Orders from {}: [{}]", blockchain.name, continuation)
         val page = orderServiceRouter.getService(blockchain).getOrdersAll(
             continuation,
