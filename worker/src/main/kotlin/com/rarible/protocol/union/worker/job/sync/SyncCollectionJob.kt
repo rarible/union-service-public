@@ -34,12 +34,11 @@ class SyncCollectionJob(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val batchSize = 50
 
     override suspend fun getNext(param: SyncCollectionJobParam, state: String?): Slice<UnionCollection> {
         return collectionServiceRouter.getService(param.blockchain).getAllCollections(
             state,
-            batchSize
+            param.batchSize
         ).toSlice()
     }
 
@@ -48,13 +47,15 @@ class SyncCollectionJob(
         unionEntities: List<UnionCollection>
     ): List<EnrichmentCollection> {
         // We should NOT catch exceptions here, our SYNC job should not skip entities
-        return unionEntities.mapAsync { collection ->
-            val enrichmentCollection = enrichmentCollectionService.update(collection, false)
-            if (enrichmentCollection.metaEntry == null) {
-                collectionMetaService.schedule(collection.id, CollectionMetaPipeline.SYNC, false)
+        return unionEntities.chunked(param.chunkSize).map { chunk ->
+            chunk.mapAsync { collection ->
+                val enrichmentCollection = enrichmentCollectionService.update(collection, false)
+                if (enrichmentCollection.metaEntry == null) {
+                    collectionMetaService.schedule(collection.id, CollectionMetaPipeline.SYNC, false)
+                }
+                enrichmentCollection
             }
-            enrichmentCollection
-        }
+        }.flatten()
     }
 
     override suspend fun updateEs(
@@ -86,5 +87,7 @@ class SyncCollectionJob(
 data class SyncCollectionJobParam(
     override val blockchain: BlockchainDto,
     override val scope: SyncScope,
-    override val esIndex: String? = null
+    override val esIndex: String? = null,
+    override val batchSize: Int = DEFAULT_BATCH,
+    override val chunkSize: Int = DEFAULT_CHUNK,
 ) : AbstractSyncJobParam()

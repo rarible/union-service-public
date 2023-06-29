@@ -33,13 +33,12 @@ class SyncActivityJob(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val batchSize = 50
 
     override suspend fun getNext(param: SyncActivityJobParam, state: String?): Slice<UnionActivity> {
         val service = activityServiceRouter.getService(param.blockchain)
         return when {
-            param.reverted -> service.getAllRevertedActivitiesSync(state, batchSize, param.sort, param.type)
-            else -> service.getAllActivitiesSync(state, batchSize, param.sort, param.type)
+            param.reverted -> service.getAllRevertedActivitiesSync(state, param.batchSize, param.sort, param.type)
+            else -> service.getAllActivitiesSync(state, param.batchSize, param.sort, param.type)
         }
     }
 
@@ -48,9 +47,11 @@ class SyncActivityJob(
         unionEntities: List<UnionActivity>
     ): List<EnrichmentActivity> {
         // We should NOT catch exceptions here, our SYNC job should not skip entities
-        return unionEntities.mapAsync { activity ->
-            enrichmentActivityService.update(activity)
-        }
+        return unionEntities.chunked(param.chunkSize).map { chunk ->
+            chunk.mapAsync { activity ->
+                enrichmentActivityService.update(activity)
+            }
+        }.flatten()
     }
 
     override suspend fun updateEs(
@@ -89,8 +90,10 @@ class SyncActivityJob(
 data class SyncActivityJobParam(
     override val blockchain: BlockchainDto,
     override val scope: SyncScope,
-    override val esIndex: String? = null,
     val type: SyncTypeDto,
+    override val esIndex: String? = null,
+    override val batchSize: Int = DEFAULT_BATCH,
+    override val chunkSize: Int = DEFAULT_CHUNK,
     // With task state (which is 'continuation') and 'sort/to' combination we can reindex any time range
     val sort: SyncSortDto = SyncSortDto.DB_UPDATE_DESC,
     val to: Instant? = null,
