@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
@@ -56,6 +57,7 @@ internal class CollectionMetaRefreshServiceTest {
         whenever(esItemRepository.countItemsInCollection(collectionId.fullId())).thenReturn(40000 + randomLong(1000))
 
         assertThat(collectionMetaRefreshService.shouldRefresh(collectionId)).isFalse()
+        assertThat(collectionMetaRefreshService.shouldAutoRefresh(collectionId.fullId())).isFalse()
     }
 
     @Test
@@ -114,6 +116,7 @@ internal class CollectionMetaRefreshServiceTest {
         ).thenReturn(meta2.copy(createdAt = Instant.now()))
 
         assertThat(collectionMetaRefreshService.shouldRefresh(collectionId)).isFalse()
+        assertThat(collectionMetaRefreshService.shouldAutoRefresh(collectionId.fullId())).isFalse()
     }
 
     @Test
@@ -144,8 +147,9 @@ internal class CollectionMetaRefreshServiceTest {
         ).thenReturn(randomUnionMeta())
 
         assertThat(collectionMetaRefreshService.shouldRefresh(collectionId)).isTrue()
+        assertThat(collectionMetaRefreshService.shouldAutoRefresh(collectionId.fullId())).isTrue()
 
-        verify(itemMetaService).download(itemId = itemId1, pipeline = ItemMetaPipeline.REFRESH, force = true)
+        verify(itemMetaService, times(2)).download(itemId = itemId1, pipeline = ItemMetaPipeline.REFRESH, force = true)
         verifyNoMoreInteractions(itemMetaService)
     }
 }

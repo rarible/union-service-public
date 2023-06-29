@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OrderIdDto
@@ -20,7 +21,9 @@ import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaServi
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.model.MetaAutoRefreshState
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
+import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.util.spent
 import kotlinx.coroutines.async
@@ -39,6 +42,7 @@ class EnrichmentCollectionService(
     private val metrics: CollectionMetaMetrics,
     private val ff: FeatureFlagsProperties,
     private val enrichmentHelperService: EnrichmentHelperService,
+    private val metaAutoRefreshStateRepository: MetaAutoRefreshStateRepository,
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionService::class.java)
@@ -69,7 +73,8 @@ class EnrichmentCollectionService(
 
     suspend fun update(collection: UnionCollection, updateDate: Boolean = true): EnrichmentCollection {
         val id = EnrichmentCollectionId(collection.id)
-        val updated = collectionRepository.get(id)?.withData(collection) // Update existing
+        val existingCollection = collectionRepository.get(id)
+        val updated = existingCollection?.withData(collection) // Update existing
             ?: EnrichmentCollectionConverter.convert(collection) // Or create new one
 
         // TODO update after the migration
@@ -78,7 +83,18 @@ class EnrichmentCollectionService(
         } else {
             updated.withCalculatedFields()
         }
-        return collectionRepository.save(withCalculatedFields)
+        val result = collectionRepository.save(withCalculatedFields)
+        if (existingCollection == null) {
+            LogUtils.addToMdc(result.id.toDto()) {
+                logger.info("Create meta auto refresh state for ${result.id}")
+            }
+            metaAutoRefreshStateRepository.save(
+                MetaAutoRefreshState(
+                    id = result.id.toString(),
+                )
+            )
+        }
+        return result
     }
 
     suspend fun save(collection: EnrichmentCollection): EnrichmentCollection? {
