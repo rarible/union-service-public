@@ -3,17 +3,15 @@ package com.rarible.protocol.union.worker.job.sync
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.worker.job.AbstractBatchJob
 import com.rarible.protocol.union.worker.task.search.EsRateLimiter
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
-import java.util.concurrent.atomic.AtomicReference
 
 abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
     private val entityName: String,
     private val paramClass: Class<P>,
     private val esRateLimiter: EsRateLimiter
-) {
+) : AbstractBatchJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val mapper = ObjectMapper().registerKotlinModule()
@@ -39,15 +37,9 @@ abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
      */
     abstract suspend fun notify(param: P, enrichmentEntities: List<E>)
 
-    fun sync(param: String, state: String?): Flow<String> {
+    override suspend fun handleBatch(continuation: String?, param: String): String? {
         val parsedParam = mapper.readValue(param, paramClass)
-        return flow {
-            val next = AtomicReference(state)
-            do {
-                next.set(syncBatch(parsedParam, next.get()))
-                next.get()?.let { emit(it) }
-            } while (next.get() != null)
-        }
+        return syncBatch(parsedParam, continuation)
     }
 
     private suspend fun syncBatch(param: P, state: String?): String? {

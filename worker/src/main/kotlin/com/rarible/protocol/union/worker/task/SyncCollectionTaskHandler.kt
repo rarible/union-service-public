@@ -19,6 +19,6 @@ class SyncCollectionTaskHandler(
     }
     */
 
-    override fun runLongTask(from: String?, param: String) = job.sync(param, from)
+    override fun runLongTask(from: String?, param: String) = job.handle(from, param)
 
 }
