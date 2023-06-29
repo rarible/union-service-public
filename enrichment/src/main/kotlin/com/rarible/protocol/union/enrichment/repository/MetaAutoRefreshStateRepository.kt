@@ -72,7 +72,6 @@ class MetaAutoRefreshStateRepository(
         private val STATUS_CREATED_AT_DEFINITION = Index()
             .on(MetaAutoRefreshState::status.name, Sort.Direction.ASC)
             .on(MetaAutoRefreshState::createdAt.name, Sort.Direction.ASC)
-            .on(MetaAutoRefreshState::lastRefreshedAt.name, Sort.Direction.ASC)
             .background()
 
         private val ALL_INDEXES = listOf(
