@@ -89,7 +89,7 @@ class SyncCollectionJobTest {
         coEvery { enrichmentCollectionService.enrich(enrichmentCollections, CollectionMetaPipeline.SYNC) } returns dto
 
         val param = """{"blockchain" : "ETHEREUM", "scope" : "ES"}"""
-        job.sync(param, null).toList()
+        job.handle(null, param).toList()
 
         coVerify(exactly = 1) { enrichmentCollectionService.update(collection1, false) }
         coVerify(exactly = 1) { enrichmentCollectionService.update(collection2, false) }
@@ -125,7 +125,7 @@ class SyncCollectionJobTest {
         coEvery { enrichmentCollectionService.update(collection2, false) } returns updated2
 
         val param = """{"blockchain" : "ETHEREUM", "scope" : "EVENT"}"""
-        job.sync(param, null).toList()
+        job.handle(null, param).toList()
 
         coVerify(exactly = 1) { enrichmentCollectionService.update(collection1, false) }
         coVerify(exactly = 1) { enrichmentCollectionService.update(collection2, false) }

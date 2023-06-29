@@ -24,7 +24,7 @@ class SyncActivityJob(
     private val activityServiceRouter: BlockchainRouter<ActivityService>,
     private val enrichmentActivityService: EnrichmentActivityService,
     private val esActivityRepository: EsActivityRepository,
-    private val converter: EsActivityConverter,
+    private val esActivityConverter: EsActivityConverter,
     esRateLimiter: EsRateLimiter
 ) : AbstractSyncJob<UnionActivity, EnrichmentActivity, SyncActivityJobParam>(
     "Activity",
@@ -64,7 +64,7 @@ class SyncActivityJob(
             .map { EnrichmentActivityDtoConverter.convert(source = it, reverted = false) }
 
         esActivityRepository.bulk(
-            entitiesToSave = converter.batchConvert(toSave),
+            entitiesToSave = esActivityConverter.batchConvert(toSave),
             idsToDelete = toDelete.map { it.fullId() },
             indexName = param.esIndex,
             refreshPolicy = WriteRequest.RefreshPolicy.NONE,

@@ -270,7 +270,9 @@ fun randomUnionActivityOrderBid(blockchain: BlockchainDto) = runBlocking {
     list
 }
 
-fun randomUnionActivityTransfer(itemId: ItemIdDto) = runBlocking {
+fun randomUnionActivityTransfer(
+    itemId: ItemIdDto = randomEthItemId()
+) = runBlocking {
     val mint = mockedEthActivityConverter.convert(
         randomEthItemTransferActivity(), itemId.blockchain
     ) as UnionTransferActivity
@@ -278,7 +280,9 @@ fun randomUnionActivityTransfer(itemId: ItemIdDto) = runBlocking {
     mint.copy(itemId = itemId)
 }
 
-fun randomUnionActivityBurn(itemId: ItemIdDto) = runBlocking {
+fun randomUnionActivityBurn(
+    itemId: ItemIdDto = randomEthItemId()
+) = runBlocking {
     val mint = mockedEthActivityConverter.convert(
         randomEthItemBurnActivity(), itemId.blockchain
     ) as UnionBurnActivity
@@ -286,7 +290,9 @@ fun randomUnionActivityBurn(itemId: ItemIdDto) = runBlocking {
     mint.copy(itemId = itemId)
 }
 
-fun randomUnionActivitySale(itemId: ItemIdDto) = runBlocking {
+fun randomUnionActivitySale(
+    itemId: ItemIdDto = randomEthItemId()
+) = runBlocking {
     val swapDto = randomEthOrderActivityMatch()
     val dto = swapDto.copy(left = swapDto.left.copy(asset = randomEthAssetErc1155(itemId)))
 

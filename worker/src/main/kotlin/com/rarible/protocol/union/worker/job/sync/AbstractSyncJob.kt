@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.worker.job.sync
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.worker.job.AbstractBatchJob
@@ -14,7 +15,9 @@ abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
 ) : AbstractBatchJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val mapper = ObjectMapper().registerKotlinModule()
+    private val mapper = ObjectMapper()
+        .registerKotlinModule()
+        .registerModule(JavaTimeModule())
 
     /**
      * Returns next parts of entities to be synced
@@ -69,6 +72,7 @@ abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
                 "Sync {} state for {}: {} entities updated, sync is finished by task conditions",
                 entityName, param, unionEntities.size
             )
+            return null
         }
 
         val newState = slice.continuation
