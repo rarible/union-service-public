@@ -13,11 +13,5 @@ class SyncActivityTaskHandler(
 
     override val type = "SYNC_ACTIVITY_TASK"
 
-    /*
-    override fun getAutorunParams(): List<RunTask> {
-        return activeBlockchains.map { RunTask(it.name) }
-    }
-    */
-
     override fun runLongTask(from: String?, param: String) = job.handle(from, param)
 }
