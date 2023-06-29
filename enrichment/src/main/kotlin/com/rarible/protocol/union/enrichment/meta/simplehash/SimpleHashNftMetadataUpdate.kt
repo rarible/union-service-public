@@ -11,6 +11,8 @@ data class SimpleHashNftMetadataUpdate(
 sealed class HookEventType(@get:JsonValue val value: String) {
     object ChainNftMetadataUpdate : HookEventType("chain.nft_metadata_update")
 
+    object ContractNftMetadataUpdate : HookEventType("contract.nft_metadata_update")
+
     class Unknown(values: String) : HookEventType(values)
 
     companion object {
@@ -19,6 +21,7 @@ sealed class HookEventType(@get:JsonValue val value: String) {
         fun fromValue(value: String): HookEventType {
             return when (value) {
                 ChainNftMetadataUpdate.value -> ChainNftMetadataUpdate
+                ContractNftMetadataUpdate.value -> ContractNftMetadataUpdate
                 else -> Unknown(value)
             }
         }
