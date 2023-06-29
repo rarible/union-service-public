@@ -66,7 +66,7 @@ class ReconciliationOwnershipSourceJobTest {
             randomUnionOwnership((it.invocation.args[0] as ShortOwnershipId).toDto())
         }
 
-        val result = job.reconcileBatch(lastContinuation, BlockchainDto.ETHEREUM)
+        val result = job.handleBatch(lastContinuation, BlockchainDto.ETHEREUM)
 
         assertThat(result).isEqualTo(nextContinuation)
         coVerify(exactly = testPageSize) { ownershipEventService.onActivity(any(), any(), any()) }
@@ -83,7 +83,7 @@ class ReconciliationOwnershipSourceJobTest {
         mockGetActivities(null, testPageSize, Slice(null, listOf(notSaleActivity, burnedOwnershipActivity)))
         coEvery { ownershipService.fetchOrNull(ShortOwnershipId(burnedOwnershipId)) } returns null
 
-        val result = job.reconcileBatch(null, BlockchainDto.ETHEREUM)
+        val result = job.handleBatch(null, BlockchainDto.ETHEREUM)
 
         assertThat(result).isNull()
         coVerify(exactly = 0) { ownershipEventService.onActivityLegacy(any(), any(), any()) }

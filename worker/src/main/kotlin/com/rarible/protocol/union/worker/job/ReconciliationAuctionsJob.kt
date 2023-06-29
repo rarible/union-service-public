@@ -20,13 +20,13 @@ class ReconciliationAuctionsJob(
     private val auctionServiceRouter: BlockchainRouter<AuctionService>,
     private val auctionEventService: EnrichmentAuctionEventService,
     properties: WorkerProperties
-) : AbstractReconciliationJob() {
+) : AbstractBlockchainBatchJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val config = properties.reconciliation
 
-    override suspend fun reconcileBatch(continuation: String?, blockchain: BlockchainDto): String? {
+    override suspend fun handleBatch(continuation: String?, blockchain: BlockchainDto): String? {
         logger.info("Fetching auctions from {}: [{}]", blockchain.name, continuation)
         val page = auctionServiceRouter.getService(blockchain).getAuctionsAll(
             platform = null,

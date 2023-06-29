@@ -19,7 +19,7 @@ class ReconciliationPoolOrderJob(
     private val orderServiceRouter: BlockchainRouter<OrderService>,
     private val orderEventService: EnrichmentOrderEventService,
     properties: WorkerProperties,
-) : AbstractReconciliationJob() {
+) : AbstractBlockchainBatchJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -29,7 +29,7 @@ class ReconciliationPoolOrderJob(
     // On other hand - each order can produce a lot of events, so let's set small batch size here
     private val batchSize = 8
 
-    override suspend fun reconcileBatch(continuation: String?, blockchain: BlockchainDto): String? {
+    override suspend fun handleBatch(continuation: String?, blockchain: BlockchainDto): String? {
         logger.info("Fetching pool Orders from {}: [{}]", blockchain.name, continuation)
         val page = orderServiceRouter.getService(blockchain).getAmmOrdersAll(
             listOf(OrderStatusDto.ACTIVE),

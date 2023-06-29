@@ -63,7 +63,7 @@ class ReconciliationLastSaleJobTest {
             randomUnionItem((it.invocation.args[0] as ShortItemId).toDto())
         }
 
-        val result = job.reconcileBatch(lastContinuation, BlockchainDto.ETHEREUM)
+        val result = job.handleBatch(lastContinuation, BlockchainDto.ETHEREUM)
 
         assertThat(result).isEqualTo(nextContinuation)
         coVerify(exactly = testPageSize) { itemEventService.onActivity(any(), any(), any()) }
@@ -80,7 +80,7 @@ class ReconciliationLastSaleJobTest {
         mockGetActivities(null, testPageSize, Slice(null, listOf(notSaleActivity, burnedItemActivity)))
         coEvery { itemService.fetchOrNull(ShortItemId(burnedItemId)) } returns null
 
-        val result = job.reconcileBatch(null, BlockchainDto.ETHEREUM)
+        val result = job.handleBatch(null, BlockchainDto.ETHEREUM)
 
         assertThat(result).isNull()
         coVerify(exactly = 0) { itemEventService.onActivity(any(), any(), any()) }

@@ -57,6 +57,15 @@ class ActivityRepository(
         return activityIds.mapNotNull { activitiesByIds[it] }
     }
 
+    suspend fun findAll(fromIdExcluded: EnrichmentActivityId? = null, limit: Int): List<EnrichmentActivity> {
+        val criteria = Criteria().apply {
+            fromIdExcluded?.let { and(EnrichmentActivity::id).gt(fromIdExcluded) }
+        }
+        val query = Query(criteria).limit(limit)
+            .with(Sort.by(EnrichmentActivity::id.name))
+        return template.find<EnrichmentActivity>(query).collectList().awaitFirst()
+    }
+
     suspend fun findLastSale(itemId: ItemIdDto): EnrichmentActivity? =
         template.find<EnrichmentActivity>(
             Query(

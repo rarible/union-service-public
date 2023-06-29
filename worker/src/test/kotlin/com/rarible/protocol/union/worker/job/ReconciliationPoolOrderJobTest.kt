@@ -62,7 +62,7 @@ class ReconciliationPoolOrderJobTest {
         mockGetOrdersAll("1", page2)
         mockGetOrdersAll("2", page3)
 
-        val result = job.reconcile(null, BlockchainDto.ETHEREUM).toList()
+        val result = job.handle(null, BlockchainDto.ETHEREUM.name).toList()
 
         assertThat(result.size).isEqualTo(2)
         assertThat(result[0]).isEqualTo("1")

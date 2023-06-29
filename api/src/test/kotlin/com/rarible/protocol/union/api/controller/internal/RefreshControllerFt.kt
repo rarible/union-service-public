@@ -32,7 +32,6 @@ import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
 import com.rarible.protocol.union.enrichment.meta.MetaSource
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
-import com.rarible.protocol.union.enrichment.model.RawMetaCache
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -600,8 +599,19 @@ class RefreshControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `handle simpleHash nft meta update webhook - ok`() = runBlocking<Unit> {
+    fun `handle simpleHash nft meta update webhook - ok, chain`() = runBlocking<Unit> {
+        `check simpleHash nft meta update webhook`("chain.nft_metadata_update")
+    }
+
+    @Test
+    fun `handle simpleHash nft meta update webhook - ok, contract`() = runBlocking<Unit> {
+        `check simpleHash nft meta update webhook`("contract.nft_metadata_update")
+    }
+
+    fun `check simpleHash nft meta update webhook`(eventType: String) = runBlocking<Unit> {
         val eventJsom = getResource("/json/simplehash/nft_metadata_update.json")
+            .replace("#EVENT_TYPE", eventType)
+
         val eventDto = jacksonObjectMapper().readValue(eventJsom, SimpleHashNftMetadataUpdate::class.java)
 
         val expectedItemId = "ethereum.0x8943c7bac1914c9a7aba750bf2b6b09fd21037e0.5903"

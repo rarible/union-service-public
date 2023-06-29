@@ -25,13 +25,13 @@ class ReconciliationOwnershipSourceJob(
     private val ownershipEventService: EnrichmentOwnershipEventService,
     private val ownershipService: EnrichmentOwnershipService,
     properties: WorkerProperties,
-) : AbstractReconciliationJob() {
+) : AbstractBlockchainBatchJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val config = properties.reconciliation
 
-    override suspend fun reconcileBatch(continuation: String?, blockchain: BlockchainDto): String? {
+    override suspend fun handleBatch(continuation: String?, blockchain: BlockchainDto): String? {
         logger.info("Fetching Mint/Transfer Activities from {}: [{}]", blockchain.name, continuation)
         val page = activityServiceRouter.getService(blockchain).getAllActivities(
             types = listOf(ActivityTypeDto.MINT, ActivityTypeDto.TRANSFER),

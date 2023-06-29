@@ -94,7 +94,7 @@ internal class SyncActivityJobTest {
         coEvery { enrichmentActivityService.enrich(activity2) } returns enrichmentActivity2
         coEvery { activityRepository.save(any()) } returnsArgument 0
 
-        assertThat(syncActivityJob.reconcile(null, blockchain).toList()).containsExactly("continuation1")
+        assertThat(syncActivityJob.handle(null, blockchain.name).toList()).containsExactly("continuation1")
 
         coVerify {
             activityRepository.save(enrichmentActivity1)
