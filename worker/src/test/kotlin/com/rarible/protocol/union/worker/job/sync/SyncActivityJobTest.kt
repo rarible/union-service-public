@@ -2,6 +2,7 @@ package com.rarible.protocol.union.worker.job.sync
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.converter.EsActivityConverter
+import com.rarible.protocol.union.core.event.OutgoingActivityEventListener
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -11,12 +12,14 @@ import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityDtoConverter
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityBurn
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityTransfer
 import com.rarible.protocol.union.worker.task.search.EsRateLimiter
+import io.mockk.Called
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -52,13 +55,16 @@ class SyncActivityJobTest {
     @MockK
     lateinit var esRateLimiter: EsRateLimiter
 
+    @MockK
+    lateinit var outgoingActivityEventListener: OutgoingActivityEventListener
+
     @InjectMockKs
     lateinit var job: SyncActivityJob
 
     @BeforeEach
     @Suppress("UNCHECKED_CAST")
     fun beforeEach() {
-        clearMocks(activityService, activityServiceRouter, esRateLimiter)
+        clearMocks(activityService, activityServiceRouter, esRateLimiter, outgoingActivityEventListener)
         coEvery { esRateLimiter.waitIfNecessary(any()) } returns Unit
         every { activityServiceRouter.getService(BlockchainDto.ETHEREUM) } returns activityService
         coEvery { esActivityRepository.bulk(any(), any(), any(), WriteRequest.RefreshPolicy.NONE) } returns Unit
@@ -70,6 +76,7 @@ class SyncActivityJobTest {
                 randomEsActivity().copy(activityId = dto.id.fullId())
             }
         }
+        coEvery { outgoingActivityEventListener.onEvents(any()) } returns Unit
     }
 
     @Test
@@ -92,6 +99,7 @@ class SyncActivityJobTest {
 
         coVerify(exactly = 1) { enrichmentActivityService.update(reverted) }
         coVerify(exactly = 1) { enrichmentActivityService.update(live) }
+        coVerify { outgoingActivityEventListener wasNot Called }
         coVerify(exactly = 1) {
             esActivityRepository.bulk(
                 match { batch -> batch.map { it.activityId } == listOf(live.id.fullId()) },
@@ -100,6 +108,36 @@ class SyncActivityJobTest {
                 WriteRequest.RefreshPolicy.NONE
             )
         }
+    }
+
+    @Test
+    fun `activities synced - event`() = runBlocking<Unit> {
+        val reverted = randomUnionActivityBurn().copy(reverted = true)
+        val live = randomUnionActivityTransfer()
+
+        val param = """{
+            "blockchain": "ETHEREUM",
+            "scope": "EVENT", 
+            "sort": "DB_UPDATE_ASC", 
+            "type": "NFT"
+        }"""
+
+        coEvery {
+            activityService.getAllActivitiesSync(null, any(), SyncSortDto.DB_UPDATE_ASC, SyncTypeDto.NFT)
+        } returns Slice(null, listOf(reverted, live))
+
+        job.handle(null, param).toList()
+
+        val expectedReverted = EnrichmentActivityConverter.convert(reverted)
+            .let { EnrichmentActivityDtoConverter.convert(it, reverted = true) }
+
+        val expectedLive = EnrichmentActivityConverter.convert(live)
+            .let { EnrichmentActivityDtoConverter.convert(it, reverted = false) }
+
+        coVerify(exactly = 1) { enrichmentActivityService.update(reverted) }
+        coVerify(exactly = 1) { enrichmentActivityService.update(live) }
+        coVerify(exactly = 1) { outgoingActivityEventListener.onEvents(listOf(expectedReverted, expectedLive)) }
+        coVerify { esActivityRepository wasNot Called }
     }
 
     @Test
@@ -123,7 +161,8 @@ class SyncActivityJobTest {
 
         coVerify(exactly = 1) { enrichmentActivityService.update(reverted1) }
         coVerify(exactly = 1) { enrichmentActivityService.update(reverted2) }
-        coVerify(exactly = 0) { esActivityRepository.bulk(any(), any(), any(), any()) }
+        coVerify { esActivityRepository wasNot Called }
+        coVerify { outgoingActivityEventListener wasNot Called }
     }
 
     @Test

@@ -2,9 +2,11 @@ package com.rarible.protocol.union.worker.job.sync
 
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.converter.EsActivityConverter
+import com.rarible.protocol.union.core.event.OutgoingActivityEventListener
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
@@ -25,6 +27,7 @@ class SyncActivityJob(
     private val enrichmentActivityService: EnrichmentActivityService,
     private val esActivityRepository: EsActivityRepository,
     private val esActivityConverter: EsActivityConverter,
+    private val outgoingActivityEventListener: OutgoingActivityEventListener,
     esRateLimiter: EsRateLimiter
 ) : AbstractSyncJob<UnionActivity, EnrichmentActivity, SyncActivityJobParam>(
     "Activity",
@@ -59,20 +62,33 @@ class SyncActivityJob(
         enrichmentEntities: List<EnrichmentActivity>,
         unionEntities: List<UnionActivity>
     ) {
-        val toDelete = unionEntities.filter { it.reverted == true }.map { it.id }.toSet()
-        val toSave = enrichmentEntities.filter { it.id.toDto() !in toDelete }
-            .map { EnrichmentActivityDtoConverter.convert(source = it, reverted = false) }
+        val reverted = getReverted(unionEntities)
+        val toSave = enrichmentEntities.mapNotNull {
+            if (it.id.toDto() !in reverted) {
+                EnrichmentActivityDtoConverter.convert(source = it, reverted = false)
+            } else {
+                null
+            }
+        }
 
         esActivityRepository.bulk(
             entitiesToSave = esActivityConverter.batchConvert(toSave),
-            idsToDelete = toDelete.map { it.fullId() },
+            idsToDelete = reverted.map { it.fullId() },
             indexName = param.esIndex,
             refreshPolicy = WriteRequest.RefreshPolicy.NONE,
         )
     }
 
-    override suspend fun notify(param: SyncActivityJobParam, enrichmentEntities: List<EnrichmentActivity>) {
-        // TODO Not needed for Activities?
+    override suspend fun notify(
+        param: SyncActivityJobParam,
+        enrichmentEntities: List<EnrichmentActivity>,
+        unionEntities: List<UnionActivity>
+    ) {
+        val reverted = getReverted(unionEntities)
+        val dto = enrichmentEntities.map {
+            EnrichmentActivityDtoConverter.convert(source = it, reverted = it.id.toDto() in reverted)
+        }
+        outgoingActivityEventListener.onEvents(dto)
     }
 
     override fun isDone(param: SyncActivityJobParam, batch: Slice<UnionActivity>): Boolean {
@@ -83,6 +99,12 @@ class SyncActivityJob(
         return when (param.sort) {
             SyncSortDto.DB_UPDATE_DESC -> param.to.isAfter(last)
             SyncSortDto.DB_UPDATE_ASC -> param.to.isBefore(last)
+        }
+    }
+
+    private fun getReverted(unionEntities: List<UnionActivity>): Set<ActivityIdDto> {
+        return unionEntities.mapNotNullTo(HashSet()) {
+            if (it.reverted == true) it.id else null
         }
     }
 }

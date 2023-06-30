@@ -78,10 +78,13 @@ class SyncCollectionJob(
         esCollectionRepository.bulk(esCollections, deleted, param.esIndex, WriteRequest.RefreshPolicy.NONE)
     }
 
-    override suspend fun notify(param: SyncCollectionJobParam, enrichmentEntities: List<EnrichmentCollection>) {
+    override suspend fun notify(
+        param: SyncCollectionJobParam,
+        enrichmentEntities: List<EnrichmentCollection>,
+        unionEntities: List<UnionCollection>
+    ) {
         producer.sendChangeEvents(enrichmentEntities.map { it.id.toDto() })
     }
-
 }
 
 data class SyncCollectionJobParam(

@@ -55,7 +55,7 @@ class SyncOwnershipJob(
     override suspend fun updateEs(
         param: SyncOwnershipJobParam,
         enrichmentEntities: List<ShortOwnership>,
-        unionEntities: List<UnionOwnership>,
+        unionEntities: List<UnionOwnership>
     ) {
         // TODO ideally we should have ES service to perform such bulk updates,
         // duplicated logic is here: OwnershipEventHandler
@@ -75,10 +75,13 @@ class SyncOwnershipJob(
         esOwnershipRepository.bulk(esOwnerships, deleted, param.esIndex, WriteRequest.RefreshPolicy.NONE)
     }
 
-    override suspend fun notify(param: SyncOwnershipJobParam, enrichmentEntities: List<ShortOwnership>) {
+    override suspend fun notify(
+        param: SyncOwnershipJobParam,
+        enrichmentEntities: List<ShortOwnership>,
+        unionEntities: List<UnionOwnership>
+    ) {
         producer.sendChangeEvents(enrichmentEntities.map { it.id.toDto() })
     }
-
 }
 
 data class SyncOwnershipJobParam(

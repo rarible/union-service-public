@@ -38,7 +38,7 @@ abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
     /**
      * Send "CHANGE" events into internal topic which means actual data will be delivered to market and ES
      */
-    abstract suspend fun notify(param: P, enrichmentEntities: List<E>)
+    abstract suspend fun notify(param: P, enrichmentEntities: List<E>, unionEntities: List<U>)
 
     override suspend fun handleBatch(continuation: String?, param: String): String? {
         val parsedParam = mapper.readValue(param, paramClass)
@@ -64,7 +64,7 @@ abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
                 updateEs(param, enrichmentEntities, unionEntities)
             }
 
-            SyncScope.EVENT -> notify(param, enrichmentEntities)
+            SyncScope.EVENT -> notify(param, enrichmentEntities, unionEntities)
         }
 
         if (isDone(param, slice)) {
