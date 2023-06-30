@@ -51,7 +51,6 @@ class ReconciliationOwnershipSourceJobTest {
         clearMocks(orderServiceRouter, ownershipEventService, ownershipService)
         coEvery { orderServiceRouter.getService(BlockchainDto.ETHEREUM) } returns activityService
         coEvery { ownershipEventService.onActivity(any(), any(), any()) } returns Unit
-        coEvery { ownershipEventService.onActivityLegacy(any(), any(), any()) } returns Unit
     }
 
     @Test
@@ -86,7 +85,7 @@ class ReconciliationOwnershipSourceJobTest {
         val result = job.handleBatch(null, BlockchainDto.ETHEREUM)
 
         assertThat(result).isNull()
-        coVerify(exactly = 0) { ownershipEventService.onActivityLegacy(any(), any(), any()) }
+        coVerify(exactly = 0) { ownershipEventService.onActivity(any(), any(), any()) }
     }
 
     private fun mockGetActivities(continuation: String?, size: Int, result: Slice<UnionActivity>): Unit {

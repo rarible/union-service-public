@@ -6,11 +6,6 @@ object UnionInternalTopicProvider {
 
     const val VERSION = "v1"
 
-    @Deprecated("Replaced by blockchain topics")
-    fun getWrappedTopic(environment: String): String {
-        return "protocol.$environment.union.internal.wrapped"
-    }
-
     fun getInternalBlockchainTopic(environment: String, blockchain: BlockchainDto): String {
         return "protocol.$environment.union.internal.blockchain.${blockchain.name.lowercase()}"
     }

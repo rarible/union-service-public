@@ -5,9 +5,6 @@ import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionOrder
-import com.rarible.protocol.union.core.model.itemId
-import com.rarible.protocol.union.core.model.ownershipId
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -53,12 +50,6 @@ class ReconciliationEventService(
         if (takeItemId != null) {
             onCorruptedItem(takeItemId)
         }
-    }
-
-    @Deprecated("keep UnionActivity only")
-    suspend fun onFailedActivity(activity: ActivityDto) {
-        activity.itemId()?.let { onCorruptedItem(it) }
-        activity.ownershipId()?.let { onCorruptedOwnership(it) }
     }
 
     suspend fun onFailedActivity(activity: UnionActivity) {

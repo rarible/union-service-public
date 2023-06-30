@@ -12,9 +12,7 @@ import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.getItemId
-import com.rarible.protocol.union.core.model.itemId
 import com.rarible.protocol.union.core.service.ReconciliationEventService
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
@@ -30,11 +28,10 @@ import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
-import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class EnrichmentItemEventService(
@@ -140,26 +137,6 @@ class EnrichmentItemEventService(
 
     suspend fun onActivity(
         activity: UnionActivity,
-        item: UnionItem? = null,
-        eventTimeMarks: UnionEventTimeMarks?,
-        notificationEnabled: Boolean = true
-    ) {
-        val lastSale = ItemLastSaleConverter.convert(activity) ?: return
-        val itemId = activity.itemId() ?: return
-
-        onActivity(
-            id = activity.id,
-            reverted = activity.reverted,
-            itemId = itemId,
-            lastSale = lastSale,
-            eventTimeMarks = eventTimeMarks,
-            notificationEnabled = notificationEnabled
-        )
-    }
-
-    @Deprecated("keep with UnionActivity only")
-    suspend fun onActivityLegacy(
-        activity: ActivityDto,
         item: UnionItem? = null,
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true

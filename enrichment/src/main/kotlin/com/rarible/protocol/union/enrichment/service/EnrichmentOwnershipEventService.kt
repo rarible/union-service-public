@@ -11,11 +11,8 @@ import com.rarible.protocol.union.core.model.UnionOwnershipChangeEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
-import com.rarible.protocol.union.core.model.ownershipId
-import com.rarible.protocol.union.core.model.source
 import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.ReconciliationEventService
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.ActivityIdDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionStatusDto
@@ -33,7 +30,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class EnrichmentOwnershipEventService(
@@ -211,26 +208,6 @@ class EnrichmentOwnershipEventService(
             // Consider as regular update, auction won't be present in event since it is deleted
             onOwnershipUpdated(UnionOwnershipUpdateEvent(it, null))
         }
-    }
-
-    @Deprecated("keep UnionActivity only")
-    suspend fun onActivityLegacy(
-        activity: ActivityDto,
-        ownership: UnionOwnership? = null,
-        eventTimeMarks: UnionEventTimeMarks?,
-        notificationEnabled: Boolean = true
-    ) {
-        val source = activity.source() ?: return
-        val ownershipId = activity.ownershipId() ?: return
-        onActivity(
-            id = activity.id,
-            reverted = activity.reverted,
-            source = source,
-            ownershipId = ownershipId,
-            ownership = ownership,
-            eventTimeMarks = eventTimeMarks,
-            notificationEnabled = notificationEnabled
-        )
     }
 
     suspend fun onActivity(

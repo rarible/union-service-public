@@ -1,9 +1,7 @@
 package com.rarible.protocol.union.listener.handler.internal
 
-import com.rarible.core.apm.CaptureTransaction
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.service.ReconciliationEventService
-import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityEventService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -14,17 +12,8 @@ class UnionInternalActivityEventHandler(
     private val reconciliationEventService: ReconciliationEventService
 ) {
 
-    @CaptureTransaction("UnionActivityEvent")
-    suspend fun onEvent(event: ActivityDto) {
-        try {
-            enrichmentActivityEventService.onActivity(event)
-        } catch (e: Throwable) {
-            reconciliationEventService.onFailedActivity(event)
-            throw e
-        }
-    }
+    private val logger = LoggerFactory.getLogger(javaClass)
 
-    @CaptureTransaction("UnionActivityEvent")
     suspend fun onEvent(event: UnionActivity) {
         if (!event.isValid()) {
             logger.info("Ignoring activity event $event as it is not valid")
@@ -38,7 +27,4 @@ class UnionInternalActivityEventHandler(
         }
     }
 
-    companion object {
-        private val logger = LoggerFactory.getLogger(UnionInternalActivityEventHandler::class.java)
-    }
 }
