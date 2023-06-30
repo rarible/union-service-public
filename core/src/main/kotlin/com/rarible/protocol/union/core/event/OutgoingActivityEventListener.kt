@@ -19,4 +19,9 @@ class OutgoingActivityEventListener(
         eventsProducer.send(KafkaEventFactory.activityEvent(event)).ensureSuccess()
         logger.debug("Activity Event sent: {}", event)
     }
+
+    suspend fun onEvents(events: List<ActivityDto>) {
+        val messages = events.map { KafkaEventFactory.activityEvent(it) }
+        eventsProducer.send(messages)
+    }
 }

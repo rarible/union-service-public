@@ -13,13 +13,6 @@ class SyncOwnershipTaskHandler(
 
     override val type = "SYNC_OWNERSHIP_TASK"
 
-    // TODO not needed ATM
-    /*
-    override fun getAutorunParams(): List<RunTask> {
-        return activeBlockchains.map { RunTask(it.name) }
-    }
-    */
-
-    override fun runLongTask(from: String?, param: String) = job.sync(param, from)
+    override fun runLongTask(from: String?, param: String) = job.handle(from, param)
 
 }

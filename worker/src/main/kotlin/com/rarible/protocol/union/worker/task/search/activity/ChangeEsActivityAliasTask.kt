@@ -8,6 +8,7 @@ import com.rarible.protocol.union.worker.task.search.ParamFactory
 import org.springframework.stereotype.Component
 
 @Component
+// TODO should be dependent on SyncActivityTask
 class ChangeEsActivityAliasTask(
     taskRepository: TaskRepository,
     esActivityRepository: EsActivityRepository,

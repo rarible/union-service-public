@@ -1,21 +1,23 @@
 package com.rarible.protocol.union.worker.job.sync
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.worker.job.AbstractBatchJob
 import com.rarible.protocol.union.worker.task.search.EsRateLimiter
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
 
 abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
     private val entityName: String,
     private val paramClass: Class<P>,
     private val esRateLimiter: EsRateLimiter
-) {
+) : AbstractBatchJob() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-    private val mapper = ObjectMapper().registerKotlinModule()
+    private val mapper = ObjectMapper()
+        .registerKotlinModule()
+        .registerModule(JavaTimeModule())
 
     /**
      * Returns next parts of entities to be synced
@@ -36,19 +38,11 @@ abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
     /**
      * Send "CHANGE" events into internal topic which means actual data will be delivered to market and ES
      */
-    abstract suspend fun notify(param: P, enrichmentEntities: List<E>)
+    abstract suspend fun notify(param: P, enrichmentEntities: List<E>, unionEntities: List<U>)
 
-    fun sync(param: String, state: String?): Flow<String> {
+    override suspend fun handleBatch(continuation: String?, param: String): String? {
         val parsedParam = mapper.readValue(param, paramClass)
-        return flow {
-            var next = state
-            do {
-                next = syncBatch(parsedParam, next)
-                if (next != null) {
-                    emit(next)
-                }
-            } while (next != null)
-        }
+        return syncBatch(parsedParam, continuation)
     }
 
     private suspend fun syncBatch(param: P, state: String?): String? {
@@ -70,7 +64,15 @@ abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
                 updateEs(param, enrichmentEntities, unionEntities)
             }
 
-            SyncScope.EVENT -> notify(param, enrichmentEntities)
+            SyncScope.EVENT -> notify(param, enrichmentEntities, unionEntities)
+        }
+
+        if (isDone(param, slice)) {
+            logger.info(
+                "Sync {} state for {}: {} entities updated, sync is finished by task conditions",
+                entityName, param, unionEntities.size
+            )
+            return null
         }
 
         val newState = slice.continuation
@@ -80,4 +82,6 @@ abstract class AbstractSyncJob<U, E, P : AbstractSyncJobParam>(
         )
         return newState
     }
+
+    open fun isDone(param: P, batch: Slice<U>): Boolean = false
 }

@@ -13,6 +13,7 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Component
 
 @Component
+@Deprecated("Replace with SyncCollectionJob")
 class CollectionTask(
     private val properties: CollectionReindexProperties,
     private val paramFactory: ParamFactory,
