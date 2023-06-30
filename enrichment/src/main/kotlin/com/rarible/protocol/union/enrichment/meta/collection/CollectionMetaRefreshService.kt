@@ -54,6 +54,7 @@ class CollectionMetaRefreshService(
             esItemRepository.getRandomItemsFromCollection(collectionId = collectionFullId, size = RANDOM_ITEMS_TO_CHECK)
                 .map { esItem ->
                     asyncWithTraceId {
+                        logger.info("Checking item meta changes ${esItem.itemId}")
                         val idDto = IdParser.parseItemId(esItem.itemId)
                         val oldItem = itemRepository.get(ShortItemId(idDto)) ?: return@asyncWithTraceId false
                         val meta =
@@ -82,15 +83,18 @@ class CollectionMetaRefreshService(
             )
             return false
         }
+        logger.info("Collection size is ok")
         val scheduledCount = metaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId)
         if (scheduledCount > 0) {
             logger.info("Collection refresh already pending for $collectionId. Will not auto refresh")
             return false
         }
+        logger.info("Task is not scheduled")
         if (!checkMetaChanges(collectionId)) {
             logger.info("No meta changes found for sample items from $collectionId. Will not auto refresh")
             return false
         }
+        logger.info("Changes found")
         return true
     }
 
