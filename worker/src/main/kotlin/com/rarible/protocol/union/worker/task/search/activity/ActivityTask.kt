@@ -13,6 +13,7 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Component
 
 @Component
+@Deprecated("Replace with SyncActivityTask")
 class ActivityTask(
     private val properties: ActivityReindexProperties,
     private val paramFactory: ParamFactory,

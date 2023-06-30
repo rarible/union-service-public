@@ -84,7 +84,7 @@ class SyncOwnershipJobTest {
         coEvery { enrichmentOwnershipService.enrich(wrappedOwnerships) } returns dto
 
         val param = """{"blockchain" : "ETHEREUM", "scope" : "ES"}"""
-        job.sync(param, null).toList()
+        job.handle(null, param).toList()
 
         coVerify(exactly = 1) { enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(ownership1.id)) }
         coVerify(exactly = 1) { enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(ownership1.id)) }
@@ -115,7 +115,7 @@ class SyncOwnershipJobTest {
         coEvery { enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(ownership2.id)) } returns updated2
 
         val param = """{"blockchain" : "ETHEREUM", "scope" : "EVENT", "owner" : "$owner"}"""
-        job.sync(param, null).toList()
+        job.handle(null, param).toList()
 
         coVerify(exactly = 1) { enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(ownership1.id)) }
         coVerify(exactly = 1) { enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(ownership1.id)) }

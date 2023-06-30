@@ -1,14 +1,15 @@
 package com.rarible.protocol.union.worker.task.search.activity
 
 import com.rarible.core.task.TaskHandler
+import com.rarible.protocol.union.core.task.RemoveRevertedActivityTaskParam
 import com.rarible.protocol.union.worker.config.ActivityReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
-import com.rarible.protocol.union.core.task.RemoveRevertedActivityTaskParam
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import org.springframework.stereotype.Component
 
 @Component
+@Deprecated("Replace with SyncActivityJob")
 class RemoveRevertedActivityTask(
     private val properties: ActivityReindexProperties,
     private val paramFactory: ParamFactory,

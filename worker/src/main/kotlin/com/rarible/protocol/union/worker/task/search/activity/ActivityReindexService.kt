@@ -17,6 +17,7 @@ import org.elasticsearch.action.support.WriteRequest
 import org.springframework.stereotype.Component
 
 @Component
+@Deprecated("Replace with SyncActivityJob")
 class ActivityReindexService(
     private val activityApiMergeService: ActivityApiMergeService,
     private val esActivityRepository: EsActivityRepository,

@@ -35,6 +35,16 @@ class EnrichmentActivityService(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    suspend fun update(activity: UnionActivity): EnrichmentActivity {
+        val enrichmentActivity = enrich(activity)
+        if (activity.reverted == true) {
+            activityRepository.delete(enrichmentActivity.id)
+        } else {
+            activityRepository.save(enrichmentActivity)
+        }
+        return enrichmentActivity
+    }
+
     @Deprecated("remove after enabling ff.enableMongoActivityWrite")
     suspend fun enrichDeprecated(activities: List<UnionActivity>): List<ActivityDto> {
         val request = activities.map { CustomCollectionResolutionRequest(it.id, it.itemId(), it.collectionId()) }

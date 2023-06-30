@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.worker.job.sync
 
+import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.converter.EsOwnershipConverter
 import com.rarible.protocol.union.core.model.UnionAuctionOwnershipWrapper
 import com.rarible.protocol.union.core.model.UnionOwnership
@@ -31,13 +32,11 @@ class SyncOwnershipJob(
     esRateLimiter
 ) {
 
-    private val batchSize = 50
-
     override suspend fun getNext(param: SyncOwnershipJobParam, state: String?): Slice<UnionOwnership> {
         val service = ownershipServiceRouter.getService(param.blockchain)
         return when {
-            param.owner != null -> service.getOwnershipsByOwner(param.owner, state, batchSize).toSlice()
-            else -> service.getOwnershipsAll(state, batchSize)
+            param.owner != null -> service.getOwnershipsByOwner(param.owner, state, param.batchSize).toSlice()
+            else -> service.getOwnershipsAll(state, param.batchSize)
         }
     }
 
@@ -46,13 +45,17 @@ class SyncOwnershipJob(
         unionEntities: List<UnionOwnership>
     ): List<ShortOwnership> {
         // TODO nothing to update, implement when we start to store Ownerships in Union
-        return unionEntities.map { enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(it.id)) }
+        return unionEntities.chunked(param.chunkSize).map { chunk ->
+            chunk.mapAsync {
+                enrichmentOwnershipService.getOrEmpty(ShortOwnershipId(it.id))
+            }
+        }.flatten()
     }
 
     override suspend fun updateEs(
         param: SyncOwnershipJobParam,
         enrichmentEntities: List<ShortOwnership>,
-        unionEntities: List<UnionOwnership>,
+        unionEntities: List<UnionOwnership>
     ) {
         // TODO ideally we should have ES service to perform such bulk updates,
         // duplicated logic is here: OwnershipEventHandler
@@ -72,15 +75,20 @@ class SyncOwnershipJob(
         esOwnershipRepository.bulk(esOwnerships, deleted, param.esIndex, WriteRequest.RefreshPolicy.NONE)
     }
 
-    override suspend fun notify(param: SyncOwnershipJobParam, enrichmentEntities: List<ShortOwnership>) {
+    override suspend fun notify(
+        param: SyncOwnershipJobParam,
+        enrichmentEntities: List<ShortOwnership>,
+        unionEntities: List<UnionOwnership>
+    ) {
         producer.sendChangeEvents(enrichmentEntities.map { it.id.toDto() })
     }
-
 }
 
 data class SyncOwnershipJobParam(
     override val blockchain: BlockchainDto,
     override val scope: SyncScope,
     override val esIndex: String? = null,
-    val owner: String?
+    override val batchSize: Int = DEFAULT_BATCH,
+    override val chunkSize: Int = DEFAULT_CHUNK,
+    val owner: String? = null
 ) : AbstractSyncJobParam()

@@ -1,10 +1,8 @@
 package com.rarible.protocol.union.worker.task.search.activity
 
-import com.rarible.protocol.union.dto.BlockchainDto
 import org.slf4j.LoggerFactory
-import java.time.Instant
-import kotlin.math.log
 
+@Deprecated("Replace with SyncActivityJob")
 object TimePeriodContinuationHelper {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -36,7 +34,6 @@ object TimePeriodContinuationHelper {
 
         return parts.build()
     }
-
 
     data class ContinuationParts(
         val prefix: String?,
