@@ -52,7 +52,6 @@ class MetaAutoRefreshJob(
     }
 
     private suspend fun processState(state: MetaAutoRefreshState) {
-        logger.info("Processing collection ${state.id}")
         if (collectionMetaRefreshService.shouldAutoRefresh(state.id)) {
             metaRefreshRequestRepository.save(
                 MetaRefreshRequest(
