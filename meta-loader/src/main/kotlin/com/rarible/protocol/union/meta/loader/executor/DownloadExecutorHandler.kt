@@ -2,16 +2,26 @@ package com.rarible.protocol.union.meta.loader.executor
 
 import com.rarible.core.daemon.sequential.ConsumerBatchEventHandler
 import com.rarible.protocol.union.core.model.download.DownloadTask
+import org.slf4j.LoggerFactory
 
 class DownloadExecutorHandler(
-    pipeline: String,
+    private val pipeline: String,
     downloadExecutorManager: DownloadExecutorManager
 ) : ConsumerBatchEventHandler<DownloadTask> {
 
     private val executor = downloadExecutorManager.getExecutor(pipeline)
 
-    override suspend fun handle(event: List<DownloadTask>) {
-        executor.execute(event)
-    }
+    private val logger = LoggerFactory.getLogger(javaClass)
 
+    override suspend fun handle(event: List<DownloadTask>) {
+        val start = System.currentTimeMillis()
+        executor.execute(event)
+        logger.info(
+            "Handled {} events for pipeline {} for {} ({}ms)",
+            event.size,
+            pipeline,
+            executor.type,
+            System.currentTimeMillis() - start
+        )
+    }
 }
