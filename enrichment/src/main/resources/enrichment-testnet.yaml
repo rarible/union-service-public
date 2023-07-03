@@ -51,6 +51,7 @@ enrichment:
       - ETHEREUM:0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea # dai
       - POLYGON:0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa # weth
       - POLYGON:0xd6e804e7edb5b2aecb31d9ccc9d9f3940a7b4ce2 # usdc
+      - POLYGON:0x9c3c9283d3e44854697cd22d3faa240cfb032889 # wmatic
 
 meta:
   simpleHash:
