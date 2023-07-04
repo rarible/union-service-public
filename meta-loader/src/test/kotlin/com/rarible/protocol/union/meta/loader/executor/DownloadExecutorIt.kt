@@ -11,6 +11,7 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.meta.loader.test.AbstractIntegrationTest
@@ -43,6 +44,9 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var metrics: DownloadExecutorMetrics
 
+    @Autowired
+    lateinit var enrichmentBlacklistService: EnrichmentBlacklistService
+
     val downloader: ItemMetaDownloader = mockk() { every { type } returns "Item" }
     val notifier: DownloadNotifier<UnionMeta> = mockk { coEvery { notify(any()) } returns Unit }
     val pool = DownloadPool(2, "item-meta-test")
@@ -58,6 +62,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     @BeforeEach
     fun beforeEach() {
         downloadExecutor = ItemDownloadExecutor(
+            enrichmentBlacklistService,
             repository,
             downloader,
             notifier,
