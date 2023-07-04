@@ -18,6 +18,7 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaNotifier
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.repository.CollectionMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
 import com.rarible.protocol.union.meta.loader.executor.CollectionDownloadExecutor
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutor
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutorHandler
@@ -62,6 +63,7 @@ class DownloadExecutorConfiguration(
     @Bean
     @Qualifier("item.meta.download.executor.manager")
     fun itemMetaDownloadExecutorManager(
+        enrichmentBlacklistService: EnrichmentBlacklistService,
         itemMetaRepository: ItemMetaRepository,
         itemMetaDownloader: ItemMetaDownloader,
         itemMetaNotifier: ItemMetaNotifier,
@@ -73,6 +75,7 @@ class DownloadExecutorConfiguration(
             val conf = getItemPipelineConfiguration(pipeline)
             val pool = DownloadPool(conf.poolSize, "item-meta-task-executor")
             val executor = ItemDownloadExecutor(
+                enrichmentBlacklistService,
                 itemMetaRepository,
                 itemMetaDownloader,
                 itemMetaNotifier,
@@ -113,6 +116,7 @@ class DownloadExecutorConfiguration(
     @Bean
     @Qualifier("collection.meta.download.executor.manager")
     fun collectionMetaDownloadExecutorManager(
+        enrichmentBlacklistService: EnrichmentBlacklistService,
         collectionMetaRepository: CollectionMetaRepository,
         collectionMetaDownloader: CollectionMetaDownloader,
         collectionMetaNotifier: CollectionMetaNotifier,
@@ -124,6 +128,7 @@ class DownloadExecutorConfiguration(
             val conf = getCollectionPipelineConfiguration(pipeline)
             val pool = DownloadPool(conf.poolSize, "collection-meta-task-executor")
             val executor = CollectionDownloadExecutor(
+                enrichmentBlacklistService,
                 collectionMetaRepository,
                 collectionMetaDownloader,
                 collectionMetaNotifier,
