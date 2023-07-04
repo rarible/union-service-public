@@ -16,6 +16,7 @@ import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaDownl
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
+import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
 import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -24,18 +25,21 @@ import java.time.Instant
  * Async data download executor, end point of entire download pipeline.
  */
 sealed class DownloadExecutor<T>(
+    protected val enrichmentBlacklistService: EnrichmentBlacklistService,
     private val repository: DownloadEntryRepository<T>,
     private val downloader: Downloader<T>,
     private val notifier: DownloadNotifier<T>,
     private val pool: DownloadPool,
     private val metrics: DownloadExecutorMetrics,
     private val maxRetries: Int,
-    private val blockchainExtractor: (id: String) -> BlockchainDto,
+    protected val blockchainExtractor: (id: String) -> BlockchainDto,
 ) : AutoCloseable {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     abstract val type: String
+
+    abstract suspend fun isBlacklisted(task: DownloadTask): Boolean
 
     suspend fun execute(tasks: List<DownloadTask>) {
         tasks.map {
@@ -49,6 +53,11 @@ sealed class DownloadExecutor<T>(
         if (current.succeedAt != null && task.scheduledAt.isBefore(current.succeedAt)) {
             val retry = if (current.status != DownloadStatus.SUCCESS) current.retries else 0
             metrics.onSkippedTask(type, blockchainExtractor(task.id), started, task, retry)
+            return
+        }
+
+        if (isBlacklisted(task)) {
+            onBlacklisted(started, task)
             return
         }
 
@@ -172,6 +181,26 @@ sealed class DownloadExecutor<T>(
         }
     }
 
+    private suspend fun onBlacklisted(started: Instant, task: DownloadTask) {
+        val saved = repository.update(task.id) { exist ->
+            val current = exist ?: getDefault(task)
+            val updated = current
+                .withFailInc("Blacklisted")
+                .copy(status = DownloadStatus.FAILED, retriedAt = nowMillis())
+
+            markStatus(started, task, updated.status, updated.retries)
+            updated
+        }
+
+        // Never should be null
+        saved?.let {
+            logger.warn(
+                "Data download ABORTED for {} task: {} ({}) - blacklisted",
+                type, saved.id, task.pipeline,
+            )
+        }
+    }
+
     private fun markStatus(started: Instant, task: DownloadTask, status: DownloadStatus, retry: Int) {
         when (status) {
             DownloadStatus.FAILED -> metrics.onFailedTask(type, blockchainExtractor(task.id), started, task, retry)
@@ -203,6 +232,7 @@ sealed class DownloadExecutor<T>(
 }
 
 class ItemDownloadExecutor(
+    enrichmentBlacklistService: EnrichmentBlacklistService,
     repository: DownloadEntryRepository<UnionMeta>,
     downloader: Downloader<UnionMeta>,
     notifier: DownloadNotifier<UnionMeta>,
@@ -210,6 +240,7 @@ class ItemDownloadExecutor(
     metrics: DownloadExecutorMetrics,
     maxRetries: Int
 ) : DownloadExecutor<UnionMeta>(
+    enrichmentBlacklistService,
     repository,
     downloader,
     notifier,
@@ -217,13 +248,21 @@ class ItemDownloadExecutor(
     metrics,
     maxRetries,
     { IdParser.parseItemId(it).blockchain }
-
 ) {
 
     override val type = downloader.type
+    override suspend fun isBlacklisted(task: DownloadTask): Boolean {
+        val blockchain = blockchainExtractor(task.id)
+        if (blockchain == BlockchainDto.SOLANA) {
+            return false
+        }
+        val collectionId = task.id.substringBeforeLast(":")
+        return enrichmentBlacklistService.isBlacklisted(collectionId)
+    }
 }
 
 class CollectionDownloadExecutor(
+    enrichmentBlacklistService: EnrichmentBlacklistService,
     repository: DownloadEntryRepository<UnionCollectionMeta>,
     downloader: CollectionMetaDownloader,
     notifier: DownloadNotifier<UnionCollectionMeta>,
@@ -231,6 +270,7 @@ class CollectionDownloadExecutor(
     metrics: DownloadExecutorMetrics,
     maxRetries: Int,
 ) : DownloadExecutor<UnionCollectionMeta>(
+    enrichmentBlacklistService,
     repository,
     downloader,
     notifier,
@@ -241,4 +281,5 @@ class CollectionDownloadExecutor(
 ) {
 
     override val type = downloader.type
+    override suspend fun isBlacklisted(task: DownloadTask) = false
 }
