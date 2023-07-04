@@ -7,6 +7,7 @@ import java.time.Instant
 data class DownloadEntry<T>(
     val id: String,
     val status: DownloadStatus,
+    val failedProviders: List<MetaProviderType>? = null,
 
     val data: T? = null,
     // Successful downloads
@@ -71,5 +72,6 @@ enum class DownloadStatus {
     SCHEDULED,  // Never loaded, will be loaded soon
     SUCCESS,    // Successfully downloaded
     RETRY,      // Waits for retry
+    RETRY_PARTIAL, // Waits for partial retry
     FAILED      // Completely failed
 }

@@ -67,10 +67,15 @@ class ItemRepository(
         return template.find<ShortItem>(Query(criteria)).collectList().awaitFirst()
     }
 
-    fun getItemForMetaRetry(now: Instant, retryPeriod: Duration, attempt: Int): Flow<ShortItem> {
+    fun getItemForMetaRetry(
+        now: Instant,
+        retryPeriod: Duration,
+        attempt: Int,
+        status: DownloadStatus
+    ): Flow<ShortItem> {
         val query = Query(
             Criteria().andOperator(
-                ShortItem::metaEntry / DownloadEntry<*>::status isEqualTo DownloadStatus.RETRY,
+                ShortItem::metaEntry / DownloadEntry<*>::status isEqualTo status,
                 ShortItem::metaEntry / DownloadEntry<*>::retries isEqualTo attempt,
                 ShortItem::metaEntry / DownloadEntry<*>::retriedAt lt now.minus(retryPeriod)
             )

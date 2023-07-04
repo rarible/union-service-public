@@ -17,6 +17,9 @@ enum class ItemMetaPipeline(
     // Tasks triggerred by Retry job (not forced)
     RETRY("retry"),
 
+    // Tasks triggerred by Retry job (not forced)
+    RETRY_PARTIAL("retry_partial"),
+
     // For 'cold' start when we need to sync new blockchain's metadata
     SYNC("sync")
 }

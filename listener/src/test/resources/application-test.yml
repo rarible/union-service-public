@@ -32,8 +32,9 @@ rarible:
     apm:
       agent:
         enabled: false
-  task:
-    initialDelay: 600000
+    task:
+      enabled: false
+      initialDelay: 600000
   loader:
     enableWorkers: true # Enable workers in the tests.
     workers: 1

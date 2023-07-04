@@ -14,4 +14,5 @@ interface Downloader<T> {
     @Throws(DownloadException::class)
     suspend fun download(id: String): T
 
+    val type: String
 }
