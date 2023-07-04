@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
-import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -17,6 +17,6 @@ class EnrichmentBlacklistService(
     suspend fun isBlacklisted(id: String): Boolean {
         val query = Query(Criteria("_id").isEqualTo(id))
         return template.exists(query, collection)
-            .awaitFirst()
+            .awaitSingle()
     }
 }
