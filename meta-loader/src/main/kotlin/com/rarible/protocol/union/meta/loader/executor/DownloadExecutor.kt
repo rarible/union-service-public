@@ -54,6 +54,11 @@ sealed class DownloadExecutor<T>(
             return
         }
 
+        if (isBlacklisted(task)) {
+            onBlacklisted(started, task)
+            return
+        }
+
         try {
             val data = download(task.id, current)
             onSuccess(started, task, data)
