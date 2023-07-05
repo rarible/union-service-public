@@ -33,7 +33,7 @@ class SimpleHashItemProvider(
                         description = original.data.description ?: simpleHashMeta.description,
                         content = mergeContent(original.data, simpleHashMeta.content)
                             .mergeContentProperties(simpleHashMeta),
-                        attributes = mergeAttrs(original.data, simpleHashMeta.attributes),
+                        attributes = original.data.attributes.ifEmpty { simpleHashMeta.attributes },
                         createdAt = original.data.createdAt ?: simpleHashMeta.createdAt,
                         externalUri = original.data.externalUri ?: simpleHashMeta.externalUri,
                         originalMetaUri = original.data.originalMetaUri ?: simpleHashMeta.originalMetaUri
@@ -49,12 +49,6 @@ class SimpleHashItemProvider(
         val existed = meta.content.map { it.representation }.toSet()
         val adding = simpleHashContent.filterNot { it.representation in existed }
         return meta.content + adding
-    }
-
-    private fun mergeAttrs(meta: UnionMeta, attrs: List<UnionMetaAttribute>): List<UnionMetaAttribute> {
-        val existed = meta.attributes.map { it.key }.toSet()
-        val adding = attrs.filterNot { it.key in existed }
-        return meta.attributes + adding
     }
 
     private fun List<UnionMetaContent>.mergeContentProperties(simpleHashMeta: UnionMeta): List<UnionMetaContent> {

@@ -16,6 +16,7 @@ import com.rarible.protocol.union.dto.MetaContentDto.Representation
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.provider.SimpleHashItemProvider
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
+import com.rarible.protocol.union.enrichment.test.data.randomUnionContent
 import com.rarible.protocol.union.enrichment.test.data.randomUnionImageProperties
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import io.micrometer.core.instrument.MeterRegistry
@@ -161,7 +162,7 @@ class ItemMetaDownloaderTest {
     }
 
     @Test
-    fun `add additional attribute - ok`() = runBlocking<Unit> {
+    fun `add additional attribute - shouldn't add`() = runBlocking<Unit> {
         val itemId = ItemIdDto(blockchain, randomString().lowercase(), randomBigInt())
 
         coEvery { itemService.getItemMetaById(itemId.value) } returns randomUnionMeta().copy(
@@ -170,6 +171,7 @@ class ItemMetaDownloaderTest {
             )
         )
         coEvery { simpleHashService.fetch(itemId) } returns randomUnionMeta().copy(
+            content = listOf(randomUnionContent()),
             attributes = listOf(
                 UnionMetaAttribute("new", "value")
             )
@@ -177,7 +179,7 @@ class ItemMetaDownloaderTest {
 
         val meta = downloader.download(itemId.toString())
 
-        assertThat(meta.attributes).hasSize(2)
+        assertThat(meta.attributes).containsExactly(UnionMetaAttribute("key", "value"))
     }
 
     @Test
