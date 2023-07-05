@@ -462,6 +462,7 @@ class EthOrderConverter(
             SeaportOrderTypeDto.PARTIAL_OPEN -> EthSeaportOrderTypeDto.PARTIAL_OPEN
             SeaportOrderTypeDto.FULL_RESTRICTED -> EthSeaportOrderTypeDto.FULL_RESTRICTED
             SeaportOrderTypeDto.PARTIAL_RESTRICTED -> EthSeaportOrderTypeDto.PARTIAL_RESTRICTED
+            SeaportOrderTypeDto.CONTRACT -> EthSeaportOrderTypeDto.CONTRACT
         }
     }
 
