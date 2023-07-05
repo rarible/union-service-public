@@ -7,6 +7,8 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
+import com.rarible.protocol.union.core.model.download.MetaProviderType
+import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.parser.IdParser
@@ -14,7 +16,6 @@ import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaDownl
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
 import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory
@@ -64,13 +65,38 @@ sealed class DownloadExecutor<T>(
             val data = download(task.id, current)
             onSuccess(started, task, data)
         } catch (e: DownloadException) {
-            onFail(started, task, e.message)
+            onFail(
+                started = started,
+                task = task,
+                errorMessage = e.message,
+                data = null,
+                downloadStatus = null,
+                failedProviders = null,
+            )
+        } catch (e: PartialDownloadException) {
+            onFail(
+                started = started,
+                task = task,
+                errorMessage = e.message,
+                data = e.data as T,
+                downloadStatus = DownloadStatus.RETRY_PARTIAL,
+                failedProviders = e.failedProviders,
+            )?.let {
+                notifier.notify(it)
+            }
         } catch (e: Exception) {
             logger.error(
                 "Unexpected exception while downloading data for {} task {} ({})",
                 type, task.id, task.pipeline, e
             )
-            onFail(started, task, e.message)
+            onFail(
+                started = started,
+                task = task,
+                errorMessage = e.message,
+                data = null,
+                downloadStatus = null,
+                failedProviders = null
+            )
         }
     }
 
@@ -96,24 +122,50 @@ sealed class DownloadExecutor<T>(
         return downloader.download(id)
     }
 
-    private suspend fun onFail(started: Instant, task: DownloadTask, errorMessage: String?) {
+    private suspend fun onFail(
+        started: Instant,
+        task: DownloadTask,
+        errorMessage: String?,
+        data: T?,
+        downloadStatus: DownloadStatus?,
+        failedProviders: List<MetaProviderType>?,
+    ): DownloadEntry<T>? {
         val saved = repository.update(task.id) { exist ->
             val current = exist ?: getDefault(task)
 
             val failed = current.withFailInc(errorMessage)
 
             val isRetryLimitExceeded = failed.retries >= maxRetries
-            val status = if (isRetryLimitExceeded) DownloadStatus.FAILED else DownloadStatus.RETRY
+            val status = if (isRetryLimitExceeded) {
+                DownloadStatus.FAILED
+            } else {
+                downloadStatus ?: if (failed.status == DownloadStatus.RETRY_PARTIAL) {
+                    DownloadStatus.RETRY_PARTIAL
+                } else {
+                    DownloadStatus.RETRY
+                }
+            }
 
             val updated = when (failed.status) {
                 // Nothing to do here, we don't want to replace existing data, just update fail counters
                 DownloadStatus.SUCCESS, DownloadStatus.FAILED -> failed
                 // Failed on retry, just update status, retry counter should be managed by job
                 // Status can be changed here if retry limit exceeded
-                DownloadStatus.RETRY -> failed.copy(status = status)
+                DownloadStatus.RETRY,
+                DownloadStatus.RETRY_PARTIAL -> failed.copy(
+                    status = status,
+                    data = data ?: failed.data,
+                    failedProviders = failedProviders ?: failed.failedProviders
+                )
                 // That was first download, set retry counter as 0 (never retried before)
                 // SCHEDULE can turn into FAILED only if we set retry policy with 0 retries
-                DownloadStatus.SCHEDULED -> failed.copy(status = status, retries = 0, retriedAt = nowMillis())
+                DownloadStatus.SCHEDULED -> failed.copy(
+                    status = status,
+                    retries = 0,
+                    retriedAt = nowMillis(),
+                    data = data ?: failed.data,
+                    failedProviders = failedProviders ?: failed.failedProviders,
+                )
             }
 
             markStatus(started, task, status, failed.retries)
@@ -121,7 +173,7 @@ sealed class DownloadExecutor<T>(
         }
 
         // Never should be null
-        saved?.let {
+        return saved?.apply {
             logger.warn(
                 "Data download FAILED for {} task: {} ({}), status = {}, retries = {}, errorMessage = {}",
                 type, saved.id, task.pipeline, saved.status, saved.retries, saved.errorMessage
@@ -152,7 +204,14 @@ sealed class DownloadExecutor<T>(
     private fun markStatus(started: Instant, task: DownloadTask, status: DownloadStatus, retry: Int) {
         when (status) {
             DownloadStatus.FAILED -> metrics.onFailedTask(type, blockchainExtractor(task.id), started, task, retry)
-            DownloadStatus.RETRY -> metrics.onRetriedTask(type, blockchainExtractor(task.id), started, task, retry)
+            DownloadStatus.RETRY,
+            DownloadStatus.RETRY_PARTIAL -> metrics.onRetriedTask(
+                type,
+                blockchainExtractor(task.id),
+                started,
+                task,
+                retry
+            )
             else -> logger.warn("Incorrect status of failed {} task {} ({}): {}", type, task.id, task.pipeline, status)
         }
     }
@@ -175,7 +234,7 @@ sealed class DownloadExecutor<T>(
 class ItemDownloadExecutor(
     enrichmentBlacklistService: EnrichmentBlacklistService,
     repository: DownloadEntryRepository<UnionMeta>,
-    downloader: ItemMetaDownloader,
+    downloader: Downloader<UnionMeta>,
     notifier: DownloadNotifier<UnionMeta>,
     pool: DownloadPool,
     metrics: DownloadExecutorMetrics,

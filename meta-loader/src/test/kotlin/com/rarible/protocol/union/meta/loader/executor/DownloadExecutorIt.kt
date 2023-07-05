@@ -3,7 +3,10 @@ package com.rarible.protocol.union.meta.loader.executor
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
+import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
+import com.rarible.protocol.union.core.model.download.MetaProviderType
+import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.configuration.MetaTrimmingProperties
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
@@ -130,7 +133,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
             .isEqualTo(trimmingProperties.nameLength + trimmingProperties.suffix.length)
 
         assertThat(saved.data?.description?.length)
-            .isEqualTo(trimmingProperties.descriptionLength  + trimmingProperties.suffix.length)
+            .isEqualTo(trimmingProperties.descriptionLength + trimmingProperties.suffix.length)
     }
 
     @Test
@@ -286,6 +289,97 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         downloadExecutor.execute(listOf(randomTask(fullItemId).copy(scheduledAt = Instant.now().minusSeconds(1))))
 
         coVerify(exactly = 0) { downloader.download(any()) }
+    }
+
+    @Test
+    fun `forced task - partial retry increased`() = runBlocking<Unit> {
+        val entry = randomMetaEntry(fullItemId).copy(
+            retries = 0,
+            status = DownloadStatus.RETRY_PARTIAL,
+            failedProviders = listOf(MetaProviderType.SIMPLE_HASH),
+        )
+        createItem(itemId, entry)
+        val savedItem = itemRepository.get(ShortItemId(itemId))!!
+        mockGetMetaFailed(fullItemId, "error")
+
+        downloadExecutor.execute(listOf(randomTask(fullItemId)))
+
+        val saved = repository.get(fullItemId)!!
+        assertThat(saved.data).isEqualTo(entry.data)
+        assertThat(saved.status).isEqualTo(DownloadStatus.RETRY_PARTIAL)
+        assertThat(saved.downloads).isEqualTo(entry.downloads)
+        assertThat(saved.fails).isEqualTo(entry.fails + 1)
+        assertThat(saved.failedProviders).isEqualTo(entry.failedProviders)
+
+        coVerify(exactly = 0) { notifier.notify(any()) }
+        verifyItemNotChanged(itemId, savedItem)
+    }
+
+    @Test
+    fun `initial task - partially failed`() = runBlocking<Unit> {
+        val task = randomTask(fullItemId)
+        createItem(itemId, null)
+
+        val partialMeta = randomUnionMeta()
+        coEvery { downloader.download(fullItemId) } throws PartialDownloadException(
+            failedProviders = listOf(MetaProviderType.SIMPLE_HASH),
+            data = partialMeta,
+        )
+
+        downloadExecutor.execute(listOf(task))
+
+        val saved = repository.get(fullItemId)!!
+
+        assertThat(saved.status).isEqualTo(DownloadStatus.RETRY_PARTIAL)
+        assertThat(saved.failedProviders).containsExactly(MetaProviderType.SIMPLE_HASH)
+        assertThat(saved.fails).isEqualTo(1)
+        assertThat(saved.retries).isEqualTo(0)
+        assertThat(saved.downloads).isEqualTo(0)
+        assertThat(saved.succeedAt).isNull()
+        assertThat(saved.failedAt).isAfterOrEqualTo(now)
+        assertThat(saved.updatedAt).isEqualTo(saved.failedAt)
+        assertThat(saved.scheduledAt).isEqualTo(task.scheduledAt)
+        assertThat(saved.errorMessage).isEqualTo("Failed to download meta from providers: [SIMPLE_HASH]")
+        assertThat(saved.data).isEqualTo(partialMeta)
+
+        coVerify(exactly = 1) { notifier.notify(saved) }
+    }
+
+    @Test
+    fun `partial retry - failed`() = runBlocking<Unit> {
+        val task = randomTask(fullItemId)
+        val partialMeta = randomUnionMeta()
+        createItem(
+            itemId, randomMetaEntry(itemId = fullItemId, meta = partialMeta).copy(
+                status = DownloadStatus.RETRY_PARTIAL,
+                failedProviders = listOf(MetaProviderType.SIMPLE_HASH),
+                retries = 0,
+                fails = 1,
+                downloads = 0,
+                succeedAt = null,
+            )
+        )
+        val savedItem = itemRepository.get(ShortItemId(itemId))!!
+
+        coEvery { downloader.download(fullItemId) } throws DownloadException("failed")
+
+        downloadExecutor.execute(listOf(task))
+
+        val saved = repository.get(fullItemId)!!
+
+        assertThat(saved.status).isEqualTo(DownloadStatus.RETRY_PARTIAL)
+        assertThat(saved.failedProviders).containsExactly(MetaProviderType.SIMPLE_HASH)
+        assertThat(saved.fails).isEqualTo(2)
+        assertThat(saved.retries).isEqualTo(0)
+        assertThat(saved.downloads).isEqualTo(0)
+        assertThat(saved.succeedAt).isNull()
+        assertThat(saved.failedAt).isAfterOrEqualTo(now)
+        assertThat(saved.updatedAt).isEqualTo(saved.failedAt)
+        assertThat(saved.errorMessage).isEqualTo("failed")
+        assertThat(saved.data).isEqualTo(partialMeta)
+
+        coVerify(exactly = 0) { notifier.notify(any()) }
+        verifyItemNotChanged(itemId, savedItem)
     }
 
     private suspend fun createItem(itemId: ItemIdDto, metaEntry: DownloadEntry<UnionMeta>?): ShortItem =

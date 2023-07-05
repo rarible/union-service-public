@@ -8,7 +8,6 @@ import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.MetaDownloader
-import com.rarible.protocol.union.enrichment.meta.content.ContentMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
 import com.rarible.protocol.union.enrichment.meta.provider.MetaProvider
 import org.springframework.stereotype.Component
@@ -16,19 +15,15 @@ import org.springframework.stereotype.Component
 @Component
 class CollectionMetaDownloader(
     private val router: BlockchainRouter<CollectionService>,
-    contentMetaLoader: ContentMetaDownloader,
-    customizers: List<CollectionMetaCustomizer>,
+    collectionMetaContentEnrichmentService: CollectionMetaContentEnrichmentService,
     providers: List<MetaProvider<CollectionIdDto, UnionCollectionMeta>>,
     metrics: CollectionMetaMetrics
 ) : Downloader<UnionCollectionMeta>, MetaDownloader<CollectionIdDto, UnionCollectionMeta>(
-    contentMetaLoader,
-    customizers,
-    providers,
-    metrics,
-    "Collection"
+    metaContentEnrichmentService = collectionMetaContentEnrichmentService,
+    providers = providers,
+    metrics = metrics,
+    type = "Collection"
 ) {
-
-    override fun generaliseKey(key: CollectionIdDto) = Pair(key.fullId(), key.blockchain)
 
     override suspend fun getRawMeta(key: CollectionIdDto) =
         router.getService(key.blockchain).getCollectionMetaById(key.value)

@@ -4,6 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.daemon.job.JobHandler
 import com.rarible.core.daemon.sequential.SequentialDaemonWorker
+import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
@@ -17,6 +18,8 @@ import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.time.delay
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.Duration
+import java.time.Instant
 
 @Component
 class ItemMetaRetryJob(
@@ -51,22 +54,50 @@ class ItemMetaRetryJobHandler(
         val retryIntervals = metaProperties.retryIntervals
 
         for (i in retryIntervals.indices) {
-            val itemFlow = repository.getItemForMetaRetry(now, retryIntervals[i], i)
+            processInterval(
+                now = now,
+                period = retryIntervals[i],
+                i = i,
+                status = DownloadStatus.RETRY,
+                pipeline = ItemMetaPipeline.RETRY
+            )
+            processInterval(
+                now = now,
+                period = retryIntervals[i],
+                i = i,
+                status = DownloadStatus.RETRY_PARTIAL,
+                pipeline = ItemMetaPipeline.RETRY_PARTIAL
+            )
+        }
+    }
 
-            itemFlow.collect { item ->
-                val itemId = item.id.toDto()
+    private suspend fun processInterval(
+        now: Instant,
+        period: Duration,
+        i: Int,
+        status: DownloadStatus,
+        pipeline: ItemMetaPipeline,
+    ) {
+        val itemFlow = repository.getItemForMetaRetry(
+            now = now,
+            retryPeriod = period,
+            attempt = i,
+            status = status
+        )
 
-                LogUtils.addToMdc(
-                    itemId,
-                    item.collectionId?.let { CollectionIdDto(item.blockchain, it) },
-                    router
-                ) {
-                    logger.info("Scheduling item meta download (retry = $i) for $itemId")
-                }
+        itemFlow.collect { item ->
+            val itemId = item.id.toDto()
 
-                metaService.schedule(itemId, ItemMetaPipeline.RETRY, true)
-                repository.save(item.withNextRetry())
+            LogUtils.addToMdc(
+                itemId,
+                item.collectionId?.let { CollectionIdDto(item.blockchain, it) },
+                router
+            ) {
+                logger.info("Scheduling item meta download (retry = $i) for $itemId")
             }
+
+            metaService.schedule(itemId = itemId, pipeline = pipeline, force = true)
+            repository.save(item.withNextRetry())
         }
     }
 }

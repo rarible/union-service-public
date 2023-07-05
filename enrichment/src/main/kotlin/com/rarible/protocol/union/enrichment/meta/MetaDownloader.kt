@@ -4,16 +4,18 @@ import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.exception.UnionMetaException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.ContentOwner
+import com.rarible.protocol.union.core.model.download.MetaProviderType
+import com.rarible.protocol.union.core.model.download.PartialDownloadException
+import com.rarible.protocol.union.core.model.download.ProviderDownloadException
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.enrichment.meta.content.ContentMetaDownloader
+import com.rarible.protocol.union.enrichment.meta.content.MetaContentEnrichmentService
 import com.rarible.protocol.union.enrichment.meta.provider.MetaProvider
-import com.rarible.protocol.union.enrichment.util.sanitizeContent
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import java.util.concurrent.ArrayBlockingQueue
 
 abstract class MetaDownloader<K, T : ContentOwner<T>>(
-    private val contentMetaLoader: ContentMetaDownloader,
-    private val customizers: List<MetaCustomizer<K, T>>,
+    private val metaContentEnrichmentService: MetaContentEnrichmentService<K, T>,
     private val providers: List<MetaProvider<K, T>>,
     private val metrics: MetaMetrics,
     val type: String
@@ -21,29 +23,30 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    abstract fun generaliseKey(key: K): Pair<String, BlockchainDto>
     abstract suspend fun getRawMeta(key: K): T
 
     protected suspend fun load(key: K): T? {
-        val meta = getMeta(key) ?: getMetaFromProviders(key)
+        val failedProviders = ArrayBlockingQueue<MetaProviderType>(providers.size)
+        val meta = providers.fold(getMeta(key)) { current, provider ->
+            try {
+                provider.fetch(key, current)
+            } catch (e: ProviderDownloadException) {
+                failedProviders.add(e.provider)
+                current
+            }
+        }
         meta ?: return null
 
-        val sanitized = sanitizeContent(meta.data.content)
-        val (id, blockchain) = generaliseKey(key)
-        val content = contentMetaLoader.enrichContent(id, blockchain, sanitized)
-        val initial = meta.copy(data = meta.data.withContent(content))
-        return customizers.fold(initial) { current, customizer ->
-            customizer.customize(key, current)
-        }.data
-    }
-
-    private suspend fun getMetaFromProviders(key: K): WrappedMeta<T>? {
-        logger.info("Meta fetching failed from original source trying other providers key: $key")
-        return providers.firstNotNullOfOrNull { it.fetch(key) }
+        val result = metaContentEnrichmentService.enrcih(key = key, meta = meta)
+        return if (failedProviders.isEmpty()) {
+            result
+        } else {
+            throw PartialDownloadException(failedProviders = failedProviders.toList(), data = result)
+        }
     }
 
     private suspend fun getMeta(key: K): WrappedMeta<T>? {
-        val (id, blockchain) = generaliseKey(key)
+        val (id, blockchain) = metaContentEnrichmentService.generaliseKey(key)
         try {
             val result = getRawMeta(key)
             metrics.onMetaFetched(blockchain)
@@ -88,5 +91,4 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
         logger.warn("Meta fetching failed with code: NOT_FOUND for $type {}", id)
         metrics.onMetaFetchNotFound(blockchain)
     }
-
 }

@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.Document
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
@@ -49,7 +51,15 @@ class ItemRepository(
     suspend fun createIndices() {
         ALL_INDEXES.forEach { index ->
             logger.info("Ensure index '{}' for collection '{}'", index, collection)
-            template.indexOps(collection).ensureIndex(index).awaitFirst()
+            template.indexOps(collection).ensureIndex(index).awaitSingle()
+        }
+    }
+
+    suspend fun dropOldIndices() {
+        try {
+            template.indexOps(collection).dropIndex("metaEntry.retries_1_metaEntry.retriedAt_1").awaitSingleOrNull()
+        } catch (e: Exception) {
+
         }
     }
 
@@ -67,10 +77,15 @@ class ItemRepository(
         return template.find<ShortItem>(Query(criteria)).collectList().awaitFirst()
     }
 
-    fun getItemForMetaRetry(now: Instant, retryPeriod: Duration, attempt: Int): Flow<ShortItem> {
+    fun getItemForMetaRetry(
+        now: Instant,
+        retryPeriod: Duration,
+        attempt: Int,
+        status: DownloadStatus
+    ): Flow<ShortItem> {
         val query = Query(
             Criteria().andOperator(
-                ShortItem::metaEntry / DownloadEntry<*>::status isEqualTo DownloadStatus.RETRY,
+                ShortItem::metaEntry / DownloadEntry<*>::status isEqualTo status,
                 ShortItem::metaEntry / DownloadEntry<*>::retries isEqualTo attempt,
                 ShortItem::metaEntry / DownloadEntry<*>::retriedAt lt now.minus(retryPeriod)
             )
@@ -183,7 +198,7 @@ class ItemRepository(
         private const val POOL_ORDER_ID_FIELD = "poolSellOrders.order._id"
 
         private val STATUS_RETRIES_FAILED_AT_DEFINITION = Index()
-            .partial(PartialIndexFilter.of(ShortItem::metaEntry / DownloadEntry<*>::status isEqualTo DownloadStatus.RETRY))
+            .on("${ShortItem::metaEntry.name}.${DownloadEntry<*>::status.name}", Sort.Direction.ASC)
             .on("${ShortItem::metaEntry.name}.${DownloadEntry<*>::retries.name}", Sort.Direction.ASC)
             .on("${ShortItem::metaEntry.name}.${DownloadEntry<*>::retriedAt.name}", Sort.Direction.ASC)
             .background()
