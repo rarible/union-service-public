@@ -6,6 +6,8 @@ import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
+import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import io.changock.migration.api.annotations.NonLockGuarded
@@ -27,11 +29,17 @@ class ChangeLog99999CreateIndices {
         @NonLockGuarded collectionRepository: CollectionRepository,
         @NonLockGuarded itemMetaRepository: ItemMetaRepository,
         @NonLockGuarded activityRepository: ActivityRepository,
+        @NonLockGuarded metaAutoRefreshStateRepository: MetaAutoRefreshStateRepository,
+        @NonLockGuarded metaRefreshRequestRepository: MetaRefreshRequestRepository,
     ) = runBlocking {
         ownershipRepository.createIndices()
         itemRepository.createIndices()
         itemReconciliationMarkRepository.createIndices()
         collectionRepository.createIndices()
         activityRepository.createIndices()
+        metaAutoRefreshStateRepository.createIndices()
+        metaRefreshRequestRepository.createIndices()
+
+        itemRepository.dropOldIndices()
     }
 }
