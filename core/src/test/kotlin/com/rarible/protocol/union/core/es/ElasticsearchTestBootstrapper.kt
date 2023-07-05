@@ -67,8 +67,6 @@ class ElasticsearchTestBootstrapper(
         repositories.forEach { it.init() }
     }
 
-    private suspend fun createIndex(definition: EntityDefinitionExtended) {
-    }
 
     suspend fun deleteDataInAllIndex(metadataIndexName: String) = coroutineScope {
         val indexesByAlias = getIndexesByAlias(esOperations, "")
