@@ -30,48 +30,43 @@ class ElasticsearchTestBootstrapper(
     private val repositories: List<EsRepository>,
 ) {
     private val metadataMapping = metadataMappingIndex()
-    private val suffix = AtomicInteger(1)
+    private val suffix = 1
     private val extendedEntityDefinitions: List<EntityDefinitionExtended> =
         entityDefinitions.map { esNameResolver.createEntityDefinitionExtended(it) }
 
     fun bootstrap(): Unit = runBlocking<Unit> {
         logger.info("Initializing elasticsearch for test")
-        if (existsIndex(esOperations, esNameResolver.metadataIndexName)) {
-            deleteDataInAllIndex(esNameResolver.metadataIndexName)
-        } else {
+        if (!existsIndex(esOperations, esNameResolver.metadataIndexName)) {
             createIndex(
                 reactiveElasticSearchOperations = esOperations,
                 name = esNameResolver.metadataIndexName,
                 mapping = metadataMapping,
                 settings = "{}"
             )
-            for (entityDefinitionExtended in extendedEntityDefinitions) {
-                logger.info("Create index for entity ${entityDefinitionExtended.entity}")
-                refreshIndex(entityDefinitionExtended)
-
-                logger.info("Finished elasticsearch initialization")
-            }
-
-            repositories.forEach { it.init() }
         }
+        for (entityDefinitionExtended in extendedEntityDefinitions) {
+            logger.info("Create index for entity ${entityDefinitionExtended.entity}")
+            val newIndexName = entityDefinitionExtended.indexName(minorVersion = suffix)
+            if (!existsIndex(esOperations, newIndexName)) {
+                createIndex(
+                    reactiveElasticSearchOperations = esOperations,
+                    name = newIndexName,
+                    mapping = entityDefinitionExtended.mapping,
+                    settings = entityDefinitionExtended.settings
+                )
+            }
+            createAlias(
+                reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = entityDefinitionExtended.aliasName,
+            )
+            createAlias(
+                reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = entityDefinitionExtended.writeAliasName,
+            )
+            logger.info("Finished elasticsearch initialization")
+        }
+        deleteDataInAllIndex(esNameResolver.metadataIndexName)
+        repositories.forEach { it.init() }
     }
 
-    private suspend fun refreshIndex(definition: EntityDefinitionExtended) {
-        val newIndexName = definition.indexName(minorVersion = suffix.getAndIncrement())
-
-        createIndex(
-            reactiveElasticSearchOperations = esOperations,
-            name = newIndexName,
-            mapping = definition.mapping,
-            settings = definition.settings
-        )
-        createAlias(
-            reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = definition.aliasName,
-        )
-        createAlias(
-            reactiveElasticSearchOperations = esOperations, indexName = newIndexName, alias = definition.writeAliasName,
-        )
-    }
 
     suspend fun deleteDataInAllIndex(metadataIndexName: String) = coroutineScope {
         val indexesByAlias = getIndexesByAlias(esOperations, "")
