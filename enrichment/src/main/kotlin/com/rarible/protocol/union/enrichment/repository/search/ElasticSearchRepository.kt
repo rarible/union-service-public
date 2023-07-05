@@ -18,6 +18,7 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import java.io.IOException
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.annotation.PostConstruct
 
 //@CaptureSpan(type = SpanType.DB)
@@ -33,13 +34,13 @@ abstract class ElasticSearchRepository<T>(
 
     protected val logger by Logger()
 
-    private var brokenEsState: Boolean = true
+    private val brokenEsState: AtomicBoolean = AtomicBoolean(true)
 
     abstract fun entityId(entity: T): String
 
     @PostConstruct
     override fun init() = runBlocking {
-        brokenEsState = try {
+        val isBroken = try {
             val result = !EsHelper.existsIndexesForEntity(esOperations, entityDefinition.indexRootName)
             logger.info("Index ${entityDefinition.indexRootName} exists: $result")
             result
@@ -47,6 +48,7 @@ abstract class ElasticSearchRepository<T>(
             logger.error("Failed to get index state ${entityDefinition.indexRootName}: ${e.message}", e)
             true
         }
+        brokenEsState.set(isBroken)
     }
 
     suspend fun findById(id: String): T? {
@@ -56,7 +58,7 @@ abstract class ElasticSearchRepository<T>(
     // TODO used in tests only
     @Deprecated("Use bulk() instead")
     suspend fun save(entity: T): T {
-        if (brokenEsState) {
+        if (brokenEsState.get()) {
             throw IllegalStateException("No indexes to save")
         }
 
@@ -74,7 +76,7 @@ abstract class ElasticSearchRepository<T>(
             return emptyList()
         }
 
-        if (brokenEsState) {
+        if (brokenEsState.get()) {
             throw IllegalStateException("No indexes to save")
         }
 
@@ -119,7 +121,7 @@ abstract class ElasticSearchRepository<T>(
             return
         }
 
-        if (brokenEsState) {
+        if (brokenEsState.get()) {
             throw IllegalStateException("No indexes to save")
         }
 
