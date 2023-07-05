@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.meta.provider
 
-import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.MetaProviderType
 import com.rarible.protocol.union.core.model.download.ProviderDownloadException
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -13,7 +12,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
