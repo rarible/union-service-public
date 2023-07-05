@@ -7,8 +7,6 @@ import com.rarible.core.kafka.RaribleKafkaConsumerSettings
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumerWorkerGroup
 import com.rarible.core.kafka.RaribleKafkaProducer
-import com.rarible.core.task.EnableRaribleTask
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.InternalEventHandler
 import com.rarible.protocol.union.core.model.CompositeRegisteredTimer
@@ -38,7 +36,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 
 @Configuration
-@EnableRaribleTask
 @EnableMongock
 @Import(value = [EnrichmentConsumerConfiguration::class, SearchConfiguration::class])
 @EnableConfigurationProperties(value = [UnionListenerProperties::class])
@@ -46,7 +43,6 @@ class UnionListenerConfiguration(
     private val listenerProperties: UnionListenerProperties,
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     private val meterRegistry: MeterRegistry,
-    private val ff: FeatureFlagsProperties,
     activeBlockchains: List<BlockchainDto>,
 ) {
 

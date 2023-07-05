@@ -3,11 +3,10 @@ package com.rarible.protocol.union.worker.job.meta
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
-import com.rarible.core.task.TaskService
 import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
+import com.rarible.protocol.union.worker.task.meta.RefreshMetaSimpleHashTask
 import com.rarible.protocol.union.worker.task.meta.RefreshMetaTask
 import com.rarible.protocol.union.worker.task.meta.RefreshMetaTaskParam
-import com.rarible.protocol.union.worker.task.meta.RefreshMetaSimpleHashTask
 import com.rarible.protocol.union.worker.task.meta.RefreshSimpleHashTaskParam
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
@@ -17,8 +16,7 @@ import org.springframework.stereotype.Service
 @Service
 class MetaRefreshSchedulingService(
     private val taskRepository: TaskRepository,
-    private val objectMapper: ObjectMapper,
-    private val taskService: TaskService,
+    private val objectMapper: ObjectMapper
 ) {
 
     suspend fun scheduleTask(collection: MetaRefreshRequest) {
@@ -47,7 +45,6 @@ class MetaRefreshSchedulingService(
                 running = false
             )
         ).awaitSingle()
-        taskService.runTask(type = type, param = param)
     }
 
     companion object {
