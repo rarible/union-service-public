@@ -1,8 +1,6 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.elasticsearch.EsHelper
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
@@ -22,7 +20,7 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import java.io.IOException
 import javax.annotation.PostConstruct
 
-@CaptureSpan(type = SpanType.DB)
+//@CaptureSpan(type = SpanType.DB)
 abstract class ElasticSearchRepository<T>(
     val objectMapper: ObjectMapper,
     val esOperations: ReactiveElasticsearchOperations,
