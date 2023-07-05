@@ -24,6 +24,9 @@ class SimpleHashItemProvider(
     override suspend fun fetch(key: ItemIdDto, original: WrappedMeta<UnionMeta>?): WrappedMeta<UnionMeta>? {
         return if (simpleHashService.isSupported(key.blockchain)) {
             simpleHashService.fetch(key)?.let { simpleHashMeta ->
+                if (simpleHashMeta.content.isEmpty()) {
+                    throw ProviderDownloadException(MetaProviderType.SIMPLE_HASH)
+                }
                 return WrappedMeta(
                     source = original?.source ?: MetaSource.SIMPLE_HASH,
                     data = original?.data?.copy(
