@@ -32,6 +32,11 @@ logging:
   level:
     org.springframework.context.annotation: "DEBUG"
 
+rarible:
+  core:
+    task:
+      enabled: false
+
 worker:
   reconciliation:
     orderBatchSize: 50
