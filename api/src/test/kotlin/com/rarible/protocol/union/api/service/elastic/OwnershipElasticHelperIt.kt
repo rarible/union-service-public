@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.ninjasquad.springmockk.SpykBean
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -18,6 +19,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import randomEsOwnership
@@ -33,6 +35,14 @@ internal class OwnershipElasticHelperIt {
 
     @Autowired
     private lateinit var helper: OwnershipElasticHelper
+
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
+    @BeforeEach
+    fun setUp() = runBlocking {
+        elasticsearchTestBootstrapper.bootstrap()
+    }
 
     @Test
     fun `should get raw ownerships by owner`() = runBlocking<Unit> {
