@@ -1,12 +1,14 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.currency.dto.CurrenciesDto
 import com.rarible.protocol.dto.NftItemIdsDto
 import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
+import com.rarible.protocol.union.core.test.nativeTestCurrencies
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -27,8 +29,10 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
+import com.rarible.protocol.union.test.mock.CurrencyMock
 import convertUnionOwnershipToEsOwnership
 import io.mockk.coEvery
+import io.mockk.every
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
@@ -40,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
 import randomEsOwnership
 import reactor.kotlin.core.publisher.toFlux
+import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
 import java.math.BigInteger
 
@@ -73,13 +78,15 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
 
     @BeforeEach
-    fun setUp() = runBlocking {
+    fun setUp() = runBlocking<Unit> {
         elasticsearchTestBootstrapper.bootstrap()
+        every {
+            CurrencyMock.currencyControllerApiMock.allCurrencies
+        } returns CurrenciesDto(nativeTestCurrencies()).toMono()
     }
 
     @Test
     fun `get all activities`() = runBlocking<Unit> {
-
         val blockchains = listOf(
             BlockchainDto.ETHEREUM,
             BlockchainDto.POLYGON,
