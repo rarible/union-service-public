@@ -9,6 +9,7 @@ import com.rarible.core.kafka.RaribleKafkaConsumerWorkerGroup
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.InternalEventHandler
+import com.rarible.protocol.union.core.handler.InternalEventHandlerWrapper
 import com.rarible.protocol.union.core.model.CompositeRegisteredTimer
 import com.rarible.protocol.union.core.model.ItemEventDelayMetric
 import com.rarible.protocol.union.core.model.OrderEventDelayMetric
@@ -72,7 +73,7 @@ class UnionListenerConfiguration(
                 offsetResetStrategy = OffsetResetStrategy.EARLIEST,
                 valueClass = UnionInternalBlockchainEvent::class.java
             )
-            kafkaConsumerFactory.createWorker(settings, handler)
+            kafkaConsumerFactory.createWorker(settings, InternalEventHandlerWrapper(handler))
         }
         return RaribleKafkaConsumerWorkerGroup(consumers)
     }
