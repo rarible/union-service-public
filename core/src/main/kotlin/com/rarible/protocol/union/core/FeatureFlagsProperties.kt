@@ -24,6 +24,7 @@ data class FeatureFlagsProperties(
     // collections
     val enableCollectionQueriesToElastic: Boolean = false,
     var enableCollectionSaveImmediateToElasticSearch: Boolean = false,
+    var enableSearchCollections: Boolean = false,
     // ownerships
     var enableOwnershipQueriesToElasticSearch: Boolean = false,
     var enableOwnershipSaveImmediateToElasticSearch: Boolean = false,
@@ -42,4 +43,7 @@ data class FeatureFlagsProperties(
     val enableElasticsearchCompatibilityMode: Boolean = false,
     val enableMongoActivityWrite: Boolean = false,
     val enableMongoActivityRead: Boolean = false,
+
+    // Search
+    val enableJoinedTextSearch: Boolean = true
 )

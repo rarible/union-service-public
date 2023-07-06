@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsDto
+import com.rarible.protocol.union.dto.CollectionsSearchRequestDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
@@ -98,6 +99,10 @@ class CollectionController(
         val ownerAddress = IdParser.parseAddress(owner)
         val result = collectionSourceSelector.getCollectionsByOwner(ownerAddress, blockchains, continuation, size)
         return ResponseEntity.ok(result)
+    }
+
+    override suspend fun searchCollection(collectionsSearchRequestDto: CollectionsSearchRequestDto): ResponseEntity<CollectionsDto> {
+        return ResponseEntity.ok(collectionSourceSelector.searchCollections(collectionsSearchRequestDto))
     }
 
     @GetMapping(value = ["/v0.1/collections/{collectionId}/generate_token_id"])

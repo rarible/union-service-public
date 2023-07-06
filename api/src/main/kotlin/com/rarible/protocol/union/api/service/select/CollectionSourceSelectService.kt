@@ -1,9 +1,13 @@
 package com.rarible.protocol.union.api.service.select
 
+import com.rarible.protocol.union.api.exception.FeatureUnderConstructionException
 import com.rarible.protocol.union.api.service.elastic.CollectionElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionsDto
+import com.rarible.protocol.union.dto.CollectionsSearchRequestDto
+import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.service.query.collection.CollectionApiMergeService
 import com.rarible.protocol.union.enrichment.service.query.collection.CollectionQueryService
@@ -31,6 +35,12 @@ class CollectionSourceSelectService(
         size: Int?
     ): CollectionsDto {
         return getQuerySource().getCollectionsByOwner(owner, blockchains, continuation, size)
+    }
+
+    suspend fun searchCollections(collectionsSearchRequestDto: CollectionsSearchRequestDto): CollectionsDto {
+        return if (featureFlagsProperties.enableSearchCollections) {
+            collectionElasticService.searchCollections(collectionsSearchRequestDto)
+        } else throw FeatureUnderConstructionException("searchCollections() feature is under construction")
     }
 
     private fun getQuerySource(): CollectionQueryService {

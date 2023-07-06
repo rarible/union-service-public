@@ -12,3 +12,9 @@ data class EsCollectionGenericFilter(
     val owners: Set<String> = emptySet(),
     override val cursor: String? = null,
 ) : EsCollectionFilter()
+
+data class EsCollectionTextFilter(
+    val blockchains: Set<BlockchainDto> = emptySet(),
+    val text: String,
+    override val cursor: String?,
+) : EsCollectionFilter()

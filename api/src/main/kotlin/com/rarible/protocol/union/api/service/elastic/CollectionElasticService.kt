@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.service.elastic
 
+import co.elastic.clients.elasticsearch.ml.Page
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
@@ -8,11 +9,15 @@ import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.elastic.EsCollectionCursor.Companion.fromCollectionLite
 import com.rarible.protocol.union.core.model.elastic.EsCollectionGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsCollectionLite
+import com.rarible.protocol.union.core.model.elastic.EsCollectionTextFilter
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionsDto
+import com.rarible.protocol.union.dto.CollectionsSearchRequestDto
+import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
@@ -76,6 +81,17 @@ class CollectionElasticService(
         )
         val result = repository.search(filter, size)
 
+        return processResult(result)
+    }
+
+    suspend fun searchCollections(request: CollectionsSearchRequestDto): CollectionsDto {
+        val blockchains = router.getEnabledBlockchains(request.filter.blockchains).toList()
+        val filter = EsCollectionTextFilter(
+            blockchains = blockchains.toSet(),
+            text = request.filter.text,
+            cursor = request.continuation,
+        )
+        val result = repository.search(filter, request.size)
         return processResult(result)
     }
 
