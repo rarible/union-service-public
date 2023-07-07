@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.elastic.EsCollection
 import com.rarible.protocol.union.core.model.elastic.EsCollectionFilter
 import com.rarible.protocol.union.core.model.elastic.EsCollectionGenericFilter
@@ -15,8 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 class EsCollectionQueryBuilderService(
     private val cursorService: EsCollectionQueryCursorService,
-    private val featureFlagsProperties: FeatureFlagsProperties,
-) : AbstractQueryBuilderService(featureFlagsProperties) {
+) : AbstractQueryBuilderService() {
 
     override fun textFieldsWithBoost(): Map<String, Float> {
         return mapOf(

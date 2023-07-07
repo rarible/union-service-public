@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import org.apache.lucene.queryparser.flexible.standard.QueryParserUtil
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.MultiMatchQueryBuilder
@@ -8,9 +7,7 @@ import org.elasticsearch.index.query.Operator
 import org.elasticsearch.index.query.QueryBuilders
 import kotlin.math.pow
 
-abstract class AbstractQueryBuilderService(
-    private val featureFlagsProperties: FeatureFlagsProperties
-) {
+abstract class AbstractQueryBuilderService {
     protected abstract fun textFieldsWithBoost(): Map<String, Float>
 
     protected abstract fun keywordFieldsWithBoost(): Map<String, Float>
@@ -44,15 +41,13 @@ abstract class AbstractQueryBuilderService(
                 .fuzzyMaxExpansions(0)
                 .fields(fields)
         )
-        if (featureFlagsProperties.enableJoinedTextSearch) {
-            boolQuery.should(
-                QueryBuilders.simpleQueryStringQuery(joinedTextForSearch)
-                    .defaultOperator(Operator.AND)
-                    .fuzzyTranspositions(false)
-                    .fuzzyMaxExpansions(0)
-                    .fields(fields)
-            )
-        }
+        boolQuery.should(
+            QueryBuilders.simpleQueryStringQuery(joinedTextForSearch)
+                .defaultOperator(Operator.AND)
+                .fuzzyTranspositions(false)
+                .fuzzyMaxExpansions(0)
+                .fields(fields)
+        )
         boolQuery.should(
             QueryBuilders.multiMatchQuery(text)
                 .fields(fields)
