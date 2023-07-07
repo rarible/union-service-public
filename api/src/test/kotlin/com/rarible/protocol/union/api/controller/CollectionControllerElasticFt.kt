@@ -11,6 +11,7 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elastic.EsCollection
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionsSearchFilterDto
 import com.rarible.protocol.union.dto.CollectionsSearchRequestDto
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
@@ -27,6 +28,7 @@ import com.rarible.protocol.union.integration.solana.data.randomSolanaCollection
 import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktCollectionConverter
 import io.mockk.coEvery
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -35,6 +37,9 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import reactor.kotlin.core.publisher.toMono
+import java.lang.RuntimeException
+import java.time.Duration
+import java.util.concurrent.atomic.AtomicReference
 
 @IntegrationTest
 @SpringBootTest(
@@ -364,5 +369,61 @@ class CollectionControllerElasticFt : AbstractIntegrationTest() {
             .containsExactlyInAnyOrderElementsOf(matchUnionEth.map { it.id })
 
         assertThat(unionCollections.total).isEqualTo(2)
+    }
+
+    @Test
+    fun `get collections by name with continuation`() = runBlocking<Unit> {
+        val matches = (1..10).map {
+            randomEthCollectionDto().copy(name = "needfound$it")
+        }
+        val notMatches = (1..10).map {
+            randomEthCollectionDto().copy(name = "my")
+        }
+        val esEth = (matches + notMatches).map {
+            randomEsCollection().copy(
+                collectionId = "${BlockchainDto.ETHEREUM}:${it.id}",
+                blockchain = BlockchainDto.ETHEREUM,
+                name = it.name,
+            )
+        }
+        esCollectionRepository.saveAll(esEth)
+        esCollectionRepository.refresh()
+
+        val matchUnionEth = matches.map {
+            EthCollectionConverter.convert(it, BlockchainDto.ETHEREUM)
+        }
+        val notMatchUnionEth = notMatches.map {
+            EthCollectionConverter.convert(it, BlockchainDto.ETHEREUM)
+        }
+        (matchUnionEth + notMatchUnionEth).forEach {
+            enrichmentCollectionService.save(EnrichmentCollectionConverter.convert(it))
+        }
+        coEvery {
+            testEthereumCollectionApi.getNftCollectionsByIds(any())
+        } answers {
+            val requests = invocation.args.first() as CollectionsByIdRequestDto
+            val collections = requests.ids.map { id ->
+                (matches + notMatches).single { it.id.prefixed() == id }
+            }
+            NftCollectionsDto(
+                total = 2, continuation = null, collections = collections
+            ).toMono()
+        }
+
+        val foundCollections = mutableListOf<CollectionDto>()
+        val continuation: AtomicReference<String?> = AtomicReference(null)
+        do {
+            val request = CollectionsSearchRequestDto(
+                continuation = continuation.get(),
+                size = 2,
+                filter = CollectionsSearchFilterDto(text = "need found", blockchains = listOf(BlockchainDto.ETHEREUM))
+            )
+            val result = collectionControllerApi.searchCollection(request).awaitFirst()
+            foundCollections.addAll(result.collections)
+            continuation.set(result.continuation)
+        } while (result.collections.isNotEmpty())
+
+        assertThat(foundCollections.map { it.id })
+            .containsExactlyInAnyOrderElementsOf(matchUnionEth.map { it.id })
     }
 }
