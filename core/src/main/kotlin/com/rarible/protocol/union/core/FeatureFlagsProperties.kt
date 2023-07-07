@@ -24,6 +24,7 @@ data class FeatureFlagsProperties(
     // collections
     val enableCollectionQueriesToElastic: Boolean = false,
     var enableCollectionSaveImmediateToElasticSearch: Boolean = false,
+    var enableSearchCollections: Boolean = true,
     // ownerships
     var enableOwnershipQueriesToElasticSearch: Boolean = false,
     var enableOwnershipSaveImmediateToElasticSearch: Boolean = false,

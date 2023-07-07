@@ -22,7 +22,65 @@
       "format": "strict_date_optional_time||epoch_second"
     },
     "name": {
-      "type": "keyword"
+      "type": "text",
+      "index_prefixes": {
+        "min_chars": 1,
+        "max_chars": 10
+      },
+      "analyzer": "stemmer_analyzer",
+      "search_analyzer": "stemmer_stop_analyzer",
+      "search_quote_analyzer": "stemmer_analyzer",
+      "fields": {
+        "camelCase": {
+          "type": "text",
+          "analyzer": "stemmer_camel_case_analyzer",
+          "search_analyzer": "stemmer_stop_analyzer",
+          "search_quote_analyzer": "stemmer_analyzer",
+          "index_prefixes": {
+            "min_chars": 1,
+            "max_chars": 10
+          }
+        },
+        "join": {
+          "type": "text",
+          "analyzer": "stemmer_join_analyzer",
+          "search_analyzer": "stemmer_stop_analyzer",
+          "search_quote_analyzer": "stemmer_analyzer",
+          "index_prefixes": {
+            "min_chars": 1,
+            "max_chars": 10
+          }
+        },
+        "initials": {
+          "type": "text",
+          "analyzer": "keyword_initials_analyzer",
+          "search_analyzer": "keyword_analyzer",
+          "search_quote_analyzer": "keyword_analyzer",
+          "index_prefixes": {
+            "min_chars": 1,
+            "max_chars": 10
+          }
+        },
+        "keyword": {
+          "type": "text",
+          "analyzer": "keyword_analyzer",
+          "search_analyzer": "keyword_analyzer",
+          "search_quote_analyzer": "keyword_analyzer",
+          "index_prefixes": {
+            "min_chars": 1,
+            "max_chars": 10
+          }
+        },
+        "specialCharacter": {
+          "type": "text",
+          "analyzer": "special_character_analyzer",
+          "search_analyzer": "special_character_analyzer",
+          "index_prefixes": {
+            "min_chars": 1,
+            "max_chars": 10
+          }
+        }
+      }
     },
     "symbol": {
       "type": "keyword"
@@ -36,7 +94,65 @@
     "meta": {
       "properties": {
         "name": {
-          "type": "keyword"
+          "type": "text",
+          "index_prefixes": {
+            "min_chars": 1,
+            "max_chars": 10
+          },
+          "analyzer": "stemmer_analyzer",
+          "search_analyzer": "stemmer_stop_analyzer",
+          "search_quote_analyzer": "stemmer_analyzer",
+          "fields": {
+            "camelCase": {
+              "type": "text",
+              "analyzer": "stemmer_camel_case_analyzer",
+              "search_analyzer": "stemmer_stop_analyzer",
+              "search_quote_analyzer": "stemmer_analyzer",
+              "index_prefixes": {
+                "min_chars": 1,
+                "max_chars": 10
+              }
+            },
+            "join": {
+              "type": "text",
+              "analyzer": "stemmer_join_analyzer",
+              "search_analyzer": "stemmer_stop_analyzer",
+              "search_quote_analyzer": "stemmer_analyzer",
+              "index_prefixes": {
+                "min_chars": 1,
+                "max_chars": 10
+              }
+            },
+            "initials": {
+              "type": "text",
+              "analyzer": "keyword_initials_analyzer",
+              "search_analyzer": "keyword_analyzer",
+              "search_quote_analyzer": "keyword_analyzer",
+              "index_prefixes": {
+                "min_chars": 1,
+                "max_chars": 10
+              }
+            },
+            "keyword": {
+              "type": "text",
+              "analyzer": "keyword_analyzer",
+              "search_analyzer": "keyword_analyzer",
+              "search_quote_analyzer": "keyword_analyzer",
+              "index_prefixes": {
+                "min_chars": 1,
+                "max_chars": 10
+              }
+            },
+            "specialCharacter": {
+              "type": "text",
+              "analyzer": "special_character_analyzer",
+              "search_analyzer": "special_character_analyzer",
+              "index_prefixes": {
+                "min_chars": 1,
+                "max_chars": 10
+              }
+            }
+          }
         },
         "feeRecipient": {
           "type": "keyword"
