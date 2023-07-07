@@ -9,6 +9,7 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
+import com.rarible.protocol.union.core.model.elastic.EsCollection
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionsSearchFilterDto
 import com.rarible.protocol.union.dto.CollectionsSearchRequestDto
@@ -284,6 +285,61 @@ class CollectionControllerElasticFt : AbstractIntegrationTest() {
         val unionPolygon = EthCollectionConverter.convert(polygonDto, BlockchainDto.POLYGON)
 
         (matchUnionEth + notMatchUnionEth + unionPolygon).forEach {
+            enrichmentCollectionService.save(EnrichmentCollectionConverter.convert(it))
+        }
+        coEvery {
+            testEthereumCollectionApi.getNftCollectionsByIds(any())
+        } answers {
+            val requests = invocation.args.first() as CollectionsByIdRequestDto
+            val collections = requests.ids.map { id ->
+                (matches + notMatches).single { it.id.prefixed() == id }
+            }
+            NftCollectionsDto(
+                total = 2, continuation = null, collections = collections
+            ).toMono()
+        }
+        val request = CollectionsSearchRequestDto(
+            continuation = null,
+            size = 10,
+            filter = CollectionsSearchFilterDto(text = "apes", blockchains = listOf(BlockchainDto.ETHEREUM))
+        )
+        val unionCollections = collectionControllerApi.searchCollection(request).awaitFirst()
+
+        assertThat(unionCollections.collections.map { it.id })
+            .containsExactlyInAnyOrderElementsOf(matchUnionEth.map { it.id })
+
+        assertThat(unionCollections.total).isEqualTo(2)
+    }
+
+    @Test
+    fun `get collections by meta name`() = runBlocking<Unit> {
+        val matches = listOf(
+            randomEthCollectionDto().copy(name = "apes"),
+            randomEthCollectionDto().copy(name = "my apes")
+        )
+        val notMatches = listOf(
+            randomEthCollectionDto().copy(name = "my"),
+            randomEthCollectionDto().copy(name = "test")
+        )
+        val esEth = (matches + notMatches).map {
+            randomEsCollection().copy(
+                collectionId = "${BlockchainDto.ETHEREUM}:${it.id}",
+                blockchain = BlockchainDto.ETHEREUM,
+                name = "",
+                meta = EsCollection.CollectionMeta(
+                    name = it.name
+                ),
+            )
+        }
+        esCollectionRepository.saveAll(esEth)
+
+        val matchUnionEth = matches.map {
+            EthCollectionConverter.convert(it, BlockchainDto.ETHEREUM)
+        }
+        val notMatchUnionEth = notMatches.map {
+            EthCollectionConverter.convert(it, BlockchainDto.ETHEREUM)
+        }
+        (matchUnionEth + notMatchUnionEth).forEach {
             enrichmentCollectionService.save(EnrichmentCollectionConverter.convert(it))
         }
         coEvery {

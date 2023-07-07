@@ -8,7 +8,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.search.sort.SortOrder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
-import org.springframework.data.mapping.div
 import org.springframework.stereotype.Component
 
 @Component
@@ -18,10 +17,19 @@ class EsCollectionQueryBuilderService(
 
     override fun textFieldsWithBoost(): Map<String, Float> {
         return mapOf(
-            EsCollection::name.name to boost(100),
-            EsCollection::symbol.name to boost(100),
-            (EsCollection::meta / EsCollection.CollectionMeta::name).name to boost(100),
-            (EsCollection::meta / EsCollection.CollectionMeta::description).name to boost(100),
+            "name" to boost(100),
+            "name.camelCase" to boost(100),
+            "name.join" to boost(100),
+            "name.initials" to boost(100),
+            "name.keyword" to boost(100),
+            "name.specialCharacter" to boost(100),
+
+            "meta.name" to boost(100),
+            "meta.name.camelCase" to boost(100),
+            "meta.name.join" to boost(100),
+            "meta.name.initials" to boost(100),
+            "meta.name.keyword" to boost(100),
+            "meta.name.specialCharacter" to boost(100),
         )
     }
 
