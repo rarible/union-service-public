@@ -14,3 +14,4 @@ enrichment:
     bestBidByCurrencyWhitelist:
       - ETHEREUM:0x55eb2809896ab7414706aacdde63e3bbb26e0bc6
       - POLYGON:0xb24740adecb71feb7d66aa4ebd5f5c334e5be922
+      - POLYGON:0x328823f69a0915c9BEc366Eb09ccdfB964f91Ad5
