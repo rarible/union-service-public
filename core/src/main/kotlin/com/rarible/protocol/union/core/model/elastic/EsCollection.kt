@@ -38,8 +38,7 @@ data class EsCollection(
 ) : EsCollectionSealed() {
 
     data class CollectionMeta(
-        val name: String,
-        val description: String? = null,
+        val name: String
     )
 
     companion object {
