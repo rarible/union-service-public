@@ -12,6 +12,7 @@ import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.MetaSource
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverterService
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import kotlinx.coroutines.reactor.awaitSingle
@@ -29,6 +30,7 @@ class SimpleHashService(
     private val metaCacheRepository: RawMetaCacheRepository,
     private val metrics: ItemMetaMetrics,
     private val itemServiceRouter: BlockchainRouter<ItemService>,
+    private val simpleHashConverterService: SimpleHashConverterService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -43,7 +45,7 @@ class SimpleHashService(
     suspend fun fetch(key: ItemIdDto): UnionMeta? {
         val cacheMeta = metaCacheRepository.get(SimpleHashConverter.cacheId(key))
         if (cacheMeta != null && !cacheMeta.hasExpired(props.simpleHash.cacheExpiration)) {
-            return SimpleHashConverter.convertRawToUnionMeta(cacheMeta.data)
+            return simpleHashConverterService.convertRawToUnionMeta(cacheMeta.data)
         }
         try {
             if (!isSupported(key.blockchain) || isLazyOrNotFound(key)) {
@@ -70,7 +72,7 @@ class SimpleHashService(
         return try {
             val result = objectMapper.readValue(json, SimpleHashItem::class.java)
             metrics.onMetaFetched(key.blockchain, MetaSource.SIMPLE_HASH)
-            SimpleHashConverter.convert(result)
+            simpleHashConverterService.convert(result)
         } catch (e: Exception) {
             logger.error("Failed to parse meta from simplehash {}: {}", key, json)
             metrics.onMetaCorruptedDataError(key.blockchain, MetaSource.SIMPLE_HASH)

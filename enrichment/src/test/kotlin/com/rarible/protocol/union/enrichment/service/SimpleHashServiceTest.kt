@@ -15,6 +15,7 @@ import com.rarible.protocol.union.enrichment.configuration.UnionMetaConfiguratio
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverterService
 import com.rarible.protocol.union.enrichment.model.RawMetaCache
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
@@ -59,7 +60,8 @@ class SimpleHashServiceTest {
     }
     private val client = UnionMetaConfiguration(props).simpleHashClient(customizer)
     private val metrics = ItemMetaMetrics(SimpleMeterRegistry())
-    private val service = SimpleHashService(props, client, cacheRepository, metrics, router)
+    private val simpleHashConverterService = SimpleHashConverterService()
+    private val service = SimpleHashService(props, client, cacheRepository, metrics, router, simpleHashConverterService)
 
 
     @Test
