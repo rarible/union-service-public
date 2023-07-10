@@ -29,8 +29,8 @@ open class SimpleHashResolver(
             language = null,
             rights = null,
             rightsUri = null,
-            externalUri = source.metadataOriginalUrl,
-            originalMetaUri = source.metadataOriginalUrl,
+            externalUri = source.externalUrl,
+            originalMetaUri = source.extraMetadata?.metadataOriginalUrl,
             attributes = attributes(source),
             content = content(source),
             restrictions = emptyList()

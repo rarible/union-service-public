@@ -1,10 +1,5 @@
 package com.rarible.protocol.union.enrichment.meta.simplehash.resolver
 
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
@@ -18,13 +13,6 @@ import org.junit.jupiter.api.Test
 import java.time.Instant
 
 class SimpleHashArtBlocksResolverTest {
-
-    private val mapper = ObjectMapper().run {
-        registerKotlinModule()
-        registerModule(JavaTimeModule())
-        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        setSerializationInclusion(JsonInclude.Include.NON_NULL)
-    }
 
     private val simpleHashConverterService = SimpleHashConverterService()
     private val artBlocksResolver = SimpleHashArtBlocksResolver(simpleHashConverterService.mapper)
@@ -42,7 +30,6 @@ class SimpleHashArtBlocksResolverTest {
             collection = null,
             createdDate = null,
             externalUrl = null,
-            metadataOriginalUrl = null
         )
 
         assertTrue(artBlocksResolver.support(source))
@@ -59,6 +46,8 @@ class SimpleHashArtBlocksResolverTest {
                 name = "Chromie Squiggle #9790",
                 description = "Simple and easily identifiable, each squiggle embodies the soul of the Art Blocks platform. Consider each my personal signature as an artist, developer, and tinkerer. Public minting of the Chromie Squiggle is permanently paused. They are now reserved for manual distribution to collectors and community members over a longer period of time. Please visit OpenSea to explore Squiggles available on the secondary market.",
                 createdAt = Instant.parse("2023-06-06T23:00:11Z"),
+                externalUri = "https://artblocks.io/collections/curated/projects/0x059edd72cd353df5106d2b9cc5ab83a52287ac3a/0/tokens/9790",
+                originalMetaUri = "https://api.artblocks.io/token/9790",
                 attributes = listOf(
                     UnionMetaAttribute("Type", "Normal"),
                     UnionMetaAttribute("Height", "3"),
