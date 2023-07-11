@@ -164,22 +164,6 @@ integration:
 listener:
   consumer:
     broker-replica-set: ${kafka.hosts}
-    workers:
-      ethereum:
-        workers: 3
-        batchSize: 32
-      polygon:
-        workers: 3
-        batchSize: 32
-      flow:
-        workers: 3
-        batchSize: 32
-      tezos:
-        workers: 3
-        batchSize: 32
-      immutablex:
-        workers: 3
-        batchSize: 32
   meta-scheduling:
     item:
       workers: 3
