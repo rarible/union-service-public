@@ -161,10 +161,10 @@ worker:
     rate: PT15S
   meta-item-retry:
     enabled: true
-    rate: PT15M
+    rate: PT1M
   meta-collection-retry:
     enabled: true
-    rate: PT15M
+    rate: PT1M
   itemMetaCustomAttributesJob:
     enabled: true
     rate: PT24H
