@@ -1,0 +1,267 @@
+{
+  "nft_id": "ethereum.0x059edd72cd353df5106d2b9cc5ab83a52287ac3a.9790",
+  "chain": "ethereum",
+  "contract_address": "0x059EDD72Cd353dF5106D2B9cC5ab83a52287aC3a",
+  "token_id": "9790",
+  "name": "Chromie Squiggle #9790",
+  "description": "Simple and easily identifiable, each squiggle embodies the soul of the Art Blocks platform. Consider each my personal signature as an artist, developer, and tinkerer. Public minting of the Chromie Squiggle is permanently paused. They are now reserved for manual distribution to collectors and community members over a longer period of time. Please visit OpenSea to explore Squiggles available on the secondary market.",
+  "previews": {
+    "image_small_url": "https://lh3.googleusercontent.com/vlB6dvhEODOrcddWMorSgxlQ4Fl4B8yRCAdkBl66ShqJeBdQ0OjXVHeq7HLqXcdTot3ljt_pEB61WgYAYuWusPlJZVP15xXQcA=s250",
+    "image_medium_url": "https://lh3.googleusercontent.com/vlB6dvhEODOrcddWMorSgxlQ4Fl4B8yRCAdkBl66ShqJeBdQ0OjXVHeq7HLqXcdTot3ljt_pEB61WgYAYuWusPlJZVP15xXQcA",
+    "image_large_url": "https://lh3.googleusercontent.com/vlB6dvhEODOrcddWMorSgxlQ4Fl4B8yRCAdkBl66ShqJeBdQ0OjXVHeq7HLqXcdTot3ljt_pEB61WgYAYuWusPlJZVP15xXQcA=s1000",
+    "image_opengraph_url": "https://lh3.googleusercontent.com/vlB6dvhEODOrcddWMorSgxlQ4Fl4B8yRCAdkBl66ShqJeBdQ0OjXVHeq7HLqXcdTot3ljt_pEB61WgYAYuWusPlJZVP15xXQcA=k-w1200-s2400-rj",
+    "blurhash": "UUR:pCWH}Ks~fBWBbDxH]?k7ASaRoYs;jLI.",
+    "predominant_color": "#0efc3d"
+  },
+  "image_url": "https://cdn.simplehash.com/assets/fb1e81f4016976924c0d8199187aa32681736d5bc875e63a06fecc8063b12633.png",
+  "image_properties": {
+    "width": 2400,
+    "height": 1600,
+    "size": 234107,
+    "mime_type": "image/png"
+  },
+  "video_url": null,
+  "video_properties": null,
+  "audio_url": null,
+  "audio_properties": null,
+  "model_url": null,
+  "model_properties": null,
+  "background_color": null,
+  "external_url": "https://artblocks.io/collections/curated/projects/0x059edd72cd353df5106d2b9cc5ab83a52287ac3a/0/tokens/9790",
+  "created_date": "2023-06-06T23:00:11",
+  "status": "minted",
+  "token_count": 1,
+  "owner_count": 1,
+  "owners": [
+    {
+      "owner_address": "0x26ee69E130126683849b4Ad7e67510e56BC2D4D9",
+      "quantity": 1,
+      "first_acquired_date": "2023-06-06T23:00:11",
+      "last_acquired_date": "2023-06-06T23:00:11"
+    }
+  ],
+  "contract": {
+    "type": "ERC721",
+    "name": "Art Blocks",
+    "symbol": "BLOCKS",
+    "deployed_by": "0x96dC73c8B5969608C77375F085949744b5177660",
+    "deployed_via_contract": null
+  },
+  "collection": {
+    "collection_id": "33c589d389b53ba90764ae3c120945aa",
+    "name": "Chromie Squiggle by Snowfro",
+    "description": null,
+    "image_url": "https://lh3.googleusercontent.com/K-2BJVgDdpMl-dbBjWgF80I_3PS6B1yXTX5eHAv8qn0Jgs8GlsaiQZFyXqVtT1TFxH15Xt1cC-GyW944t2WnriqY4DH5ewLiiw",
+    "banner_image_url": "https://lh3.googleusercontent.com/LHt7W9lt6cqq8nJdkiT507Ik-rdTf_wWGpE-b_MEj1XfpnS2_ynw6BtdmeKYkjdV_uJFGRIb3kLbXKidgkMj8FUI7y4Q4D9fqA=w2500",
+    "category": "art",
+    "is_nsfw": false,
+    "external_url": "https://artblocks.io",
+    "twitter_username": "artblocks_io",
+    "discord_url": null,
+    "instagram_username": null,
+    "medium_username": null,
+    "telegram_url": null,
+    "marketplace_pages": [
+      {
+        "marketplace_id": "opensea",
+        "marketplace_name": "OpenSea",
+        "marketplace_collection_id": "chromie-squiggle-by-snowfro",
+        "nft_url": "https://opensea.io/assets/ethereum/0x059edd72cd353df5106d2b9cc5ab83a52287ac3a/9790",
+        "collection_url": "https://opensea.io/collection/chromie-squiggle-by-snowfro",
+        "verified": true
+      }
+    ],
+    "metaplex_mint": null,
+    "metaplex_first_verified_creator": null,
+    "floor_prices": [
+      {
+        "marketplace_id": "looksrare",
+        "marketplace_name": "LooksRare",
+        "value": 10000000000000000000,
+        "payment_token": {
+          "payment_token_id": "ethereum.native",
+          "name": "Ether",
+          "symbol": "ETH",
+          "address": null,
+          "decimals": 18
+        }
+      },
+      {
+        "marketplace_id": "opensea",
+        "marketplace_name": "OpenSea",
+        "value": 10400000000000000000,
+        "payment_token": {
+          "payment_token_id": "ethereum.native",
+          "name": "Ether",
+          "symbol": "ETH",
+          "address": null,
+          "decimals": 18
+        }
+      },
+      {
+        "marketplace_id": "x2y2",
+        "marketplace_name": "X2Y2",
+        "value": 11000000000000000000,
+        "payment_token": {
+          "payment_token_id": "ethereum.native",
+          "name": "Ether",
+          "symbol": "ETH",
+          "address": null,
+          "decimals": 18
+        }
+      }
+    ],
+    "distinct_owner_count": 2848,
+    "distinct_nft_count": 9791,
+    "total_quantity": 9792,
+    "chains": [
+      "ethereum"
+    ],
+    "top_contracts": [
+      "ethereum.0x059edd72cd353df5106d2b9cc5ab83a52287ac3a"
+    ]
+  },
+  "last_sale": null,
+  "first_created": {
+    "minted_to": "0x26ee69E130126683849b4Ad7e67510e56BC2D4D9",
+    "quantity": 1,
+    "timestamp": "2023-06-06T23:00:11",
+    "block_number": 17424517,
+    "transaction": "0xa2508c06b624aae5ebae0ee614a6a3e66390b37a7ebd3a8e790230f6948dff4f",
+    "transaction_initiator": "0xf3860788D1597cecF938424bAABe976FaC87dC26"
+  },
+  "rarity": {
+    "rank": 2677,
+    "score": 1.31,
+    "unique_attributes": 0
+  },
+  "royalty": [
+    {
+      "source": "opensea",
+      "total_creator_fee_basis_points": 750,
+      "recipients": [
+        {
+          "address": "0x6C093Fe8bc59e1e0cAe2Ec10F0B717D3D182056B",
+          "percentage": 100,
+          "basis_points": 750
+        }
+      ]
+    }
+  ],
+  "extra_metadata": {
+    "attributes": [
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "All Chromie Squiggles",
+        "display_type": null
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Type: Normal",
+        "display_type": null
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Height: 3",
+        "display_type": null
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Segments: 15",
+        "display_type": null
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Spectrum: Normal",
+        "display_type": null
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Color Spread: 21",
+        "display_type": null
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Steps Between: 200",
+        "display_type": null
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Color Direction: Reverse",
+        "display_type": null
+      }
+    ],
+    "platform": "Art Blocks Curated",
+    "tokenID": "9790",
+    "series": 1,
+    "aspect_ratio": 1.5,
+    "payout_address": "0x6C093Fe8bc59e1e0cAe2Ec10F0B717D3D182056B",
+    "minted": true,
+    "artist": "Snowfro",
+    "script_type": "p5@1.0.0",
+    "project_id": "0",
+    "curation_status": "curated",
+    "heritage_curation_status": "curated series 1",
+    "preview_asset_url": "https://media-proxy.artblocks.io/0x059edd72cd353df5106d2b9cc5ab83a52287ac3a/9790.png",
+    "generator_url": "https://generator.artblocks.io/9790",
+    "royaltyInfo": {
+      "artistAddress": "0xb998a2520907ed1fc0f9f457b2219fb2720466cd",
+      "additionalPayee": "0xf3860788d1597cecf938424baabe976fac87dc26",
+      "additionalPayeePercentage": 100,
+      "royaltyFeeByID": 5
+    },
+    "collection_name": "Chromie Squiggle by Snowfro",
+    "token_hash": "0x8266763207387cec16f880678ce5daae232f2ff6557aafa3e2c664715c5b29eb",
+    "primary_asset_url": "https://generator.artblocks.io/0x059edd72cd353df5106d2b9cc5ab83a52287ac3a/9790",
+    "features": {
+      "Type": "Normal",
+      "Height": "3",
+      "Segments": 15,
+      "Spectrum": "Normal",
+      "End Color": 233,
+      "Start Color": 91,
+      "Color Spread": "21",
+      "Steps Between": "200",
+      "Color Direction": "Reverse"
+    },
+    "traits": [
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "All Chromie Squiggles"
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Type: Normal"
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Height: 3"
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Segments: 15"
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Spectrum: Normal"
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Color Spread: 21"
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Steps Between: 200"
+      },
+      {
+        "trait_type": "Chromie Squiggle",
+        "value": "Color Direction: Reverse"
+      }
+    ],
+    "is_static": false,
+    "license": "NFT License",
+    "image_original_url": "https://media-proxy.artblocks.io/0x059edd72cd353df5106d2b9cc5ab83a52287ac3a/9790.png",
+    "animation_original_url": "https://generator.artblocks.io/0x059edd72cd353df5106d2b9cc5ab83a52287ac3a/9790",
+    "metadata_original_url": "https://api.artblocks.io/token/9790"
+  }
+}
