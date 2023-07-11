@@ -229,6 +229,7 @@ class SimpleHashServiceTest {
                 )
             )
         ),
-        restrictions = emptyList()
+        restrictions = emptyList(),
+        originalMetaUri = "https://boredapeyachtclub.com/api/mutants/2691"
     )
 }

@@ -211,7 +211,7 @@
       "royaltyFeeByID": 5
     },
     "collection_name": "Chromie Squiggle by Snowfro",
-    "token_hash": "0x8266763207387cec16f880678ce5daae232f2ff6557aafa3e2c664715c5b29eb",
+    "token_hash": "0",
     "primary_asset_url": "https://generator.artblocks.io/0x059edd72cd353df5106d2b9cc5ab83a52287ac3a/9790",
     "features": {
       "Type": "Normal",
