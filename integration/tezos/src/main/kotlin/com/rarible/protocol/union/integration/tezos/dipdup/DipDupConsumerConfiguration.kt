@@ -226,7 +226,7 @@ class DipDupConsumerConfiguration(
             hosts = consumer.brokerReplicaSet!!,
             topic = topic,
             group = consumerFactory.consumerGroup(eventType),
-            concurrency = workers.getOrDefault(eventType.value, 1),
+            concurrency = workers.getOrDefault(eventType.value, 9),
             batchSize = batchSize,
             async = false,
             offsetResetStrategy = OffsetResetStrategy.EARLIEST,

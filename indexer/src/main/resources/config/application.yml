@@ -108,19 +108,12 @@ integration:
         broker-replica-set: ${consul.tezos.dipdup.consumer.hosts:}
         username: ${consul.tezos.dipdup.consumer.username:}
         password: ${consul.tezos.dipdup.consumer.password:}
-        workers:
-          order: ${consul.tezos.dipdup.consumer.workers.order:1}
-          activity: ${consul.tezos.dipdup.consumer.workers.activity:4}
     client:
       url: ${consul.tezos.api.baseUrl}
     consumer:
       broker-replica-set: ${consul.tezos.kafka.hosts}
       username: ${consul.tezos.kafka.username}
       password: ${consul.tezos.kafka.password}
-      workers:
-        item: 1
-        ownership: 1
-        order: 1
     auctionContracts: ${consul.tezos.auctionContracts:}
   solana:
     enabled: ${consul.solana.enabled:false}
