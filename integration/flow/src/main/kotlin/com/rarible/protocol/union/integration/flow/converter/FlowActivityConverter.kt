@@ -17,6 +17,7 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionAsset
 import com.rarible.protocol.union.core.model.UnionBurnActivity
+import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionMintActivity
 import com.rarible.protocol.union.core.model.UnionOrderActivityMatchSideDto
 import com.rarible.protocol.union.core.model.UnionOrderBidActivity
@@ -46,10 +47,9 @@ class FlowActivityConverter(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    // TODO handle time marks when it will be implemented at Union
     suspend fun convert(source: FlowActivityEventDto): UnionActivity {
         try {
-            return convertInternal(source.activity)
+            return convertInternal(source.activity, FlowConverter.convert(source.eventTimeMarks))
         } catch (e: Exception) {
             logger.error("Failed to convert Flow Activity: {} \n{}", e.message, source)
             throw e
@@ -65,7 +65,7 @@ class FlowActivityConverter(
         }
     }
 
-    private suspend fun convertInternal(source: FlowActivityDto): UnionActivity {
+    private suspend fun convertInternal(source: FlowActivityDto, timeMarks: UnionEventTimeMarks? = null): UnionActivity {
         val blockchain = BlockchainDto.FLOW
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
@@ -81,7 +81,8 @@ class FlowActivityConverter(
                         blockchain = blockchain,
                         nft = leftSide,
                         payment = rightSide,
-                        type = UnionOrderMatchSell.Type.SELL
+                        type = UnionOrderMatchSell.Type.SELL,
+                        timeMarks = timeMarks
                     )
                 } else if (leftType.isCurrency() && rightTypeExt.isNft()) {
                     activityToSell(
@@ -90,13 +91,15 @@ class FlowActivityConverter(
                         blockchain = blockchain,
                         nft = rightSide,
                         payment = leftSide,
-                        type = UnionOrderMatchSell.Type.ACCEPT_BID
+                        type = UnionOrderMatchSell.Type.ACCEPT_BID,
+                        timeMarks = timeMarks
                     )
                 } else {
                     activityToSwap(
                         activityId = activityId,
                         source = source,
-                        blockchain = blockchain
+                        blockchain = blockchain,
+                        timeMarks = timeMarks
                     )
                 }
             }
@@ -116,7 +119,8 @@ class FlowActivityConverter(
                     make = FlowConverter.convert(source.make, blockchain),
                     take = payment,
                     reverted = source.reverted,
-                    lastUpdatedAt = source.updatedAt
+                    lastUpdatedAt = source.updatedAt,
+                    eventTimeMarks = timeMarks
                 )
             }
             is FlowNftOrderActivityCancelListDto -> {
@@ -136,7 +140,8 @@ class FlowActivityConverter(
                         logIndex = source.logIndex ?: 0
                     ),
                     reverted = source.reverted,
-                    lastUpdatedAt = source.updatedAt
+                    lastUpdatedAt = source.updatedAt,
+                    eventTimeMarks = timeMarks
                 )
             }
             is FlowMintDto -> {
@@ -158,7 +163,8 @@ class FlowActivityConverter(
                         logIndex = source.logIndex
                     ),
                     reverted = source.reverted,
-                    lastUpdatedAt = source.updatedAt
+                    lastUpdatedAt = source.updatedAt,
+                    eventTimeMarks = timeMarks
                 )
             }
             is FlowBurnDto -> {
@@ -180,7 +186,8 @@ class FlowActivityConverter(
                         logIndex = source.logIndex
                     ),
                     reverted = source.reverted,
-                    lastUpdatedAt = source.updatedAt
+                    lastUpdatedAt = source.updatedAt,
+                    eventTimeMarks = timeMarks
                 )
             }
             is FlowTransferDto -> {
@@ -204,7 +211,8 @@ class FlowActivityConverter(
                     ),
                     reverted = source.reverted,
                     purchase = source.purchased,
-                    lastUpdatedAt = source.updatedAt
+                    lastUpdatedAt = source.updatedAt,
+                    eventTimeMarks = timeMarks
                 )
             }
             is FlowNftOrderActivityBidDto -> {
@@ -223,7 +231,8 @@ class FlowActivityConverter(
                     make = payment,
                     take = FlowConverter.convert(source.take, blockchain),
                     reverted = source.reverted,
-                    lastUpdatedAt = source.updatedAt
+                    lastUpdatedAt = source.updatedAt,
+                    eventTimeMarks = timeMarks
                 )
             }
             is FlowNftOrderActivityCancelBidDto -> {
@@ -236,7 +245,8 @@ class FlowActivityConverter(
                     take = FlowConverter.convertToType(source.take, blockchain),
                     transactionHash = source.transactionHash ?: "",
                     reverted = source.reverted,
-                    lastUpdatedAt = source.updatedAt
+                    lastUpdatedAt = source.updatedAt,
+                    eventTimeMarks = timeMarks
                 )
             }
             else -> throw IllegalStateException("Unsupported flow activity! $source")
@@ -249,7 +259,8 @@ class FlowActivityConverter(
         nft: FlowOrderActivityMatchSideDto,
         payment: FlowOrderActivityMatchSideDto,
         type: UnionOrderMatchSell.Type,
-        activityId: ActivityIdDto
+        activityId: ActivityIdDto,
+        timeMarks: UnionEventTimeMarks?
     ): UnionOrderMatchSell {
         val unionPayment = FlowConverter.convert(payment.asset, blockchain)
         val unionNft = FlowConverter.convert(nft.asset, blockchain)
@@ -281,14 +292,16 @@ class FlowActivityConverter(
                 logIndex = source.logIndex
             ),
             reverted = source.reverted,
-            lastUpdatedAt = source.updatedAt
+            lastUpdatedAt = source.updatedAt,
+            eventTimeMarks = timeMarks
         )
     }
 
     private fun activityToSwap(
         source: FlowNftOrderActivitySellDto,
         blockchain: BlockchainDto,
-        activityId: ActivityIdDto
+        activityId: ActivityIdDto,
+        timeMarks: UnionEventTimeMarks?
     ) = UnionOrderMatchSwap(
         id = activityId,
         date = source.date,
@@ -304,7 +317,8 @@ class FlowActivityConverter(
         left = convert(source.left, blockchain),
         right = convert(source.right, blockchain),
         reverted = source.reverted,
-        lastUpdatedAt = source.updatedAt
+        lastUpdatedAt = source.updatedAt,
+        eventTimeMarks = timeMarks
     )
 
     private fun convert(

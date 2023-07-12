@@ -14,6 +14,7 @@ class UnionActivityEventHandler(
 ) : IncomingEventHandler<UnionActivity> {
 
     override suspend fun onEvent(event: UnionActivity) = producer.send(event)
-    override suspend fun onEvents(events: Collection<UnionActivity>) = producer.send(events)
+    override suspend fun onEvents(events: Collection<UnionActivity>) = producer.send(events.map(::addIn))
+    private fun addIn(event: UnionActivity) = event.addTimeMark("enrichment-in")
 
 }

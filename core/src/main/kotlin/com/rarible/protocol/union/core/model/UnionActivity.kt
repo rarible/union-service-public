@@ -46,6 +46,8 @@ sealed class UnionActivity {
     abstract val lastUpdatedAt: Instant?
     abstract val cursor: String?
     abstract val reverted: Boolean?
+    abstract val eventTimeMarks: UnionEventTimeMarks?
+    abstract fun addTimeMark(name: String, date: Instant? = null): UnionActivity
 
     /**
      * Returns associated itemId for this activity (if applicable)
@@ -77,7 +79,8 @@ data class UnionMintActivity(
     val value: BigInteger,
     val mintPrice: BigDecimal? = null,
     val transactionHash: String,
-    val blockchainInfo: ActivityBlockchainInfoDto? = null
+    val blockchainInfo: ActivityBlockchainInfoDto? = null,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = itemId
@@ -86,6 +89,9 @@ data class UnionMintActivity(
     override fun source(): OwnershipSourceDto = OwnershipSourceDto.MINT
     override fun isBlockchainEvent() = this.blockchainInfo != null
 
+    override fun addTimeMark(name: String, date: Instant?): UnionMintActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionBurnActivity(
@@ -101,13 +107,17 @@ data class UnionBurnActivity(
     val itemId: ItemIdDto? = null,
     val value: BigInteger,
     val transactionHash: String,
-    val blockchainInfo: ActivityBlockchainInfoDto? = null
+    val blockchainInfo: ActivityBlockchainInfoDto? = null,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = itemId
     override fun isBlockchainEvent() = this.blockchainInfo != null
     override fun collectionId() = collection
 
+    override fun addTimeMark(name: String, date: Instant?): UnionBurnActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionTransferActivity(
@@ -125,7 +135,8 @@ data class UnionTransferActivity(
     val value: BigInteger,
     val purchase: Boolean? = null,
     val transactionHash: String,
-    val blockchainInfo: ActivityBlockchainInfoDto? = null
+    val blockchainInfo: ActivityBlockchainInfoDto? = null,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = itemId
@@ -139,6 +150,10 @@ data class UnionTransferActivity(
 
     override fun isBlockchainEvent() = this.blockchainInfo != null
     override fun collectionId() = collection
+
+    override fun addTimeMark(name: String, date: Instant?): UnionTransferActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 sealed class UnionOrderMatchActivity : UnionActivity() {
@@ -160,12 +175,17 @@ data class UnionOrderMatchSwap(
     override val cursor: String? = null,
     override val reverted: Boolean? = null,
     val left: UnionOrderActivityMatchSideDto,
-    val right: UnionOrderActivityMatchSideDto
+    val right: UnionOrderActivityMatchSideDto,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionOrderMatchActivity() {
 
     override fun itemId() = null
     override fun isValid(): Boolean = left.asset.type.isNft() && right.asset.type.isNft()
     override fun collectionId() = null
+
+    override fun addTimeMark(name: String, date: Instant?): UnionOrderMatchSwap {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionOrderMatchSell(
@@ -189,7 +209,8 @@ data class UnionOrderMatchSell(
     val amountUsd: BigDecimal? = null,
     val type: Type,
     val sellMarketplaceMarker: String? = null,
-    val buyMarketplaceMarker: String? = null
+    val buyMarketplaceMarker: String? = null,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionOrderMatchActivity() {
 
     enum class Type {
@@ -201,6 +222,9 @@ data class UnionOrderMatchSell(
     override fun collectionId() = this.nft.type.collectionId()
     override fun isBlockchainEvent() = this.blockchainInfo != null
 
+    override fun addTimeMark(name: String, date: Instant?): UnionOrderMatchActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionOrderBidActivity(
@@ -217,11 +241,16 @@ data class UnionOrderBidActivity(
     val price: BigDecimal,
     val priceUsd: BigDecimal? = null,
     val source: OrderActivitySourceDto? = null,
-    val marketplaceMarker: String? = null
+    val marketplaceMarker: String? = null,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = this.take.type.itemId()
     override fun collectionId() = this.take.type.collectionId()
+
+    override fun addTimeMark(name: String, date: Instant?): UnionOrderBidActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionOrderListActivity(
@@ -237,11 +266,16 @@ data class UnionOrderListActivity(
     val take: UnionAsset,
     val price: BigDecimal,
     val priceUsd: BigDecimal? = null,
-    val source: OrderActivitySourceDto? = null
+    val source: OrderActivitySourceDto? = null,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = this.make.type.itemId()
     override fun collectionId() = this.make.type.collectionId()
+
+    override fun addTimeMark(name: String, date: Instant?): UnionOrderListActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionOrderCancelBidActivity(
@@ -257,12 +291,17 @@ data class UnionOrderCancelBidActivity(
     val take: UnionAssetType,
     val source: OrderActivitySourceDto? = null,
     val transactionHash: String,
-    val blockchainInfo: ActivityBlockchainInfoDto? = null
+    val blockchainInfo: ActivityBlockchainInfoDto? = null,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = this.take.itemId()
     override fun collectionId() = this.take.collectionId()
     override fun isBlockchainEvent() = this.blockchainInfo != null
+
+    override fun addTimeMark(name: String, date: Instant?): UnionOrderCancelBidActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionOrderCancelListActivity(
@@ -278,12 +317,17 @@ data class UnionOrderCancelListActivity(
     val take: UnionAssetType,
     val source: OrderActivitySourceDto? = null,
     val transactionHash: String,
-    val blockchainInfo: ActivityBlockchainInfoDto? = null
+    val blockchainInfo: ActivityBlockchainInfoDto? = null,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = this.make.itemId()
     override fun collectionId() = this.make.collectionId()
     override fun isBlockchainEvent() = this.blockchainInfo != null
+
+    override fun addTimeMark(name: String, date: Instant?): UnionOrderCancelListActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionAuctionOpenActivity(
@@ -293,12 +337,16 @@ data class UnionAuctionOpenActivity(
     override val cursor: String? = null,
     override val reverted: Boolean? = null,
     val auction: AuctionDto,
-    val transactionHash: String
+    val transactionHash: String,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
     override fun collectionId() = auction.sell.type.ext.collectionId
 
+    override fun addTimeMark(name: String, date: Instant?): UnionAuctionOpenActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionAuctionBidActivity(
@@ -309,13 +357,17 @@ data class UnionAuctionBidActivity(
     override val reverted: Boolean? = null,
     val auction: AuctionDto,
     val bid: AuctionBidDto,
-    val transactionHash: String
+    val transactionHash: String,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
     override fun ownershipId() = null
     override fun collectionId() = auction.sell.type.ext.collectionId
 
+    override fun addTimeMark(name: String, date: Instant?): UnionAuctionBidActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionAuctionFinishActivity(
@@ -325,12 +377,16 @@ data class UnionAuctionFinishActivity(
     override val cursor: String? = null,
     override val reverted: Boolean? = null,
     val auction: AuctionDto,
-    val transactionHash: String
+    val transactionHash: String,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
     override fun collectionId() = auction.sell.type.ext.collectionId
 
+    override fun addTimeMark(name: String, date: Instant?): UnionAuctionFinishActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionAuctionCancelActivity(
@@ -340,12 +396,16 @@ data class UnionAuctionCancelActivity(
     override val cursor: String? = null,
     override val reverted: Boolean? = null,
     val auction: AuctionDto,
-    val transactionHash: String
+    val transactionHash: String,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
     override fun collectionId() = auction.sell.type.ext.collectionId
 
+    override fun addTimeMark(name: String, date: Instant?): UnionAuctionCancelActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionAuctionStartActivity(
@@ -354,12 +414,16 @@ data class UnionAuctionStartActivity(
     override val lastUpdatedAt: Instant? = null,
     override val cursor: String? = null,
     override val reverted: Boolean? = null,
-    val auction: AuctionDto
+    val auction: AuctionDto,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
     override fun collectionId() = auction.sell.type.ext.collectionId
 
+    override fun addTimeMark(name: String, date: Instant?): UnionAuctionStartActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionAuctionEndActivity(
@@ -368,12 +432,16 @@ data class UnionAuctionEndActivity(
     override val lastUpdatedAt: Instant? = null,
     override val cursor: String? = null,
     override val reverted: Boolean? = null,
-    val auction: AuctionDto
+    val auction: AuctionDto,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = this.auction.getItemId()
     override fun collectionId() = auction.sell.type.ext.collectionId
 
+    override fun addTimeMark(name: String, date: Instant?): UnionAuctionEndActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionL2DepositActivity(
@@ -386,11 +454,16 @@ data class UnionL2DepositActivity(
     val status: String,
     val itemId: ItemIdDto,
     val collection: CollectionIdDto?,
-    val value: BigInteger? = null
+    val value: BigInteger? = null,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = this.itemId
     override fun collectionId() = collection
+
+    override fun addTimeMark(name: String, date: Instant?): UnionL2DepositActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionL2WithdrawalActivity(
@@ -403,12 +476,16 @@ data class UnionL2WithdrawalActivity(
     val status: String,
     val itemId: ItemIdDto,
     val collection: CollectionIdDto?,
-    val value: BigInteger? = null
+    val value: BigInteger? = null,
+    override val eventTimeMarks: UnionEventTimeMarks? = null
 ) : UnionActivity() {
 
     override fun itemId() = this.itemId
     override fun collectionId() = collection
 
+    override fun addTimeMark(name: String, date: Instant?): UnionL2WithdrawalActivity {
+        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
+    }
 }
 
 data class UnionOrderActivityMatchSideDto(
