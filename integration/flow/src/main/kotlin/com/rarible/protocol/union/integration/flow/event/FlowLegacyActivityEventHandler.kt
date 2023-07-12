@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.flow.converter.FlowActivityConverter
 import org.slf4j.LoggerFactory
 
+@Deprecated("Replace with FlowActivityEventHandler")
 open class FlowLegacyActivityEventHandler(
     override val handler: IncomingEventHandler<UnionActivity>,
     private val flowActivityConverter: FlowActivityConverter
