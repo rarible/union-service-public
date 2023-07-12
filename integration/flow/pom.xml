@@ -41,10 +41,6 @@
             <groupId>com.rarible.protocol.flow</groupId>
             <artifactId>flow-protocol-client-nft-starter</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.rarible.protocol.flow</groupId>
-            <artifactId>flow-protocol-subscriber-nft</artifactId>
-        </dependency>
 
         <!-- ================== Test ===================== -->
         <dependency>
