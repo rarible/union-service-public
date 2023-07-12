@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.flow.converter
 
 import com.rarible.protocol.dto.FlowActivitiesDto
 import com.rarible.protocol.dto.FlowActivityDto
+import com.rarible.protocol.dto.FlowActivityEventDto
 import com.rarible.protocol.dto.FlowBurnDto
 import com.rarible.protocol.dto.FlowMintDto
 import com.rarible.protocol.dto.FlowNftOrderActivityBidDto
@@ -44,6 +45,16 @@ class FlowActivityConverter(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    // TODO handle time marks when it will be implemented at Union
+    suspend fun convert(source: FlowActivityEventDto): UnionActivity {
+        try {
+            return convertInternal(source.activity)
+        } catch (e: Exception) {
+            logger.error("Failed to convert Flow Activity: {} \n{}", e.message, source)
+            throw e
+        }
+    }
 
     suspend fun convert(source: FlowActivityDto): UnionActivity {
         try {

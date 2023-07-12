@@ -77,7 +77,7 @@ class UnionSubscribeHandlerConfiguration(
             hosts = unionSubscriberProperties.brokerReplicaSet,
             topic = topic,
             group = "${subscribeConsumerGroup(type)}.${UUID.randomUUID()}",
-            concurrency = properties.workers.getOrDefault(type.value, 1),
+            concurrency = properties.workers.getOrDefault(type.value, 9),
             batchSize = 100,
             async = false,
             offsetResetStrategy = OffsetResetStrategy.LATEST,

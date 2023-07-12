@@ -3,6 +3,7 @@ package com.rarible.protocol.union.integration.flow
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.protocol.dto.FlowActivityDto
+import com.rarible.protocol.dto.FlowActivityEventDto
 import com.rarible.protocol.dto.FlowActivityEventTopicProvider
 import com.rarible.protocol.dto.FlowCollectionEventDto
 import com.rarible.protocol.dto.FlowNftCollectionEventTopicProvider
@@ -26,6 +27,7 @@ import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import com.rarible.protocol.union.integration.flow.event.FlowActivityEventHandler
 import com.rarible.protocol.union.integration.flow.event.FlowCollectionEventHandler
 import com.rarible.protocol.union.integration.flow.event.FlowItemEventHandler
+import com.rarible.protocol.union.integration.flow.event.FlowLegacyActivityEventHandler
 import com.rarible.protocol.union.integration.flow.event.FlowOrderEventHandler
 import com.rarible.protocol.union.integration.flow.event.FlowOwnershipEventHandler
 import org.springframework.context.annotation.Bean
@@ -77,6 +79,15 @@ class FlowConsumerConfiguration(
         converter: FlowActivityConverter
     ): FlowActivityEventHandler {
         return FlowActivityEventHandler(handler, converter)
+    }
+
+    @Bean
+    @Deprecated("remove later")
+    fun flowLegacyActivityEventHandler(
+        handler: IncomingEventHandler<UnionActivity>,
+        converter: FlowActivityConverter
+    ): FlowLegacyActivityEventHandler {
+        return FlowLegacyActivityEventHandler(handler, converter)
     }
 
     //-------------------- Workers --------------------//
@@ -131,6 +142,19 @@ class FlowConsumerConfiguration(
 
     @Bean
     fun flowActivityWorker(
+        handler: BlockchainEventHandler<FlowActivityEventDto, UnionActivity>
+    ): RaribleKafkaConsumerWorker<FlowActivityEventDto> {
+        return createConsumer(
+            topic = FlowActivityEventTopicProvider.getActivityTopic(env),
+            handler = handler,
+            valueClass = FlowActivityEventDto::class.java,
+            eventType = EventType.ACTIVITY,
+        )
+    }
+
+    @Bean
+    @Deprecated("Remove later")
+    fun flowLegacyActivityWorker(
         handler: BlockchainEventHandler<FlowActivityDto, UnionActivity>
     ): RaribleKafkaConsumerWorker<FlowActivityDto> {
         return createConsumer(

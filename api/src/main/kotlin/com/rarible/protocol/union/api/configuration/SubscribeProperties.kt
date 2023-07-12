@@ -8,5 +8,5 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties("api.subscribe")
 data class SubscribeProperties(
     val daemon: DaemonWorkerProperties = DaemonWorkerProperties(),
-    val workers: Map<String, Int>
+    val workers: Map<String, Int> = mapOf()
 )

@@ -45,26 +45,14 @@ integration:
     enabled: true
     consumer:
       broker-replica-set: ${kafka.hosts}
-      workers:
-        item: 1
-        ownership: 1
-        order: 1
   polygon:
     enabled: true
     consumer:
       broker-replica-set: ${kafka.hosts}
-      workers:
-        item: 1
-        ownership: 1
-        order: 1
   flow:
     enabled: true
     consumer:
       broker-replica-set: ${kafka.hosts}
-      workers:
-        item: 1
-        ownership: 1
-        order: 1
   tezos:
     enabled: true
     client:
@@ -73,10 +61,6 @@ integration:
       broker-replica-set: ${kafka.hosts}
       username:
       password:
-      workers:
-        item: 1
-        ownership: 1
-        order: 1
     dipdup:
       dipdupUrl: "http://localhost:8080"
       tzktUrl: "http://localhost:8080"
@@ -85,18 +69,10 @@ integration:
       sigChecker: ""
       consumer:
         broker-replica-set: ${kafka.hosts}
-        workers:
-          item: 1
-          activity: 1
-          order: 1
   solana:
     enabled: true
     consumer:
       broker-replica-set: ${kafka.hosts}
-      workers:
-        item: 1
-        ownership: 1
-        order: 1
   immutablex:
     scanner:
       job:

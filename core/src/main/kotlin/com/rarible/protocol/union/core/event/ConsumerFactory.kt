@@ -26,7 +26,7 @@ class ConsumerFactory(
             hosts = hosts,
             topic = topic,
             group = consumerGroup(eventType),
-            concurrency = workers.getOrDefault(eventType.value, 1),
+            concurrency = workers.getOrDefault(eventType.value, 9),
             batchSize = batchSize,
             async = false,
             offsetResetStrategy = OffsetResetStrategy.EARLIEST,

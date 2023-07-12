@@ -39,6 +39,6 @@ data class MetaEntrySchedulingProperties(
 )
 
 data class BlockchainWorkerProperties(
-    val concurrency: Int = 3,
-    val batchSize: Int = 32
+    val concurrency: Int = 9,
+    val batchSize: Int = 500
 )
