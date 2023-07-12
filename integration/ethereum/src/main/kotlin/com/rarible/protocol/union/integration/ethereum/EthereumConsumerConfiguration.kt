@@ -6,6 +6,7 @@ import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.ActivityDto
 import com.rarible.protocol.dto.ActivityTopicProvider
 import com.rarible.protocol.dto.AuctionEventDto
+import com.rarible.protocol.dto.EthActivityEventDto
 import com.rarible.protocol.dto.NftCollectionEventDto
 import com.rarible.protocol.dto.NftCollectionEventTopicProvider
 import com.rarible.protocol.dto.NftItemEventDto
@@ -28,12 +29,14 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConv
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.event.EthActivityEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthActivityLegacyEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthAuctionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthCollectionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthItemEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOrderEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOwnershipEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthereumActivityEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthereumActivityLegacyEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthereumAuctionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthereumCollectionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthereumItemEventHandler
@@ -107,6 +110,16 @@ class EthereumConsumerConfiguration(
         return EthereumActivityEventHandler(handler, converter)
     }
 
+    @Bean
+    @Deprecated("Remove later")
+    @Qualifier("ethereum.activity.handler.legacy")
+    fun ethereumLegacyActivityEventHandler(
+        handler: IncomingEventHandler<UnionActivity>,
+        converter: EthActivityConverter
+    ): EthActivityLegacyEventHandler {
+        return EthereumActivityLegacyEventHandler(handler, converter)
+    }
+
     //-------------------- Workers --------------------//
 
     @Bean
@@ -171,7 +184,20 @@ class EthereumConsumerConfiguration(
 
     @Bean
     fun ethereumActivityWorker(
-        @Qualifier("ethereum.activity.handler") handler: BlockchainEventHandler<ActivityDto, UnionActivity>
+        @Qualifier("ethereum.activity.handler") handler: BlockchainEventHandler<EthActivityEventDto, UnionActivity>
+    ): RaribleKafkaConsumerWorker<EthActivityEventDto> {
+        return createConsumer(
+            topic = ActivityTopicProvider.getActivityTopic(env, blockchain.value),
+            handler = handler,
+            valueClass = EthActivityEventDto::class.java,
+            eventType = EventType.ACTIVITY,
+        )
+    }
+
+    @Bean
+    @Deprecated("Remove later")
+    fun ethereumLegacyActivityWorker(
+        @Qualifier("ethereum.activity.handler.legacy") handler: BlockchainEventHandler<ActivityDto, UnionActivity>
     ): RaribleKafkaConsumerWorker<ActivityDto> {
         return createConsumer(
             topic = ActivityTopicProvider.getTopic(env, blockchain.value),
