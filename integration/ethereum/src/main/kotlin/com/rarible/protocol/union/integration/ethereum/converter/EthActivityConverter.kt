@@ -11,6 +11,7 @@ import com.rarible.protocol.dto.AuctionActivityFinishDto
 import com.rarible.protocol.dto.AuctionActivityOpenDto
 import com.rarible.protocol.dto.AuctionActivityStartDto
 import com.rarible.protocol.dto.BurnDto
+import com.rarible.protocol.dto.EthActivityEventDto
 import com.rarible.protocol.dto.MintDto
 import com.rarible.protocol.dto.NftActivityFilterAllDto
 import com.rarible.protocol.dto.NftActivityFilterByCollectionDto
@@ -78,6 +79,16 @@ class EthActivityConverter(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    // TODO handle time marks when it will be implemented at Union
+    suspend fun convert(source: EthActivityEventDto, blockchain: BlockchainDto): UnionActivity {
+        try {
+            return convertInternal(source.activity, blockchain)
+        } catch (e: Exception) {
+            logger.error("Failed to convert {} Activity: {} \n{}", blockchain, e.message, source)
+            throw e
+        }
+    }
 
     suspend fun convert(source: com.rarible.protocol.dto.ActivityDto, blockchain: BlockchainDto): UnionActivity {
         try {

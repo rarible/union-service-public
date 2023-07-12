@@ -22,7 +22,7 @@ class EthereumActivityEventHandlerTest {
     private val incomingEventHandler: IncomingEventHandler<UnionActivity> = mockk()
     private val ethAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
     private val ethActivityConverter = EthActivityConverter(ethAuctionConverter)
-    private val handler = EthereumActivityEventHandler(incomingEventHandler, ethActivityConverter)
+    private val handler = EthereumActivityLegacyEventHandler(incomingEventHandler, ethActivityConverter)
 
     @BeforeEach
     fun beforeEach() {
