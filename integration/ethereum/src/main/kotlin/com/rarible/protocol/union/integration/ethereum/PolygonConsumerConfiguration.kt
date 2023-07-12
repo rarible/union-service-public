@@ -99,7 +99,7 @@ class PolygonConsumerConfiguration(
     @Bean
     @Deprecated("Remove later")
     @Qualifier("polygon.activity.handler.legacy")
-    fun ethereumLegacyActivityEventHandler(
+    fun polygonLegacyActivityEventHandler(
         handler: IncomingEventHandler<UnionActivity>,
         converter: EthActivityConverter
     ): EthActivityLegacyEventHandler {
