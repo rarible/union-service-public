@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.model.ActivityEvent
 import com.rarible.protocol.union.core.event.OutgoingActivityEventListener
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityDtoConverter
@@ -24,6 +25,10 @@ class EnrichmentActivityEventService(
         } else {
             enrichmentActivityService.enrichDeprecated(activity)
         }
+        val activityEvent = ActivityEvent(
+            activity = activityDto,
+            eventTimeMarks = marks?.toDto()
+        )
 
         if (ff.enableItemLastSaleEnrichment) {
             itemEventService.onActivity(
@@ -43,7 +48,7 @@ class EnrichmentActivityEventService(
 
         val shouldSend = ff.enableRevertedActivityEventSending || activity.reverted != true
         if (shouldSend) {
-            activityEventListeners.onEach { it.onEvent(activityDto) }
+            activityEventListeners.onEach { it.onEvent(activityEvent) }
         }
     }
 
