@@ -13,11 +13,11 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class FlowActivityEventHandlerTest() {
+class FlowLegacyActivityEventHandlerTest() {
 
     private val incomingEventHandler: IncomingEventHandler<UnionActivity> = mockk()
     private val converter = FlowActivityConverter(CurrencyMock.currencyServiceMock)
-    private val handler = FlowActivityEventHandler(incomingEventHandler, converter)
+    private val handler = FlowLegacyActivityEventHandler(incomingEventHandler, converter)
 
     @BeforeEach
     fun beforeEach() {
