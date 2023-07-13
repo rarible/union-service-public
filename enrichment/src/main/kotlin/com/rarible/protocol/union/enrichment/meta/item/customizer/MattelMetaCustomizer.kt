@@ -255,7 +255,7 @@ class BarbieTokenMetaCustomizer(
     }
 
     override val fieldDescription = fields("description")
-    override val fieldContentUrl = fields("tokenImageHash")
+    override val fieldContentUrl = fields("imageCID")
     override val fieldRights = fields("legal")
     override val fieldRightsUri = fields("eula")
 
