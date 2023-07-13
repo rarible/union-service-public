@@ -13,6 +13,7 @@ import com.rarible.protocol.union.enrichment.meta.provider.MetaProvider
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import java.util.concurrent.ArrayBlockingQueue
+import kotlin.math.max
 
 abstract class MetaDownloader<K, T : ContentOwner<T>>(
     private val metaContentEnrichmentService: MetaContentEnrichmentService<K, T>,
@@ -26,7 +27,7 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
     abstract suspend fun getRawMeta(key: K): T
 
     protected suspend fun load(key: K): T? {
-        val failedProviders = ArrayBlockingQueue<MetaProviderType>(providers.size)
+        val failedProviders = ArrayBlockingQueue<MetaProviderType>(max(providers.size, 1))
         val meta = providers.fold(getMeta(key)) { current, provider ->
             try {
                 provider.fetch(key, current)
