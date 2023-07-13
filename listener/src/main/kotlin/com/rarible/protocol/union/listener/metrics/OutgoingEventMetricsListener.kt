@@ -98,7 +98,7 @@ class ItemEventMetricsListener(metrics: OutgoingEventMetrics) : OutgoingEventMet
 @Component
 class ActivityMetricsListener(metrics: OutgoingEventMetrics) : OutgoingEventMetricsListener<ActivityEvent>(metrics) {
 
-    override val eventType = EventType.ITEM
+    override val eventType = EventType.ACTIVITY
     override fun getBlockchain(event: ActivityEvent) = event.activity.id.blockchain
     override fun getEventTimeMarks(event: ActivityEvent) = event.eventTimeMarks
 
