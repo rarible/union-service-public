@@ -1,10 +1,9 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.model.ActivityEvent
 import com.rarible.protocol.union.core.event.OutgoingActivityEventListener
 import com.rarible.protocol.union.core.model.UnionActivity
-import com.rarible.protocol.union.core.model.blockchainAndIndexerMarks
-import com.rarible.protocol.union.core.model.offchainAndIndexerMarks
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityDtoConverter
 import org.springframework.stereotype.Component
 
@@ -18,13 +17,7 @@ class EnrichmentActivityEventService(
 ) {
 
     suspend fun onActivity(activity: UnionActivity) {
-        // Workaround since we can't pass EVentTimeMarks for activities
-        val isBlockchainEvent = activity.isBlockchainEvent()
-        val marks = if (isBlockchainEvent) {
-            blockchainAndIndexerMarks(activity.date)
-        } else {
-            offchainAndIndexerMarks(activity.date)
-        }.add("enrichment-in")
+        val marks = activity.eventTimeMarks
 
         val activityDto = if (ff.enableMongoActivityWrite) {
             val enrichmentActivity = enrichmentActivityService.update(activity)
@@ -32,6 +25,10 @@ class EnrichmentActivityEventService(
         } else {
             enrichmentActivityService.enrichDeprecated(activity)
         }
+        val activityEvent = ActivityEvent(
+            activity = activityDto,
+            eventTimeMarks = marks?.toDto()
+        )
 
         if (ff.enableItemLastSaleEnrichment) {
             itemEventService.onActivity(
@@ -51,7 +48,7 @@ class EnrichmentActivityEventService(
 
         val shouldSend = ff.enableRevertedActivityEventSending || activity.reverted != true
         if (shouldSend) {
-            activityEventListeners.onEach { it.onEvent(activityDto) }
+            activityEventListeners.onEach { it.onEvent(activityEvent) }
         }
     }
 

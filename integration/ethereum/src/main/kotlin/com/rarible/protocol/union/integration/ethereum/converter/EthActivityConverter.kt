@@ -39,6 +39,7 @@ import com.rarible.protocol.union.core.model.UnionAuctionFinishActivity
 import com.rarible.protocol.union.core.model.UnionAuctionOpenActivity
 import com.rarible.protocol.union.core.model.UnionAuctionStartActivity
 import com.rarible.protocol.union.core.model.UnionBurnActivity
+import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionMintActivity
 import com.rarible.protocol.union.core.model.UnionOrderActivityMatchSideDto
 import com.rarible.protocol.union.core.model.UnionOrderBidActivity
@@ -80,10 +81,9 @@ class EthActivityConverter(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    // TODO handle time marks when it will be implemented at Union
     suspend fun convert(source: EthActivityEventDto, blockchain: BlockchainDto): UnionActivity {
         try {
-            return convertInternal(source.activity, blockchain)
+            return convertInternal(source.activity, blockchain, EthConverter.convert(source.eventTimeMarks))
         } catch (e: Exception) {
             logger.error("Failed to convert {} Activity: {} \n{}", blockchain, e.message, source)
             throw e
@@ -105,7 +105,8 @@ class EthActivityConverter(
     // for THAT date instead of price calculated for current rate
     private suspend fun convertInternal(
         source: com.rarible.protocol.dto.ActivityDto,
-        blockchain: BlockchainDto
+        blockchain: BlockchainDto,
+        eventTimeMarks: UnionEventTimeMarks? = null
     ): UnionActivity {
         val activityId = ActivityIdDto(blockchain, source.id)
         return when (source) {
@@ -122,7 +123,8 @@ class EthActivityConverter(
                         blockchain = blockchain,
                         nft = leftSide,
                         payment = rightSide,
-                        type = convert(type)
+                        type = convert(type),
+                        eventTimeMarks = eventTimeMarks
                     )
                 } else if (type != null && leftType.isCurrency() && rightType.isNft()) {
                     activityToSell(
@@ -131,13 +133,15 @@ class EthActivityConverter(
                         blockchain = blockchain,
                         nft = rightSide,
                         payment = leftSide,
-                        type = convert(type)
+                        type = convert(type),
+                        eventTimeMarks = eventTimeMarks
                     )
                 } else {
                     activityToSwap(
                         activityId = activityId,
                         source = source,
-                        blockchain = blockchain
+                        blockchain = blockchain,
+                        eventTimeMarks = eventTimeMarks
                     )
                 }
             }
@@ -157,7 +161,8 @@ class EthActivityConverter(
                     make = payment,
                     take = nft,
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
 
@@ -176,7 +181,8 @@ class EthActivityConverter(
                     make = nft,
                     take = payment,
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
 
@@ -198,7 +204,8 @@ class EthActivityConverter(
                         logIndex = source.logIndex
                     ),
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
 
@@ -220,7 +227,8 @@ class EthActivityConverter(
                         logIndex = source.logIndex
                     ),
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
 
@@ -245,7 +253,8 @@ class EthActivityConverter(
                         logIndex = source.logIndex
                     ),
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
 
@@ -269,7 +278,8 @@ class EthActivityConverter(
                         logIndex = source.logIndex
                     ),
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
 
@@ -295,7 +305,8 @@ class EthActivityConverter(
                         logIndex = source.logIndex
                     ),
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
 
@@ -306,7 +317,8 @@ class EthActivityConverter(
                     auction = auctionConverter.convert(source.auction, blockchain),
                     transactionHash = EthConverter.convert(source.transactionHash),
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
 
@@ -318,7 +330,8 @@ class EthActivityConverter(
                     auction = auctionConverter.convert(source.auction, blockchain),
                     transactionHash = EthConverter.convert(source.transactionHash),
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
 
@@ -329,7 +342,8 @@ class EthActivityConverter(
                     auction = auctionConverter.convert(source.auction, blockchain),
                     transactionHash = EthConverter.convert(source.transactionHash),
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
 
@@ -340,7 +354,8 @@ class EthActivityConverter(
                     auction = auctionConverter.convert(source.auction, blockchain),
                     transactionHash = EthConverter.convert(source.transactionHash),
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
 
@@ -350,7 +365,8 @@ class EthActivityConverter(
                     date = source.date,
                     auction = auctionConverter.convert(source.auction, blockchain),
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
 
@@ -360,7 +376,8 @@ class EthActivityConverter(
                     date = source.date,
                     auction = auctionConverter.convert(source.auction, blockchain),
                     reverted = source.reverted ?: false,
-                    lastUpdatedAt = source.lastUpdatedAt
+                    lastUpdatedAt = source.lastUpdatedAt,
+                    eventTimeMarks = eventTimeMarks
                 )
             }
         }
@@ -372,7 +389,8 @@ class EthActivityConverter(
         nft: com.rarible.protocol.dto.OrderActivityMatchSideDto,
         payment: com.rarible.protocol.dto.OrderActivityMatchSideDto,
         type: UnionOrderMatchSell.Type,
-        activityId: ActivityIdDto
+        activityId: ActivityIdDto,
+        eventTimeMarks: UnionEventTimeMarks?
     ): UnionOrderMatchSell {
         val unionPayment = EthConverter.convert(payment.asset, blockchain)
         val priceUsd = source.priceUsd
@@ -398,13 +416,15 @@ class EthActivityConverter(
             lastUpdatedAt = source.lastUpdatedAt,
             sellMarketplaceMarker = if (type == UnionOrderMatchSell.Type.SELL) source.marketplaceMarker?.toString() else source.counterMarketplaceMarker?.toString(),
             buyMarketplaceMarker = if (type == UnionOrderMatchSell.Type.ACCEPT_BID) source.marketplaceMarker?.toString() else source.counterMarketplaceMarker?.toString(),
+            eventTimeMarks = eventTimeMarks
         )
     }
 
     private fun activityToSwap(
         source: OrderActivityMatchDto,
         blockchain: BlockchainDto,
-        activityId: ActivityIdDto
+        activityId: ActivityIdDto,
+        eventTimeMarks: UnionEventTimeMarks?
     ) = UnionOrderMatchSwap(
         id = activityId,
         date = source.date,
@@ -415,7 +435,8 @@ class EthActivityConverter(
         left = convert(source.left, blockchain),
         right = convert(source.right, blockchain),
         reverted = source.reverted ?: false,
-        lastUpdatedAt = source.lastUpdatedAt
+        lastUpdatedAt = source.lastUpdatedAt,
+        eventTimeMarks = eventTimeMarks
     )
 
     fun convertToNftAllTypes(types: List<ActivityTypeDto>): List<NftActivityFilterAllDto.Types>? {

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.metrics
 
+import com.rarible.protocol.union.core.model.ActivityEvent
 import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -91,6 +92,15 @@ class ItemEventMetricsListener(metrics: OutgoingEventMetrics) : OutgoingEventMet
     override val eventType = EventType.ITEM
     override fun getBlockchain(event: ItemEventDto) = event.itemId.blockchain
     override fun getEventTimeMarks(event: ItemEventDto) = event.eventTimeMarks
+
+}
+
+@Component
+class ActivityMetricsListener(metrics: OutgoingEventMetrics) : OutgoingEventMetricsListener<ActivityEvent>(metrics) {
+
+    override val eventType = EventType.ITEM
+    override fun getBlockchain(event: ActivityEvent) = event.activity.id.blockchain
+    override fun getEventTimeMarks(event: ActivityEvent) = event.eventTimeMarks
 
 }
 
