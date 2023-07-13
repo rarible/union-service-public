@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.MetaDownloader
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -34,9 +35,14 @@ class ItemMetaDownloader(
         } catch (e: PartialDownloadException) {
             throw e
         } catch (e: Exception) {
+            logger.error(e.message, e)
             throw DownloadException(e.message ?: "Unexpected exception")
         }
         result ?: throw DownloadException("No meta resolved for Item: $id")
         return result
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(ItemMetaDownloader::class.java)
     }
 }
