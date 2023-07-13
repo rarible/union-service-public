@@ -271,8 +271,8 @@ class BarbieTokenMetaCustomizer(
         "tokenMintID",
         "tokenNumber",
         "tokenSerial",
-        "tokenExpireDate",
-        "tokenReleaseDate",
+        "expirationDate",
+        "releaseDate",
         "originalCardSerial"
     )
 }

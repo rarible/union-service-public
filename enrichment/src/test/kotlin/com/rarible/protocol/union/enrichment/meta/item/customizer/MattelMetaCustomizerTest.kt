@@ -174,8 +174,8 @@ class MattelMetaCustomizerTest {
             UnionMetaAttribute("tokenMintID", "tokenMintID_value"),
             UnionMetaAttribute("tokenNumber", "tokenNumber_value"),
             UnionMetaAttribute("tokenSerial", "tokenSerial_value"),
-            UnionMetaAttribute("tokenExpireDate", "tokenExpireDate_value"),
-            UnionMetaAttribute("tokenReleaseDate", "tokenReleaseDate_value"),
+            UnionMetaAttribute("expirationDate", "expirationDate_value"),
+            UnionMetaAttribute("releaseDate", "releaseDate_value"),
             UnionMetaAttribute("originalCardSerial", "originalCardSerial_value")
         )
         val attributes = listOf(
