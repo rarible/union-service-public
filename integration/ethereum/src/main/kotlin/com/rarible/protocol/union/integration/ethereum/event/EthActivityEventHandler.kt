@@ -21,7 +21,7 @@ abstract class EthActivityEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun convert(event: EthActivityEventDto): UnionActivity {
-        logger.debug("Received Ethereum ({}) Activity event: type={}", blockchain, event::class.java.simpleName)
+        logger.info("Received Ethereum ({}) Activity event: type={}", blockchain, event::class.java.simpleName)
         return ethActivityConverter.convert(event, blockchain)
     }
 }
