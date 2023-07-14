@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.listener.metrics
 
-import com.rarible.protocol.union.core.model.ActivityEvent
 import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.event.OutgoingEventListener
+import com.rarible.protocol.union.core.model.ActivityEvent
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.EventTimeMarksDto
@@ -16,6 +16,12 @@ import java.time.Duration
 sealed class OutgoingEventMetricsListener<T>(
     private val metrics: OutgoingEventMetrics
 ) : OutgoingEventListener<T> {
+
+    private val measuredSources = setOf(
+        "blockchain",
+        "offchain",
+        "integration"
+    )
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -38,6 +44,9 @@ sealed class OutgoingEventMetricsListener<T>(
         if (marks.isNullOrEmpty()) {
             // TODO remove later, just an indicator that we have marked all incoming events
             logger.warn("{} event from {} has no time marks", eventType, blockchain)
+            return
+        }
+        if (eventTimeMarks.source !in measuredSources) {
             return
         }
         if (marks.size < 2) {
@@ -83,7 +92,6 @@ class CollectionEventMetricsListener(metrics: OutgoingEventMetrics) :
     override val eventType = EventType.COLLECTION
     override fun getBlockchain(event: CollectionEventDto) = event.collectionId.blockchain
     override fun getEventTimeMarks(event: CollectionEventDto) = event.eventTimeMarks
-
 }
 
 @Component
@@ -92,7 +100,6 @@ class ItemEventMetricsListener(metrics: OutgoingEventMetrics) : OutgoingEventMet
     override val eventType = EventType.ITEM
     override fun getBlockchain(event: ItemEventDto) = event.itemId.blockchain
     override fun getEventTimeMarks(event: ItemEventDto) = event.eventTimeMarks
-
 }
 
 @Component
@@ -101,7 +108,6 @@ class ActivityMetricsListener(metrics: OutgoingEventMetrics) : OutgoingEventMetr
     override val eventType = EventType.ACTIVITY
     override fun getBlockchain(event: ActivityEvent) = event.activity.id.blockchain
     override fun getEventTimeMarks(event: ActivityEvent) = event.eventTimeMarks
-
 }
 
 @Component
@@ -111,7 +117,6 @@ class OwnershipEventMetricsListener(metrics: OutgoingEventMetrics) :
     override val eventType = EventType.OWNERSHIP
     override fun getBlockchain(event: OwnershipEventDto) = event.ownershipId.blockchain
     override fun getEventTimeMarks(event: OwnershipEventDto) = event.eventTimeMarks
-
 }
 
 @Component
@@ -120,5 +125,4 @@ class OrderEventMetricsListener(metrics: OutgoingEventMetrics) : OutgoingEventMe
     override val eventType = EventType.ORDER
     override fun getBlockchain(event: OrderEventDto) = event.orderId.blockchain
     override fun getEventTimeMarks(event: OrderEventDto) = event.eventTimeMarks
-
 }
