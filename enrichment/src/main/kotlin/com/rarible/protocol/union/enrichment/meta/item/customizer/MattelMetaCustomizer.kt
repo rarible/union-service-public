@@ -260,20 +260,8 @@ class BarbieTokenMetaCustomizer(
     override val fieldRightsUri = fields("eula")
 
     override val attributesWhiteList = setOf(
-        "type",
-        "drop",
-        "rarity",
-        "series",
-        "splits",
-        "collection",
-        "redeemable",
-        "seriesName",
-        "tokenMintID",
-        "tokenNumber",
-        "tokenSerial",
         "expirationDate",
-        "releaseDate",
-        "originalCardSerial"
+        "releaseDate"
     )
 }
 

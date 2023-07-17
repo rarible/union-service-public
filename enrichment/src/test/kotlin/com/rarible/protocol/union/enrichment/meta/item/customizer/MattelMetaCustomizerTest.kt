@@ -163,20 +163,8 @@ class MattelMetaCustomizerTest {
     @Test
     fun `customize - barbie token`() = runBlocking<Unit> {
         val whitListAttributes = listOf(
-            UnionMetaAttribute("type", "type_value"),
-            UnionMetaAttribute("drop", "drop_value"),
-            UnionMetaAttribute("rarity", "rarity_value"),
-            UnionMetaAttribute("series", "series_value"),
-            UnionMetaAttribute("splits", "splits_value"),
-            UnionMetaAttribute("collection", "collection_value"),
-            UnionMetaAttribute("redeemable", "redeemable_value"),
-            UnionMetaAttribute("seriesName", "seriesName_value"),
-            UnionMetaAttribute("tokenMintID", "tokenMintID_value"),
-            UnionMetaAttribute("tokenNumber", "tokenNumber_value"),
-            UnionMetaAttribute("tokenSerial", "tokenSerial_value"),
             UnionMetaAttribute("expirationDate", "expirationDate_value"),
-            UnionMetaAttribute("releaseDate", "releaseDate_value"),
-            UnionMetaAttribute("originalCardSerial", "originalCardSerial_value")
+            UnionMetaAttribute("releaseDate", "releaseDate_value")
         )
         val attributes = listOf(
             UnionMetaAttribute("tokenImageHash", "imageUrl_value"),
