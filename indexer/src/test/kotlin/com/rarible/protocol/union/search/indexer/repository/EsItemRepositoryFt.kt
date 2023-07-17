@@ -12,19 +12,17 @@ import com.rarible.protocol.union.core.model.elastic.EsItemSort
 import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.core.model.elastic.TraitFilter
 import com.rarible.protocol.union.core.service.CurrencyService
+import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import io.mockk.coEvery
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DynamicTest
-import org.junit.jupiter.api.DynamicTest.dynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -249,29 +247,33 @@ internal class EsItemRepositoryFt {
     }
 
     @TestFactory
-    fun `should search by prefix name key`(): List<DynamicTest> = runBlocking {
-        val esItems = (1..50).map { randomEsItem() }
-        repository.saveAll(esItems)
+    fun `should search by prefix name key`() = runBlocking<Unit> {
+        // Let's make strings a bit longer to avoid collisions with default traits
+        val key1 = randomString(12)
+        val key2 = randomString(12)
+        val key3 = randomString(12)
 
-        val esItem = randomEsItem().copy(name = "Axie #120738 key3")
-        repository.save(esItem)
+        val esItem = randomEsItem().copy(name = "$key1 $key2 $key3")
+        val esItems = (1..50).map { randomEsItem() } + esItem
+        repository.bulk(esItems + esItem)
 
-        listOf(
-            "key3", "KEY3", "key", "axie"
-        ).map {
+        assertItemFoundByText(esItem, key1)
+        assertItemFoundByText(esItem, key2)
+        assertItemFoundByText(esItem, key3)
+        assertItemFoundByText(esItem, key1.uppercase())
+        assertItemFoundByText(esItem, key2.lowercase())
+        assertItemFoundByText(esItem, key3.uppercase())
+    }
 
-            dynamicTest("should search by prefix name key $it") {
-                runBlocking {
+    private suspend fun assertItemFoundByText(esItem: EsItem, text: String) {
+        val result = repository.search(
+            EsItemGenericFilter(text = text),
+            EsItemSort.DEFAULT,
+            10
+        ).entities
 
-                    val result = repository.search(
-                        EsItemGenericFilter(text = it), EsItemSort.DEFAULT, 10
-                    ).entities
-
-                    assertThat(result.size).isEqualTo(1)
-                    assertThat(result[0].itemId).isEqualTo(esItem.itemId)
-                }
-            }
-        }
+        assertThat(result.size).isEqualTo(1)
+        assertThat(result[0].itemId).isEqualTo(esItem.itemId)
     }
 
     @Test
@@ -317,10 +319,8 @@ internal class EsItemRepositoryFt {
 
     @Test
     fun `get random items from collection`() = runBlocking<Unit> {
-        val collectionId =
-            CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = randomAddress().toString()).fullId()
-        val otherCollectionId =
-            CollectionIdDto(blockchain = BlockchainDto.ETHEREUM, value = randomAddress().toString()).fullId()
+        val collectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().toString()).fullId()
+        val otherCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().toString()).fullId()
         val esItem1 = randomEsItem(collectionId = collectionId)
         val esItem2 = randomEsItem(collectionId = collectionId)
         val esItem3 = randomEsItem(collectionId = collectionId)
@@ -328,12 +328,14 @@ internal class EsItemRepositoryFt {
 
         repository.bulk(entitiesToSave = listOf(esItem1, esItem2, esItem3, esItem4))
 
-        val result1 = repository.getRandomItemsFromCollection(collectionId = collectionId,  size = 3)
-        delay(10)
-        val result2 = repository.getRandomItemsFromCollection(collectionId = collectionId, size = 3)
-        assertThat(result1).containsExactlyInAnyOrder(esItem1, esItem2, esItem3)
-        assertThat(result1).containsExactlyInAnyOrder(*result2.toTypedArray())
-        assertThat(result1).isNotEqualTo(result2)
+        val result1 = repository.getRandomItemsFromCollection(collectionId = collectionId, size = 3)
+        WaitAssert.wait {
+            val result2 = repository.getRandomItemsFromCollection(collectionId = collectionId, size = 3)
+            assertThat(result1).containsExactlyInAnyOrder(esItem1, esItem2, esItem3)
+            assertThat(result1).containsExactlyInAnyOrder(*result2.toTypedArray())
+            // Sometimes it might match
+            assertThat(result1).isNotEqualTo(result2)
+        }
     }
 
     fun randomEsItem(
