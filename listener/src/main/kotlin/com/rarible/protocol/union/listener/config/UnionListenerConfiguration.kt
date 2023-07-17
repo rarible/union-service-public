@@ -7,9 +7,10 @@ import com.rarible.core.kafka.RaribleKafkaConsumerSettings
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumerWorkerGroup
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
+import com.rarible.protocol.union.core.handler.InternalBatchEventHandler
 import com.rarible.protocol.union.core.handler.InternalEventHandler
-import com.rarible.protocol.union.core.handler.InternalEventHandlerWrapper
 import com.rarible.protocol.union.core.model.CompositeRegisteredTimer
 import com.rarible.protocol.union.core.model.ItemEventDelayMetric
 import com.rarible.protocol.union.core.model.OrderEventDelayMetric
@@ -25,6 +26,7 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.listener.downloader.MetaTaskRouter
 import com.rarible.protocol.union.listener.handler.internal.CollectionMetaTaskSchedulerHandler
 import com.rarible.protocol.union.listener.handler.internal.ItemMetaTaskSchedulerHandler
+import com.rarible.protocol.union.listener.handler.internal.UnionInternalEventHandler
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
@@ -45,6 +47,7 @@ class UnionListenerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     private val meterRegistry: MeterRegistry,
     activeBlockchains: List<BlockchainDto>,
+    private val ff: FeatureFlagsProperties
 ) {
 
     private val env = applicationEnvironmentInfo.name
@@ -59,7 +62,7 @@ class UnionListenerConfiguration(
 
     @Bean
     fun unionBlockchainEventWorker(
-        handler: InternalEventHandler<UnionInternalBlockchainEvent>
+        handler: UnionInternalEventHandler
     ): RaribleKafkaConsumerWorker<UnionInternalBlockchainEvent> {
         val consumers = blockchains.map { blockchain ->
             val workers = properties.getWorkerProperties(blockchain)
@@ -69,11 +72,23 @@ class UnionListenerConfiguration(
                 group = consumerGroup("blockchain.${blockchain.name.lowercase()}"),
                 concurrency = workers.concurrency,
                 batchSize = workers.batchSize,
+                // Mandatory to be true with InternalBatchEventHandler, do not set it FALSE!
+                // Sync handling won't work with UnionInternalEventChunker, can cause bugs
                 async = true,
                 offsetResetStrategy = OffsetResetStrategy.EARLIEST,
                 valueClass = UnionInternalBlockchainEvent::class.java
             )
-            kafkaConsumerFactory.createWorker(settings, InternalEventHandlerWrapper(handler))
+            if (ff.enableInternalEventChunkAsyncHandling) {
+                kafkaConsumerFactory.createWorker(
+                    settings,
+                    handler as InternalBatchEventHandler<UnionInternalBlockchainEvent>
+                )
+            } else {
+                kafkaConsumerFactory.createWorker(
+                    settings,
+                    handler as InternalEventHandler<UnionInternalBlockchainEvent>
+                )
+            }
         }
         return RaribleKafkaConsumerWorkerGroup(consumers)
     }

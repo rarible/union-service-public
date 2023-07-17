@@ -105,16 +105,18 @@ fun randomUnionCollection(): UnionCollection =
         BlockchainDto.ETHEREUM
     )
 
-fun randomUnionItem(id: ItemIdDto): UnionItem {
+fun randomUnionItem(id: ItemIdDto = randomEthItemId()): UnionItem {
     return when (id.blockchain) {
         BlockchainDto.ETHEREUM, BlockchainDto.POLYGON, BlockchainDto.IMMUTABLEX -> EthItemConverter.convert(
             randomEthNftItemDto(id),
             id.blockchain
         )
+
         BlockchainDto.FLOW -> FlowItemConverter.convert(
             randomFlowNftItemDto(id),
             id.blockchain
         )
+
         BlockchainDto.TEZOS -> TODO()
         BlockchainDto.SOLANA -> SolanaItemConverter.convert(
             randomSolanaTokenDto(id),
