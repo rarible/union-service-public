@@ -13,28 +13,42 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     // TODO remove this one later, everything is serialized with "ACTIVITY" now
     JsonSubTypes.Type(name = "ACTIVITY_", value = UnionInternalActivityEvent::class)
 )
-sealed class UnionInternalBlockchainEvent
+sealed class UnionInternalBlockchainEvent {
+    abstract fun getEntityId(): Any
+}
 
 data class UnionInternalItemEvent(
     val event: UnionItemEvent
-) : UnionInternalBlockchainEvent()
+) : UnionInternalBlockchainEvent() {
+    override fun getEntityId() = event.itemId
+}
 
 data class UnionInternalCollectionEvent(
     val event: UnionCollectionEvent
-) : UnionInternalBlockchainEvent()
+) : UnionInternalBlockchainEvent() {
+    override fun getEntityId() = event.collectionId
+}
 
 data class UnionInternalOwnershipEvent(
     val event: UnionOwnershipEvent
-) : UnionInternalBlockchainEvent()
+) : UnionInternalBlockchainEvent() {
+    override fun getEntityId() = event.ownershipId
+}
 
 data class UnionInternalOrderEvent(
     val event: UnionOrderEvent
-) : UnionInternalBlockchainEvent()
+) : UnionInternalBlockchainEvent() {
+    override fun getEntityId() = event.orderId
+}
 
 data class UnionInternalAuctionEvent(
     val event: UnionAuctionEvent
-) : UnionInternalBlockchainEvent()
+) : UnionInternalBlockchainEvent() {
+    override fun getEntityId() = event.auction.auctionId
+}
 
 data class UnionInternalActivityEvent(
     val event: UnionActivity
-) : UnionInternalBlockchainEvent()
+) : UnionInternalBlockchainEvent() {
+    override fun getEntityId() = event.id
+}
