@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.worker.config
 
+import com.github.cloudyrock.spring.v5.EnableMongock
 import com.rarible.core.task.EnableRaribleTask
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
@@ -41,6 +42,7 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
 )
 @EnableRaribleTask
 @EnableConfigurationProperties(WorkerProperties::class, RateLimiterProperties::class)
+@EnableMongock
 class WorkerConfiguration(
     val properties: WorkerProperties
 ) {
