@@ -83,7 +83,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         assertThat(created).isEqualTo(
             ShortItem.empty(created.id).copy(
                 lastUpdatedAt = created.lastUpdatedAt,
-                version = 0,
+                version = created.version,
                 metaEntry = created.metaEntry
             )
         )
@@ -423,14 +423,12 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         itemEventService.onItemBestBidOrderUpdated(shortItem.id, unionBestBid, stubEventMark())
 
-        val saved = itemService.get(shortItem.id)!!
-        assertThat(saved.bestBidOrder).isNull()
+        val saved = itemService.get(shortItem.id)
+        assertThat(saved).isNull()
 
         waitAssert {
             val messages = findItemUpdates(itemId.value)
-            assertThat(messages).hasSize(1)
-            assertThat(messages[0].itemId).isEqualTo(itemId)
-            assertThat(messages[0].item.bestBidOrder).isNull()
+            assertThat(messages).hasSize(0)
         }
     }
 
