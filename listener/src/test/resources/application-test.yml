@@ -77,12 +77,14 @@ integration:
     scanner:
       job:
         initialDelay:
-          mints: 600
-          transfers: 600
-          trades: 600
-          deposits: 600
-          withdrawals: 600
-          orders: 600
+          mints: 6000
+          transfers: 6000
+          trades: 6000
+          deposits: 6000
+          withdrawals: 6000
+          orders: 6000
+          assets: 6000
+          collections: 6000
 
 meta:
   embedded:
