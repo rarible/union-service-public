@@ -51,6 +51,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
 import reactor.kotlin.core.publisher.toMono
@@ -74,6 +75,8 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
     private val continuation: String? = null
     private val defaultSize = PageSize.ACTIVITY.default
     private val sort: com.rarible.protocol.union.dto.ActivitySortDto? = null
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Autowired
     private lateinit var activityControllerApi: ActivityControllerApi
@@ -294,11 +297,14 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val fourthActivity = activities.activities[3]
         val fifthActivity = activities.activities[4]
 
-        assertThat(firstActivity.id.value).isEqualTo(flowActivity1.id)
-        assertThat(secondActivity.id.value).isEqualTo(polygonItemActivity1.id)
-        assertThat(thirdActivity.id.value).isEqualTo(ethOrderActivity3.id)
-        assertThat(fourthActivity.id.value).isEqualTo(tezosActivity1.id)
-        assertThat(fifthActivity.id.value).isEqualTo(solanaActivity1.id)
+        val message = "Received activities: ${activities.activities}, but expected: " +
+            "${listOf(flowActivity1, polygonItemActivity1, ethOrderActivity3, tezosActivity1, solanaActivity1)}"
+
+        assertThat(firstActivity.id.value).withFailMessage(message).isEqualTo(flowActivity1.id)
+        assertThat(secondActivity.id.value).withFailMessage(message).isEqualTo(polygonItemActivity1.id)
+        assertThat(thirdActivity.id.value).withFailMessage(message).isEqualTo(ethOrderActivity3.id)
+        assertThat(fourthActivity.id.value).withFailMessage(message).isEqualTo(tezosActivity1.id)
+        assertThat(fifthActivity.id.value).withFailMessage(message).isEqualTo(solanaActivity1.id)
 
         assertThat(activities.cursor).isNotNull
 
