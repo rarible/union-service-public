@@ -8,8 +8,10 @@ import com.rarible.protocol.union.core.model.UnionInternalItemEvent
 import com.rarible.protocol.union.core.model.UnionInternalOrderEvent
 import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
+import org.springframework.stereotype.Component
 
-object UnionInternalEventChunker {
+@Component
+class UnionInternalEventChunker {
 
     // IMPORTANT! We suggest these events have SAME key in Kafka
     fun toChunks(events: List<UnionInternalBlockchainEvent>): List<List<UnionInternalBlockchainEvent>> {
@@ -88,14 +90,14 @@ object UnionInternalEventChunker {
             return chunk.isEmpty()
         }
     }
+}
 
-    private fun UnionInternalBlockchainEvent.data(): Any = when (this) {
-        is UnionInternalItemEvent -> event
-        is UnionInternalOwnershipEvent -> event
-        is UnionInternalActivityEvent -> event
-        is UnionInternalAuctionEvent -> event
-        is UnionInternalCollectionEvent -> event
-        is UnionInternalOrderEvent -> event
-        else -> throw IllegalArgumentException("Unexpected event type: $this")
-    }
+private fun UnionInternalBlockchainEvent.data(): Any = when (this) {
+    is UnionInternalItemEvent -> event
+    is UnionInternalOwnershipEvent -> event
+    is UnionInternalActivityEvent -> event
+    is UnionInternalAuctionEvent -> event
+    is UnionInternalCollectionEvent -> event
+    is UnionInternalOrderEvent -> event
+    else -> throw IllegalArgumentException("Unexpected event type: $this")
 }

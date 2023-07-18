@@ -26,6 +26,8 @@ import org.junit.jupiter.api.Test
 
 class UnionInternalEventChunkerTest {
 
+    private val unionInternalEventChunker = UnionInternalEventChunker()
+
     @Test
     fun `to chunks - ok, individual events`() {
         val marks = stubEventMark()
@@ -45,7 +47,7 @@ class UnionInternalEventChunkerTest {
 
         // Single chunks expected, no parallelism allowed
         val expected = events.map { listOf(it) }
-        val chunks = UnionInternalEventChunker.toChunks(events)
+        val chunks = unionInternalEventChunker.toChunks(events)
 
         assertThat(chunks).isEqualTo(expected)
     }
@@ -60,7 +62,7 @@ class UnionInternalEventChunkerTest {
         )
 
         val expected = listOf(events)
-        val chunks = UnionInternalEventChunker.toChunks(events)
+        val chunks = unionInternalEventChunker.toChunks(events)
 
         assertThat(chunks).isEqualTo(expected)
     }
@@ -81,7 +83,7 @@ class UnionInternalEventChunkerTest {
             listOf(events[1], events[2]),
             listOf(events[3])
         )
-        val chunks = UnionInternalEventChunker.toChunks(events)
+        val chunks = unionInternalEventChunker.toChunks(events)
 
         assertThat(chunks).isEqualTo(expected)
     }
@@ -103,7 +105,7 @@ class UnionInternalEventChunkerTest {
             listOf(events[0]),
             listOf(events[1], events[2])
         )
-        val chunks = UnionInternalEventChunker.toChunks(events)
+        val chunks = unionInternalEventChunker.toChunks(events)
 
         assertThat(chunks).isEqualTo(expected)
     }
@@ -123,7 +125,7 @@ class UnionInternalEventChunkerTest {
             listOf(events[0], events[1], events[2]),
             listOf(events[3])
         )
-        val chunks = UnionInternalEventChunker.toChunks(events)
+        val chunks = unionInternalEventChunker.toChunks(events)
 
         assertThat(chunks).isEqualTo(expected)
     }

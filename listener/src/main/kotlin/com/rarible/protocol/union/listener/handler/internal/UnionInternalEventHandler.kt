@@ -25,7 +25,8 @@ class UnionInternalEventHandler(
     private val internalOrderEventHandler: UnionInternalOrderEventHandler,
     private val internalAuctionEventHandler: UnionInternalAuctionEventHandler,
     private val internalActivityEventHandler: UnionInternalActivityEventHandler,
-    private val internalCollectionEventHandler: UnionInternalCollectionEventHandler
+    private val internalCollectionEventHandler: UnionInternalCollectionEventHandler,
+    private val unionInternalEventChunker: UnionInternalEventChunker,
 ) : InternalBatchEventHandler<UnionInternalBlockchainEvent>, InternalEventHandler<UnionInternalBlockchainEvent> {
 
     // Important! Can be used ONLY for sub-batches with same kafka key
@@ -35,7 +36,7 @@ class UnionInternalEventHandler(
         // Here events divided in chunks that should be handled consequently,
         // but events inside each chunk can be handled in parallel
         // (initially done for case when we got tons of ownerships for same item - they can be handled in parallel)
-        val sequentialChunks = UnionInternalEventChunker.toChunks(event)
+        val sequentialChunks = unionInternalEventChunker.toChunks(event)
         coroutineScope {
             sequentialChunks.forEach { chunk ->
                 // TODO remove later, for initial debug only
