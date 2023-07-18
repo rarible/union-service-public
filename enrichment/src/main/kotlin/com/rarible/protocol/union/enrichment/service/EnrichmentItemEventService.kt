@@ -327,10 +327,9 @@ class EnrichmentItemEventService(
     private suspend fun update(
         itemId: ShortItemId,
         action: suspend (item: ShortItem) -> ShortItem
-    ): Pair<ShortItem?, ShortItem> {
-        val current = enrichmentItemService.get(itemId)
-        val short = current ?: ShortItem.empty(itemId)
-        return current to action(short)
+    ): Pair<ShortItem, ShortItem> {
+        val current = enrichmentItemService.getOrEmpty(itemId)
+        return current to action(current)
     }
 
     // Potentially we could have updated Order here (no matter - bid/sell) and when we need to fetch
