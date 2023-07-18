@@ -47,6 +47,7 @@ import com.rarible.protocol.union.dto.SubscriptionRequestDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
+import io.mockk.coEvery
 import io.mockk.mockk
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.elasticsearch.action.support.IndicesOptions
@@ -125,20 +126,24 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
 
     @Bean
     @Primary
-    fun testItemEventProducer(): RaribleKafkaProducer<ItemEventDto> = mockk()
+    fun testItemEventProducer(): RaribleKafkaProducer<ItemEventDto> =
+        mockk { coEvery { close() } returns Unit }
 
     @Bean
     @Primary
-    fun testCollectionEventProducer(): RaribleKafkaProducer<CollectionEventDto> = mockk()
+    fun testCollectionEventProducer(): RaribleKafkaProducer<CollectionEventDto> =
+        mockk { coEvery { close() } returns Unit }
 
     @Bean
     @Primary
-    fun testOwnershipEventProducer(): RaribleKafkaProducer<OwnershipEventDto> = mockk()
+    fun testOwnershipEventProducer(): RaribleKafkaProducer<OwnershipEventDto> =
+        mockk { coEvery { close() } returns Unit }
 
     @Bean
     @Primary
     @Qualifier("download.scheduler.task.producer.item-meta")
-    fun testDownloadTaskProducer(): RaribleKafkaProducer<DownloadTask> = mockk()
+    fun testDownloadTaskProducer(): RaribleKafkaProducer<DownloadTask> =
+        mockk { coEvery { close() } returns Unit }
 
     @Bean
     @Primary

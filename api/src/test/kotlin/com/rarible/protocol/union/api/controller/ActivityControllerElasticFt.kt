@@ -114,11 +114,11 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         val polygonItemActivity1 = randomEthItemMintActivity().copy(date = now.minusSeconds(12))
         val polygonItemActivity2 = randomEthItemMintActivity().copy(date = now.minusSeconds(2))
         val flowActivity1 = randomFlowBurnDto().copy(date = nowMillis().minusSeconds(13))
-        val flowActivity2 = randomFlowCancelBidActivityDto().copy(date = nowMillis().minusSeconds(3))
-        val solanaActivity1 = randomSolanaMintActivity().copy(date = nowMillis().minusSeconds(8))
+        val flowActivity2 = randomFlowCancelBidActivityDto().copy(date = now.minusSeconds(3))
+        val solanaActivity1 = randomSolanaMintActivity().copy(date = now.minusSeconds(8))
         val tezosActivity1 = randomTezosItemBurnActivity().copy(
             id = randomInt().toString(),
-            date = nowMillis().minusSeconds(9).atOffset(ZoneOffset.UTC)
+            date = now.minusSeconds(9).atOffset(ZoneOffset.UTC)
         )
 
         val elasticEthOrderActivity1 = randomEsActivity().copy(
@@ -212,7 +212,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             blockchain = BlockchainDto.TEZOS,
         )
 
-        repository.saveAll(
+        repository.bulk(
             listOf(
                 elasticEthOrderActivity1, elasticEthOrderActivity2, elasticEthOrderActivity3,
                 elasticEthItemActivity1, elasticEthItemActivity2, elasticEthItemActivity3,
