@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.listener.config
 
-import com.github.cloudyrock.spring.v5.EnableMongock
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
@@ -39,7 +38,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 
 @Configuration
-@EnableMongock
 @Import(value = [EnrichmentConsumerConfiguration::class, SearchConfiguration::class])
 @EnableConfigurationProperties(value = [UnionListenerProperties::class])
 class UnionListenerConfiguration(

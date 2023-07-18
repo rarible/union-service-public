@@ -22,9 +22,6 @@ spring:
     scheduling:
       pool:
         size: 16
-mongock:
-  change-logs-scan-package:
-    - com.rarible.protocol.union.enrichment.migration
 
 rarible:
   core:
