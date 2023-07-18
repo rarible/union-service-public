@@ -66,7 +66,7 @@ data class SimpleHash(
     val enabled: Boolean = false,
     val endpoint: String = "https://api.simplehash.com/api/v0",
     val apiKey: String = "",
-    val supported: Set<BlockchainDto> = setOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON/*, BlockchainDto.FLOW*/),
+    val supported: Set<BlockchainDto> = setOf(BlockchainDto.ETHEREUM /* BlockchainDto.POLYGON, BlockchainDto.FLOW*/),
 
     // this is needed to mapping for test networks
     val mapping: Map<String, String> = emptyMap(),
