@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -25,7 +26,7 @@ import com.rarible.protocol.union.enrichment.meta.item.MetaTrimmer
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
-import kotlinx.coroutines.async
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.toSet
 import org.slf4j.LoggerFactory
@@ -114,7 +115,7 @@ class EnrichmentItemService(
         require(shortItem != null || item != null)
         val itemId = shortItem?.id?.toDto() ?: item!!.id
 
-        val fetchedItem = async { item ?: fetch(ShortItemId(itemId)) }
+        val fetchedItem = asyncWithTraceId(context = NonCancellable) { item ?: fetch(ShortItemId(itemId)) }
 
         val metaEntry = shortItem?.metaEntry
         val meta = metaEntry?.data
@@ -128,7 +129,12 @@ class EnrichmentItemService(
         val itemBestOrders = itemOrders.mapNotNull { bestOrders[it.dtoId] }.associateBy { it.id }
 
         val auctionIds = shortItem?.auctions ?: emptySet()
-        val auctionsData = async { enrichmentAuctionService.fetchAuctionsIfAbsent(auctionIds, auctions) }
+        val auctionsData = asyncWithTraceId(context = NonCancellable) {
+            enrichmentAuctionService.fetchAuctionsIfAbsent(
+                auctionIds,
+                auctions
+            )
+        }
 
         val trimmedMeta = itemMetaTrimmer.trim(meta)
         if (meta != trimmedMeta) {

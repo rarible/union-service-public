@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
@@ -26,7 +27,7 @@ import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.util.spent
-import kotlinx.coroutines.async
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -156,7 +157,7 @@ class EnrichmentCollectionService(
     ) = coroutineScope {
         require(enrichmentCollection != null || collection != null)
         val collectionId = enrichmentCollection?.id?.toDto() ?: collection!!.id
-        val fetchedCollection = async {
+        val fetchedCollection = asyncWithTraceId(context = NonCancellable) {
             collection ?: fetch(EnrichmentCollectionId(collectionId))
         }
 

@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.client.WebClientResponseProxyException
-import com.rarible.core.common.flatMapAsync
 import com.rarible.core.common.nowMillis
+import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -21,6 +21,9 @@ import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.util.spent
 import com.rarible.protocol.union.enrichment.validator.BestOrderValidator
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -56,13 +59,14 @@ class EnrichmentOrderService(
         }
     }
 
-    suspend fun getByIds(ids: List<OrderIdDto>): List<UnionOrder> {
-        return ids
-            .groupBy { it.blockchain }
-            .flatMapAsync { (blockchain, ids) ->
-                val nativeIds = ids.map { it.value }
-                orderServiceRouter.getService(blockchain).getOrdersByIds(nativeIds)
-            }
+    suspend fun getByIds(ids: List<OrderIdDto>): List<UnionOrder> = coroutineScope {
+        ids.groupBy { it.blockchain }
+            .map { (blockchain, ids) ->
+                asyncWithTraceId(context = NonCancellable) {
+                    val nativeIds = ids.map { it.value }
+                    orderServiceRouter.getService(blockchain).getOrdersByIds(nativeIds)
+                }
+            }.awaitAll().flatten()
     }
 
     suspend fun fetchMissingOrders(

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.core.model.UnionActivity
@@ -26,7 +27,7 @@ import com.rarible.protocol.union.enrichment.evaluator.OwnershipSourceComparator
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.validator.OwnershipValidator
-import kotlinx.coroutines.async
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -133,7 +134,9 @@ class EnrichmentOwnershipEventService(
     suspend fun onOwnershipDeleted(event: UnionOwnershipDeleteEvent) = coroutineScope {
         val ownershipId = event.ownershipId
         val shortOwnershipId = ShortOwnershipId(ownershipId)
-        val ownershipAuctionDeferred = async { enrichmentAuctionService.fetchOwnershipAuction(shortOwnershipId) }
+        val ownershipAuctionDeferred = asyncWithTraceId(context = NonCancellable) {
+            enrichmentAuctionService.fetchOwnershipAuction(shortOwnershipId)
+        }
 
         logger.debug("Deleting Ownership [{}] since it was removed from NFT-Indexer", shortOwnershipId)
         val deleted = enrichmentOwnershipService.delete(shortOwnershipId)
@@ -301,7 +304,9 @@ class EnrichmentOwnershipEventService(
         }
 
         val dto = coroutineScope {
-            val auctionDeferred = async { auction ?: enrichmentAuctionService.fetchOwnershipAuction(short.id) }
+            val auctionDeferred = asyncWithTraceId(context = NonCancellable) {
+                auction ?: enrichmentAuctionService.fetchOwnershipAuction(short.id)
+            }
             val orders = listOfNotNull(order).associateBy { it.id }
             val enriched = enrichmentOwnershipService.enrichOwnership(short, ownership, orders)
             enrichmentOwnershipService.mergeWithAuction(enriched, auctionDeferred.await())
