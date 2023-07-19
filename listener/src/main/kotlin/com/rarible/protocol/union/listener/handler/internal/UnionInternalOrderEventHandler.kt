@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.apm.CaptureTransaction
+import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
@@ -17,7 +18,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
-import kotlinx.coroutines.async
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -97,7 +98,7 @@ class UnionInternalOrderEventHandler(
             return
         }
 
-        val orderDeferred = coroutineScope { async { fetchOrder(orderId) } }
+        val orderDeferred = coroutineScope { asyncWithTraceId(context = NonCancellable) { fetchOrder(orderId) } }
         val exist = enrichmentItemService.findByPoolOrder(orderId)
         val order = orderDeferred.await()
 
