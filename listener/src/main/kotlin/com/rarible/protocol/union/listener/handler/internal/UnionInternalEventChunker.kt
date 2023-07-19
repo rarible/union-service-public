@@ -58,13 +58,15 @@ class UnionInternalEventChunker {
     }
 
     private fun squash(events: List<UnionInternalBlockchainEvent>): List<UnionInternalBlockchainEvent> {
-        val ids = HashSet<Any>(events.size)
+        val ids = HashSet<Pair<Class<*>, Any>>(events.size)
         return events.reversed().filter {
-            if (it.data().javaClass in squashableEventTypes) {
-                if (it.getEntityId() in ids) {
+            val type = it.data().javaClass
+            val key = Pair(type, it.getEntityId())
+            if (type in squashableEventTypes) {
+                if (key in ids) {
                     false
                 } else {
-                    ids.add(it.getEntityId())
+                    ids.add(key)
                     true
                 }
             } else {

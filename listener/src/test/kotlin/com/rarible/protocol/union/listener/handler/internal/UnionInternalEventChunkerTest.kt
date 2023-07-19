@@ -176,4 +176,30 @@ class UnionInternalEventChunkerTest {
 
         assertThat(chunks).isEqualTo(expected)
     }
+
+    @Test
+    fun `to chunks - ok, item different events squashed`() {
+        val marks = stubEventMark()
+        val itemId = randomEthItemId()
+
+        // Change and Update events for the same item should be squashed - but only in scope of their type
+        val events = listOf(
+            UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(itemId), marks)),
+            UnionInternalItemEvent(UnionItemChangeEvent(itemId, marks)),
+            UnionInternalOwnershipEvent(UnionOwnershipUpdateEvent(randomUnionOwnership(), marks)),
+            UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(itemId), marks)),
+            UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(), marks)),
+            UnionInternalItemEvent(UnionItemChangeEvent(itemId, marks)),
+        )
+
+        val expected = listOf(
+            listOf(events[2]),
+            listOf(events[3]),
+            listOf(events[4]),
+            listOf(events[5])
+        )
+        val chunks = unionInternalEventChunker.toChunks(events)
+
+        assertThat(chunks).isEqualTo(expected)
+    }
 }
