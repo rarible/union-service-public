@@ -63,12 +63,7 @@ class UnionInternalEventChunker {
             val type = it.data().javaClass
             val key = Pair(type, it.getEntityId())
             if (type in squashableEventTypes) {
-                if (key in ids) {
-                    false
-                } else {
-                    ids.add(key)
-                    true
-                }
+                ids.add(key)
             } else {
                 true
             }
