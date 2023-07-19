@@ -89,7 +89,7 @@ class UnionInternalEventChunkerTest {
     }
 
     @Test
-    fun `to chunks - ok, with same ownership id, ends with chunk`() {
+    fun `to chunks - ok, chunk with squashed events`() {
         val marks = stubEventMark()
 
         val ownershipId = randomEthOwnershipId()
@@ -100,9 +100,7 @@ class UnionInternalEventChunkerTest {
             UnionInternalOwnershipEvent(UnionOwnershipUpdateEvent(randomUnionOwnership(), marks)),
         )
 
-        // Since 0 and 1 have same ID, they should be in different chunks
         val expected = listOf(
-            listOf(events[0]),
             listOf(events[1], events[2])
         )
         val chunks = unionInternalEventChunker.toChunks(events)
@@ -124,6 +122,81 @@ class UnionInternalEventChunkerTest {
         val expected = listOf(
             listOf(events[0], events[1], events[2]),
             listOf(events[3])
+        )
+        val chunks = unionInternalEventChunker.toChunks(events)
+
+        assertThat(chunks).isEqualTo(expected)
+    }
+
+    @Test
+    fun `to chunks - ok, item events squashed`() {
+        val marks = stubEventMark()
+        val itemId = randomEthItemId()
+
+        // Only last item update should stay
+        val events = listOf(
+            UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(itemId), marks)),
+            UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(), marks)),
+            UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(itemId), marks)),
+            UnionInternalOwnershipEvent(UnionOwnershipUpdateEvent(randomUnionOwnership(), marks)),
+            UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(itemId), marks)),
+            UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(), marks)),
+        )
+
+        val expected = listOf(
+            listOf(events[1]),
+            listOf(events[3]),
+            listOf(events[4]),
+            listOf(events[5])
+        )
+        val chunks = unionInternalEventChunker.toChunks(events)
+
+        assertThat(chunks).isEqualTo(expected)
+    }
+
+    @Test
+    fun `to chunks - ok, ownership events squashed`() {
+        val marks = stubEventMark()
+        val ownershipId = randomEthOwnershipId()
+
+        // Chunk at the end, squashed events distributed across entire batch
+        val events = listOf(
+            UnionInternalOwnershipEvent(UnionOwnershipUpdateEvent(randomUnionOwnership(ownershipId), marks)),
+            UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(), marks)),
+            UnionInternalOwnershipEvent(UnionOwnershipUpdateEvent(randomUnionOwnership(), marks)),
+            UnionInternalOwnershipEvent(UnionOwnershipUpdateEvent(randomUnionOwnership(ownershipId), marks)),
+            UnionInternalOwnershipEvent(UnionOwnershipUpdateEvent(randomUnionOwnership(ownershipId), marks))
+        )
+
+        val expected = listOf(
+            listOf(events[1]),
+            listOf(events[2], events[4])
+        )
+        val chunks = unionInternalEventChunker.toChunks(events)
+
+        assertThat(chunks).isEqualTo(expected)
+    }
+
+    @Test
+    fun `to chunks - ok, item different events squashed`() {
+        val marks = stubEventMark()
+        val itemId = randomEthItemId()
+
+        // Change and Update events for the same item should be squashed - but only in scope of their type
+        val events = listOf(
+            UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(itemId), marks)),
+            UnionInternalItemEvent(UnionItemChangeEvent(itemId, marks)),
+            UnionInternalOwnershipEvent(UnionOwnershipUpdateEvent(randomUnionOwnership(), marks)),
+            UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(itemId), marks)),
+            UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(), marks)),
+            UnionInternalItemEvent(UnionItemChangeEvent(itemId, marks)),
+        )
+
+        val expected = listOf(
+            listOf(events[2]),
+            listOf(events[3]),
+            listOf(events[4]),
+            listOf(events[5])
         )
         val chunks = unionInternalEventChunker.toChunks(events)
 
