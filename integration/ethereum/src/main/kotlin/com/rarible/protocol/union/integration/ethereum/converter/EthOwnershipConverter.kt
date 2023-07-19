@@ -32,8 +32,7 @@ object EthOwnershipConverter {
         }
     }
 
-    suspend fun convert(event: NftOwnershipEventDto, blockchain: BlockchainDto): UnionOwnershipEvent {
-        logger.info("Received {} Ownership event: {}", blockchain, event)
+    fun convert(event: NftOwnershipEventDto, blockchain: BlockchainDto): UnionOwnershipEvent {
         val eventTimeMarks = EthConverter.convert(event.eventTimeMarks)
 
         return when (event) {

@@ -4,6 +4,7 @@ import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.common.nowMillis
+import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.model.UnionAuctionOwnershipWrapper
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOwnership
@@ -26,7 +27,7 @@ import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.util.spent
-import kotlinx.coroutines.async
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -116,7 +117,7 @@ class EnrichmentOwnershipService(
         ownership: UnionOwnership? = null,
         orders: Map<OrderIdDto, UnionOrder> = emptyMap()
     ) = coroutineScope {
-        val fetchedOwnership = async { ownership ?: fetch(short.id) }
+        val fetchedOwnership = asyncWithTraceId(context = NonCancellable) { ownership ?: fetch(short.id) }
         val bestOrders = enrichmentOrderService.fetchMissingOrders(
             existing = short.getAllBestOrders(),
             orders = orders

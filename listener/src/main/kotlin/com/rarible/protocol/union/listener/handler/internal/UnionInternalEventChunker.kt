@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.handler.internal
 
+import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.core.model.UnionInternalActivityEvent
 import com.rarible.protocol.union.core.model.UnionInternalAuctionEvent
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
@@ -7,16 +8,33 @@ import com.rarible.protocol.union.core.model.UnionInternalCollectionEvent
 import com.rarible.protocol.union.core.model.UnionInternalItemEvent
 import com.rarible.protocol.union.core.model.UnionInternalOrderEvent
 import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
+import com.rarible.protocol.union.core.model.UnionItemChangeEvent
+import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
+import com.rarible.protocol.union.core.model.UnionOwnershipChangeEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import org.springframework.stereotype.Component
 
 @Component
 class UnionInternalEventChunker {
 
+    private val squashableEventTypes = setOf(
+        // Since we send actual data in Updated events, we can use only last one
+        UnionItemUpdateEvent::class.java,
+        UnionOwnershipUpdateEvent::class.java,
+        UnionOrderUpdateEvent::class.java,
+        UnionCollectionUpdateEvent::class.java,
+
+        // The same for change events - if there are several in the batch, we can handle only last one
+        UnionItemChangeEvent::class.java,
+        UnionOwnershipChangeEvent::class.java
+    )
+
     // IMPORTANT! We suggest these events have SAME key in Kafka
     fun toChunks(events: List<UnionInternalBlockchainEvent>): List<List<UnionInternalBlockchainEvent>> {
-        val state = ChunkerState(events)
-        events.forEach { event ->
+        val squashed = squash(events)
+        val state = ChunkerState(squashed)
+        squashed.forEach { event ->
             val entityEvent = event.data()
             val current = state.current
 
@@ -37,6 +55,19 @@ class UnionInternalEventChunker {
         }
         state.flush()
         return state.result
+    }
+
+    private fun squash(events: List<UnionInternalBlockchainEvent>): List<UnionInternalBlockchainEvent> {
+        val ids = HashSet<Pair<Class<*>, Any>>(events.size)
+        return events.reversed().filter {
+            val type = it.data().javaClass
+            val key = Pair(type, it.getEntityId())
+            if (type in squashableEventTypes) {
+                ids.add(key)
+            } else {
+                true
+            }
+        }.reversed()
     }
 
     private class ChunkerState(events: List<UnionInternalBlockchainEvent>) {
@@ -64,7 +95,7 @@ class UnionInternalEventChunker {
     private class UnionIndependentEventChunk {
 
         // In most cases there will be only 1 event
-        val chunk = ArrayList<UnionInternalBlockchainEvent>(1)
+        val chunk = ArrayList<UnionInternalBlockchainEvent>(4)
         private val typesInChunk = HashSet<Class<*>>(4)
         private val entityIds = HashSet<Any>(4)
 

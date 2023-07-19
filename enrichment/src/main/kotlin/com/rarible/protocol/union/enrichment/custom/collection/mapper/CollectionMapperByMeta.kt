@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.custom.collection.mapper
 
+import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -8,7 +9,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
-import kotlinx.coroutines.async
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -52,7 +53,7 @@ class CollectionMapperByMeta(
         return coroutineScope {
             itemIds.chunked(16).map { chunk ->
                 chunk.map {
-                    async {
+                    asyncWithTraceId(context = NonCancellable) {
                         try {
                             it to itemServiceRouter.getService(it.blockchain).getItemMetaById(it.value)
                         } catch (e: Exception) {

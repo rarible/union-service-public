@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.handler.internal
 
+import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.handler.InternalBatchEventHandler
 import com.rarible.protocol.union.core.handler.InternalEventHandler
 import com.rarible.protocol.union.core.model.UnionInternalActivityEvent
@@ -9,7 +10,7 @@ import com.rarible.protocol.union.core.model.UnionInternalCollectionEvent
 import com.rarible.protocol.union.core.model.UnionInternalItemEvent
 import com.rarible.protocol.union.core.model.UnionInternalOrderEvent
 import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
-import kotlinx.coroutines.async
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -39,11 +40,11 @@ class UnionInternalEventHandler(
         val sequentialChunks = unionInternalEventChunker.toChunks(event)
         coroutineScope {
             sequentialChunks.forEach { chunk ->
-                // TODO remove later, for initial debug only
-                if (chunk.size > 1) {
-                    logger.info("Handling chunk of {} events, first of them: {}", chunk.size, chunk.first())
+                if (chunk.size == 1) {
+                    handle(chunk.first())
+                } else {
+                    chunk.map { event -> asyncWithTraceId(context = NonCancellable) { handle(event) } }.awaitAll()
                 }
-                chunk.map { event -> async { handle(event) } }.awaitAll()
             }
         }
 
