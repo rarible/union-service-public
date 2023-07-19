@@ -39,11 +39,11 @@ class UnionInternalEventHandler(
         val sequentialChunks = unionInternalEventChunker.toChunks(event)
         coroutineScope {
             sequentialChunks.forEach { chunk ->
-                // TODO remove later, for initial debug only
-                if (chunk.size > 1) {
-                    logger.info("Handling chunk of {} events, first of them: {}", chunk.size, chunk.first())
+                if (chunk.size == 1) {
+                    handle(chunk.first())
+                } else {
+                    chunk.map { event -> async { handle(event) } }.awaitAll()
                 }
-                chunk.map { event -> async { handle(event) } }.awaitAll()
             }
         }
 
