@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.enrichment.meta.collection
 
 import com.rarible.core.logging.asyncWithTraceId
+import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
@@ -56,9 +58,14 @@ class CollectionMetaRefreshService(
                     asyncWithTraceId {
                         val idDto = IdParser.parseItemId(esItem.itemId)
                         val oldItem = itemRepository.get(ShortItemId(idDto)) ?: return@asyncWithTraceId false
-                        val meta =
+                        val meta = try {
                             itemMetaService.download(itemId = idDto, pipeline = ItemMetaPipeline.REFRESH, force = true)
                                 ?: return@asyncWithTraceId false
+                        } catch (e: PartialDownloadException) {
+                            e.data as UnionMeta
+                        } catch (e: Exception) {
+                            return@asyncWithTraceId false
+                        }
                         if (oldItem.metaEntry?.data?.toComparable() != meta.toComparable()) {
                             logger.info(
                                 "Meta changed for item $idDto from ${oldItem.metaEntry?.data} to $meta " +

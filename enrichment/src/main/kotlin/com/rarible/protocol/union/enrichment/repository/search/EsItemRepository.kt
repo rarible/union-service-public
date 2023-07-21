@@ -84,7 +84,7 @@ class EsItemRepository(
         val query = NativeSearchQuery(
             functionScoreQuery(
                 termQuery(EsItem::collection.name, collectionId),
-                ScoreFunctionBuilders.randomFunction().seed(System.currentTimeMillis())
+                ScoreFunctionBuilders.randomFunction().seed(System.currentTimeMillis()).setField("_seq_no")
             )
         )
         return esOperations
