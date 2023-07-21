@@ -24,12 +24,21 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
             <id>nexus-ext-maven-public</id>
             <name>nexus-ext-maven-public</name>
             <url>https://repo.rarible.org/repository/maven-public/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>confluent</id>
+            <name>Confluent</name>
+            <url>https://packages.confluent.io/maven/</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -46,7 +55,7 @@
         <postgresql.version>42.3.4</postgresql.version>
         <okhttp.version>4.9.3</okhttp.version>
 
-        <rarible.core.version>2.5.32</rarible.core.version>
+        <rarible.core.version>2.5.34</rarible.core.version>
         <rarible.ethereum.version>1.7.11</rarible.ethereum.version>
 
         <rarible.protocol.currency.version>1.38.3</rarible.protocol.currency.version>
@@ -396,6 +405,18 @@
                 <groupId>com.rarible.protocol.solana</groupId>
                 <artifactId>solana-protocol-subscriber</artifactId>
                 <version>${rarible.protocol.solana.version}</version>
+            </dependency>
+
+            <!-- ======== Simple hash kafka integraion ====== -->
+            <dependency>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-avro-serializer</artifactId>
+                <version>7.3.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro</artifactId>
+                <version>1.11.2</version>
             </dependency>
 
             <!-- ================== Other =================== -->

@@ -29,6 +29,48 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>io.confluent</groupId>
+                <artifactId>kafka-schema-registry-maven-plugin</artifactId>
+                <version>7.4.1</version>
+                <configuration>
+                    <schemaRegistryUrls>
+                        <param>https://psrc-xqq6z.us-central1.gcp.confluent.cloud</param>
+                    </schemaRegistryUrls>
+                    <userInfoConfig>${env.SH_USER}:${env.SH_PASSWORD}</userInfoConfig>
+                    <subjects/>
+                    <subjectPatterns>
+                        <param>ethereum-.*</param>
+                    </subjectPatterns>
+                    <versions>
+                        <param>latest</param>
+                    </versions>
+                    <outputDirectory>src/main/avro</outputDirectory>
+                    <compatibilityLevels/>
+                    <messagePath/>
+                    <outputPath/>
+                    <previousSchemaPaths/>
+                    <schemas/>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.avro</groupId>
+                <artifactId>avro-maven-plugin</artifactId>
+                <version>1.11.2</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>schema</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>src/main/avro</sourceDirectory>
+                            <outputDirectory>src/main/java</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -59,6 +101,16 @@
         <dependency>
             <groupId>com.rarible.core</groupId>
             <artifactId>rarible-core-content-meta-loader</artifactId>
+        </dependency>
+
+        <!-- ======== Simple hash kafka integraion ====== -->
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
         </dependency>
 
         <!-- ================== Other =================== -->
