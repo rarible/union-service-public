@@ -20,6 +20,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.util.concurrent.ConcurrentLinkedDeque
 
+
 @KafkaTest
 class SimpleHashKafkaTest {
 
