@@ -59,7 +59,7 @@ class ItemMetaService(
             is HookEventType.ContractNftMetadataUpdate -> {
                 logHook(updateDto)
                 updateDto.nfts.forEach { nft ->
-                    scheduleWebHookMetaRefresh(nft)
+                    scheduleSimpleHashItemUpdate(nft)
                 }
             }
             is HookEventType.Unknown -> {
@@ -68,7 +68,7 @@ class ItemMetaService(
         }
     }
 
-    private suspend fun scheduleWebHookMetaRefresh(item: SimpleHashItem) {
+    suspend fun scheduleSimpleHashItemUpdate(item: SimpleHashItem) {
         try {
             val itemIdDto = SimpleHashConverter.parseNftId(item.nftId)
             rawMetaCacheRepository.save(
@@ -76,7 +76,7 @@ class ItemMetaService(
             )
             schedule(itemIdDto, ItemMetaPipeline.REFRESH, true)
         } catch (e: Exception) {
-            logger.error("Error processing webhook event for item ${item.nftId}", e)
+            logger.error("Error processing scheduling for item ${item.nftId}", e)
         }
     }
 

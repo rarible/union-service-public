@@ -1,9 +1,11 @@
 package com.rarible.protocol.union.enrichment.configuration
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
+import com.rarible.protocol.apikey.kafka.RaribleKafkaMessageListenerFactory
 import com.rarible.protocol.union.integration.ethereum.EthereumConsumerConfiguration
 import com.rarible.protocol.union.integration.ethereum.PolygonConsumerConfiguration
 import com.rarible.protocol.union.integration.flow.FlowConsumerConfiguration
@@ -78,8 +80,9 @@ class EnrichmentConsumerConfiguration(
     fun simplehashWorker(
         props: UnionMetaProperties,
         factory: RaribleKafkaListenerContainerFactory<nft>,
-        listener: BatchMessageListener<String, nft>
+        handler: RaribleKafkaBatchEventHandler<nft>
     ): RaribleKafkaConsumerWorker<nft> {
+        val listener = RaribleKafkaMessageListenerFactory.create(handler, true)
         val containers = props.simpleHash.kafka.topics.map {
             val container = factory.createContainer(it)
             container.setupMessageListener(listener)
