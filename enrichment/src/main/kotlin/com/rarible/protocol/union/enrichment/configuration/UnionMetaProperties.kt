@@ -78,9 +78,11 @@ data class SimpleHash(
 data class SimpleHashKafka(
     val enabled: Boolean = false,
     val broker: String = "pkc-3w22w.us-central1.gcp.confluent.cloud:9092",
+    val concurrency: Int = 1,
+    val batchSize: Int = 100,
 
     // topic depends on environment
-    val topic: String = "",
+    val topics: List<String> = emptyList(),
 
     val username: String? = null,
     val password: String? = null,

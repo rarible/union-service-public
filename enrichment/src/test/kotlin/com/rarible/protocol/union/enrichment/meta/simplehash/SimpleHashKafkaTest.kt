@@ -33,7 +33,7 @@ class SimpleHashKafkaTest {
                 kafka = SimpleHashKafka(
                     enabled = true,
                     broker = kafkaBootstrap,
-                    topic = "ethereum-${nowMillis().toEpochMilli()}"
+                    topics = listOf("ethereum-${nowMillis().toEpochMilli()}")
                 )
             )
         }
@@ -51,7 +51,7 @@ class SimpleHashKafkaTest {
             clientId = "test.rarible",
             valueSerializerClass = SHKafkaAvroSerializer::class.java,
             valueClass = nft::class.java,
-            defaultTopic = props.simpleHash.kafka.topic,
+            defaultTopic = props.simpleHash.kafka.topics.first(),
             bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
             properties = mapOf(
                 "auto.register.schemas" to "false",

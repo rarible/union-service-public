@@ -64,9 +64,9 @@ class EnrichmentConsumerConfiguration(
             avroConfig
         }
         return RaribleKafkaListenerContainerFactory(
-            hosts = props.simpleHash.kafka.broker,
-            concurrency = 1,
-            batchSize = 1,
+            hosts = kafkaProps.broker,
+            concurrency = kafkaProps.concurrency,
+            batchSize = kafkaProps.batchSize,
             offsetResetStrategy = OffsetResetStrategy.EARLIEST,
             valueClass = nft::class.java,
             customSettings = settings
@@ -80,12 +80,15 @@ class EnrichmentConsumerConfiguration(
         factory: RaribleKafkaListenerContainerFactory<nft>,
         listener: BatchMessageListener<String, nft>
     ): RaribleKafkaConsumerWorker<nft> {
-        val container = factory.createContainer(props.simpleHash.kafka.topic)
-        container.setupMessageListener(listener)
-        container.containerProperties.groupId = "rarible-${env}"
-        container.containerProperties.clientId = "rarible-${clientId}"
+        val containers = props.simpleHash.kafka.topics.map {
+            val container = factory.createContainer(it)
+            container.setupMessageListener(listener)
+            container.containerProperties.groupId = "rarible-${env}"
+            container.containerProperties.clientId = "rarible-${clientId}"
+            container
+        }
 
-        return RaribleKafkaConsumerFactory.RaribleKafkaConsumerWorkerWrapper(listOf(container))
+        return RaribleKafkaConsumerFactory.RaribleKafkaConsumerWorkerWrapper(containers)
     }
 
 }
