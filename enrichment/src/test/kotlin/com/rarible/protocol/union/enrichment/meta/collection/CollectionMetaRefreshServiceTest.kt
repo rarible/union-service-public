@@ -1,6 +1,9 @@
 package com.rarible.protocol.union.enrichment.meta.collection
 
 import com.rarible.core.test.data.randomLong
+import com.rarible.protocol.union.core.model.download.PartialDownloadException
+import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
@@ -121,6 +124,50 @@ internal class CollectionMetaRefreshServiceTest {
 
     @Test
     fun `check random meta changed`() = runBlocking<Unit> {
+        val (collectionId, itemId1) = prepareData()
+
+        whenever(
+            itemMetaService.download(itemId = itemId1, pipeline = ItemMetaPipeline.REFRESH, force = true)
+        ).thenReturn(randomUnionMeta())
+
+        assertThat(collectionMetaRefreshService.shouldRefresh(collectionId)).isTrue()
+        assertThat(collectionMetaRefreshService.shouldAutoRefresh(collectionId.fullId())).isTrue()
+
+        verify(itemMetaService, times(2)).download(itemId = itemId1, pipeline = ItemMetaPipeline.REFRESH, force = true)
+        verifyNoMoreInteractions(itemMetaService)
+    }
+
+    @Test
+    fun `check random partial exception`() = runBlocking<Unit> {
+        val (collectionId, itemId1) = prepareData()
+
+        whenever(
+            itemMetaService.download(itemId = itemId1, pipeline = ItemMetaPipeline.REFRESH, force = true)
+        ).thenThrow(PartialDownloadException(failedProviders = emptyList(), data = randomUnionMeta()))
+
+        assertThat(collectionMetaRefreshService.shouldRefresh(collectionId)).isTrue()
+        assertThat(collectionMetaRefreshService.shouldAutoRefresh(collectionId.fullId())).isTrue()
+
+        verify(itemMetaService, times(2)).download(itemId = itemId1, pipeline = ItemMetaPipeline.REFRESH, force = true)
+        verifyNoMoreInteractions(itemMetaService)
+    }
+
+    @Test
+    fun `check random exception`() = runBlocking<Unit> {
+        val (collectionId, itemId1) = prepareData()
+
+        whenever(
+            itemMetaService.download(itemId = itemId1, pipeline = ItemMetaPipeline.REFRESH, force = true)
+        ).thenThrow(RuntimeException())
+
+        assertThat(collectionMetaRefreshService.shouldRefresh(collectionId)).isFalse()
+        assertThat(collectionMetaRefreshService.shouldAutoRefresh(collectionId.fullId())).isFalse()
+
+        verify(itemMetaService, times(2)).download(itemId = itemId1, pipeline = ItemMetaPipeline.REFRESH, force = true)
+        verifyNoMoreInteractions(itemMetaService)
+    }
+
+    private suspend fun prepareData(): Pair<CollectionIdDto, ItemIdDto> {
         val collectionId = randomEthCollectionId()
         whenever(esItemRepository.countItemsInCollection(collectionId.fullId())).thenReturn(1000 + randomLong(1000))
         whenever(metaRefreshRequestRepository.countForCollectionId(collectionId.fullId())).thenReturn(0)
@@ -141,15 +188,6 @@ internal class CollectionMetaRefreshServiceTest {
         whenever(itemRepository.get(ShortItemId(itemId1))).thenReturn(
             randomShortItem().copy(metaEntry = randomItemMetaDownloadEntry(data = meta1))
         )
-
-        whenever(
-            itemMetaService.download(itemId = itemId1, pipeline = ItemMetaPipeline.REFRESH, force = true)
-        ).thenReturn(randomUnionMeta())
-
-        assertThat(collectionMetaRefreshService.shouldRefresh(collectionId)).isTrue()
-        assertThat(collectionMetaRefreshService.shouldAutoRefresh(collectionId.fullId())).isTrue()
-
-        verify(itemMetaService, times(2)).download(itemId = itemId1, pipeline = ItemMetaPipeline.REFRESH, force = true)
-        verifyNoMoreInteractions(itemMetaService)
+        return Pair(collectionId, itemId1)
     }
 }
