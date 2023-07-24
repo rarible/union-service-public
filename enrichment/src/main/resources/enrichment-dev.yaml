@@ -3,7 +3,7 @@ enrichment:
     # Specified for test purposes on Dev env
     mappings:
       # Regular collection with additional items from somewhere
-      - customCollection: "ETHEREUM:0xadb3985b976ae8059938d69f8442b80dfa76a777"
+      - name: "ETHEREUM:0xadb3985b976ae8059938d69f8442b80dfa76a777"
         # Single item from default collection
         items:
           - "ETHEREUM:0x6972347e66a32f40ef3c012615c13cb88bf681cc:66891234636452780444728742514468970113916103980372408812967600838058321117185"

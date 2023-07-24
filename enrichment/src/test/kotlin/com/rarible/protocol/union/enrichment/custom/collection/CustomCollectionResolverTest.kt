@@ -13,7 +13,7 @@ import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMetaA
 import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMetaMapping
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentCollectionProperties
 import com.rarible.protocol.union.enrichment.custom.collection.mapper.CollectionMapperIndex
-import com.rarible.protocol.union.enrichment.repository.ItemRepository
+import com.rarible.protocol.union.enrichment.custom.collection.provider.CustomCollectionProviderFactory
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
@@ -37,7 +37,8 @@ class CustomCollectionResolverTest {
         every { getService(BlockchainDto.POLYGON) } returns itemService
     }
 
-    private val itemRepository: ItemRepository = mockk() { coEvery { getAll(emptyList()) } returns emptyList() }
+    private val customCollectionProviderFactory = CustomCollectionProviderFactory(mockk())
+    private val customCollectionItemProvider: CustomCollectionItemProvider = mockk()
 
     private lateinit var resolver: CustomCollectionResolver
 
@@ -158,8 +159,7 @@ class CustomCollectionResolverTest {
         val itemId = ItemIdDto(collectionId.blockchain, "${collectionId.value}:1")
 
         val meta = randomUnionMeta().copy(attributes = listOf(UnionMetaAttribute("a", "b")))
-        val item = randomShortItem(itemId).copy(metaEntry = randomItemMetaDownloadEntry().copy(data = meta))
-        coEvery { itemRepository.getAll(listOf(item.id)) } returns listOf(item)
+        coEvery { customCollectionItemProvider.getOrFetchMeta(listOf(itemId)) } returns mapOf(itemId to meta)
 
         val customMetaMapping = CustomCollectionMetaMapping(
             listOf(collectionId.fullId()),
@@ -179,7 +179,7 @@ class CustomCollectionResolverTest {
 
         val meta = randomUnionMeta().copy(attributes = listOf(UnionMetaAttribute("key1", "b")))
         val item = randomShortItem(itemId).copy(metaEntry = randomItemMetaDownloadEntry().copy(data = meta))
-        coEvery { itemRepository.getAll(listOf(item.id)) } returns listOf(item)
+        coEvery { customCollectionItemProvider.getOrFetchMeta(listOf(itemId)) } returns mapOf(itemId to meta)
 
         val customMetaMapping = CustomCollectionMetaMapping(
             listOf(collectionId.fullId()),
@@ -202,7 +202,7 @@ class CustomCollectionResolverTest {
         meta: CustomCollectionMetaMapping = CustomCollectionMetaMapping()
     ): CustomCollectionResolver {
         val mapping = CustomCollectionMapping(
-            customCollection = customCollection.fullId(),
+            name = customCollection.fullId(),
             items = items.map { it.fullId() },
             collections = collections.map { it.fullId() },
             ranges = ranges,
@@ -210,8 +210,8 @@ class CustomCollectionResolverTest {
         )
         val properties = EnrichmentCollectionProperties(listOf(mapping))
         val index = CollectionMapperIndex(
-            router,
-            itemRepository,
+            customCollectionItemProvider,
+            customCollectionProviderFactory,
             FeatureFlagsProperties(enableCustomCollections = true),
             properties
         )

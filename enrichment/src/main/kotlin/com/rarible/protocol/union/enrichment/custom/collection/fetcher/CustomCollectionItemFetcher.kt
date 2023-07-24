@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.custom.collection
+package com.rarible.protocol.union.enrichment.custom.collection.fetcher
 
 interface CustomCollectionItemFetcher {
 

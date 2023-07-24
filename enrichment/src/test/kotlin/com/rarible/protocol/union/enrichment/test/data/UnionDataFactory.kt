@@ -126,7 +126,8 @@ fun randomUnionItem(id: ItemIdDto = randomEthItemId()): UnionItem {
 }
 
 fun randomUnionMeta(
-    content: List<UnionMetaContent> = emptyList()
+    content: List<UnionMetaContent> = emptyList(),
+    attributes: List<UnionMetaAttribute> = listOf(randomUnionMetaAttribute()),
 ): UnionMeta {
     return UnionMeta(
         name = randomString(),
@@ -139,7 +140,7 @@ fun randomUnionMeta(
         rightsUri = randomString(),
         externalUri = randomString(),
         originalMetaUri = randomString(),
-        attributes = listOf(randomUnionMetaAttribute()),
+        attributes = attributes,
         content = content,
         restrictions = listOf()
     )

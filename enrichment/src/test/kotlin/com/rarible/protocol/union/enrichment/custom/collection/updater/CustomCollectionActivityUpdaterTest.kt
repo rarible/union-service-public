@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.custom.collection
+package com.rarible.protocol.union.enrichment.custom.collection.updater
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer

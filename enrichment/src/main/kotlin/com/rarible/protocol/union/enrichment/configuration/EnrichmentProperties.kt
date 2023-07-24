@@ -45,7 +45,9 @@ data class EnrichmentCollectionProperties(
 
 // Contains fully-qualified collection/item identifiers
 data class CustomCollectionMapping(
-    val customCollection: String,
+    val enabled: Boolean = true,
+    // Full ID of collection for default mapping OR name of custom mapper
+    val name: String,
     private val items: List<String> = emptyList(),
     private val collections: List<String> = emptyList(),
     private val ranges: List<String> = emptyList(),

@@ -1,7 +1,8 @@
-package com.rarible.protocol.union.enrichment.custom.collection
+package com.rarible.protocol.union.enrichment.custom.collection.fetcher
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemProvider
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.util.TokenRange
