@@ -8,10 +8,10 @@ import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTest
 import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.core.test.wait.BlockingWait.waitAssert
-import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SimpleHash
 import com.rarible.protocol.union.enrichment.configuration.SimpleHashKafka
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.configuration.simplehash.SimplehashConsumerConfiguration
 import com.simplehash.v0.nft
 import io.mockk.every
 import io.mockk.mockk
@@ -39,7 +39,7 @@ class SimpleHashKafkaTest {
             )
         }
         val applicationEnvironmentInfo = ApplicationEnvironmentInfo("test", "localhost")
-        val enrichmentConfig = EnrichmentConsumerConfiguration(applicationEnvironmentInfo)
+        val enrichmentConfig = SimplehashConsumerConfiguration(applicationEnvironmentInfo)
         val factory = enrichmentConfig.simplehashConsumerFactory(props)
 
         val records = ConcurrentLinkedDeque<nft>()

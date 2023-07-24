@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.configuration
+package com.rarible.protocol.union.enrichment.configuration.simplehash
 
 import com.simplehash.v0.nft
 import io.confluent.kafka.serializers.AbstractKafkaAvroDeserializer
@@ -8,7 +8,7 @@ import org.apache.kafka.common.serialization.Deserializer
 import java.nio.ByteBuffer
 
 
-class SHKafkaAvroDeserializer : AbstractKafkaAvroDeserializer(), Deserializer<nft> {
+class SimplehashKafkaAvroDeserializer : AbstractKafkaAvroDeserializer(), Deserializer<nft> {
 
     override fun deserialize(topic: String, bytes: ByteArray): nft? {
         validateSchema(bytes)
