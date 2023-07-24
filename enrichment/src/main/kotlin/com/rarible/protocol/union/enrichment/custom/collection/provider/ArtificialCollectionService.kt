@@ -8,6 +8,7 @@ import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.stereotype.Component
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
@@ -16,13 +17,21 @@ class ArtificialCollectionService(
     private val producer: UnionInternalCollectionEventProducer
 ) {
 
-    // TODO Is there any impl of concurrent set?
-    private val cache = ConcurrentHashMap<CollectionIdDto, CollectionIdDto>()
+    private val cache = Collections.newSetFromMap(ConcurrentHashMap<CollectionIdDto, Boolean>())
 
     suspend fun exists(surrogateId: CollectionIdDto): Boolean {
         // Just to avoid unnecessary DB calls after collection has been created
-        return cache.contains(surrogateId)
-            || collectionRepository.get(EnrichmentCollectionId(surrogateId)) != null
+        if (cache.contains(surrogateId)) {
+            return true
+        }
+
+        val foundInDb = collectionRepository.get(EnrichmentCollectionId(surrogateId)) != null
+        if (foundInDb) {
+            cache.add(surrogateId)
+            return true
+        }
+        
+        return false
     }
 
     suspend fun createArtificialCollection(
@@ -49,6 +58,6 @@ class ArtificialCollectionService(
             // Nothing to do, somebody already created it
         }
 
-        cache[surrogateId] = surrogateId
+        cache.add(surrogateId)
     }
 }

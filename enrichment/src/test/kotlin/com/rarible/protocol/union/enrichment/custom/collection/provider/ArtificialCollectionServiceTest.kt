@@ -34,6 +34,10 @@ class ArtificialCollectionServiceTest {
 
         val result = artificialCollectionService.exists(collection.id.toDto())
         assertThat(result).isTrue()
+
+        assertThat(artificialCollectionService.exists(collection.id.toDto())).isTrue()
+
+        coVerify(atMost = 1) { collectionRepository.get(collection.id) }
     }
 
     @Test
