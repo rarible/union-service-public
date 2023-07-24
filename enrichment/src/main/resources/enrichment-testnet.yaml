@@ -4,7 +4,7 @@ enrichment:
       - name: "ETHEREUM:0xe2de2249cf1c9d76eaf24257b85bbe83bd218a0b"
         collections:
           - "ETHEREUM:0xc8ec13089712ee09b651a41bd8a01245628e58d4"
-      - customCollection: "FLOW:A.9f36754d9b38f155.HWGarageFFCardV2"
+      - name: "FLOW:A.9f36754d9b38f155.HWGarageFFCardV2"
         meta:
           collections:
             - "FLOW:A.9f36754d9b38f155.HWGarageCardV2"
@@ -12,6 +12,10 @@ enrichment:
             - name: "seriesName"
               values:
                 - "Fast & Furious"
+      - name: "artblocks"
+        collections:
+          - "ETHEREUM:0xda62f67be7194775a75be91cbf9feedcc5776d4b"
+          - "ETHEREUM:0xb614c578062a62714c927cd8193f0b8bfb90055c"
   meta:
     item:
       customizers:
