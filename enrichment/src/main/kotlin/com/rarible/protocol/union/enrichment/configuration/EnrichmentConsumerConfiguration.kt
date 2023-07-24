@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.configuration
 
-import com.rarible.protocol.union.enrichment.configuration.simplehash.SimplehashConsumerConfiguration
 import com.rarible.protocol.union.integration.ethereum.EthereumConsumerConfiguration
 import com.rarible.protocol.union.integration.ethereum.PolygonConsumerConfiguration
 import com.rarible.protocol.union.integration.flow.FlowConsumerConfiguration

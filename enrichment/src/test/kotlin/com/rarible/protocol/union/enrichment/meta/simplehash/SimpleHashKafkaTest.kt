@@ -11,7 +11,8 @@ import com.rarible.core.test.wait.BlockingWait.waitAssert
 import com.rarible.protocol.union.enrichment.configuration.SimpleHash
 import com.rarible.protocol.union.enrichment.configuration.SimpleHashKafka
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.configuration.simplehash.SimplehashConsumerConfiguration
+import com.rarible.protocol.union.enrichment.configuration.SimplehashConsumerConfiguration
+import com.rarible.simplehash.client.subcriber.SimplehashKafkaAvroSerializer
 import com.simplehash.v0.nft
 import io.mockk.every
 import io.mockk.mockk
@@ -28,13 +29,14 @@ class SimpleHashKafkaTest {
     fun `should send and receive avro message`() = runBlocking<Unit> {
 
         val kafkaBootstrap = System.getProperty("kafka.hosts")
+        val topic = "ethereum-${nowMillis().toEpochMilli()}"
 
         val props: UnionMetaProperties = mockk() {
             every { simpleHash } returns SimpleHash(
                 kafka = SimpleHashKafka(
                     enabled = true,
                     broker = kafkaBootstrap,
-                    topics = listOf("ethereum-${nowMillis().toEpochMilli()}")
+                    topics = listOf(topic)
                 )
             )
         }
@@ -54,9 +56,9 @@ class SimpleHashKafkaTest {
 
         val producer = RaribleKafkaProducer(
             clientId = "test.rarible",
-            valueSerializerClass = SHKafkaAvroSerializer::class.java,
+            valueSerializerClass = SimplehashKafkaAvroSerializer::class.java,
             valueClass = nft::class.java,
-            defaultTopic = props.simpleHash.kafka.topics.first(),
+            defaultTopic = topic,
             bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
             properties = mapOf(
                 "auto.register.schemas" to "false",

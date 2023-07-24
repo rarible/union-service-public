@@ -402,7 +402,7 @@
             <!-- ======== Simple hash kafka integraion ====== -->
             <dependency>
                 <groupId>com.rarible.simplehash.client</groupId>
-                <artifactId>model</artifactId>
+                <artifactId>subscriber</artifactId>
                 <version>${rarible.protocol.simplehash.version}</version>
             </dependency>
 

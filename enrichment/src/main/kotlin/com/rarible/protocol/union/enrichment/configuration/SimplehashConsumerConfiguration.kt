@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.configuration.simplehash
+package com.rarible.protocol.union.enrichment.configuration
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
@@ -6,7 +6,7 @@ import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.protocol.apikey.kafka.RaribleKafkaMessageListenerFactory
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.simplehash.client.subcriber.SimplehashKafkaAvroDeserializer
 import com.simplehash.v0.nft
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -49,7 +49,7 @@ class SimplehashConsumerConfiguration(
             hosts = kafkaProps.broker,
             concurrency = kafkaProps.concurrency,
             batchSize = kafkaProps.batchSize,
-            offsetResetStrategy = OffsetResetStrategy.LATEST,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
             valueClass = nft::class.java,
             customSettings = settings
         )

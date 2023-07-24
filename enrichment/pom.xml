@@ -64,7 +64,7 @@
         <!-- ======== Simple hash kafka integraion ====== -->
         <dependency>
             <groupId>com.rarible.simplehash.client</groupId>
-            <artifactId>model</artifactId>
+            <artifactId>subscriber</artifactId>
         </dependency>
 
         <!-- ================== Other =================== -->
