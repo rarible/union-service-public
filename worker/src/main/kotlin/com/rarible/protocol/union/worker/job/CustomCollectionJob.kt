@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.worker.job
 
-import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemFetcherFactory
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionMigrator
+import com.rarible.protocol.union.enrichment.custom.collection.fetcher.CustomCollectionItemFetcherFactory
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.concurrent.atomic.AtomicInteger

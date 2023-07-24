@@ -13,7 +13,7 @@ enrichment:
     # Custom collections mappings
     mappings:
       # https://rarible.com/boi/items
-      - customCollection: "ETHEREUM:0xe03e4721c75188de6dd9ccf4fc0eb7c81399e305"
+      - name: "ETHEREUM:0xe03e4721c75188de6dd9ccf4fc0eb7c81399e305"
         items:
           - "ETHEREUM:0x2d820afb710681580a55ca8077b57fba6dd9fd72:2700010001"
           - "ETHEREUM:0x3b3ee1931dc30c1957379fac9aba94d1c48a5405:19731"
@@ -56,6 +56,14 @@ enrichment:
           - "ETHEREUM:0xd07dc4262bcdbf85190c01c996b4c06a461d2430:506982"
           - "ETHEREUM:0xd07dc4262bcdbf85190c01c996b4c06a461d2430:506988"
           - "ETHEREUM:0x2438a0eeffa36cb738727953d35047fb89c81417:5"
+      - name: "artblocks"
+        enabled: false
+        collections:
+          - "ETHEREUM:0x059edd72cd353df5106d2b9cc5ab83a52287ac3a"
+          - "ETHEREUM:0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270"
+          - "ETHEREUM:0x99a9b7c1116f9ceeb1652de04d5969cce509b069"
+          - "ETHEREUM:0x942bc2d3e7a589fe5bd4a5c6ef9727dfd82f5c8a"
+          - "ETHEREUM:0xea698596b6009a622c3ed00dd5a8b5d1cae4fc36"
   meta:
     item:
       customizers:

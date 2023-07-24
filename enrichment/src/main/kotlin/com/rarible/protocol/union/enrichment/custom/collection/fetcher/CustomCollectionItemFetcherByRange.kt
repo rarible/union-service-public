@@ -1,6 +1,7 @@
-package com.rarible.protocol.union.enrichment.custom.collection
+package com.rarible.protocol.union.enrichment.custom.collection.fetcher
 
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemProvider
 import com.rarible.protocol.union.enrichment.util.TokenRange
 import java.math.BigInteger
 import java.util.concurrent.atomic.AtomicInteger

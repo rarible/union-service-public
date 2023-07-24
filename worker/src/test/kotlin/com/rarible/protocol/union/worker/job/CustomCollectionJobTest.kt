@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.worker.job
 
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemBatch
-import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemFetcher
-import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemFetcherFactory
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionMigrator
+import com.rarible.protocol.union.enrichment.custom.collection.fetcher.CustomCollectionItemBatch
+import com.rarible.protocol.union.enrichment.custom.collection.fetcher.CustomCollectionItemFetcher
+import com.rarible.protocol.union.enrichment.custom.collection.fetcher.CustomCollectionItemFetcherFactory
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.clearMocks

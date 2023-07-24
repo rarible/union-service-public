@@ -27,7 +27,8 @@ class CustomCollectionTaskHandler(
 
     override fun getAutorunParams(): List<RunTask> {
         return enrichmentCollectionProperties.mappings
-            .map { IdParser.parseCollectionId(it.customCollection) }
+            .filter { it.enabled }
+            .map { IdParser.parseCollectionId(it.name) }
             .filter { activeBlockchains.contains(it.blockchain) }
             .map { RunTask(it.fullId()) }
     }

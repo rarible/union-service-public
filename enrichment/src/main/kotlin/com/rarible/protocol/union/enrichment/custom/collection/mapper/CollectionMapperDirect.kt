@@ -2,22 +2,23 @@ package com.rarible.protocol.union.enrichment.custom.collection.mapper
 
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.custom.collection.provider.CustomCollectionProvider
 import com.rarible.protocol.union.enrichment.model.ShortItem
 
 class CollectionMapperDirect(
-    private val collectionId: CollectionIdDto
+    private val provider: CustomCollectionProvider
 ) : CollectionMapper {
 
-    override suspend fun getCustomCollections(
+    override suspend fun getCustomCollectionProviders(
         itemIds: Collection<ItemIdDto>,
         hint: Map<ItemIdDto, ShortItem>
-    ): Map<ItemIdDto, CollectionIdDto> {
-        return itemIds.associateWith { collectionId }
+    ): Map<ItemIdDto, CustomCollectionProvider> {
+        return itemIds.associateWith { provider }
     }
 
-    override suspend fun getCustomCollections(
+    override suspend fun getCustomCollectionProviders(
         collectionIds: Collection<CollectionIdDto>
-    ): Map<CollectionIdDto, CollectionIdDto> {
-        return collectionIds.associateWith { collectionId }
+    ): Map<CollectionIdDto, CustomCollectionProvider> {
+        return collectionIds.associateWith { provider }
     }
 }

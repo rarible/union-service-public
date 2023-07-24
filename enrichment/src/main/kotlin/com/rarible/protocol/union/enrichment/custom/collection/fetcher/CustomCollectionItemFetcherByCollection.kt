@@ -1,8 +1,9 @@
-package com.rarible.protocol.union.enrichment.custom.collection
+package com.rarible.protocol.union.enrichment.custom.collection.fetcher
 
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemProvider
 import java.util.TreeSet
 
 class CustomCollectionItemFetcherByCollection(

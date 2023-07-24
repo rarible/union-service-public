@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.custom.collection.mapper.CollectionMapperIndex
+import com.rarible.protocol.union.enrichment.custom.collection.provider.CustomCollectionProvider
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import org.springframework.stereotype.Component
 
@@ -21,19 +22,16 @@ class CustomCollectionResolver(
     ): Map<T, CollectionIdDto> {
         val result = HashMap<T, CollectionIdDto>()
         val remain = entities.filter { e ->
+            val itemId = e.itemId
             // Checking collections first - there can be only direct mapping for them
-            if (e.itemId == null) {
+            if (itemId == null) {
                 e.collectionId?.let { id -> resolve(id)?.let { result[e.entityId] = it } }
                 false
             } else {
                 // Then check is there is direct item mapping
-                val customCollectionId = collectionMapperIndex.getItemMapping(e.itemId)
-                if (customCollectionId != null) {
-                    result[e.entityId] = customCollectionId
-                    false
-                } else {
-                    true
-                }
+                val provider = collectionMapperIndex.getItemProvider(itemId)
+                provider?.let { result[e.entityId] = it.getCustomCollection(itemId, hint[itemId]) }
+                provider == null
             }
         }
 
@@ -60,21 +58,22 @@ class CustomCollectionResolver(
             }
         }.groupBy({ it.first }, { it.second })
 
-        val result = HashMap<ItemIdDto, CollectionIdDto>()
+        val result = HashMap<ItemIdDto, CustomCollectionProvider>()
 
         gropedByCollection.forEach { (collectionId, collectionItemIds) ->
             collectionMapperIndex.getCollectionMapper(collectionId)
-                ?.getCustomCollections(collectionItemIds, hint)
+                ?.getCustomCollectionProviders(collectionItemIds, hint)
                 ?.let { result.putAll(it) }
 
         }
 
-        return result
+        return result.mapValues { it.value.getCustomCollection(it.key, hint[it.key]) }
     }
 
     private suspend fun resolve(collectionId: CollectionIdDto): CollectionIdDto? {
         return collectionMapperIndex.getCollectionMapper(collectionId)
-            ?.getCustomCollections(listOf(collectionId))
+            ?.getCustomCollectionProviders(listOf(collectionId))
             ?.get(collectionId)
+            ?.getCustomCollection(collectionId, null)
     }
 }

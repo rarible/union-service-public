@@ -1,7 +1,8 @@
-package com.rarible.protocol.union.enrichment.custom.collection
+package com.rarible.protocol.union.enrichment.custom.collection.fetcher
 
 import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMapping
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentCollectionProperties
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemProvider
 import org.springframework.stereotype.Component
 
 @Component
@@ -11,11 +12,11 @@ class CustomCollectionItemFetcherFactory(
 ) {
 
     private val fetchersByCustomCollection = enrichmentCollectionProperties.mappings
-        .associateBy { it.customCollection }
+        .associateBy { it.name }
         .mapValues { createFetchers(it.value) }
 
-    fun get(collectionId: String): List<CustomCollectionItemFetcher> {
-        return fetchersByCustomCollection[collectionId] ?: emptyList()
+    fun get(name: String): List<CustomCollectionItemFetcher> {
+        return fetchersByCustomCollection[name] ?: emptyList()
     }
 
     private fun createFetchers(mapping: CustomCollectionMapping): List<CustomCollectionItemFetcher> {

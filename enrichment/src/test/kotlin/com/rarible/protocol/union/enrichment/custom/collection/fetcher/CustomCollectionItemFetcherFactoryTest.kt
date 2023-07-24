@@ -1,7 +1,8 @@
-package com.rarible.protocol.union.enrichment.custom.collection
+package com.rarible.protocol.union.enrichment.custom.collection.fetcher
 
 import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMapping
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentCollectionProperties
+import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemProvider
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.mockk
@@ -18,7 +19,7 @@ class CustomCollectionItemFetcherFactoryTest {
         val itemId = randomEthItemId()
 
         val mapping = CustomCollectionMapping(
-            customCollection = customCollection.fullId(),
+            name = customCollection.fullId(),
             items = listOf(itemId.fullId())
         )
 
@@ -37,7 +38,7 @@ class CustomCollectionItemFetcherFactoryTest {
         val collectionId = randomEthCollectionId()
 
         val mapping = CustomCollectionMapping(
-            customCollection = customCollection.fullId(),
+            name = customCollection.fullId(),
             collections = listOf(collectionId.fullId())
         )
 
@@ -57,7 +58,7 @@ class CustomCollectionItemFetcherFactoryTest {
         val collectionId = randomEthCollectionId()
 
         val mapping = CustomCollectionMapping(
-            customCollection = customCollection.fullId(),
+            name = customCollection.fullId(),
             items = listOf(itemId.fullId()),
             collections = listOf(collectionId.fullId())
         )
@@ -77,13 +78,13 @@ class CustomCollectionItemFetcherFactoryTest {
         val customCollection = randomEthCollectionId()
 
         val mapping = CustomCollectionMapping(
-            customCollection = customCollection.fullId()
+            name = customCollection.fullId()
         )
 
         val properties = EnrichmentCollectionProperties(listOf(mapping))
 
         val provider = CustomCollectionItemFetcherFactory(customCollectionItemProvider, properties)
-        val fetchers = provider.get(customCollection.fullId())
+        val fetchers = provider.get("test-custom-collection")
 
         assertThat(fetchers).isEmpty()
     }

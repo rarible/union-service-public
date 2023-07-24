@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.custom.collection
 
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.producer.UnionInternalItemEventProducer
+import com.rarible.protocol.union.enrichment.custom.collection.updater.CustomCollectionUpdater
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope

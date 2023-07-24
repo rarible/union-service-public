@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.custom.collection
 
 import com.rarible.protocol.union.core.producer.UnionInternalItemEventProducer
+import com.rarible.protocol.union.enrichment.custom.collection.updater.CustomCollectionUpdater
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.coEvery

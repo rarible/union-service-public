@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.custom.collection
+package com.rarible.protocol.union.enrichment.custom.collection.updater
 
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.producer.UnionInternalOwnershipEventProducer
