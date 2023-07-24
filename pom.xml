@@ -24,21 +24,12 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
-        <repository>
-            <id>confluent</id>
-            <url>https://packages.confluent.io/maven/</url>
-        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
             <id>nexus-ext-maven-public</id>
             <name>nexus-ext-maven-public</name>
             <url>https://repo.rarible.org/repository/maven-public/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>confluent</id>
-            <name>Confluent</name>
-            <url>https://packages.confluent.io/maven/</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -63,12 +54,11 @@
         <rarible.protocol.flow.version>1.55.0</rarible.protocol.flow.version>
         <rarible.protocol.solana.version>1.41.0</rarible.protocol.solana.version>
         <rarible.protocol.tezos.api.version>1.39.31</rarible.protocol.tezos.api.version>
+        <rarible.protocol.simplehash.version>1.0.0</rarible.protocol.simplehash.version>
 
         <rarible.protocol.union.version>1.55.0</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
-        <avro.version>1.11.2</avro.version>
-        <kafka-avro.version>7.4.1</kafka-avro.version>
     </properties>
 
     <dependencyManagement>
@@ -411,14 +401,9 @@
 
             <!-- ======== Simple hash kafka integraion ====== -->
             <dependency>
-                <groupId>io.confluent</groupId>
-                <artifactId>kafka-avro-serializer</artifactId>
-                <version>${kafka-avro.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.avro</groupId>
-                <artifactId>avro</artifactId>
-                <version>${avro.version}</version>
+                <groupId>com.rarible.simplehash.client</groupId>
+                <artifactId>model</artifactId>
+                <version>${rarible.protocol.simplehash.version}</version>
             </dependency>
 
             <!-- ================== Other =================== -->
