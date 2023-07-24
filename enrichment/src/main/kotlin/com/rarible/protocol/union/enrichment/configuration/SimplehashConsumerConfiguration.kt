@@ -49,7 +49,7 @@ class SimplehashConsumerConfiguration(
             hosts = kafkaProps.broker,
             concurrency = kafkaProps.concurrency,
             batchSize = kafkaProps.batchSize,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            offsetResetStrategy = OffsetResetStrategy.LATEST,
             valueClass = nft::class.java,
             customSettings = settings
         )
