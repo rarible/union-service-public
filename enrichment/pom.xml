@@ -61,6 +61,12 @@
             <artifactId>rarible-core-content-meta-loader</artifactId>
         </dependency>
 
+        <!-- ======== Simple hash kafka integraion ====== -->
+        <dependency>
+            <groupId>com.rarible.simplehash.client</groupId>
+            <artifactId>subscriber</artifactId>
+        </dependency>
+
         <!-- ================== Other =================== -->
         <dependency>
             <groupId>com.github.cloudyrock.mongock</groupId>

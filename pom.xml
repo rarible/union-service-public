@@ -46,7 +46,7 @@
         <postgresql.version>42.3.4</postgresql.version>
         <okhttp.version>4.9.3</okhttp.version>
 
-        <rarible.core.version>2.5.32</rarible.core.version>
+        <rarible.core.version>2.5.34</rarible.core.version>
         <rarible.ethereum.version>1.7.11</rarible.ethereum.version>
 
         <rarible.protocol.currency.version>1.38.3</rarible.protocol.currency.version>
@@ -54,6 +54,7 @@
         <rarible.protocol.flow.version>1.55.0</rarible.protocol.flow.version>
         <rarible.protocol.solana.version>1.41.0</rarible.protocol.solana.version>
         <rarible.protocol.tezos.api.version>1.39.31</rarible.protocol.tezos.api.version>
+        <rarible.protocol.simplehash.version>1.0.0</rarible.protocol.simplehash.version>
 
         <rarible.protocol.union.version>1.55.0</rarible.protocol.union.version>
 
@@ -396,6 +397,13 @@
                 <groupId>com.rarible.protocol.solana</groupId>
                 <artifactId>solana-protocol-subscriber</artifactId>
                 <version>${rarible.protocol.solana.version}</version>
+            </dependency>
+
+            <!-- ======== Simple hash kafka integraion ====== -->
+            <dependency>
+                <groupId>com.rarible.simplehash.client</groupId>
+                <artifactId>subscriber</artifactId>
+                <version>${rarible.protocol.simplehash.version}</version>
             </dependency>
 
             <!-- ================== Other =================== -->

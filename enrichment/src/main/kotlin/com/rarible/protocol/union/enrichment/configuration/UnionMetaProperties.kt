@@ -70,5 +70,20 @@ data class SimpleHash(
 
     // this is needed to mapping for test networks
     val mapping: Map<String, String> = emptyMap(),
-    val cacheExpiration: Duration = Duration.ofMinutes(10)
+    val cacheExpiration: Duration = Duration.ofMinutes(10),
+
+    val kafka: SimpleHashKafka = SimpleHashKafka()
+)
+
+data class SimpleHashKafka(
+    val enabled: Boolean = false,
+    val broker: String = "pkc-3w22w.us-central1.gcp.confluent.cloud:9092",
+    val concurrency: Int = 1,
+    val batchSize: Int = 100,
+
+    // topic depends on environment
+    val topics: List<String> = emptyList(),
+
+    val username: String? = null,
+    val password: String? = null,
 )
