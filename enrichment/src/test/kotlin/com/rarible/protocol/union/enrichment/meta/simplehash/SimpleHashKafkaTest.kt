@@ -16,6 +16,7 @@ import com.rarible.simplehash.client.subcriber.SimplehashKafkaAvroSerializer
 import com.simplehash.v0.nft
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -53,6 +54,9 @@ class SimpleHashKafkaTest {
         }
         val worker = enrichmentConfig.simplehashWorker(props, factory, handler)
         worker.start()
+
+        // There's offsetResetStrategy = OffsetResetStrategy.LATEST, that why better to wait a little bit
+        delay(250)
 
         val producer = RaribleKafkaProducer(
             clientId = "test.rarible",
