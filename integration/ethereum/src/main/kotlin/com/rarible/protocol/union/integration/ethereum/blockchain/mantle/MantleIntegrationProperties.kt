@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.integration.ethereum
+package com.rarible.protocol.union.integration.ethereum.blockchain.mantle
 
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.protocol.union.core.DefaultBlockchainProperties
@@ -10,8 +10,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
-@ConfigurationProperties(prefix = "integration.ethereum")
-class EthereumIntegrationProperties(
+@ConfigurationProperties(prefix = "integration.mantle")
+class MantleIntegrationProperties(
     enabled: Boolean,
     consumer: DefaultConsumerProperties?,
     client: DefaultClientProperties?,
@@ -19,7 +19,7 @@ class EthereumIntegrationProperties(
     auctionContracts: String? = null,
     origins: Map<String, OriginProperties> = emptyMap()
 ) : DefaultBlockchainProperties(
-    BlockchainDto.ETHEREUM,
+    BlockchainDto.MANTLE,
     enabled,
     consumer,
     client,

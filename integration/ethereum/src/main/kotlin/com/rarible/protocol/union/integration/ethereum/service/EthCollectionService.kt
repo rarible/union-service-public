@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.CollectionsByIdRequestDto
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.union.core.exception.UnionMetaException
@@ -87,7 +86,6 @@ open class EthCollectionService(
     }
 }
 
-@CaptureSpan(type = "blockchain")
 open class EthereumCollectionService(
     collectionControllerApi: NftCollectionControllerApi
 ) : EthCollectionService(
@@ -95,10 +93,16 @@ open class EthereumCollectionService(
     collectionControllerApi
 )
 
-@CaptureSpan(type = "blockchain")
 open class PolygonCollectionService(
     collectionControllerApi: NftCollectionControllerApi
 ) : EthCollectionService(
     BlockchainDto.POLYGON,
+    collectionControllerApi
+)
+
+open class MantleCollectionService(
+    collectionControllerApi: NftCollectionControllerApi
+) : EthCollectionService(
+    BlockchainDto.MANTLE,
     collectionControllerApi
 )

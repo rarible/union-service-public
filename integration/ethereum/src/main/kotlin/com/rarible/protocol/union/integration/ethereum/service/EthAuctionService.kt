@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.AuctionIdsDto
 import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.union.core.service.AuctionService
@@ -130,7 +129,6 @@ open class EthAuctionService(
     }
 }
 
-@CaptureSpan(type = "blockchain")
 open class EthereumAuctionService(
     auctionControllerApi: AuctionControllerApi,
     ethAuctionConverter: EthAuctionConverter
@@ -140,12 +138,20 @@ open class EthereumAuctionService(
     ethAuctionConverter
 )
 
-@CaptureSpan(type = "blockchain")
 open class PolygonAuctionService(
     auctionControllerApi: AuctionControllerApi,
     ethAuctionConverter: EthAuctionConverter
 ) : EthAuctionService(
     BlockchainDto.POLYGON,
+    auctionControllerApi,
+    ethAuctionConverter
+)
+
+open class MantleAuctionService(
+    auctionControllerApi: AuctionControllerApi,
+    ethAuctionConverter: EthAuctionConverter
+) : EthAuctionService(
+    BlockchainDto.MANTLE,
     auctionControllerApi,
     ethAuctionConverter
 )

@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.integration.ethereum
+package com.rarible.protocol.union.integration.ethereum.blockchain.polygon
 
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
@@ -14,6 +14,7 @@ import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.integration.ethereum.EthApiFactoryConfiguration
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter

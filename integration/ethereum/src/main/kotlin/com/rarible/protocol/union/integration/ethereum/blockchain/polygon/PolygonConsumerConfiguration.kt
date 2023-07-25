@@ -1,11 +1,10 @@
-package com.rarible.protocol.union.integration.ethereum
+package com.rarible.protocol.union.integration.ethereum.blockchain.polygon
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.ActivityDto
 import com.rarible.protocol.dto.ActivityTopicProvider
-import com.rarible.protocol.dto.AuctionEventDto
 import com.rarible.protocol.dto.EthActivityEventDto
 import com.rarible.protocol.dto.NftCollectionEventDto
 import com.rarible.protocol.dto.NftCollectionEventTopicProvider
@@ -20,37 +19,33 @@ import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionActivity
-import com.rarible.protocol.union.core.model.UnionAuctionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
-import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.event.EthActivityEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthActivityLegacyEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.EthAuctionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthCollectionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthItemEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOrderEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOwnershipEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.EthereumActivityEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.EthereumActivityLegacyEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.EthereumAuctionEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.EthereumCollectionEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.EthereumItemEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.EthereumOrderEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.EthereumOwnershipEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.PolygonActivityEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.PolygonActivityLegacyEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.PolygonCollectionEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.PolygonItemEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.PolygonOrderEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.PolygonOwnershipEventHandler
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 
-@EthereumConfiguration
-@Import(EthereumApiConfiguration::class)
-class EthereumConsumerConfiguration(
+@PolygonConfiguration
+@Import(PolygonApiConfiguration::class)
+class PolygonConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-    properties: EthereumIntegrationProperties,
+    properties: PolygonIntegrationProperties,
     private val consumerFactory: ConsumerFactory
 ) {
 
@@ -61,70 +56,61 @@ class EthereumConsumerConfiguration(
     private val workers = consumer.workers
     private val batchSize = consumer.batchSize
 
-    private val blockchain = Blockchain.ETHEREUM
+    private val blockchain = Blockchain.POLYGON
 
     //-------------------- Handlers -------------------//
 
     @Bean
-    @Qualifier("ethereum.item.handler")
-    fun ethereumItemEventHandler(handler: IncomingEventHandler<UnionItemEvent>): EthItemEventHandler {
-        return EthereumItemEventHandler(handler)
+    @Qualifier("polygon.item.handler")
+    fun polygonItemEventHandler(handler: IncomingEventHandler<UnionItemEvent>): EthItemEventHandler {
+        return PolygonItemEventHandler(handler)
     }
 
     @Bean
-    @Qualifier("ethereum.ownership.handler")
-    fun ethereumOwnershipEventHandler(handler: IncomingEventHandler<UnionOwnershipEvent>): EthOwnershipEventHandler {
-        return EthereumOwnershipEventHandler(handler)
+    @Qualifier("polygon.ownership.handler")
+    fun polygonOwnershipEventHandler(handler: IncomingEventHandler<UnionOwnershipEvent>): EthOwnershipEventHandler {
+        return PolygonOwnershipEventHandler(handler)
     }
 
     @Bean
-    @Qualifier("ethereum.collection.handler")
-    fun ethereumCollectionEventHandler(handler: IncomingEventHandler<UnionCollectionEvent>): EthCollectionEventHandler {
-        return EthereumCollectionEventHandler(handler)
+    @Qualifier("polygon.collection.handler")
+    fun polygonCollectionEventHandler(handler: IncomingEventHandler<UnionCollectionEvent>): EthCollectionEventHandler {
+        return PolygonCollectionEventHandler(handler)
     }
 
     @Bean
-    @Qualifier("ethereum.order.handler")
-    fun ethereumOrderEventHandler(
+    @Qualifier("polygon.order.handler")
+    fun polygonOrderEventHandler(
         handler: IncomingEventHandler<UnionOrderEvent>,
         converter: EthOrderConverter
     ): EthOrderEventHandler {
-        return EthereumOrderEventHandler(handler, converter)
+        return PolygonOrderEventHandler(handler, converter)
     }
 
     @Bean
-    @Qualifier("ethereum.auction.handler")
-    fun ethereumAuctionEventHandler(
-        handler: IncomingEventHandler<UnionAuctionEvent>,
-        converter: EthAuctionConverter
-    ): EthAuctionEventHandler {
-        return EthereumAuctionEventHandler(handler, converter)
-    }
-
-    @Bean
-    @Qualifier("ethereum.activity.handler")
-    fun ethereumActivityEventHandler(
+    @Qualifier("polygon.activity.handler")
+    fun polygonActivityEventHandler(
         handler: IncomingEventHandler<UnionActivity>,
         converter: EthActivityConverter
     ): EthActivityEventHandler {
-        return EthereumActivityEventHandler(handler, converter)
+        return PolygonActivityEventHandler(handler, converter)
     }
 
     @Bean
     @Deprecated("Remove later")
-    @Qualifier("ethereum.activity.handler.legacy")
-    fun ethereumLegacyActivityEventHandler(
+    @Qualifier("polygon.activity.handler.legacy")
+    fun polygonLegacyActivityEventHandler(
         handler: IncomingEventHandler<UnionActivity>,
         converter: EthActivityConverter
     ): EthActivityLegacyEventHandler {
-        return EthereumActivityLegacyEventHandler(handler, converter)
+        return PolygonActivityLegacyEventHandler(handler, converter)
     }
 
     //-------------------- Workers --------------------//
 
     @Bean
-    fun ethereumItemWorker(
-        @Qualifier("ethereum.item.handler") handler: BlockchainEventHandler<NftItemEventDto, UnionItemEvent>
+    fun polygonItemWorker(
+        @Qualifier("polygon.item.handler") handler: BlockchainEventHandler<NftItemEventDto, UnionItemEvent>
     ): RaribleKafkaConsumerWorker<NftItemEventDto> {
         return createConsumer(
             topic = NftItemEventTopicProvider.getTopic(env, blockchain.value),
@@ -135,8 +121,8 @@ class EthereumConsumerConfiguration(
     }
 
     @Bean
-    fun ethereumOwnershipWorker(
-        @Qualifier("ethereum.ownership.handler") handler: BlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>
+    fun polygonOwnershipWorker(
+        @Qualifier("polygon.ownership.handler") handler: BlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>
     ): RaribleKafkaConsumerWorker<NftOwnershipEventDto> {
         return createConsumer(
             topic = NftOwnershipEventTopicProvider.getTopic(env, blockchain.value),
@@ -147,8 +133,8 @@ class EthereumConsumerConfiguration(
     }
 
     @Bean
-    fun ethereumCollectionWorker(
-        @Qualifier("ethereum.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>
+    fun polygonCollectionWorker(
+        @Qualifier("polygon.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>
     ): RaribleKafkaConsumerWorker<NftCollectionEventDto> {
         return createConsumer(
             topic = NftCollectionEventTopicProvider.getTopic(env, blockchain.value),
@@ -159,8 +145,8 @@ class EthereumConsumerConfiguration(
     }
 
     @Bean
-    fun ethereumOrderWorker(
-        @Qualifier("ethereum.order.handler") handler: BlockchainEventHandler<OrderEventDto, UnionOrderEvent>
+    fun polygonOrderWorker(
+        @Qualifier("polygon.order.handler") handler: BlockchainEventHandler<OrderEventDto, UnionOrderEvent>
     ): RaribleKafkaConsumerWorker<OrderEventDto> {
         return createConsumer(
             topic = OrderIndexerTopicProvider.getOrderUpdateTopic(env, blockchain.value),
@@ -171,20 +157,8 @@ class EthereumConsumerConfiguration(
     }
 
     @Bean
-    fun ethereumAuctionWorker(
-        @Qualifier("ethereum.auction.handler") handler: BlockchainEventHandler<AuctionEventDto, UnionAuctionEvent>
-    ): RaribleKafkaConsumerWorker<AuctionEventDto> {
-        return createConsumer(
-            topic = OrderIndexerTopicProvider.getAuctionUpdateTopic(env, blockchain.value),
-            handler = handler,
-            valueClass = AuctionEventDto::class.java,
-            eventType = EventType.AUCTION,
-        )
-    }
-
-    @Bean
-    fun ethereumActivityWorker(
-        @Qualifier("ethereum.activity.handler") handler: BlockchainEventHandler<EthActivityEventDto, UnionActivity>
+    fun polygonActivityWorker(
+        @Qualifier("polygon.activity.handler") handler: BlockchainEventHandler<EthActivityEventDto, UnionActivity>
     ): RaribleKafkaConsumerWorker<EthActivityEventDto> {
         return createConsumer(
             topic = ActivityTopicProvider.getActivityTopic(env, blockchain.value),
@@ -196,8 +170,8 @@ class EthereumConsumerConfiguration(
 
     @Bean
     @Deprecated("Remove later")
-    fun ethereumLegacyActivityWorker(
-        @Qualifier("ethereum.activity.handler.legacy") handler: BlockchainEventHandler<ActivityDto, UnionActivity>
+    fun polygonLegacyActivityWorker(
+        @Qualifier("polygon.activity.handler.legacy") handler: BlockchainEventHandler<ActivityDto, UnionActivity>
     ): RaribleKafkaConsumerWorker<ActivityDto> {
         return createConsumer(
             topic = ActivityTopicProvider.getTopic(env, blockchain.value),

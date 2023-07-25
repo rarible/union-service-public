@@ -33,3 +33,7 @@ open class EthereumOrderEventHandler(
 open class PolygonOrderEventHandler(
     handler: IncomingEventHandler<UnionOrderEvent>, ethOrderConverter: EthOrderConverter
 ) : EthOrderEventHandler(BlockchainDto.POLYGON, handler, ethOrderConverter)
+
+open class MantleOrderEventHandler(
+    handler: IncomingEventHandler<UnionOrderEvent>, ethOrderConverter: EthOrderConverter
+) : EthOrderEventHandler(BlockchainDto.MANTLE, handler, ethOrderConverter)

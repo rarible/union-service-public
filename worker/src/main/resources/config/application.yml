@@ -76,6 +76,11 @@ integration:
     consumer:
       broker-replica-set: ${kafka.hosts}
     auctionContracts: ${consul.polygon.auctionContracts:}
+  mantle:
+    enabled: ${consul.mantle.enabled:false}
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+    auctionContracts: ${consul.mantle.auctionContracts:}
   flow:
     enabled: ${consul.flow.enabled:true}
     consumer:
@@ -171,6 +176,8 @@ worker:
           enabled: true
         - blockchain: POLYGON
           enabled: true
+        - blockchain: MANTLE
+          enabled: true
         - blockchain: FLOW
           enabled: true
         - blockchain: TEZOS
@@ -185,6 +192,8 @@ worker:
         - blockchain: ETHEREUM
           enabled: true
         - blockchain: POLYGON
+          enabled: true
+        - blockchain: MANTLE
           enabled: true
         - blockchain: FLOW
           enabled: true
@@ -201,6 +210,8 @@ worker:
           enabled: true
         - blockchain: POLYGON
           enabled: true
+        - blockchain: MANTLE
+          enabled: true
         - blockchain: FLOW
           enabled: true
         - blockchain: TEZOS
@@ -216,6 +227,8 @@ worker:
           enabled: true
         - blockchain: POLYGON
           enabled: true
+        - blockchain: MANTLE
+          enabled: true
         - blockchain: FLOW
           enabled: true
         - blockchain: TEZOS
@@ -230,6 +243,8 @@ worker:
         - blockchain: ETHEREUM
           enabled: true
         - blockchain: POLYGON
+          enabled: true
+        - blockchain: MANTLE
           enabled: true
         - blockchain: FLOW
           enabled: true

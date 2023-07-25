@@ -49,6 +49,10 @@ integration:
     enabled: true
     consumer:
       broker-replica-set: ${kafka.hosts}
+  mantle:
+    enabled: true
+    consumer:
+      broker-replica-set: ${kafka.hosts}
   flow:
     enabled: true
     consumer:

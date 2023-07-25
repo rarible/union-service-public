@@ -32,3 +32,7 @@ open class EthereumItemEventHandler(
 open class PolygonItemEventHandler(
     handler: IncomingEventHandler<UnionItemEvent>
 ) : EthItemEventHandler(BlockchainDto.POLYGON, handler)
+
+open class MantleItemEventHandler(
+    handler: IncomingEventHandler<UnionItemEvent>
+) : EthItemEventHandler(BlockchainDto.MANTLE, handler)

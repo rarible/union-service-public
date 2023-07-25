@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.nft.api.client.NftDomainControllerApi
 import com.rarible.protocol.union.core.model.UnionDomainResolveResult
 import com.rarible.protocol.union.core.service.DomainService
@@ -19,7 +18,6 @@ open class EthDomainService(
     }
 }
 
-@CaptureSpan(type = "blockchain")
 open class EthereumDomainService(
     nftDomainControllerApi: NftDomainControllerApi
 ) : EthDomainService(
@@ -27,10 +25,16 @@ open class EthereumDomainService(
     nftDomainControllerApi
 )
 
-@CaptureSpan(type = "blockchain")
 open class PolygonDomainService(
     nftDomainControllerApi: NftDomainControllerApi
 ) : EthDomainService(
     BlockchainDto.POLYGON,
+    nftDomainControllerApi
+)
+
+open class MantleDomainService(
+    nftDomainControllerApi: NftDomainControllerApi
+) : EthDomainService(
+    BlockchainDto.MANTLE,
     nftDomainControllerApi
 )

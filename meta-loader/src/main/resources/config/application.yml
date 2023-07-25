@@ -80,6 +80,15 @@ integration:
         ownership: 1
         order: 1
     auctionContracts: ${consul.polygon.auctionContracts:}
+  mantle:
+    enabled: ${consul.mantle.enabled:false}
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+      workers:
+        item: 1
+        ownership: 1
+        order: 1
+    auctionContracts: ${consul.mantle.auctionContracts:}
   flow:
     enabled: ${consul.flow.enabled:true}
     consumer:

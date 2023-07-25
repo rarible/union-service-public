@@ -32,3 +32,7 @@ open class EthereumOwnershipEventHandler(
 open class PolygonOwnershipEventHandler(
     handler: IncomingEventHandler<UnionOwnershipEvent>
 ) : EthOwnershipEventHandler(BlockchainDto.POLYGON, handler)
+
+open class MantleOwnershipEventHandler(
+    handler: IncomingEventHandler<UnionOwnershipEvent>
+) : EthOwnershipEventHandler(BlockchainDto.MANTLE, handler)
