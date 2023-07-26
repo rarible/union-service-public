@@ -4,6 +4,7 @@ import com.rarible.protocol.currency.dto.CurrencyDto
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.BlockchainDto.*
 import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
 import java.math.BigInteger
@@ -33,24 +34,27 @@ object CurrencyConverter {
 
     fun convert(blockchain: BlockchainDto): com.rarible.protocol.currency.dto.BlockchainDto {
         return when (blockchain) {
-            BlockchainDto.ETHEREUM -> com.rarible.protocol.currency.dto.BlockchainDto.ETHEREUM
-            BlockchainDto.IMMUTABLEX -> com.rarible.protocol.currency.dto.BlockchainDto.IMMUTABLEX
-            BlockchainDto.FLOW -> com.rarible.protocol.currency.dto.BlockchainDto.FLOW
-            BlockchainDto.POLYGON -> com.rarible.protocol.currency.dto.BlockchainDto.POLYGON
-            BlockchainDto.TEZOS -> com.rarible.protocol.currency.dto.BlockchainDto.TEZOS
-            BlockchainDto.SOLANA -> com.rarible.protocol.currency.dto.BlockchainDto.SOLANA
+            ETHEREUM -> com.rarible.protocol.currency.dto.BlockchainDto.ETHEREUM
+            IMMUTABLEX -> com.rarible.protocol.currency.dto.BlockchainDto.IMMUTABLEX
+            FLOW -> com.rarible.protocol.currency.dto.BlockchainDto.FLOW
+            POLYGON -> com.rarible.protocol.currency.dto.BlockchainDto.POLYGON
+            TEZOS -> com.rarible.protocol.currency.dto.BlockchainDto.TEZOS
+            SOLANA -> com.rarible.protocol.currency.dto.BlockchainDto.SOLANA
+            MANTLE -> com.rarible.protocol.currency.dto.BlockchainDto.MANTLE
         }
     }
 
     fun convert(blockchain: com.rarible.protocol.currency.dto.BlockchainDto): BlockchainDto {
         return when (blockchain) {
-            com.rarible.protocol.currency.dto.BlockchainDto.ETHEREUM -> BlockchainDto.ETHEREUM
-            com.rarible.protocol.currency.dto.BlockchainDto.FLOW -> BlockchainDto.FLOW
-            com.rarible.protocol.currency.dto.BlockchainDto.POLYGON -> BlockchainDto.POLYGON
-            com.rarible.protocol.currency.dto.BlockchainDto.TEZOS -> BlockchainDto.TEZOS
-            com.rarible.protocol.currency.dto.BlockchainDto.SOLANA -> BlockchainDto.SOLANA
-            com.rarible.protocol.currency.dto.BlockchainDto.IMMUTABLEX -> BlockchainDto.IMMUTABLEX
-            else -> throw UnionCurrencyException("Unsupported blockchain: $blockchain")
+            com.rarible.protocol.currency.dto.BlockchainDto.ETHEREUM -> ETHEREUM
+            com.rarible.protocol.currency.dto.BlockchainDto.FLOW -> FLOW
+            com.rarible.protocol.currency.dto.BlockchainDto.POLYGON -> POLYGON
+            com.rarible.protocol.currency.dto.BlockchainDto.TEZOS -> TEZOS
+            com.rarible.protocol.currency.dto.BlockchainDto.SOLANA -> SOLANA
+            com.rarible.protocol.currency.dto.BlockchainDto.IMMUTABLEX -> IMMUTABLEX
+            com.rarible.protocol.currency.dto.BlockchainDto.MANTLE -> MANTLE
+            com.rarible.protocol.currency.dto.BlockchainDto.OPTIMISM,
+            com.rarible.protocol.currency.dto.BlockchainDto.APTOS -> throw UnionCurrencyException("Unsupported blockchain: $blockchain")
         }
     }
 }

@@ -4,8 +4,9 @@ import com.rarible.core.mongo.configuration.EnableRaribleMongo
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.integration.ethereum.EthereumApiConfiguration
-import com.rarible.protocol.union.integration.ethereum.PolygonApiConfiguration
+import com.rarible.protocol.union.integration.ethereum.blockchain.ethereum.EthereumApiConfiguration
+import com.rarible.protocol.union.integration.ethereum.blockchain.mantle.MantleApiConfiguration
+import com.rarible.protocol.union.integration.ethereum.blockchain.polygon.PolygonApiConfiguration
 import com.rarible.protocol.union.integration.flow.FlowApiConfiguration
 import com.rarible.protocol.union.integration.immutablex.ImxApiConfiguration
 import com.rarible.protocol.union.integration.solana.SolanaApiConfiguration
@@ -27,6 +28,7 @@ import org.springframework.context.annotation.Import
         TezosApiConfiguration::class, // TODO enable with proper config
         SolanaApiConfiguration::class,
         ImxApiConfiguration::class,
+        MantleApiConfiguration::class,
         SearchConfiguration::class,
         CoreConfiguration::class,
     ]

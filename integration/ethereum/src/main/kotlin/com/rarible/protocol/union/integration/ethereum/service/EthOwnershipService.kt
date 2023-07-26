@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.NftOwnershipIdsDto
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.union.core.model.UnionOwnership
@@ -54,16 +53,20 @@ open class EthOwnershipService(
     }
 }
 
-@CaptureSpan(type = "blockchain")
 open class EthereumOwnershipService(
     ownershipControllerApi: NftOwnershipControllerApi
 ) : EthOwnershipService(
     BlockchainDto.ETHEREUM, ownershipControllerApi
 )
 
-@CaptureSpan(type = "blockchain")
 open class PolygonOwnershipService(
     ownershipControllerApi: NftOwnershipControllerApi
 ) : EthOwnershipService(
     BlockchainDto.POLYGON, ownershipControllerApi
+)
+
+open class MantleOwnershipService(
+    ownershipControllerApi: NftOwnershipControllerApi
+) : EthOwnershipService(
+    BlockchainDto.MANTLE, ownershipControllerApi
 )

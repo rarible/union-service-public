@@ -21,14 +21,14 @@ rarible:
   core:
     apm:
       agent:
-        enabled: true
+        enabled: false
         server: http://elk_apm-server:8200
         packages: com.rarible.protocol.union.api
       web:
         filter:
-          enabled: true
+          enabled: false
       annotation:
-        enabled: true
+        enabled: false
     client:
       name: rarible-protocol
   ethereum:
@@ -58,6 +58,9 @@ integration:
   polygon:
     enabled: ${consul.polygon.enabled:true}
     auctionContracts: ${consul.polygon.auctionContracts:}
+  mantle:
+    enabled: ${consul.mantle.enabled:false}
+    auctionContracts: ${consul.mantle.auctionContracts:}
   flow:
     enabled: ${consul.flow.enabled:true}
     auctionContracts: ${consul.flow.auctionContracts:}

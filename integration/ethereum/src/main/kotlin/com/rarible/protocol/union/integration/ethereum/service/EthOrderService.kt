@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.OrderIdsDto
 import com.rarible.protocol.dto.OrderStateDto
 import com.rarible.protocol.order.api.client.OrderAdminControllerApi
@@ -367,7 +366,6 @@ open class EthOrderService(
     }
 }
 
-@CaptureSpan(type = "blockchain")
 open class EthereumOrderService(
     orderControllerApi: OrderControllerApi,
     orderAdminControllerApi: OrderAdminControllerApi,
@@ -379,13 +377,23 @@ open class EthereumOrderService(
     ethOrderConverter
 )
 
-@CaptureSpan(type = "blockchain")
 open class PolygonOrderService(
     orderControllerApi: OrderControllerApi,
     orderAdminControllerApi: OrderAdminControllerApi,
     ethOrderConverter: EthOrderConverter
 ) : EthOrderService(
     BlockchainDto.POLYGON,
+    orderControllerApi,
+    orderAdminControllerApi,
+    ethOrderConverter
+)
+
+open class MantleOrderService(
+    orderControllerApi: OrderControllerApi,
+    orderAdminControllerApi: OrderAdminControllerApi,
+    ethOrderConverter: EthOrderConverter
+) : EthOrderService(
+    BlockchainDto.MANTLE,
     orderControllerApi,
     orderAdminControllerApi,
     ethOrderConverter

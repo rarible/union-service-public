@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.ActivitiesByIdRequestDto
 import com.rarible.protocol.dto.AuctionActivitiesDto
 import com.rarible.protocol.dto.AuctionActivityFilterAllDto
@@ -461,7 +460,6 @@ open class EthActivityService(
     }
 }
 
-@CaptureSpan(type = "blockchain")
 open class EthereumActivityService(
     activityItemControllerApi: NftActivityControllerApi,
     activityOrderControllerApi: OrderActivityControllerApi,
@@ -475,7 +473,6 @@ open class EthereumActivityService(
     ethActivityConverter
 )
 
-@CaptureSpan(type = "blockchain")
 open class PolygonActivityService(
     activityItemControllerApi: NftActivityControllerApi,
     activityOrderControllerApi: OrderActivityControllerApi,
@@ -483,6 +480,19 @@ open class PolygonActivityService(
     ethActivityConverter: EthActivityConverter
 ) : EthActivityService(
     BlockchainDto.POLYGON,
+    activityItemControllerApi,
+    activityOrderControllerApi,
+    activityAuctionControllerApi,
+    ethActivityConverter
+)
+
+open class MantleActivityService(
+    activityItemControllerApi: NftActivityControllerApi,
+    activityOrderControllerApi: OrderActivityControllerApi,
+    activityAuctionControllerApi: AuctionActivityControllerApi,
+    ethActivityConverter: EthActivityConverter
+) : EthActivityService(
+    BlockchainDto.MANTLE,
     activityItemControllerApi,
     activityOrderControllerApi,
     activityAuctionControllerApi,

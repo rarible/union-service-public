@@ -100,7 +100,9 @@ object CollectionDtoConverter {
         return if (source == null) {
             logger.warn("Unknown collection {}, type can't be determined", collectionId.toDto().fullId())
             when (collectionId.blockchain) {
-                BlockchainDto.ETHEREUM, BlockchainDto.POLYGON -> CollectionDto.Type.ERC721
+                BlockchainDto.ETHEREUM,
+                BlockchainDto.POLYGON,
+                BlockchainDto.MANTLE -> CollectionDto.Type.ERC721
                 BlockchainDto.IMMUTABLEX -> CollectionDto.Type.IMMUTABLEX
                 BlockchainDto.FLOW -> CollectionDto.Type.FLOW
                 BlockchainDto.TEZOS -> CollectionDto.Type.TEZOS_NFT

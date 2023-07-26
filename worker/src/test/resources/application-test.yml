@@ -65,6 +65,8 @@ worker:
           enabled: true
         - blockchain: POLYGON
           enabled: true
+        - blockchain: MANTLE
+          enabled: true
         - blockchain: FLOW
           enabled: true
         - blockchain: TEZOS
@@ -83,6 +85,8 @@ worker:
           enabled: true
         - blockchain: POLYGON
           enabled: true
+        - blockchain: MANTLE
+          enabled: true
         - blockchain: FLOW
           enabled: true
         - blockchain: TEZOS
@@ -97,6 +101,8 @@ worker:
         - blockchain: ETHEREUM
           enabled: true
         - blockchain: POLYGON
+          enabled: true
+        - blockchain: MANTLE
           enabled: true
         - blockchain: FLOW
           enabled: true

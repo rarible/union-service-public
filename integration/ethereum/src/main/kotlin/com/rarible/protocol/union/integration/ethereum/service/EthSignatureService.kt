@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.EthereumSignatureValidationFormDto
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.core.service.SignatureService
@@ -29,7 +28,6 @@ open class EthSignatureService(
     }
 }
 
-@CaptureSpan(type = "blockchain")
 open class EthereumSignatureService(
     signatureControllerApi: OrderSignatureControllerApi
 ) : EthSignatureService(
@@ -37,10 +35,16 @@ open class EthereumSignatureService(
     signatureControllerApi
 )
 
-@CaptureSpan(type = "blockchain")
 open class PolygonSignatureService(
     signatureControllerApi: OrderSignatureControllerApi
 ) : EthSignatureService(
     BlockchainDto.POLYGON,
+    signatureControllerApi
+)
+
+open class MantleSignatureService(
+    signatureControllerApi: OrderSignatureControllerApi
+) : EthSignatureService(
+    BlockchainDto.MANTLE,
     signatureControllerApi
 )

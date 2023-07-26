@@ -73,6 +73,11 @@ integration:
     consumer:
       broker-replica-set: ${kafka.hosts}
     auctionContracts: ${consul.polygon.auctionContracts:}
+  mantle:
+    enabled: ${consul.mantle.enabled:false}
+    consumer:
+      broker-replica-set: ${kafka.hosts}
+    auctionContracts: ${consul.mantle.auctionContracts:}
   flow:
     enabled: ${consul.flow.enabled:true}
     consumer:

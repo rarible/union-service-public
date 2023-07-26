@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.ethereum.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.NftItemIdsDto
 import com.rarible.protocol.dto.parser.AddressParser
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
@@ -126,7 +125,6 @@ open class EthItemService(
     }
 }
 
-@CaptureSpan(type = "blockchain")
 open class EthereumItemService(
     itemControllerApi: NftItemControllerApi
 ) : EthItemService(
@@ -134,7 +132,6 @@ open class EthereumItemService(
     itemControllerApi
 )
 
-@CaptureSpan(type = "blockchain")
 open class PolygonItemService(
     itemControllerApi: NftItemControllerApi
 ) : EthItemService(
@@ -142,3 +139,9 @@ open class PolygonItemService(
     itemControllerApi
 )
 
+open class MantleItemService(
+    itemControllerApi: NftItemControllerApi
+) : EthItemService(
+    BlockchainDto.MANTLE,
+    itemControllerApi
+)

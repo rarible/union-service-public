@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.integration.ethereum
+package com.rarible.protocol.union.integration.ethereum.blockchain.ethereum
 
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
@@ -14,6 +14,7 @@ import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.integration.ethereum.EthApiFactoryConfiguration
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
@@ -33,7 +34,6 @@ import com.rarible.protocol.union.integration.ethereum.service.EthereumItemServi
 import com.rarible.protocol.union.integration.ethereum.service.EthereumOrderService
 import com.rarible.protocol.union.integration.ethereum.service.EthereumOwnershipService
 import com.rarible.protocol.union.integration.ethereum.service.EthereumSignatureService
-import com.rarible.protocol.union.integration.ethereum.service.PolygonDomainService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean

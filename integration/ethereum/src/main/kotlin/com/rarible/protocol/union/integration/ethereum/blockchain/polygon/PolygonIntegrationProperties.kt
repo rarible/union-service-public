@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.integration.ethereum
+package com.rarible.protocol.union.integration.ethereum.blockchain.polygon
 
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.protocol.union.core.DefaultBlockchainProperties

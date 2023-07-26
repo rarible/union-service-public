@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.integration.ethereum
+package com.rarible.protocol.union.integration.ethereum.blockchain.mantle
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
@@ -31,21 +31,21 @@ import com.rarible.protocol.union.integration.ethereum.event.EthCollectionEventH
 import com.rarible.protocol.union.integration.ethereum.event.EthItemEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOrderEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOwnershipEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.PolygonActivityEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.PolygonActivityLegacyEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.PolygonCollectionEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.PolygonItemEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.PolygonOrderEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.PolygonOwnershipEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.MantleActivityEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.MantleActivityLegacyEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.MantleCollectionEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.MantleItemEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.MantleOrderEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.MantleOwnershipEventHandler
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 
-@PolygonConfiguration
-@Import(PolygonApiConfiguration::class)
-class PolygonConsumerConfiguration(
+@MantleConfiguration
+@Import(MantleApiConfiguration::class)
+class MantleConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-    properties: PolygonIntegrationProperties,
+    properties: MantleIntegrationProperties,
     private val consumerFactory: ConsumerFactory
 ) {
 
@@ -56,61 +56,61 @@ class PolygonConsumerConfiguration(
     private val workers = consumer.workers
     private val batchSize = consumer.batchSize
 
-    private val blockchain = Blockchain.POLYGON
+    private val blockchain = Blockchain.MANTLE
 
     //-------------------- Handlers -------------------//
 
     @Bean
-    @Qualifier("polygon.item.handler")
-    fun polygonItemEventHandler(handler: IncomingEventHandler<UnionItemEvent>): EthItemEventHandler {
-        return PolygonItemEventHandler(handler)
+    @Qualifier("mantle.item.handler")
+    fun mantleItemEventHandler(handler: IncomingEventHandler<UnionItemEvent>): EthItemEventHandler {
+        return MantleItemEventHandler(handler)
     }
 
     @Bean
-    @Qualifier("polygon.ownership.handler")
-    fun polygonOwnershipEventHandler(handler: IncomingEventHandler<UnionOwnershipEvent>): EthOwnershipEventHandler {
-        return PolygonOwnershipEventHandler(handler)
+    @Qualifier("mantle.ownership.handler")
+    fun mantleOwnershipEventHandler(handler: IncomingEventHandler<UnionOwnershipEvent>): EthOwnershipEventHandler {
+        return MantleOwnershipEventHandler(handler)
     }
 
     @Bean
-    @Qualifier("polygon.collection.handler")
-    fun polygonCollectionEventHandler(handler: IncomingEventHandler<UnionCollectionEvent>): EthCollectionEventHandler {
-        return PolygonCollectionEventHandler(handler)
+    @Qualifier("mantle.collection.handler")
+    fun mantleCollectionEventHandler(handler: IncomingEventHandler<UnionCollectionEvent>): EthCollectionEventHandler {
+        return MantleCollectionEventHandler(handler)
     }
 
     @Bean
-    @Qualifier("polygon.order.handler")
-    fun polygonOrderEventHandler(
+    @Qualifier("mantle.order.handler")
+    fun mantleOrderEventHandler(
         handler: IncomingEventHandler<UnionOrderEvent>,
         converter: EthOrderConverter
     ): EthOrderEventHandler {
-        return PolygonOrderEventHandler(handler, converter)
+        return MantleOrderEventHandler(handler, converter)
     }
 
     @Bean
-    @Qualifier("polygon.activity.handler")
-    fun polygonActivityEventHandler(
+    @Qualifier("mantle.activity.handler")
+    fun mantleActivityEventHandler(
         handler: IncomingEventHandler<UnionActivity>,
         converter: EthActivityConverter
     ): EthActivityEventHandler {
-        return PolygonActivityEventHandler(handler, converter)
+        return MantleActivityEventHandler(handler, converter)
     }
 
     @Bean
     @Deprecated("Remove later")
-    @Qualifier("polygon.activity.handler.legacy")
-    fun polygonLegacyActivityEventHandler(
+    @Qualifier("mantle.activity.handler.legacy")
+    fun mantleLegacyActivityEventHandler(
         handler: IncomingEventHandler<UnionActivity>,
         converter: EthActivityConverter
     ): EthActivityLegacyEventHandler {
-        return PolygonActivityLegacyEventHandler(handler, converter)
+        return MantleActivityLegacyEventHandler(handler, converter)
     }
 
     //-------------------- Workers --------------------//
 
     @Bean
-    fun polygonItemWorker(
-        @Qualifier("polygon.item.handler") handler: BlockchainEventHandler<NftItemEventDto, UnionItemEvent>
+    fun mantleItemWorker(
+        @Qualifier("mantle.item.handler") handler: BlockchainEventHandler<NftItemEventDto, UnionItemEvent>
     ): RaribleKafkaConsumerWorker<NftItemEventDto> {
         return createConsumer(
             topic = NftItemEventTopicProvider.getTopic(env, blockchain.value),
@@ -121,8 +121,8 @@ class PolygonConsumerConfiguration(
     }
 
     @Bean
-    fun polygonOwnershipWorker(
-        @Qualifier("polygon.ownership.handler") handler: BlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>
+    fun mantleOwnershipWorker(
+        @Qualifier("mantle.ownership.handler") handler: BlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>
     ): RaribleKafkaConsumerWorker<NftOwnershipEventDto> {
         return createConsumer(
             topic = NftOwnershipEventTopicProvider.getTopic(env, blockchain.value),
@@ -133,8 +133,8 @@ class PolygonConsumerConfiguration(
     }
 
     @Bean
-    fun polygonCollectionWorker(
-        @Qualifier("polygon.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>
+    fun mantleCollectionWorker(
+        @Qualifier("mantle.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>
     ): RaribleKafkaConsumerWorker<NftCollectionEventDto> {
         return createConsumer(
             topic = NftCollectionEventTopicProvider.getTopic(env, blockchain.value),
@@ -145,8 +145,8 @@ class PolygonConsumerConfiguration(
     }
 
     @Bean
-    fun polygonOrderWorker(
-        @Qualifier("polygon.order.handler") handler: BlockchainEventHandler<OrderEventDto, UnionOrderEvent>
+    fun mantleOrderWorker(
+        @Qualifier("mantle.order.handler") handler: BlockchainEventHandler<OrderEventDto, UnionOrderEvent>
     ): RaribleKafkaConsumerWorker<OrderEventDto> {
         return createConsumer(
             topic = OrderIndexerTopicProvider.getOrderUpdateTopic(env, blockchain.value),
@@ -157,8 +157,8 @@ class PolygonConsumerConfiguration(
     }
 
     @Bean
-    fun polygonActivityWorker(
-        @Qualifier("polygon.activity.handler") handler: BlockchainEventHandler<EthActivityEventDto, UnionActivity>
+    fun mantleActivityWorker(
+        @Qualifier("mantle.activity.handler") handler: BlockchainEventHandler<EthActivityEventDto, UnionActivity>
     ): RaribleKafkaConsumerWorker<EthActivityEventDto> {
         return createConsumer(
             topic = ActivityTopicProvider.getActivityTopic(env, blockchain.value),
@@ -170,8 +170,8 @@ class PolygonConsumerConfiguration(
 
     @Bean
     @Deprecated("Remove later")
-    fun polygonLegacyActivityWorker(
-        @Qualifier("polygon.activity.handler.legacy") handler: BlockchainEventHandler<ActivityDto, UnionActivity>
+    fun mantleLegacyActivityWorker(
+        @Qualifier("mantle.activity.handler.legacy") handler: BlockchainEventHandler<ActivityDto, UnionActivity>
     ): RaribleKafkaConsumerWorker<ActivityDto> {
         return createConsumer(
             topic = ActivityTopicProvider.getTopic(env, blockchain.value),

@@ -12,6 +12,11 @@ fun nativeTestCurrencies() = listOf(
         blockchain = com.rarible.protocol.currency.dto.BlockchainDto.POLYGON,
     ),
     com.rarible.protocol.currency.dto.CurrencyDto(
+        currencyId = "mantle",
+        address = "0x0000000000000000000000000000000000000000",
+        blockchain = com.rarible.protocol.currency.dto.BlockchainDto.MANTLE,
+    ),
+    com.rarible.protocol.currency.dto.CurrencyDto(
         currencyId = "flow",
         address = "A.1654653399040a61.FlowToken",
         blockchain = com.rarible.protocol.currency.dto.BlockchainDto.FLOW,

@@ -33,3 +33,7 @@ open class EthereumActivityEventHandler(
 open class PolygonActivityEventHandler(
     handler: IncomingEventHandler<UnionActivity>, ethActivityConverter: EthActivityConverter
 ) : EthActivityEventHandler(BlockchainDto.POLYGON, handler, ethActivityConverter)
+
+open class MantleActivityEventHandler(
+    handler: IncomingEventHandler<UnionActivity>, ethActivityConverter: EthActivityConverter
+) : EthActivityEventHandler(BlockchainDto.MANTLE, handler, ethActivityConverter)
