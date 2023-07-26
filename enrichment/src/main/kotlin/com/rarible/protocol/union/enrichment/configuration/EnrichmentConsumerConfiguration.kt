@@ -10,6 +10,7 @@ import com.rarible.protocol.union.integration.tezos.TezosConsumerConfiguration
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 
+
 @Configuration
 @Import(
     value = [
@@ -21,6 +22,7 @@ import org.springframework.context.annotation.Import
         ImxConsumerConfiguration::class,
         SolanaConsumerConfiguration::class,
         MantleConsumerConfiguration::class,
+        SimplehashConsumerConfiguration::class
     ]
 )
 class EnrichmentConsumerConfiguration

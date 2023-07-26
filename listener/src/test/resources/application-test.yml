@@ -93,3 +93,6 @@ integration:
 meta:
   embedded:
     publicUrl: "http://localhost:8080/content/embedded"
+  simpleHash:
+    kafka:
+      enabled: false

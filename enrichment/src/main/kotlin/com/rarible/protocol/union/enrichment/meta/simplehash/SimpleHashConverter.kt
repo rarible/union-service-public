@@ -10,7 +10,10 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.MetaSource
 import com.rarible.protocol.union.enrichment.model.RawMetaCache
+import com.simplehash.v0.nft
+import org.apache.commons.text.StringEscapeUtils
 import java.time.Instant
+import java.time.LocalDateTime
 
 object SimpleHashConverter {
 
@@ -23,6 +26,41 @@ object SimpleHashConverter {
 
     fun convertRawToSimpleHashItem(json: String): SimpleHashItem {
         return mapper.readValue<SimpleHashItem>(json)
+    }
+
+    fun convert(source: nft): SimpleHashItem {
+        return SimpleHashItem(
+            nftId = source.nftId.toString(),
+            tokenId = source.tokenId?.toString(),
+            name = source.name?.toString(),
+            description = source.description?.toString(),
+            previews = source.previews?.let { preview ->
+                SimpleHashItem.Preview(
+                    imageSmallUrl = preview.imageSmallUrl?.toString(),
+                    imageMediumUrl = preview.imageMediumUrl?.toString(),
+                    imageLargeUrl = preview.imageLargeUrl?.toString(),
+                    imageOpengraphUrl = preview.imageOpengraphUrl?.toString()
+                )
+            },
+            imageProperties = source.imageProperties?.let { props ->
+                SimpleHashItem.ImageProperties(
+                    width = props.width,
+                    height = props.height,
+                    size = props.size?.let { it.toLong() },
+                    mimeType = props.mimeType?.toString()
+                )
+            },
+            createdDate = source.createdDate?.let { LocalDateTime.parse(it) },
+            externalUrl = source.externalUrl?.toString(),
+            extraMetadata = source.extraMetadata?.let { extractExtraMeta(it.toString()) },
+
+            // is not supported in the kafka event
+            collection = null,
+        )
+    }
+
+    fun extractExtraMeta(source: String): SimpleHashItem.ExtraMetadata {
+        return mapper.readValue(StringEscapeUtils.unescapeJson(source))
     }
 
     fun safeConvertToMetaUpdate(json: String): SimpleHashNftMetadataUpdate? {
