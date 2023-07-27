@@ -160,7 +160,7 @@ class ImxActivityServiceMt : ImxManualTest() {
         val activitiesWithWrongUser = service.getActivitiesByItemAndOwner(
             types = listOf(),
             itemId = "0xb2d73b6a1da13882c15ca7e248051e38f0abd1e6:2083",
-            owner = "0xf42eca6ccfaab740a962317ce6506639f3588888", //Non-existing user
+            owner = "0xf42eca6ccfaab740a962317ce6506639f3588888", // Non-existing user
             continuation = null,
             size = 10,
             sort = ActivitySortDto.LATEST_FIRST
@@ -275,5 +275,4 @@ class ImxActivityServiceMt : ImxManualTest() {
 
         assertThat(trades).hasSize(1)
     }
-
 }

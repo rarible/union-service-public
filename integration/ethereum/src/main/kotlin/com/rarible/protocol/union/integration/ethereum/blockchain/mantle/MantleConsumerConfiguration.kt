@@ -58,7 +58,7 @@ class MantleConsumerConfiguration(
 
     private val blockchain = Blockchain.MANTLE
 
-    //-------------------- Handlers -------------------//
+    // -------------------- Handlers -------------------//
 
     @Bean
     @Qualifier("mantle.item.handler")
@@ -106,7 +106,7 @@ class MantleConsumerConfiguration(
         return MantleActivityLegacyEventHandler(handler, converter)
     }
 
-    //-------------------- Workers --------------------//
+    // -------------------- Workers --------------------//
 
     @Bean
     fun mantleItemWorker(

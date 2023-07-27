@@ -10,8 +10,8 @@ import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.core.test.wait.BlockingWait.waitAssert
 import com.rarible.protocol.union.enrichment.configuration.SimpleHash
 import com.rarible.protocol.union.enrichment.configuration.SimpleHashKafka
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.configuration.SimplehashConsumerConfiguration
+import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.simplehash.client.subcriber.SimplehashKafkaAvroSerializer
 import com.simplehash.v0.nft
 import io.mockk.every
@@ -22,7 +22,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.concurrent.ConcurrentLinkedDeque
-
 
 @Disabled("Works locally, but fails in jenkins")
 @KafkaTest
@@ -52,7 +51,6 @@ class SimpleHashKafkaTest {
             override suspend fun handle(events: List<nft>) {
                 records.addAll(events)
             }
-
         }
         val worker = enrichmentConfig.simplehashWorker(props, factory, handler)
         worker.start()
@@ -88,5 +86,4 @@ class SimpleHashKafkaTest {
             assertThat(records.first).isEqualTo(event)
         }
     }
-
 }

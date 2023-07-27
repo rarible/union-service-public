@@ -44,10 +44,11 @@ class FlowOrderEventHandlerTest {
         val expected = converter.convert(order, BlockchainDto.FLOW)
 
         coVerify(exactly = 1) {
-            incomingEventHandler.onEvent(match {
-                (it as UnionOrderUpdateEvent).order == expected
-            })
+            incomingEventHandler.onEvent(
+                match {
+                    (it as UnionOrderUpdateEvent).order == expected
+                }
+            )
         }
     }
-
 }

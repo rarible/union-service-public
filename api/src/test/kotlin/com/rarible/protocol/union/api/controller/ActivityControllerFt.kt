@@ -485,7 +485,8 @@ class ActivityControllerFt : AbstractIntegrationTest() {
     }
 
     private fun fillEthereumActivitiesLists(
-        size: Int, orderActivities: MutableList<OrderActivityDto>,
+        size: Int,
+        orderActivities: MutableList<OrderActivityDto>,
         auctionActivities: MutableList<AuctionActivityDto>,
         itemActivities: MutableList<NftActivityDto>
     ) {

@@ -37,7 +37,7 @@ class SolanaApiConfiguration {
     @Bean
     fun solanaBlockchain(): BlockchainDto = BlockchainDto.SOLANA
 
-    //-------------------- API --------------------//
+    // -------------------- API --------------------//
 
     @Bean
     fun solanaNftIndexerApiClientFactory(
@@ -71,7 +71,7 @@ class SolanaApiConfiguration {
     fun solanaSignatureApi(factory: SolanaNftIndexerApiClientFactory): SignatureControllerApi =
         factory.createSignControllerApiClient()
 
-    //-------------------- Services --------------------//
+    // -------------------- Services --------------------//
     @Bean
     fun solanaItemService(controllerApi: TokenControllerApi): SolanaItemService {
         return SolanaItemService(controllerApi)
@@ -108,5 +108,4 @@ class SolanaApiConfiguration {
     fun solanaSignatureService(controllerApi: SignatureControllerApi): SolanaSignatureService {
         return SolanaSignatureService(controllerApi)
     }
-
 }

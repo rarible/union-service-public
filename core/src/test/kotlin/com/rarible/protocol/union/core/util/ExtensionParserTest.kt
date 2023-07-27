@@ -34,5 +34,4 @@ class ExtensionParserTest {
     private fun assertMimeType(mimeType: String, expected: String) {
         assertThat(ExtensionParser.getFileExtension(mimeType)).isEqualTo(expected)
     }
-
 }

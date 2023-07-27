@@ -90,5 +90,4 @@ class IndexService(
         }
         updateMetadata(definition)
     }
-
 }

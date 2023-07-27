@@ -8,8 +8,7 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
-class ItemFilterConverter(
-) {
+class ItemFilterConverter() {
 
     fun convertGetAllItems(
         blockchains: Set<String>,

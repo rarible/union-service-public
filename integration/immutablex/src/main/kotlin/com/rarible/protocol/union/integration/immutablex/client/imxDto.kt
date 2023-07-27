@@ -167,10 +167,9 @@ data class ImmutablexOrderData(
     val properties: ImmutablexDataProperties?,
 ) {
 
-    fun itemId(): String = "${tokenAddress}:${tokenId}"
+    fun itemId(): String = "$tokenAddress:$tokenId"
 
     fun encodedTokenId() = tokenId?.let { TokenIdDecoder.encode(tokenId) }
-
 }
 
 data class ImmutablexDataProperties(
@@ -328,4 +327,3 @@ sealed class ImmutablexEvent(open val transactionId: Long, open val timestamp: I
     JsonSubTypes.Type(value = ImmutablexWithdrawal::class)
 )
 sealed interface ImmutablexJson
-

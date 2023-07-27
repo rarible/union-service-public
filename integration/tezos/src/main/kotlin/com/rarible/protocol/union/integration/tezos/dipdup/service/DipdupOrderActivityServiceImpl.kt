@@ -14,7 +14,7 @@ import java.math.BigInteger
 class DipdupOrderActivityServiceImpl(
     private val dipdupActivityClient: OrderActivityClient,
     private val dipDupActivityConverter: DipDupActivityConverter
-): DipdupOrderActivityService {
+) : DipdupOrderActivityService {
 
     private val blockchain = BlockchainDto.TEZOS
 
@@ -94,5 +94,4 @@ class DipdupOrderActivityServiceImpl(
     companion object {
         private val logger by Logger()
     }
-
 }

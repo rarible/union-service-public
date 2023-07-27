@@ -17,7 +17,6 @@ import java.util.stream.Stream
 
 class EsCollectionConverterTest {
 
-
     @ParameterizedTest
     @MethodSource("args")
     internal fun `collection parser test`(unionCollection: CollectionDto) {
@@ -80,6 +79,5 @@ class EsCollectionConverterTest {
                 Arguments.of(it)
             }.stream()
         }
-
     }
 }

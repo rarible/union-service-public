@@ -89,5 +89,4 @@ class DipDupTokenActivityService(
         val activities = dipDupTokenActivityClient.getActivitiesByIds(ids)
         return activities.map { dipDupActivityConverter.convert(it, BlockchainDto.TEZOS) }
     }
-
 }

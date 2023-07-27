@@ -129,11 +129,13 @@ class CustomCollectionActivityUpdaterTest {
         expected: List<ActivityIdDto>
     ) {
         coVerify {
-            producer.send(match<Collection<KafkaMessage<ActivityDto>>> { events ->
-                val received = events.map { it.value.id }
-                assertThat(received).isEqualTo(expected)
-                true
-            })
+            producer.send(
+                match<Collection<KafkaMessage<ActivityDto>>> { events ->
+                    val received = events.map { it.value.id }
+                    assertThat(received).isEqualTo(expected)
+                    true
+                }
+            )
         }
     }
 

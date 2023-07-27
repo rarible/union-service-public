@@ -49,5 +49,4 @@ open class DipDupCollectionEventHandler(
             null
         }
     }
-
 }

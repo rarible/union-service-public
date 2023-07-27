@@ -14,5 +14,4 @@ abstract class AbstractIntegrationTest {
     @Autowired
     @Qualifier("test.content.meta.receiver")
     lateinit var testContentMetaReceiver: ContentMetaReceiver
-
 }

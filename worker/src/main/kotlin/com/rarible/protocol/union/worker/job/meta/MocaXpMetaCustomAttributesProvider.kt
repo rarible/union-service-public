@@ -102,7 +102,7 @@ object MocaXpCustomAttributesParser {
 
         fun toAttributes(): List<UnionMetaAttribute> {
             return listOfNotNull(
-                //tribe?.let { UnionMetaAttribute(FIELD_TRIBE, it) },
+                // tribe?.let { UnionMetaAttribute(FIELD_TRIBE, it) },
                 UnionMetaAttribute(ATTRIBUTE_XP_TOKEN_ID, tokenId),
                 xp?.let { UnionMetaAttribute(FIELD_XP, it.toPlainString()) },
                 rank?.let { UnionMetaAttribute(FIELD_RANK, it) },
@@ -110,5 +110,4 @@ object MocaXpCustomAttributesParser {
             )
         }
     }
-
 }

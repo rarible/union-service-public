@@ -67,9 +67,9 @@ class MattelMetaCustomizer(
             }
 
             // Target content to "fix" - @IMAGE with ORIGINAL representation and same URL as in attributes
-            it.representation == MetaContentDto.Representation.ORIGINAL
-                && it.url == originalUrl
-                && properties?.isFull() != true
+            it.representation == MetaContentDto.Representation.ORIGINAL &&
+                it.url == originalUrl &&
+                properties?.isFull() != true
         } ?: return content
 
         val fixedContent = targetContent.copy(
@@ -264,4 +264,3 @@ class BarbieTokenMetaCustomizer(
         "releaseDate"
     )
 }
-

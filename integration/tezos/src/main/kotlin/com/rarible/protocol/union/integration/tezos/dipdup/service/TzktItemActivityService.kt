@@ -20,7 +20,10 @@ interface TzktItemActivityService {
     suspend fun getByItem(
         types: List<ActivityTypeDto>,
         contract: String,
-        tokenId: BigInteger, continuation: String?, limit: Int, sort: ActivitySortDto?
+        tokenId: BigInteger,
+        continuation: String?,
+        limit: Int,
+        sort: ActivitySortDto?
     ): Slice<UnionActivity> {
         TODO("Not implemented")
     }
@@ -28,5 +31,4 @@ interface TzktItemActivityService {
     suspend fun getByIds(ids: List<String>, wrapHash: Boolean): List<UnionActivity> {
         TODO("Not implemented")
     }
-
 }

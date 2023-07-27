@@ -27,5 +27,4 @@ class RestrictionTemplateSubstitutor(
         val provider = defaultParameters[key] ?: return parameters[key] ?: ""
         return provider(itemId)
     }
-
 }

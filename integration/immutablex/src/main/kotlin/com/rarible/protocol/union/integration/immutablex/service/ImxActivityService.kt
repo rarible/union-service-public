@@ -50,7 +50,7 @@ class ImxActivityService(
         UserActivityTypeDto.MINT to ActivityType.MINT,
         UserActivityTypeDto.BURN to ActivityType.BURN,
         UserActivityTypeDto.TRANSFER_FROM to ActivityType.TRANSFER,
-        //UserActivityTypeDto.SELL to ActivityType.TRADE, // TODO IMMUTABLEX filter by user is not supported
+        // UserActivityTypeDto.SELL to ActivityType.TRADE, // TODO IMMUTABLEX filter by user is not supported
     )
 
     private val allowedItemAndOwnerTypes = mapOf(

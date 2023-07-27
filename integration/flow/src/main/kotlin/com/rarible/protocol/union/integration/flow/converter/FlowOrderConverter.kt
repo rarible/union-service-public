@@ -81,7 +81,7 @@ class FlowOrderConverter(
             makePriceUsd = makePriceUsd,
             takePriceUsd = takePriceUsd,
             data = convert(order.data, blockchain),
-            salt = "",// Not supported on Flow
+            salt = "", // Not supported on Flow
             dbUpdatedAt = order.dbUpdatedAt
         )
     }
@@ -156,4 +156,3 @@ class FlowOrderConverter(
             else -> null
         }
 }
-

@@ -144,5 +144,4 @@ class ImxItemEventHandlerTest {
             creator?.let { mapOf(itemId to it) } ?: emptyMap()
         }
     }
-
 }

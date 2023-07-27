@@ -63,24 +63,26 @@ class UnionInternalEventProducerTest {
 
     private fun verifyEvent(order: UnionOrder, producer: RaribleKafkaProducer<UnionInternalBlockchainEvent>) {
         coVerify(exactly = 1) {
-            producer.send(match<KafkaMessage<UnionInternalBlockchainEvent>> {
-                val orderEvent = (it.value as UnionInternalOrderEvent).event as UnionOrderUpdateEvent
-                orderEvent.order == order
-            })
+            producer.send(
+                match<KafkaMessage<UnionInternalBlockchainEvent>> {
+                    val orderEvent = (it.value as UnionInternalOrderEvent).event as UnionOrderUpdateEvent
+                    orderEvent.order == order
+                }
+            )
         }
     }
 
     private fun verifyEvents(orders: List<UnionOrder>, producer: RaribleKafkaProducer<UnionInternalBlockchainEvent>) {
         coVerify(exactly = 1) {
-            producer.send(match<List<KafkaMessage<UnionInternalBlockchainEvent>>> { batch ->
-                val sent = batch.map {
-                    val orderEvent = (it.value as UnionInternalOrderEvent).event as UnionOrderUpdateEvent
-                    orderEvent.order
+            producer.send(
+                match<List<KafkaMessage<UnionInternalBlockchainEvent>>> { batch ->
+                    val sent = batch.map {
+                        val orderEvent = (it.value as UnionInternalOrderEvent).event as UnionOrderUpdateEvent
+                        orderEvent.order
+                    }
+                    sent == orders
                 }
-                sent == orders
-            })
+            )
         }
     }
 }
-
-

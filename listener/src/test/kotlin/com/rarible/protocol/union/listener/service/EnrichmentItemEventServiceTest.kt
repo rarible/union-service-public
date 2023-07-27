@@ -169,5 +169,4 @@ class EnrichmentItemEventServiceTest {
 
         coVerify(exactly = 0) { itemService.save(any()) }
     }
-
 }

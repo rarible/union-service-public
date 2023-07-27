@@ -156,5 +156,4 @@ class EnrichedMetaConverterTest {
         assertThat(convertedModel.mimeType).isEqualTo(modelProperties.mimeType)
         assertThat(convertedModel.size).isEqualTo(modelProperties.size)
     }
-
 }

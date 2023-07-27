@@ -10,7 +10,7 @@ data class EsActivityCursor(
     val salt: Long,
 ) {
     override fun toString(): String {
-        return "${date.toEpochMilli()}_${blockNumber}_${logIndex}_${salt}"
+        return "${date.toEpochMilli()}_${blockNumber}_${logIndex}_$salt"
     }
 
     companion object {

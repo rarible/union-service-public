@@ -45,7 +45,7 @@ class FlowApiConfiguration(
         return BlockchainDto.FLOW
     }
 
-    //-------------------- API --------------------//
+    // -------------------- API --------------------//
 
     @Bean
     fun flowNftIndexerApiClientFactory(
@@ -83,7 +83,7 @@ class FlowApiConfiguration(
     fun flowCryptoApi(factory: FlowNftIndexerApiClientFactory): FlowNftCryptoControllerApi =
         factory.createCryptoApiClient()
 
-    //-------------------- Services --------------------//
+    // -------------------- Services --------------------//
 
     @Bean
     fun flowItemService(controllerApi: FlowNftItemControllerApi): FlowItemService {

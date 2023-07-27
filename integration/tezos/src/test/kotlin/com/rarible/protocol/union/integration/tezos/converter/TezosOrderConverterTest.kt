@@ -132,5 +132,4 @@ class TezosOrderConverterTest {
         assertThat(converted.takePrice).isNull()
         assertThat(converted.makeStock).isEqualTo(1.toBigDecimal())
     }
-
 }

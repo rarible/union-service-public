@@ -51,11 +51,7 @@ class CustomCollectionJob(
         )
 
         override fun toString(): String {
-            return "${rule}_${state}"
+            return "${rule}_$state"
         }
     }
 }
-
-
-
-

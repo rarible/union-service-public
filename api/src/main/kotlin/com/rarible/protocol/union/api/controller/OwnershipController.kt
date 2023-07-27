@@ -58,7 +58,6 @@ class OwnershipController(
         )
 
         return ResponseEntity.ok(result)
-
     }
 
     override suspend fun getOwnershipsByItem(

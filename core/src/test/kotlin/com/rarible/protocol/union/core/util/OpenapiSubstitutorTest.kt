@@ -43,5 +43,4 @@ components:"""
 
         assertThat(withHost).isEqualTo(expectedYaml)
     }
-
 }

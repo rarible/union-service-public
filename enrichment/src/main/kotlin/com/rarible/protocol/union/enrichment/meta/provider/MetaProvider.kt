@@ -9,5 +9,4 @@ interface MetaProvider<K, T : ContentOwner<T>> {
     fun getType(): MetaProviderType
 
     suspend fun fetch(key: K, original: WrappedMeta<T>?): WrappedMeta<T>?
-
 }

@@ -53,5 +53,4 @@ object DipDupOwnershipConverter {
             pending = emptyList() // In Union we won't use this field for Tezos
         )
     }
-
 }

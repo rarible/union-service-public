@@ -27,5 +27,4 @@ class HttpContentCacheTest {
         Assertions.assertEquals(content, result.content)
         Assertions.assertEquals("http://localhost:8080", result.url)
     }
-
 }

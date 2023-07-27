@@ -9,5 +9,4 @@ object ImxWebClientFactory {
         val headers = apiKey?.let { mapOf("x-api-key" to it) } ?: emptyMap()
         return WebClientFactory.createClient(baseUrl, headers)
     }
-
 }

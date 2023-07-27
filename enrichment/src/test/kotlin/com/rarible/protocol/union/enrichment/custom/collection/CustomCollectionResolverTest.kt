@@ -233,5 +233,4 @@ class CustomCollectionResolverTest {
         return resolver.resolve(request)
             .get(key)
     }
-
 }

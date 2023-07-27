@@ -36,7 +36,6 @@ class DummyItemService(
     }
 
     override suspend fun resetItemMeta(itemId: String) {
-
     }
 
     override suspend fun getItemsByCollection(
@@ -71,5 +70,4 @@ class DummyItemService(
     override suspend fun getItemCollectionId(itemId: String): String? {
         return null
     }
-
 }

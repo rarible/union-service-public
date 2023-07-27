@@ -38,5 +38,4 @@ class CollectionMetaService(
         pipeline: CollectionMetaPipeline,
         force: Boolean
     ) = schedule(collectionId, pipeline.pipeline, force, DownloadTaskSource.INTERNAL)
-
 }

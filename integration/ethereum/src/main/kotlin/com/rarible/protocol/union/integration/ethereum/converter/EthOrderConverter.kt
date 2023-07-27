@@ -499,7 +499,7 @@ class EthOrderConverter(
     }
 
     fun convert(source: com.rarible.protocol.dto.OrderRaribleV2DataDto, blockchain: BlockchainDto): OrderDataDto {
-        return when(source) {
+        return when (source) {
             is OrderRaribleV2DataV2Dto -> {
                 EthOrderDataRaribleV2DataV1Dto(
                     payouts = source.payouts.map { EthConverter.convertToPayout(it, blockchain) },
@@ -679,4 +679,3 @@ class EthOrderConverter(
         }
     }
 }
-

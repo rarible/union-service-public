@@ -13,5 +13,4 @@ data class CustomCollectionItemBatch(
             return CustomCollectionItemBatch(null, emptyList())
         }
     }
-
 }

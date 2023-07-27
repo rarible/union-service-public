@@ -33,7 +33,7 @@ class ImxOwnershipServiceMt : ImxManualTest() {
     fun getOwnershipsByIds() = runBlocking<Unit> {
         val ownershipIds = listOf(
             "$itemId:0xfe1e9caa0baf84f197835a2d139ab307ff119170", // exists
-            "$itemId:0xfe1e9caa0baf84f197835a2d139ab307ff119171"  // doesn't exists
+            "$itemId:0xfe1e9caa0baf84f197835a2d139ab307ff119171" // doesn't exists
         )
         val result = service.getOwnershipsByIds(ownershipIds)
         println(result)
@@ -41,5 +41,4 @@ class ImxOwnershipServiceMt : ImxManualTest() {
         assertThat(result).hasSize(1)
         assertThat(result[0].id.value).isEqualTo(ownershipIds[0])
     }
-
 }

@@ -9,5 +9,4 @@ interface BestBidOrderOwner<T> {
 
     fun withBestBidOrders(orders: Map<String, ShortOrder>): T
     fun withBestBidOrder(order: ShortOrder?): T
-
 }

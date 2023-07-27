@@ -32,9 +32,9 @@ class EthSignatureServiceTest {
             signer = EthConverter.convert(expected.signer),
             publicKey = null,
             signature = EthConverter.convert(expected.signature),
-            message = expected.message)
+            message = expected.message
+        )
 
         assertThat(result).isEqualTo(true)
     }
-
 }

@@ -34,5 +34,4 @@ class EmbeddedContentUrlProviderTest {
     fun `get public url by id`() {
         assertThat(provider.getPublicUrlById("abc")).isEqualTo("http://localhost:8080/media/abc")
     }
-
 }

@@ -179,7 +179,7 @@ open class SolanaOrderService(
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
-        //Not implemented
+        // Not implemented
         return Slice.empty()
     }
 
@@ -194,7 +194,7 @@ open class SolanaOrderService(
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
-        //Not implemented
+        // Not implemented
         return Slice.empty()
     }
 

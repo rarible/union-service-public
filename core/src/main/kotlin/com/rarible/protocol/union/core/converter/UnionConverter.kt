@@ -29,5 +29,4 @@ object UnionConverter {
             throw UnionValidationException("Incorrect BigDecimal format: $value")
         }
     }
-
 }

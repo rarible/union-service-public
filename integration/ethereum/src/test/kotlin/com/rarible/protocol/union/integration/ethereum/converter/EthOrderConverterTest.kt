@@ -109,7 +109,6 @@ class EthOrderConverterTest {
         assertThat(converted.takeUsd).isEqualTo(dto.takeUsd)
         assertThat(converted.makePriceUsd).isEqualTo(dto.makePriceUsd)
         assertThat(converted.takePriceUsd).isEqualTo(dto.takePriceUsd)
-
     }
 
     @Test

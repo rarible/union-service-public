@@ -43,7 +43,7 @@ class TezosCollectionServiceTest {
             continuation = continuation
         )
         coEvery { tezosCollectionRepository.getCollections(listOf(address)) } returns
-                listOf(TezosCollection(address, TezosCollection.Type.MT, BigInteger.ZERO))
+            listOf(TezosCollection(address, TezosCollection.Type.MT, BigInteger.ZERO))
 
         val contract = service.getAllCollections(null, 1)
 
@@ -57,7 +57,7 @@ class TezosCollectionServiceTest {
         val address = "KT1Tu6A2NHKwEjdHTTJBys8Pu8K9Eo87P2Vy"
         coEvery { tzktCollectionClient.collection(address) } returns contract(address)
         coEvery { tezosCollectionRepository.getCollections(listOf(address)) } returns
-                listOf(TezosCollection(address, TezosCollection.Type.MT, BigInteger.ZERO))
+            listOf(TezosCollection(address, TezosCollection.Type.MT, BigInteger.ZERO))
         val contract = service.getCollectionById(address)
 
         assertThat(contract.id).isEqualTo(CollectionIdDto(BlockchainDto.TEZOS, address))
@@ -68,7 +68,7 @@ class TezosCollectionServiceTest {
         val addresses = listOf("KT1Tu6A2NHKwEjdHTTJBys8Pu8K9Eo87P2Vy")
         coEvery { tzktCollectionClient.collectionsByIds(addresses) } returns addresses.map(::contract)
         coEvery { tezosCollectionRepository.getCollections(addresses) } returns
-                addresses.map { TezosCollection(it, TezosCollection.Type.MT, BigInteger.ZERO) }
+            addresses.map { TezosCollection(it, TezosCollection.Type.MT, BigInteger.ZERO) }
         val contracts = service.getCollectionsByIds(addresses)
 
         assertThat(contracts).hasSize(1)
@@ -93,5 +93,4 @@ class TezosCollectionServiceTest {
         numReveals = 1,
         numMigrations = 1
     )
-
 }

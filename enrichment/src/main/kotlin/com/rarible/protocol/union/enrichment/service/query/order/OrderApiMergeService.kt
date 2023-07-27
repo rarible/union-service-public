@@ -122,7 +122,6 @@ class OrderApiMergeService(
             UnionOrderContinuation.BySellPriceUsdAndIdAsc,
             currencySlices
         ).getSlice(safeSize)
-
     }
 
     override suspend fun getOrdersAll(
@@ -186,9 +185,9 @@ class OrderApiMergeService(
         if (!ensureSameBlockchain(
                 makerBlockchainGroups +
                     listOf(
-                        itemId.blockchain.group(),
-                        originAddress?.blockchainGroup
-                    ),
+                            itemId.blockchain.group(),
+                            originAddress?.blockchainGroup
+                        ),
             )
         ) {
             logger.warn(
@@ -310,8 +309,9 @@ class OrderApiMergeService(
             blockchainPages.flatMap { it.entities }
         ).getSlice(safeSize)
 
-        logger.info("Response for getSellOrders(blockchains={}, platform={}, origin={}, continuation={}, size={}):" +
-            " Slice(size={}, continuation={}) from blockchain slices {} ",
+        logger.info(
+            "Response for getSellOrders(blockchains={}, platform={}, origin={}, continuation={}, size={}):" +
+                " Slice(size={}, continuation={}) from blockchain slices {} ",
             evaluatedBlockchains, platform, origin, continuation, size,
             combinedSlice.entities.size, combinedSlice.continuation, blockchainPages.map { it.entities.size }
         )
@@ -391,7 +391,6 @@ class OrderApiMergeService(
                 ArgSlice(currency, currencyContinuation, clientCall(currency, currencyContinuation))
             }
         }
-
     }
 
     private suspend fun getOrdersByBlockchains(
@@ -409,7 +408,6 @@ class OrderApiMergeService(
                 ArgSlice(blockchain, blockchainContinuation, clientCall(blockchain, blockchainContinuation))
             }
         }
-
     }
 
     private fun continuationFactory(sort: OrderSortDto?) = when (sort) {

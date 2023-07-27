@@ -15,8 +15,9 @@ class UnionInternalOwnershipEventProducer(
     override fun getBlockchain(event: UnionOwnershipEvent) = event.ownershipId.blockchain
     override fun toMessage(event: UnionOwnershipEvent) = KafkaEventFactory.internalOwnershipEvent(event)
 
-    suspend fun sendChangeEvents(ids: List<OwnershipIdDto>) = send(ids.map {
-        UnionOwnershipChangeEvent(it, offchainEventMark("enrichment-in"))
-    })
-
+    suspend fun sendChangeEvents(ids: List<OwnershipIdDto>) = send(
+        ids.map {
+            UnionOwnershipChangeEvent(it, offchainEventMark("enrichment-in"))
+        }
+    )
 }

@@ -19,7 +19,7 @@ data class RawMetaCache(
         id: CacheId,
         data: String,
         createdAt: Instant,
-    ): this(id.entityId, id.source, data, createdAt)
+    ) : this(id.entityId, id.source, data, createdAt)
 
     @Transient
     private val _id: CacheId = CacheId(source, entityId)

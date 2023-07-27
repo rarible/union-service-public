@@ -49,5 +49,4 @@ abstract class AbstractImxQueryBuilder(
             this.queryParam(name, value)
         }
     }
-
 }

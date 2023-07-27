@@ -10,5 +10,4 @@ interface SignatureService : BlockchainService {
         signature: String,
         message: String
     ): Boolean
-
 }

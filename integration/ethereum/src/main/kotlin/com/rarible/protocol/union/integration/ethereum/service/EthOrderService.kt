@@ -213,8 +213,8 @@ open class EthOrderService(
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
-        //We use hack here, get item with id = -1,
-        //since it doesn't exist, we only get collections
+        // We use hack here, get item with id = -1,
+        // since it doesn't exist, we only get collections
         val itemId = "$collectionId:-1"
         return getSellOrdersByItem(
             platform,
@@ -239,8 +239,8 @@ open class EthOrderService(
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
-        //We use hack here, get item with id = -1,
-        //since it doesn't exist, we only get  collections
+        // We use hack here, get item with id = -1,
+        // since it doesn't exist, we only get  collections
         val itemId = "$collectionId:-1"
         return getOrderBidsByItem(
             platform,

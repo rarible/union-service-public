@@ -154,5 +154,4 @@ class EthActivityFilterConverterTest {
             OrderActivityFilterByUserDto.Types.CANCEL_LIST
         )
     }
-
 }

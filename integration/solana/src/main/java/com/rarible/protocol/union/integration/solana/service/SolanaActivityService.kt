@@ -122,7 +122,8 @@ open class SolanaActivityService(
         from: Instant?,
         to: Instant?,
         continuation: String?,
-        size: Int, sort: ActivitySortDto?
+        size: Int,
+        sort: ActivitySortDto?
     ): Slice<UnionActivity> {
         val solanaTypes = types.mapNotNull { activityConverter.convertToUserTypes(it) }
         if (solanaTypes.isEmpty()) return Slice.empty()
@@ -134,7 +135,6 @@ open class SolanaActivityService(
             to = from,
         )
         return searchActivities(filter, continuation, size, sort)
-
     }
 
     override suspend fun getActivitiesByIds(ids: List<TypedActivityId>): List<UnionActivity> {
@@ -158,5 +158,4 @@ open class SolanaActivityService(
             result.activities.map { activityConverter.convert(it, blockchain) }
         )
     }
-
 }

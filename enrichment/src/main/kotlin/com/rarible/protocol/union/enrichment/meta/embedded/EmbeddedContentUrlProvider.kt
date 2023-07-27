@@ -35,5 +35,4 @@ class EmbeddedContentUrlProvider(
 
         const val EMBEDDED_SCHEMA = "embedded://"
     }
-
 }

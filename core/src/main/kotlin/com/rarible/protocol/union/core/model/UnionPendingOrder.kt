@@ -52,7 +52,6 @@ data class UnionPendingOrderMatch(
         LEFT,
         RIGHT
     }
-
 }
 
 data class UnionOnChainOrder(

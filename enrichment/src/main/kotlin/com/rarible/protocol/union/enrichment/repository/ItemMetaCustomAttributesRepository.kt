@@ -34,5 +34,4 @@ class ItemMetaCustomAttributesRepository(
         val criteria = Criteria("_id").inValues(ids.map { it.fullId() })
         return template.find<ItemMetaCustomAttributes>(Query(criteria)).collectList().awaitFirst()
     }
-
 }

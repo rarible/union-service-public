@@ -63,7 +63,8 @@ internal class PartialItemMetaDownloaderTest {
         val updatedMeta = randomUnionMeta()
         coEvery {
             provider.fetch(
-                key = itemId, original = WrappedMeta(
+                key = itemId,
+                original = WrappedMeta(
                     source = MetaSource.ORIGINAL,
                     data = metaEntry.data!!
                 )
@@ -96,7 +97,8 @@ internal class PartialItemMetaDownloaderTest {
 
         coEvery {
             provider.fetch(
-                key = itemId, original = WrappedMeta(
+                key = itemId,
+                original = WrappedMeta(
                     source = MetaSource.ORIGINAL,
                     data = metaEntry.data!!
                 )

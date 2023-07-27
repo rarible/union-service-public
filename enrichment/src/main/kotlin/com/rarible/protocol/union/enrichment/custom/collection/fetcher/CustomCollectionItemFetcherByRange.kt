@@ -21,7 +21,7 @@ class CustomCollectionItemFetcherByRange(
             val collection = range.collection
             val next = range.batch(lastTokenId.get(), batchSize)
             if (next.isNotEmpty()) {
-                val itemIds = next.map { ItemIdDto(collection.blockchain, "${collection.collectionId}:${it}") }
+                val itemIds = next.map { ItemIdDto(collection.blockchain, "${collection.collectionId}:$it") }
                 val items = customCollectionItemProvider.fetch(itemIds)
                 return CustomCollectionItemBatch(State(currentRange.get(), next.last()).toString(), items)
             }
@@ -42,9 +42,7 @@ class CustomCollectionItemFetcherByRange(
         )
 
         override fun toString(): String {
-            return "${range}-${state}"
+            return "$range-$state"
         }
     }
 }
-
-

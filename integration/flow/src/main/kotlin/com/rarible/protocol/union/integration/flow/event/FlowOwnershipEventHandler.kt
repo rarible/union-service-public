@@ -22,5 +22,4 @@ open class FlowOwnershipEventHandler(
         logger.info("Received {} Ownership event: {}", blockchain, event)
         return FlowOwnershipConverter.convert(event, blockchain)
     }
-
 }

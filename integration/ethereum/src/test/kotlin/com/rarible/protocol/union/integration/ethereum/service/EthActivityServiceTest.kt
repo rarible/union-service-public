@@ -73,7 +73,6 @@ internal class EthActivityServiceTest {
             val owner = randomAddress()
             val types = NftActivityFilterByItemAndOwnerDto.Types.values().asList()
 
-
             val filter = NftActivityFilterByItemAndOwnerDto(token, tokenId, owner, types)
             val ethMint = randomEthItemMintActivity().copy(owner = owner, contract = token, tokenId = tokenId)
             val ethTransfer = randomEthItemTransferActivity().copy(owner = owner, contract = token, tokenId = tokenId)

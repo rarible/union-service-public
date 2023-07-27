@@ -26,7 +26,6 @@ import io.mockk.clearMocks
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import java.util.*
 
 @Suppress("UNCHECKED_CAST")
 abstract class AbstractIntegrationTest {
@@ -35,7 +34,7 @@ abstract class AbstractIntegrationTest {
     @Qualifier("test.content.meta.receiver")
     lateinit var testContentMetaReceiver: ContentMetaReceiver
 
-    //--------------------- ETHEREUM ---------------------//
+    // --------------------- ETHEREUM ---------------------//
     @Autowired
     @Qualifier("ethereum.item.api")
     lateinit var testEthereumItemApi: NftItemControllerApi

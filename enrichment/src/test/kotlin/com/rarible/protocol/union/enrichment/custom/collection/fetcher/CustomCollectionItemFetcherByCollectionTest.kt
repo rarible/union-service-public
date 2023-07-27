@@ -91,5 +91,4 @@ class CustomCollectionItemFetcherByCollectionTest {
         assertThat(batch3.items).isEmpty()
         assertThat(batch3.state).isNull()
     }
-
 }

@@ -50,5 +50,4 @@ data class UnionCollection(
         ERROR,
         CONFIRMED
     }
-
 }

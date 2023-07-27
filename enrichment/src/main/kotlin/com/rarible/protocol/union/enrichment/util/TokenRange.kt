@@ -30,5 +30,4 @@ data class TokenRange(
         }
         return result
     }
-
 }

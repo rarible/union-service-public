@@ -59,7 +59,7 @@ sealed class ImxActivityQueryBuilder(
             cursor(cursor)
         }
 
-        //orderBy("created_at", direction)
+        // orderBy("created_at", direction)
     }
 
     // For scanner purposes only
@@ -79,7 +79,6 @@ sealed class ImxActivityQueryBuilder(
             }
         }
     }
-
 }
 
 class MintQueryBuilder(
@@ -93,7 +92,7 @@ class MintQueryBuilder(
         const val PATH = "/mints"
 
         fun getByIdPath(id: String): String {
-            return "$PATH/${id}"
+            return "$PATH/$id"
         }
     }
 
@@ -104,7 +103,6 @@ class MintQueryBuilder(
 
     override val tokenIdField: String = "token_id"
     override val tokenField: String = "token_address"
-
 }
 
 class TradeQueryBuilder(
@@ -118,7 +116,7 @@ class TradeQueryBuilder(
         const val PATH = "/trades"
 
         fun getByIdPath(id: String): String {
-            return "$PATH/${id}"
+            return "$PATH/$id"
         }
     }
 
@@ -128,7 +126,6 @@ class TradeQueryBuilder(
 
     override val tokenIdField = "party_b_token_id"
     override val tokenField = "party_b_token_address"
-
 }
 
 class TransferQueryBuilder(
@@ -147,7 +144,7 @@ class TransferQueryBuilder(
         const val PATH = "/transfers"
 
         fun getByIdPath(id: String): String {
-            return "$PATH/${id}"
+            return "$PATH/$id"
         }
     }
 
@@ -157,7 +154,6 @@ class TransferQueryBuilder(
     fun receiver(receiver: String?) {
         builder.queryParamNotNull("receiver", receiver)
     }
-
 }
 
 enum class ActivityType {

@@ -47,5 +47,4 @@ class TezosOwnershipControllerApiMock(
             )
         } returns Page(returnOwnerships.asList(), null)
     }
-
 }

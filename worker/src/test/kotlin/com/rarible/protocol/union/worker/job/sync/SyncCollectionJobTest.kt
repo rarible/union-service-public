@@ -133,5 +133,4 @@ class SyncCollectionJobTest {
 
         coVerify(exactly = 1) { producer.sendChangeEvents(listOf(collection1.id, collection2.id)) }
     }
-
 }

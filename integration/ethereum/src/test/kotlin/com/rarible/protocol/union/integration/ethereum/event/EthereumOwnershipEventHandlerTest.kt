@@ -71,5 +71,4 @@ class EthereumOwnershipEventHandlerTest {
         val expected = EthOwnershipConverter.convert(dto, BlockchainDto.ETHEREUM)
         coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
     }
-
 }

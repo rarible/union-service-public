@@ -78,5 +78,4 @@ class PlatformBestSellOrderOwnershipCleanupJobIt {
 
         assertThat(skipped.copy(version = null)).isEqualTo(withoutOpenSea)
     }
-
 }

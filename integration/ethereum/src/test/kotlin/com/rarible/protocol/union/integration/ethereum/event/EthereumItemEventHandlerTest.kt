@@ -71,5 +71,4 @@ class EthereumItemEventHandlerTest {
         val expected = EthItemConverter.convert(dto, BlockchainDto.ETHEREUM)
         coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
     }
-
 }

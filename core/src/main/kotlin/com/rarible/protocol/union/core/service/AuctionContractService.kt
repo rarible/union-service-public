@@ -28,5 +28,4 @@ class AuctionContractService(
     suspend fun isAuctionContract(blockchain: BlockchainDto, contract: String): Boolean {
         return auctionContracts[blockchain]!!.contains(contract)
     }
-
 }

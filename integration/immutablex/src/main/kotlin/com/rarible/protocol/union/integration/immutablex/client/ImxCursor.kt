@@ -7,5 +7,4 @@ object ImxCursor {
     fun encode(json: String): String {
         return Base64.encodeBase64String(json.toByteArray()).trimEnd('=')
     }
-
 }

@@ -45,7 +45,7 @@ import org.springframework.web.client.RestTemplate
 import reactor.kotlin.core.publisher.toMono
 import java.math.BigDecimal
 import java.net.URI
-import java.util.*
+import java.util.UUID
 import com.rarible.protocol.solana.api.client.ActivityControllerApi as SolanaActivityControllerApi
 import com.rarible.protocol.solana.api.client.CollectionControllerApi as SolanaCollectionControllerApi
 
@@ -71,12 +71,12 @@ abstract class AbstractIntegrationTest {
     @Qualifier("download.scheduler.task.producer.item-meta")
     protected lateinit var testDownloadTaskProducer: RaribleKafkaProducer<DownloadTask>
 
-    //--------------------- CURRENCY ---------------------//
+    // --------------------- CURRENCY ---------------------//
 
     @Autowired
     lateinit var testCurrencyApi: CurrencyControllerApi
 
-    //--------------------- ETHEREUM ---------------------//
+    // --------------------- ETHEREUM ---------------------//
     @Autowired
     @Qualifier("ethereum.item.api")
     lateinit var testEthereumItemApi: NftItemControllerApi
@@ -119,7 +119,7 @@ abstract class AbstractIntegrationTest {
     lateinit var ethereumAuctionControllerApiMock: EthAuctionControllerApiMock
     lateinit var ethereumActivityControllerApiMock: EthActivityControllerApiMock
 
-    //--------------------- POLYGON ---------------------//
+    // --------------------- POLYGON ---------------------//
     @Autowired
     @Qualifier("polygon.item.api")
     lateinit var testPolygonItemApi: NftItemControllerApi
@@ -161,12 +161,12 @@ abstract class AbstractIntegrationTest {
     lateinit var polygonOrderControllerApiMock: EthOrderControllerApiMock
     lateinit var polygonAuctionControllerApiMock: EthAuctionControllerApiMock
 
-    //--------------------- SOLANA ---------------------//
+    // --------------------- SOLANA ---------------------//
 
     @Autowired
     lateinit var testSolanaActivityApi: SolanaActivityControllerApi
 
-    //--------------------- FLOW ---------------------//
+    // --------------------- FLOW ---------------------//
     @Autowired
     lateinit var testFlowItemApi: FlowNftItemControllerApi
 
@@ -192,7 +192,7 @@ abstract class AbstractIntegrationTest {
     lateinit var flowOwnershipControllerApiMock: FlowOwnershipControllerApiMock
     lateinit var flowOrderControllerApiMock: FlowOrderControllerApiMock
 
-    //--------------------- TEZOS ---------------------//
+    // --------------------- TEZOS ---------------------//
     @Autowired
     lateinit var testDipDupOrderClient: com.rarible.dipdup.client.OrderClient
 

@@ -5,7 +5,8 @@ import com.rarible.protocol.union.dto.EventTimeMarksDto
 import java.time.Instant
 
 data class UnionEventTimeMarks(
-    val source: String, val marks: List<UnionSourceEventTimeMark> = emptyList()
+    val source: String,
+    val marks: List<UnionSourceEventTimeMark> = emptyList()
 ) {
 
     fun add(name: String, date: Instant? = null): UnionEventTimeMarks {
@@ -18,11 +19,11 @@ data class UnionEventTimeMarks(
     fun addOut() = add("enrichment-out")
     fun addIn() = add("enrichment-in")
     fun toDto() = EventTimeMarksDto(source, marks.map { EventTimeMarkDto(it.name, it.date) })
-
 }
 
 data class UnionSourceEventTimeMark(
-    val name: String, val date: Instant
+    val name: String,
+    val date: Instant
 )
 
 // Stub event marks for blockchains who don't support time marking

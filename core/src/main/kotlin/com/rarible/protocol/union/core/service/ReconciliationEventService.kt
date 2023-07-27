@@ -56,5 +56,4 @@ class ReconciliationEventService(
         activity.itemId()?.let { onCorruptedItem(it) }
         activity.ownershipId()?.let { onCorruptedOwnership(it) }
     }
-
 }

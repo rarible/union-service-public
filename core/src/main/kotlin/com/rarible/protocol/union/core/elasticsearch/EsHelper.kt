@@ -73,7 +73,9 @@ object EsHelper {
     }
 
     suspend fun getRealName(
-        esOperations: ReactiveElasticsearchOperations, aliasName: String, definition: EntityDefinitionExtended
+        esOperations: ReactiveElasticsearchOperations,
+        aliasName: String,
+        definition: EntityDefinitionExtended
     ): String? {
 
         val exists = esOperations.execute { it.indices().existsIndex(GetIndexRequest(aliasName)) }.awaitFirst()
@@ -86,15 +88,18 @@ object EsHelper {
     }
 
     suspend fun existsIndexesForEntity(
-        esOperations: ReactiveElasticsearchOperations, indexPrefix: String
+        esOperations: ReactiveElasticsearchOperations,
+        indexPrefix: String
     ): Boolean = esOperations.execute { it.indices().existsIndex(GetIndexRequest("$indexPrefix*")) }.awaitFirst()
 
     suspend fun existsIndex(
-        esOperations: ReactiveElasticsearchOperations, index: String
+        esOperations: ReactiveElasticsearchOperations,
+        index: String
     ): Boolean = esOperations.execute { it.indices().existsIndex(GetIndexRequest(index)) }.awaitFirst()
 
     suspend fun getIndexesByAlias(
-        esOperations: ReactiveElasticsearchOperations, indexRootName: String
+        esOperations: ReactiveElasticsearchOperations,
+        indexRootName: String
     ): List<String> {
 
         val exists = esOperations.execute { it.indices().existsIndex(GetIndexRequest("$indexRootName*")) }.awaitFirst()
@@ -109,7 +114,7 @@ object EsHelper {
         esOperations.execute { it.indices().getIndex(GetIndexRequest(indexName)) }.awaitFirst()
             .mappings[indexName]?.source()?.string()
 
-    fun submitReindexTask(restHighLevelClient: RestHighLevelClient, oldIndexName: String, indexName: String, ){
+    fun submitReindexTask(restHighLevelClient: RestHighLevelClient, oldIndexName: String, indexName: String,) {
         restHighLevelClient.submitReindexTask(
             ReindexRequest()
                 .setSourceIndices(oldIndexName)
@@ -119,7 +124,8 @@ object EsHelper {
     }
 
     private suspend fun getAliasesOfIndex(
-        reactiveElasticSearchOperations: ReactiveElasticsearchOperations, indexName: String?
+        reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
+        indexName: String?
     ): List<String> {
         val response =
             reactiveElasticSearchOperations.execute { it.indices().getIndex(GetIndexRequest(indexName)) }.awaitFirst()

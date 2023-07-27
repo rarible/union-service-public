@@ -236,5 +236,4 @@ class OwnershipElasticServiceTest {
             BlockchainDto.ETHEREUM
         )
     }
-
 }

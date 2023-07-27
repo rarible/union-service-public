@@ -9,7 +9,6 @@ import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders
 import org.springframework.stereotype.Service
 
-
 @Service
 class EsEntityQueryScoreService(
     private val currencyService: CurrencyService,

@@ -32,5 +32,4 @@ object TzktWebClientFactory {
 
         return webClient.baseUrl(baseUrl)
     }
-
 }

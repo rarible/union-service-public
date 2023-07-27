@@ -63,7 +63,6 @@ class SimpleHashServiceTest {
     private val simpleHashConverterService = SimpleHashConverterService()
     private val service = SimpleHashService(props, client, cacheRepository, metrics, router, simpleHashConverterService)
 
-
     @Test
     fun `get and convert item meta for item - ok`() = runBlocking<Unit> {
         val itemId = ItemIdDto(
@@ -73,9 +72,10 @@ class SimpleHashServiceTest {
         )
         coEvery { itemService.getItemById(itemId.value) } returns randomUnionItem(itemId).copy(lazySupply = BigInteger.ZERO)
 
-        mockServer.enqueue(MockResponse()
-            .setHeader("Content-Type", "application/json")
-            .setBody(this::class.java.getResource("/simplehash/nft.json").readText())
+        mockServer.enqueue(
+            MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody(this::class.java.getResource("/simplehash/nft.json").readText())
         )
 
         val fetched = service.fetch(itemId)
@@ -123,9 +123,10 @@ class SimpleHashServiceTest {
         coEvery { itemService.getItemById(itemId.value) } returns randomUnionItem(itemId).copy(lazySupply = BigInteger.ZERO)
         coEvery { cacheRepository.get(cacheId) } returns cache
 
-        mockServer.enqueue(MockResponse()
-            .setHeader("Content-Type", "application/json")
-            .setBody(this::class.java.getResource("/simplehash/nft.json").readText())
+        mockServer.enqueue(
+            MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody(this::class.java.getResource("/simplehash/nft.json").readText())
         )
 
         service.fetch(itemId)
@@ -181,9 +182,10 @@ class SimpleHashServiceTest {
 
     @Test
     fun `refresh contract`() = runBlocking<Unit> {
-        mockServer.enqueue(MockResponse()
-            .setHeader("Content-Type", "application/json")
-            .setBody("")
+        mockServer.enqueue(
+            MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody("")
         )
         val collectionId = randomEthCollectionId()
         service.refreshContract(collectionId)

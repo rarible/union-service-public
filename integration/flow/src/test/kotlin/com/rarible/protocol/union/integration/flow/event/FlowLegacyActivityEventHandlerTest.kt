@@ -34,5 +34,4 @@ class FlowLegacyActivityEventHandlerTest() {
         val expected = converter.convert(event)
         coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
     }
-
 }

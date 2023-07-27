@@ -113,5 +113,4 @@ class ImxOrderQueryBuilder(
     private fun isEth(currencyId: String): Boolean {
         return (currencyId == "0x0000000000000000000000000000000000000000")
     }
-
 }

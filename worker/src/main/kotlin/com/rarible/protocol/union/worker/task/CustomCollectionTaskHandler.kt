@@ -44,5 +44,4 @@ class CustomCollectionTaskHandler(
             } while (next != null)
         }
     }
-
 }

@@ -31,5 +31,4 @@ class MongoEmbeddedContentStorage(
         val criteria = Criteria("_id").isEqualTo(id)
         template.remove(Query(criteria), collection).awaitFirstOrNull()
     }
-
 }

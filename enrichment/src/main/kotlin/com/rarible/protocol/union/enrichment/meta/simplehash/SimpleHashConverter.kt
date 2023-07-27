@@ -86,7 +86,7 @@ object SimpleHashConverter {
 
     fun parseNftId(nftId: String): ItemIdDto {
         // SimpleHash itemId format is "ethereum.0x8943c7bac1914c9a7aba750bf2b6b09fd21037e0.5903"
-        val toUnionFormat = nftId.replace(".",":").uppercase()
+        val toUnionFormat = nftId.replace(".", ":").uppercase()
         return IdParser.parseItemId(toUnionFormat)
     }
 

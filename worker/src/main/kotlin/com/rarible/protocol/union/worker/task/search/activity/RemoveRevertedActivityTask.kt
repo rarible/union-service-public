@@ -14,7 +14,7 @@ class RemoveRevertedActivityTask(
     private val properties: ActivityReindexProperties,
     private val paramFactory: ParamFactory,
     private val activityReindexService: ActivityReindexService,
-): TaskHandler<String> {
+) : TaskHandler<String> {
 
     override val type: String
         get() = "ES_REMOVE_REVERTED_ACTIVITY"
@@ -29,7 +29,7 @@ class RemoveRevertedActivityTask(
      * param is json-serialized ActivityTaskParam
      */
     override fun runLongTask(from: String?, param: String): Flow<String> {
-        return if(from == "") {
+        return if (from == "") {
             emptyFlow()
         } else {
             val taskParam = paramFactory.parse<RemoveRevertedActivityTaskParam>(param)

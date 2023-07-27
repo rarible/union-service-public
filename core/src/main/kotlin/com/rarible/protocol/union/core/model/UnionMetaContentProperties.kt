@@ -43,10 +43,10 @@ data class UnionImageProperties(
     override fun isEmpty(): Boolean = mimeType == null || width == null || height == null
 
     override fun isFull(): Boolean {
-        return mimeType != null
-            && size != null
-            && width != null
-            && height != null
+        return mimeType != null &&
+            size != null &&
+            width != null &&
+            height != null
     }
 
     override fun withAvailable(available: Boolean): UnionImageProperties = copy(available = available)
@@ -74,10 +74,10 @@ data class UnionVideoProperties(
     override fun isEmpty(): Boolean = mimeType == null || width == null || height == null
 
     override fun isFull(): Boolean {
-        return mimeType != null
-            && size != null
-            && width != null
-            && height != null
+        return mimeType != null &&
+            size != null &&
+            width != null &&
+            height != null
     }
 
     override fun withAvailable(available: Boolean): UnionVideoProperties = copy(available = available)

@@ -75,7 +75,6 @@ class RestrictionService(
         val rule = restriction.rule
         val checker = checkersByRuleType[rule.javaClass]!! as RestrictionRuleChecker<RestrictionRule>
         return checker.checkRule(itemId, rule, form)
-
     }
 
     private fun getType(form: RestrictionCheckFormDto): RestrictionTypeDto {

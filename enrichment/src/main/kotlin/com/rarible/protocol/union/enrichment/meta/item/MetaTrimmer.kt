@@ -38,5 +38,4 @@ class MetaTrimmer(
             value = trimToLength(attribute.value, properties.attributeValueLength, suffix)
         )
     }
-
 }

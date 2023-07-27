@@ -82,5 +82,4 @@ class ItemMetaCustomAttributesJobHandlerTest {
         assertThat(updated?.attributes).isEqualTo(listOf(extraAttribute))
         coVerify(exactly = 0) { itemMetaService.schedule(itemId, ItemMetaPipeline.REFRESH, true) }
     }
-
 }

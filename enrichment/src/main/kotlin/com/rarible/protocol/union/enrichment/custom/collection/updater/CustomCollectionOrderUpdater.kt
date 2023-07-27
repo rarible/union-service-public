@@ -113,5 +113,4 @@ class CustomCollectionOrderUpdater(
             messages.size, type, currencyId, itemId.fullId()
         )
     }
-
 }

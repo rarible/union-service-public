@@ -24,5 +24,4 @@ data class PageSize(
         }
         return Integer.min(size ?: default, max)
     }
-
 }

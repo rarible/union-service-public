@@ -286,5 +286,4 @@ object AssetDtoConverter {
     private fun UnionAssetType.getEnrichedCollection(data: EnrichmentAssetData): CollectionIdDto? {
         return data.customCollection ?: this.collectionId()
     }
-
 }

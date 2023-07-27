@@ -85,7 +85,6 @@ open class FlowItemService(
 
             FlowMetaDto.Status.OK, null -> FlowItemConverter.convert(meta, itemId)
         }
-
     }
 
     override suspend fun resetItemMeta(itemId: String) {
@@ -141,5 +140,4 @@ open class FlowItemService(
         // TODO is validation possible here?
         return itemId.substringBefore(":")
     }
-
 }

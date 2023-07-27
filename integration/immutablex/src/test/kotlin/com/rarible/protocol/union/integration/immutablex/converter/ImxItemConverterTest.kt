@@ -138,5 +138,4 @@ class ImxItemConverterTest {
         assertThat(fees[0].value).isEqualTo(500)
         assertThat(fees[0].account.value).isEqualTo(royalty.address)
     }
-
 }

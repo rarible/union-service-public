@@ -50,7 +50,7 @@ class BestOrderEvaluator(
         }
     }
 
-    //--- Methods below presented as separate methods mostly for logging ---//
+    // --- Methods below presented as separate methods mostly for logging ---//
 
     // Set alive best Order for entity if there is no current best Order
     private fun setBestOrder(updated: ShortOrder): ShortOrder {
@@ -118,5 +118,4 @@ class BestOrderEvaluator(
     private fun isAlive(order: UnionOrder): Boolean {
         return order.status == UnionOrder.Status.ACTIVE
     }
-
 }

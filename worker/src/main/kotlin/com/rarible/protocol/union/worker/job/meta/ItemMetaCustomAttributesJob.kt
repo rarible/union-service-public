@@ -58,7 +58,7 @@ class ItemMetaCustomAttributesJobHandler(
         val attributes = provider.getCustomAttributes()
         logger.info("Found {} Item meta custom attributes for {}", attributes.size, provider.name)
 
-        var changed = 0;
+        var changed = 0
 
         attributes.chunked(1000).forEach { chunk ->
             val exists = repository.getAll(chunk.map { it.id }).associateBy { it.id }

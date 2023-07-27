@@ -66,5 +66,4 @@ class TezosItemControllerFt : AbstractIntegrationTest() {
         val itemDto = itemControllerClient.getItemById(itemId.fullId()).awaitSingle()
         assertThat(itemDto.id.value).isEqualTo(item.contract!!.address + ":" + item.tokenId)
     }
-
 }

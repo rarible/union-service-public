@@ -118,7 +118,6 @@ class ImxScannerTest {
         coVerify(exactly = 2) { itemEventHandler.handle(any()) }
         // State updated twice, after second scanning should be interrupted
         coVerify(exactly = 2) { imxScanStateRepository.updateState(any(), lastUpdated, lastId) }
-
     }
 
     @Test
@@ -192,5 +191,4 @@ class ImxScannerTest {
         coVerify(exactly = 1) { activityHandler.handle(listOf(first, second)) }
         coVerify(exactly = 2) { imxScanStateRepository.updateState(any(), second.timestamp, second.activityId.value) }
     }
-
 }

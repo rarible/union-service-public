@@ -14,11 +14,11 @@ class ImxCollectionQueryBuilder(
         const val PATH = "/collections"
 
         fun getByIdPath(collection: String): String {
-            return "$PATH/${collection}"
+            return "$PATH/$collection"
         }
 
         fun getMetaSchemaPath(collection: String): String {
-            return "$PATH/${collection}/metadata-schema"
+            return "$PATH/$collection/metadata-schema"
         }
     }
 
@@ -53,5 +53,4 @@ class ImxCollectionQueryBuilder(
         cursor(cursor)
         orderBy("updated_at", direction)
     }
-
 }

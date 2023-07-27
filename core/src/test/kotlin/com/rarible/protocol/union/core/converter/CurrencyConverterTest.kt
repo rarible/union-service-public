@@ -42,5 +42,4 @@ class CurrencyConverterTest {
         assertThat(result.alias).isNull()
         assertThat(result.symbol).isEqualTo(currency.currencyId)
     }
-
 }

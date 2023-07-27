@@ -44,5 +44,4 @@ class TezosSignatureTest {
             service.validate(randomString(), publicKey, signature, message)
         }
     }
-
 }

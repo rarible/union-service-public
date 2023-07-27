@@ -16,7 +16,6 @@ class EsMaintenanceController(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-
     @PostMapping(
         value = ["/maintenance/es/reindex/activity"],
         consumes = ["application/json"]

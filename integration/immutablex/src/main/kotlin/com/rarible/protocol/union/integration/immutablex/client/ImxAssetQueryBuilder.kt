@@ -17,7 +17,7 @@ class ImxAssetQueryBuilder(
 
         fun getByIdPath(itemId: String): String {
             val (collection, tokenId) = IdParser.split(itemId, 2)
-            return "$PATH/${collection}/${tokenId}?include_fees=true"
+            return "$PATH/$collection/$tokenId?include_fees=true"
         }
     }
 

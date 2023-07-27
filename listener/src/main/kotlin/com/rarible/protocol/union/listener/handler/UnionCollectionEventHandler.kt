@@ -16,6 +16,4 @@ class UnionCollectionEventHandler(
     override suspend fun onEvent(event: UnionCollectionEvent) = producer.send(addIn(event))
     override suspend fun onEvents(events: Collection<UnionCollectionEvent>) = producer.send(events.map(::addIn))
     private fun addIn(event: UnionCollectionEvent) = event.addTimeMark("enrichment-in")
-
 }
-

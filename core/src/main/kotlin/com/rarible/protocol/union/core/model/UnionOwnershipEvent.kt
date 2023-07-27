@@ -42,7 +42,6 @@ data class UnionOwnershipDeleteEvent(
     override fun addTimeMark(name: String, date: Instant?): UnionOwnershipDeleteEvent {
         return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
     }
-
 }
 
 data class UnionOwnershipChangeEvent(
@@ -53,5 +52,4 @@ data class UnionOwnershipChangeEvent(
     override fun addTimeMark(name: String, date: Instant?): UnionOwnershipChangeEvent {
         return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
     }
-
 }

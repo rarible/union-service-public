@@ -6,12 +6,10 @@ import com.rarible.core.test.ext.MongoCleanup
 import com.rarible.core.test.ext.MongoTest
 import com.rarible.core.test.ext.RedisTest
 import com.rarible.protocol.union.core.es.ElasticsearchBootstrapperTestConfig
-import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 
 @KafkaTest
 @MongoTest

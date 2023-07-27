@@ -72,5 +72,4 @@ class TezosConverterTest {
         assertThat(converted.contract.value).isEqualTo(assetType.contract)
         assertThat(converted.tokenId).isEqualTo(assetType.tokenId)
     }
-
 }

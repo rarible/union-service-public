@@ -21,5 +21,4 @@ object WebClientExceptionMock {
         result.data = data
         return result
     }
-
 }

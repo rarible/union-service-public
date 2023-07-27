@@ -14,5 +14,4 @@ class SyncCollectionTaskHandler(
     override val type = "SYNC_COLLECTION_TASK"
 
     override fun runLongTask(from: String?, param: String) = job.handle(from, param)
-
 }

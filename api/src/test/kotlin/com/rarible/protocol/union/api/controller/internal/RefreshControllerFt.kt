@@ -214,7 +214,6 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(reconciled.bestBidOrder!!.id).isEqualTo(unionBestBid.id)
         assertThat(reconciled.originOrders).hasSize(1)
 
-
         coVerify {
             testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
                 message.value is ItemUpdateEventDto && message.value.itemId == itemId
@@ -589,7 +588,6 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val savedShortItem = enrichmentItemService.get(shortItem.id)!!
         assertThat(savedShortItem.bestSellOrder!!.id).isEqualTo(shortBestSell.id)
         assertThat(savedShortItem.bestSellOrders[unionBestSell.sellCurrencyId()]!!.id).isEqualTo(shortBestSell.id)
-
 
         coVerify {
             testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->

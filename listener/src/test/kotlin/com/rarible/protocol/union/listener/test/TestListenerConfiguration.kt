@@ -69,7 +69,7 @@ class TestListenerConfiguration(
     @Qualifier("test.content.meta.receiver")
     fun testContentMetaReceiver(): ContentMetaReceiver = mockk()
 
-    //----------------- UNION CONSUMERS ------------------//
+    // ----------------- UNION CONSUMERS ------------------//
     // Test consumers with EARLIEST offset
 
     @Bean
@@ -175,7 +175,7 @@ class TestListenerConfiguration(
         return kafkaConsumerFactory.createWorker(settings, handler)
     }
 
-    //---------------- ETHEREUM producers ----------------//
+    // ---------------- ETHEREUM producers ----------------//
 
     @Bean
     fun testEthereumItemEventProducer(): RaribleKafkaProducer<NftItemEventDto> {
@@ -276,7 +276,7 @@ class TestListenerConfiguration(
         )
     }
 
-    //------------------ FLOW producers ------------------//
+    // ------------------ FLOW producers ------------------//
 
     @Bean
     fun testFlowItemEventProducer(): RaribleKafkaProducer<FlowNftItemEventDto> {
@@ -322,7 +322,7 @@ class TestListenerConfiguration(
         )
     }
 
-    //---------------- SOLANA producers ----------------//
+    // ---------------- SOLANA producers ----------------//
 
     @Bean
     fun testSolanaTokenMetaEventProducer(): RaribleKafkaProducer<TokenMetaEventDto> {
@@ -340,13 +340,13 @@ class TestListenerConfiguration(
     @Qualifier("solana.token.api")
     fun testSolanaTokenApi(): TokenControllerApi = mockk()
 
-    //--------------------- CURRENCY ---------------------//
+    // --------------------- CURRENCY ---------------------//
 
     @Bean
     @Primary
     fun testCurrencyApi(): CurrencyControllerApi = CurrencyMock.currencyControllerApiMock
 
-    //--------------------- ETHEREUM ---------------------//
+    // --------------------- ETHEREUM ---------------------//
     @Bean
     @Primary
     @Qualifier("ethereum.item.api")
@@ -372,7 +372,7 @@ class TestListenerConfiguration(
     @Qualifier("ethereum.auction.api")
     fun testEthereumAuctionApi(): com.rarible.protocol.order.api.client.AuctionControllerApi = mockk()
 
-    //--------------------- FLOW ---------------------//
+    // --------------------- FLOW ---------------------//
     @Bean
     @Primary
     fun testFlowItemApi(): FlowNftItemControllerApi = mockk()
@@ -385,7 +385,7 @@ class TestListenerConfiguration(
     @Primary
     fun testFlowOrderApi(): FlowOrderControllerApi = mockk()
 
-    //--------------------- TEZOS ---------------------//
+    // --------------------- TEZOS ---------------------//
 
     @Bean
     @Primary

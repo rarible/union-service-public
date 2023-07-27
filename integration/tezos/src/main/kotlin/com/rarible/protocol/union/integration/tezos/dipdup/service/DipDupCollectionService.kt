@@ -10,7 +10,7 @@ import java.math.BigInteger
 class DipDupCollectionService(
     private val dipdupCollectionClient: CollectionClient,
     private val dipdupTokenClient: TokenClient,
-) : DipDupService  {
+) : DipDupService {
 
     suspend fun getCollectionsAll(continuation: String?, size: Int): Page<UnionCollection> {
         val page = dipdupCollectionClient.getCollectionsAll(

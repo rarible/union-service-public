@@ -20,5 +20,4 @@ class LegacyEmbeddedContentUrlDetector(
         }
         return false
     }
-
 }

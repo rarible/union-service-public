@@ -68,5 +68,4 @@ class FlowItemControllerApiMock(
             nftItemControllerApi.getNftItemsByCreator(creator, continuation, size)
         } returns Mono.just(FlowNftItemsDto(null, returnItems.asList()))
     }
-
 }

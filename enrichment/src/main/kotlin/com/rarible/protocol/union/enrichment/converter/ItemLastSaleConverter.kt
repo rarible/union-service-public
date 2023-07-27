@@ -45,5 +45,4 @@ object ItemLastSaleConverter {
             else -> null
         }
     }
-
 }

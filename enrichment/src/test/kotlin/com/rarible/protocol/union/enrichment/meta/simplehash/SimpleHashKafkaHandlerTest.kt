@@ -24,5 +24,4 @@ class SimpleHashKafkaHandlerTest {
             itemMetaService.scheduleSimpleHashItemUpdate(any())
         }
     }
-
 }

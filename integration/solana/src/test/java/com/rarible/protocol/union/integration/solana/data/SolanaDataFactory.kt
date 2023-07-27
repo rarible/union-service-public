@@ -154,4 +154,3 @@ fun randomAsset() = AssetDto(
     type = SolanaSolAssetTypeDto(),
     value = randomBigDecimal()
 )
-

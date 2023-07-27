@@ -25,7 +25,6 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
-import org.springframework.data.mongodb.core.index.PartialIndexFilter
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.and
@@ -59,7 +58,6 @@ class ItemRepository(
         try {
             template.indexOps(collection).dropIndex("metaEntry.retries_1_metaEntry.retriedAt_1").awaitSingleOrNull()
         } catch (e: Exception) {
-
         }
     }
 
@@ -106,7 +104,9 @@ class ItemRepository(
     }
 
     fun findByBlockchain(
-        fromShortItemId: ShortItemId?, blockchain: BlockchainDto?, limit: Int
+        fromShortItemId: ShortItemId?,
+        blockchain: BlockchainDto?,
+        limit: Int
     ): Flow<ShortItem> {
         val criteria = Criteria().andOperator(
             listOfNotNull(
@@ -165,12 +165,14 @@ class ItemRepository(
         size: Int = 20
     ): List<ShortItemId> {
         return template.find(
-            Query(where(ShortItem::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)
-                .apply {
-                    if (continuation != null) {
-                        and(ShortItem::id).gt(continuation)
+            Query(
+                where(ShortItem::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)
+                    .apply {
+                        if (continuation != null) {
+                            and(ShortItem::id).gt(continuation)
+                        }
                     }
-                })
+            )
                 .with(Sort.by(ShortItem::id.name))
                 .limit(size),
             IdObject::class.java,
@@ -182,9 +184,11 @@ class ItemRepository(
     }
 
     fun findAll(fromIdExcluded: ShortItemId? = null): Flow<ShortItem> = template.find(
-        Query(Criteria().apply {
-            fromIdExcluded?.let { and(ShortItem::id).gt(fromIdExcluded) }
-        }).with(Sort.by(ShortItem::id.name)),
+        Query(
+            Criteria().apply {
+                fromIdExcluded?.let { and(ShortItem::id).gt(fromIdExcluded) }
+            }
+        ).with(Sort.by(ShortItem::id.name)),
         ShortItem::class.java
     ).asFlow()
 

@@ -117,5 +117,4 @@ class UnionContentMetaProviderIt : AbstractIntegrationTest() {
         // Not cached
         assertThat(fromCache).isNull()
     }
-
 }

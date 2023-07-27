@@ -155,7 +155,6 @@ class OwnershipElasticServiceIt {
                         )
                     )
                 }
-
             }
 
             coEvery {
@@ -402,7 +401,7 @@ class OwnershipElasticServiceIt {
         WaitAssert.wait {
             val actual = service.search(OwnershipSearchRequestDto(filter = filter))
             assertThat(actual.ownerships.map { it.id.fullId().lowercase() })
-                //.withFailMessage(failMessage)
+                // .withFailMessage(failMessage)
                 .containsAll(expectedIds)
         }
     }

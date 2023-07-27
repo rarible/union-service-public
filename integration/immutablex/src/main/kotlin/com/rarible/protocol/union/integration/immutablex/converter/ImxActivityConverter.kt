@@ -137,7 +137,6 @@ class ImxActivityConverter(
                     blockchainInfo = null,
                 )
             }
-
         }
 
         // We don't need these activities ATM

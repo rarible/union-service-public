@@ -88,7 +88,7 @@ class ReconciliationOwnershipSourceJobTest {
         coVerify(exactly = 0) { ownershipEventService.onActivity(any(), any(), any()) }
     }
 
-    private fun mockGetActivities(continuation: String?, size: Int, result: Slice<UnionActivity>): Unit {
+    private fun mockGetActivities(continuation: String?, size: Int, result: Slice<UnionActivity>) {
         coEvery {
             activityService.getAllActivities(
                 types = listOf(ActivityTypeDto.MINT, ActivityTypeDto.TRANSFER),

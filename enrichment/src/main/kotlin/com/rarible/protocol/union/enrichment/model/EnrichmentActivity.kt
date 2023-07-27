@@ -411,7 +411,6 @@ data class EnrichmentAuctionFinishActivity(
         get() = _id
         set(_) {}
 
-
     @get:AccessType(AccessType.Type.PROPERTY)
     override var activityType: ActivityTypeDto
         get() = ActivityTypeDto.AUCTION_FINISHED

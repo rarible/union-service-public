@@ -16,7 +16,9 @@ class UnionInternalCollectionEventProducer(
     override fun toMessage(event: UnionCollectionEvent) = KafkaEventFactory.internalCollectionEvent(event)
 
     suspend fun sendChangeEvent(id: CollectionIdDto) = sendChangeEvents(listOf(id))
-    suspend fun sendChangeEvents(ids: Collection<CollectionIdDto>) = send(ids.map {
-        UnionCollectionChangeEvent(it, offchainEventMark("enrichment-in"))
-    })
+    suspend fun sendChangeEvents(ids: Collection<CollectionIdDto>) = send(
+        ids.map {
+            UnionCollectionChangeEvent(it, offchainEventMark("enrichment-in"))
+        }
+    )
 }

@@ -26,5 +26,4 @@ class UnionInternalActivityEventHandler(
             throw e
         }
     }
-
 }

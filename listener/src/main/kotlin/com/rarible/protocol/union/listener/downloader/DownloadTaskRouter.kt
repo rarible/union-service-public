@@ -8,5 +8,4 @@ import com.rarible.protocol.union.core.model.download.DownloadTask
 interface DownloadTaskRouter {
 
     suspend fun send(tasks: List<DownloadTask>, pipeline: String)
-
 }

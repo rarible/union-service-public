@@ -79,17 +79,19 @@ fun randomDipDupCollection(address: String): DipDupCollection {
             name = name,
             description = randomString(),
             symbol = null,
-            content = listOf(DipDupCollection.Content(
-                uri = "http://example.png",
-                representation = DipDupCollection.Representation.ORIGINAL
-            )),
+            content = listOf(
+                DipDupCollection.Content(
+                    uri = "http://example.png",
+                    representation = DipDupCollection.Representation.ORIGINAL
+                )
+            ),
             homepage = "http://example.com"
         )
     )
 }
 
-//fun randomTezosPartDto() = randomTezosPartDto(randomString())
-//fun randomTezosPartDto(account: String) = PartDto(account, randomInt())
+// fun randomTezosPartDto() = randomTezosPartDto(randomString())
+// fun randomTezosPartDto(account: String) = PartDto(account, randomInt())
 
 fun randomTezosOwnershipId() = randomTezosOwnershipId(randomTezosItemId())
 fun randomTezosOwnershipId(itemId: ItemIdDto) = itemId.toOwnership(randomTezosAddress().value)
@@ -183,7 +185,6 @@ fun randomTezosDipDupOwnershipDto(itemId: ItemIdDto, creator: Part): DipDupOwner
         balance = BigInteger.ONE
     )
 }
-
 
 fun randomTezosOrderDto() = randomTezosOrderDto(randomTezosAssetNFT(randomTezosItemId()), randomString(), randomTezosAssetXtz())
 fun randomTezosOrderDto(itemId: ItemIdDto) = randomTezosOrderDto(itemId, randomString())

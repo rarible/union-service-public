@@ -51,7 +51,7 @@ class PolygonApiConfiguration {
         return BlockchainDto.POLYGON
     }
 
-    //-------------------- API --------------------//
+    // -------------------- API --------------------//
 
     @Bean
     @Qualifier("polygon.item.api")
@@ -108,7 +108,7 @@ class PolygonApiConfiguration {
     fun polygonActivityAuctionApi(factory: OrderIndexerApiClientFactory): AuctionActivityControllerApi =
         factory.createAuctionActivityApiClient(polygon)
 
-    //-------------------- Services --------------------//
+    // -------------------- Services --------------------//
 
     @Bean
     fun polygonItemService(

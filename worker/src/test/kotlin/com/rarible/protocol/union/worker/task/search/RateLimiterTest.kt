@@ -10,7 +10,6 @@ import org.assertj.core.data.Offset
 import org.junit.jupiter.api.Test
 import kotlin.system.measureTimeMillis
 
-
 class RateLimiterTest {
 
     private val rateLimiter = EsRateLimiter(RateLimiterProperties(100, 10))

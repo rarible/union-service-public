@@ -65,7 +65,7 @@ class EsItemRepository(
         return esOperations.search(query, EsItemLite::class.java, entityDefinition.searchIndexCoordinates)
             .collectList()
             .awaitFirst()
-        //.apply { logger.debug(this.map { it.score }.joinToString()) }
+        // .apply { logger.debug(this.map { it.score }.joinToString()) }
     }
 
     suspend fun countItemsInCollection(collectionId: String): Long {

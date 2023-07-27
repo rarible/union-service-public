@@ -76,7 +76,5 @@ class ImxItemMetaConverterTest {
         val imageContent = meta.content[2]
         assertThat(imageContent.url).isEqualTo(imxItem.imageUrl)
         assertThat(imageContent.properties).isInstanceOf(UnionImageProperties::class.java)
-
     }
-
 }

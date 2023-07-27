@@ -19,7 +19,7 @@ class ActivityTask(
     private val paramFactory: ParamFactory,
     private val activityReindexService: ActivityReindexService,
     private val taskRepository: TaskRepository,
-): TaskHandler<String> {
+) : TaskHandler<String> {
 
     override val type: String
         get() = EsActivity.ENTITY_DEFINITION.reindexTask
@@ -34,7 +34,7 @@ class ActivityTask(
      * param is json-serialized ActivityTaskParam
      */
     override fun runLongTask(from: String?, param: String): Flow<String> {
-        return if(from == "") {
+        return if (from == "") {
             emptyFlow()
         } else {
             val taskParam = paramFactory.parse<ActivityTaskParam>(param)
@@ -50,5 +50,4 @@ class ActivityTask(
                 .takeWhile { taskRepository.findByTypeAndParam(type, param).awaitSingleOrNull()?.running ?: false }
         }
     }
-
 }

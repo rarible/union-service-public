@@ -164,5 +164,4 @@ class AuctionControllerFt : AbstractIntegrationTest() {
         assertThat(unionAuctions.auctions.size).isEqualTo(1)
         assertThat(unionAuctions.auctions.first().id).isEqualTo(unionAuction.id)
     }
-
 }

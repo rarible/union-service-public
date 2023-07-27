@@ -48,5 +48,4 @@ interface TzktItemService {
     suspend fun isNft(itemId: String): Boolean {
         TODO("Not implemented")
     }
-
 }

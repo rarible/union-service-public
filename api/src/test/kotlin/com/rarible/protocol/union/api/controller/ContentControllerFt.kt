@@ -37,7 +37,5 @@ class ContentControllerFt : AbstractIntegrationTest() {
         assertThat(result.headers.getFirst(HttpHeaders.CONTENT_DISPOSITION)).isEqualTo(
             "attachment; filename=\"${content.id}.html\""
         )
-
     }
-
 }

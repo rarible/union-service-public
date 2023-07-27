@@ -64,7 +64,6 @@ class CustomCollectionResolver(
             collectionMapperIndex.getCollectionMapper(collectionId)
                 ?.getCustomCollectionProviders(collectionItemIds, hint)
                 ?.let { result.putAll(it) }
-
         }
 
         return result.mapValues { it.value.getCustomCollection(it.key, hint[it.key]) }

@@ -12,5 +12,4 @@ class EnrichmentOrderData(
         private val EMPTY = EnrichmentOrderData()
         fun empty() = EMPTY
     }
-
 }

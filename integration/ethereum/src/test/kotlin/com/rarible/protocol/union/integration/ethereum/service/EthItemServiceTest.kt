@@ -259,5 +259,4 @@ class EthItemServiceTest {
         assertThat(result.entities).hasSize(1)
         assertThat(result.entities[0]).isEqualTo(expected)
     }
-
 }

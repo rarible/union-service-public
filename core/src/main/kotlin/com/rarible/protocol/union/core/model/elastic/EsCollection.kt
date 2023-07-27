@@ -15,14 +15,14 @@ sealed class EsCollectionSealed {
 }
 
 data class EsCollectionLite(
-    override val collectionId: String, //blockchain:value
+    override val collectionId: String, // blockchain:value
     override val date: Instant,
     override val salt: Long,
 ) : EsCollectionSealed()
 
 data class EsCollection(
     @Id
-    override val collectionId: String, //blockchain:value
+    override val collectionId: String, // blockchain:value
 
     // Sort fields
     @Field(type = FieldType.Date)

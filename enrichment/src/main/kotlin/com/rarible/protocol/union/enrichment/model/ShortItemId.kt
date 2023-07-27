@@ -31,5 +31,4 @@ data class ShortItemId(
             return ShortItemId(IdParser.parseItemId(itemId))
         }
     }
-
 }

@@ -122,5 +122,4 @@ class SyncOwnershipJobTest {
 
         coVerify(exactly = 1) { producer.sendChangeEvents(ownerships.map { it.id }) }
     }
-
 }

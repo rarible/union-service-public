@@ -263,7 +263,6 @@ object ActivityDtoConverter {
             auction = source.auction,
             transactionHash = source.transactionHash,
         )
-
     }
 
     private fun convert(source: UnionAuctionBidActivity, data: EnrichmentActivityData): AuctionBidActivityDto {
@@ -301,7 +300,6 @@ object ActivityDtoConverter {
             auction = source.auction,
             transactionHash = source.transactionHash,
         )
-
     }
 
     private fun convert(source: UnionAuctionStartActivity, data: EnrichmentActivityData): AuctionStartActivityDto {
@@ -313,7 +311,6 @@ object ActivityDtoConverter {
             reverted = source.reverted,
             auction = source.auction,
         )
-
     }
 
     private fun convert(source: UnionAuctionEndActivity, data: EnrichmentActivityData): AuctionEndActivityDto {
@@ -325,7 +322,6 @@ object ActivityDtoConverter {
             reverted = source.reverted,
             auction = source.auction,
         )
-
     }
 
     private fun convert(source: UnionL2DepositActivity, data: EnrichmentActivityData): L2DepositActivityDto {
@@ -399,5 +395,4 @@ object ActivityDtoConverter {
     private fun UnionActivity.getEnrichedCollection(data: EnrichmentActivityData): CollectionIdDto? {
         return data.customCollections[id] ?: this.collectionId()
     }
-
 }

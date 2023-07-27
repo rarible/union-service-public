@@ -81,12 +81,11 @@ open class SimpleHashResolver(
         } ?: emptyList()
     }
 
-    fun address(source: String) : String {
+    fun address(source: String): String {
         val parts = source.split(".")
         return when (parts.size) {
             0 -> source
             else -> parts[1]
         }
     }
-
 }

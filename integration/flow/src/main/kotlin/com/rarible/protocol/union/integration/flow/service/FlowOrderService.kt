@@ -192,7 +192,7 @@ open class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
-        //Not implemented
+        // Not implemented
         return Slice.empty()
     }
 
@@ -207,7 +207,7 @@ open class FlowOrderService(
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
-        //Not implemented
+        // Not implemented
         return Slice.empty()
     }
 

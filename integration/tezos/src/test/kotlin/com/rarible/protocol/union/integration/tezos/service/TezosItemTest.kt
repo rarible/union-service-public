@@ -38,5 +38,4 @@ class TezosItemTest {
             service.getItemMetaById(itemId)
         }
     }
-
 }

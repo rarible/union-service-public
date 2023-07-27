@@ -11,5 +11,4 @@ class ContentCacheService(
     fun getCache(urlResource: UrlResource): ContentCache? {
         return caches.find { it.isSupported(urlResource) }
     }
-
 }

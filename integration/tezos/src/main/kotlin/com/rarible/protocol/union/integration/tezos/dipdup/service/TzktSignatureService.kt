@@ -7,5 +7,4 @@ interface TzktSignatureService {
         signature: String,
         message: String
     ): Boolean = false
-
 }

@@ -139,7 +139,7 @@ class CollectionElasticService(
                 val time = measureTimeMillis {
                     mapAsyncResult = router.getService(k).getCollectionsByIds(ids)
                 }
-                logger.info("getCollectionsByIds(), time: ${time}ms. blockchain: ${k}, size ${ids.size}")
+                logger.info("getCollectionsByIds(), time: ${time}ms. blockchain: $k, size ${ids.size}")
                 return@mapAsync mapAsyncResult
             }
             .flatten().associateBy { seq[it.id.fullId()] }.toSortedMap(compareBy { it })

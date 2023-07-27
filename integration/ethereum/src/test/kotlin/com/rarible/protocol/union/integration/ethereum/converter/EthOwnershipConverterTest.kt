@@ -24,5 +24,4 @@ class EthOwnershipConverterTest {
         assertThat(converted.creators[0].value).isEqualTo(dto.creators!![0].value)
         assertThat(converted.pending.size).isEqualTo(dto.pending.size)
     }
-
 }

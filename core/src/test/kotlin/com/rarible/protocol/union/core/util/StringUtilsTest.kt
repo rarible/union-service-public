@@ -22,5 +22,4 @@ class StringUtilsTest {
         assertThat(safeSplit("")).isEqualTo(emptyList<String>())
         assertThat(safeSplit(null)).isEqualTo(emptyList<String>())
     }
-
 }

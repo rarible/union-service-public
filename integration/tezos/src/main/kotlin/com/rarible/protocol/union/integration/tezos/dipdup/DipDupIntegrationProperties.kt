@@ -69,5 +69,4 @@ data class DipDupIntegrationProperties(
             return result
         }
     }
-
 }

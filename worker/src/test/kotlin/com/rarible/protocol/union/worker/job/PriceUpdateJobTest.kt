@@ -28,7 +28,7 @@ import java.math.BigDecimal
 import java.time.Instant
 
 @IntegrationTest
-internal class PriceUpdateJobTest: AbstractIntegrationTest() {
+internal class PriceUpdateJobTest : AbstractIntegrationTest() {
     @Autowired
     private lateinit var ethereumOrderConverter: EthOrderConverter
 

@@ -169,10 +169,11 @@ class ImxActivityClient(
         // IMX has problems with trades requests where page_size=1 and filters by itemId,
         // with page_size=200 it works much faster, should be fixed by IMX one day
         val hackedPageSize = if (
-            pageSize == 1
-            && token != null
-            && tokenId != null
-            && sort == ActivitySortDto.LATEST_FIRST) {
+            pageSize == 1 &&
+            token != null &&
+            tokenId != null &&
+            sort == ActivitySortDto.LATEST_FIRST
+        ) {
             200
         } else {
             pageSize

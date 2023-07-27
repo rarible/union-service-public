@@ -48,10 +48,11 @@ class TezosOrderEventHandlerTest {
         val expected = converter.convert(event, BlockchainDto.TEZOS)
 
         coVerify(exactly = 1) {
-            incomingEventHandler.onEvent(match {
-                it is UnionOrderUpdateEvent && it.order == expected
-            })
+            incomingEventHandler.onEvent(
+                match {
+                    it is UnionOrderUpdateEvent && it.order == expected
+                }
+            )
         }
     }
-
 }

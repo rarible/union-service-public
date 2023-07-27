@@ -14,5 +14,4 @@ class SyncOwnershipTaskHandler(
     override val type = "SYNC_OWNERSHIP_TASK"
 
     override fun runLongTask(from: String?, param: String) = job.handle(from, param)
-
 }

@@ -44,5 +44,4 @@ class FlowOwnershipControllerApiMock(
             )
         } returns Mono.just(FlowNftOwnershipsDto(null, returnOwnerships.asList()))
     }
-
 }

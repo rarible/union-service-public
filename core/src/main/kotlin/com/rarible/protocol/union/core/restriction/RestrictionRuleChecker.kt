@@ -12,5 +12,4 @@ interface RestrictionRuleChecker<T : RestrictionRule> {
         rule: T,
         form: RestrictionCheckFormDto
     ): RestrictionCheckResult
-
 }

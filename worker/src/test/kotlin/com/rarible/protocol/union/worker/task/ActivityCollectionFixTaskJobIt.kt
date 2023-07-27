@@ -47,7 +47,6 @@ class ActivityCollectionFixTaskJobIt {
             customCollectionResolver.resolve(any<List<CustomCollectionResolutionRequest<EnrichmentActivity>>>(), any())
         } returns mapOf(toUpdateCustom to customCollection)
 
-
         job.handle(null, "").collect()
 
         assertThat(repository.get(toUpdate.id)?.collection).isNotNull()

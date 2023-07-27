@@ -52,7 +52,9 @@ data class EnrichmentCollection(
 
     @Version
     val version: Long? = null
-) : BestSellOrderOwner<EnrichmentCollection>, BestBidOrderOwner<EnrichmentCollection>, OriginOrdersOwner,
+) : BestSellOrderOwner<EnrichmentCollection>,
+    BestBidOrderOwner<EnrichmentCollection>,
+    OriginOrdersOwner,
     BlockchainAware {
 
     fun withCalculatedFieldsAndUpdatedAt(): EnrichmentCollection {

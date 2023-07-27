@@ -28,7 +28,6 @@ import com.rarible.protocol.union.integration.solana.data.randomSolanaCollection
 import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDto
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktCollectionConverter
 import io.mockk.coEvery
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -37,8 +36,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import reactor.kotlin.core.publisher.toMono
-import java.lang.RuntimeException
-import java.time.Duration
 import java.util.concurrent.atomic.AtomicReference
 
 @IntegrationTest

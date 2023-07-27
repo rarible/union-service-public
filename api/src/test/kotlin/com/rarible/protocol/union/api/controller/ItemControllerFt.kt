@@ -155,7 +155,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         itemRepository.save(randomShortItem(itemId).copy(metaEntry = randomItemMetaDownloadEntry(data = meta)))
 
-        val response = restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/image", String::class.java)
+        val response = restTemplate.getForEntity("$baseUri/v0.1/items/${itemId.fullId()}/image", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
         assertThat(response.headers["Location"]).contains(imageUrl)
     }
@@ -170,7 +170,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         itemRepository.save(randomShortItem(itemId).copy(metaEntry = randomItemMetaDownloadEntry(data = meta)))
 
         val response =
-            restTemplate.getForEntity("${baseUri}/v0.1/items/${itemId.fullId()}/animation", String::class.java)
+            restTemplate.getForEntity("$baseUri/v0.1/items/${itemId.fullId()}/animation", String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.TEMPORARY_REDIRECT)
         assertThat(response.headers["Location"]).contains(videoUrl)
     }

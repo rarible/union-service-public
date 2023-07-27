@@ -36,5 +36,4 @@ class InternalItemEventHandlerFt : AbstractIntegrationTest() {
             assertThat(messages[0].itemId).isEqualTo(itemId)
         }
     }
-
 }

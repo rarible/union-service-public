@@ -41,8 +41,9 @@ class CollectionApiMergeService(
         val slices = getAllCollectionsSafe(blockchains, continuation, safeSize)
         val arg = ArgPaging(UnionCollectionContinuation.ById, slices.map { it.toSlice() }).getSlice(safeSize)
         val total = slices.sumOf { it.page.total }
-        logger.info("Response for getAllCollections(blockchains={}, continuation={}, size={}):" +
-            " Slice(size={}, continuation={}) from blockchain pages {} ",
+        logger.info(
+            "Response for getAllCollections(blockchains={}, continuation={}, size={}):" +
+                " Slice(size={}, continuation={}) from blockchain pages {} ",
             blockchains, continuation, size, arg.entities.size, arg.continuation, slices.map { it.page.entities.size }
         )
         return enrich(arg, total)

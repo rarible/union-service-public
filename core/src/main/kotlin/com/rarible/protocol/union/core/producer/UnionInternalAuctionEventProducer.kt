@@ -11,5 +11,4 @@ class UnionInternalAuctionEventProducer(
 
     override fun getBlockchain(event: UnionAuctionEvent) = event.auction.id.blockchain
     override fun toMessage(event: UnionAuctionEvent) = KafkaEventFactory.internalAuctionEvent(event)
-
 }

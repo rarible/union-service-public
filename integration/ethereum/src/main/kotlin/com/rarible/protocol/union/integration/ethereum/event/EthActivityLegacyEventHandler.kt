@@ -28,15 +28,18 @@ abstract class EthActivityLegacyEventHandler(
 
 @Deprecated("Use EthActivityEventHandler with time marks")
 open class EthereumActivityLegacyEventHandler(
-    handler: IncomingEventHandler<UnionActivity>, ethActivityConverter: EthActivityConverter
+    handler: IncomingEventHandler<UnionActivity>,
+    ethActivityConverter: EthActivityConverter
 ) : EthActivityLegacyEventHandler(BlockchainDto.ETHEREUM, handler, ethActivityConverter)
 
 @Deprecated("Use EthActivityEventHandler with time marks")
 open class PolygonActivityLegacyEventHandler(
-    handler: IncomingEventHandler<UnionActivity>, ethActivityConverter: EthActivityConverter
+    handler: IncomingEventHandler<UnionActivity>,
+    ethActivityConverter: EthActivityConverter
 ) : EthActivityLegacyEventHandler(BlockchainDto.POLYGON, handler, ethActivityConverter)
 
 @Deprecated("Use EthActivityEventHandler with time marks")
 open class MantleActivityLegacyEventHandler(
-    handler: IncomingEventHandler<UnionActivity>, ethActivityConverter: EthActivityConverter
+    handler: IncomingEventHandler<UnionActivity>,
+    ethActivityConverter: EthActivityConverter
 ) : EthActivityLegacyEventHandler(BlockchainDto.MANTLE, handler, ethActivityConverter)

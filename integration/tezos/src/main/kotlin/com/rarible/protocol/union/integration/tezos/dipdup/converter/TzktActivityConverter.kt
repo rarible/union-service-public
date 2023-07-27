@@ -77,7 +77,7 @@ object TzktActivityConverter {
 
     private fun convertValue(bd: BigDecimal, id: ActivityIdDto): BigInteger {
         if (bd.stripTrailingZeros()
-                .scale() > 0
+            .scale() > 0
         ) throw UnionDataFormatException("Value: $bd must be BigInteger for token activity: $id")
         else return bd.toBigInteger()
     }
@@ -91,5 +91,4 @@ object TzktActivityConverter {
         return this.token?.contract?.address
             ?: throw UnionDataFormatException("Token must have address for activity: $id")
     }
-
 }

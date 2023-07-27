@@ -10,4 +10,3 @@ enum class ReconciliationMarkType {
     OWNERSHIP,
     COLLECTION
 }
-

@@ -30,7 +30,7 @@ class ArtificialCollectionService(
             cache.add(surrogateId)
             return true
         }
-        
+
         return false
     }
 

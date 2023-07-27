@@ -39,12 +39,12 @@ object CurrencyMock {
             val rate = 1.0 + 2.0.pow(index.toDouble())
             ratesPerCurrency["${currency.blockchain}:${currency.address}"] = rate
             every { currencyControllerApiMock.getCurrencyRate(currency.blockchain, currency.address, any()) } returns
-                    CurrencyRateDto(
-                        fromCurrencyId = currency.currencyId,
-                        toCurrencyId = "",
-                        rate = rate.toBigDecimal(),
-                        date = nowMillis(),
-                    ).toMono()
+                CurrencyRateDto(
+                    fromCurrencyId = currency.currencyId,
+                    toCurrencyId = "",
+                    rate = rate.toBigDecimal(),
+                    date = nowMillis(),
+                ).toMono()
         }
 
         return ratesPerCurrency

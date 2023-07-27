@@ -84,7 +84,8 @@ class EnrichmentAuctionService(
                 async {
                     do {
                         val page = auctionServiceRouter.getService(blockchain).getAuctionsBySeller(
-                            seller.value, listOf(AuctionStatusDto.ACTIVE), null, null, continuation, FETCH_SIZE)
+                            seller.value, listOf(AuctionStatusDto.ACTIVE), null, null, continuation, FETCH_SIZE
+                        )
                         result.addAll(page.entities)
                         continuation = page.continuation
                     } while (continuation != null)
@@ -99,5 +100,4 @@ class EnrichmentAuctionService(
     companion object {
         private const val FETCH_SIZE = 1_000
     }
-
 }

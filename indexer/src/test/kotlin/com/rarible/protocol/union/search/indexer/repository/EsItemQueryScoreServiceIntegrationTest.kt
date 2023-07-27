@@ -108,8 +108,8 @@ class EsItemQueryScoreServiceIntegrationTest {
         } returns listOf(
             CurrencyRate(BlockchainDto.ETHEREUM, "ETHEREUM:0x0000000000000000000000000000000000000000", BigDecimal(1500)),
             CurrencyRate(BlockchainDto.POLYGON, "POLYGON:0x0000000000000000000000000000000000000000", BigDecimal(150)),
-            CurrencyRate(BlockchainDto.POLYGON,"ETHEREUM:0xfca59cd816ab1ead66534d82bc21e7515ce441cf", BigDecimal(15)),
-            CurrencyRate(BlockchainDto.SOLANA,"SOLANA:So11111111111111111111111111111111111111112", BigDecimal(50)),
+            CurrencyRate(BlockchainDto.POLYGON, "ETHEREUM:0xfca59cd816ab1ead66534d82bc21e7515ce441cf", BigDecimal(15)),
+            CurrencyRate(BlockchainDto.SOLANA, "SOLANA:So11111111111111111111111111111111111111112", BigDecimal(50)),
             )
         val boolQueryBuilder = BoolQueryBuilder()
         val blockchains = setOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON)
@@ -120,7 +120,6 @@ class EsItemQueryScoreServiceIntegrationTest {
         sortService.applySort(builder, sort)
         val actual = repository.search(builder.build())
             .map { it.content.itemId }
-
 
         // then
         assertThat(actual).isEqualTo(expected)
@@ -178,8 +177,8 @@ class EsItemQueryScoreServiceIntegrationTest {
         } returns listOf(
             CurrencyRate(BlockchainDto.ETHEREUM, "ETHEREUM:0x0000000000000000000000000000000000000000", BigDecimal(1500)),
             CurrencyRate(BlockchainDto.POLYGON, "POLYGON:0x0000000000000000000000000000000000000000", BigDecimal(150)),
-            CurrencyRate(BlockchainDto.POLYGON,"ETHEREUM:0xfca59cd816ab1ead66534d82bc21e7515ce441cf", BigDecimal(15)),
-            CurrencyRate(BlockchainDto.SOLANA,"SOLANA:So11111111111111111111111111111111111111112", BigDecimal(50)),
+            CurrencyRate(BlockchainDto.POLYGON, "ETHEREUM:0xfca59cd816ab1ead66534d82bc21e7515ce441cf", BigDecimal(15)),
+            CurrencyRate(BlockchainDto.SOLANA, "SOLANA:So11111111111111111111111111111111111111112", BigDecimal(50)),
         )
         val boolQueryBuilder = BoolQueryBuilder()
         val blockchains = setOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON)

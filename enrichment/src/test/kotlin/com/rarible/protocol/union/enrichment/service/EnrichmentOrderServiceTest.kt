@@ -102,7 +102,8 @@ internal class EnrichmentOrderServiceTest {
                 any()
             )
         } returns Slice(
-            null, listOf(
+            null,
+            listOf(
                 randomUnionSellOrder().copy(
                     platform = PlatformDto.OPEN_SEA,
                     takePriceUsd = BigDecimal("1337.0")
@@ -122,7 +123,8 @@ internal class EnrichmentOrderServiceTest {
                 any()
             )
         } returns Slice(
-            null, listOf(
+            null,
+            listOf(
                 randomUnionSellOrder().copy(
                     platform = PlatformDto.RARIBLE,
                     takePriceUsd = BigDecimal("1337.00")
@@ -150,7 +152,8 @@ internal class EnrichmentOrderServiceTest {
                 any()
             )
         } returns Slice(
-            null, listOf(
+            null,
+            listOf(
                 randomUnionSellOrder().copy(
                     platform = PlatformDto.OPEN_SEA,
                     takePriceUsd = BigDecimal(1337)
@@ -169,7 +172,8 @@ internal class EnrichmentOrderServiceTest {
                 any()
             )
         } returns Slice(
-            null, listOf(
+            null,
+            listOf(
                 randomUnionSellOrder().copy(platform = PlatformDto.RARIBLE, takePriceUsd = BigDecimal(1338)),
             )
         )

@@ -7,7 +7,7 @@ class SubscriptionTest {
 
     data class TestSubscription(
         val value: String
-    ): Subscription<String>() {
+    ) : Subscription<String>() {
         override fun covers(event: String): Boolean {
             return event.startsWith(value)
         }

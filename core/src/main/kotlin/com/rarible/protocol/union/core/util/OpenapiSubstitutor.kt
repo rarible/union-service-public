@@ -21,5 +21,4 @@ paths:"""
         val substitutor = StringSubstitutor(examples)
         return substitutor.replace(yaml)
     }
-
 }

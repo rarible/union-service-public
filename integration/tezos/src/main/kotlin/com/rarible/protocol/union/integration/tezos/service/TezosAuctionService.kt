@@ -78,5 +78,4 @@ class TezosAuctionService(
     ): Slice<AuctionDto> {
         return Slice.empty()
     }
-
 }

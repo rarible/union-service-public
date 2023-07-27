@@ -86,5 +86,4 @@ class EthAuctionControllerApiMock(
             auctionControllerApi.getAuctionsBySeller(address, any(), any(), any(), any(), any())
         } returns Mono.just(AuctionsPaginationDto(returnItems, null))
     }
-
 }

@@ -117,9 +117,9 @@ class EnrichmentActivityService(
                 sort = ActivitySortDto.LATEST_FIRST
             )
             val purchase = response.entities.firstOrNull {
-                (it is UnionTransferActivity)
-                    && it.owner == owner
-                    && it.purchase == true
+                (it is UnionTransferActivity) &&
+                    it.owner == owner &&
+                    it.purchase == true
             }
             if (purchase != null) {
                 logger.info(

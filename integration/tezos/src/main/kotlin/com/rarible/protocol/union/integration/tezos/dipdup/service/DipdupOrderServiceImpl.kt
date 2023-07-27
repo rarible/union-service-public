@@ -50,14 +50,16 @@ class DipdupOrderServiceImpl(
         size: Int
     ): Slice<UnionOrder> {
         logger.info("Fetch dipdup all orders: $sort, $statuses, $continuation, $size")
-        val page = safeApiCall { dipdupOrderClient.getOrdersAll(
-            sort = sort?.let { dipDupOrderConverter.convert(it) },
-            statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
-            platforms = enabledPlatforms,
-            isBid = isBid,
-            size = size,
-            continuation = continuation
-        ) }
+        val page = safeApiCall {
+            dipdupOrderClient.getOrdersAll(
+                sort = sort?.let { dipDupOrderConverter.convert(it) },
+                statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
+                platforms = enabledPlatforms,
+                isBid = isBid,
+                size = size,
+                continuation = continuation
+            )
+        }
         return Slice(
             continuation = page.continuation,
             entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
@@ -81,14 +83,16 @@ class DipdupOrderServiceImpl(
         size: Int
     ): Slice<UnionOrder> {
         logger.info("Fetch dipdup sell orders: $requested, $origin, $continuation, $size")
-        val page = safeApiCall { dipdupOrderClient.getOrdersAll(
-            sort = DipDupOrderSort.LAST_UPDATE_DESC,
-            statuses = listOf(OrderStatus.ACTIVE),
-            platforms = platforms(requested),
-            isBid = false,
-            size = size,
-            continuation = continuation
-        ) }
+        val page = safeApiCall {
+            dipdupOrderClient.getOrdersAll(
+                sort = DipDupOrderSort.LAST_UPDATE_DESC,
+                statuses = listOf(OrderStatus.ACTIVE),
+                platforms = platforms(requested),
+                isBid = false,
+                size = size,
+                continuation = continuation
+            )
+        }
         return Slice(
             continuation = page.continuation,
             entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
@@ -103,14 +107,16 @@ class DipdupOrderServiceImpl(
         size: Int
     ): Slice<UnionOrder> {
         logger.info("Fetch dipdup sell orders by collection: $contract, platforms=$platforms, continuation=$continuation, size=$size")
-        val page = safeApiCall { dipdupOrderClient.getOrdersByCollection(
-            contract = contract,
-            statuses = listOf(OrderStatus.ACTIVE),
-            platforms = platforms(platforms),
-            isBid = false,
-            size = size,
-            continuation = continuation
-        ) }
+        val page = safeApiCall {
+            dipdupOrderClient.getOrdersByCollection(
+                contract = contract,
+                statuses = listOf(OrderStatus.ACTIVE),
+                platforms = platforms(platforms),
+                isBid = false,
+                size = size,
+                continuation = continuation
+            )
+        }
         return Slice(
             continuation = page.continuation,
             entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
@@ -128,17 +134,19 @@ class DipdupOrderServiceImpl(
         size: Int
     ): Slice<UnionOrder> {
         logger.info("Fetch dipdup sell orders by item: $contract:$tokenId, maker=$maker, platforms=$platforms, currency=$currencyId, status=$statuses, continuation=$continuation, size=$size")
-        val page = safeApiCall { dipdupOrderClient.getOrdersByItem(
-            contract = contract,
-            tokenId = tokenId.toString(),
-            maker = maker,
-            currencyId = currencyId,
-            statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
-            platforms = platforms(platforms),
-            isBid = false,
-            size = size,
-            continuation = continuation
-        ) }
+        val page = safeApiCall {
+            dipdupOrderClient.getOrdersByItem(
+                contract = contract,
+                tokenId = tokenId.toString(),
+                maker = maker,
+                currencyId = currencyId,
+                statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
+                platforms = platforms(platforms),
+                isBid = false,
+                size = size,
+                continuation = continuation
+            )
+        }
         return Slice(
             continuation = page.continuation,
             entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
@@ -152,14 +160,16 @@ class DipdupOrderServiceImpl(
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
-        val page = safeApiCall { dipdupOrderClient.getOrdersByMakers(
-            makers = maker,
-            statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
-            platforms = platforms(platforms),
-            isBid = false,
-            size = size,
-            continuation = continuation
-        ) }
+        val page = safeApiCall {
+            dipdupOrderClient.getOrdersByMakers(
+                makers = maker,
+                statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
+                platforms = platforms(platforms),
+                isBid = false,
+                size = size,
+                continuation = continuation
+            )
+        }
         return Slice(
             continuation = page.continuation,
             entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
@@ -193,17 +203,19 @@ class DipdupOrderServiceImpl(
         size: Int
     ): Slice<UnionOrder> {
         logger.info("Fetch dipdup sell orders by item: $contract, $tokenId, $maker, $currencyId, $statuses, $continuation, $size")
-        val page = safeApiCall { dipdupOrderClient.getOrdersByItem(
-            contract = contract,
-            tokenId = tokenId.toString(),
-            maker = maker,
-            currencyId = currencyId,
-            statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
-            platforms = platforms(platforms),
-            isBid = true,
-            size = size,
-            continuation = continuation
-        ) }
+        val page = safeApiCall {
+            dipdupOrderClient.getOrdersByItem(
+                contract = contract,
+                tokenId = tokenId.toString(),
+                maker = maker,
+                currencyId = currencyId,
+                statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
+                platforms = platforms(platforms),
+                isBid = true,
+                size = size,
+                continuation = continuation
+            )
+        }
         return Slice(
             continuation = page.continuation,
             entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
@@ -217,14 +229,16 @@ class DipdupOrderServiceImpl(
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
-        val page = safeApiCall { dipdupOrderClient.getOrdersByMakers(
-            makers = maker,
-            statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
-            platforms = platforms(platforms),
-            isBid = true,
-            size = size,
-            continuation = continuation
-        ) }
+        val page = safeApiCall {
+            dipdupOrderClient.getOrdersByMakers(
+                makers = maker,
+                statuses = statuses?.let { it.map { status -> dipDupOrderConverter.convert(status) } } ?: emptyList(),
+                platforms = platforms(platforms),
+                isBid = true,
+                size = size,
+                continuation = continuation
+            )
+        }
         return Slice(
             continuation = page.continuation,
             entities = page.orders.map { dipDupOrderConverter.convert(it, blockchain) }
@@ -268,5 +282,3 @@ class DipdupOrderServiceImpl(
         private val logger by Logger()
     }
 }
-
-

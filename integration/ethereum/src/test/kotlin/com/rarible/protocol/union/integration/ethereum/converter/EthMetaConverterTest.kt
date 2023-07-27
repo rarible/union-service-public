@@ -266,5 +266,4 @@ class EthMetaConverterTest {
         assertThat(properties.height).isEqualTo(expected.height)
         assertThat(properties.size).isEqualTo(expected.size)
     }
-
 }

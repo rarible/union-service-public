@@ -87,7 +87,6 @@ class DipDupActivityConverter(
         else -> emptyList()
     }
 
-
     fun asNftActivityType(source: ActivityTypeDto): DipDupActivityType? {
         return when (source) {
             ActivityTypeDto.TRANSFER -> DipDupActivityType.TRANSFER
@@ -471,14 +470,14 @@ class DipDupActivityConverter(
     }
 
     private fun convert(source: TezosPlatform): OrderActivitySourceDto {
-        return when(source) {
+        return when (source) {
             TezosPlatform.HEN -> OrderActivitySourceDto.HEN
             TezosPlatform.OBJKT_V1, TezosPlatform.OBJKT_V2 -> OrderActivitySourceDto.OBJKT
             TezosPlatform.RARIBLE_V1, TezosPlatform.RARIBLE_V2 -> OrderActivitySourceDto.RARIBLE
             TezosPlatform.TEIA_V1 -> OrderActivitySourceDto.TEIA
             TezosPlatform.VERSUM_V1 -> OrderActivitySourceDto.VERSUM
             TezosPlatform.FXHASH_V1, TezosPlatform.FXHASH_V2 -> OrderActivitySourceDto.FXHASH
-            else -> throw RuntimeException("Not implemented for ${source} platform")
+            else -> throw RuntimeException("Not implemented for $source platform")
         }
     }
 
@@ -497,4 +496,3 @@ class DipDupActivityConverter(
             }
     }
 }
-

@@ -75,7 +75,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
         jobHandler.handle()
 
         // 1 additional call for single retry for one corrupted item
-        ///coVerify(exactly = collectionMarks.size + 1) { refreshService.reconcileCollection(any()) }
+        // /coVerify(exactly = collectionMarks.size + 1) { refreshService.reconcileCollection(any()) }
         // One failed item mark should remain in DB
         val failedMarks = itemReconciliationMarkRepository.findByType(ReconciliationMarkType.COLLECTION, 100)
         assertThat(failedMarks).hasSize(1)

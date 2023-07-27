@@ -20,5 +20,4 @@ class FlowCollectionConverterTest {
         assertThat(converted.owner?.value).isEqualTo(dto.owner)
         assertThat(converted.features).containsExactly(UnionCollection.Features.BURN)
     }
-
 }

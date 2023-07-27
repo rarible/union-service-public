@@ -45,5 +45,4 @@ abstract class ImxManualTest {
         coEvery { save(any()) } returns Unit
         coEvery { getById(any()) } returns null
     }
-
 }

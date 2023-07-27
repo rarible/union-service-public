@@ -25,6 +25,5 @@ class ItemBestBidOrderProvider(
         override fun create(origin: String?): BestOrderProvider<ShortItem> {
             return ItemBestBidOrderProvider(item, enrichmentOrderService, origin)
         }
-
     }
 }

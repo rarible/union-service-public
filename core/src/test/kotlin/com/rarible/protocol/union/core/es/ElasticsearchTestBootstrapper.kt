@@ -20,7 +20,6 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.index.query.MatchAllQueryBuilder
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
-import java.util.concurrent.atomic.AtomicInteger
 
 class ElasticsearchTestBootstrapper(
     private val esNameResolver: EsNameResolver,
@@ -66,7 +65,6 @@ class ElasticsearchTestBootstrapper(
         deleteDataInAllIndex(esNameResolver.metadataIndexName)
         repositories.forEach { it.init() }
     }
-
 
     suspend fun deleteDataInAllIndex(metadataIndexName: String) = coroutineScope {
         val indexesByAlias = getIndexesByAlias(esOperations, "")

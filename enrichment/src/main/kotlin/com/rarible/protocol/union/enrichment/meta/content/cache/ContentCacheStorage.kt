@@ -7,5 +7,4 @@ interface ContentCacheStorage {
     suspend fun save(content: UnionContentCacheEntry)
 
     suspend fun delete(url: String)
-
 }

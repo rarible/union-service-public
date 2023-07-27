@@ -32,5 +32,4 @@ class UnionConverterTest {
             UnionConverter.convertToLong("abc")
         }
     }
-
 }

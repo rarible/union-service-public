@@ -152,4 +152,3 @@ abstract class DownloadService<K, T>(
         )
     }
 }
-

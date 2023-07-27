@@ -32,5 +32,4 @@ interface TzktCollectionService {
     suspend fun tokenCount(collectionId: String): BigInteger {
         TODO("Not implemented")
     }
-
 }

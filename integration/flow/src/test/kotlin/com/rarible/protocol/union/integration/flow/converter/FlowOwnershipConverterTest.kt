@@ -24,5 +24,4 @@ class FlowOwnershipConverterTest {
         assertThat(converted.creators[0].value).isEqualTo(FlowConverter.toBasePoints(dto.creators[0].value))
         assertThat(converted.creators[0].account.value).isEqualTo(dto.creators[0].account)
     }
-
 }

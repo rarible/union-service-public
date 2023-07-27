@@ -111,7 +111,7 @@ internal class SubscriptionEventFt : AbstractIntegrationTest() {
             )
         )
 
-        //delay(1000)
+        // delay(1000)
         webSocketEventsQueue.clear()
 
         val kafkaMessage = KafkaMessage(

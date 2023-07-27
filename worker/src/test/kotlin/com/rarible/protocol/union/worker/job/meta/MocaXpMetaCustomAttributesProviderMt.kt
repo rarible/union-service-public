@@ -34,5 +34,4 @@ class MocaXpMetaCustomAttributesProviderMt {
             println(it)
         }
     }
-
 }

@@ -11,5 +11,4 @@ enum class EventType(
     ITEM_META("itemMeta"),
     COLLECTION("collection"),
     OWNERSHIP("ownership")
-
 }

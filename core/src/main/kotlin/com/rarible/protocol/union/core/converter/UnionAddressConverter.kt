@@ -15,6 +15,4 @@ object UnionAddressConverter {
     fun convert(contract: ContractAddress): UnionAddress {
         return convert(contract.blockchain, contract.value)
     }
-
 }
-
