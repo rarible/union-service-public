@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProd
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
+import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.stereotype.Component
@@ -16,6 +17,8 @@ class ArtificialCollectionService(
     private val collectionRepository: CollectionRepository,
     private val producer: UnionInternalCollectionEventProducer
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     private val cache = Collections.newSetFromMap(ConcurrentHashMap<CollectionIdDto, Boolean>())
 
@@ -48,14 +51,15 @@ class ArtificialCollectionService(
                 original.copy(
                     collectionId = surrogateId.value,
                     name = name ?: original.name, // Nothing to do with it...
-                    structure = structure
+                    structure = structure,
+                    version = null
                 )
             )
             producer.sendChangeEvent(surrogateId)
         } catch (e: DuplicateKeyException) {
-            // Nothing to do, somebody already created it
+            logger.info("Artificial collection ${surrogateId.fullId()} can't be created, already exists: ${e.message}")
         } catch (e: OptimisticLockingFailureException) {
-            // Nothing to do, somebody already created it
+            logger.info("Artificial collection ${surrogateId.fullId()} can't be created, already updated: ${e.message}")
         }
 
         cache.add(surrogateId)
