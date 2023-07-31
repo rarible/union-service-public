@@ -65,5 +65,4 @@ class EthItemConverterTest {
         assertThat(converted.pending[0].contract.value).isEqualTo(dto.pending!![0].contract.prefixed())
         assertThat(converted.pending[0].tokenId).isEqualTo(dto.pending!![0].tokenId)
     }
-
 }

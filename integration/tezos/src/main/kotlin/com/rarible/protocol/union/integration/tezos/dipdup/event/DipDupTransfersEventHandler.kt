@@ -46,7 +46,8 @@ open class DipDupTransfersEventHandler(
             when (event) {
                 is UnionMintActivity -> listOf(
                     async { sendItemEvent(event.itemId()) },
-                    async { sendOwnershipEvent(event.ownershipId()) })
+                    async { sendOwnershipEvent(event.ownershipId()) }
+                )
 
                 is UnionTransferActivity -> listOf(
                     async { sendOwnershipEvent(event.itemId()?.toOwnership(event.from.value)) },
@@ -95,5 +96,4 @@ open class DipDupTransfersEventHandler(
     private suspend fun isNft(event: UnionActivity): Boolean {
         return event.itemId()?.let { tokenService.isNft(it.value) } ?: false
     }
-
 }

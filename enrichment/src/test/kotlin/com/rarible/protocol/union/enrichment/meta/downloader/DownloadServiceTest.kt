@@ -72,12 +72,14 @@ class DownloadServiceTest {
         // Updated and notified
         coVerify(exactly = 1) { repository.update(eq(itemId.fullId()), any()) }
         coVerify(exactly = 1) {
-            notifier.notify(match {
-                assertThat(it.data).isEqualTo(meta)
-                assertThat(it.id).isEqualTo(itemId.fullId())
-                assertThat(it.status).isEqualTo(DownloadStatus.SUCCESS)
-                true
-            })
+            notifier.notify(
+                match {
+                    assertThat(it.data).isEqualTo(meta)
+                    assertThat(it.id).isEqualTo(itemId.fullId())
+                    assertThat(it.status).isEqualTo(DownloadStatus.SUCCESS)
+                    true
+                }
+            )
         }
     }
 
@@ -122,12 +124,14 @@ class DownloadServiceTest {
         // Updated and notified
         coVerify(exactly = 1) { repository.update(eq(itemId.fullId()), any()) }
         coVerify(exactly = 1) {
-            notifier.notify(match {
-                assertThat(it.data).isEqualTo(meta)
-                assertThat(it.id).isEqualTo(itemId.fullId())
-                assertThat(it.status).isEqualTo(DownloadStatus.SUCCESS)
-                true
-            })
+            notifier.notify(
+                match {
+                    assertThat(it.data).isEqualTo(meta)
+                    assertThat(it.id).isEqualTo(itemId.fullId())
+                    assertThat(it.status).isEqualTo(DownloadStatus.SUCCESS)
+                    true
+                }
+            )
         }
     }
 
@@ -140,5 +144,4 @@ class DownloadServiceTest {
         coVerify(exactly = 0) { notifier.notify(any()) }
         coVerify(exactly = 1) { publisher.publish(match { it.size == 1 && it[0].id == itemId.fullId() }) }
     }
-
 }

@@ -40,6 +40,6 @@ class EsRateLimiter(
                 remainingEntities -= amount
             }
         }
-        //logger.info("Spent $elapsedTime ms waiting in rate limiter")
+        // logger.info("Spent $elapsedTime ms waiting in rate limiter")
     }
 }

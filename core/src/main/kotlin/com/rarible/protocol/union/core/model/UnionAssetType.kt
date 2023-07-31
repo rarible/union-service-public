@@ -46,10 +46,9 @@ sealed class UnionAssetType {
     open fun collectionId(): CollectionIdDto? = null
     open fun contract(): ContractAddress? = null
     open fun currencyId(): String? = null
-
 }
 
-//------------------ FLOW ------------------//
+// ------------------ FLOW ------------------//
 
 data class UnionFlowAssetTypeNft(
     val contract: ContractAddress,
@@ -71,7 +70,7 @@ data class UnionFlowAssetTypeFt(
     override fun contract() = this.contract
 }
 
-//------------------ TEZOS ------------------//
+// ------------------ TEZOS ------------------//
 
 class UnionTezosXTZAssetType : UnionAssetType() {
 
@@ -88,7 +87,7 @@ data class UnionTezosFTAssetType(
 ) : UnionAssetType() {
 
     override fun isCurrency() = true
-    override fun currencyId() = tokenId?.let { "${this.contract.value}:${it}" } ?: this.contract.value
+    override fun currencyId() = tokenId?.let { "${this.contract.value}:$it" } ?: this.contract.value
     override fun contract() = this.contract
 }
 
@@ -114,7 +113,7 @@ data class UnionTezosMTAssetType(
     override fun contract() = this.contract
 }
 
-//------------------ ETH ------------------//
+// ------------------ ETH ------------------//
 
 data class UnionEthEthereumAssetType(
     val blockchain: BlockchainDto? = null
@@ -226,7 +225,7 @@ data class UnionEthAmmNftAssetType(
     override fun contract() = this.contract
 }
 
-//------------------ SOLANA ------------------//
+// ------------------ SOLANA ------------------//
 
 data class UnionSolanaNftAssetType(
     val contract: ContractAddress? = null,

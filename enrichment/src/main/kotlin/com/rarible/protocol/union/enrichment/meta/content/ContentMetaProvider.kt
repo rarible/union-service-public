@@ -127,5 +127,4 @@ class ContentMetaProvider(
         }
         metrics.onContentFetched(blockchain, "remote", properties)
     }
-
 }

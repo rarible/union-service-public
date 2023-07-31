@@ -18,7 +18,8 @@ class TezosOrderControllerApiMock(
     }
 
     fun mockGetAll(orders: List<DipDupOrder>) {
-        coEvery { orderControllerApi.getOrdersAll(any(), any(), any(), any(), any(), any())
+        coEvery {
+            orderControllerApi.getOrdersAll(any(), any(), any(), any(), any(), any())
         } returns DipDupOrdersPage(orders)
     }
 }

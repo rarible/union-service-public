@@ -35,7 +35,7 @@ class ActivityTaskUnitTest {
     }
 
     @Test
-    fun `should launch first run of the task`(): Unit {
+    fun `should launch first run of the task`() {
         runBlocking {
             val task = ActivityTask(
                 ActivityReindexProperties(

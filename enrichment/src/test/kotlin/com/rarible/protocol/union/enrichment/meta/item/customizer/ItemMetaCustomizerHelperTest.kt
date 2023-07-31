@@ -37,5 +37,4 @@ class ItemMetaCustomizerHelperTest {
         assertThat(helper.attribute("key", "key1", "key2")).isEqualTo("a")
         assertThat(helper.attribute("key")).isNull()
     }
-
 }

@@ -53,7 +53,7 @@ class RestrictionApiRuleCheckerTest {
         )
         val rule = RestrictionApiRule(
             method = RestrictionApiRule.Method.GET,
-            uriTemplate = "${mockHost}/\${itemId}?address=\${user}"
+            uriTemplate = "$mockHost/\${itemId}?address=\${user}"
         )
 
         val checkResult = checker.checkRule(itemId, rule, form)
@@ -76,7 +76,7 @@ class RestrictionApiRuleCheckerTest {
         )
         val rule = RestrictionApiRule(
             method = RestrictionApiRule.Method.POST,
-            uriTemplate = "${mockHost}/check",
+            uriTemplate = "$mockHost/check",
             bodyTemplate = "{\"itemId\":\"\${itemId}\", \"address\":\"\${user}\"}"
         )
 
@@ -97,6 +97,4 @@ class RestrictionApiRuleCheckerTest {
             .setResponseCode(200)
             .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
     }
-
-
 }

@@ -218,5 +218,4 @@ class UnionContentMetaServiceTest {
             Arguments.of("https://mypinata.com/ipfs/$CID", "https://mypinata.com/ipfs/$CID")
         )
     }
-
 }

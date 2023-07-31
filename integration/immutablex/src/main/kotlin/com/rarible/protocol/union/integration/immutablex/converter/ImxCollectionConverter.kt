@@ -49,5 +49,4 @@ object ImxCollectionConverter {
             ) else emptyList()
         )
     }
-
 }

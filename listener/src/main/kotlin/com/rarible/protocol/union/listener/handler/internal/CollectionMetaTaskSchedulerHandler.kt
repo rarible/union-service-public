@@ -13,5 +13,4 @@ class CollectionMetaTaskSchedulerHandler(
     override suspend fun handle(events: List<DownloadTask>) {
         scheduler.schedule(events)
     }
-
 }

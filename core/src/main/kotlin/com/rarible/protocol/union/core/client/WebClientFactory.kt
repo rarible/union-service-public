@@ -10,7 +10,6 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
 
-
 object WebClientFactory {
 
     fun createClient(baseUrl: String, headers: Map<String, String>): WebClient.Builder {
@@ -35,5 +34,4 @@ object WebClientFactory {
 
         return webClient.baseUrl(baseUrl)
     }
-
 }

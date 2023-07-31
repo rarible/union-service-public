@@ -23,9 +23,11 @@ open class EthAuctionService(
     private val ethAuctionConverter: EthAuctionConverter
 ) : AbstractBlockchainService(blockchain), AuctionService {
 
-    override suspend fun getAuctionsBidsById(auctionId: String,
-                                             continuation: String?,
-                                             size: Int?): Slice<AuctionBidDto> {
+    override suspend fun getAuctionsBidsById(
+        auctionId: String,
+        continuation: String?,
+        size: Int?
+    ): Slice<AuctionBidDto> {
         val bids = auctionControllerApi.getAuctionBidsByHash(auctionId, continuation, size).awaitFirst()
         return ethAuctionConverter.convert(bids, blockchain)
     }

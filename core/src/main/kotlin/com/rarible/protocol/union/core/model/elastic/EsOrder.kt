@@ -32,7 +32,7 @@ data class EsOrder(
     val takePriceUsd: Double?,
     val start: Instant?,
     val end: Instant?,
-    val origins: List<String>, //list of address fulIds
+    val origins: List<String>, // list of address fulIds
     val status: OrderStatusDto,
 ) {
 

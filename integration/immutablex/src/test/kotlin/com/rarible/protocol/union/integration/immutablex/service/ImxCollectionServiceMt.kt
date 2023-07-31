@@ -29,5 +29,4 @@ class ImxCollectionServiceMt : ImxManualTest() {
         val withContinuation = service.getAllCollections(page[0].id.value, 1).entities
         assertThat(withContinuation[0]).isEqualTo(page[1])
     }
-
 }

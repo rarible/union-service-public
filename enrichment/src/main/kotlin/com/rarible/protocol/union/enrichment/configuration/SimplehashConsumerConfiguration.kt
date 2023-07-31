@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import java.util.UUID
 
-
 @ConditionalOnProperty("meta.simpleHash.kafka.enabled", havingValue = "true")
 class SimplehashConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo
@@ -40,7 +39,7 @@ class SimplehashConsumerConfiguration(
                 "security.protocol" to "SASL_SSL",
                 "sasl.mechanism" to "PLAIN",
                 "sasl.jaas.config" to "org.apache.kafka.common.security.plain.PlainLoginModule required " +
-                        "username=\"${kafkaProps.username}\" password=\"${kafkaProps.password}\";"
+                    "username=\"${kafkaProps.username}\" password=\"${kafkaProps.password}\";"
             )
         } else {
             avroConfig
@@ -65,12 +64,11 @@ class SimplehashConsumerConfiguration(
         val containers = props.simpleHash.kafka.topics.map {
             val container = factory.createContainer(it)
             container.setupMessageListener(listener)
-            container.containerProperties.groupId = "rarible-${env}"
-            container.containerProperties.clientId = "rarible-${clientId}"
+            container.containerProperties.groupId = "rarible-$env"
+            container.containerProperties.clientId = "rarible-$clientId"
             container
         }
 
         return RaribleKafkaConsumerFactory.RaribleKafkaConsumerWorkerWrapper(containers)
     }
-
 }

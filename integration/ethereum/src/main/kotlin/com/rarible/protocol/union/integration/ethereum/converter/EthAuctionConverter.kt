@@ -85,7 +85,7 @@ class EthAuctionConverter(
     }
 
     fun convert(source: com.rarible.protocol.dto.AuctionStatusDto): AuctionStatusDto {
-        return when(source) {
+        return when (source) {
             com.rarible.protocol.dto.AuctionStatusDto.ACTIVE -> AuctionStatusDto.ACTIVE
             com.rarible.protocol.dto.AuctionStatusDto.CANCELLED -> AuctionStatusDto.CANCELLED
             com.rarible.protocol.dto.AuctionStatusDto.FINISHED -> AuctionStatusDto.FINISHED
@@ -93,11 +93,10 @@ class EthAuctionConverter(
     }
 
     fun convert(source: com.rarible.protocol.dto.AuctionSortDto): AuctionSortDto {
-        return when(source) {
+        return when (source) {
             com.rarible.protocol.dto.AuctionSortDto.LAST_UPDATE_ASC -> AuctionSortDto.LAST_UPDATE_ASC
             com.rarible.protocol.dto.AuctionSortDto.LAST_UPDATE_DESC -> AuctionSortDto.LAST_UPDATE_DESC
             com.rarible.protocol.dto.AuctionSortDto.BUY_PRICE_ASC -> AuctionSortDto.BUY_PRICE_ASC
         }
     }
 }
-

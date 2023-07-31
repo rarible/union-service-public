@@ -34,7 +34,9 @@ open class EthOwnershipService(
     }
 
     override suspend fun getOwnershipsByItem(
-        itemId: String, continuation: String?, size: Int
+        itemId: String,
+        continuation: String?,
+        size: Int
     ): Page<UnionOwnership> {
         val (contract, tokenId) = CompositeItemIdParser.split(itemId)
         val ownerships = ownershipControllerApi.getNftOwnershipsByItem(
@@ -44,7 +46,9 @@ open class EthOwnershipService(
     }
 
     override suspend fun getOwnershipsByOwner(
-        address: String, continuation: String?, size: Int
+        address: String,
+        continuation: String?,
+        size: Int
     ): Page<UnionOwnership> {
         val ownerships = ownershipControllerApi.getNftOwnershipsByOwner(
             address, null, continuation, size

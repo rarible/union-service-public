@@ -8,7 +8,7 @@ import org.apache.commons.codec.digest.DigestUtils
 
 object EsItemConverter {
 
-   private const val MAX_TRAIT_LENGTH = 1000
+    private const val MAX_TRAIT_LENGTH = 1000
 
     fun ItemDto.toEsItem(): EsItem {
         return EsItem(

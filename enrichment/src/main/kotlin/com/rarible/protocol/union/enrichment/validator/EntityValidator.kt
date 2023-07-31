@@ -24,7 +24,7 @@ object EntityValidator {
     }
 
     private fun isAllValid(bestBidOrder: OrderDto?, bestSellOrder: OrderDto?, id: String): Boolean {
-        return isBestBidValid(bestBidOrder,id) && isBestSellValid(bestSellOrder, id)
+        return isBestBidValid(bestBidOrder, id) && isBestSellValid(bestSellOrder, id)
     }
 
     private fun isBestBidValid(order: OrderDto?, id: String): Boolean {

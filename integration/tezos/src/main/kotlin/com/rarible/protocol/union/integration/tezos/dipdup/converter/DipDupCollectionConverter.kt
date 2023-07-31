@@ -54,10 +54,10 @@ object DipDupCollectionConverter {
             DipDupCollection.Representation.BIG -> MetaContentDto.Representation.BIG
             DipDupCollection.Representation.PREVIEW -> MetaContentDto.Representation.PREVIEW
         }
-       return UnionMetaContent(
-           url = source.uri,
-           representation = representation
-       )
+        return UnionMetaContent(
+            url = source.uri,
+            representation = representation
+        )
     }
 
     private fun minters(source: DipDupCollection): List<UnionAddress> {

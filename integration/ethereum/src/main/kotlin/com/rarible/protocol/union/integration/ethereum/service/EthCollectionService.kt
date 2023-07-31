@@ -48,7 +48,6 @@ open class EthCollectionService(
 
             return response.meta?.let { EthMetaConverter.convert(it, blockchain) }
                 ?: throw UnionNotFoundException("Meta not found for $entityId")
-
         } catch (e: NftCollectionControllerApi.ErrorGetCollectionMeta) {
             if (e.statusCode == HttpStatus.NOT_FOUND) {
                 throw UnionNotFoundException("Meta not found for $entityId")
@@ -58,7 +57,7 @@ open class EthCollectionService(
     }
 
     override suspend fun refreshCollectionMeta(collectionId: String) {
-        //collectionControllerApi.resetNftCollectionMetaById(collectionId).awaitFirstOrNull()
+        // collectionControllerApi.resetNftCollectionMetaById(collectionId).awaitFirstOrNull()
     }
 
     override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {

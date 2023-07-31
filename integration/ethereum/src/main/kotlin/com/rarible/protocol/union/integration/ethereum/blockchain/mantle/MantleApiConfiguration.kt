@@ -51,7 +51,7 @@ class MantleApiConfiguration {
         return BlockchainDto.MANTLE
     }
 
-    //-------------------- API --------------------//
+    // -------------------- API --------------------//
 
     @Bean
     @Qualifier("mantle.item.api")
@@ -108,7 +108,7 @@ class MantleApiConfiguration {
     fun mantleActivityAuctionApi(factory: OrderIndexerApiClientFactory): AuctionActivityControllerApi =
         factory.createAuctionActivityApiClient(mantle)
 
-    //-------------------- Services --------------------//
+    // -------------------- Services --------------------//
 
     @Bean
     fun mantleItemService(

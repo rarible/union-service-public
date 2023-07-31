@@ -8,5 +8,4 @@ interface BestOrderProvider<E> {
     val entityType: Class<E>
 
     suspend fun fetch(currencyId: String): UnionOrder?
-
 }

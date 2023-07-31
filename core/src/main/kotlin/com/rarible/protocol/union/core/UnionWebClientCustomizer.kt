@@ -43,5 +43,4 @@ class UnionWebClientCustomizer(
         webClientBuilder.clientConnector(connector)
         webClientBuilder.defaultHeader("x-rarible-client", "rarible-protocol")
     }
-
 }

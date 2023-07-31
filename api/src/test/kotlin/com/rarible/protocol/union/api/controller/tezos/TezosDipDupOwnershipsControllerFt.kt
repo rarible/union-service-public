@@ -42,7 +42,7 @@ class TezosDipDupOwnershipsControllerFt : AbstractIntegrationTest() {
         val ownerId = OwnershipIdDto(BlockchainDto.TEZOS,
             "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton",
             BigInteger("718165"),
-            UnionAddressConverter.convert(BlockchainDto.TEZOS,"tz1Uf5tnHetAA7nWzc9TnDMk7jCovp9D8cjB"))
+            UnionAddressConverter.convert(BlockchainDto.TEZOS, "tz1Uf5tnHetAA7nWzc9TnDMk7jCovp9D8cjB"))
         val tokenBalance = randomTzktTokenBalance(ownerId)
 
         coEvery {
@@ -82,7 +82,7 @@ class TezosDipDupOwnershipsControllerFt : AbstractIntegrationTest() {
         val ownerId = OwnershipIdDto(BlockchainDto.TEZOS,
             "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton",
             BigInteger("718165"),
-            UnionAddressConverter.convert(BlockchainDto.TEZOS,"tz1Uf5tnHetAA7nWzc9TnDMk7jCovp9D8cjB"))
+            UnionAddressConverter.convert(BlockchainDto.TEZOS, "tz1Uf5tnHetAA7nWzc9TnDMk7jCovp9D8cjB"))
         val tokenBalance = randomTzktTokenBalance(ownerId)
 
         coEvery {

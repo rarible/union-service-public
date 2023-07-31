@@ -193,5 +193,4 @@ class ImxScanner(
     fun withdrawals() = runBlocking {
         listenActivity(eventsApi::withdrawals, ImmutablexEntityTypes.WITHDRAWALS)
     }*/
-
 }

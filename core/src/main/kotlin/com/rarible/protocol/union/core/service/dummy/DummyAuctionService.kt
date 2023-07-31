@@ -78,5 +78,4 @@ class DummyAuctionService(
     ): Slice<AuctionDto> {
         return Slice.empty()
     }
-
 }

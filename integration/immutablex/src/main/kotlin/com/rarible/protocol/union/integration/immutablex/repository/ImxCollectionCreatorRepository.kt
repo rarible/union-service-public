@@ -20,5 +20,4 @@ class ImxCollectionCreatorRepository(
     suspend fun saveAll(creators: List<ImxCollectionCreator>) {
         creators.forEach { mongo.save(it).awaitFirst() }
     }
-
 }

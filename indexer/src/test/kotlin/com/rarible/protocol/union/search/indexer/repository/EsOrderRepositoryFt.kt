@@ -228,12 +228,11 @@ internal class EsOrderRepositoryFt {
             exampleFilter.copy(platform = exampleOrder.platform, maker = exampleOrder.maker)
         )
 
-        //then
+        // then
         filters.forEach { filter ->
             val orderId = repository.findByFilter(filter).first().orderId
             assertThat(orderId).isEqualTo(exampleOrder.orderId)
         }
-
     }
 
     @Test
@@ -432,7 +431,7 @@ internal class EsOrderRepositoryFt {
             currencies = null,
         )
 
-        //then
+        // then
         val esOrders1 = repository.findByFilter(exampleFilter)
         assertThat(esOrders1.map { it.orderId }).containsExactlyInAnyOrder(order1.orderId, order2.orderId)
 
@@ -495,11 +494,10 @@ internal class EsOrderRepositoryFt {
             currencies = null,
         )
 
-        //then
+        // then
         val esOrders = repository.findByFilter(exampleFilter)
         assertThat(esOrders).hasSize(1)
         assertThat(esOrders.first().orderId).isEqualTo(o1.orderId)
-
     }
 
     @Test
@@ -528,7 +526,7 @@ internal class EsOrderRepositoryFt {
             sort = EsOrderSort.LAST_UPDATE_DESC,
         )
 
-        //then
+        // then
         val esOrders = repository.findByFilter(exampleFilter)
         assertThat(esOrders).hasSize(countOrders)
     }

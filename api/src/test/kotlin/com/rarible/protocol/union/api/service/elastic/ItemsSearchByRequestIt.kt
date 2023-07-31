@@ -64,7 +64,6 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
     @MockK
     private lateinit var flowService: ItemService
 
-
     @Autowired
     private lateinit var itemElasticService: ItemElasticService
 
@@ -216,7 +215,6 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
         }
     }
 
-
     @Test
     internal fun `search items by request`() {
         runBlocking {
@@ -337,7 +335,6 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                 expected = expected,
                 failMessage = "Search by best bid platforms failed!"
             )
-
 
             expected = takeRandomItems()
             checkResult(

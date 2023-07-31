@@ -23,14 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired
 @Suppress("UNCHECKED_CAST")
 abstract class AbstractDipDupIntegrationTest {
 
-    //--------------------- TEZOS ---------------------//
+    // --------------------- TEZOS ---------------------//
 
     @Autowired
     lateinit var ownershipClient: OwnershipClient
 
     @Autowired
     lateinit var tokenClient: TokenClient
-
 
     @Autowired
     lateinit var dipDupOrderProducer: RaribleKafkaProducer<DipDupOrder>

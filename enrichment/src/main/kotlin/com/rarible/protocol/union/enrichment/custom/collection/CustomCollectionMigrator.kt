@@ -33,5 +33,4 @@ class CustomCollectionMigrator(
 
         logger.info("Custom collection recalculated for Items: {}", items.map { it.id.fullId() })
     }
-
 }

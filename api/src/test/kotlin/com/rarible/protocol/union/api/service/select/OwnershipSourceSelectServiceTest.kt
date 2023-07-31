@@ -6,7 +6,6 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.enrichment.test.data.randomItemDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.coEvery

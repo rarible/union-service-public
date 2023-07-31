@@ -66,7 +66,7 @@ open class FlowActivityService(
             flowSort
         ).awaitFirst()
 
-        return result(activities,size, sort)
+        return result(activities, size, sort)
     }
 
     override suspend fun getAllRevertedActivitiesSync(

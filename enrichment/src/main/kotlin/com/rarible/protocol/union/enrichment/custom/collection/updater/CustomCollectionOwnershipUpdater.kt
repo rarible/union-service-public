@@ -34,5 +34,4 @@ class CustomCollectionOwnershipUpdater(
             continuation = page.continuation
         } while (continuation != null)
     }
-
 }

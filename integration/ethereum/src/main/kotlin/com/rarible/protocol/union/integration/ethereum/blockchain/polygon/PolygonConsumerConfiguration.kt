@@ -58,7 +58,7 @@ class PolygonConsumerConfiguration(
 
     private val blockchain = Blockchain.POLYGON
 
-    //-------------------- Handlers -------------------//
+    // -------------------- Handlers -------------------//
 
     @Bean
     @Qualifier("polygon.item.handler")
@@ -106,7 +106,7 @@ class PolygonConsumerConfiguration(
         return PolygonActivityLegacyEventHandler(handler, converter)
     }
 
-    //-------------------- Workers --------------------//
+    // -------------------- Workers --------------------//
 
     @Bean
     fun polygonItemWorker(

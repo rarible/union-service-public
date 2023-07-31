@@ -102,5 +102,4 @@ class ImxConsumerConfiguration {
         collectionEventHandler,
         activityDelay
     )
-
 }

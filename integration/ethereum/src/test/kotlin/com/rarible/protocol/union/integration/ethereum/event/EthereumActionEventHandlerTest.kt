@@ -52,5 +52,4 @@ class EthereumActionEventHandlerTest {
 
         coVerify(exactly = 1) { incomingEventHandler.onEvent(expected) }
     }
-
 }

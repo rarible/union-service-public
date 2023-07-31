@@ -104,7 +104,7 @@ class ReconciliationOrderJobTest {
         coVerify(exactly = 0) { orderEventService.updateOrder(any(), any()) }
     }
 
-    private fun mockGetOrdersAll(continuation: String?, size: Int, result: Slice<UnionOrder>): Unit {
+    private fun mockGetOrdersAll(continuation: String?, size: Int, result: Slice<UnionOrder>) {
         coEvery {
             orderService.getOrdersAll(
                 continuation,

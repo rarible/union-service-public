@@ -27,8 +27,12 @@ interface DipdupOrderActivityService {
     }
 
     suspend fun getByItem(
-        types: List<ActivityTypeDto>, contract: String,
-        tokenId: BigInteger, continuation: String?, limit: Int, sort: ActivitySortDto?
+        types: List<ActivityTypeDto>,
+        contract: String,
+        tokenId: BigInteger,
+        continuation: String?,
+        limit: Int,
+        sort: ActivitySortDto?
     ): Slice<UnionActivity> {
         TODO("Not implemented")
     }
@@ -36,5 +40,4 @@ interface DipdupOrderActivityService {
     suspend fun getByIds(ids: List<String>): List<UnionActivity> {
         TODO("Not implemented")
     }
-
 }

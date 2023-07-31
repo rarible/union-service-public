@@ -141,7 +141,6 @@ class EnrichmentOwnershipEventServiceIt : AbstractIntegrationTest() {
 
         ownershipEventHandler.onOwnershipUpdated(UnionOwnershipUpdateEvent(unionOwnership, stubEventMark()))
 
-
         waitAssert {
             // Event should not be sent in case of corrupted enrichment data
             val messages = findOwnershipUpdates(ownershipId.value)

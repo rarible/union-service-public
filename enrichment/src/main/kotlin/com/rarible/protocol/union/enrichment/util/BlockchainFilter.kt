@@ -24,5 +24,4 @@ class BlockchainFilter(
         }
         return blockchains.filter { filter.contains(it) }
     }
-
 }

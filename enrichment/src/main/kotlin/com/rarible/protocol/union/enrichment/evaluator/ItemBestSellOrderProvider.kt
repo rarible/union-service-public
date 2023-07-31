@@ -53,6 +53,5 @@ class ItemBestSellOrderProvider(
         override fun create(origin: String?): BestOrderProvider<ShortItem> {
             return ItemBestSellOrderProvider(item, enrichmentOrderService, origin, enablePoolOrders)
         }
-
     }
 }

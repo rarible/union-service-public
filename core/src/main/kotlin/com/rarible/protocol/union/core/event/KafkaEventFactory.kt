@@ -207,5 +207,4 @@ object KafkaEventFactory {
             value = task
         )
     }
-
 }

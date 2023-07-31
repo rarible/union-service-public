@@ -109,7 +109,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Bean
     @Qualifier("testLocalhostUri")
     fun testLocalhostUri(@LocalServerPort port: Int): URI {
-        return URI("http://localhost:${port}")
+        return URI("http://localhost:$port")
     }
 
     @Bean
@@ -151,7 +151,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
         return UnionApiClientFactory(FixedUnionApiServiceUriProvider(uri))
     }
 
-    //--------------------- UNION CLIENTS ---------------------//
+    // --------------------- UNION CLIENTS ---------------------//
 
     @Bean
     fun testItemControllerApi(factory: UnionApiClientFactory) = factory.createItemApiClient()
@@ -180,13 +180,13 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Bean
     fun testCurrencyControllerApi(factory: UnionApiClientFactory) = factory.createCurrencyApiClient()
 
-    //--------------------- CURRENCY ---------------------//
+    // --------------------- CURRENCY ---------------------//
 
     @Bean
     @Primary
     fun testCurrencyApi(): CurrencyControllerApi = CurrencyMock.currencyControllerApiMock
 
-    //--------------------- ETHEREUM ---------------------//
+    // --------------------- ETHEREUM ---------------------//
     @Bean
     @Primary
     @Qualifier("ethereum.item.api")
@@ -237,7 +237,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Qualifier("ethereum.activity.api.auction")
     fun testEthereumActivityAuctionApi(): AuctionActivityControllerApi = mockk()
 
-    //--------------------- POLYGON ---------------------//
+    // --------------------- POLYGON ---------------------//
     @Bean
     @Primary
     @Qualifier("polygon.item.api")
@@ -283,7 +283,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Qualifier("polygon.activity.api.auction")
     fun testPolygonActivityAuctionApi(): AuctionActivityControllerApi = mockk()
 
-    //--------------------- SOLANA -------------------//
+    // --------------------- SOLANA -------------------//
 
     @Bean
     @Primary
@@ -293,7 +293,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Primary
     fun testSolanaCollectionApi(): SolanaCollectionControllerApi = mockk()
 
-    //--------------------- FLOW ---------------------//
+    // --------------------- FLOW ---------------------//
     @Bean
     @Primary
     fun testFlowItemApi(): FlowNftItemControllerApi = mockk()
@@ -318,7 +318,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Primary
     fun testFlowActivityApi(): FlowNftOrderActivityControllerApi = mockk()
 
-    //--------------------- TEZOS ---------------------//
+    // --------------------- TEZOS ---------------------//
 
     @Bean
     @Primary
@@ -344,7 +344,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Primary
     fun testSignatureClient(): com.rarible.tzkt.client.SignatureClient = mockk()
 
-    //---------------------- KAFKA ---------------------//
+    // ---------------------- KAFKA ---------------------//
     @Bean
     fun testItemHandler() = TestUnionEventHandler<ItemEventDto>()
 
@@ -427,7 +427,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
 
     private fun <T> createUnionProducer(clientSuffix: String, topic: String, type: Class<T>): RaribleKafkaProducer<T> {
         return RaribleKafkaProducer(
-            clientId = "test.protocol-union-service.${clientSuffix}",
+            clientId = "test.protocol-union-service.$clientSuffix",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = type,
             defaultTopic = topic,
@@ -435,7 +435,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
         )
     }
 
-    //---------------------- ES -----------------------//
+    // ---------------------- ES -----------------------//
 
     @Bean
     @Primary

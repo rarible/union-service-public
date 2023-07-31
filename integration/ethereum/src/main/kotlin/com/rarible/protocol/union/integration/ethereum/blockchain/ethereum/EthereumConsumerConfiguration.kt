@@ -63,7 +63,7 @@ class EthereumConsumerConfiguration(
 
     private val blockchain = Blockchain.ETHEREUM
 
-    //-------------------- Handlers -------------------//
+    // -------------------- Handlers -------------------//
 
     @Bean
     @Qualifier("ethereum.item.handler")
@@ -120,7 +120,7 @@ class EthereumConsumerConfiguration(
         return EthereumActivityLegacyEventHandler(handler, converter)
     }
 
-    //-------------------- Workers --------------------//
+    // -------------------- Workers --------------------//
 
     @Bean
     fun ethereumItemWorker(

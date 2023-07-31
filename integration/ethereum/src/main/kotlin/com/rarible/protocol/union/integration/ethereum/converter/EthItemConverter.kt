@@ -106,5 +106,4 @@ object EthItemConverter {
             royalties = source.royalties.map { EthConverter.convertToRoyalty(it, blockchain) }
         )
     }
-
 }

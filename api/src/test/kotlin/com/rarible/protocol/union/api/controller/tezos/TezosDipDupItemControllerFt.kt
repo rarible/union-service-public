@@ -43,7 +43,7 @@ class TezosDipDupItemControllerFt : AbstractIntegrationTest() {
     lateinit var itemControllerClient: ItemControllerApi
 
     private fun baseUrl(): String {
-        return "http://localhost:${port}/v0.1"
+        return "http://localhost:$port/v0.1"
     }
 
     @Test

@@ -38,5 +38,4 @@ class CustomCollectionItemFetcherFactory(
         }
         return result
     }
-
 }

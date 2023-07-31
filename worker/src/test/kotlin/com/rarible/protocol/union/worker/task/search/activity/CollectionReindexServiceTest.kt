@@ -22,7 +22,6 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import randomUnionAddress
 
-
 class CollectionReindexServiceTest {
 
     private val counter = mockk<RegisteredCounter> {
@@ -122,5 +121,4 @@ class CollectionReindexServiceTest {
             owner = randomUnionAddress(BlockchainDto.ETHEREUM),
         )
     }
-
 }

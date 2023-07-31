@@ -34,5 +34,4 @@ class AdminControllerTest {
         val result = controller.cancelOrder(orderId.fullId())
         assertThat(result.body).isEqualTo(canceledDtoOrder)
     }
-
 }

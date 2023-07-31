@@ -16,7 +16,7 @@ class ReconciliationAuctionTaskHandler(
 
     override fun getAutorunParams(): List<RunTask> {
         // TODO Enable when all blockchains will support auctions
-        //blockchains.map { RunTask(it.name) }
+        // blockchains.map { RunTask(it.name) }
         return listOf(
             RunTask(BlockchainDto.ETHEREUM.name)
         )

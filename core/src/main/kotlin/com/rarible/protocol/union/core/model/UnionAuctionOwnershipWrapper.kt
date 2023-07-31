@@ -12,5 +12,4 @@ data class UnionAuctionOwnershipWrapper(
 
     val ownershipId: OwnershipIdDto = ownership?.id ?: auction!!.getSellerOwnershipId()
     val date: Instant = ownership?.createdAt ?: auction!!.createdAt
-
 }

@@ -27,13 +27,16 @@ abstract class EthActivityEventHandler(
 }
 
 open class EthereumActivityEventHandler(
-    handler: IncomingEventHandler<UnionActivity>, ethActivityConverter: EthActivityConverter
+    handler: IncomingEventHandler<UnionActivity>,
+    ethActivityConverter: EthActivityConverter
 ) : EthActivityEventHandler(BlockchainDto.ETHEREUM, handler, ethActivityConverter)
 
 open class PolygonActivityEventHandler(
-    handler: IncomingEventHandler<UnionActivity>, ethActivityConverter: EthActivityConverter
+    handler: IncomingEventHandler<UnionActivity>,
+    ethActivityConverter: EthActivityConverter
 ) : EthActivityEventHandler(BlockchainDto.POLYGON, handler, ethActivityConverter)
 
 open class MantleActivityEventHandler(
-    handler: IncomingEventHandler<UnionActivity>, ethActivityConverter: EthActivityConverter
+    handler: IncomingEventHandler<UnionActivity>,
+    ethActivityConverter: EthActivityConverter
 ) : EthActivityEventHandler(BlockchainDto.MANTLE, handler, ethActivityConverter)

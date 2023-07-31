@@ -78,5 +78,4 @@ class FlowAuctionService(
     ): Slice<AuctionDto> {
         return Slice.empty()
     }
-
 }

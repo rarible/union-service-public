@@ -85,7 +85,8 @@ class CollectionRepository(
                         if (continuation != null) {
                             and(EnrichmentCollection::id).gt(continuation)
                         }
-                    })
+                    }
+            )
                 .with(Sort.by(EnrichmentCollection::id.name))
                 .limit(size),
             EnrichmentCollection::class.java
@@ -104,9 +105,11 @@ class CollectionRepository(
     }
 
     fun findAll(fromIdExcluded: EnrichmentCollectionId? = null): Flow<EnrichmentCollection> = template.find(
-        Query(Criteria().apply {
-            fromIdExcluded?.let { and(EnrichmentCollection::id).gt(fromIdExcluded) }
-        }).with(Sort.by(EnrichmentCollection::id.name)),
+        Query(
+            Criteria().apply {
+                fromIdExcluded?.let { and(EnrichmentCollection::id).gt(fromIdExcluded) }
+            }
+        ).with(Sort.by(EnrichmentCollection::id.name)),
         EnrichmentCollection::class.java
     ).asFlow()
 

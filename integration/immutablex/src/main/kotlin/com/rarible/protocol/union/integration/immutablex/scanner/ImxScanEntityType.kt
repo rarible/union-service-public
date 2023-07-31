@@ -10,4 +10,3 @@ enum class ImxScanEntityType {
     WITHDRAWAL,
     DEPOSIT
 }
-

@@ -71,5 +71,4 @@ class CustomCollectionItemFetcherByRangeTest {
     private fun itemIds(collectionId: EnrichmentCollectionId, vararg tokenIds: Int) = tokenIds.map {
         ItemIdDto(collectionId.blockchain, "${collectionId.collectionId}:$it")
     }
-
 }

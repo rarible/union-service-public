@@ -38,5 +38,4 @@ class OpenapiService(
             openapiProperties.examples
         )
     }
-
 }

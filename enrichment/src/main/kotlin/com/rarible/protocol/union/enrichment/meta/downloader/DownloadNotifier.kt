@@ -8,5 +8,4 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 interface DownloadNotifier<T> {
 
     suspend fun notify(entry: DownloadEntry<T>)
-
 }

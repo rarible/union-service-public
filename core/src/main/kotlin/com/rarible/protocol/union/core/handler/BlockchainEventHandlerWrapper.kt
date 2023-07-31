@@ -41,5 +41,4 @@ class BlockchainEventHandlerWrapper<B, U>(
             throw ex
         }
     }
-
 }

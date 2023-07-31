@@ -8,7 +8,6 @@ import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.NoopReindexSchedulingService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
-import com.rarible.protocol.union.integration.ethereum.mock.EthItemControllerApiMock
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
 import io.mockk.spyk
@@ -29,7 +28,7 @@ class TestWorkerConfiguration {
     @Bean
     @Qualifier("testLocalhostUri")
     fun testLocalhostUri(@LocalServerPort port: Int): URI {
-        return URI("http://localhost:${port}")
+        return URI("http://localhost:$port")
     }
 
     @Bean
@@ -45,13 +44,13 @@ class TestWorkerConfiguration {
     fun reindexSchedulingService(indexService: IndexService) =
         spyk(NoopReindexSchedulingService(indexService))
 
-    //--------------------- CURRENCY ---------------------//
+    // --------------------- CURRENCY ---------------------//
 
     @Bean
     @Primary
     fun testCurrencyApi(): CurrencyControllerApi = CurrencyMock.currencyControllerApiMock
 
-    //--------------------- ETHEREUM ---------------------//
+    // --------------------- ETHEREUM ---------------------//
 
     @Bean
     @Primary
@@ -62,5 +61,4 @@ class TestWorkerConfiguration {
     @Primary
     @Qualifier("ethereum.order.api")
     fun testEthereumOrderApi(): com.rarible.protocol.order.api.client.OrderControllerApi = mockk()
-
 }

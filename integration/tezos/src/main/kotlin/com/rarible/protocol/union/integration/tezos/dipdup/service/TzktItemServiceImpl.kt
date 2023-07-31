@@ -121,5 +121,4 @@ class TzktItemServiceImpl(val tzktTokenClient: TokenClient, val properties: DipD
             emptyList()
         }
     }
-
 }

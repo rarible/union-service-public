@@ -6,8 +6,6 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.CollectionsSearchRequestDto
-import com.rarible.protocol.union.dto.ItemsDto
-import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.service.query.collection.CollectionApiMergeService
 import com.rarible.protocol.union.enrichment.service.query.collection.CollectionQueryService

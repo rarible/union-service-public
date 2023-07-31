@@ -160,7 +160,6 @@ fun randomFlowAsset(): FlowAssetDto {
     return randomFlowNftAsset()
 }
 
-
 fun randomFlowFungibleAsset() = randomFlowFungibleAsset(randomFlowAddress())
 fun randomFlowFungibleAsset(contract: UnionAddress) = FlowAssetFungibleDto(
     value = randomBigDecimal(),
@@ -216,7 +215,6 @@ fun randomFlowNftOrderActivityBidDto(): FlowNftOrderActivityBidDto {
         updatedAt = nowMillis(),
     )
 }
-
 
 fun randomFlowCancelListActivityDto(): FlowNftOrderActivityCancelListDto {
     return FlowNftOrderActivityCancelListDto(

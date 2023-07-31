@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.protocol.union.core.FeatureFlagsProperties
-import com.rarible.protocol.union.core.model.ActivityEvent
 import com.rarible.protocol.union.core.event.OutgoingEventListener
+import com.rarible.protocol.union.core.model.ActivityEvent
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityDtoConverter
 import org.springframework.stereotype.Component
@@ -51,5 +51,4 @@ class EnrichmentActivityEventService(
             activityEventListeners.onEach { it.onEvent(activityEvent) }
         }
     }
-
 }

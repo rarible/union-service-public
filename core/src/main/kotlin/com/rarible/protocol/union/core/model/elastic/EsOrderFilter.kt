@@ -181,7 +181,6 @@ data class EsOrderSellOrdersByItem(
             if (status != null) {
                 add(termsQuery(EsOrder::status.name, status.map { it.name }))
             }
-
         }
 
         return genericBuild(continuation, size, EsOrderSort.MAKE_PRICE_ASC, *list.toTypedArray())
@@ -388,7 +387,6 @@ data class EsOrderSellOrders(
             if (origin != null) {
                 add(termsQuery(EsOrder::origins.name, origin))
             }
-
         }
 
         return genericBuild(continuation, size, sort, *list.toTypedArray())

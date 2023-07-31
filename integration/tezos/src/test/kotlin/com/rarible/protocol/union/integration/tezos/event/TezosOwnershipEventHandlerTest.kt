@@ -48,9 +48,11 @@ class TezosOwnershipEventHandlerTest {
         val expected = DipDupOwnershipConverter.convert(ownership)
 
         coVerify(exactly = 1) {
-            incomingEventHandler.onEvent(match {
-                it is UnionOwnershipUpdateEvent && it.ownership == expected
-            })
+            incomingEventHandler.onEvent(
+                match {
+                    it is UnionOwnershipUpdateEvent && it.ownership == expected
+                }
+            )
         }
     }
 
@@ -65,10 +67,11 @@ class TezosOwnershipEventHandlerTest {
         handler.handle(event)
 
         coVerify(exactly = 1) {
-            incomingEventHandler.onEvent(match {
-                it is UnionOwnershipDeleteEvent && it.ownershipId == ownershipId
-            })
+            incomingEventHandler.onEvent(
+                match {
+                    it is UnionOwnershipDeleteEvent && it.ownershipId == ownershipId
+                }
+            )
         }
     }
-
 }

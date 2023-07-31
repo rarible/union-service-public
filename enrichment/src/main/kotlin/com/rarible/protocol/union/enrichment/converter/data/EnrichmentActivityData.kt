@@ -12,5 +12,4 @@ data class EnrichmentActivityData(
         private val EMPTY = EnrichmentActivityData()
         fun empty() = EMPTY
     }
-
 }

@@ -86,7 +86,7 @@ class ReconciliationLastSaleJobTest {
         coVerify(exactly = 0) { itemEventService.onActivity(any(), any(), any()) }
     }
 
-    private fun mockGetActivities(continuation: String?, size: Int, result: Slice<UnionActivity>): Unit {
+    private fun mockGetActivities(continuation: String?, size: Int, result: Slice<UnionActivity>) {
         coEvery {
             activityService.getAllActivities(
                 types = listOf(ActivityTypeDto.SELL),

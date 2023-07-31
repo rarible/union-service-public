@@ -15,5 +15,4 @@ abstract class DownloadTaskPublisher(
     suspend fun publish(tasks: List<DownloadTask>) {
         producer.send(tasks.map { KafkaEventFactory.downloadTaskEvent(it) }).collect()
     }
-
 }

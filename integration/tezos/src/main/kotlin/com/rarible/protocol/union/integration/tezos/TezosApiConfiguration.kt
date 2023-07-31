@@ -49,7 +49,7 @@ class TezosApiConfiguration {
         return TezosCollectionRepository(mongoTemplate)
     }
 
-    //-------------------- Services --------------------//
+    // -------------------- Services --------------------//
 
     @Bean
     fun tezosItemService(

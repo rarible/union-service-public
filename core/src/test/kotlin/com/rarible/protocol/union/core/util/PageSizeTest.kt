@@ -18,5 +18,4 @@ class PageSizeTest {
         // Replaced by maximum
         assertThat(PageSize.OWNERSHIP.limit(10000)).isEqualTo(1000)
     }
-
 }

@@ -26,6 +26,5 @@ class OwnershipBestBidOrderProvider(
         override fun create(origin: String?): BestOrderProvider<ShortOwnership> {
             return OwnershipBestBidOrderProvider(ownershipId, enrichmentOrderService, origin)
         }
-
     }
 }

@@ -7,5 +7,4 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties("common.producer")
 class ProducerProperties(
     val brokerReplicaSet: String
-) {
-}
+)

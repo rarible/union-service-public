@@ -29,7 +29,6 @@ data class UnionItemUpdateEvent(
     override fun addTimeMark(name: String, date: Instant?): UnionItemUpdateEvent {
         return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
     }
-
 }
 
 data class UnionItemDeleteEvent(

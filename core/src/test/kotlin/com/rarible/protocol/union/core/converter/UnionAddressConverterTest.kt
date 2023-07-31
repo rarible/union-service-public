@@ -21,5 +21,4 @@ class UnionAddressConverterTest {
         assertThat(ethereumAddress.value).isEqualTo(address)
         assertThat(ethereumAddress.blockchainGroup).isEqualTo(BlockchainGroupDto.ETHEREUM)
     }
-
 }

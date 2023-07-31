@@ -166,5 +166,4 @@ class EthOrderControllerApiMock(
             )
         } returns Mono.just(OrdersPaginationDto(returnOrders.asList(), null))
     }
-
 }

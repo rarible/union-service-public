@@ -17,5 +17,4 @@ class RestrictionTemplateSubstitutorTest {
 
         assertThat(itemIdAndParams).isEqualTo("test.com/${itemId.value}?param1=abc&param2=")
     }
-
 }

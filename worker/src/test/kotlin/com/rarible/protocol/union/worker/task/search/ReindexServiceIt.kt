@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.worker.task.search
 
 import com.rarible.core.task.TaskRepository
-import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.elastic.EntityDefinition
 import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
@@ -15,7 +14,6 @@ import com.rarible.protocol.union.worker.IntegrationTest
 import kotlinx.coroutines.reactive.awaitFirstOrDefault
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -81,7 +79,7 @@ internal class ReindexServiceIt {
         reindexService.scheduleReindex("test_activity_index", esActivityRepository.entityDefinition)
 
         val tasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        Assertions.assertThat(tasks).hasSize(19) //all blockchains * all activities + index switch (minus immutablex)
+        assertThat(tasks).hasSize(19) // all blockchains * all activities + index switch (minus immutablex)
     }
 
     @Test
@@ -90,7 +88,7 @@ internal class ReindexServiceIt {
         reindexService.scheduleReindex("test_collection_index", esCollectionRepository.entityDefinition)
 
         val tasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        assertThat(tasks).hasSize(7) //all blockchains + index switch (minus immutablex)
+        assertThat(tasks).hasSize(7) // all blockchains + index switch (minus immutablex)
     }
 
     @Test
@@ -99,7 +97,7 @@ internal class ReindexServiceIt {
         reindexService.scheduleReindex("test_ownership_index", esOwnershipRepository.entityDefinition)
 
         val tasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        Assertions.assertThat(tasks).hasSize(13) //all enabled blockchains(5) * target.types(2) + index switch(1)
+        assertThat(tasks).hasSize(13) // all enabled blockchains(5) * target.types(2) + index switch(1)
     }
 
     @Test
@@ -108,11 +106,11 @@ internal class ReindexServiceIt {
         reindexService.scheduleReindex("test_collection_index", esCollectionRepository.entityDefinition)
         reindexService.scheduleReindex("test_ownership_index", esOwnershipRepository.entityDefinition)
         val runningTasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        //collection - all blockchains + index switch (minus immutablex) = 6
+        // collection - all blockchains + index switch (minus immutablex) = 6
         assertThat(runningTasks
             .filter { it.type == "COLLECTION_REINDEX" || it.type == "CHANGE_ES_COLLECTION_ALIAS_TASK" })
             .hasSize(7)
-        //ownerships - all enabled blockchains(5) * target.types(2) + index switch(1) = 11
+        // ownerships - all enabled blockchains(5) * target.types(2) + index switch(1) = 11
         assertThat(runningTasks
             .filter { it.type == "OWNERSHIP_REINDEX" || it.type == "CHANGE_ES_OWNERSHIP_ALIAS_TASK" })
             .hasSize(13)

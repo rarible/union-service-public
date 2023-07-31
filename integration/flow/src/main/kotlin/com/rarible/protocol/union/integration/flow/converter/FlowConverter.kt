@@ -135,5 +135,4 @@ object FlowConverter {
             marks = marks.marks.map { UnionSourceEventTimeMark(it.name, it.date) }
         )
     }
-
 }

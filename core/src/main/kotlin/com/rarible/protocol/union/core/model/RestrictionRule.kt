@@ -12,6 +12,4 @@ data class RestrictionApiRule(
         GET,
         POST
     }
-
 }
-

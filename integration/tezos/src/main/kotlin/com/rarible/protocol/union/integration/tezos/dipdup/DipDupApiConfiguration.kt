@@ -103,7 +103,8 @@ class DipDupApiConfiguration(
 
     @Bean
     fun tzktCollectionClient(
-        metaCollectionService: MetaCollectionService, settings: TzktSettings
+        metaCollectionService: MetaCollectionService,
+        settings: TzktSettings
     ) = CollectionClient(tzktWebClient, metaCollectionService, settings)
 
     @Bean
@@ -206,5 +207,4 @@ class DipDupApiConfiguration(
         webClientCustomizer.customize(builder)
         return builder.build()
     }
-
 }

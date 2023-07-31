@@ -41,5 +41,4 @@ class TokenRangeTest {
         val batch = range.batch(5.toBigInteger(), 2)
         assertThat(batch).isEqualTo(listOf(6.toBigInteger(), 7.toBigInteger()))
     }
-
 }

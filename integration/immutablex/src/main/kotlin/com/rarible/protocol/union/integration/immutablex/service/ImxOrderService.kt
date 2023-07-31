@@ -216,8 +216,13 @@ class ImxOrderService(
 
     // IMX doesn't support floor orders
     override suspend fun getOrderFloorSellsByCollection(
-        platform: PlatformDto?, collectionId: String, origin: String?, status: List<OrderStatusDto>?,
-        currencyAddress: String, continuation: String?, size: Int
+        platform: PlatformDto?,
+        collectionId: String,
+        origin: String?,
+        status: List<OrderStatusDto>?,
+        currencyAddress: String,
+        continuation: String?,
+        size: Int
     ): Slice<UnionOrder> {
         return Slice.empty()
     }

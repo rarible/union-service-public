@@ -22,4 +22,3 @@ class DomainResolveService(
         return router.getService(blockchain).resolve(domain)
     }
 }
-

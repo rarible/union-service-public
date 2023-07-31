@@ -39,13 +39,12 @@ object TokenIdDecoder {
     fun decodeItemId(itemId: String): String {
         val (token, rawTokenId) = IdParser.split(itemId, 2)
         val tokenId = decode(rawTokenId)
-        return "${token}:${tokenId}"
+        return "$token:$tokenId"
     }
 
     fun encodeItemId(itemId: String): String {
         val (token, rawTokenId) = IdParser.split(itemId, 2)
         val tokenId = encode(rawTokenId)
-        return "${token}:${tokenId}"
+        return "$token:$tokenId"
     }
-
 }

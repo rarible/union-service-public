@@ -64,7 +64,7 @@ open class TezosActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ) = coroutineScope  {
+    ) = coroutineScope {
         val orderActivitiesRequest = async {
             dipdupOrderActivityService.getAll(types, continuation, size, sort)
         }
@@ -138,7 +138,7 @@ open class TezosActivityService(
         continuation: String?,
         size: Int,
         sort: ActivitySortDto?
-    ) = coroutineScope  {
+    ) = coroutineScope {
         val orderActivitiesRequest = async {
             dipdupOrderActivityService.getByItem(types, contract, tokenId, continuation, size, sort)
         }
@@ -244,5 +244,4 @@ open class TezosActivityService(
 
     private val UUID_REGEX_PATTERN: Pattern =
         Pattern.compile("^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$")
-
 }

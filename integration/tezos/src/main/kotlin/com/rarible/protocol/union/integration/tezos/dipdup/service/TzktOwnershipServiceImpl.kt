@@ -9,7 +9,7 @@ import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktOwnersh
 import com.rarible.tzkt.client.OwnershipClient
 import com.rarible.tzkt.model.TzktNotFound
 
-class TzktOwnershipServiceImpl(val ownershipClient: OwnershipClient): TzktOwnershipService {
+class TzktOwnershipServiceImpl(val ownershipClient: OwnershipClient) : TzktOwnershipService {
 
     private val blockchain = BlockchainDto.TEZOS
 
@@ -41,5 +41,4 @@ class TzktOwnershipServiceImpl(val ownershipClient: OwnershipClient): TzktOwners
             throw UnionNotFoundException(message = e.message ?: "")
         }
     }
-
 }

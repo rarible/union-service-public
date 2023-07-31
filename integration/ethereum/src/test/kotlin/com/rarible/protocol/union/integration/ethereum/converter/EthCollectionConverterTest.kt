@@ -20,7 +20,6 @@ class EthCollectionConverterTest {
             .copy(type = NftCollectionDto.Type.ERC721)
             .copy(status = NftCollectionDto.Status.PENDING)
 
-
         val converted = EthCollectionConverter.convert(dto, BlockchainDto.ETHEREUM)
 
         assertThat(converted.id.value).isEqualTo(dto.id.prefixed())
@@ -107,5 +106,4 @@ class EthCollectionConverterTest {
         assertThat(properties.size).isEqualTo(expected.size)
     }
     */
-
 }

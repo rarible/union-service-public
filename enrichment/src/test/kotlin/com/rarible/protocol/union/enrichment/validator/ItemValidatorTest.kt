@@ -57,5 +57,4 @@ class ItemValidatorTest {
         assertThat(EntityValidator.isValid(bidInvalid)).isFalse()
         assertThat(EntityValidator.isValid(sellInvalid)).isFalse()
     }
-
 }

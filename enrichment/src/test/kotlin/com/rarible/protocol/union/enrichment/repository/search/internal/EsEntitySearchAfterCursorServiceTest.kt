@@ -33,7 +33,7 @@ class EsEntitySearchAfterCursorServiceTest {
         val actual = service.tryFixLegacyCursor("1657495888423_123456")
 
         // then
-       assertThat(actual).isEqualTo("1657495888423_123456")
+        assertThat(actual).isEqualTo("1657495888423_123456")
     }
 
     @Test

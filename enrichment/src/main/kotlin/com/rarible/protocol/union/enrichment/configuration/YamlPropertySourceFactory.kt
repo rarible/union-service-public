@@ -21,5 +21,4 @@ class YamlPropertySourceFactory : PropertySourceFactory {
             return MapPropertySource(name, emptyMap())
         }
     }
-
 }

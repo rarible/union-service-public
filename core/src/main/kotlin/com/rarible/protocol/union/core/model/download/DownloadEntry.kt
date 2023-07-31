@@ -69,9 +69,9 @@ data class DownloadEntry<T>(
 }
 
 enum class DownloadStatus {
-    SCHEDULED,  // Never loaded, will be loaded soon
-    SUCCESS,    // Successfully downloaded
-    RETRY,      // Waits for retry
+    SCHEDULED, // Never loaded, will be loaded soon
+    SUCCESS, // Successfully downloaded
+    RETRY, // Waits for retry
     RETRY_PARTIAL, // Waits for partial retry
-    FAILED      // Completely failed
+    FAILED // Completely failed
 }

@@ -30,5 +30,4 @@ abstract class AbstractContentCache(
         storage.save(entry)
         return entry
     }
-
 }

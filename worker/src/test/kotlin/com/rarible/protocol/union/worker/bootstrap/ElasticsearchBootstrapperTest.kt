@@ -133,7 +133,6 @@ internal class ElasticsearchBootstrapperTest {
 
         coVerify(exactly = 0) {
             reindexSchedulingService.checkReindexInProgress(any())
-
         }
     }
 
@@ -255,6 +254,5 @@ internal class ElasticsearchBootstrapperTest {
 
         assertThat(newIndexInfo.aliases.values.first().size).isEqualTo(1)
         assertThat(newIndexInfo.aliases.values.first().first().alias()).isEqualTo(aliasWriteName)
-
     }
 }

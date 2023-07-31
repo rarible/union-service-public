@@ -39,5 +39,6 @@ abstract class EthAuctionEventHandler(
 }
 
 open class EthereumAuctionEventHandler(
-    handler: IncomingEventHandler<UnionAuctionEvent>, ethActionConverter: EthAuctionConverter
+    handler: IncomingEventHandler<UnionAuctionEvent>,
+    ethActionConverter: EthAuctionConverter
 ) : EthAuctionEventHandler(BlockchainDto.ETHEREUM, handler, ethActionConverter)

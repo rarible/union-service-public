@@ -57,7 +57,6 @@ data class CustomCollectionMapping(
     fun getItemIds(): List<ShortItemId> = items.map { ShortItemId.of(it) }
     fun getCollectionIds(): List<EnrichmentCollectionId> = collections.map { EnrichmentCollectionId.of(it) }
     fun getRanges(): List<TokenRange> = ranges.map { TokenRange.of(it) }
-
 }
 
 data class CustomCollectionMetaMapping(
@@ -67,7 +66,6 @@ data class CustomCollectionMetaMapping(
 
     fun getCollectionIds(): List<EnrichmentCollectionId> = collections.map { EnrichmentCollectionId.of(it) }
     fun getAttributes(): Map<String, Set<String>> = attributes.associateBy({ it.name }, { it.values })
-
 }
 
 data class CustomCollectionMetaAttributeMapping(

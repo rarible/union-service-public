@@ -296,7 +296,6 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
         assertThat(result.activities).containsExactlyInAnyOrder(toFind1, toFind2)
     }
 
-
     @Test
     fun `should do by bid currencies query`() = runBlocking<Unit> {
         // given
@@ -312,7 +311,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
             userFrom = "loupa",
             userTo = null,
             collection = "boredApes",
-            currency =  Address.ONE().toString(),
+            currency = Address.ONE().toString(),
             date = Instant.ofEpochMilli(600),
         )
         val toFind2 = randomEsActivity().copy(
@@ -321,7 +320,7 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
             userFrom = "0x00",
             userTo = null,
             collection = "cryptoPunks",
-            currency =  Address.TWO().toString(),
+            currency = Address.TWO().toString(),
             date = Instant.ofEpochMilli(900),
         )
         val toFind3 = randomEsActivity().copy(

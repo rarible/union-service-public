@@ -131,5 +131,4 @@ class UnionInternalOrderEventHandler(
         return enrichmentOrderService.getById(orderId)
             ?: throw UnionNotFoundException("Order [{}] not found in blockchain")
     }
-
 }

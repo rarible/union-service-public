@@ -13,7 +13,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.reactive.function.client.WebClientException
 import reactor.kotlin.core.publisher.toMono
 
 @FlowPreview

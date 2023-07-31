@@ -181,7 +181,6 @@ class ImxOrderServiceMt : ImxManualTest() {
             4
         ).entities
 
-
         println(bigPage)
         assertThat(bigPage).hasSize(4)
         assertThat(bigPage).isEqualTo(page1.entities + page2.entities)
@@ -230,7 +229,6 @@ class ImxOrderServiceMt : ImxManualTest() {
             null,
             4
         ).entities
-
 
         println(bigPage)
         assertThat(bigPage).hasSize(4)

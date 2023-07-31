@@ -44,7 +44,7 @@ class SolanaConsumerConfiguration(
     private val workers = consumer.workers
     private val batchSize = consumer.batchSize
 
-    //-------------------- Handlers -------------------//
+    // -------------------- Handlers -------------------//
 
     @Bean
     fun solanaItemEventHandler(handler: IncomingEventHandler<UnionItemEvent>): SolanaItemEventHandler {
@@ -82,7 +82,7 @@ class SolanaConsumerConfiguration(
         return SolanaActivityEventHandler(handler, converter)
     }
 
-    //-------------------- Workers --------------------//
+    // -------------------- Workers --------------------//
 
     @Bean
     fun solanaNftIndexerConsumerFactory(): SolanaEventsConsumerFactory {

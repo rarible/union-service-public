@@ -9,7 +9,7 @@ open class MetaMetrics(
     private val type: String
 ) : UnionMetrics(meterRegistry) {
 
-    //-------------------- Meta fetch -----------------------//
+    // -------------------- Meta fetch -----------------------//
     // Set of metrics to gather statistics for meta fetching from blockchains
 
     fun onMetaFetched(blockchain: BlockchainDto, source: MetaSource = MetaSource.ORIGINAL) {
@@ -79,7 +79,7 @@ open class MetaMetrics(
         )
     }
 
-    //--------------------- Meta cache ----------------------//
+    // --------------------- Meta cache ----------------------//
     // Cached and contains meta
     fun onMetaCacheHit(blockchain: BlockchainDto) {
         increment(META_CACHE, type(type), tag(blockchain), status("hit"))

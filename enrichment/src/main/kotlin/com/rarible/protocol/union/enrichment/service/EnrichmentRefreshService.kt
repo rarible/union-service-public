@@ -407,7 +407,6 @@ class EnrichmentRefreshService(
 
         logger.info("Found Sell currencies for Item [{}] : {}", itemId.fullId(), result)
         return result.map { it.currencyId()!! }
-
     }
 
     private suspend fun getBidCurrencies(collectionId: CollectionIdDto): List<String> {
@@ -545,5 +544,4 @@ class EnrichmentRefreshService(
         val all: Map<OrderIdDto, UnionOrder>,
         val orders: OriginOrders
     )
-
 }

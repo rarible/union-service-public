@@ -117,7 +117,7 @@ class ImxActivityConverterTest {
     }
 
     @Test
-    fun `convert mint`()= runBlocking<Unit> {
+    fun `convert mint`() = runBlocking<Unit> {
         val imxMint = randomImxMint()
 
         val mint = imxActivityConverter.convert(imxMint, emptyMap(), blockchain) as UnionMintActivity

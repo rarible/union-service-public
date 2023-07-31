@@ -26,7 +26,6 @@ import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -108,11 +107,13 @@ class CustomCollectionOrderUpdaterTest {
         expected: List<OrderIdDto>
     ) {
         coVerify {
-            producer.send(match<Collection<KafkaMessage<OrderEventDto>>> { events ->
-                val received = events.map { it.value.orderId }
-                assertThat(received).isEqualTo(expected)
-                true
-            })
+            producer.send(
+                match<Collection<KafkaMessage<OrderEventDto>>> { events ->
+                    val received = events.map { it.value.orderId }
+                    assertThat(received).isEqualTo(expected)
+                    true
+                }
+            )
         }
     }
 

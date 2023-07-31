@@ -21,10 +21,10 @@ class CustomCollectionItemFetcherByListTest {
         val ethCollection = randomEthAddress()
         val polyCollection = randomEthAddress()
 
-        val item1 = randomUnionItem(ItemIdDto(BlockchainDto.FLOW, "f:1")) //3
-        val item2 = randomUnionItem(ItemIdDto(BlockchainDto.POLYGON, "$polyCollection:2")) //4
-        val item3 = randomUnionItem(ItemIdDto(BlockchainDto.ETHEREUM, "$ethCollection:2")) //2
-        val item4 = randomUnionItem(ItemIdDto(BlockchainDto.ETHEREUM, "$ethCollection:1")) //1
+        val item1 = randomUnionItem(ItemIdDto(BlockchainDto.FLOW, "f:1")) // 3
+        val item2 = randomUnionItem(ItemIdDto(BlockchainDto.POLYGON, "$polyCollection:2")) // 4
+        val item3 = randomUnionItem(ItemIdDto(BlockchainDto.ETHEREUM, "$ethCollection:2")) // 2
+        val item4 = randomUnionItem(ItemIdDto(BlockchainDto.ETHEREUM, "$ethCollection:1")) // 1
 
         val items = listOf(item1.id, item2.id, item3.id, item4.id)
 
@@ -48,5 +48,4 @@ class CustomCollectionItemFetcherByListTest {
         assertThat(batch3.items).isEmpty()
         assertThat(batch3.state).isNull()
     }
-
 }

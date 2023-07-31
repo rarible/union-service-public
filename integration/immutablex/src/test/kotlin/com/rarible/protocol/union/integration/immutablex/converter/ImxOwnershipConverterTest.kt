@@ -66,5 +66,4 @@ class ImxOwnershipConverterTest {
         assertThat(ownership.lazyValue).isEqualTo(BigInteger.ZERO)
         assertThat(ownership.collection!!.value).isEqualTo(imxItem.tokenAddress)
     }
-
 }

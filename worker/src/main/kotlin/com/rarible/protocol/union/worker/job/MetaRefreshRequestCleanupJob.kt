@@ -27,4 +27,3 @@ class MetaRefreshRequestCleanupJob(
         delay(pollingPeriod)
     }
 }
-

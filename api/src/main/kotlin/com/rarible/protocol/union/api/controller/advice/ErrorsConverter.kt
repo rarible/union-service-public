@@ -29,7 +29,7 @@ object ErrorsConverter {
             // FLOW
             // TEZOS
             is DipDupNotFound -> UnionApiErrorEntityNotFoundDto(message = data.message ?: "")
-            is TzktBadRequest -> UnionApiErrorBadRequestDto(UnionApiErrorBadRequestDto.Code.BAD_REQUEST,  data.message ?: "")
+            is TzktBadRequest -> UnionApiErrorBadRequestDto(UnionApiErrorBadRequestDto.Code.BAD_REQUEST, data.message ?: "")
             else -> null
         }
     }
@@ -40,5 +40,4 @@ object ErrorsConverter {
             EthereumApiErrorBadRequestDto.Code.BAD_REQUEST -> UnionApiErrorBadRequestDto.Code.BAD_REQUEST
         }
     }
-
 }

@@ -18,7 +18,6 @@ class EnrichmentAuctionEventService(
     suspend fun onAuctionUpdated(auction: AuctionDto) = coroutineScope {
         ignoreApi404 { enrichmentItemEventService.onAuctionUpdated(auction) }
         enrichmentOwnershipEventService.onAuctionUpdated(auction)
-
     }
 
     suspend fun onAuctionDeleted(auction: AuctionDto) = coroutineScope {

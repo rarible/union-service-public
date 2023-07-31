@@ -62,5 +62,4 @@ class ImxCollectionEventHandlerTest {
 
         coVerify(exactly = 1) { collectionCreatorRepository.saveAll(emptyList()) }
     }
-
 }

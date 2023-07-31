@@ -55,7 +55,7 @@ class TezosCollectionControllerFt : AbstractIntegrationTest() {
     private lateinit var router: BlockchainRouter<CollectionService>
 
     private fun baseUrl(): String {
-        return "http://localhost:${port}/v0.1"
+        return "http://localhost:$port/v0.1"
     }
 
     @Test
@@ -163,5 +163,4 @@ class TezosCollectionControllerFt : AbstractIntegrationTest() {
         val collection = collectionControllerClient.getCollectionById(collectionId.fullId()).awaitSingle()
         assertThat(collection.type).isEqualTo(CollectionDto.Type.TEZOS_NFT)
     }
-
 }

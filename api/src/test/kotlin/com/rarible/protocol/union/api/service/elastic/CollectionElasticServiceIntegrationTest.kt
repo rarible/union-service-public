@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
 
-
 @IntegrationTest
 class CollectionElasticServiceIntegrationTest : AbstractIntegrationTest() {
 

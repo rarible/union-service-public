@@ -88,7 +88,7 @@ class CollectionDownloadExecutorIt : AbstractIntegrationTest() {
             .isEqualTo(trimmingProperties.nameLength + trimmingProperties.suffix.length)
 
         assertThat(saved.data?.description?.length)
-            .isEqualTo(trimmingProperties.descriptionLength  + trimmingProperties.suffix.length)
+            .isEqualTo(trimmingProperties.descriptionLength + trimmingProperties.suffix.length)
     }
 
     private suspend fun createCollection(collectionId: CollectionIdDto, metaEntry: DownloadEntry<UnionMeta>?): EnrichmentCollection =

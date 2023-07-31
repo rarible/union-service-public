@@ -32,5 +32,4 @@ class TezosActivityConverterTest {
         assertThat(converted.value).isEqualTo(actType.value.toBigInteger())
         assertThat(converted.transactionHash).isEqualTo(actType.transactionId)
     }
-
 }

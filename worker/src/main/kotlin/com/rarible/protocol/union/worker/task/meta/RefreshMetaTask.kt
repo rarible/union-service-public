@@ -3,7 +3,6 @@ package com.rarible.protocol.union.worker.task.meta
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.logging.withTraceId
 import com.rarible.core.task.TaskHandler
-import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.parser.IdParser
@@ -13,8 +12,6 @@ import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.concurrent.atomic.AtomicReference

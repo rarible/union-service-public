@@ -7,5 +7,4 @@ interface EmbeddedContentStorage {
     suspend fun save(content: UnionEmbeddedContent)
 
     suspend fun delete(id: String)
-
 }

@@ -48,5 +48,4 @@ class RestrictionCheckResultTest {
         assertThat(firstToSecond).isEqualTo(expected)
         assertThat(secondToFirst).isEqualTo(expected)
     }
-
 }

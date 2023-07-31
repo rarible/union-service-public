@@ -17,7 +17,7 @@ class ContentMetaMetrics(
     meterRegistry: MeterRegistry
 ) : UnionMetrics(meterRegistry) {
 
-    //--------------- Content meta resolution ---------------//
+    // --------------- Content meta resolution ---------------//
     // Content resolution statistics (for embedded and remote meta content)
 
     fun onContentFetched(blockchain: BlockchainDto, source: String, properties: UnionMetaContentProperties) {
@@ -56,7 +56,7 @@ class ContentMetaMetrics(
         )
     }
 
-    //------------------- Content cache ---------------------//
+    // ------------------- Content cache ---------------------//
     // Content cache usage statistics
 
     fun onContentCacheHit(blockchain: BlockchainDto, cacheType: String) {
@@ -74,7 +74,7 @@ class ContentMetaMetrics(
         increment(CONTENT_META_CACHE, tag(blockchain), status("skip"), tag("cache_type", "none"))
     }
 
-    //---------------- Content cache updates ----------------//
+    // ---------------- Content cache updates ----------------//
     // Metrics to control cache fulfillment
 
     fun onContentCacheUpdated(blockchain: BlockchainDto, cacheType: String) {
@@ -103,5 +103,4 @@ class ContentMetaMetrics(
         const val CONTENT_META_CACHE = "content_meta_cache"
         const val CONTENT_META_CACHE_UPDATE = "content_meta_cache_update"
     }
-
 }

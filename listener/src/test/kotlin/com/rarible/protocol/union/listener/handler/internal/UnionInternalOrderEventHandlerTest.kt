@@ -170,5 +170,4 @@ class UnionInternalOrderEventHandlerTest {
         coVerify(exactly = 1) { incomingEventHandler.onEvents(expected) }
         coVerify(exactly = 1) { orderEventService.updatePoolOrder(order, marks) }
     }
-
 }

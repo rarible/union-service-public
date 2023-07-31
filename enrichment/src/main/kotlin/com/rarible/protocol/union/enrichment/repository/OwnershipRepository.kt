@@ -66,7 +66,9 @@ class OwnershipRepository(
     }
 
     fun findByPlatformWithSell(
-        platform: PlatformDto, fromShortOwnershipId: ShortOwnershipId?, limit: Int?
+        platform: PlatformDto,
+        fromShortOwnershipId: ShortOwnershipId?,
+        limit: Int?
     ): Flow<ShortOwnership> {
         val criteria = Criteria().andOperator(
             listOfNotNull(
@@ -128,12 +130,14 @@ class OwnershipRepository(
         size: Int = 20
     ): List<ShortOwnershipId> =
         template.find(
-            Query(where(ShortOwnership::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)
-                .apply {
-                    if (continuation != null) {
-                        and(ShortOwnership::id).gt(continuation)
+            Query(
+                where(ShortOwnership::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)
+                    .apply {
+                        if (continuation != null) {
+                            and(ShortOwnership::id).gt(continuation)
+                        }
                     }
-                })
+            )
                 .with(Sort.by(ShortOwnership::id.name))
                 .limit(size),
             IdObject::class.java,

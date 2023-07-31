@@ -9,7 +9,7 @@ data class EsCollectionCursor(
     val salt: Long,
 ) {
     override fun toString(): String {
-        return "${date.toEpochMilli()}_${salt}"
+        return "${date.toEpochMilli()}_$salt"
     }
 
     companion object {

@@ -19,5 +19,4 @@ class ContractAddressConverterTest {
         }
         ContractAddressConverter.validate(blockchain, "abcdefghiajklmonpqrstuvwxyz1234567890!@#$%^&*()_+|\\/.,;")
     }
-
 }

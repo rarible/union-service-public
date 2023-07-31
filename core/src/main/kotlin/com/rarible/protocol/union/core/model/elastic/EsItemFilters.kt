@@ -32,5 +32,4 @@ data class EsItemGenericFilter(
     override val cursor: String? = null,
 ) : EsItemFilter()
 
-
 data class TraitFilter(val key: String, val value: String)

@@ -34,7 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.ZoneOffset
-import java.util.*
+import java.util.UUID
 
 @FlowPreview
 @IntegrationTest

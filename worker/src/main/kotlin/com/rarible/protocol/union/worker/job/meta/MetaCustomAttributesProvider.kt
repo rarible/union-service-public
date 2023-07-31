@@ -4,5 +4,4 @@ interface MetaCustomAttributesProvider {
 
     val name: String
     suspend fun getCustomAttributes(): List<MetaCustomAttributes>
-
 }

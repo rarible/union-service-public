@@ -12,7 +12,6 @@ import com.rarible.protocol.union.enrichment.meta.simplehash.resolver.SimpleHash
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
-
 @Component
 class SimpleHashConverterService {
 
@@ -57,5 +56,4 @@ class SimpleHashConverterService {
         SimpleHashArtBlocksResolver(mapper),
         SimpleHashResolver(mapper)
     )
-
 }

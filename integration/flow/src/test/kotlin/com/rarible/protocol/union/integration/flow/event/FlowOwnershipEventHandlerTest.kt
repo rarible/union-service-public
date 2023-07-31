@@ -43,9 +43,11 @@ class FlowOwnershipEventHandlerTest {
 
         val expected = FlowOwnershipConverter.convert(ownership, BlockchainDto.FLOW)
         coVerify(exactly = 1) {
-            incomingEventHandler.onEvent(match {
-                (it as UnionOwnershipUpdateEvent).ownership == expected
-            })
+            incomingEventHandler.onEvent(
+                match {
+                    (it as UnionOwnershipUpdateEvent).ownership == expected
+                }
+            )
         }
     }
 
@@ -64,10 +66,11 @@ class FlowOwnershipEventHandlerTest {
         handler.handle(dto)
 
         coVerify(exactly = 1) {
-            incomingEventHandler.onEvent(match {
-                it is UnionOwnershipDeleteEvent && it.ownershipId == ownershipId
-            })
+            incomingEventHandler.onEvent(
+                match {
+                    it is UnionOwnershipDeleteEvent && it.ownershipId == ownershipId
+                }
+            )
         }
     }
-
 }

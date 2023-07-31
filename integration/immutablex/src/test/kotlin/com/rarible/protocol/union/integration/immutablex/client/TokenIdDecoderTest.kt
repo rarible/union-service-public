@@ -46,7 +46,7 @@ class TokenIdDecoderTest {
     fun `decode itemId`() {
         val tokenId = "abc"
         val encodedTokenId = TokenIdDecoder.encode(tokenId)
-        val itemId = "${Address.ZERO()}:${encodedTokenId}"
+        val itemId = "${Address.ZERO()}:$encodedTokenId"
 
         val decodedItemId = TokenIdDecoder.decodeItemId(itemId)
         assertThat(decodedItemId).isEqualTo("${Address.ZERO()}:abc")

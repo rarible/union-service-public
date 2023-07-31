@@ -108,5 +108,3 @@ class ImxEventsApi(
         private const val PAGE_SIZE = 200 // As per IMX support, that's maximum page size
     }
 }
-
-

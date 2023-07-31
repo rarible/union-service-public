@@ -46,4 +46,3 @@ class TrimItemMetaJobTest {
         coVerify(exactly = 1) { itemRepository.save(any()) }
     }
 }
-

@@ -169,8 +169,10 @@ class EnrichmentItemService(
 
         val enrichedItems = coroutineScope {
 
-            val shortItems: Map<ItemIdDto, ShortItem> = findAll(unionItems
-                .map { ShortItemId(it.id) })
+            val shortItems: Map<ItemIdDto, ShortItem> = findAll(
+                unionItems
+                    .map { ShortItemId(it.id) }
+            )
                 .associateBy { it.id.toDto() }
 
             // Looking for full orders for existing items in order-indexer

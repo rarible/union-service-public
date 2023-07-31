@@ -69,5 +69,4 @@ class OrderPoolEvaluatorTest {
         // Non-existing order is removed, no changes expected
         assertThat(updated).isEqualTo(item)
     }
-
 }

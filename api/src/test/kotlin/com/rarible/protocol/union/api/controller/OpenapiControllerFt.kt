@@ -33,5 +33,4 @@ internal class OpenapiControllerFt : AbstractIntegrationTest() {
 
         assertTrue(redocly.contains("<html>"))
     }
-
 }

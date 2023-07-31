@@ -135,7 +135,7 @@ class UnionListenerConfiguration(
         ItemMetaPipeline.values().map { it.pipeline }.forEach { pipeline ->
             val topic = UnionInternalTopicProvider.getItemMetaDownloadTaskExecutorTopic(env, pipeline)
             val producer = RaribleKafkaProducer(
-                clientId = "${env}.protocol-union-service.meta.scheduler",
+                clientId = "$env.protocol-union-service.meta.scheduler",
                 valueSerializerClass = UnionKafkaJsonSerializer::class.java,
                 valueClass = DownloadTask::class.java,
                 defaultTopic = topic,
@@ -173,7 +173,7 @@ class UnionListenerConfiguration(
         CollectionMetaPipeline.values().map { it.pipeline }.forEach { pipeline ->
             val topic = UnionInternalTopicProvider.getCollectionMetaDownloadTaskExecutorTopic(env, pipeline)
             val producer = RaribleKafkaProducer(
-                clientId = "${env}.protocol-union-service.meta.scheduler",
+                clientId = "$env.protocol-union-service.meta.scheduler",
                 valueSerializerClass = UnionKafkaJsonSerializer::class.java,
                 valueClass = DownloadTask::class.java,
                 defaultTopic = topic,
@@ -187,7 +187,7 @@ class UnionListenerConfiguration(
     // --------------- Meta 3.0 beans END
 
     private fun consumerGroup(suffix: String): String {
-        return "protocol.union.${suffix}"
+        return "protocol.union.$suffix"
     }
 
     @Bean

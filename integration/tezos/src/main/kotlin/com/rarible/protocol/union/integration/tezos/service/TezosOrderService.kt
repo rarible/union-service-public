@@ -170,7 +170,7 @@ open class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
-        //Not implemented
+        // Not implemented
         return Slice.empty()
     }
 
@@ -185,7 +185,7 @@ open class TezosOrderService(
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
-        //Not implemented
+        // Not implemented
         return Slice.empty()
     }
 

@@ -41,5 +41,4 @@ class OwnershipSourceComparatorTest {
         assertThat(OwnershipSourceComparator.getPreferred(OwnershipSourceDto.TRANSFER, OwnershipSourceDto.PURCHASE))
             .isEqualTo(OwnershipSourceDto.PURCHASE)
     }
-
 }

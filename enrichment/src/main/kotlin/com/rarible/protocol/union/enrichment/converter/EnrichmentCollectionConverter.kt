@@ -32,5 +32,4 @@ object EnrichmentCollectionConverter {
             lastUpdatedAt = nowMillis(),
         )
     }
-
 }

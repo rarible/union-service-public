@@ -31,5 +31,4 @@ data class EnrichmentCollectionId(
             return EnrichmentCollectionId(IdParser.parseCollectionId(collectionId))
         }
     }
-
 }

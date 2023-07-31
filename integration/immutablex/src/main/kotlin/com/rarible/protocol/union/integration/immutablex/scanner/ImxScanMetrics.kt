@@ -50,5 +50,4 @@ class ImxScanMetrics(
         const val IMX_SCAN_ERROR = "immutablex_scan_error"
         const val IMX_EVENT_ERROR = "immutablex_event_error"
     }
-
 }

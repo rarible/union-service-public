@@ -28,5 +28,4 @@ open class SolanaSignatureService(
             )
         ).awaitFirst()
     }
-
 }

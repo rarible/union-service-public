@@ -127,7 +127,6 @@ class SubscriptionHandler(
                                     logger.error("Unable to process OrderEvent: $it")
                                     false
                                 }
-
                             }
                         }
                         .map { OrderSubscriptionEventDto(it) },
@@ -204,7 +203,7 @@ class SubscriptionHandler(
 
     private fun extractCollectionId(assetType: AssetTypeDto): CollectionIdDto? {
         return when (assetType) {
-            //TODO we assume that Contract = Collection for EVM based NFTs
+            // TODO we assume that Contract = Collection for EVM based NFTs
             is EthCollectionAssetTypeDto -> CollectionIdDto(
                 assetType.contract.blockchain,
                 assetType.contract.value
@@ -245,7 +244,7 @@ class SubscriptionHandler(
                 assetType.contract.value
             )
 
-            //TODO we can't watch for "byCollection" subscriptions on Solana (NOW)
+            // TODO we can't watch for "byCollection" subscriptions on Solana (NOW)
             is SolanaNftAssetTypeDto -> null
 
             is FlowAssetTypeNftDto -> CollectionIdDto(

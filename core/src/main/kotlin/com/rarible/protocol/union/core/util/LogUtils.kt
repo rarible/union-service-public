@@ -91,7 +91,8 @@ object LogUtils {
                 "blockchain" to item.id.blockchain.name,
                 "itemId" to item.id.value,
                 "collection" to (item.collection?.value ?: "")
-            ), block
+            ),
+            block
         )
     }
 

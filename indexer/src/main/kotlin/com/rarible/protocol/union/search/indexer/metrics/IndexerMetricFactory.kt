@@ -20,7 +20,7 @@ class IndexerMetricFactory(
             name = "${properties.metrics.rootPath}.event.delay",
             tag(ENTITY_TAG, entity.entityName),
             tag(BLOCKCHAIN_TAG, blockchain.name.lowercase())
-        ){}.bind(meterRegistry)
+        ) {}.bind(meterRegistry)
     }
 
     fun createEventHandlerCountMetric(entity: EsEntity, blockchain: BlockchainDto): Counter {

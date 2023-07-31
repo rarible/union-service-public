@@ -36,8 +36,8 @@ object ImxOrderConverter {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    //private val originFees = setOf("ecosystem", "protocol")
-    //private val royalties = setOf("royalty")
+    // private val originFees = setOf("ecosystem", "protocol")
+    // private val royalties = setOf("royalty")
 
     private val originFees = setOf("ecosystem", "protocol", "royalty")
     private val royalties = emptySet<String>() // TODO in IMX royalties works as originFees

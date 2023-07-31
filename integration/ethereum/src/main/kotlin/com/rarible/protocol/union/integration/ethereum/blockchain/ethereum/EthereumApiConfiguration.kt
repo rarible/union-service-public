@@ -51,7 +51,7 @@ class EthereumApiConfiguration {
         return BlockchainDto.ETHEREUM
     }
 
-    //-------------------- API --------------------//
+    // -------------------- API --------------------//
 
     @Bean
     @Qualifier("ethereum.item.api")
@@ -108,7 +108,7 @@ class EthereumApiConfiguration {
     fun ethereumActivityAuctionApi(factory: OrderIndexerApiClientFactory): AuctionActivityControllerApi =
         factory.createAuctionActivityApiClient(ethereum)
 
-    //-------------------- Services --------------------//
+    // -------------------- Services --------------------//
 
     @Bean
     fun ethereumItemService(

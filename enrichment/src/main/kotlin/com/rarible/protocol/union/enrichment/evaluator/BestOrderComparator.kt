@@ -7,6 +7,4 @@ interface BestOrderComparator {
     val name: String
 
     fun compare(current: ShortOrder, updated: ShortOrder): ShortOrder
-
-
 }

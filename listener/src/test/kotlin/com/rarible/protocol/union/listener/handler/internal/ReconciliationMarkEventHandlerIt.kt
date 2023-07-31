@@ -61,5 +61,4 @@ class ReconciliationMarkEventHandlerIt : AbstractIntegrationTest() {
             100
         )
     }
-
 }

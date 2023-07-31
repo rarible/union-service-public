@@ -63,7 +63,6 @@ class CustomCollectionActivityUpdater(
                     .map { KafkaEventFactory.activityEvent(it) }
             }
 
-
             eventProducer.send(messages).collect()
 
             logger.info("Updated {} activities for custom collection migration of Item {}", messages.size, item.id)
@@ -71,5 +70,4 @@ class CustomCollectionActivityUpdater(
             continuation = page.continuation
         } while (continuation != null)
     }
-
 }

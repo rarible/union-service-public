@@ -154,7 +154,7 @@ class EthActivityConverter(
                     date = source.date,
                     price = source.price,
                     priceUsd = source.priceUsd,
-                    //priceUsd = currencyService.toUsd(blockchain, payment.type.ext.contract, source.price),
+                    // priceUsd = currencyService.toUsd(blockchain, payment.type.ext.contract, source.price),
                     source = convert(source.source),
                     hash = EthConverter.convert(source.hash),
                     maker = EthConverter.convert(source.maker, blockchain),
@@ -174,7 +174,7 @@ class EthActivityConverter(
                     date = source.date,
                     price = source.price,
                     priceUsd = source.priceUsd,
-                    //priceUsd = currencyService.toUsd(blockchain, payment.type.ext.contract, source.price),
+                    // priceUsd = currencyService.toUsd(blockchain, payment.type.ext.contract, source.price),
                     source = convert(source.source),
                     hash = EthConverter.convert(source.hash),
                     maker = EthConverter.convert(source.maker, blockchain),
@@ -678,4 +678,3 @@ class EthActivityConverter(
             OrderActivityMatchDto.Type.ACCEPT_BID -> UnionOrderMatchSell.Type.ACCEPT_BID
         }
 }
-

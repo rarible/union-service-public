@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.worker.task.search.order;
+package com.rarible.protocol.union.worker.task.search.order
 
 import com.rarible.core.telemetry.metrics.RegisteredCounter
 import com.rarible.protocol.union.core.model.UnionAsset

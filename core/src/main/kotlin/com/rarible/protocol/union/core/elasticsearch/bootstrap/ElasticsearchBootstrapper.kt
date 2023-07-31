@@ -217,7 +217,7 @@ class ElasticsearchBootstrapper(
 }
 
 fun metadataMappingIndex(): String {
-    return ElasticsearchBootstrapper::class.java.getResource("/mappings/${METADATA_INDEX}.json")!!.readText()
+    return ElasticsearchBootstrapper::class.java.getResource("/mappings/$METADATA_INDEX.json")!!.readText()
 }
 
 fun metadataSettingsIndex(): String {

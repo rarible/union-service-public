@@ -21,8 +21,12 @@ class DeleteCollectionStatistics {
     @Test
     fun `should remove statistics from collections`() = runBlocking<Unit> {
         mongoTemplate.insert(
-            mapOf("collectionId" to randomString(),
-            STATISTICS to "b"), "enrichment_collection").awaitFirstOrNull()
+            mapOf(
+                "collectionId" to randomString(),
+                STATISTICS to "b"
+            ),
+            "enrichment_collection"
+        ).awaitFirstOrNull()
 
         val migration = ChangeLog00003DeleteCollectionStatistics()
         migration.deleteCollectionStatistics(mongoTemplate)
@@ -32,5 +36,4 @@ class DeleteCollectionStatistics {
                 .awaitFirstOrNull()
         assertThat(collection).isNull()
     }
-
 }

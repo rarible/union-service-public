@@ -12,5 +12,4 @@ class DownloadExecutorManager(
     override fun close() {
         executors.values.forEach { it.close() }
     }
-
 }

@@ -48,7 +48,7 @@ class FlowConsumerConfiguration(
     private val workers = consumer.workers
     private val batchSize = consumer.batchSize
 
-    //-------------------- Handlers -------------------//
+    // -------------------- Handlers -------------------//
 
     @Bean
     fun flowItemEventHandler(handler: IncomingEventHandler<UnionItemEvent>): FlowItemEventHandler {
@@ -90,7 +90,7 @@ class FlowConsumerConfiguration(
         return FlowLegacyActivityEventHandler(handler, converter)
     }
 
-    //-------------------- Workers --------------------//
+    // -------------------- Workers --------------------//
 
     @Bean
     fun flowItemWorker(

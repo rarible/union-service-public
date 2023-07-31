@@ -26,6 +26,5 @@ class CollectionBestSellOrderProvider(
         override fun create(origin: String?): BestOrderProvider<EnrichmentCollection> {
             return CollectionBestSellOrderProvider(collectionId, enrichmentOrderService, origin)
         }
-
     }
 }

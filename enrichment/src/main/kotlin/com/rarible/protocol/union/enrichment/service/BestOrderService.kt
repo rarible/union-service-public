@@ -31,7 +31,7 @@ class BestOrderService(
     private val ff: FeatureFlagsProperties
 ) {
 
-    //---------------------- Ownership ----------------------//
+    // ---------------------- Ownership ----------------------//
     suspend fun updateBestSellOrder(
         ownership: ShortOwnership,
         order: UnionOrder,
@@ -49,7 +49,7 @@ class BestOrderService(
             .copy(originOrders = originBestOrders)
     }
 
-    //---------------------- Collection ---------------------//
+    // ---------------------- Collection ---------------------//
     suspend fun updateBestSellOrder(
         collection: EnrichmentCollection,
         order: UnionOrder,
@@ -78,7 +78,7 @@ class BestOrderService(
             .copy(originOrders = originBestOrders)
     }
 
-    //------------------------- Item ------------------------//
+    // ------------------------- Item ------------------------//
     suspend fun updateBestSellOrder(
         item: ShortItem,
         order: UnionOrder,
@@ -91,7 +91,8 @@ class BestOrderService(
     }
 
     suspend fun updateBestBidOrder(
-        item: ShortItem, order: UnionOrder,
+        item: ShortItem,
+        order: UnionOrder,
         origins: List<String>
     ): ShortItem {
         val providerFactory = ItemBestBidOrderProvider.Factory(item, enrichmentOrderService)
@@ -106,7 +107,7 @@ class BestOrderService(
             .copy(originOrders = originBestOrders)
     }
 
-    //------------------------- USD -------------------------//
+    // ------------------------- USD -------------------------//
     suspend fun getBestSellOrderInUsd(orders: Map<String, ShortOrder>): ShortOrder? {
         return getBestOrderByUsd(orders, BestSellOrderComparator)
     }
@@ -156,7 +157,7 @@ class BestOrderService(
         return updatedOrders
     }
 
-    //--------------------- Best bid/sell -------------------//
+    // --------------------- Best bid/sell -------------------//
     private suspend fun <T : BestSellOrderOwner<T>> updateBestSell(
         bestSellOwner: T,
         bestOrderProvider: BestOrderProvider<*>,
@@ -258,6 +259,4 @@ class BestOrderService(
             }
         }.filterNot { it.isEmpty() }.toSet()
     }
-
 }
-

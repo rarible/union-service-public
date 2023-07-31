@@ -33,6 +33,5 @@ class ChangeLog00002DeleteLegacyCollections {
         collections.forEach {
             template.dropCollection(it).awaitFirstOrNull()
         }
-
     }
 }

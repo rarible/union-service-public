@@ -20,5 +20,4 @@ class ImxItemMetaRepository(
     suspend fun save(itemMeta: ImxItemMeta) {
         mongo.save(itemMeta).awaitFirst()
     }
-
 }

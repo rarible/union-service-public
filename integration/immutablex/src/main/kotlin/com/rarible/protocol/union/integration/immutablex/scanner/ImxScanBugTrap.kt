@@ -39,9 +39,9 @@ class ImxScanBugTrap(
                 val start = received.map { it.transactionId }
                 lastWarning =
                     "Received {$type} Immutablex page with unexpected event order/content," +
-                        "expected start: $prevTail, but received page: $start; " +
-                        "previous request: transaction_id=$prevFromTx, trimmed to $prevToDate; " +
-                        "current request: transaction_id=$fromTx, trimmed to $toDate"
+                    "expected start: $prevTail, but received page: $start; " +
+                    "previous request: transaction_id=$prevFromTx, trimmed to $prevToDate; " +
+                    "current request: transaction_id=$fromTx, trimmed to $toDate"
                 logger.warn(lastWarning)
                 break
             }

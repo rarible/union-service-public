@@ -31,5 +31,4 @@ interface OwnershipService : BlockchainService {
         continuation: String?,
         size: Int,
     ): Page<UnionOwnership>
-
 }

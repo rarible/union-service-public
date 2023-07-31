@@ -40,9 +40,11 @@ class FlowCollectionEventHandlerTest {
 
         val expected = FlowCollectionConverter.convert(collection, BlockchainDto.FLOW)
         coVerify(exactly = 1) {
-            incomingEventHandler.onEvent(match {
-                (it as UnionCollectionUpdateEvent).collection == expected
-            })
+            incomingEventHandler.onEvent(
+                match {
+                    (it as UnionCollectionUpdateEvent).collection == expected
+                }
+            )
         }
     }
 }

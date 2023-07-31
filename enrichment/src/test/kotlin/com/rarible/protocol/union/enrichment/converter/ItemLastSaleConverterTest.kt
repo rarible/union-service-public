@@ -22,5 +22,4 @@ class ItemLastSaleConverterTest {
         assertThat(lastSale.value).isEqualTo(sell.nft.value)
         assertThat(lastSale.price).isEqualTo(sell.price)
     }
-
 }

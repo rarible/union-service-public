@@ -16,4 +16,4 @@ data class UnionOwnership(
     val creators: List<CreatorDto> = listOf(),
     val lazyValue: BigInteger,
     val pending: List<ItemHistoryDto> = listOf()
-) 
+)

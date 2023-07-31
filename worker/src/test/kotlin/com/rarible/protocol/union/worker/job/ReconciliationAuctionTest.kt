@@ -49,7 +49,6 @@ class ReconciliationAuctionTest {
         mockGetAuctionsAll("1_1", testPageSize, mockPagination("1_2", testPageSize))
         mockGetAuctionsAll("1_2", testPageSize, mockPagination(null, 10))
 
-
         val result = auctionReconciliationService.handle(null, BlockchainDto.ETHEREUM.name).toList()
 
         assertEquals(2, result.size)
@@ -102,7 +101,7 @@ class ReconciliationAuctionTest {
         coVerify(exactly = 0) { auctionEventService.onAuctionUpdated(any()) }
     }
 
-    private fun mockGetAuctionsAll(continuation: String?, size: Int, result: Slice<AuctionDto>): Unit {
+    private fun mockGetAuctionsAll(continuation: String?, size: Int, result: Slice<AuctionDto>) {
         coEvery {
             auctionService.getAuctionsAll(null, null, null, null, continuation, size)
         } returns result

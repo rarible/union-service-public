@@ -39,7 +39,7 @@ object TimePeriodContinuationHelper {
         val prefix: String?,
         var timestamp: Long,
         val suffix: String,
-        val hasPrefix : Boolean = true,
+        val hasPrefix: Boolean = true,
     ) {
         companion object {
             fun parse(continuation: String, hasPrefix: Boolean = true): ContinuationParts {

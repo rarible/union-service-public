@@ -44,7 +44,6 @@ internal class ItemTraitServiceTest {
         elasticsearchTestBootstrapper.bootstrap()
     }
 
-
     @TestFactory
     fun `search items traits successfully`(): List<DynamicTest> {
         runBlocking {
@@ -92,7 +91,7 @@ internal class ItemTraitServiceTest {
 
                     val result = itemTraitService.searchTraits(it, collectionIds)
 
-                    assertThat(result.traits .size).isEqualTo(1)
+                    assertThat(result.traits.size).isEqualTo(1)
                     assertThat(result.traits[0].key.value).isEqualTo("eyes")
                     assertThat(result.traits[0].values[0].value).isEqualTo("googly")
                 }
@@ -180,7 +179,7 @@ internal class ItemTraitServiceTest {
     }
 
     @Test
-    fun `get empty Traits` (): Unit = runBlocking {
+    fun `get empty Traits`(): Unit = runBlocking {
 
         val result = itemTraitService.getTraitsWithRarity(
             randomString(), setOf(
@@ -232,7 +231,7 @@ internal class ItemTraitServiceTest {
          val keysLimit = 3
          val valuesLimit = 15
 
-        var result: TraitsDto = itemTraitService.queryTraits(collectionIds, emptyList() )
+        var result: TraitsDto = itemTraitService.queryTraits(collectionIds, emptyList())
 
         assertThat(result.traits.size).isEqualTo(keysLimit)
 

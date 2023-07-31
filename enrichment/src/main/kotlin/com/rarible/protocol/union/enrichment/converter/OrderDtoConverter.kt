@@ -145,5 +145,4 @@ object OrderDtoConverter {
     ): AssetTypeDto {
         return AssetDtoConverter.convert(source, EnrichmentAssetData(data.customCollections[id]))
     }
-
 }

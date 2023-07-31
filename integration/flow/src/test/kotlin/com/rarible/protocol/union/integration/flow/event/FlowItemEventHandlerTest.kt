@@ -45,9 +45,11 @@ class FlowItemEventHandlerTest {
 
         val expected = FlowItemConverter.convert(item, BlockchainDto.FLOW)
         coVerify(exactly = 1) {
-            incomingEventHandler.onEvent(match {
-                (it as UnionItemUpdateEvent).item == expected
-            })
+            incomingEventHandler.onEvent(
+                match {
+                    (it as UnionItemUpdateEvent).item == expected
+                }
+            )
         }
     }
 
@@ -70,10 +72,11 @@ class FlowItemEventHandlerTest {
         handler.handle(dto)
 
         coVerify(exactly = 1) {
-            incomingEventHandler.onEvent(match {
-                it is UnionItemDeleteEvent && it.itemId == itemId
-            })
+            incomingEventHandler.onEvent(
+                match {
+                    it is UnionItemDeleteEvent && it.itemId == itemId
+                }
+            )
         }
     }
-
 }

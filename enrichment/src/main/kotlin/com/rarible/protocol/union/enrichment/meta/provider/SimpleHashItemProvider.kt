@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.enrichment.meta.provider
 
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.download.MetaProviderType
 import com.rarible.protocol.union.core.model.download.ProviderDownloadException

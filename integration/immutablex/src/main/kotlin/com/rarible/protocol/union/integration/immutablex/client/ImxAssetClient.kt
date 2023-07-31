@@ -79,5 +79,4 @@ class ImxAssetClient(
             .toEntity(ImmutablexAssetsPage::class.java)
             .awaitSingle().body!!
     }
-
 }

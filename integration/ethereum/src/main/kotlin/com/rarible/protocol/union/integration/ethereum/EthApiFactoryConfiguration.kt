@@ -28,5 +28,4 @@ class EthApiFactoryConfiguration(
     fun ethOrderIndexerApiClientFactory(uriProvider: OrderIndexerApiServiceUriProvider): OrderIndexerApiClientFactory {
         return OrderIndexerApiClientFactory(uriProvider, webClientCustomizer)
     }
-
 }

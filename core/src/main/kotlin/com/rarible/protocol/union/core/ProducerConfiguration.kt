@@ -88,22 +88,20 @@ class ProducerConfiguration(
         return createUnionProducer("meta.publisher", topic, DownloadTask::class.java)
     }
 
-
     @Bean
     @Qualifier("download.scheduler.task.producer.collection-meta")
-    fun collectionDownloadTaskProducer() : RaribleKafkaProducer<DownloadTask> {
+    fun collectionDownloadTaskProducer(): RaribleKafkaProducer<DownloadTask> {
         val topic = UnionInternalTopicProvider.getCollectionMetaDownloadTaskSchedulerTopic(env)
         return createUnionProducer("meta.publisher", topic, DownloadTask::class.java)
     }
 
     private fun <T> createUnionProducer(clientSuffix: String, topic: String, type: Class<T>): RaribleKafkaProducer<T> {
         return RaribleKafkaProducer(
-            clientId = "${env}.protocol-union-service.${clientSuffix}",
+            clientId = "$env.protocol-union-service.$clientSuffix",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = type,
             defaultTopic = topic,
             bootstrapServers = producerBrokerReplicaSet
         )
     }
-
 }

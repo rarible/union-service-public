@@ -48,7 +48,6 @@ class EsCollectionQueryBuilderServiceIntegrationTest {
         assertThat(result).containsExactlyInAnyOrder(toFind1.info, toFind2.info)
     }
 
-
     @Test
     fun `should query by blockchain`() = runBlocking<Unit> {
         // given
@@ -84,7 +83,7 @@ class EsCollectionQueryBuilderServiceIntegrationTest {
     }
 
     @Test
-    fun `should query with cursor`()  = runBlocking<Unit> {
+    fun `should query with cursor`() = runBlocking<Unit> {
         // given
         val filter = EsCollectionGenericFilter(cursor = "500_100")
         val toFind1 = randomEsCollection().copy(date = Instant.ofEpochMilli(450), salt = 10)

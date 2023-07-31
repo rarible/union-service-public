@@ -27,13 +27,16 @@ abstract class EthOrderEventHandler(
 }
 
 open class EthereumOrderEventHandler(
-    handler: IncomingEventHandler<UnionOrderEvent>, ethOrderConverter: EthOrderConverter
+    handler: IncomingEventHandler<UnionOrderEvent>,
+    ethOrderConverter: EthOrderConverter
 ) : EthOrderEventHandler(BlockchainDto.ETHEREUM, handler, ethOrderConverter)
 
 open class PolygonOrderEventHandler(
-    handler: IncomingEventHandler<UnionOrderEvent>, ethOrderConverter: EthOrderConverter
+    handler: IncomingEventHandler<UnionOrderEvent>,
+    ethOrderConverter: EthOrderConverter
 ) : EthOrderEventHandler(BlockchainDto.POLYGON, handler, ethOrderConverter)
 
 open class MantleOrderEventHandler(
-    handler: IncomingEventHandler<UnionOrderEvent>, ethOrderConverter: EthOrderConverter
+    handler: IncomingEventHandler<UnionOrderEvent>,
+    ethOrderConverter: EthOrderConverter
 ) : EthOrderEventHandler(BlockchainDto.MANTLE, handler, ethOrderConverter)

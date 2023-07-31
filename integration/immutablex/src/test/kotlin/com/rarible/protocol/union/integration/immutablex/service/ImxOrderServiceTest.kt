@@ -169,7 +169,7 @@ class ImxOrderServiceTest {
             "currency",
             null,
             50
-            )
+        )
 
         assertThat(slice.entities).hasSize(0)
     }

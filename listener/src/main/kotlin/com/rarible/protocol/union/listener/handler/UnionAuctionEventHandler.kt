@@ -15,5 +15,4 @@ class UnionAuctionEventHandler(
 
     override suspend fun onEvent(event: UnionAuctionEvent) = producer.send(event)
     override suspend fun onEvents(events: Collection<UnionAuctionEvent>) = producer.send(events)
-
 }

@@ -68,7 +68,7 @@ class ImxItemServiceMt : ImxManualTest() {
         val token = "0x6de6b04d630a4a41bb223815433b9ebf0da50f69"
         val tokenId = "8e842633-fe3d-4e30-a93d-e5c0b0c940ac"
         val tokenIdEncoded = TokenIdDecoder.encode(tokenId)
-        val itemId = "${token}:${tokenIdEncoded}"
+        val itemId = "$token:$tokenIdEncoded"
         val result = service.getItemById(itemId)
 
         println(result)
@@ -161,5 +161,4 @@ class ImxItemServiceMt : ImxManualTest() {
         assertThat(page2.entities).hasSize(3)
         assertThat(page2.continuation).isNull()
     }
-
 }

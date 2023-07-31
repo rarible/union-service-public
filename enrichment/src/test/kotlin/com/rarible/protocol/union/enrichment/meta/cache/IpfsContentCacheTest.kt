@@ -28,5 +28,4 @@ class IpfsContentCacheTest {
             ipfsContentCache.save(resource, UnionAudioProperties("audio/mp3", 100))
         }
     }
-
 }

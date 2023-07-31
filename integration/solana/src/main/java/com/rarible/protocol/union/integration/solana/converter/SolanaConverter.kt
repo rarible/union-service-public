@@ -65,5 +65,4 @@ object SolanaConverter {
             ActivitySortDto.EARLIEST_FIRST -> com.rarible.protocol.solana.dto.ActivitySortDto.EARLIEST_FIRST
         }
     }
-
 }
