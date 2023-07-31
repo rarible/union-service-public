@@ -51,13 +51,14 @@ class ArtificialCollectionServiceTest {
 
     @Test
     fun `create - ok`() = runBlocking<Unit> {
-        val collection = randomEnrichmentCollection()
+        val collection = randomEnrichmentCollection().copy(version = 1)
         val subCollection = randomEnrichmentCollection()
 
         val expected = collection.copy(
             collectionId = subCollection.collectionId,
             name = subCollection.name,
-            structure = UnionCollection.Structure.PART
+            structure = UnionCollection.Structure.PART,
+            version = null
         )
 
         coEvery { collectionRepository.get(collection.id) } returns collection
