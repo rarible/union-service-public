@@ -14,7 +14,6 @@ import com.rarible.protocol.union.worker.task.meta.RefreshMetaSimpleHashTask
 import com.rarible.protocol.union.worker.task.meta.RefreshMetaTask
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
@@ -51,7 +50,6 @@ class RefreshMetaTaskSchedulingJob(
 }
 
 @ExperimentalCoroutinesApi
-@OptIn(FlowPreview::class)
 @Component
 class RefreshMetaTaskSchedulingJobHandler(
     private val taskRepository: TaskRepository,

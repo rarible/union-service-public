@@ -15,10 +15,9 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
-import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
-import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -32,7 +31,7 @@ class EnrichmentCollectionEventService(
     private val reconciliationEventService: ReconciliationEventService,
     private val bestOrderService: BestOrderService,
     private val originService: OriginService,
-    private val metaRefreshRequestRepository: MetaRefreshRequestRepository,
+    private val itemMetaRefreshService: ItemMetaRefreshService,
     private val unionMetaProperties: UnionMetaProperties,
 ) {
 
@@ -61,12 +60,10 @@ class EnrichmentCollectionEventService(
 
     suspend fun onCollectionSetBaseUri(event: UnionCollectionSetBaseUriEvent) {
         val collectionId = event.collectionId
-        metaRefreshRequestRepository.save(
-            MetaRefreshRequest(
-                collectionId = collectionId.fullId(),
-                full = true,
-                withSimpleHash = unionMetaProperties.simpleHash.enabled,
-            )
+        itemMetaRefreshService.scheduleRefresh(
+            collectionId = collectionId,
+            full = true,
+            withSimpleHash = unionMetaProperties.simpleHash.enabled,
         )
     }
 

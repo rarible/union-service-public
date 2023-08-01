@@ -10,7 +10,7 @@ import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaRefreshService
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.worker.job.BestOrderCheckJob
@@ -133,16 +133,14 @@ class WorkerConfiguration(
     @ConditionalOnProperty(name = ["worker.metaAutoRefresh.enabled"], havingValue = "true")
     fun collectionMetaAutoRefreshJob(
         metaAutoRefreshStateRepository: MetaAutoRefreshStateRepository,
-        collectionMetaRefreshService: CollectionMetaRefreshService,
-        metaRefreshRequestRepository: MetaRefreshRequestRepository,
+        itemMetaRefreshService: ItemMetaRefreshService,
         unionMetaProperties: UnionMetaProperties,
         properties: WorkerProperties,
         meterRegistry: MeterRegistry,
     ): MetaAutoRefreshJob {
         return MetaAutoRefreshJob(
             metaAutoRefreshStateRepository = metaAutoRefreshStateRepository,
-            collectionMetaRefreshService = collectionMetaRefreshService,
-            metaRefreshRequestRepository = metaRefreshRequestRepository,
+            itemMetaRefreshService = itemMetaRefreshService,
             simpleHashEnabled = unionMetaProperties.simpleHash.enabled,
             properties = properties,
             meterRegistry = meterRegistry,
