@@ -58,6 +58,7 @@ class ArtificialCollectionServiceTest {
             collectionId = subCollection.collectionId,
             name = subCollection.name,
             structure = UnionCollection.Structure.PART,
+            parent = collection.id,
             version = null
         )
 
