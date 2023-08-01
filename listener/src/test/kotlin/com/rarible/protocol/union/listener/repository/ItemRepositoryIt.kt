@@ -90,33 +90,60 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
 
     @Test
     fun findIdsByLastUpdatedAt() = runBlocking<Unit> {
-        val item1 = itemRepository.save(randomShortItem().copy(lastUpdatedAt = Instant.ofEpochMilli(1000)))
-        val item2 = itemRepository.save(randomShortItem().copy(lastUpdatedAt = Instant.ofEpochMilli(2000)))
-        val item3 = itemRepository.save(randomShortItem().copy(lastUpdatedAt = Instant.ofEpochMilli(3000)))
-        val item4 = itemRepository.save(randomShortItem().copy(lastUpdatedAt = Instant.ofEpochMilli(4000)))
-        val item5 = itemRepository.save(randomShortItem().copy(lastUpdatedAt = Instant.ofEpochMilli(5000)))
+        val item1 = itemRepository.save(randomShortItem().copy(
+            lastUpdatedAt = Instant.ofEpochMilli(1000),
+            blockchain = BlockchainDto.ETHEREUM,
+            itemId = "1"
+        ))
+        val item2 = itemRepository.save(randomShortItem().copy(
+            lastUpdatedAt = Instant.ofEpochMilli(2000),
+            blockchain = BlockchainDto.ETHEREUM,
+            itemId = "2"
+        ))
+        val item3 = itemRepository.save(randomShortItem().copy(
+            lastUpdatedAt = Instant.ofEpochMilli(3000),
+            blockchain = BlockchainDto.ETHEREUM,
+            itemId = "3"
+        ))
+        val item4 = itemRepository.save(randomShortItem().copy(
+            lastUpdatedAt = Instant.ofEpochMilli(4000),
+            blockchain = BlockchainDto.ETHEREUM,
+            itemId = "4"
+        ))
+        val item5 = itemRepository.save(randomShortItem().copy(
+            lastUpdatedAt = Instant.ofEpochMilli(4000),
+            blockchain = BlockchainDto.ETHEREUM,
+            itemId = "5"
+        ))
+        val item6 = itemRepository.save(randomShortItem().copy(
+            lastUpdatedAt = Instant.ofEpochMilli(6000),
+            blockchain = BlockchainDto.ETHEREUM,
+            itemId = "6"
+        ))
 
-        val result = itemRepository.findIdsByLastUpdatedAt(
-            lastUpdatedFrom = Instant.ofEpochMilli(1500),
-            lastUpdatedTo = Instant.ofEpochMilli(4500),
-            continuation = null
+        var result = itemRepository.findIdsByLastUpdatedAt(
+            lastUpdatedFrom = Instant.ofEpochMilli(500),
+            lastUpdatedTo = Instant.ofEpochMilli(7000),
+            fromId = null,
+            size = 2
         )
-        assertThat(result).containsExactlyInAnyOrder(item2.id, item3.id, item4.id)
+        assertThat(result.map { it.id }).containsExactlyInAnyOrder(item1.id, item2.id)
 
-        val resultWithContinuation = itemRepository.findIdsByLastUpdatedAt(
-            lastUpdatedFrom = Instant.ofEpochMilli(1500),
-            lastUpdatedTo = Instant.ofEpochMilli(4500),
-            continuation = result[0]
+        result = itemRepository.findIdsByLastUpdatedAt(
+            lastUpdatedFrom = result.last().date,
+            lastUpdatedTo = Instant.ofEpochMilli(7000),
+            fromId = result.last().id,
+            size = 2
         )
-        assertThat(resultWithContinuation).containsExactly(result[1], result[2])
+        assertThat(result.map { it.id }).containsExactlyInAnyOrder(item3.id, item4.id)
 
-        val resultWithContinuationAndSize = itemRepository.findIdsByLastUpdatedAt(
-            lastUpdatedFrom = Instant.ofEpochMilli(1500),
-            lastUpdatedTo = Instant.ofEpochMilli(4500),
-            continuation = result[0],
-            size = 1
+        result = itemRepository.findIdsByLastUpdatedAt(
+            lastUpdatedFrom = result.last().date,
+            lastUpdatedTo = Instant.ofEpochMilli(7000),
+            fromId = result.last().id,
+            size = 2
         )
-        assertThat(resultWithContinuationAndSize).containsExactly(result[1])
+        assertThat(result.map { it.id }).containsExactlyInAnyOrder(item5.id, item6.id)
     }
 
     @Test

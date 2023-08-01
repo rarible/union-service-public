@@ -134,8 +134,7 @@ class OwnershipRepository(
                         and(ShortOwnership::id).gt(continuation)
                     }
                 })
-                .with(Sort.by(ShortOwnership::id.name))
-                .withHint(Indices.LAST_UPDATED_AT_ID.indexKeys)
+                .with(Sort.by(ShortOwnership::lastUpdatedAt.name, ShortOwnership::id.name))
                 .limit(size),
             IdObject::class.java,
             ShortOwnership.COLLECTION
@@ -157,12 +156,12 @@ class OwnershipRepository(
             .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
-        val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
+        private val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
             .on("${ShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", Sort.Direction.ASC)
             .on("_id", Sort.Direction.ASC)
             .background()
 
-        val LAST_UPDATED_AT_ID: Index = Index()
+        private val LAST_UPDATED_AT_ID: Index = Index()
             .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.ASC)
             .on("_id", Sort.Direction.ASC)
             .background()
