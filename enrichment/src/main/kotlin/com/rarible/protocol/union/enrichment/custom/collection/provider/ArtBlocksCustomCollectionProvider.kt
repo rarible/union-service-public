@@ -34,9 +34,11 @@ class ArtBlocksCustomCollectionProvider(
             return collectionId
         }
 
-        val subCollectionId = collectionId.copy(
-            value = ArtBlocksCustomCollectionGenerator.generate(collectionId, projectId)
-        )
+        val surrogateCollectionId = Address.apply(
+            Keys.getAddress("custom_collection:artblocks:${collectionId.value}:$projectId")
+        ).prefixed()
+
+        val subCollectionId = collectionId.copy(value = surrogateCollectionId)
 
         if (!artificialCollectionService.exists(subCollectionId)) {
             val name = customCollectionItemProvider.getMeta(listOf(itemId))[itemId]
@@ -58,11 +60,4 @@ class ArtBlocksCustomCollectionProvider(
         }
         return subCollectionId
     }
-}
-
-object ArtBlocksCustomCollectionGenerator {
-
-    fun generate(original: CollectionIdDto, projectId: Long): String = Address.apply(
-        Keys.getAddress("custom_collection:artblocks:${original.value}:$projectId")
-    ).prefixed()
 }

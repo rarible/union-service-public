@@ -20,6 +20,8 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.web3j.crypto.Keys
+import scalether.domain.Address
 
 @ExtendWith(MockKExtension::class)
 class ArtBlocksCustomCollectionProviderTest {
@@ -112,6 +114,9 @@ class ArtBlocksCustomCollectionProviderTest {
     }
 
     private fun createSubCollectionId(projectId: Long): CollectionIdDto {
-        return collectionId.copy(value = ArtBlocksCustomCollectionGenerator.generate(collectionId, projectId))
+        val surrogateTokenId = Address.apply(
+            Keys.getAddress("custom_collection:artblocks:${collectionId.value}:$projectId")
+        ).prefixed()
+        return collectionId.copy(value = surrogateTokenId)
     }
 }
