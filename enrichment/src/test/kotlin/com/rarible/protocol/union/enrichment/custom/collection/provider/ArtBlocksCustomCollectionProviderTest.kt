@@ -111,7 +111,7 @@ class ArtBlocksCustomCollectionProviderTest {
         return ItemIdDto(BlockchainDto.ETHEREUM, "$token:$tokenId")
     }
 
-    private fun createSubCollectionId(projectId: Int): CollectionIdDto {
-        return collectionId.copy(value = "${token}_$projectId")
+    private fun createSubCollectionId(projectId: Long): CollectionIdDto {
+        return collectionId.copy(value = ArtBlocksCustomCollectionGenerator.generate(collectionId, projectId))
     }
 }
