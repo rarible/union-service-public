@@ -7,7 +7,6 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemProvider
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
-import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -33,7 +32,7 @@ class ArtBlocksCustomCollectionProviderTest {
     @InjectMockKs
     lateinit var provider: ArtBlocksCustomCollectionProvider
 
-    private val token = randomAddressString()
+    private val token = "0x259de0ebbd1e3a81ad288d29fac8beae3abbb599"
     private val collectionId = CollectionIdDto(BlockchainDto.ETHEREUM, token)
 
     @BeforeEach
@@ -53,7 +52,7 @@ class ArtBlocksCustomCollectionProviderTest {
     @Test
     fun `get sub-collection - ok, already exists`() = runBlocking<Unit> {
         val itemId = createItemId(9111111)
-        val subCollection = createSubCollectionId(9)
+        val subCollection = CollectionIdDto(BlockchainDto.ETHEREUM, "0x15d8aadd6c6c56f09de8c88ef42c2cf0c52d71b9")
 
         coEvery { artificialCollectionService.exists(subCollection) } returns true
 
@@ -66,7 +65,7 @@ class ArtBlocksCustomCollectionProviderTest {
     @Test
     fun `get sub-collection - ok, created`() = runBlocking<Unit> {
         val itemId = createItemId(123111111)
-        val subCollection = createSubCollectionId(123)
+        val subCollection = CollectionIdDto(BlockchainDto.ETHEREUM, "0x814ec5e9a5e91837887cd7b78c39fa9038c7a239")
         val meta = randomUnionMeta(attributes = listOf(UnionMetaAttribute("collection_name", "123")))
 
         coEvery { artificialCollectionService.exists(subCollection) } returns false
@@ -88,7 +87,7 @@ class ArtBlocksCustomCollectionProviderTest {
     @Test
     fun `get sub-collection - ok, created, meta attribute not found`() = runBlocking<Unit> {
         val itemId = createItemId(987987111111)
-        val subCollection = createSubCollectionId(987987)
+        val subCollection = CollectionIdDto(BlockchainDto.ETHEREUM, "0x4755745f20b8b7944f85abfffb62549dc8f6d4dd")
         val meta = randomUnionMeta()
 
         coEvery { artificialCollectionService.exists(subCollection) } returns false
@@ -109,9 +108,5 @@ class ArtBlocksCustomCollectionProviderTest {
 
     private fun createItemId(tokenId: Long): ItemIdDto {
         return ItemIdDto(BlockchainDto.ETHEREUM, "$token:$tokenId")
-    }
-
-    private fun createSubCollectionId(projectId: Int): CollectionIdDto {
-        return collectionId.copy(value = "${token}_$projectId")
     }
 }
