@@ -52,6 +52,7 @@ class ArtificialCollectionService(
                     collectionId = surrogateId.value,
                     name = name ?: original.name, // Nothing to do with it...
                     structure = structure,
+                    parent = EnrichmentCollectionId(originalId),
                     version = null
                 )
             )
