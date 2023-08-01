@@ -120,6 +120,11 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
             blockchain = BlockchainDto.ETHEREUM,
             itemId = "6"
         ))
+        itemRepository.save(randomShortItem().copy(
+            lastUpdatedAt = Instant.ofEpochMilli(8000),
+            blockchain = BlockchainDto.ETHEREUM,
+            itemId = "7"
+        ))
 
         var result = itemRepository.findIdsByLastUpdatedAt(
             lastUpdatedFrom = Instant.ofEpochMilli(500),
@@ -130,7 +135,7 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
         assertThat(result.map { it.id }).containsExactlyInAnyOrder(item1.id, item2.id)
 
         result = itemRepository.findIdsByLastUpdatedAt(
-            lastUpdatedFrom = result.last().date,
+            lastUpdatedFrom = result.last().lastUpdatedAt,
             lastUpdatedTo = Instant.ofEpochMilli(7000),
             fromId = result.last().id,
             size = 2
@@ -138,10 +143,10 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
         assertThat(result.map { it.id }).containsExactlyInAnyOrder(item3.id, item4.id)
 
         result = itemRepository.findIdsByLastUpdatedAt(
-            lastUpdatedFrom = result.last().date,
+            lastUpdatedFrom = result.last().lastUpdatedAt,
             lastUpdatedTo = Instant.ofEpochMilli(7000),
             fromId = result.last().id,
-            size = 2
+            size = 10
         )
         assertThat(result.map { it.id }).containsExactlyInAnyOrder(item5.id, item6.id)
     }

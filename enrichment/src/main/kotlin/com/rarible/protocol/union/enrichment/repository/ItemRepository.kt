@@ -8,11 +8,10 @@ import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
-import com.rarible.protocol.union.enrichment.model.ShotDateIdItem
+import com.rarible.protocol.union.enrichment.model.ShortDateIdItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
@@ -38,7 +37,6 @@ import org.springframework.data.mongodb.core.query.lte
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.Instant
-import java.util.Date
 
 @Component
 @CaptureSpan(type = SpanType.DB)
@@ -165,10 +163,10 @@ class ItemRepository(
         lastUpdatedTo: Instant,
         fromId: ShortItemId?,
         size: Int = 20
-    ): List<ShotDateIdItem> {
+    ): List<ShortDateIdItem> {
         val criteria = if (fromId != null) {
             Criteria().orOperator(
-                ShortItem::lastUpdatedAt gt lastUpdatedFrom,
+                (ShortItem::lastUpdatedAt gt lastUpdatedFrom).lte(lastUpdatedTo),
                 (ShortItem::lastUpdatedAt isEqualTo lastUpdatedFrom).and("_id").gt(fromId)
             )
         } else {
@@ -183,20 +181,7 @@ class ItemRepository(
             .include(ShortItem::id.name)
             .include(ShortItem::lastUpdatedAt.name)
 
-        return template.find(query, Document::class.java, ShortItem.COLLECTION)
-            .map {
-                val id = (it["_id"] as Document).let { doc ->
-                    ShortItemId(
-                        BlockchainDto.valueOf(doc[ShortItemId::blockchain.name] as String),
-                        doc[ShortItemId::itemId.name] as String
-                    )
-                }
-                val date = it[ShortItem::lastUpdatedAt.name]
-                ShotDateIdItem(
-                    id = id,
-                    date = (date as Date).toInstant()
-                )
-            }
+        return template.find(query, ShortDateIdItem::class.java, ShortItem.COLLECTION)
             .collectList()
             .awaitFirst()
     }

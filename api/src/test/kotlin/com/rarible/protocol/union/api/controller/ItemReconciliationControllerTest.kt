@@ -2,7 +2,7 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.dto.continuation.DateIdContinuation
-import com.rarible.protocol.union.enrichment.model.ShotDateIdItem
+import com.rarible.protocol.union.enrichment.model.ShortDateIdItem
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemDto
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
@@ -24,8 +24,8 @@ class ItemReconciliationControllerTest {
         val from = Instant.ofEpochSecond(1)
         val to = Instant.ofEpochSecond(10)
 
-        val id1 = ShotDateIdItem(randomShortItem().id, Instant.ofEpochSecond(2))
-        val id2 = ShotDateIdItem(randomShortItem().id, Instant.ofEpochSecond(3))
+        val id1 = ShortDateIdItem(randomShortItem().id, Instant.ofEpochSecond(2))
+        val id2 = ShortDateIdItem(randomShortItem().id, Instant.ofEpochSecond(3))
 
         coEvery { itemRepository.findIdsByLastUpdatedAt(
             lastUpdatedFrom = from,
@@ -45,7 +45,7 @@ class ItemReconciliationControllerTest {
             size = 2,
         )
         assertThat(items.items).hasSize(2)
-        assertThat(items.continuation).isEqualTo(DateIdContinuation(id2.date, id2.id.toDto().fullId()).toString())
+        assertThat(items.continuation).isEqualTo(DateIdContinuation(id2.lastUpdatedAt, id2.id.toDto().fullId()).toString())
     }
 
     @Test
@@ -56,16 +56,15 @@ class ItemReconciliationControllerTest {
         val actualFrom = Instant.ofEpochSecond(5)
         val actualFromId = randomShortItem()
 
-        val id1 = ShotDateIdItem(randomShortItem().id, Instant.ofEpochSecond(2))
-        val id2 = ShotDateIdItem(randomShortItem().id, Instant.ofEpochSecond(3))
-        val id3 = ShotDateIdItem(randomShortItem().id, Instant.ofEpochSecond(11))
+        val id1 = ShortDateIdItem(randomShortItem().id, Instant.ofEpochSecond(2))
+        val id2 = ShortDateIdItem(randomShortItem().id, Instant.ofEpochSecond(3))
 
         coEvery { itemRepository.findIdsByLastUpdatedAt(
             lastUpdatedFrom = actualFrom,
             lastUpdatedTo = to,
             fromId = actualFromId.id,
             size = 10
-        ) } returns listOf(id1, id2, id3)
+        ) } returns listOf(id1, id2)
 
         coEvery {
             itemSourceSelectService.getItemsByIds(listOf(id1.id.toDto(), id2.id.toDto()))

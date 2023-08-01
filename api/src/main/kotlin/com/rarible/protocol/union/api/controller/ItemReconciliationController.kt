@@ -39,15 +39,14 @@ class ItemReconciliationController(
             lastUpdatedTo = lastUpdatedTo,
             fromId = id?.let { ShortItemId(IdParser.parseItemId(id)) },
             size = size
-        ).filter { it.date <= lastUpdatedTo }
-
+        )
         if (ids.isEmpty()) {
             return ItemsDto()
         }
         val items = itemSourceSelectService.getItemsByIds(ids.map { it.id.toDto() })
         val next = if (ids.size == size) {
             val last = ids.last()
-            DateIdContinuation(last.date, last.id.toDto().fullId())
+            DateIdContinuation(last.lastUpdatedAt, last.id.toDto().fullId())
         } else {
             null
         }
