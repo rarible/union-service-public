@@ -57,7 +57,7 @@ enrichment:
           - "ETHEREUM:0xd07dc4262bcdbf85190c01c996b4c06a461d2430:506988"
           - "ETHEREUM:0x2438a0eeffa36cb738727953d35047fb89c81417:5"
       - name: "artblocks"
-        enabled: false
+        enabled: true
         collections:
           - "ETHEREUM:0x059edd72cd353df5106d2b9cc5ab83a52287ac3a"
           - "ETHEREUM:0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270"
