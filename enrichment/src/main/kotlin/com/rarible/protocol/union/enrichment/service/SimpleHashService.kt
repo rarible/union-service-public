@@ -3,13 +3,13 @@ package com.rarible.protocol.union.enrichment.service
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.meta.MetaSource
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverterService

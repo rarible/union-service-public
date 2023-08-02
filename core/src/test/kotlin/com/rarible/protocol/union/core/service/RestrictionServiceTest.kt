@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.model.RestrictionApiRule
 import com.rarible.protocol.union.core.model.RestrictionCheckResult
 import com.rarible.protocol.union.core.model.RestrictionRule
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.restriction.RestrictionApiRuleChecker
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -66,7 +67,8 @@ class RestrictionServiceTest {
             name = randomString(),
             attributes = emptyList(),
             content = emptyList(),
-            restrictions = listOf()
+            restrictions = listOf(),
+            source = MetaSource.ORIGINAL,
         )
 
         val expectedResult = RestrictionCheckResult(true)
@@ -86,7 +88,8 @@ class RestrictionServiceTest {
             name = randomString(),
             attributes = emptyList(),
             content = emptyList(),
-            restrictions = listOf(restriction)
+            restrictions = listOf(restriction),
+            source = MetaSource.ORIGINAL,
         )
     }
 }

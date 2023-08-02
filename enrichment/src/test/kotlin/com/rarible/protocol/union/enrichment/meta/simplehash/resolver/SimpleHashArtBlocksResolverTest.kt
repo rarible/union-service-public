@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverterService
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
@@ -86,7 +87,8 @@ class SimpleHashArtBlocksResolverTest {
                             height = 1600
                         )
                     ),
-                )
+                ),
+                source = MetaSource.SIMPLE_HASH,
             )
         )
     }

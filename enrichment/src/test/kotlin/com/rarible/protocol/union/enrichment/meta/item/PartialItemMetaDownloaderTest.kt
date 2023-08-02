@@ -3,11 +3,10 @@ package com.rarible.protocol.union.enrichment.meta.item
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.MetaProviderType
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.model.download.ProviderDownloadException
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.enrichment.meta.MetaSource
-import com.rarible.protocol.union.enrichment.meta.WrappedMeta
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
@@ -56,29 +55,17 @@ internal class PartialItemMetaDownloaderTest {
 
         val metaEntry = randomItemMetaDownloadEntry().copy(
             status = DownloadStatus.RETRY_PARTIAL,
-            failedProviders = listOf(MetaProviderType.SIMPLE_HASH)
+            failedProviders = listOf(MetaProviderType.SIMPLE_HASH),
+            data = randomUnionMeta(source = MetaSource.ORIGINAL)
         )
         coEvery { itemRepository.get(ShortItemId(itemId)) } returns randomShortItem().copy(metaEntry = metaEntry)
 
         val updatedMeta = randomUnionMeta()
-        coEvery {
-            provider.fetch(
-                key = itemId,
-                original = WrappedMeta(
-                    source = MetaSource.ORIGINAL,
-                    data = metaEntry.data!!
-                )
-            )
-        } returns WrappedMeta(source = MetaSource.ORIGINAL, data = updatedMeta)
+        coEvery { provider.fetch(itemId, metaEntry.data) } returns updatedMeta
         coEvery { provider.getType() } returns MetaProviderType.SIMPLE_HASH
 
         val enrichedMeta = randomUnionMeta()
-        coEvery {
-            itemMetaContentEnrichmentService.enrcih(
-                key = itemId,
-                meta = WrappedMeta(source = MetaSource.ORIGINAL, data = updatedMeta)
-            )
-        } returns enrichedMeta
+        coEvery { itemMetaContentEnrichmentService.enrcih(itemId, updatedMeta) } returns enrichedMeta
 
         val result = partialItemMetaDownloader.download(itemId.fullId())
 
@@ -97,11 +84,8 @@ internal class PartialItemMetaDownloaderTest {
 
         coEvery {
             provider.fetch(
-                key = itemId,
-                original = WrappedMeta(
-                    source = MetaSource.ORIGINAL,
-                    data = metaEntry.data!!
-                )
+                itemId,
+                metaEntry.data
             )
         } throws ProviderDownloadException(provider = MetaProviderType.SIMPLE_HASH)
         coEvery { provider.getType() } returns MetaProviderType.SIMPLE_HASH

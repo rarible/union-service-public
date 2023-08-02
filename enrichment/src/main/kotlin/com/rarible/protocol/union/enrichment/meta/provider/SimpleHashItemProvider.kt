@@ -5,8 +5,6 @@ import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.download.MetaProviderType
 import com.rarible.protocol.union.core.model.download.ProviderDownloadException
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.enrichment.meta.MetaSource
-import com.rarible.protocol.union.enrichment.meta.WrappedMeta
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaProvider
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -20,28 +18,27 @@ class SimpleHashItemProvider(
 
     override fun getType(): MetaProviderType = MetaProviderType.SIMPLE_HASH
 
-    override suspend fun fetch(key: ItemIdDto, original: WrappedMeta<UnionMeta>?): WrappedMeta<UnionMeta>? {
-        return if (simpleHashService.isSupported(key.blockchain)) {
-            simpleHashService.fetch(key)?.let { simpleHashMeta ->
-                if (simpleHashMeta.content.isEmpty()) {
-                    throw ProviderDownloadException(MetaProviderType.SIMPLE_HASH)
-                }
-                return WrappedMeta(
-                    source = original?.source ?: MetaSource.SIMPLE_HASH,
-                    data = original?.data?.copy(
-                        description = original.data.description ?: simpleHashMeta.description,
-                        content = mergeContent(original.data, simpleHashMeta.content)
-                            .mergeContentProperties(simpleHashMeta),
-                        attributes = original.data.attributes.ifEmpty { simpleHashMeta.attributes },
-                        createdAt = original.data.createdAt ?: simpleHashMeta.createdAt,
-                        externalUri = original.data.externalUri ?: simpleHashMeta.externalUri,
-                        originalMetaUri = original.data.originalMetaUri ?: simpleHashMeta.originalMetaUri
-                    ) ?: simpleHashMeta
-                )
-            } ?: throw ProviderDownloadException(MetaProviderType.SIMPLE_HASH)
-        } else {
-            original
+    override suspend fun fetch(key: ItemIdDto, original: UnionMeta?): UnionMeta? {
+        if (!simpleHashService.isSupported(key.blockchain)) {
+            return original
         }
+
+        val simpleHashMeta = simpleHashService.fetch(key)
+        if (simpleHashMeta == null || simpleHashMeta.content.isEmpty()) {
+            throw ProviderDownloadException(MetaProviderType.SIMPLE_HASH)
+        }
+
+        if (original == null) return simpleHashMeta
+
+        return original.copy(
+            contributors = original.contributors + getType(),
+            description = original.description ?: simpleHashMeta.description,
+            content = mergeContent(original, simpleHashMeta.content).mergeContentProperties(simpleHashMeta),
+            attributes = original.attributes.ifEmpty { simpleHashMeta.attributes },
+            createdAt = original.createdAt ?: simpleHashMeta.createdAt,
+            externalUri = original.externalUri ?: simpleHashMeta.externalUri,
+            originalMetaUri = original.originalMetaUri ?: simpleHashMeta.originalMetaUri
+        )
     }
 
     private fun mergeContent(meta: UnionMeta, simpleHashContent: List<UnionMetaContent>): List<UnionMetaContent> {

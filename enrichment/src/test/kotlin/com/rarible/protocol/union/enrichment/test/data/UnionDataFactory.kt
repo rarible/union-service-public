@@ -26,6 +26,8 @@ import com.rarible.protocol.union.core.model.UnionOrderMatchSell
 import com.rarible.protocol.union.core.model.UnionTransferActivity
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadStatus
+import com.rarible.protocol.union.core.model.download.MetaProviderType
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivityLite
 import com.rarible.protocol.union.core.model.elastic.EsCollection
@@ -131,6 +133,8 @@ fun randomUnionItem(id: ItemIdDto = randomEthItemId()): UnionItem {
 fun randomUnionMeta(
     content: List<UnionMetaContent> = emptyList(),
     attributes: List<UnionMetaAttribute> = listOf(randomUnionMetaAttribute()),
+    source: MetaSource = MetaSource.ORIGINAL,
+    contributors: List<MetaProviderType> = listOf()
 ): UnionMeta {
     return UnionMeta(
         name = randomString(),
@@ -145,7 +149,9 @@ fun randomUnionMeta(
         originalMetaUri = randomString(),
         attributes = attributes,
         content = content,
-        restrictions = listOf()
+        restrictions = listOf(),
+        source = source,
+        contributors = contributors
     )
 }
 

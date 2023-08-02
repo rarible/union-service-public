@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -232,6 +233,7 @@ class SimpleHashServiceTest {
             )
         ),
         restrictions = emptyList(),
-        originalMetaUri = "https://boredapeyachtclub.com/api/mutants/2691"
+        originalMetaUri = "https://boredapeyachtclub.com/api/mutants/2691",
+        source = MetaSource.SIMPLE_HASH,
     )
 }
