@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.meta.item
 
 import com.rarible.core.test.data.randomLong
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -9,11 +10,13 @@ import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomEsItem
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
+import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -45,14 +48,21 @@ internal class ItemMetaRefreshServiceTest {
     @MockK
     private lateinit var metaRefreshRequestRepository: MetaRefreshRequestRepository
 
+    @MockK
+    private lateinit var enrichmentItemService: EnrichmentItemService
+
+    @MockK
+    private lateinit var ff: FeatureFlagsProperties
+
     @BeforeEach
     fun beforeEach() {
-        clearMocks(metaRefreshRequestRepository)
+        clearMocks(metaRefreshRequestRepository, enrichmentItemService, ff)
         coEvery { metaRefreshRequestRepository.save(any()) } returns Unit
+        coEvery { ff.enableCollectionAutoReveal } returns true
     }
 
     @Test
-    fun `collection size is small`() = runBlocking<Unit> {
+    fun `run refresh - ok, small collection`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns randomLong(1000)
 
@@ -63,7 +73,7 @@ internal class ItemMetaRefreshServiceTest {
     }
 
     @Test
-    fun `collection size is too big`() = runBlocking<Unit> {
+    fun `run refresh - fail, big collection`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns 40000 + randomLong(1000)
 
@@ -73,7 +83,7 @@ internal class ItemMetaRefreshServiceTest {
     }
 
     @Test
-    fun `attempts exceeded`() = runBlocking<Unit> {
+    fun `run refresh - fail, too many attempts`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns 1000 + randomLong(1000)
         coEvery { metaRefreshRequestRepository.countForCollectionId(collectionId.fullId()) } returns 3
@@ -82,7 +92,7 @@ internal class ItemMetaRefreshServiceTest {
     }
 
     @Test
-    fun `already scheduled`() = runBlocking<Unit> {
+    fun `run refresh - fail, already in progress`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns 1000 + randomLong(1000)
         coEvery { metaRefreshRequestRepository.countForCollectionId(collectionId.fullId()) } returns 1
@@ -92,7 +102,7 @@ internal class ItemMetaRefreshServiceTest {
     }
 
     @Test
-    fun `check random no changes`() = runBlocking<Unit> {
+    fun `run refresh and auto refresh - fail, no meta changes`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns 1000 + randomLong(1000)
         coEvery { metaRefreshRequestRepository.countForCollectionId(collectionId.fullId()) } returns 2
@@ -131,7 +141,7 @@ internal class ItemMetaRefreshServiceTest {
     }
 
     @Test
-    fun `check random meta changed`() = runBlocking<Unit> {
+    fun `run refresh and auto refresh - ok, meta has been changed`() = runBlocking<Unit> {
         val (collectionId, itemId) = prepareData()
 
         coEvery {
@@ -147,7 +157,7 @@ internal class ItemMetaRefreshServiceTest {
     }
 
     @Test
-    fun `check random partial exception`() = runBlocking<Unit> {
+    fun `run refresh and auto refresh - ok, partial refresh`() = runBlocking<Unit> {
         val (collectionId, itemId) = prepareData()
 
         coEvery {
@@ -163,7 +173,7 @@ internal class ItemMetaRefreshServiceTest {
     }
 
     @Test
-    fun `check random exception`() = runBlocking<Unit> {
+    fun `run refresh and auto refresh - fail, unexpected exception`() = runBlocking<Unit> {
         val (collectionId, itemId) = prepareData()
 
         coEvery {
@@ -176,6 +186,39 @@ internal class ItemMetaRefreshServiceTest {
         coVerify(exactly = 2) {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
         }
+    }
+
+    @Test
+    fun `run refresh on meta change - ok`() = runBlocking<Unit> {
+        val (collectionId, itemId) = prepareData()
+        val meta1 = randomUnionMeta()
+        val meta2 = randomUnionMeta()
+
+        coEvery { enrichmentItemService.getItemCollection(ShortItemId(itemId)) } returns collectionId
+
+        assertThat(itemMetaRefreshService.runRefreshIfItemMetaChanged(itemId, meta1, meta2, true)).isTrue()
+    }
+
+    @Test
+    fun `run refresh on meta change - fail, meta hasn't been changed`() = runBlocking<Unit> {
+        val (collectionId, itemId) = prepareData()
+        val meta1 = randomUnionMeta()
+
+        coEvery { enrichmentItemService.getItemCollection(ShortItemId(itemId)) } returns collectionId
+        assertThat(itemMetaRefreshService.runRefreshIfItemMetaChanged(itemId, meta1, meta1, true)).isFalse()
+    }
+
+    @Test
+    fun `run refresh on meta change - fail, collection is too big`() = runBlocking<Unit> {
+        val collectionId = randomEthCollectionId()
+        val itemId = randomEthItemId()
+        val meta1 = randomUnionMeta()
+        val meta2 = randomUnionMeta()
+
+        coEvery { enrichmentItemService.getItemCollection(ShortItemId(itemId)) } returns collectionId
+        coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns 40000 + randomLong(1000)
+
+        assertThat(itemMetaRefreshService.runRefreshIfItemMetaChanged(itemId, meta1, meta2, true)).isFalse()
     }
 
     private suspend fun prepareData(): Pair<CollectionIdDto, ItemIdDto> {

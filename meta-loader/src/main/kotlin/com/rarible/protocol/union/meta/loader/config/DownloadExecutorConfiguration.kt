@@ -20,6 +20,7 @@ import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipel
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaNotifier
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.meta.item.PartialItemMetaDownloader
 import com.rarible.protocol.union.enrichment.repository.CollectionMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
@@ -57,6 +58,7 @@ class DownloadExecutorConfiguration(
     @Bean
     @Qualifier("item.meta.download.executor.manager")
     fun itemMetaDownloadExecutorManager(
+        itemMetaRefreshService: ItemMetaRefreshService,
         enrichmentBlacklistService: EnrichmentBlacklistService,
         itemMetaRepository: ItemMetaRepository,
         itemMetaDownloader: ItemMetaDownloader,
@@ -70,6 +72,7 @@ class DownloadExecutorConfiguration(
             val conf = getItemPipelineConfiguration(pipeline)
             val pool = DownloadPool(conf.poolSize, "item-meta-task-executor")
             val executor = ItemDownloadExecutor(
+                itemMetaRefreshService,
                 enrichmentBlacklistService,
                 itemMetaRepository,
                 if (pipeline == ItemMetaPipeline.RETRY_PARTIAL.name.lowercase()) {
@@ -80,7 +83,8 @@ class DownloadExecutorConfiguration(
                 itemMetaNotifier,
                 pool,
                 itemDownloadExecutorMetrics,
-                maxRetries
+                maxRetries,
+                metaProperties.simpleHash.enabled
             )
             executors[pipeline] = executor
             logger.info(

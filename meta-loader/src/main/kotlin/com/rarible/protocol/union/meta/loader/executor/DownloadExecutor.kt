@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
+import com.rarible.protocol.union.core.model.download.DownloadTaskSource
 import com.rarible.protocol.union.core.model.download.MetaProviderType
 import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.core.util.LogUtils
@@ -16,10 +17,13 @@ import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaDownl
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
 import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory
 import java.time.Instant
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * Async data download executor, end point of entire download pipeline.
@@ -102,19 +106,24 @@ sealed class DownloadExecutor<T>(
 
     private suspend fun onSuccess(started: Instant, task: DownloadTask, data: T) {
         // For successful case we should rewrite current data anyway
-        var retry = 0
+        val retry = AtomicReference(0)
+        val previous = AtomicReference<T>(null)
         val saved = LogUtils.addToMdc(Pair("source", task.source.name)) {
             repository.update(task.id) { exist ->
                 val current = exist ?: getDefault(task)
+                previous.set(current.data)
                 // If current.status == success, there is no sense to count its previous retries
-                retry = if (current.status != DownloadStatus.SUCCESS) current.retries else 0
+                retry.set(if (current.status != DownloadStatus.SUCCESS) current.retries else 0)
                 current.withSuccessInc(data)
             }
         }
 
-        saved?.let { notifier.notify(saved) }
+        saved?.let {
+            notifier.notify(saved)
+            onSuccessfulDownload(task, previous.get(), saved.data)
+        }
 
-        metrics.onSuccessfulTask(type, blockchainExtractor(task.id), started, task, retry)
+        metrics.onSuccessfulTask(type, blockchainExtractor(task.id), started, task, retry.get())
         logger.info("Data download SUCCEEDED for {} task: {} ({})", type, task.id, task.pipeline)
     }
 
@@ -212,6 +221,7 @@ sealed class DownloadExecutor<T>(
                 task,
                 retry
             )
+
             else -> logger.warn("Incorrect status of failed {} task {} ({}): {}", type, task.id, task.pipeline, status)
         }
     }
@@ -226,19 +236,23 @@ sealed class DownloadExecutor<T>(
         )
     }
 
+    protected open suspend fun onSuccessfulDownload(task: DownloadTask, previous: T?, updated: T?) = Unit
+
     override fun close() {
         pool.close()
     }
 }
 
 class ItemDownloadExecutor(
+    private val itemMetaRefreshService: ItemMetaRefreshService,
     enrichmentBlacklistService: EnrichmentBlacklistService,
     repository: DownloadEntryRepository<UnionMeta>,
     downloader: Downloader<UnionMeta>,
     notifier: DownloadNotifier<UnionMeta>,
     pool: DownloadPool,
     metrics: DownloadExecutorMetrics,
-    maxRetries: Int
+    maxRetries: Int,
+    private val simpleHashEnabled: Boolean
 ) : DownloadExecutor<UnionMeta>(
     enrichmentBlacklistService,
     repository,
@@ -258,6 +272,19 @@ class ItemDownloadExecutor(
         }
         val collectionId = task.id.substringBeforeLast(":")
         return enrichmentBlacklistService.isBlacklisted(collectionId)
+    }
+
+    override suspend fun onSuccessfulDownload(task: DownloadTask, previous: UnionMeta?, updated: UnionMeta?) {
+        // Only EXTERNAL (made by users) refreshes should be checked
+        if (task.pipeline != ItemMetaPipeline.REFRESH.pipeline || task.source != DownloadTaskSource.EXTERNAL) {
+            return
+        }
+        itemMetaRefreshService.runRefreshIfItemMetaChanged(
+            itemId = IdParser.parseItemId(task.id),
+            previous = previous,
+            updated = updated,
+            withSimpleHash = simpleHashEnabled
+        )
     }
 }
 

@@ -133,7 +133,7 @@ fun randomUnionItem(id: ItemIdDto = randomEthItemId()): UnionItem {
 fun randomUnionMeta(
     content: List<UnionMetaContent> = emptyList(),
     attributes: List<UnionMetaAttribute> = listOf(randomUnionMetaAttribute()),
-    source: MetaSource = MetaSource.ORIGINAL,
+    source: MetaSource? = MetaSource.ORIGINAL,
     contributors: List<MetaProviderType> = listOf()
 ): UnionMeta {
     return UnionMeta(

@@ -1,15 +1,18 @@
 package com.rarible.protocol.union.enrichment.meta.item
 
 import com.rarible.core.common.asyncWithTraceId
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -22,6 +25,8 @@ class ItemMetaRefreshService(
     private val itemRepository: ItemRepository,
     private val itemMetaService: ItemMetaService,
     private val metaRefreshRequestRepository: MetaRefreshRequestRepository,
+    private val enrichmentItemService: EnrichmentItemService,
+    private val ff: FeatureFlagsProperties
 ) {
 
     /**
@@ -42,18 +47,19 @@ class ItemMetaRefreshService(
         scheduledAt: Instant,
         withSimpleHash: Boolean = false
     ) {
+        if (metaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId.fullId()) > 0L) {
+            return
+        }
         try {
-            if (metaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId.fullId()) == 0L) {
-                logger.info("Scheduling refresh for $collectionId, full=$full at $scheduledAt")
-                scheduleRefresh(
-                    collectionId = collectionId,
-                    full = full,
-                    scheduledAt = scheduledAt,
-                    withSimpleHash = withSimpleHash
-                )
-            }
+            logger.info("Scheduling refresh for Items in $collectionId, full=$full at $scheduledAt")
+            scheduleRefresh(
+                collectionId = collectionId,
+                full = full,
+                scheduledAt = scheduledAt,
+                withSimpleHash = withSimpleHash
+            )
         } catch (e: Exception) {
-            logger.error("Failed to schedule refresh for $collectionId", e)
+            logger.error("Failed to schedule refresh for Items in $collectionId", e)
         }
     }
 
@@ -66,15 +72,16 @@ class ItemMetaRefreshService(
         full: Boolean,
         withSimpleHash: Boolean = false
     ): Boolean {
-        if (isRefreshAllowed(collectionId)) {
-            scheduleRefresh(
-                collectionId = collectionId,
-                full = full,
-                withSimpleHash = withSimpleHash
-            )
-            return true
+        val collectionFullId = collectionId.fullId()
+        if (!isRefreshAllowed(collectionFullId)) {
+            return false
         }
-        return false
+        scheduleRefresh(
+            collectionId = collectionId,
+            full = full,
+            withSimpleHash = withSimpleHash
+        )
+        return true
     }
 
     /**
@@ -87,15 +94,46 @@ class ItemMetaRefreshService(
         collectionId: CollectionIdDto,
         withSimpleHash: Boolean
     ): Boolean {
-        if (isAutoRefreshAllowed(collectionId.fullId())) {
-            scheduleRefresh(
-                collectionId = collectionId,
-                full = true,
-                withSimpleHash = withSimpleHash
-            )
-            return true
+        val collectionFullId = collectionId.fullId()
+        if (!isAutoRefreshAllowed(collectionFullId) || !checkMetaChanges(collectionFullId)) {
+            return false
         }
-        return false
+
+        scheduleRefresh(
+            collectionId = collectionId,
+            full = true,
+            withSimpleHash = withSimpleHash
+        )
+        return true
+    }
+
+    suspend fun runRefreshIfItemMetaChanged(
+        itemId: ItemIdDto,
+        previous: UnionMeta?,
+        updated: UnionMeta?,
+        withSimpleHash: Boolean
+    ): Boolean {
+        if (!ff.enableCollectionAutoReveal) {
+            return false
+        }
+        // We interested only in cases when meta was exists previously and successfully received again
+        if (previous == null || updated == null || !ItemMetaComparator.hasChanged(itemId, previous, updated)) {
+            return false
+        }
+
+        // Can be null only in case of Solana item
+        val collectionId = enrichmentItemService.getItemCollection(ShortItemId(itemId)) ?: return false
+
+        if (!isAutoRefreshAllowed(collectionId.fullId())) {
+            return false
+        }
+
+        scheduleRefresh(
+            collectionId = collectionId,
+            full = true,
+            withSimpleHash = withSimpleHash
+        )
+        return true
     }
 
     /**
@@ -125,8 +163,7 @@ class ItemMetaRefreshService(
         return metaRefreshRequestRepository.countNotScheduled()
     }
 
-    private suspend fun isRefreshAllowed(collectionId: CollectionIdDto): Boolean {
-        val collectionFullId = collectionId.fullId()
+    private suspend fun isRefreshAllowed(collectionFullId: String): Boolean {
         logger.info("Checking collection $collectionFullId for meta changes")
         val collectionSize = esItemRepository.countItemsInCollection(collectionFullId)
         if (collectionSize < COLLECTION_SIZE_THRESHOLD) {
@@ -153,23 +190,30 @@ class ItemMetaRefreshService(
     }
 
     private suspend fun checkMetaChanges(collectionFullId: String): Boolean {
-        return coroutineScope {
+        val result = coroutineScope {
             esItemRepository.getRandomItemsFromCollection(collectionId = collectionFullId, size = RANDOM_ITEMS_TO_CHECK)
                 .map { esItem ->
                     asyncWithTraceId {
-                        val idDto = IdParser.parseItemId(esItem.itemId)
-                        val oldItem = itemRepository.get(ShortItemId(idDto)) ?: return@asyncWithTraceId false
-                        val meta = try {
-                            itemMetaService.download(itemId = idDto, pipeline = ItemMetaPipeline.REFRESH, force = true)
-                                ?: return@asyncWithTraceId false
+                        val itemId = IdParser.parseItemId(esItem.itemId)
+
+                        val previous = itemRepository.get(ShortItemId(itemId))?.metaEntry?.data
+                            ?: return@asyncWithTraceId false
+
+                        val actual = try {
+                            itemMetaService.download(
+                                itemId = itemId,
+                                pipeline = ItemMetaPipeline.REFRESH,
+                                force = true
+                            ) ?: return@asyncWithTraceId false
                         } catch (e: PartialDownloadException) {
                             e.data as UnionMeta
                         } catch (e: Exception) {
                             return@asyncWithTraceId false
                         }
-                        if (oldItem.metaEntry?.data?.toComparable() != meta.toComparable()) {
+
+                        if (ItemMetaComparator.hasChanged(itemId, previous, actual)) {
                             logger.info(
-                                "Meta changed for item $idDto from ${oldItem.metaEntry?.data} to $meta " +
+                                "Meta changed for item $itemId from $previous to $actual " +
                                     "will allow meta refresh for collection"
                             )
                             true
@@ -179,6 +223,10 @@ class ItemMetaRefreshService(
                     }
                 }.awaitAll()
         }.any { it }
+        if (!result) {
+            logger.info("No meta changes found for sample items from $collectionFullId. Will not auto refresh")
+        }
+        return result
     }
 
     private suspend fun isAutoRefreshAllowed(collectionId: String): Boolean {
@@ -193,10 +241,6 @@ class ItemMetaRefreshService(
         val scheduledCount = metaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId)
         if (scheduledCount > 0) {
             logger.info("Collection refresh already pending for $collectionId. Will not auto refresh")
-            return false
-        }
-        if (!checkMetaChanges(collectionId)) {
-            logger.info("No meta changes found for sample items from $collectionId. Will not auto refresh")
             return false
         }
         return true
