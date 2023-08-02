@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.ItemsDto
+import com.rarible.protocol.union.dto.continuation.DateIdContinuation
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -27,21 +28,32 @@ class ItemReconciliationController(
     ): ItemsDto {
         if (size !in 1..200) throw UnionException("Size param must be between 1 and 200")
 
+        val (from, id) = if (continuation?.contains("_") == true) {
+            val dateIdContinuation = DateIdContinuation.parse(continuation)
+            dateIdContinuation?.date to dateIdContinuation?.id
+        } else {
+            null to continuation
+        }
         val ids = itemRepository.findIdsByLastUpdatedAt(
-            lastUpdatedFrom = lastUpdatedFrom,
+            lastUpdatedFrom = from ?: lastUpdatedFrom,
             lastUpdatedTo = lastUpdatedTo,
-            continuation = continuation?.let { ShortItemId(IdParser.parseItemId(continuation)) }
-        ).map { it.toDto() }
+            fromId = id?.let { ShortItemId(IdParser.parseItemId(id)) },
+            size = size
+        )
         if (ids.isEmpty()) {
             return ItemsDto()
         }
-
-        val items = itemSourceSelectService.getItemsByIds(ids)
-
+        val items = itemSourceSelectService.getItemsByIds(ids.map { it.id.toDto() })
+        val next = if (ids.size == size) {
+            val last = ids.last()
+            DateIdContinuation(last.lastUpdatedAt, last.id.toDto().fullId())
+        } else {
+            null
+        }
         return ItemsDto(
             total = 0,
             items = items,
-            continuation = ids.last().fullId()
+            continuation = next?.toString()
         )
     }
 }

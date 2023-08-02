@@ -5,6 +5,7 @@ import com.rarible.core.apm.SpanType
 import com.rarible.core.mongo.util.div
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
+import com.rarible.protocol.union.enrichment.model.ShortDateIdOwnership
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -23,12 +24,11 @@ import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.and
 import org.springframework.data.mongodb.core.query.exists
+import org.springframework.data.mongodb.core.query.gt
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lte
-import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
 import java.math.BigInteger
 import java.time.Instant
@@ -126,28 +126,30 @@ class OwnershipRepository(
     suspend fun findIdsByLastUpdatedAt(
         lastUpdatedFrom: Instant,
         lastUpdatedTo: Instant,
-        continuation: ShortOwnershipId?,
+        fromId: ShortOwnershipId?,
         size: Int = 20
-    ): List<ShortOwnershipId> =
-        template.find(
-            Query(
-                where(ShortOwnership::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)
-                    .apply {
-                        if (continuation != null) {
-                            and(ShortOwnership::id).gt(continuation)
-                        }
-                    }
+    ): List<ShortDateIdOwnership> {
+        val criteria = if (fromId != null) {
+            Criteria().orOperator(
+                (ShortOwnership::lastUpdatedAt gt lastUpdatedFrom).lte(lastUpdatedTo),
+                (ShortOwnership::lastUpdatedAt isEqualTo lastUpdatedFrom).and("_id").gt(fromId)
             )
-                .with(Sort.by(ShortOwnership::id.name))
-                .withHint(Indices.LAST_UPDATED_AT_ID.indexKeys)
-                .limit(size),
-            IdObject::class.java,
-            ShortOwnership.COLLECTION
-        ).map { it.id }.collectList().awaitFirst()
+        } else {
+            (ShortOwnership::lastUpdatedAt gt lastUpdatedFrom).lte(lastUpdatedTo)
+        }
+        val query = Query
+            .query(criteria)
+            .with(Sort.by(ShortOwnership::lastUpdatedAt.name, ShortOwnership::id.name))
+            .limit(size)
 
-    private data class IdObject(
-        val id: ShortOwnershipId
-    )
+        query.fields()
+            .include(ShortOwnership::id.name)
+            .include(ShortOwnership::lastUpdatedAt.name)
+
+        return template.find(query, ShortDateIdOwnership::class.java, ShortOwnership.COLLECTION)
+            .collectList()
+            .awaitFirst()
+    }
 
     object Indices {
 
@@ -161,12 +163,12 @@ class OwnershipRepository(
             .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
-        val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
+        private val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
             .on("${ShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", Sort.Direction.ASC)
             .on("_id", Sort.Direction.ASC)
             .background()
 
-        val LAST_UPDATED_AT_ID: Index = Index()
+        private val LAST_UPDATED_AT_ID: Index = Index()
             .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.ASC)
             .on("_id", Sort.Direction.ASC)
             .background()
