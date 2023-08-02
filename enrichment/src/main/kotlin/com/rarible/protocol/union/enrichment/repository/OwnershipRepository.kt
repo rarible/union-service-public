@@ -139,6 +139,7 @@ class OwnershipRepository(
                     }
             )
                 .with(Sort.by(ShortOwnership::id.name))
+                .withHint(Indices.LAST_UPDATED_AT_ID.indexKeys)
                 .limit(size),
             IdObject::class.java,
             ShortOwnership.COLLECTION
@@ -165,7 +166,7 @@ class OwnershipRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
-        private val LAST_UPDATED_AT_ID: Index = Index()
+        val LAST_UPDATED_AT_ID: Index = Index()
             .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.ASC)
             .on("_id", Sort.Direction.ASC)
             .background()
