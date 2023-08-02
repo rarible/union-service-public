@@ -1,10 +1,9 @@
 package com.rarible.protocol.union.worker.job
 
-import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaRefreshService
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.MetaAutoRefreshState
 import com.rarible.protocol.union.enrichment.model.MetaAutoRefreshStatus
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
-import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.worker.config.MetaAutoRefreshProperties
 import com.rarible.protocol.union.worker.config.WorkerProperties
@@ -32,10 +31,7 @@ internal class MetaAutoRefreshJobTest {
     private lateinit var metaAutoRefreshStateRepository: MetaAutoRefreshStateRepository
 
     @MockK
-    private lateinit var collectionMetaRefreshService: CollectionMetaRefreshService
-
-    @MockK
-    private lateinit var metaRefreshRequestRepository: MetaRefreshRequestRepository
+    private lateinit var itemMetaRefreshService: ItemMetaRefreshService
 
     @SpyK
     private var simpleHashEnabled: Boolean = true
@@ -50,12 +46,12 @@ internal class MetaAutoRefreshJobTest {
 
     @Test
     fun handle() = runTest {
-        val state1 = MetaAutoRefreshState(
-            id = randomEthCollectionId().fullId(),
-        )
-        val state2 = MetaAutoRefreshState(
-            id = randomEthCollectionId().fullId(),
-        )
+        val collectionId1 = randomEthCollectionId()
+        val state1 = MetaAutoRefreshState(id = collectionId1.fullId())
+
+        val collectionId2 = randomEthCollectionId()
+        val state2 = MetaAutoRefreshState(id = collectionId2.fullId())
+
         coEvery {
             metaAutoRefreshStateRepository.loadToCheckCreated(match {
                 it.isAfter(Instant.now().minus(Duration.ofDays(31))) && it.isBefore(
@@ -63,13 +59,17 @@ internal class MetaAutoRefreshJobTest {
                 )
             })
         } returns flowOf(state1, state2)
+
+        val collectionId3 = randomEthCollectionId()
         val state3 = MetaAutoRefreshState(
-            id = randomEthCollectionId().fullId(),
+            id = collectionId3.fullId(),
             status = MetaAutoRefreshStatus.REFRESHED,
             lastRefreshedAt = Instant.now().minus(Duration.ofHours(2)),
         )
+
+        val collectionId4 = randomEthCollectionId()
         val state4 = MetaAutoRefreshState(
-            id = randomEthCollectionId().fullId(),
+            id = collectionId4.fullId(),
             status = MetaAutoRefreshStatus.REFRESHED,
             lastRefreshedAt = Instant.now().minus(Duration.ofHours(2)),
         )
@@ -85,20 +85,16 @@ internal class MetaAutoRefreshJobTest {
             })
         } returns flowOf(state3, state4)
 
-        coEvery { collectionMetaRefreshService.shouldAutoRefresh(state1.id) } returns false
-        coEvery { collectionMetaRefreshService.shouldAutoRefresh(state2.id) } returns true
-        coEvery { collectionMetaRefreshService.shouldAutoRefresh(state3.id) } returns false
-        coEvery { collectionMetaRefreshService.shouldAutoRefresh(state4.id) } returns true
+        coEvery { itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId1, simpleHashEnabled) } returns false
+        coEvery { itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId2, simpleHashEnabled) } returns true
+        coEvery { itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId3, simpleHashEnabled) } returns false
+        coEvery { itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId4, simpleHashEnabled) } returns true
 
-        coEvery { metaRefreshRequestRepository.save(any()) } returns Unit
         coEvery { metaAutoRefreshStateRepository.save(any()) } returns Unit
 
         metaAutoRefreshJob.handle()
 
         coVerify(exactly = 2) {
-            metaRefreshRequestRepository.save(match {
-                (it.collectionId == state2.id || it.collectionId == state4.id) && it.withSimpleHash
-            })
             metaAutoRefreshStateRepository.save(match {
                 it.status == MetaAutoRefreshStatus.REFRESHED && it.lastRefreshedAt != null &&
                     (it.id == state2.id || it.id == state4.id)

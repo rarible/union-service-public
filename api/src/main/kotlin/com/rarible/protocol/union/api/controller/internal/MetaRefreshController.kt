@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.withTraceId
 import com.rarible.core.task.TaskRepository
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
-import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
-import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import org.slf4j.LoggerFactory
@@ -22,7 +22,7 @@ import java.time.Instant
 
 @RestController
 class MetaRefreshController(
-    private val metaRefreshRequestRepository: MetaRefreshRequestRepository,
+    private val itemMetaRefreshService: ItemMetaRefreshService,
     private val unionMetaProperties: UnionMetaProperties,
     private val taskRepository: TaskRepository,
     private val objectMapper: ObjectMapper,
@@ -38,7 +38,7 @@ class MetaRefreshController(
         @RequestBody body: String,
         @RequestParam(value = "withSimpleHash", required = false, defaultValue = "false") withSimpleHash: Boolean
     ): Unit = withTraceId {
-        scheduleRefresh(
+        itemMetaRefreshService.scheduleRefreshIfNotRunning(
             collections = parseCollectionsFromBody(body),
             full = "full" == mode,
             scheduledAt = scheduledAt ?: nowMillis(),
@@ -52,12 +52,12 @@ class MetaRefreshController(
     )
     suspend fun cancelRefresh(): Unit = withTraceId {
         logger.info("Cancelling refresh")
-        metaRefreshRequestRepository.deleteAll()
+        itemMetaRefreshService.deleteAllScheduledRequests()
     }
 
     @GetMapping(value = ["/maintenance/items/meta/refresh/status"], produces = ["text/plain"])
     suspend fun status(): String {
-        val queueSize = metaRefreshRequestRepository.countNotScheduled()
+        val queueSize = itemMetaRefreshService.countNotScheduled()
         val processing = taskRepository.findByRunning(true)
             .filter { it.type in setOf("META_REFRESH_TASK", "META_REFRESH_SIMPLEHASH_TASK") }
             .asFlow().toList()
@@ -66,38 +66,11 @@ class MetaRefreshController(
 Currently processing: $processing""".trimIndent()
     }
 
-    private fun parseCollectionsFromBody(body: String): List<String> {
-        return body.split("\n").filter { it.isNotBlank() }.map { sanitise(it) }
-    }
-
-    private fun sanitise(value: String): String {
-        val sanitised = value.replace("\"", "").trim()
-        return IdParser.parseCollectionId(sanitised).fullId()
-    }
-
-    private suspend fun scheduleRefresh(
-        collections: List<String>,
-        full: Boolean,
-        scheduledAt: Instant,
-        withSimpleHash: Boolean = false
-    ) {
-        collections.map { id ->
-            try {
-                if (metaRefreshRequestRepository.countNotScheduledForCollectionId(id) == 0L) {
-                    logger.info("Scheduling refresh for $id, full=$full at $scheduledAt")
-                    metaRefreshRequestRepository.save(
-                        MetaRefreshRequest(
-                            collectionId = id,
-                            full = full,
-                            scheduledAt = scheduledAt,
-                            withSimpleHash = withSimpleHash
-                        )
-                    )
-                }
-            } catch (e: Exception) {
-                logger.error("Failed to schedule refresh for $id", e)
-            }
-        }
+    private fun parseCollectionsFromBody(body: String): List<CollectionIdDto> {
+        return body.split("\n")
+            .filter { it.isNotBlank() }
+            .map { it.replace("\"", "").trim() }
+            .map { IdParser.parseCollectionId(it) }
     }
 
     companion object {
