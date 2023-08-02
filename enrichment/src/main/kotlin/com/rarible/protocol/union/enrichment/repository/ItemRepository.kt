@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.enrichment.model.ShortDateIdItem
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
@@ -28,11 +29,11 @@ import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.and
+import org.springframework.data.mongodb.core.query.gt
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lt
 import org.springframework.data.mongodb.core.query.lte
-import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.Instant
@@ -161,24 +162,27 @@ class ItemRepository(
     suspend fun findIdsByLastUpdatedAt(
         lastUpdatedFrom: Instant,
         lastUpdatedTo: Instant,
-        continuation: ShortItemId?,
+        fromId: ShortItemId?,
         size: Int = 20
-    ): List<ShortItemId> {
-        return template.find(
-            Query(
-                where(ShortItem::lastUpdatedAt).gt(lastUpdatedFrom).lte(lastUpdatedTo)
-                    .apply {
-                        if (continuation != null) {
-                            and(ShortItem::id).gt(continuation)
-                        }
-                    }
+    ): List<ShortDateIdItem> {
+        val criteria = if (fromId != null) {
+            Criteria().orOperator(
+                (ShortItem::lastUpdatedAt gt lastUpdatedFrom).lte(lastUpdatedTo),
+                (ShortItem::lastUpdatedAt isEqualTo lastUpdatedFrom).and("_id").gt(fromId)
             )
-                .with(Sort.by(ShortItem::id.name))
-                .limit(size),
-            IdObject::class.java,
-            ShortItem.COLLECTION
-        )
-            .map { it.id }
+        } else {
+            (ShortItem::lastUpdatedAt gt lastUpdatedFrom).lte(lastUpdatedTo)
+        }
+        val query = Query
+            .query(criteria)
+            .with(Sort.by(ShortItem::lastUpdatedAt.name, ShortItem::id.name))
+            .limit(size)
+
+        query.fields()
+            .include(ShortItem::id.name)
+            .include(ShortItem::lastUpdatedAt.name)
+
+        return template.find(query, ShortDateIdItem::class.java, ShortItem.COLLECTION)
             .collectList()
             .awaitFirst()
     }
@@ -191,10 +195,6 @@ class ItemRepository(
         ).with(Sort.by(ShortItem::id.name)),
         ShortItem::class.java
     ).asFlow()
-
-    private data class IdObject(
-        val id: ShortItemId
-    )
 
     companion object {
 
