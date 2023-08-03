@@ -59,8 +59,11 @@ abstract class DownloadScheduler<T>(
         val exist = repository.getAll(ids).associateByTo(HashMap()) { it.id }
 
         val notFound = tasks.filter {
-            logger.info("Entry with key {} already exists, debouncing task", it.id)
-            exist[it.id] == null
+            val result = exist[it.id] == null
+            if (!result && !it.force) {
+                logger.info("Initial entry with key {} already exists, skipping it", it.id)
+            }
+            result
         }.groupBy { it.id }
 
         // Potentially there could be several tasks for same entry
