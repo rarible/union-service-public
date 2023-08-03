@@ -25,6 +25,7 @@ import com.rarible.protocol.union.enrichment.meta.item.PartialItemMetaDownloader
 import com.rarible.protocol.union.enrichment.repository.CollectionMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.meta.loader.executor.CollectionDownloadExecutor
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutor
 import com.rarible.protocol.union.meta.loader.executor.DownloadExecutorHandler
@@ -59,6 +60,7 @@ class DownloadExecutorConfiguration(
     @Qualifier("item.meta.download.executor.manager")
     fun itemMetaDownloadExecutorManager(
         itemMetaRefreshService: ItemMetaRefreshService,
+        enrichmentItemService: EnrichmentItemService,
         enrichmentBlacklistService: EnrichmentBlacklistService,
         itemMetaRepository: ItemMetaRepository,
         itemMetaDownloader: ItemMetaDownloader,
@@ -73,6 +75,7 @@ class DownloadExecutorConfiguration(
             val pool = DownloadPool(conf.poolSize, "item-meta-task-executor")
             val executor = ItemDownloadExecutor(
                 itemMetaRefreshService,
+                enrichmentItemService,
                 enrichmentBlacklistService,
                 itemMetaRepository,
                 if (pipeline == ItemMetaPipeline.RETRY_PARTIAL.name.lowercase()) {

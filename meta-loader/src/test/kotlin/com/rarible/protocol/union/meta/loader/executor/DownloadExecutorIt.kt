@@ -19,6 +19,8 @@ import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.meta.loader.test.AbstractIntegrationTest
@@ -58,9 +60,11 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var enrichmentBlacklistService: EnrichmentBlacklistService
 
-    private val itemMetaRefreshService: ItemMetaRefreshService = mockk() {
+    private val itemMetaRefreshService: ItemMetaRefreshService = mockk {
         coEvery { runRefreshIfItemMetaChanged(any(), any(), any(), any()) } returns true
     }
+
+    private val enrichmentItemService: EnrichmentItemService = mockk()
 
     val downloader: ItemMetaDownloader = mockk() { every { type } returns "Item" }
     val notifier: DownloadNotifier<UnionMeta> = mockk { coEvery { notify(any()) } returns Unit }
@@ -76,9 +80,10 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(testContentMetaReceiver)
+        clearMocks(testContentMetaReceiver, enrichmentItemService)
         downloadExecutor = ItemDownloadExecutor(
             itemMetaRefreshService,
+            enrichmentItemService,
             enrichmentBlacklistService,
             repository,
             downloader,
@@ -92,6 +97,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         itemId = randomEthItemId()
         fullItemId = itemId.fullId()
         meta = randomUnionMeta()
+        coEvery { enrichmentItemService.fetchOrNull(ShortItemId(itemId)) } returns randomUnionItem()
     }
 
     @Test
@@ -185,6 +191,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.fails).isEqualTo(entry.fails)
 
         coVerify(exactly = 1) { notifier.notify(saved) }
+        coVerify(exactly = 1) { enrichmentItemService.fetchOrNull(ShortItemId(itemId)) }
         verifyItemUpdated(itemId, currentItem)
     }
 
@@ -203,6 +210,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.fails).isEqualTo(entry.fails)
 
         coVerify(exactly = 1) { notifier.notify(saved) }
+        coVerify(exactly = 1) { enrichmentItemService.fetchOrNull(ShortItemId(itemId)) }
         verifyItemUpdated(itemId, currentItem)
     }
 
@@ -221,6 +229,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.fails).isEqualTo(entry.fails)
 
         coVerify(exactly = 1) { notifier.notify(saved) }
+        coVerify(exactly = 1) { enrichmentItemService.fetchOrNull(ShortItemId(itemId)) }
         verifyItemUpdated(itemId, currentItem)
     }
 
@@ -241,6 +250,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
         coVerify(exactly = 1) { notifier.notify(saved) }
         coVerify(exactly = 1) { itemMetaRefreshService.runRefreshIfItemMetaChanged(itemId, meta, meta, false) }
+        coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
         verifyItemUpdated(itemId, currentItem)
     }
 
@@ -261,6 +271,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
         coVerify(exactly = 1) { notifier.notify(saved) }
         coVerify(exactly = 0) { itemMetaRefreshService.runRefreshIfItemMetaChanged(any(), any(), any(), any()) }
+        coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
         verifyItemUpdated(itemId, currentItem)
     }
 
@@ -279,6 +290,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.fails).isEqualTo(entry.fails + 1)
 
         coVerify(exactly = 0) { notifier.notify(any()) }
+        coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
         verifyItemNotChanged(itemId, currentItem)
     }
 
@@ -301,6 +313,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.fails).isEqualTo(entry.fails + 1)
 
         coVerify(exactly = 0) { notifier.notify(any()) }
+        coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
         verifyItemNotChanged(itemId, currentItem)
     }
 
@@ -319,6 +332,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.fails).isEqualTo(entry.fails + 1)
 
         coVerify(exactly = 0) { notifier.notify(any()) }
+        coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
         val savedItem = itemRepository.get(ShortItemId(itemId))!!
         verifyItemNotChanged(itemId, savedItem)
     }
@@ -329,6 +343,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         downloadExecutor.execute(listOf(randomTask(fullItemId).copy(scheduledAt = Instant.now().minusSeconds(1))))
 
         coVerify(exactly = 0) { downloader.download(any()) }
+        coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
     }
 
     @Test
@@ -351,6 +366,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.failedProviders).isEqualTo(entry.failedProviders)
 
         coVerify(exactly = 0) { notifier.notify(any()) }
+        coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
         verifyItemNotChanged(itemId, currentItem)
     }
 
@@ -382,6 +398,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.data).isEqualTo(partialMeta)
 
         coVerify(exactly = 1) { notifier.notify(saved) }
+        coVerify(exactly = 1) { enrichmentItemService.fetchOrNull(ShortItemId(itemId)) }
     }
 
     @Test
@@ -417,6 +434,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.data).isEqualTo(partialMeta)
 
         coVerify(exactly = 0) { notifier.notify(any()) }
+        coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
         verifyItemNotChanged(itemId, currentItem)
     }
 
