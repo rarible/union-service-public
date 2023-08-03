@@ -211,15 +211,7 @@ class ItemMetaRefreshService(
                             return@asyncWithTraceId false
                         }
 
-                        if (ItemMetaComparator.hasChanged(itemId, previous, actual)) {
-                            logger.info(
-                                "Meta changed for item $itemId from $previous to $actual " +
-                                    "will allow meta refresh for collection"
-                            )
-                            true
-                        } else {
-                            false
-                        }
+                        ItemMetaComparator.hasChanged(itemId, previous, actual)
                     }
                 }.awaitAll()
         }.any { it }

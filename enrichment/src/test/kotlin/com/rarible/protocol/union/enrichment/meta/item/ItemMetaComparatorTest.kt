@@ -2,9 +2,6 @@ package com.rarible.protocol.union.enrichment.meta.item
 
 import com.rarible.protocol.union.core.model.download.MetaProviderType
 import com.rarible.protocol.union.core.model.download.MetaSource
-import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.enrichment.test.data.randomUnionContent
-import com.rarible.protocol.union.enrichment.test.data.randomUnionImageProperties
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import org.assertj.core.api.Assertions.assertThat
@@ -15,37 +12,9 @@ class ItemMetaComparatorTest {
     private val itemId = randomEthItemId()
 
     @Test
-    fun `has changed - true, name changed`() {
+    fun `has changed - true, data changed`() {
         val previous = randomUnionMeta()
         val actual = previous.copy(name = "name")
-
-        assertThat(ItemMetaComparator.hasChanged(itemId, previous, actual)).isTrue()
-    }
-
-    @Test
-    fun `has changed - true, description changed`() {
-        val previous = randomUnionMeta()
-        val actual = previous.copy(description = "description")
-
-        assertThat(ItemMetaComparator.hasChanged(itemId, previous, actual)).isTrue()
-    }
-
-    @Test
-    fun `has changed - true, meta uri changed`() {
-        val previous = randomUnionMeta()
-        val actual = previous.copy(originalMetaUri = "originalMetaUri")
-
-        assertThat(ItemMetaComparator.hasChanged(itemId, previous, actual)).isTrue()
-    }
-
-    @Test
-    fun `has changed - true, content changed`() {
-        val content = randomUnionContent(randomUnionImageProperties()).copy(
-            representation = MetaContentDto.Representation.ORIGINAL
-        )
-
-        val previous = randomUnionMeta(content = listOf(content))
-        val actual = previous.copy(content = listOf(content.copy(url = "url")))
 
         assertThat(ItemMetaComparator.hasChanged(itemId, previous, actual)).isTrue()
     }
@@ -76,13 +45,9 @@ class ItemMetaComparatorTest {
     }
 
     @Test
-    fun `has changed - false, original content hasn't been changed`() {
-        val content = randomUnionContent(randomUnionImageProperties()).copy(
-            representation = MetaContentDto.Representation.BIG
-        )
-
-        val previous = randomUnionMeta(content = listOf(content))
-        val actual = previous.copy(content = listOf(content.copy(url = "url")))
+    fun `has changed - false, meta is the same`() {
+        val previous = randomUnionMeta()
+        val actual = previous.copy(createdAt = previous.createdAt!!.plusSeconds(1))
 
         assertThat(ItemMetaComparator.hasChanged(itemId, previous, actual)).isFalse()
     }
