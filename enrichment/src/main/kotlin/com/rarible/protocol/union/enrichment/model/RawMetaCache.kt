@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.enrichment.model
 
-import com.rarible.protocol.union.enrichment.meta.MetaSource
+import com.rarible.protocol.union.core.model.download.MetaSource
 import org.springframework.data.annotation.AccessType
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient

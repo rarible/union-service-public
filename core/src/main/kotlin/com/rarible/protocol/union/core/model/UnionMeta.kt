@@ -1,9 +1,13 @@
 package com.rarible.protocol.union.core.model
 
+import com.rarible.protocol.union.core.model.download.MetaProviderType
+import com.rarible.protocol.union.core.model.download.MetaSource
 import java.time.Instant
 
 data class UnionMeta(
     val name: String,
+    val source: MetaSource?,
+    val contributors: List<MetaProviderType> = emptyList(),
     val collectionId: String? = null,
     val description: String? = null,
     val createdAt: Instant? = null,

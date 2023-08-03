@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
@@ -33,7 +34,8 @@ open class SimpleHashResolver(
             originalMetaUri = source.extraMetadata?.metadataOriginalUrl,
             attributes = attributes(source),
             content = content(source),
-            restrictions = emptyList()
+            restrictions = emptyList(),
+            source = MetaSource.SIMPLE_HASH,
         )
     }
 

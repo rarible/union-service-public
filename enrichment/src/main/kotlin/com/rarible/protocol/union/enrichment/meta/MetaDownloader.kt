@@ -46,15 +46,12 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
         }
     }
 
-    private suspend fun getMeta(key: K): WrappedMeta<T>? {
+    private suspend fun getMeta(key: K): T? {
         val (id, blockchain) = metaContentEnrichmentService.generaliseKey(key)
         try {
             val result = getRawMeta(key)
             metrics.onMetaFetched(blockchain)
-            return WrappedMeta(
-                source = MetaSource.ORIGINAL,
-                data = result
-            )
+            return result
         } catch (e: UnionMetaException) {
             logger.error("Meta fetching failed with code: {} for $type {}", e.code.name, id)
 

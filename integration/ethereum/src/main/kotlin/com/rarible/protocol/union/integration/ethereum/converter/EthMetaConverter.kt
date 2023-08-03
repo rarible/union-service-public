@@ -18,6 +18,7 @@ import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionUnknownProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MetaContentDto
 
@@ -46,7 +47,8 @@ object EthMetaConverter {
             },
             content = source.content.map { convert(it) },
             // TODO deprecated, remove later
-            restrictions = emptyList()
+            restrictions = emptyList(),
+            source = MetaSource.ORIGINAL,
         )
     }
 

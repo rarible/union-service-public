@@ -44,5 +44,7 @@ data class FeatureFlagsProperties(
     val enableMongoActivityWrite: Boolean = false,
     val enableMongoActivityRead: Boolean = false,
 
-    val enableInternalEventChunkAsyncHandling: Boolean = true
+    val enableInternalEventChunkAsyncHandling: Boolean = true,
+
+    val enableCollectionAutoReveal: Boolean = true
 )

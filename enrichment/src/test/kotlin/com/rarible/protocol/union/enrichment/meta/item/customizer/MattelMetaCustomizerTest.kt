@@ -10,8 +10,6 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentMattelMetaCustomizerProperties
-import com.rarible.protocol.union.enrichment.meta.MetaSource
-import com.rarible.protocol.union.enrichment.meta.WrappedMeta
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -51,7 +49,7 @@ class MattelMetaCustomizerTest {
 
         val customizer = MattelMetaCustomizer(listOf(HotWheelsCardMetaCustomizer(properties)))
 
-        val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
+        val customized = customizer.customize(itemId, meta)
 
         assertThat(customized.name).isEqualTo("carName_value #cardId_value")
         assertThat(customized.rights).isEqualTo("licensorLegal_value")
@@ -76,7 +74,7 @@ class MattelMetaCustomizerTest {
 
         val customizer = MattelMetaCustomizer(listOf(HotWheelsPackMetaCustomizer(properties)))
 
-        val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
+        val customized = customizer.customize(itemId, meta)
 
         assertThat(customized.name).isEqualTo("seriesName_value")
         assertThat(customized.description).isEqualTo("packDescription_value")
@@ -129,7 +127,7 @@ class MattelMetaCustomizerTest {
 
         val customizer = MattelMetaCustomizer(listOf(BarbieCardMetaCustomizer(properties)))
 
-        val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
+        val customized = customizer.customize(itemId, meta)
 
         assertThat(customized.name).isEqualTo("name_value #cardId_value")
         assertThat(customized.rights).isEqualTo("eula_value")
@@ -153,7 +151,7 @@ class MattelMetaCustomizerTest {
 
         val customizer = MattelMetaCustomizer(listOf(BarbiePackMetaCustomizer(properties)))
 
-        val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
+        val customized = customizer.customize(itemId, meta)
 
         assertThat(customized.name).isEqualTo("packName_value #1")
         assertThat(customized.description).isEqualTo("packDescription_value")
@@ -178,7 +176,7 @@ class MattelMetaCustomizerTest {
 
         val customizer = MattelMetaCustomizer(listOf(BarbieTokenMetaCustomizer(properties)))
 
-        val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
+        val customized = customizer.customize(itemId, meta)
 
         assertThat(customized.name).isEqualTo("name_value #cardId_value")
         assertThat(customized.rights).isEqualTo("legal_value")
@@ -195,7 +193,7 @@ class MattelMetaCustomizerTest {
 
         val customizer = MattelMetaCustomizer(listOf(BarbieCardMetaCustomizer(properties)))
 
-        val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
+        val customized = customizer.customize(itemId, meta)
 
         assertThat(customized.content[0].properties).isInstanceOf(UnionVideoProperties::class.java)
     }
@@ -215,7 +213,7 @@ class MattelMetaCustomizerTest {
 
         val customizer = MattelMetaCustomizer(listOf(BarbieCardMetaCustomizer(properties)))
 
-        val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
+        val customized = customizer.customize(itemId, meta)
 
         assertThat(customized.content[0].properties).isInstanceOf(UnionVideoProperties::class.java)
     }
@@ -229,7 +227,7 @@ class MattelMetaCustomizerTest {
 
         val customizer = MattelMetaCustomizer(listOf(BarbieTokenMetaCustomizer(properties)))
 
-        val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
+        val customized = customizer.customize(itemId, meta)
 
         assertThat(customized.content[0].properties).isNull()
     }
@@ -249,7 +247,7 @@ class MattelMetaCustomizerTest {
 
         val customizer = MattelMetaCustomizer(listOf(BarbieTokenMetaCustomizer(properties)))
 
-        val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
+        val customized = customizer.customize(itemId, meta)
 
         assertThat(customized.content[0].properties).isInstanceOf(UnionImageProperties::class.java)
     }
@@ -269,7 +267,7 @@ class MattelMetaCustomizerTest {
 
         val customizer = MattelMetaCustomizer(listOf(BarbieTokenMetaCustomizer(properties)))
 
-        val customized = customizer.customize(itemId, WrappedMeta(MetaSource.ORIGINAL, meta)).data
+        val customized = customizer.customize(itemId, meta)
 
         assertThat(customized.content[0].properties).isInstanceOf(UnionImageProperties::class.java)
     }

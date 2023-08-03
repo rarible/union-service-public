@@ -5,12 +5,15 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
+import com.rarible.protocol.union.core.model.download.DownloadTaskSource
 import com.rarible.protocol.union.core.model.download.MetaProviderType
 import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.configuration.MetaTrimmingProperties
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
@@ -24,6 +27,7 @@ import com.rarible.protocol.union.meta.loader.test.data.randomFailedMetaEntry
 import com.rarible.protocol.union.meta.loader.test.data.randomMetaEntry
 import com.rarible.protocol.union.meta.loader.test.data.randomRetryMetaEntry
 import com.rarible.protocol.union.meta.loader.test.data.randomTask
+import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -54,6 +58,10 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var enrichmentBlacklistService: EnrichmentBlacklistService
 
+    private val itemMetaRefreshService: ItemMetaRefreshService = mockk() {
+        coEvery { runRefreshIfItemMetaChanged(any(), any(), any(), any()) } returns true
+    }
+
     val downloader: ItemMetaDownloader = mockk() { every { type } returns "Item" }
     val notifier: DownloadNotifier<UnionMeta> = mockk { coEvery { notify(any()) } returns Unit }
     val pool = DownloadPool(2, "item-meta-test")
@@ -68,7 +76,9 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
     @BeforeEach
     fun beforeEach() {
+        clearMocks(testContentMetaReceiver)
         downloadExecutor = ItemDownloadExecutor(
+            itemMetaRefreshService,
             enrichmentBlacklistService,
             repository,
             downloader,
@@ -76,6 +86,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
             pool,
             metrics,
             maxRetries,
+            false
         )
         now = nowMillis()
         itemId = randomEthItemId()
@@ -86,8 +97,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     @Test
     fun `initial task - success`() = runBlocking<Unit> {
         val task = randomTask(fullItemId)
-        createItem(itemId, null)
-        val savedItem = itemRepository.get(ShortItemId(itemId))!!
+        val currentItem = createItem(itemId, null)
 
         mockGetMeta(fullItemId, meta)
 
@@ -107,14 +117,13 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.errorMessage).isNull()
 
         coVerify(exactly = 1) { notifier.notify(saved) }
-        verifyItemUpdated(itemId, savedItem)
+        verifyItemUpdated(itemId, currentItem)
     }
 
     @Test
     fun `initial task - success, trim`() = runBlocking<Unit> {
         val task = randomTask(fullItemId)
         createItem(itemId, null)
-        itemRepository.get(ShortItemId(itemId))!!
 
         mockGetMeta(
             fullItemId,
@@ -138,8 +147,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     @Test
     fun `initial task - failed`() = runBlocking<Unit> {
         val task = randomTask(fullItemId)
-        createItem(itemId, null)
-        val savedItem = itemRepository.get(ShortItemId(itemId))!!
+        val currentItem = createItem(itemId, null)
 
         mockGetMetaFailed(fullItemId, "failed")
 
@@ -159,15 +167,13 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.errorMessage).isEqualTo("failed")
 
         coVerify(exactly = 0) { notifier.notify(any()) }
-        verifyItemNotChanged(itemId, savedItem)
+        verifyItemNotChanged(itemId, currentItem)
     }
 
     @Test
     fun `initial task - scheduled to succeeded`() = runBlocking<Unit> {
         val entry = randomRetryMetaEntry(fullItemId).copy(status = DownloadStatus.SCHEDULED)
-        createItem(itemId, entry)
-
-        val savedItem = itemRepository.get(ShortItemId(itemId))!!
+        val currentItem = createItem(itemId, entry)
         mockGetMeta(fullItemId, meta)
 
         downloadExecutor.execute(listOf(randomTask(fullItemId)))
@@ -179,14 +185,13 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.fails).isEqualTo(entry.fails)
 
         coVerify(exactly = 1) { notifier.notify(saved) }
-        verifyItemUpdated(itemId, savedItem)
+        verifyItemUpdated(itemId, currentItem)
     }
 
     @Test
     fun `forced task - retry to succeeded`() = runBlocking<Unit> {
         val entry = randomFailedMetaEntry(fullItemId)
-        createItem(itemId, entry)
-        val savedItem = itemRepository.get(ShortItemId(itemId))!!
+        val currentItem = createItem(itemId, entry)
         mockGetMeta(fullItemId, meta)
 
         downloadExecutor.execute(listOf(randomTask(fullItemId)))
@@ -198,15 +203,13 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.fails).isEqualTo(entry.fails)
 
         coVerify(exactly = 1) { notifier.notify(saved) }
-        verifyItemUpdated(itemId, savedItem)
+        verifyItemUpdated(itemId, currentItem)
     }
 
     @Test
     fun `forced task - failed to succeeded`() = runBlocking<Unit> {
         val entry = randomFailedMetaEntry(fullItemId)
-        createItem(itemId, entry)
-        val savedItem = itemRepository.get(ShortItemId(itemId))!!
-
+        val currentItem = createItem(itemId, entry)
         mockGetMeta(fullItemId, meta)
 
         downloadExecutor.execute(listOf(randomTask(fullItemId)))
@@ -218,14 +221,53 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.fails).isEqualTo(entry.fails)
 
         coVerify(exactly = 1) { notifier.notify(saved) }
-        verifyItemUpdated(itemId, savedItem)
+        verifyItemUpdated(itemId, currentItem)
+    }
+
+    @Test
+    fun `forced task - refreshed, collection meta refresh triggered`() = runBlocking<Unit> {
+        val entry = randomMetaEntry(fullItemId, meta)
+        val currentItem = createItem(itemId, entry)
+
+        mockGetMeta(fullItemId, meta)
+        val task = randomTask(fullItemId).copy(
+            pipeline = ItemMetaPipeline.REFRESH.pipeline,
+            source = DownloadTaskSource.EXTERNAL
+        )
+
+        downloadExecutor.execute(listOf(task))
+
+        val saved = repository.get(fullItemId)!!
+
+        coVerify(exactly = 1) { notifier.notify(saved) }
+        coVerify(exactly = 1) { itemMetaRefreshService.runRefreshIfItemMetaChanged(itemId, meta, meta, false) }
+        verifyItemUpdated(itemId, currentItem)
+    }
+
+    @Test
+    fun `forced task - refreshed, collection meta refresh not triggered`() = runBlocking<Unit> {
+        val entry = randomMetaEntry(fullItemId, meta)
+        val currentItem = createItem(itemId, entry)
+
+        mockGetMeta(fullItemId, meta)
+        val task = randomTask(fullItemId).copy(
+            pipeline = ItemMetaPipeline.REFRESH.pipeline,
+            source = DownloadTaskSource.INTERNAL
+        )
+
+        downloadExecutor.execute(listOf(task))
+
+        val saved = repository.get(fullItemId)!!
+
+        coVerify(exactly = 1) { notifier.notify(saved) }
+        coVerify(exactly = 0) { itemMetaRefreshService.runRefreshIfItemMetaChanged(any(), any(), any(), any()) }
+        verifyItemUpdated(itemId, currentItem)
     }
 
     @Test
     fun `forced task - retry increased`() = runBlocking<Unit> {
         val entry = randomMetaEntry(fullItemId).copy(retries = 0, status = DownloadStatus.RETRY)
-        createItem(itemId, entry)
-        val savedItem = itemRepository.get(ShortItemId(itemId))!!
+        val currentItem = createItem(itemId, entry)
         mockGetMetaFailed(fullItemId, "error")
 
         downloadExecutor.execute(listOf(randomTask(fullItemId)))
@@ -237,7 +279,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.fails).isEqualTo(entry.fails + 1)
 
         coVerify(exactly = 0) { notifier.notify(any()) }
-        verifyItemNotChanged(itemId, savedItem)
+        verifyItemNotChanged(itemId, currentItem)
     }
 
     @Test
@@ -247,8 +289,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
             status = DownloadStatus.RETRY,
             data = null
         )
-        createItem(itemId, entry)
-        val savedItem = itemRepository.get(ShortItemId(itemId))!!
+        val currentItem = createItem(itemId, entry)
         mockGetMetaFailed(fullItemId, "error")
 
         downloadExecutor.execute(listOf(randomTask(fullItemId)))
@@ -260,7 +301,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.fails).isEqualTo(entry.fails + 1)
 
         coVerify(exactly = 0) { notifier.notify(any()) }
-        verifyItemNotChanged(itemId, savedItem)
+        verifyItemNotChanged(itemId, currentItem)
     }
 
     @Test
@@ -297,8 +338,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
             status = DownloadStatus.RETRY_PARTIAL,
             failedProviders = listOf(MetaProviderType.SIMPLE_HASH),
         )
-        createItem(itemId, entry)
-        val savedItem = itemRepository.get(ShortItemId(itemId))!!
+        val currentItem = createItem(itemId, entry)
         mockGetMetaFailed(fullItemId, "error")
 
         downloadExecutor.execute(listOf(randomTask(fullItemId)))
@@ -311,7 +351,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.failedProviders).isEqualTo(entry.failedProviders)
 
         coVerify(exactly = 0) { notifier.notify(any()) }
-        verifyItemNotChanged(itemId, savedItem)
+        verifyItemNotChanged(itemId, currentItem)
     }
 
     @Test
@@ -348,7 +388,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     fun `partial retry - failed`() = runBlocking<Unit> {
         val task = randomTask(fullItemId)
         val partialMeta = randomUnionMeta()
-        createItem(
+        val currentItem = createItem(
             itemId, randomMetaEntry(itemId = fullItemId, meta = partialMeta).copy(
                 status = DownloadStatus.RETRY_PARTIAL,
                 failedProviders = listOf(MetaProviderType.SIMPLE_HASH),
@@ -358,7 +398,6 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
                 succeedAt = null,
             )
         )
-        val savedItem = itemRepository.get(ShortItemId(itemId))!!
 
         coEvery { downloader.download(fullItemId) } throws DownloadException("failed")
 
@@ -378,7 +417,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         assertThat(saved.data).isEqualTo(partialMeta)
 
         coVerify(exactly = 0) { notifier.notify(any()) }
-        verifyItemNotChanged(itemId, savedItem)
+        verifyItemNotChanged(itemId, currentItem)
     }
 
     private suspend fun createItem(itemId: ItemIdDto, metaEntry: DownloadEntry<UnionMeta>?): ShortItem =

@@ -11,7 +11,6 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentMattelMetaCustomizerProperties
-import com.rarible.protocol.union.enrichment.meta.WrappedMeta
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaCustomizer
 import org.slf4j.LoggerFactory
 import org.springframework.core.annotation.Order
@@ -30,19 +29,18 @@ class MattelMetaCustomizer(
         customizer.collectionIds.map { it to customizer }
     }.flatten().associateBy({ it.first }, { it.second })
 
-    override suspend fun customize(id: ItemIdDto, wrappedMeta: WrappedMeta<UnionMeta>): WrappedMeta<UnionMeta> {
+    override suspend fun customize(id: ItemIdDto, meta: UnionMeta): UnionMeta {
         if (id.blockchain != BlockchainDto.FLOW) {
-            return wrappedMeta
+            return meta
         }
         val collectionId = CollectionIdDto(id.blockchain, CompositeItemIdParser.split(id.value).first)
-        val customizer = mattelCustomizers[collectionId] ?: return wrappedMeta
+        val customizer = mattelCustomizers[collectionId] ?: return meta
 
         logger.info("Customizing meta for Item {} with {}", id.fullId(), customizer::class.java.simpleName)
 
-        val meta = wrappedMeta.data
         val helper = ItemMetaCustomizerHelper(id, meta)
 
-        val customized = meta.copy(
+        return meta.copy(
             name = customizer.getName(helper) ?: meta.name,
             description = helper.attribute(*customizer.fieldDescription),
             rights = helper.attribute(*customizer.fieldRights),
@@ -50,7 +48,6 @@ class MattelMetaCustomizer(
             attributes = helper.filterAttributes(customizer.attributesWhiteList),
             content = fixContentType(meta.content, helper.attribute(*customizer.fieldContentUrl))
         )
-        return wrappedMeta.copy(data = customized)
     }
 
     // Hack for non-resolved content properties -it should be VIDEO by default

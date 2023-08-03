@@ -10,8 +10,6 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.meta.MetaSource
-import com.rarible.protocol.union.enrichment.meta.WrappedMeta
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -26,6 +24,7 @@ class PartialItemMetaDownloader(
     private val providers: List<ItemMetaProvider>,
     private val itemRepository: ItemRepository,
 ) : Downloader<UnionMeta> {
+
     override val type = "Item_Partial"
 
     override suspend fun download(id: String): UnionMeta {
@@ -42,15 +41,13 @@ class PartialItemMetaDownloader(
         return result
     }
 
-    protected suspend fun load(itemId: ItemIdDto, item: ShortItem): UnionMeta? {
+    private suspend fun load(itemId: ItemIdDto, item: ShortItem): UnionMeta? {
         val failedProviders = ArrayBlockingQueue<MetaProviderType>(providers.size)
 
-        val wrappedMeta = WrappedMeta(
-            source = MetaSource.ORIGINAL,
-            data = item.metaEntry?.data ?: return null,
-        )
+        val currentMeta = item.metaEntry?.data ?: return null
         val providersToUse = item.metaEntry.failedProviders ?: return item.metaEntry.data
-        val meta = providers.filter { it.getType() in providersToUse }.fold(wrappedMeta) { current, provider ->
+
+        val meta = providers.filter { it.getType() in providersToUse }.fold(currentMeta) { current, provider ->
             try {
                 provider.fetch(itemId, current) ?: current
             } catch (e: ProviderDownloadException) {

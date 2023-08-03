@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -71,7 +72,8 @@ object TzktItemConverter {
             tags = meta.tags,
             content = meta.content.map(::convert),
             // TODO TEZOS - implement it
-            restrictions = listOf()
+            restrictions = listOf(),
+            source = MetaSource.ORIGINAL,
         )
     }
 
