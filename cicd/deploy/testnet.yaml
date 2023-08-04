@@ -17,8 +17,8 @@ protocol-union-api:
 protocol-union-listener:
   environments:
     <<: *sharedEnv
-    META_SIMPLE_HASH_KAFKA_ENABLED: true
-    META_SIMPLE_HASH_KAFKA_TOPICS: ethereum-goerli.nft.v2-value
+    META_SIMPLEHASH_KAFKA_ENABLED: true
+    META_SIMPLEHASH_KAFKA_TOPICS: ethereum-goerli.nft.v2-value
 
 protocol-union-meta-loader:
   replicas: 3
