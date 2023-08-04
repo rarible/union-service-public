@@ -36,6 +36,28 @@ class DownloadExecutorMetrics(
         onTaskHandled(started, blockchain, type, "retry", task, retry)
     }
 
+    // Delay between start date (i.e., date when related entity has been created) and date of first successful download
+    fun onFirstSuccessfulDownload(
+        type: String,
+        blockchain: BlockchainDto,
+        start: Instant,
+        task: DownloadTask,
+        retry: Int,
+        status: SuccessfulDownloadStatus,
+    ) {
+        meterRegistry.timer(
+            DOWNLOAD_DELAY,
+            listOf(
+                tag(blockchain),
+                type(type.lowercase()),
+                tag("pipeline", task.pipeline.lowercase()),
+                tag("retry", retry.toString()),
+                tag("force", task.force.toString()),
+                tag("status", status.name.lowercase())
+            )
+        ).record(Duration.between(start, Instant.now()))
+    }
+
     private fun onTaskHandled(
         started: Instant,
         blockchain: BlockchainDto,
@@ -79,5 +101,11 @@ class DownloadExecutorMetrics(
 
         const val DOWNLOAD_TASK = "download_task"
         const val DOWNLOAD_TASK_TOTAL = "download_task_total"
+        const val DOWNLOAD_DELAY = "download_delay"
     }
+}
+
+enum class SuccessfulDownloadStatus {
+    FULL,
+    PARTIAL
 }

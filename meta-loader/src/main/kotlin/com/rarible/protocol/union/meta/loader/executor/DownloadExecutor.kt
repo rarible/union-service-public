@@ -19,7 +19,9 @@ import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
+import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
+import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -39,7 +41,7 @@ sealed class DownloadExecutor<T>(
     protected val blockchainExtractor: (id: String) -> BlockchainDto,
 ) : AutoCloseable {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    protected val logger = LoggerFactory.getLogger(javaClass)
 
     abstract val type: String
 
@@ -78,16 +80,15 @@ sealed class DownloadExecutor<T>(
                 failedProviders = null,
             )
         } catch (e: PartialDownloadException) {
-            onFail(
+            val entry = onFail(
                 started = started,
                 task = task,
                 errorMessage = e.message,
                 data = e.data as T,
                 downloadStatus = DownloadStatus.RETRY_PARTIAL,
                 failedProviders = e.failedProviders,
-            )?.let {
-                notifier.notify(it)
-            }
+            )
+            notifier.notify(entry)
         } catch (e: Exception) {
             logger.error(
                 "Unexpected exception while downloading data for {} task {} ({})",
@@ -116,15 +117,33 @@ sealed class DownloadExecutor<T>(
                 retry.set(if (current.status != DownloadStatus.SUCCESS) current.retries else 0)
                 current.withSuccessInc(data)
             }
-        }
+        }!! // Can't be null here
 
-        saved?.let {
-            notifier.notify(saved)
-            onSuccessfulDownload(task, previous.get(), saved.data)
-        }
+        notifier.notify(saved)
+        onSuccessfulDownload(task, previous.get(), saved.data)
 
         metrics.onSuccessfulTask(type, blockchainExtractor(task.id), started, task, retry.get())
+        markFirstSuccessfulDownload(
+            task = task,
+            previous = previous.get(),
+            retry = retry.get(),
+            status = SuccessfulDownloadStatus.FULL
+        )
         logger.info("Data download SUCCEEDED for {} task: {} ({})", type, task.id, task.pipeline)
+    }
+
+    private suspend fun markFirstSuccessfulDownload(
+        task: DownloadTask,
+        previous: T?,
+        retry: Int,
+        status: SuccessfulDownloadStatus,
+    ) {
+        // Not a first successful download, not measured
+        if (previous != null) {
+            return
+        }
+        val start = getStartDate(task.id)
+        start?.let { metrics.onFirstSuccessfulDownload(type, blockchainExtractor(task.id), start, task, retry, status) }
     }
 
     protected open suspend fun download(id: String, current: DownloadEntry<T>?): T {
@@ -138,7 +157,9 @@ sealed class DownloadExecutor<T>(
         data: T?,
         downloadStatus: DownloadStatus?,
         failedProviders: List<MetaProviderType>?,
-    ): DownloadEntry<T>? {
+    ): DownloadEntry<T> {
+        val retry = AtomicReference(0)
+        val previous = AtomicReference<T>(null)
         val saved = repository.update(task.id) { exist ->
             val current = exist ?: getDefault(task)
 
@@ -178,16 +199,20 @@ sealed class DownloadExecutor<T>(
             }
 
             markStatus(started, task, status, failed.retries)
+            previous.set(current.data)
+            retry.set(failed.retries)
             updated
+        }!! // Never should be null
+
+        if (downloadStatus == DownloadStatus.RETRY_PARTIAL) {
+            markFirstSuccessfulDownload(task, previous.get(), retry.get(), SuccessfulDownloadStatus.PARTIAL)
         }
 
-        // Never should be null
-        return saved?.apply {
-            logger.warn(
-                "Data download FAILED for {} task: {} ({}), status = {}, retries = {}, errorMessage = {}",
-                type, saved.id, task.pipeline, saved.status, saved.retries, saved.errorMessage
-            )
-        }
+        logger.warn(
+            "Data download FAILED for {} task: {} ({}), status = {}, retries = {}, errorMessage = {}",
+            type, saved.id, task.pipeline, saved.status, saved.retries, saved.errorMessage
+        )
+        return saved
     }
 
     private suspend fun onBlacklisted(started: Instant, task: DownloadTask) {
@@ -238,6 +263,8 @@ sealed class DownloadExecutor<T>(
 
     protected open suspend fun onSuccessfulDownload(task: DownloadTask, previous: T?, updated: T?) = Unit
 
+    protected abstract suspend fun getStartDate(id: String): Instant?
+
     override fun close() {
         pool.close()
     }
@@ -245,6 +272,7 @@ sealed class DownloadExecutor<T>(
 
 class ItemDownloadExecutor(
     private val itemMetaRefreshService: ItemMetaRefreshService,
+    private val enrichmentItemService: EnrichmentItemService,
     enrichmentBlacklistService: EnrichmentBlacklistService,
     repository: DownloadEntryRepository<UnionMeta>,
     downloader: Downloader<UnionMeta>,
@@ -265,6 +293,7 @@ class ItemDownloadExecutor(
 ) {
 
     override val type = downloader.type
+
     override suspend fun isBlacklisted(task: DownloadTask): Boolean {
         val blockchain = blockchainExtractor(task.id)
         if (blockchain == BlockchainDto.SOLANA) {
@@ -272,6 +301,15 @@ class ItemDownloadExecutor(
         }
         val collectionId = task.id.substringBeforeLast(":")
         return enrichmentBlacklistService.isBlacklisted(collectionId)
+    }
+
+    override suspend fun getStartDate(id: String): Instant? {
+        return try {
+            enrichmentItemService.fetchOrNull(ShortItemId.of(id))?.mintedAt
+        } catch (e: Exception) {
+            logger.warn("Failed to get Item $id from indexer:", e)
+            null
+        }
     }
 
     override suspend fun onSuccessfulDownload(task: DownloadTask, previous: UnionMeta?, updated: UnionMeta?) {
@@ -308,5 +346,11 @@ class CollectionDownloadExecutor(
 ) {
 
     override val type = downloader.type
+
     override suspend fun isBlacklisted(task: DownloadTask) = false
+
+    override suspend fun getStartDate(id: String): Instant? {
+        // TODO update if we can determine Collection createdAt date
+        return null
+    }
 }
