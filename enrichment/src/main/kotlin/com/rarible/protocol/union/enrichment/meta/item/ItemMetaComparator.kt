@@ -22,10 +22,12 @@ object ItemMetaComparator {
         }
 
         val result = previous.toComparable() != updated.toComparable()
-        logger.info(
-            "Meta changed for item $itemId from $previous to $updated " +
-                "will allow meta refresh for collection"
-        )
+        if (result) {
+            logger.info(
+                "Meta changed for item $itemId from $previous to $updated " +
+                    "will allow meta refresh for collection"
+            )
+        }
         return result
     }
 }
