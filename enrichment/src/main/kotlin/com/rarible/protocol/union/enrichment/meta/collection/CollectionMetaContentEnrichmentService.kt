@@ -16,5 +16,5 @@ class CollectionMetaContentEnrichmentService(
     customizers = customizers
 ) {
     override fun extractBlockchain(key: CollectionIdDto): Pair<String, BlockchainDto> =
-        Pair(key.fullId(), key.blockchain)
+        Pair(key.value, key.blockchain)
 }
