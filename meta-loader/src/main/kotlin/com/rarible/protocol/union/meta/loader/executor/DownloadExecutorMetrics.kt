@@ -43,7 +43,7 @@ class DownloadExecutorMetrics(
         start: Instant,
         task: DownloadTask,
         retry: Int,
-        full: Boolean
+        status: SuccessfulDownloadStatus,
     ) {
         meterRegistry.timer(
             DOWNLOAD_DELAY,
@@ -53,7 +53,7 @@ class DownloadExecutorMetrics(
                 tag("pipeline", task.pipeline.lowercase()),
                 tag("retry", retry.toString()),
                 tag("force", task.force.toString()),
-                tag("status", if (full) "full" else "partial")
+                tag("status", status.name.lowercase())
             )
         ).record(Duration.between(start, Instant.now()))
     }
@@ -103,4 +103,9 @@ class DownloadExecutorMetrics(
         const val DOWNLOAD_TASK_TOTAL = "download_task_total"
         const val DOWNLOAD_DELAY = "download_delay"
     }
+}
+
+enum class SuccessfulDownloadStatus {
+    FULL,
+    PARTIAL
 }

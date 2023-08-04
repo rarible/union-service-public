@@ -41,7 +41,7 @@ sealed class DownloadExecutor<T>(
     protected val blockchainExtractor: (id: String) -> BlockchainDto,
 ) : AutoCloseable {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    protected val logger = LoggerFactory.getLogger(javaClass)
 
     abstract val type: String
 
@@ -123,7 +123,12 @@ sealed class DownloadExecutor<T>(
         onSuccessfulDownload(task, previous.get(), saved.data)
 
         metrics.onSuccessfulTask(type, blockchainExtractor(task.id), started, task, retry.get())
-        markFirstSuccessfulDownload(task, previous.get(), retry.get(), true)
+        markFirstSuccessfulDownload(
+            task = task,
+            previous = previous.get(),
+            retry = retry.get(),
+            status = SuccessfulDownloadStatus.FULL
+        )
         logger.info("Data download SUCCEEDED for {} task: {} ({})", type, task.id, task.pipeline)
     }
 
@@ -131,14 +136,14 @@ sealed class DownloadExecutor<T>(
         task: DownloadTask,
         previous: T?,
         retry: Int,
-        full: Boolean,
+        status: SuccessfulDownloadStatus,
     ) {
         // Not a first successful download, not measured
         if (previous != null) {
             return
         }
         val start = getStartDate(task.id)
-        start?.let { metrics.onFirstSuccessfulDownload(type, blockchainExtractor(task.id), start, task, retry, full) }
+        start?.let { metrics.onFirstSuccessfulDownload(type, blockchainExtractor(task.id), start, task, retry, status) }
     }
 
     protected open suspend fun download(id: String, current: DownloadEntry<T>?): T {
@@ -200,7 +205,7 @@ sealed class DownloadExecutor<T>(
         }!! // Never should be null
 
         if (downloadStatus == DownloadStatus.RETRY_PARTIAL) {
-            markFirstSuccessfulDownload(task, previous.get(), retry.get(), false)
+            markFirstSuccessfulDownload(task, previous.get(), retry.get(), SuccessfulDownloadStatus.PARTIAL)
         }
 
         logger.warn(
@@ -299,7 +304,12 @@ class ItemDownloadExecutor(
     }
 
     override suspend fun getStartDate(id: String): Instant? {
-        return enrichmentItemService.fetchOrNull(ShortItemId.of(id))?.mintedAt
+        return try {
+            enrichmentItemService.fetchOrNull(ShortItemId.of(id))?.mintedAt
+        } catch (e: Exception) {
+            logger.warn("Failed to get Item $id from indexer:", e)
+            null
+        }
     }
 
     override suspend fun onSuccessfulDownload(task: DownloadTask, previous: UnionMeta?, updated: UnionMeta?) {
