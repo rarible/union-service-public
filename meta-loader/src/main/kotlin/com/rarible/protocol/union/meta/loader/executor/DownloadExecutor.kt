@@ -314,16 +314,19 @@ class ItemDownloadExecutor(
 
     override suspend fun onSuccessfulDownload(task: DownloadTask, previous: UnionMeta?, updated: UnionMeta?) {
         // Only EXTERNAL (made by users) refreshes should be checked
-        logger.info("Checking Item if full refresh required: $task")
         if (task.pipeline != ItemMetaPipeline.REFRESH.pipeline || task.source != DownloadTaskSource.EXTERNAL) {
             return
         }
-        itemMetaRefreshService.runRefreshIfItemMetaChanged(
-            itemId = IdParser.parseItemId(task.id),
-            previous = previous,
-            updated = updated,
-            withSimpleHash = simpleHashEnabled
-        )
+        try {
+            itemMetaRefreshService.runRefreshIfItemMetaChanged(
+                itemId = IdParser.parseItemId(task.id),
+                previous = previous,
+                updated = updated,
+                withSimpleHash = simpleHashEnabled
+            )
+        } catch (e: Exception) {
+            logger.warn("Failed to launch full refresh of collection on Item {} mega change", task.id, e)
+        }
     }
 }
 
