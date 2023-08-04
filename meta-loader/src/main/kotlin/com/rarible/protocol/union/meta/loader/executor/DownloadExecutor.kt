@@ -8,7 +8,7 @@ import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.model.download.DownloadTaskSource
-import com.rarible.protocol.union.core.model.download.MetaProviderType
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -156,7 +156,7 @@ sealed class DownloadExecutor<T>(
         errorMessage: String?,
         data: T?,
         downloadStatus: DownloadStatus?,
-        failedProviders: List<MetaProviderType>?,
+        failedProviders: List<MetaSource>?,
     ): DownloadEntry<T> {
         val retry = AtomicReference(0)
         val previous = AtomicReference<T>(null)

@@ -15,5 +15,5 @@ class ItemMetaContentEnrichmentService(
     contentMetaLoader = contentMetaLoader,
     customizers = customizers
 ) {
-    override fun generaliseKey(key: ItemIdDto): Pair<String, BlockchainDto> = Pair(key.fullId(), key.blockchain)
+    override fun extractBlockchain(key: ItemIdDto): Pair<String, BlockchainDto> = Pair(key.value, key.blockchain)
 }

@@ -12,13 +12,13 @@ abstract class MetaContentEnrichmentService<K, T : ContentOwner<T>>(
 
     suspend fun enrcih(key: K, meta: T): T {
         val sanitized = sanitizeContent(meta.content)
-        val (id, blockchain) = generaliseKey(key)
-        val content = contentMetaLoader.enrichContent(id, blockchain, sanitized)
+        val (_, blockchain) = extractBlockchain(key)
+        val content = contentMetaLoader.enrichContent(key.toString(), blockchain, sanitized)
         val initial = meta.withContent(content)
         return customizers.fold(initial) { current, customizer ->
             customizer.customize(key, current)
         }
     }
 
-    abstract fun generaliseKey(key: K): Pair<String, BlockchainDto>
+    abstract fun extractBlockchain(key: K): Pair<String, BlockchainDto>
 }
