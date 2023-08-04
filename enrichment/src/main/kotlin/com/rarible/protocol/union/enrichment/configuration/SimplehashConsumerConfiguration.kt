@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import java.util.UUID
 
-@ConditionalOnProperty("meta.simpleHash.kafka.enabled", havingValue = "true")
+@ConditionalOnProperty("meta.simplehash.kafka.enabled", havingValue = "true")
 class SimplehashConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo
 ) {
