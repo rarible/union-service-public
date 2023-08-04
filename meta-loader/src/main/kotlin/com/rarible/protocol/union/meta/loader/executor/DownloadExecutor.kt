@@ -314,6 +314,7 @@ class ItemDownloadExecutor(
 
     override suspend fun onSuccessfulDownload(task: DownloadTask, previous: UnionMeta?, updated: UnionMeta?) {
         // Only EXTERNAL (made by users) refreshes should be checked
+        logger.info("Checking Item if full refresh required: $task")
         if (task.pipeline != ItemMetaPipeline.REFRESH.pipeline || task.source != DownloadTaskSource.EXTERNAL) {
             return
         }
