@@ -2,11 +2,11 @@ package com.rarible.protocol.union.enrichment.meta.item
 
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
-import com.rarible.protocol.union.core.model.download.MetaProviderType
 import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.model.download.ProviderDownloadException
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.enrichment.meta.item.provider.ItemMetaProvider
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
@@ -55,14 +55,14 @@ internal class PartialItemMetaDownloaderTest {
 
         val metaEntry = randomItemMetaDownloadEntry().copy(
             status = DownloadStatus.RETRY_PARTIAL,
-            failedProviders = listOf(MetaProviderType.SIMPLE_HASH),
+            failedProviders = listOf(MetaSource.SIMPLE_HASH),
             data = randomUnionMeta(source = MetaSource.ORIGINAL)
         )
         coEvery { itemRepository.get(ShortItemId(itemId)) } returns randomShortItem().copy(metaEntry = metaEntry)
 
         val updatedMeta = randomUnionMeta()
-        coEvery { provider.fetch(itemId, metaEntry.data) } returns updatedMeta
-        coEvery { provider.getType() } returns MetaProviderType.SIMPLE_HASH
+        coEvery { provider.fetch(itemId.blockchain, itemId.value, metaEntry.data) } returns updatedMeta
+        coEvery { provider.getSource() } returns MetaSource.SIMPLE_HASH
 
         val enrichedMeta = randomUnionMeta()
         coEvery { itemMetaContentEnrichmentService.enrcih(itemId, updatedMeta) } returns enrichedMeta
@@ -78,17 +78,18 @@ internal class PartialItemMetaDownloaderTest {
 
         val metaEntry = randomItemMetaDownloadEntry().copy(
             status = DownloadStatus.RETRY_PARTIAL,
-            failedProviders = listOf(MetaProviderType.SIMPLE_HASH)
+            failedProviders = listOf(MetaSource.SIMPLE_HASH)
         )
         coEvery { itemRepository.get(ShortItemId(itemId)) } returns randomShortItem().copy(metaEntry = metaEntry)
 
         coEvery {
             provider.fetch(
-                itemId,
+                itemId.blockchain,
+                itemId.value,
                 metaEntry.data
             )
-        } throws ProviderDownloadException(provider = MetaProviderType.SIMPLE_HASH)
-        coEvery { provider.getType() } returns MetaProviderType.SIMPLE_HASH
+        } throws ProviderDownloadException(provider = MetaSource.SIMPLE_HASH)
+        coEvery { provider.getSource() } returns MetaSource.SIMPLE_HASH
 
         assertThatExceptionOfType(DownloadException::class.java).isThrownBy {
             runBlocking {

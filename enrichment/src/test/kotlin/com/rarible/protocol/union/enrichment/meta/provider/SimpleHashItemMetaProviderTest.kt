@@ -1,8 +1,9 @@
 package com.rarible.protocol.union.enrichment.meta.provider
 
-import com.rarible.protocol.union.core.model.download.MetaProviderType
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.model.download.ProviderDownloadException
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.meta.item.provider.SimpleHashItemMetaProvider
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -17,9 +18,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(MockKExtension::class)
-internal class SimpleHashItemProviderTest {
+internal class SimpleHashItemMetaProviderTest {
     @InjectMockKs
-    private lateinit var simpleHashItemProvider: SimpleHashItemProvider
+    private lateinit var simpleHashItemMetaProvider: SimpleHashItemMetaProvider
 
     @MockK
     private lateinit var simpleHashService: SimpleHashService
@@ -31,10 +32,10 @@ internal class SimpleHashItemProviderTest {
         coEvery { simpleHashService.fetch(itemId) } returns randomUnionMeta(content = emptyList())
 
         try {
-            simpleHashItemProvider.fetch(itemId, null)
+            simpleHashItemMetaProvider.fetch(itemId.blockchain, itemId.value, null)
             fail("Shouldn't be here")
         } catch (e: ProviderDownloadException) {
-            assertThat(e.provider).isEqualTo(MetaProviderType.SIMPLE_HASH)
+            assertThat(e.provider).isEqualTo(MetaSource.SIMPLE_HASH)
         }
     }
 
@@ -45,10 +46,10 @@ internal class SimpleHashItemProviderTest {
         coEvery { simpleHashService.fetch(itemId) } returns null
 
         try {
-            simpleHashItemProvider.fetch(itemId, null)
+            simpleHashItemMetaProvider.fetch(itemId.blockchain, itemId.value, null)
             fail("Shouldn't be here")
         } catch (e: ProviderDownloadException) {
-            assertThat(e.provider).isEqualTo(MetaProviderType.SIMPLE_HASH)
+            assertThat(e.provider).isEqualTo(MetaSource.SIMPLE_HASH)
         }
     }
 }

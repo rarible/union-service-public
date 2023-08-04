@@ -2,7 +2,7 @@ package com.rarible.protocol.union.enrichment.meta.item
 
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadException
-import com.rarible.protocol.union.core.model.download.MetaProviderType
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.core.model.download.ProviderDownloadException
 import com.rarible.protocol.union.core.service.ItemService
@@ -11,6 +11,7 @@ import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
+import com.rarible.protocol.union.enrichment.meta.item.provider.ItemMetaProvider
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -42,14 +43,14 @@ class PartialItemMetaDownloader(
     }
 
     private suspend fun load(itemId: ItemIdDto, item: ShortItem): UnionMeta? {
-        val failedProviders = ArrayBlockingQueue<MetaProviderType>(providers.size)
+        val failedProviders = ArrayBlockingQueue<MetaSource>(providers.size)
 
         val currentMeta = item.metaEntry?.data ?: return null
         val providersToUse = item.metaEntry.failedProviders ?: return item.metaEntry.data
 
-        val meta = providers.filter { it.getType() in providersToUse }.fold(currentMeta) { current, provider ->
+        val meta = providers.filter { it.getSource() in providersToUse }.fold(currentMeta) { current, provider ->
             try {
-                provider.fetch(itemId, current) ?: current
+                provider.fetch(itemId.blockchain, itemId.value, current) ?: current
             } catch (e: ProviderDownloadException) {
                 failedProviders.add(e.provider)
                 current

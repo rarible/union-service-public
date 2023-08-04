@@ -1,11 +1,12 @@
 package com.rarible.protocol.union.enrichment.meta.provider
 
 import com.rarible.protocol.union.core.model.ContentOwner
-import com.rarible.protocol.union.core.model.download.MetaProviderType
+import com.rarible.protocol.union.core.model.download.MetaSource
+import com.rarible.protocol.union.dto.BlockchainDto
 
-interface MetaProvider<K, T : ContentOwner<T>> {
+interface MetaProvider<T : ContentOwner<T>> {
 
-    fun getType(): MetaProviderType
+    fun getSource(): MetaSource
 
-    suspend fun fetch(key: K, original: T?): T?
+    suspend fun fetch(blockchain: BlockchainDto, id: String, original: T?): T?
 }

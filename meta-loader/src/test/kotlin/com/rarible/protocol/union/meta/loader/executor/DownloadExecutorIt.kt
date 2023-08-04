@@ -6,7 +6,7 @@ import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.model.download.DownloadTaskSource
-import com.rarible.protocol.union.core.model.download.MetaProviderType
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.configuration.MetaTrimmingProperties
@@ -351,7 +351,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         val entry = randomMetaEntry(fullItemId).copy(
             retries = 0,
             status = DownloadStatus.RETRY_PARTIAL,
-            failedProviders = listOf(MetaProviderType.SIMPLE_HASH),
+            failedProviders = listOf(MetaSource.SIMPLE_HASH),
         )
         val currentItem = createItem(itemId, entry)
         mockGetMetaFailed(fullItemId, "error")
@@ -377,7 +377,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
         val partialMeta = randomUnionMeta()
         coEvery { downloader.download(fullItemId) } throws PartialDownloadException(
-            failedProviders = listOf(MetaProviderType.SIMPLE_HASH),
+            failedProviders = listOf(MetaSource.SIMPLE_HASH),
             data = partialMeta,
         )
 
@@ -386,7 +386,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         val saved = repository.get(fullItemId)!!
 
         assertThat(saved.status).isEqualTo(DownloadStatus.RETRY_PARTIAL)
-        assertThat(saved.failedProviders).containsExactly(MetaProviderType.SIMPLE_HASH)
+        assertThat(saved.failedProviders).containsExactly(MetaSource.SIMPLE_HASH)
         assertThat(saved.fails).isEqualTo(1)
         assertThat(saved.retries).isEqualTo(0)
         assertThat(saved.downloads).isEqualTo(0)
@@ -408,7 +408,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         val currentItem = createItem(
             itemId, randomMetaEntry(itemId = fullItemId, meta = partialMeta).copy(
                 status = DownloadStatus.RETRY_PARTIAL,
-                failedProviders = listOf(MetaProviderType.SIMPLE_HASH),
+                failedProviders = listOf(MetaSource.SIMPLE_HASH),
                 retries = 0,
                 fails = 1,
                 downloads = 0,
@@ -423,7 +423,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
         val saved = repository.get(fullItemId)!!
 
         assertThat(saved.status).isEqualTo(DownloadStatus.RETRY_PARTIAL)
-        assertThat(saved.failedProviders).containsExactly(MetaProviderType.SIMPLE_HASH)
+        assertThat(saved.failedProviders).containsExactly(MetaSource.SIMPLE_HASH)
         assertThat(saved.fails).isEqualTo(2)
         assertThat(saved.retries).isEqualTo(0)
         assertThat(saved.downloads).isEqualTo(0)

@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.meta.item
 
-import com.rarible.protocol.union.core.model.download.MetaProviderType
 import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -38,7 +37,7 @@ class ItemMetaComparatorTest {
     @Test
     fun `has changed - false, contributors are different`() {
         val meta1 = randomUnionMeta()
-        val meta2 = randomUnionMeta(contributors = listOf(MetaProviderType.SIMPLE_HASH))
+        val meta2 = randomUnionMeta(contributors = listOf(MetaSource.SIMPLE_HASH))
 
         assertThat(ItemMetaComparator.hasChanged(itemId, meta1, meta2)).isFalse()
         assertThat(ItemMetaComparator.hasChanged(itemId, meta2, meta1)).isFalse()

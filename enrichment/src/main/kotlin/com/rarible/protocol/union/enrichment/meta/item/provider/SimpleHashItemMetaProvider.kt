@@ -1,37 +1,37 @@
-package com.rarible.protocol.union.enrichment.meta.provider
+package com.rarible.protocol.union.enrichment.meta.item.provider
 
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
-import com.rarible.protocol.union.core.model.download.MetaProviderType
+import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.model.download.ProviderDownloadException
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaProvider
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
 @ConditionalOnProperty("meta.simpleHash.enabled", havingValue = "true")
-class SimpleHashItemProvider(
+class SimpleHashItemMetaProvider(
     private val simpleHashService: SimpleHashService,
 ) : ItemMetaProvider {
 
-    override fun getType(): MetaProviderType = MetaProviderType.SIMPLE_HASH
+    override fun getSource(): MetaSource = MetaSource.SIMPLE_HASH
 
-    override suspend fun fetch(key: ItemIdDto, original: UnionMeta?): UnionMeta? {
-        if (!simpleHashService.isSupported(key.blockchain)) {
+    override suspend fun fetch(blockchain: BlockchainDto, id: String, original: UnionMeta?): UnionMeta? {
+        if (!simpleHashService.isSupported(blockchain)) {
             return original
         }
 
-        val simpleHashMeta = simpleHashService.fetch(key)
+        val simpleHashMeta = simpleHashService.fetch(ItemIdDto(blockchain, id))
         if (simpleHashMeta == null || simpleHashMeta.content.isEmpty()) {
-            throw ProviderDownloadException(MetaProviderType.SIMPLE_HASH)
+            throw ProviderDownloadException(MetaSource.SIMPLE_HASH)
         }
 
         if (original == null) return simpleHashMeta
 
         return original.copy(
-            contributors = original.contributors + getType(),
+            contributors = original.contributors + getSource(),
             description = original.description ?: simpleHashMeta.description,
             content = mergeContent(original, simpleHashMeta.content).mergeContentProperties(simpleHashMeta),
             attributes = original.attributes.ifEmpty { simpleHashMeta.attributes },

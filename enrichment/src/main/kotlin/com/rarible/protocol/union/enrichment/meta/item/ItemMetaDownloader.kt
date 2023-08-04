@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.MetaDownloader
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
+import com.rarible.protocol.union.enrichment.meta.item.provider.ItemMetaProvider
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -25,8 +26,6 @@ class ItemMetaDownloader(
     metrics = metrics,
     type = "Item"
 ) {
-
-    override suspend fun getRawMeta(key: ItemIdDto) = router.getService(key.blockchain).getItemMetaById(key.value)
 
     override suspend fun download(id: String): UnionMeta {
         val result = try {

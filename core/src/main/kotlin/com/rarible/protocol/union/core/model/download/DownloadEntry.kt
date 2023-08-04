@@ -7,7 +7,7 @@ import java.time.Instant
 data class DownloadEntry<T>(
     val id: String,
     val status: DownloadStatus,
-    val failedProviders: List<MetaProviderType>? = null,
+    val failedProviders: List<MetaSource>? = null,
 
     val data: T? = null,
     // Successful downloads
