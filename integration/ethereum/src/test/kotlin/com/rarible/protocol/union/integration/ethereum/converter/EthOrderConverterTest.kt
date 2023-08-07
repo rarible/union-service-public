@@ -215,7 +215,7 @@ class EthOrderConverterTest {
 
         assertThat(data.payout!!.account.value).isEqualTo(dataDto.payout?.account?.prefixed())
         assertThat(data.originFeeFirst!!.account.value).isEqualTo(dataDto.originFeeFirst?.account?.prefixed())
-        assertThat(data.originFeeSecond!!.account?.value).isEqualTo(dataDto.originFeeSecond?.account?.prefixed())
+        assertThat(data.originFeeSecond!!.account.value).isEqualTo(dataDto.originFeeSecond?.account?.prefixed())
         assertThat(data.marketplaceMarker!!).isEqualTo(dataDto.marketplaceMarker?.prefixed())
     }
 

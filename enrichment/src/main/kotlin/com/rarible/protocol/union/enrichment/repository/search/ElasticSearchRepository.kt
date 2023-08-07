@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.elasticsearch.EsHelper
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
@@ -13,6 +12,7 @@ import org.elasticsearch.action.bulk.BulkRequest
 import org.elasticsearch.action.support.WriteRequest
 import org.elasticsearch.client.Requests
 import org.elasticsearch.xcontent.XContentType
+import org.slf4j.LoggerFactory
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
@@ -32,7 +32,7 @@ abstract class ElasticSearchRepository<T>(
     private val idFieldName: String = "_id"
 ) : EsRepository {
 
-    protected val logger by Logger()
+    protected val logger = LoggerFactory.getLogger(javaClass)
 
     private val brokenEsState: AtomicBoolean = AtomicBoolean(true)
 
@@ -77,7 +77,7 @@ abstract class ElasticSearchRepository<T>(
         }
 
         if (brokenEsState.get()) {
-            throw IllegalStateException("No indexes to save")
+            throw IllegalStateException("No indexes to save ($this)")
         }
 
         val bulkRequest = BulkRequest()

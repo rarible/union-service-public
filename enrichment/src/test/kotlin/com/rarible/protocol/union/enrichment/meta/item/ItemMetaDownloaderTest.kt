@@ -204,7 +204,7 @@ class ItemMetaDownloaderTest {
     fun `partial download - ok, default failed`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
 
-        coEvery { itemService.getItemMetaById(itemId.value) } throws //returns randomUnionMeta()
+        coEvery { itemService.getItemMetaById(itemId.value) } throws // returns randomUnionMeta()
             ProviderDownloadException(provider = MetaSource.ORIGINAL)
 
         coEvery { simpleHashService.fetch(itemId) } returns randomUnionMeta(

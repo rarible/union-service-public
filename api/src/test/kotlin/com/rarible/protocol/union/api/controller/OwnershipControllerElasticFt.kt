@@ -4,6 +4,7 @@ import com.rarible.core.test.data.randomBigInt
 import com.rarible.protocol.union.api.client.OwnershipControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -37,6 +38,7 @@ import convertUnionOwnershipToEsOwnership
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
@@ -63,6 +65,14 @@ class OwnershipControllerElasticFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var ownershipRepository: EsOwnershipRepository
+
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
+    @BeforeEach
+    fun setUp() = runBlocking<Unit> {
+        elasticsearchTestBootstrapper.bootstrap()
+    }
 
     @Test
     fun `get ownership by id - ethereum, not enriched`() = runBlocking<Unit> {

@@ -32,7 +32,7 @@ class FlowCollectionEventHandlerTest {
         val collection = randomFlowCollectionDto()
         val dto = FlowCollectionUpdateEventDto(
             eventId = randomString(),
-            collectionId = collection.id!!,
+            collectionId = collection.id,
             collection = collection
         )
 

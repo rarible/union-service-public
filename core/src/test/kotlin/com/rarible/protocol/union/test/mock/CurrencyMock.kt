@@ -6,7 +6,7 @@ import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.test.nativeTestCurrencies
-import io.mockk.coEvery
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import reactor.kotlin.core.publisher.toMono
@@ -20,16 +20,7 @@ object CurrencyMock {
     val currencyServiceMock = CurrencyService(currencyClientMock)
 
     init {
-        coEvery {
-            currencyControllerApiMock.getCurrencyRate(any(), any(), any())
-        } answers {
-            CurrencyRateDto(
-                fromCurrencyId = it.invocation.args[1] as String,
-                toCurrencyId = "usd",
-                rate = BigDecimal.ONE,
-                date = nowMillis()
-            ).toMono()
-        }
+        clearCurrencyMock()
     }
 
     fun mockCurrencies(): Map<String, Double> {
@@ -48,5 +39,19 @@ object CurrencyMock {
         }
 
         return ratesPerCurrency
+    }
+
+    fun clearCurrencyMock() {
+        clearMocks(currencyControllerApiMock)
+        every {
+            currencyControllerApiMock.getCurrencyRate(any(), any(), any())
+        } answers {
+            CurrencyRateDto(
+                fromCurrencyId = it.invocation.args[1] as String,
+                toCurrencyId = "usd",
+                rate = BigDecimal.ONE,
+                date = nowMillis()
+            ).toMono()
+        }
     }
 }

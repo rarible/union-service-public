@@ -33,9 +33,9 @@ import com.rarible.protocol.union.enrichment.test.data.randomItemDto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.flow.data.randomFlowItemId
+import com.rarible.protocol.union.test.mock.CurrencyMock
 import com.rarible.protocol.union.test.mock.CurrencyMock.currencyControllerApiMock
 import com.rarible.protocol.union.test.mock.CurrencyMock.mockCurrencies
-import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -210,7 +210,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                 it.invocation.args[0].toString().substringBefore(":")
             }
 
-            clearMocks(currencyControllerApiMock)
+            CurrencyMock.clearCurrencyMock()
             every { currencyControllerApiMock.allCurrencies } returns CurrenciesDto(nativeTestCurrencies()).toMono()
         }
     }

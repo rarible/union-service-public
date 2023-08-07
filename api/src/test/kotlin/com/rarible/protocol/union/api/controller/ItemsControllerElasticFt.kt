@@ -72,14 +72,12 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
     lateinit var enrichmentItemService: EnrichmentItemService
 
     @Autowired
-    private lateinit var ownershipRepository: EsOwnershipRepository
-
-    @Autowired
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
         elasticsearchTestBootstrapper.bootstrap()
+        CurrencyMock.clearCurrencyMock()
         every {
             CurrencyMock.currencyControllerApiMock.allCurrencies
         } returns CurrenciesDto(nativeTestCurrencies()).toMono()
