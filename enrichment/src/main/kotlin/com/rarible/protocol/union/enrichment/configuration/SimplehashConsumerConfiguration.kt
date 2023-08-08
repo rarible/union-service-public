@@ -9,6 +9,7 @@ import com.rarible.protocol.apikey.kafka.RaribleKafkaMessageListenerFactory
 import com.rarible.simplehash.client.subcriber.SimplehashKafkaAvroDeserializer
 import com.simplehash.v0.nft
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
@@ -22,6 +23,8 @@ class SimplehashConsumerConfiguration(
     private val env = applicationEnvironmentInfo.name
     private val clientId = "$env.${UUID.randomUUID()}"
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Bean
     fun simplehashConsumerFactory(props: UnionMetaProperties): RaribleKafkaListenerContainerFactory<nft> {
         val kafkaProps = props.simpleHash.kafka
@@ -34,7 +37,8 @@ class SimplehashConsumerConfiguration(
 
             ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS to SimplehashKafkaAvroDeserializer::class.java
         )
-        val settings = if (kafkaProps.username != null) {
+        val settings = if (!kafkaProps.username.isNullOrEmpty()) {
+            logger.info("Connecting to ${kafkaProps.broker} using username=${kafkaProps.username} and password=****${kafkaProps.password?.takeLast(5)}")
             avroConfig + mapOf(
                 "security.protocol" to "SASL_SSL",
                 "sasl.mechanism" to "PLAIN",
