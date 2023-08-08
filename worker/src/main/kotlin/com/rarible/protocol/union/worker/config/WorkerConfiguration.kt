@@ -13,6 +13,7 @@ import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.job.BestOrderCheckJob
 import com.rarible.protocol.union.worker.job.BestOrderCheckJobHandler
 import com.rarible.protocol.union.worker.job.MetaAutoRefreshJob
@@ -134,6 +135,7 @@ class WorkerConfiguration(
     fun collectionMetaAutoRefreshJob(
         metaAutoRefreshStateRepository: MetaAutoRefreshStateRepository,
         itemMetaRefreshService: ItemMetaRefreshService,
+        esActivityRepository: EsActivityRepository,
         unionMetaProperties: UnionMetaProperties,
         properties: WorkerProperties,
         meterRegistry: MeterRegistry,
@@ -141,6 +143,7 @@ class WorkerConfiguration(
         return MetaAutoRefreshJob(
             metaAutoRefreshStateRepository = metaAutoRefreshStateRepository,
             itemMetaRefreshService = itemMetaRefreshService,
+            esActivityRepository = esActivityRepository,
             simpleHashEnabled = unionMetaProperties.simpleHash.enabled,
             properties = properties,
             meterRegistry = meterRegistry,

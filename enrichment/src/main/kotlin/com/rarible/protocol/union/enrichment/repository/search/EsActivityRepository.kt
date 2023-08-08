@@ -8,13 +8,23 @@ import com.rarible.protocol.union.core.model.elastic.EsActivityCursor.Companion.
 import com.rarible.protocol.union.core.model.elastic.EsActivityQueryResult
 import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import com.rarible.protocol.union.core.util.PageSize
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsActivityQueryBuilderService
+import com.rarible.protocol.union.enrichment.repository.search.internal.mustMatchRange
+import com.rarible.protocol.union.enrichment.repository.search.internal.mustMatchTerm
 import kotlinx.coroutines.reactive.awaitFirst
+import org.elasticsearch.index.query.BoolQueryBuilder
+import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
+import org.springframework.data.elasticsearch.core.ElasticsearchAggregation
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.stereotype.Component
+import java.time.Instant
 
 @Component
 class EsActivityRepository(
@@ -66,5 +76,30 @@ class EsActivityRepository(
             activities = activities,
             cursor = cursor
         )
+    }
+
+    suspend fun findTradedDistinctCollections(blockchain: BlockchainDto, since: Instant): List<CollectionIdDto> {
+        val boolQuery = BoolQueryBuilder()
+        boolQuery.mustMatchTerm(blockchain.name, EsActivity::blockchain.name)
+        boolQuery.mustMatchRange(since, null, EsActivity::date.name)
+        val query = NativeSearchQueryBuilder()
+            .withQuery(boolQuery)
+            .withAggregations(
+                AggregationBuilders
+                    .terms("collections")
+                    .field("collection")
+                    .size(1000)
+            )
+            .build()
+        query.maxResults = 0
+        val aggregation = esOperations.aggregate(query, EsActivity::class.java, entityDefinition.searchIndexCoordinates)
+            .map { (it as ElasticsearchAggregation).aggregation() }
+            .awaitFirst()
+        if (aggregation !is ParsedStringTerms) {
+            logger.warn("Unknown aggregation type {}", aggregation.type)
+            return emptyList()
+        }
+        return aggregation.buckets
+            .map { CollectionIdDto(blockchain, it.key as String) }
     }
 }

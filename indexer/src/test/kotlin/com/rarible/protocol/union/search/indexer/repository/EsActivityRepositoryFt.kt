@@ -18,6 +18,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.test.context.ContextConfiguration
 import randomInstant
+import java.time.Instant
 import kotlin.random.Random.Default.nextLong
 
 @IntegrationTest
@@ -81,5 +82,23 @@ internal class EsActivityRepositoryFt {
 
         // then
         assertThat(actual.activities).hasSize(0)
+    }
+
+
+    @Test
+    fun `find traded distinct collections`(): Unit = runBlocking {
+        // given
+        val activities = List(1000) { randomEsActivity() }
+        val blockchainToCollections = activities.map { Pair(it.blockchain, it.collection!!) }
+            .groupBy({ it.first }, { it.second })
+        repository.saveAll(activities)
+
+        // when
+        blockchainToCollections.forEach { (blockchain, collections) ->
+            val esCollections =
+                repository.findTradedDistinctCollections(blockchain, Instant.EPOCH)
+            // then
+            assertThat(collections).hasSize(esCollections.size)
+        }
     }
 }

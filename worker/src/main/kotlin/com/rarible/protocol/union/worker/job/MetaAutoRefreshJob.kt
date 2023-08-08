@@ -3,11 +3,14 @@ package com.rarible.protocol.union.worker.job
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.daemon.sequential.SequentialDaemonWorker
 import com.rarible.protocol.union.core.util.LogUtils
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.MetaAutoRefreshState
 import com.rarible.protocol.union.enrichment.model.MetaAutoRefreshStatus
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.delay
@@ -16,6 +19,7 @@ import java.time.Instant
 class MetaAutoRefreshJob(
     private val metaAutoRefreshStateRepository: MetaAutoRefreshStateRepository,
     private val itemMetaRefreshService: ItemMetaRefreshService,
+    private val esActivityRepository: EsActivityRepository,
     private val simpleHashEnabled: Boolean,
     properties: WorkerProperties,
     meterRegistry: MeterRegistry,
@@ -33,6 +37,13 @@ class MetaAutoRefreshJob(
 
     public override suspend fun handle() {
         logger.info("Starting MetaAutoRefreshJob")
+        loadTradableCollections().forEach { collectionId ->
+            itemMetaRefreshService.runRefreshIfAllowed(
+                collectionId = collectionId,
+                full = true,
+                withSimpleHash = simpleHashEnabled
+            )
+        }
         metaAutoRefreshStateRepository.loadToCheckCreated(Instant.now().minus(createdPeriod)).collect {
             processState(it)
         }
@@ -44,6 +55,14 @@ class MetaAutoRefreshJob(
         }
         logger.info("Finished MetaAutoRefreshJob")
         delay(rate)
+    }
+
+    private suspend fun loadTradableCollections(): List<CollectionIdDto> {
+        val since = Instant.now().minusMillis(rate)
+        return BlockchainDto.values()
+            .flatMap { blockchain ->
+                esActivityRepository.findTradedDistinctCollections(blockchain, since)
+            }
     }
 
     private suspend fun processState(state: MetaAutoRefreshState) {
