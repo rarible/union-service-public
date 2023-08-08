@@ -88,7 +88,7 @@ class EsActivityRepository(
                 AggregationBuilders
                     .terms("collections")
                     .field("collection")
-                    .size(Int.MAX_VALUE)
+                    .size(1000)
             )
             .build()
         query.maxResults = 0
