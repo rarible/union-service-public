@@ -46,6 +46,7 @@ class SimplehashConsumerConfiguration(
                     "username=\"${kafkaProps.username}\" password=\"${kafkaProps.password}\";"
             )
         } else {
+            logger.info("Connecting to ${kafkaProps.broker} without credentials")
             avroConfig
         }
         return RaribleKafkaListenerContainerFactory(
@@ -65,6 +66,7 @@ class SimplehashConsumerConfiguration(
         handler: RaribleKafkaBatchEventHandler<nft>
     ): RaribleKafkaConsumerWorker<nft> {
         val listener = RaribleKafkaMessageListenerFactory.create(handler, true)
+        logger.info("Creating consumers for topics: ${props.simpleHash.kafka.topics}")
         val containers = props.simpleHash.kafka.topics.map {
             val container = factory.createContainer(it)
             container.setupMessageListener(listener)
