@@ -64,4 +64,10 @@ data class SimpleHashItem(
         val size: Long?,
         val mimeType: String?
     )
+
+    fun differentOriginalUrls(another: SimpleHashItem): Boolean {
+        return extraMetadata?.metadataOriginalUrl != another.extraMetadata?.metadataOriginalUrl
+                || extraMetadata?.imageOriginalUrl != another.extraMetadata?.imageOriginalUrl
+    }
+
 }

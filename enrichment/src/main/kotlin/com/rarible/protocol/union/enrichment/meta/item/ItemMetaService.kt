@@ -7,6 +7,7 @@ import com.rarible.protocol.union.enrichment.meta.downloader.DownloadMetrics
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadService
 import com.rarible.protocol.union.enrichment.meta.simplehash.HookEventType
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverterService
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashNftMetadataUpdate
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
@@ -22,7 +23,8 @@ class ItemMetaService(
     publisher: ItemMetaTaskPublisher,
     downloader: ItemMetaDownloader,
     notifier: ItemMetaNotifier,
-    metrics: DownloadMetrics
+    metrics: DownloadMetrics,
+    private val simpleHashConverterService: SimpleHashConverterService,
 ) : DownloadService<ItemIdDto, UnionMeta>(repository, publisher, downloader, notifier, metrics) {
 
     override val type = downloader.type
@@ -71,10 +73,22 @@ class ItemMetaService(
     suspend fun scheduleSimpleHashItemUpdate(item: SimpleHashItem) {
         try {
             val itemIdDto = SimpleHashConverter.parseNftId(item.nftId)
-            rawMetaCacheRepository.save(
-                SimpleHashConverter.convert(itemIdDto, item)
-            )
-            schedule(itemIdDto, ItemMetaPipeline.REFRESH, true)
+            val cacheEntity = SimpleHashConverter.convert(itemIdDto, item)
+            val existedCached = rawMetaCacheRepository.get(cacheEntity.id)
+            val existedEntity = existedCached?.let {
+                simpleHashConverterService.convertRawToSimpleHashItem(it.data)
+            }
+            if (cacheEntity != existedCached) {
+                logger.info("Meta for item ${item.nftId} was changed, existed meta: $existedCached, new: ${cacheEntity.data}")
+            }
+            if (existedEntity == null || item.differentOriginalUrls(existedEntity)) {
+                rawMetaCacheRepository.save(cacheEntity)
+                schedule(itemIdDto, ItemMetaPipeline.REFRESH, true)
+            } else if (item != existedEntity) {
+                rawMetaCacheRepository.save(cacheEntity)
+            } else {
+                logger.info("Meta for item ${item.nftId} wasn't change.")
+            }
         } catch (e: Exception) {
             logger.error("Error processing scheduling for item ${item.nftId}", e)
         }
