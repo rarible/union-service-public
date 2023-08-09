@@ -84,7 +84,6 @@ internal class EsActivityRepositoryFt {
         assertThat(actual.activities).hasSize(0)
     }
 
-
     @Test
     fun `find traded distinct collections`(): Unit = runBlocking {
         // given
