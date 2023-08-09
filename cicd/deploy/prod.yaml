@@ -18,7 +18,7 @@ protocol-union-listener:
       cpu: '8'
   environments:
     META_SIMPLEHASH_KAFKA_ENABLED: true
-    META_SIMPLEHASH_KAFKA_TOPICS: ethereum.nft.v0
+    META_SIMPLEHASH_KAFKA_TOPICS: ethereum.nft.v2
 
 protocol-union-meta-loader:
   replicas: 3
