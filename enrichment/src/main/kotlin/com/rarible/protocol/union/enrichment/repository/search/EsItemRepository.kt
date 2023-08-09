@@ -52,7 +52,9 @@ class EsItemRepository(
         query.trackTotalHits = false
 
         query.addSourceFilter(FetchSourceFilter(EsItemLite.FIELDS, null))
-        val searchHits = search(query)
+        val searchHits = logIfSlow(filter, query) {
+            search(query)
+        }
         val cursor = queryCursorService.buildCursor(searchHits.lastOrNull())
 
         return Slice(
@@ -65,7 +67,6 @@ class EsItemRepository(
         return esOperations.search(query, EsItemLite::class.java, entityDefinition.searchIndexCoordinates)
             .collectList()
             .awaitFirst()
-        // .apply { logger.debug(this.map { it.score }.joinToString()) }
     }
 
     suspend fun countItemsInCollection(collectionId: String): Long {

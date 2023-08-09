@@ -47,9 +47,11 @@ class EsOwnershipRepository(
         query.maxResults = PageSize.OWNERSHIP.limit(limit)
         query.trackTotalHits = false
 
-        val searchHits = esOperations.search(query, EsOwnership::class.java, entityDefinition.searchIndexCoordinates)
-            .collectList().awaitFirst()
-
+        val searchHits = logIfSlow(filter, query) {
+            esOperations
+                .search(query, EsOwnership::class.java, entityDefinition.searchIndexCoordinates)
+                .collectList().awaitFirst()
+        }
         val cursor = queryCursorService.buildCursor(searchHits.lastOrNull())
 
         return Slice(
