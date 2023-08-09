@@ -69,5 +69,4 @@ data class SimpleHashItem(
         return extraMetadata?.metadataOriginalUrl != another.extraMetadata?.metadataOriginalUrl
                 || extraMetadata?.imageOriginalUrl != another.extraMetadata?.imageOriginalUrl
     }
-
 }
