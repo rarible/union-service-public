@@ -20,6 +20,7 @@ spring:
 meta:
   embedded:
     publicUrl: "http://localhost:8080/content/embedded"
+  retries: "PT1H,P1D"
 
 integration:
   tezos:

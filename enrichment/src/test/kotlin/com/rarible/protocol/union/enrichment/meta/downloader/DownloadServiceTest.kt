@@ -49,7 +49,8 @@ class DownloadServiceTest {
         publisher,
         downloader,
         notifier,
-        metrics
+        metrics,
+        mockk(),
     )
 
     private lateinit var itemId: ItemIdDto
