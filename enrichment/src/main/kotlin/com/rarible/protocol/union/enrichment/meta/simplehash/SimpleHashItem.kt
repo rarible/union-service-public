@@ -66,7 +66,7 @@ data class SimpleHashItem(
     )
 
     fun differentOriginalUrls(another: SimpleHashItem): Boolean {
-        return extraMetadata?.metadataOriginalUrl != another.extraMetadata?.metadataOriginalUrl
-                || extraMetadata?.imageOriginalUrl != another.extraMetadata?.imageOriginalUrl
+        return extraMetadata?.metadataOriginalUrl != another.extraMetadata?.metadataOriginalUrl ||
+                extraMetadata?.imageOriginalUrl != another.extraMetadata?.imageOriginalUrl
     }
 }
