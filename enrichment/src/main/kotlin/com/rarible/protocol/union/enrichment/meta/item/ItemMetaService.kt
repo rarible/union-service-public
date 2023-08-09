@@ -80,8 +80,11 @@ class ItemMetaService(
             if (existedEntity == null || item.differentOriginalUrls(existedEntity)) {
                 rawMetaCacheRepository.save(cacheEntity)
                 schedule(itemIdDto, ItemMetaPipeline.REFRESH, true)
+            } else if (item != existedEntity) {
+                logger.info("Meta original urls for item ${item.nftId} are the same. Scheduling update will be skipped")
+                rawMetaCacheRepository.save(cacheEntity)
             } else {
-                logger.info("Meta original urls are the same. Scheduling update will be skipped")
+                logger.info("Meta for item ${item.nftId} wasn't change.")
             }
         } catch (e: Exception) {
             logger.error("Error processing scheduling for item ${item.nftId}", e)
