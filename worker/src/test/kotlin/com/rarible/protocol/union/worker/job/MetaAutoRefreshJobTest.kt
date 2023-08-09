@@ -4,6 +4,7 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.MetaAutoRefreshState
 import com.rarible.protocol.union.enrichment.model.MetaAutoRefreshStatus
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
+import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.worker.config.MetaAutoRefreshProperties
 import com.rarible.protocol.union.worker.config.WorkerProperties
@@ -33,6 +34,9 @@ internal class MetaAutoRefreshJobTest {
     @MockK
     private lateinit var itemMetaRefreshService: ItemMetaRefreshService
 
+    @MockK
+    private lateinit var esActivityRepository: EsActivityRepository
+
     @SpyK
     private var simpleHashEnabled: Boolean = true
 
@@ -46,6 +50,10 @@ internal class MetaAutoRefreshJobTest {
 
     @Test
     fun handle() = runTest {
+        coEvery {
+            esActivityRepository.findTradedDistinctCollections(any(), any())
+        } returns emptyList()
+
         val collectionId1 = randomEthCollectionId()
         val state1 = MetaAutoRefreshState(id = collectionId1.fullId())
 
