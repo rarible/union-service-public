@@ -74,8 +74,12 @@ class ItemMetaService(
         try {
             val itemIdDto = SimpleHashConverter.parseNftId(item.nftId)
             val cacheEntity = SimpleHashConverter.convert(itemIdDto, item)
-            val existedEntity = rawMetaCacheRepository.get(cacheEntity.id)?.let {
+            val existedCached = rawMetaCacheRepository.get(cacheEntity.id)
+            val existedEntity = existedCached?.let {
                 simpleHashConverterService.convertRawToSimpleHashItem(it.data)
+            }
+            if (cacheEntity != existedCached) {
+                logger.info("Meta for item ${item.nftId} was changed, existed meta: $existedCached, new: ${cacheEntity.data}")
             }
             if (existedEntity == null || item.differentOriginalUrls(existedEntity)) {
                 rawMetaCacheRepository.save(cacheEntity)
