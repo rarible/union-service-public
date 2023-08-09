@@ -64,6 +64,7 @@ meta:
     thread-count: 1
     time-out: 10000
     total-connection: 1000
+  retries: "PT10S,PT30S,PT5M,PT1H,P1D"
 
 integration:
   ethereum:
