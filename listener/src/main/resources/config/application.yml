@@ -185,6 +185,11 @@ meta:
     thread-count: 1
     time-out: 10000
     total-connection: 1000
+  simpleHash:
+    kafka:
+      topics: ${META_SIMPLEHASH_KAFKA_TOPICS:}
+      username: ${META_SIMPLEHASH_KAFKA_USERNAME:}
+      password: ${META_SIMPLEHASH_KAFKA_PASSWORD:}
 
 # Disable verbose logs of Apache HTTP client used to load content media metadata.
 logging:

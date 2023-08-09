@@ -1,9 +1,3 @@
-global:
-  environments: &sharedEnv
-    RARIBLE_CORE_APM_AGENT_ENABLED: true
-    RARIBLE_CORE_APM_AGENT_SERVER: https://2780b44bc007472f9a47235b6726ccac.apm.us-central1.gcp.cloud.es.io:443
-    RARIBLE_CORE_APM_AGENT_TOKEN: a3bj3NavWlKTIGCHf5
-
 protocol-union-api:
   service:
     nodePort: 30418
@@ -11,25 +5,17 @@ protocol-union-api:
     jvm:
       xmx_megabytes: 512
       max_direct_memory_megabytes: 128
-  environments:
-    <<: *sharedEnv
 
 protocol-union-listener:
   environments:
-    <<: *sharedEnv
-    META_SIMPLE_HASH_KAFKA_ENABLED: false
-    META_SIMPLE_HASH_KAFKA_TOPICS: ethereum-goerli.nft.v2-value
+    META_SIMPLEHASH_KAFKA_ENABLED: false
+    META_SIMPLEHASH_KAFKA_TOPICS: ethereum-goerli.nft.v2-value
 
 protocol-union-meta-loader:
   replicas: 3
-  environments:
-    <<: *sharedEnv
 
 protocol-union-indexer:
   replicas: 3
-  environments:
-    <<: *sharedEnv
 
 protocol-union-worker:
-  environments:
-    <<: *sharedEnv
+  replicas: 1

@@ -57,7 +57,9 @@ class EsActivityRepository(
         query.maxResults = PageSize.ACTIVITY.limit(limit)
         query.trackTotalHits = false
 
-        return search(query)
+        return logIfSlow(filter, query) {
+            search(query)
+        }
     }
 
     suspend fun search(query: NativeSearchQuery): EsActivityQueryResult {

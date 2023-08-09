@@ -9,18 +9,21 @@ import com.rarible.protocol.apikey.kafka.RaribleKafkaMessageListenerFactory
 import com.rarible.simplehash.client.subcriber.SimplehashKafkaAvroDeserializer
 import com.simplehash.v0.nft
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import java.util.UUID
 
-@ConditionalOnProperty("meta.simpleHash.kafka.enabled", havingValue = "true")
+@ConditionalOnProperty("meta.simplehash.kafka.enabled", havingValue = "true")
 class SimplehashConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo
 ) {
 
     private val env = applicationEnvironmentInfo.name
     private val clientId = "$env.${UUID.randomUUID()}"
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Bean
     fun simplehashConsumerFactory(props: UnionMetaProperties): RaribleKafkaListenerContainerFactory<nft> {
@@ -34,7 +37,8 @@ class SimplehashConsumerConfiguration(
 
             ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS to SimplehashKafkaAvroDeserializer::class.java
         )
-        val settings = if (kafkaProps.username != null) {
+        val settings = if (!kafkaProps.username.isNullOrEmpty()) {
+            logger.info("Connecting to ${kafkaProps.broker} using username=${kafkaProps.username} and password=****${kafkaProps.password?.takeLast(5)}")
             avroConfig + mapOf(
                 "security.protocol" to "SASL_SSL",
                 "sasl.mechanism" to "PLAIN",
@@ -42,6 +46,7 @@ class SimplehashConsumerConfiguration(
                     "username=\"${kafkaProps.username}\" password=\"${kafkaProps.password}\";"
             )
         } else {
+            logger.info("Connecting to ${kafkaProps.broker} without credentials")
             avroConfig
         }
         return RaribleKafkaListenerContainerFactory(
@@ -61,6 +66,7 @@ class SimplehashConsumerConfiguration(
         handler: RaribleKafkaBatchEventHandler<nft>
     ): RaribleKafkaConsumerWorker<nft> {
         val listener = RaribleKafkaMessageListenerFactory.create(handler, true)
+        logger.info("Creating consumers for topics: ${props.simpleHash.kafka.topics}")
         val containers = props.simpleHash.kafka.topics.map {
             val container = factory.createContainer(it)
             container.setupMessageListener(listener)
