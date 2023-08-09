@@ -16,12 +16,11 @@ class SimpleHashKafkaHandler(
     override suspend fun handle(event: List<nft>) {
         event.forEach {
             try {
-                logger.info("Received meta update for item ${it.nftId}")
+                logger.info("Received update for item ${it.nftId}")
                 val item = SimpleHashConverter.convert(it)
                 itemMetaService.scheduleSimpleHashItemUpdate(item)
             } catch (e: Exception) {
-                logger.error("Error handling for item ${it.nftId}", e)
-                throw e
+                logger.error("Error handling for item ${it.nftId}. It will be ignored", e)
             }
         }
     }
