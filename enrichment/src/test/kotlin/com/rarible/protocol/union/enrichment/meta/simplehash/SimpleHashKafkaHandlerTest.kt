@@ -13,15 +13,19 @@ class SimpleHashKafkaHandlerTest {
     @Test
     fun `schedule meta update - ok`() = runBlocking {
         val itemMetaService: ItemMetaService = mockk() {
-            coEvery { scheduleSimpleHashItemUpdate(any()) } returns Unit
+            coEvery { scheduleAndSaveSimpleHashItemUpdate(any(), any()) } returns Unit
         }
-        val handler = SimpleHashKafkaHandler(itemMetaService)
+        val metrics: SimpleHashItemMetrics = mockk()
+        coEvery { metrics.onEventIncomingSuccess(any()) } returns Unit
+        coEvery { metrics.onEventIncomingFailed(any()) } returns Unit
+        coEvery { metrics.onEventIncomingFailed() } returns Unit
+        val handler = SimpleHashKafkaHandler(itemMetaService, metrics)
         val event = nft.newBuilder().setNftId("ethereum.test").build()
 
         handler.handle(listOf(event))
 
         coVerify(exactly = 1) {
-            itemMetaService.scheduleSimpleHashItemUpdate(any())
+            itemMetaService.scheduleAndSaveSimpleHashItemUpdate(any(), any())
         }
     }
 }

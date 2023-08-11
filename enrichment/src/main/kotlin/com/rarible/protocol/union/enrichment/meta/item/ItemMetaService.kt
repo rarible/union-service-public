@@ -10,6 +10,7 @@ import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverterService
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashNftMetadataUpdate
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItemMetrics
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import org.slf4j.Logger
@@ -25,6 +26,7 @@ class ItemMetaService(
     notifier: ItemMetaNotifier,
     metrics: DownloadMetrics,
     private val simpleHashConverterService: SimpleHashConverterService,
+    private val simpleHashMetrics: SimpleHashItemMetrics
 ) : DownloadService<ItemIdDto, UnionMeta>(repository, publisher, downloader, notifier, metrics) {
 
     override val type = downloader.type
@@ -61,7 +63,7 @@ class ItemMetaService(
             is HookEventType.ContractNftMetadataUpdate -> {
                 logHook(updateDto)
                 updateDto.nfts.forEach { nft ->
-                    scheduleSimpleHashItemUpdate(nft)
+                    scheduleAndSaveSimpleHashItemUpdate(nft, true)
                 }
             }
             is HookEventType.Unknown -> {
@@ -70,7 +72,7 @@ class ItemMetaService(
         }
     }
 
-    suspend fun scheduleSimpleHashItemUpdate(item: SimpleHashItem) {
+    suspend fun scheduleAndSaveSimpleHashItemUpdate(item: SimpleHashItem, force: Boolean) {
         try {
             val itemIdDto = SimpleHashConverter.parseNftId(item.nftId)
             val cacheEntity = SimpleHashConverter.convert(itemIdDto, item)
@@ -78,19 +80,25 @@ class ItemMetaService(
             val existedEntity = existedCached?.let {
                 simpleHashConverterService.convertRawToSimpleHashItem(it.data)
             }
-            if (cacheEntity != existedCached) {
+            if (item != existedEntity) {
                 logger.info("Meta for item ${item.nftId} was changed, existed meta: $existedCached, new: ${cacheEntity.data}")
-            }
-            if (existedEntity == null || item.differentOriginalUrls(existedEntity)) {
+                simpleHashMetrics.onMetaCacheChanged(itemIdDto.blockchain)
                 rawMetaCacheRepository.save(cacheEntity)
-                schedule(itemIdDto, ItemMetaPipeline.REFRESH, true)
-            } else if (item != existedEntity) {
-                rawMetaCacheRepository.save(cacheEntity)
+                simpleHashMetrics.onMetaCacheSaved(itemIdDto.blockchain)
+                scheduleSimpleHashItemRefresh(item, existedEntity, force)
             } else {
                 logger.info("Meta for item ${item.nftId} wasn't change.")
             }
         } catch (e: Exception) {
             logger.error("Error processing scheduling for item ${item.nftId}", e)
+        }
+    }
+
+    suspend fun scheduleSimpleHashItemRefresh(item: SimpleHashItem, existedEntity: SimpleHashItem?, force: Boolean) {
+        val itemIdDto = SimpleHashConverter.parseNftId(item.nftId)
+        if (force || (existedEntity != null && item.differentOriginalUrls(existedEntity))) {
+            schedule(itemIdDto, ItemMetaPipeline.REFRESH, true)
+            simpleHashMetrics.onMetaCacheRefresh(itemIdDto.blockchain)
         }
     }
 
