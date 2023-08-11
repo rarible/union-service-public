@@ -56,7 +56,7 @@
         <rarible.protocol.tezos.api.version>1.39.31</rarible.protocol.tezos.api.version>
         <rarible.protocol.simplehash.version>1.0.0</rarible.protocol.simplehash.version>
 
-        <rarible.protocol.union.version>1.55.2</rarible.protocol.union.version>
+        <rarible.protocol.union.version>1.56.2</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
     </properties>
