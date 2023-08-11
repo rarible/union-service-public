@@ -119,7 +119,7 @@ class EsItemQueryBuilderService(
     private fun BoolQueryBuilder.applyTraitsFilter(traits: List<TraitFilter>?) {
         traits?.forEach {
 
-            should(
+            must(
                 QueryBuilders.nestedQuery(
                     "traits",
                     QueryBuilders.boolQuery().must(termsQuery("traits.key.raw", it.key))
