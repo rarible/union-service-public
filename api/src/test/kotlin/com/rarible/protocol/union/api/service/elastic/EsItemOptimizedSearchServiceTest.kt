@@ -20,6 +20,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Clock
 import java.time.Duration
+import java.time.Instant
 
 class EsItemOptimizedSearchServiceTest {
     private val esItemRepository = mockk<EsItemRepository>()
@@ -99,6 +100,88 @@ class EsItemOptimizedSearchServiceTest {
                     assertThat(it.cursor).isEqualTo(expectedResult2.continuation)
                     assertThat(it.updatedFrom).isEqualTo(last2 - properties.lastUpdatedSearchPeriod)
                     assertThat(it.updatedTo).isEqualTo(last2)
+                },
+                any(),
+                any()
+            )
+            esItemRepository.search(
+                withArg {
+                    it as EsItemGenericFilter
+                    assertThat(it.cursor).isEqualTo(expectedResult2.continuation)
+                    assertThat(it.updatedFrom).isNull()
+                    assertThat(it.updatedTo).isNull()
+                },
+                any(),
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `search - acs`() = runBlocking<Unit> {
+        val filter = EsItemGenericFilter()
+        val sort = EsItemSort.EARLIEST_FIRST
+        val limit = 1
+        val now = nowMillis()
+
+        every { clock.instant() } returns now
+
+        val last1 = now - Duration.ofHours(10)
+        val expectedResult1 = Slice(continuation = "${last1.toEpochMilli()}_1", listOf(randomEsItemLite()))
+
+        val last2 = last1 + Duration.ofHours(1)
+        val expectedResult2 = Slice(continuation = "${last2.toEpochMilli()}_1", listOf(randomEsItemLite()))
+
+        coEvery {
+            esItemRepository.search(any<EsItemFilter>(), any(), any())
+        } returns expectedResult1
+
+        val result1 = service.search(filter, sort, limit)
+        assertThat(result1).isEqualTo(expectedResult1)
+        coVerify {
+            esItemRepository.search(
+                withArg {
+                    it as EsItemGenericFilter
+                    assertThat(it.cursor).isNull()
+                    assertThat(it.updatedFrom).isNull()
+                    assertThat(it.updatedTo).isNull()
+                },
+                any(),
+                any()
+            )
+        }
+
+        coEvery {
+            esItemRepository.search(any<EsItemFilter>(), any(), any())
+        } returns expectedResult2
+
+        val result2 = service.search(filter.copy(cursor = expectedResult1.continuation), sort, limit)
+        assertThat(result2).isEqualTo(expectedResult2)
+        coVerify {
+            esItemRepository.search(
+                withArg {
+                    it as EsItemGenericFilter
+                    assertThat(it.updatedFrom).isEqualTo(last1)
+                    assertThat(it.updatedTo).isEqualTo(last1 + properties.lastUpdatedSearchPeriod)
+                },
+                any(),
+                any()
+            )
+        }
+
+        coEvery {
+            esItemRepository.search(any<EsItemFilter>(), any(), any())
+        } returns Slice.empty()
+
+        val result3 = service.search(filter.copy(cursor = expectedResult2.continuation), sort, limit)
+        assertThat(result3).isEqualTo(Slice.empty<EsItemLite>())
+        coVerify {
+            esItemRepository.search(
+                withArg {
+                    it as EsItemGenericFilter
+                    assertThat(it.cursor).isEqualTo(expectedResult2.continuation)
+                    assertThat(it.updatedFrom).isEqualTo(last2)
+                    assertThat(it.updatedTo).isEqualTo(last2 + properties.lastUpdatedSearchPeriod)
                 },
                 any(),
                 any()

@@ -92,6 +92,9 @@ class EsItemOptimizedSearchService(
         return when (sort) {
             ASC -> {
                 val currentFrom = getCursorFrom(cursor) ?: from
+                if (currentFrom == Instant.EPOCH) {
+                    return LastUpdatedRange(from = filterFrom, to = filterTo)
+                }
                 val optimalTo = currentFrom.plus(properties.lastUpdatedSearchPeriod)
                 LastUpdatedRange(from = currentFrom, to = minOf(to, optimalTo))
             }
@@ -114,8 +117,8 @@ class EsItemOptimizedSearchService(
     }
 
     private data class LastUpdatedRange(
-        val from: Instant,
-        val to: Instant
+        val from: Instant?,
+        val to: Instant?
     )
 
     private companion object {
