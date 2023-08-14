@@ -6,7 +6,6 @@ import com.rarible.protocol.union.core.handler.InternalEventHandler
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
 import org.springframework.stereotype.Component
 
-
 @Component
 class MetricsInternalEventHandlerFactory(
     private val eventCountMetrics: EventCountMetrics,
