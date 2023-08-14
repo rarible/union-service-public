@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.api.configuration.EsOptimizationProperties
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.elastic.EsItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemLite
@@ -15,6 +16,7 @@ import org.elasticsearch.search.sort.SortOrder.DESC
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.Clock
 import java.time.Instant
 
 @Component
@@ -22,8 +24,13 @@ class EsItemOptimizedSearchService(
     private val esItemRepository: EsItemRepository,
     private val esEntitySearchAfterCursorService: EsEntitySearchAfterCursorService,
     private val properties: EsOptimizationProperties,
+    private val clock: Clock,
+    private val ff: FeatureFlagsProperties,
 ) {
     suspend fun search(filter: EsItemFilter, sort: EsItemSort, limit: Int?): Slice<EsItemLite> {
+        if (ff.enableOptimizedSearchForItems.not()) {
+            return esItemRepository.search(filter, sort, limit)
+        }
         val max = PageSize.ITEM.limit(limit)
         return when (sort) {
             EsItemSort.LATEST_FIRST,
@@ -81,7 +88,7 @@ class EsItemOptimizedSearchService(
         sort: SortOrder,
     ): LastUpdatedRange {
         val from = filterFrom ?: Instant.EPOCH
-        val to = filterTo ?: Instant.now()
+        val to = filterTo ?: clock.instant()
         return when (sort) {
             ASC -> {
                 val currentFrom = getCursorFrom(cursor) ?: from
