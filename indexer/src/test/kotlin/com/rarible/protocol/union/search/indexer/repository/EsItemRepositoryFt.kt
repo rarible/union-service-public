@@ -153,33 +153,36 @@ internal class EsItemRepositoryFt {
 
     @Test
     fun `should search by traits`(): Unit = runBlocking {
-
         val key = randomString()
+        val key2 = randomString()
         val value = randomString()
+        val value2 = randomString()
         val esItem1 = randomEsItem().copy(
             traits = listOf(
                 EsTrait(key, value),
-                EsTrait(randomString(), randomString()),
+                EsTrait(key2, value2),
                 EsTrait(randomString(), randomString()),
             ),
         )
         val esItem2 = randomEsItem().copy(
             traits = listOf(
                 EsTrait(key, randomString()),
-                EsTrait(randomString(), randomString()),
+                EsTrait(key2, value2),
                 EsTrait(randomString(), randomString()),
             ),
         )
         val esItem3 = randomEsItem().copy(
             traits = listOf(
-                EsTrait(randomString(), value),
-                EsTrait(randomString(), randomString()),
+                EsTrait(key, value),
+                EsTrait(randomString(), value2),
                 EsTrait(randomString(), randomString()),
             ),
         )
         repository.saveAll(listOf(esItem1, esItem2, esItem3))
         val result = repository.search(
-            EsItemGenericFilter(traits = listOf(TraitFilter(key, value))), EsItemSort.DEFAULT, 10
+            filter = EsItemGenericFilter(traits = listOf(TraitFilter(key, value), TraitFilter(key2, value2))),
+            sort = EsItemSort.DEFAULT,
+            limit = 10
         ).entities
 
         assertThat(result.size).isEqualTo(1)
