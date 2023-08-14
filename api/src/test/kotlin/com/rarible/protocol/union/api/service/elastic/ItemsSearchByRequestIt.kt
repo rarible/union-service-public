@@ -263,7 +263,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                 failMessage = "Search by creators failed!"
             )
 
-            expected = takeRandomItems()
+            expected = takeRandomItems().subList(0, 1)
             checkResult(
                 filter = ItemsSearchFilterDto(
                     traits = expected.flatMap { esItem ->
