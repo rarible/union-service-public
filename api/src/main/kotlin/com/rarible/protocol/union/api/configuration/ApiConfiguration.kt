@@ -24,7 +24,8 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 @Import(EnrichmentApiConfiguration::class)
 @EnableConfigurationProperties(value = [
     OpenapiProperties::class,
-    DomainProperties::class
+    DomainProperties::class,
+    EsOptimizationProperties::class,
 ])
 class ApiConfiguration {
 
