@@ -2,13 +2,13 @@ package com.rarible.protocol.union.listener.metrics
 
 import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.enrichment.metrics.UnionMetrics
+import com.rarible.protocol.union.core.UnionMetrics
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 import java.time.Duration
 
 @Component
-class OutgoingEventMetrics(
+class OutgoingEventDelayMetrics(
     meterRegistry: MeterRegistry
 ) : UnionMetrics(
     meterRegistry
