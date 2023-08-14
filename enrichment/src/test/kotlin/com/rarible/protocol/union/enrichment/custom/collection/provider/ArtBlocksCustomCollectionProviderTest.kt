@@ -43,9 +43,12 @@ class ArtBlocksCustomCollectionProviderTest {
     @Test
     fun `get sub-collection - ok, zero project id`() = runBlocking<Unit> {
         val itemId = createItemId(120324)
+        val subCollection = CollectionIdDto(BlockchainDto.ETHEREUM, "0xfa91e8df0e3ad39a4b2c5190fe610b21c7a7ac5c")
+
+        coEvery { artificialCollectionService.exists(subCollection) } returns true
         val result = provider.getCustomCollection(itemId, null)
 
-        assertThat(result).isEqualTo(collectionId)
+        assertThat(result).isEqualTo(subCollection)
     }
 
     @Test
