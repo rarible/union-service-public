@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 
 sealed class OutgoingEventMetricsListener<T>(
-    private val delays: OutgoingEventDelays,
+    private val delays: OutgoingEventDelayMetrics,
     private val metrics: EventCountMetrics
 ) : OutgoingEventListener<T> {
 
@@ -98,7 +98,7 @@ sealed class OutgoingEventMetricsListener<T>(
 }
 
 @Component
-class CollectionEventMetricsListener(delays: OutgoingEventDelays, metrics: EventCountMetrics) :
+class CollectionEventMetricsListener(delays: OutgoingEventDelayMetrics, metrics: EventCountMetrics) :
     OutgoingEventMetricsListener<CollectionEventDto>(delays, metrics) {
 
     override val eventType = EventType.COLLECTION
@@ -107,7 +107,7 @@ class CollectionEventMetricsListener(delays: OutgoingEventDelays, metrics: Event
 }
 
 @Component
-class ItemEventMetricsListener(delays: OutgoingEventDelays, metrics: EventCountMetrics) :
+class ItemEventMetricsListener(delays: OutgoingEventDelayMetrics, metrics: EventCountMetrics) :
     OutgoingEventMetricsListener<ItemEventDto>(delays, metrics) {
 
     override val eventType = EventType.ITEM
@@ -116,7 +116,7 @@ class ItemEventMetricsListener(delays: OutgoingEventDelays, metrics: EventCountM
 }
 
 @Component
-class ActivityMetricsListener(delays: OutgoingEventDelays, metrics: EventCountMetrics) :
+class ActivityMetricsListener(delays: OutgoingEventDelayMetrics, metrics: EventCountMetrics) :
     OutgoingEventMetricsListener<ActivityEvent>(delays, metrics) {
 
     override val eventType = EventType.ACTIVITY
@@ -125,7 +125,7 @@ class ActivityMetricsListener(delays: OutgoingEventDelays, metrics: EventCountMe
 }
 
 @Component
-class OwnershipEventMetricsListener(delays: OutgoingEventDelays, metrics: EventCountMetrics) :
+class OwnershipEventMetricsListener(delays: OutgoingEventDelayMetrics, metrics: EventCountMetrics) :
     OutgoingEventMetricsListener<OwnershipEventDto>(delays, metrics) {
 
     override val eventType = EventType.OWNERSHIP
@@ -134,7 +134,7 @@ class OwnershipEventMetricsListener(delays: OutgoingEventDelays, metrics: EventC
 }
 
 @Component
-class OrderEventMetricsListener(delays: OutgoingEventDelays, metrics: EventCountMetrics) :
+class OrderEventMetricsListener(delays: OutgoingEventDelayMetrics, metrics: EventCountMetrics) :
     OutgoingEventMetricsListener<OrderEventDto>(delays, metrics) {
 
     override val eventType = EventType.ORDER

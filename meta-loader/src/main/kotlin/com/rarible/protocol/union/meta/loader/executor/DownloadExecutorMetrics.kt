@@ -2,7 +2,7 @@ package com.rarible.protocol.union.meta.loader.executor
 
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.enrichment.metrics.UnionMetrics
+import com.rarible.protocol.union.core.UnionMetrics
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 import java.time.Duration

@@ -17,8 +17,8 @@ class BlockchainEventHandlerWrapper<B, U>(
 
     override suspend fun handle(event: B) {
         try {
-            eventCounter.increment()
             blockchainHandler.handle(event)
+            eventCounter.increment()
         } catch (ex: EventConversionException) {
             logger.error("Conversion of single event failed [{}]", ex.event, ex.cause)
             throw ex.cause!!
@@ -30,8 +30,8 @@ class BlockchainEventHandlerWrapper<B, U>(
 
     override suspend fun handle(events: List<B>) {
         try {
-            eventCounter.increment(events.size.toDouble())
             blockchainHandler.handle(events)
+            eventCounter.increment(events.size.toDouble())
         } catch (ex: EventConversionException) {
             logger.error(
                 "Conversion of one of ${events.size} $blockchain ${eventType.name} events failed [{}]",

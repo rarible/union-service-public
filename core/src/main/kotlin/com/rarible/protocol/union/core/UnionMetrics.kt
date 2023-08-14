@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.enrichment.metrics
+package com.rarible.protocol.union.core
 
 import com.rarible.protocol.union.dto.BlockchainDto
 import io.micrometer.core.instrument.ImmutableTag

@@ -23,8 +23,8 @@ class MetricsInternalEventHandler(
     private val handler: InternalEventHandler<UnionInternalBlockchainEvent>
 ) : InternalEventHandler<UnionInternalBlockchainEvent> {
     override suspend fun handle(event: UnionInternalBlockchainEvent) {
-        eventCountMetrics.eventReceived(EventCountMetrics.Stage.INTERNAL, event.getBlockchain(), event.getEventType())
         handler.handle(event)
+        eventCountMetrics.eventReceived(EventCountMetrics.Stage.INTERNAL, event.getBlockchain(), event.getEventType())
     }
 }
 
@@ -33,9 +33,9 @@ class MetricsInternalBatchEventHandler(
     private val handler: InternalBatchEventHandler<UnionInternalBlockchainEvent>
 ) : InternalBatchEventHandler<UnionInternalBlockchainEvent> {
     override suspend fun handle(event: List<UnionInternalBlockchainEvent>) {
+        handler.handle(event)
         event.forEach {
             eventCountMetrics.eventReceived(EventCountMetrics.Stage.INTERNAL, it.getBlockchain(), it.getEventType())
         }
-        handler.handle(event)
     }
 }
