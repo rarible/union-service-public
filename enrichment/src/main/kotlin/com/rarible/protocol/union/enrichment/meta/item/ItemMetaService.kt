@@ -82,7 +82,10 @@ class ItemMetaService(
             }
             if (item != existedEntity) {
                 logger.info("Meta for item ${item.nftId} was changed, existed meta: $existedCached, new: ${cacheEntity.data}")
-                simpleHashMetrics.onMetaCacheChanged(itemIdDto.blockchain)
+                // check that we have not nullable meta
+                if (item.hasOriginalsUrls()) {
+                    simpleHashMetrics.onMetaCacheChanged(itemIdDto.blockchain)
+                }
                 rawMetaCacheRepository.save(cacheEntity)
                 simpleHashMetrics.onMetaCacheSaved(itemIdDto.blockchain)
                 scheduleSimpleHashItemRefresh(item, existedEntity, force)
