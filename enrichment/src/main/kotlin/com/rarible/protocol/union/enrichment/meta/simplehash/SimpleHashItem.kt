@@ -69,4 +69,8 @@ data class SimpleHashItem(
         return extraMetadata?.metadataOriginalUrl != another.extraMetadata?.metadataOriginalUrl ||
                 extraMetadata?.imageOriginalUrl != another.extraMetadata?.imageOriginalUrl
     }
+
+    fun hasOriginalsUrls(): Boolean {
+        return extraMetadata?.metadataOriginalUrl != null || extraMetadata?.imageOriginalUrl != null
+    }
 }
