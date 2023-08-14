@@ -29,11 +29,6 @@ class ArtBlocksCustomCollectionProvider(
         val projectId = tokenId.toLong() / 1000000
         val collectionId = CollectionIdDto(itemId.blockchain, token)
 
-        // For 0 token no migration required
-        if (projectId == 0L) {
-            return collectionId
-        }
-
         val surrogateCollectionId = Address.apply(
             Keys.getAddress("custom_collection:artblocks:${collectionId.value}:$projectId")
         ).prefixed()
