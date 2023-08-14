@@ -1,10 +1,12 @@
 package com.rarible.protocol.union.core.handler
 
 import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
+import io.micrometer.core.instrument.Counter
 import org.slf4j.LoggerFactory
 
 class BlockchainEventHandlerWrapper<B, U>(
-    private val blockchainHandler: BlockchainEventHandler<B, U>
+    private val blockchainHandler: BlockchainEventHandler<B, U>,
+    private val eventCounter: Counter
 ) : BlockchainEventHandler<B, U>, /*RaribleKafkaEventHandler<B>,*/ RaribleKafkaBatchEventHandler<B> {
 
     override val eventType = blockchainHandler.eventType
@@ -15,6 +17,7 @@ class BlockchainEventHandlerWrapper<B, U>(
 
     override suspend fun handle(event: B) {
         try {
+            eventCounter.increment()
             blockchainHandler.handle(event)
         } catch (ex: EventConversionException) {
             logger.error("Conversion of single event failed [{}]", ex.event, ex.cause)
@@ -27,6 +30,7 @@ class BlockchainEventHandlerWrapper<B, U>(
 
     override suspend fun handle(events: List<B>) {
         try {
+            eventCounter.increment(events.size.toDouble())
             blockchainHandler.handle(events)
         } catch (ex: EventConversionException) {
             logger.error(

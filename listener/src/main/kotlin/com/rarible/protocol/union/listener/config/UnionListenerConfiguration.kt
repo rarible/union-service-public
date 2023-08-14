@@ -23,6 +23,7 @@ import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.listener.downloader.MetaTaskRouter
+import com.rarible.protocol.union.listener.handler.MetricsInternalEventHandlerFactory
 import com.rarible.protocol.union.listener.handler.internal.CollectionMetaTaskSchedulerHandler
 import com.rarible.protocol.union.listener.handler.internal.ItemMetaTaskSchedulerHandler
 import com.rarible.protocol.union.listener.handler.internal.UnionInternalEventHandler
@@ -60,6 +61,7 @@ class UnionListenerConfiguration(
 
     @Bean
     fun unionBlockchainEventWorker(
+        handlerWrapperFactory: MetricsInternalEventHandlerFactory,
         handler: UnionInternalEventHandler
     ): RaribleKafkaConsumerWorker<UnionInternalBlockchainEvent> {
         val consumers = blockchains.map { blockchain ->
@@ -79,12 +81,12 @@ class UnionListenerConfiguration(
             if (ff.enableInternalEventChunkAsyncHandling) {
                 kafkaConsumerFactory.createWorker(
                     settings,
-                    handler as InternalBatchEventHandler<UnionInternalBlockchainEvent>
+                    handlerWrapperFactory.create(handler as InternalBatchEventHandler<UnionInternalBlockchainEvent>)
                 )
             } else {
                 kafkaConsumerFactory.createWorker(
                     settings,
-                    handler as InternalEventHandler<UnionInternalBlockchainEvent>
+                    handlerWrapperFactory.create(handler as InternalEventHandler<UnionInternalBlockchainEvent>)
                 )
             }
         }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 
 @Component
-class OutgoingEventMetrics(
+class OutgoingEventDelays(
     meterRegistry: MeterRegistry
 ) : UnionMetrics(
     meterRegistry

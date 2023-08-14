@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.metrics
 
+import com.rarible.protocol.union.core.event.EventCountMetrics
 import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.ActivityEvent
@@ -14,7 +15,8 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 
 sealed class OutgoingEventMetricsListener<T>(
-    private val metrics: OutgoingEventMetrics
+    private val delays: OutgoingEventDelays,
+    private val metrics: EventCountMetrics
 ) : OutgoingEventListener<T> {
 
     private val measuredSources = setOf(
@@ -35,6 +37,7 @@ sealed class OutgoingEventMetricsListener<T>(
         } catch (e: Exception) {
             logger.error("Failed to mark event {}", event, e)
         }
+        eventSentMetric(event)
     }
 
     private fun markDelay(event: T) {
@@ -60,7 +63,7 @@ sealed class OutgoingEventMetricsListener<T>(
             if (duration.isNegative) {
                 logger.warn("Negative duration found in {} event from {}: {} -> {}", eventType, blockchain, m1, m2)
             }
-            metrics.markStageDelay(
+            delays.markStageDelay(
                 blockchain = blockchain,
                 type = eventType,
                 source = eventTimeMarks.source,
@@ -74,7 +77,7 @@ sealed class OutgoingEventMetricsListener<T>(
         val start = marks.first()
         val end = marks.last()
 
-        metrics.markGlobalDelay(
+        delays.markGlobalDelay(
             blockchain = blockchain,
             type = eventType,
             source = eventTimeMarks.source,
@@ -83,11 +86,20 @@ sealed class OutgoingEventMetricsListener<T>(
             delay = Duration.between(start.date, end.date)
         )
     }
+
+    private fun eventSentMetric(event: T) {
+        val blockchain = getBlockchain(event)
+        metrics.eventSent(
+            EventCountMetrics.Stage.EXTERNAL,
+            blockchain,
+            eventType
+        )
+    }
 }
 
 @Component
-class CollectionEventMetricsListener(metrics: OutgoingEventMetrics) :
-    OutgoingEventMetricsListener<CollectionEventDto>(metrics) {
+class CollectionEventMetricsListener(delays: OutgoingEventDelays, metrics: EventCountMetrics) :
+    OutgoingEventMetricsListener<CollectionEventDto>(delays, metrics) {
 
     override val eventType = EventType.COLLECTION
     override fun getBlockchain(event: CollectionEventDto) = event.collectionId.blockchain
@@ -95,7 +107,8 @@ class CollectionEventMetricsListener(metrics: OutgoingEventMetrics) :
 }
 
 @Component
-class ItemEventMetricsListener(metrics: OutgoingEventMetrics) : OutgoingEventMetricsListener<ItemEventDto>(metrics) {
+class ItemEventMetricsListener(delays: OutgoingEventDelays, metrics: EventCountMetrics) :
+    OutgoingEventMetricsListener<ItemEventDto>(delays, metrics) {
 
     override val eventType = EventType.ITEM
     override fun getBlockchain(event: ItemEventDto) = event.itemId.blockchain
@@ -103,7 +116,8 @@ class ItemEventMetricsListener(metrics: OutgoingEventMetrics) : OutgoingEventMet
 }
 
 @Component
-class ActivityMetricsListener(metrics: OutgoingEventMetrics) : OutgoingEventMetricsListener<ActivityEvent>(metrics) {
+class ActivityMetricsListener(delays: OutgoingEventDelays, metrics: EventCountMetrics) :
+    OutgoingEventMetricsListener<ActivityEvent>(delays, metrics) {
 
     override val eventType = EventType.ACTIVITY
     override fun getBlockchain(event: ActivityEvent) = event.activity.id.blockchain
@@ -111,8 +125,8 @@ class ActivityMetricsListener(metrics: OutgoingEventMetrics) : OutgoingEventMetr
 }
 
 @Component
-class OwnershipEventMetricsListener(metrics: OutgoingEventMetrics) :
-    OutgoingEventMetricsListener<OwnershipEventDto>(metrics) {
+class OwnershipEventMetricsListener(delays: OutgoingEventDelays, metrics: EventCountMetrics) :
+    OutgoingEventMetricsListener<OwnershipEventDto>(delays, metrics) {
 
     override val eventType = EventType.OWNERSHIP
     override fun getBlockchain(event: OwnershipEventDto) = event.ownershipId.blockchain
@@ -120,7 +134,8 @@ class OwnershipEventMetricsListener(metrics: OutgoingEventMetrics) :
 }
 
 @Component
-class OrderEventMetricsListener(metrics: OutgoingEventMetrics) : OutgoingEventMetricsListener<OrderEventDto>(metrics) {
+class OrderEventMetricsListener(delays: OutgoingEventDelays, metrics: EventCountMetrics) :
+    OutgoingEventMetricsListener<OrderEventDto>(delays, metrics) {
 
     override val eventType = EventType.ORDER
     override fun getBlockchain(event: OrderEventDto) = event.orderId.blockchain
