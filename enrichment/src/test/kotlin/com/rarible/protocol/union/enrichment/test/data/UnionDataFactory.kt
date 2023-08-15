@@ -91,7 +91,7 @@ val CUSTOM_COLLECTION_INCLUDE = CollectionIdDto(BlockchainDto.ETHEREUM, "0x88888
 fun randomUnionAddress(): UnionAddress =
     UnionAddressConverter.convert(
         BlockchainDto.ETHEREUM,
-        randomString().lowercase()
+        randomAddressString().lowercase()
     )
 
 fun randomUnionCollection(id: CollectionIdDto): UnionCollection =
@@ -257,7 +257,9 @@ fun randomUnionAuctionDto(ownershipId: OwnershipIdDto) = runBlocking {
     ).copy(seller = ownershipId.owner)
 }
 
-fun randomUnionActivityMint(itemId: ItemIdDto) = runBlocking {
+fun randomUnionActivityMint(
+    itemId: ItemIdDto = randomEthItemId()
+) = runBlocking {
     val mint = mockedEthActivityConverter.convert(
         randomEthItemMintActivity(), itemId.blockchain
     ) as UnionMintActivity
@@ -265,7 +267,9 @@ fun randomUnionActivityMint(itemId: ItemIdDto) = runBlocking {
     mint.copy(itemId = itemId)
 }
 
-fun randomUnionActivityOrderList(blockchain: BlockchainDto) = runBlocking {
+fun randomUnionActivityOrderList(
+    blockchain: BlockchainDto = BlockchainDto.ETHEREUM
+) = runBlocking {
     val list = mockedEthActivityConverter.convert(
         randomEthOrderListActivity(), blockchain
     ) as UnionOrderListActivity

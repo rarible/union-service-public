@@ -90,6 +90,9 @@ class EnrichmentItemEventService(
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean = true
     ) {
+        if (!enrichmentItemSellStatsService.isSellStatsChanged(oldOwnership, newOwnership)) {
+            return
+        }
         val ownershipId = oldOwnership?.id ?: newOwnership!!.id
         val itemId = ShortItemId(ownershipId.blockchain, ownershipId.itemId)
         optimisticLock {

@@ -20,7 +20,7 @@ open class DipDupItemMetaEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun convert(event: DipDupItemMetaEvent): UnionItemMetaEvent {
-        logger.info("Received {} dipdup token meta event: {}", blockchain, event)
+        logger.info("Received {} Item meta event: {}", blockchain, event)
         val itemId = ItemIdDto(blockchain, event.itemId)
         return UnionItemMetaRefreshEvent(itemId)
     }

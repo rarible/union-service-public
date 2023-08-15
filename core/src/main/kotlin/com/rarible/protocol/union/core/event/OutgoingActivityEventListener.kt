@@ -18,7 +18,7 @@ class OutgoingActivityEventListener(
 
     override suspend fun onEvent(event: ActivityEvent) {
         eventsProducer.send(KafkaEventFactory.activityEvent(event.activity)).ensureSuccess()
-        logger.debug("Activity Event sent: {}", event.activity)
+        logger.info("Activity Event sent: {}", event.activity)
     }
 
     suspend fun onEvents(events: List<ActivityDto>) {

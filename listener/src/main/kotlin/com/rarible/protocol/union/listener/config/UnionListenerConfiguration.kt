@@ -25,6 +25,8 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.listener.downloader.MetaTaskRouter
 import com.rarible.protocol.union.listener.handler.internal.CollectionMetaTaskSchedulerHandler
 import com.rarible.protocol.union.listener.handler.internal.ItemMetaTaskSchedulerHandler
+import com.rarible.protocol.union.listener.handler.internal.UnionInternalChunkedEventHandler
+import com.rarible.protocol.union.listener.handler.internal.UnionInternalEventChunker
 import com.rarible.protocol.union.listener.handler.internal.UnionInternalEventHandler
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
@@ -60,7 +62,8 @@ class UnionListenerConfiguration(
 
     @Bean
     fun unionBlockchainEventWorker(
-        handler: UnionInternalEventHandler
+        handler: UnionInternalEventHandler,
+        chunker: UnionInternalEventChunker
     ): RaribleKafkaConsumerWorker<UnionInternalBlockchainEvent> {
         val consumers = blockchains.map { blockchain ->
             val workers = properties.getWorkerProperties(blockchain)
@@ -76,15 +79,16 @@ class UnionListenerConfiguration(
                 offsetResetStrategy = OffsetResetStrategy.EARLIEST,
                 valueClass = UnionInternalBlockchainEvent::class.java
             )
+            val chunkedHandler = UnionInternalChunkedEventHandler(handler, chunker, blockchain)
             if (ff.enableInternalEventChunkAsyncHandling) {
                 kafkaConsumerFactory.createWorker(
                     settings,
-                    handler as InternalBatchEventHandler<UnionInternalBlockchainEvent>
+                    chunkedHandler as InternalBatchEventHandler<UnionInternalBlockchainEvent>
                 )
             } else {
                 kafkaConsumerFactory.createWorker(
                     settings,
-                    handler as InternalEventHandler<UnionInternalBlockchainEvent>
+                    chunkedHandler as InternalEventHandler<UnionInternalBlockchainEvent>
                 )
             }
         }

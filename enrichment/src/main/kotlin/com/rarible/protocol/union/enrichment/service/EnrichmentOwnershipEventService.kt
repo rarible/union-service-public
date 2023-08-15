@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.core.common.asyncWithTraceId
 import com.rarible.core.common.optimisticLock
-import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.PoolItemAction
 import com.rarible.protocol.union.core.model.UnionActivity

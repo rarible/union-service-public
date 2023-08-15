@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.listener.handler.internal
 
-import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
+import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionInternalActivityEvent
 import com.rarible.protocol.union.core.model.UnionInternalAuctionEvent
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
@@ -8,117 +8,122 @@ import com.rarible.protocol.union.core.model.UnionInternalCollectionEvent
 import com.rarible.protocol.union.core.model.UnionInternalItemEvent
 import com.rarible.protocol.union.core.model.UnionInternalOrderEvent
 import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
-import com.rarible.protocol.union.core.model.UnionItemChangeEvent
-import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
-import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
-import com.rarible.protocol.union.core.model.UnionOwnershipChangeEvent
-import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
+import com.rarible.protocol.union.core.model.UnionOrderMatchSell
+import com.rarible.protocol.union.core.model.UnionOwnershipEvent
+import com.rarible.protocol.union.dto.OwnershipIdDto
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class UnionInternalEventChunker {
 
-    private val squashableEventTypes = setOf(
-        // Since we send actual data in Updated events, we can use only last one
-        UnionItemUpdateEvent::class.java,
-        UnionOwnershipUpdateEvent::class.java,
-        UnionOrderUpdateEvent::class.java,
-        UnionCollectionUpdateEvent::class.java,
-
-        // The same for change events - if there are several in the batch, we can handle only last one
-        UnionItemChangeEvent::class.java,
-        UnionOwnershipChangeEvent::class.java
-    )
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     // IMPORTANT! We suggest these events have SAME key in Kafka
     fun toChunks(events: List<UnionInternalBlockchainEvent>): List<List<UnionInternalBlockchainEvent>> {
         val squashed = squash(events)
         val state = ChunkerState(squashed)
-        squashed.forEach { event ->
-            val entityEvent = event.data()
-            val current = state.current
-
-            when {
-                // In an empty chunk we add any event without conditions
-                current.isEmpty() -> state.add(event)
-
-                // For some events of same type we can do parallel handling,
-                // ATM implemented only for ownerships
-                (current.containsOnlyTypeOf(event)) -> when {
-                    // Ownership updates can be handled in parallel - but not for the same ownership
-                    entityEvent is UnionOwnershipUpdateEvent && !current.containsId(event) -> state.add(event)
-                    else -> state.flushAndAdd(event)
-                }
-
-                else -> state.flushAndAdd(event)
-            }
-        }
+        squashed.forEach { state.add(it) }
         state.flush()
         return state.result
     }
 
     private fun squash(events: List<UnionInternalBlockchainEvent>): List<UnionInternalBlockchainEvent> {
-        val ids = HashSet<Pair<Class<*>, Any>>(events.size)
-        return events.reversed().filter {
-            val type = it.data().javaClass
-            val key = Pair(type, it.getEntityId())
-            if (type in squashableEventTypes) {
-                ids.add(key)
-            } else {
-                true
-            }
-        }.reversed()
+        return events
+            .reversed()
+            .distinctBy { Pair(it.data().javaClass, it.getEntityId()) }
+            .reversed()
     }
 
     private class ChunkerState(events: List<UnionInternalBlockchainEvent>) {
         val result = ArrayList<List<UnionInternalBlockchainEvent>>(events.size)
-        var current = UnionIndependentEventChunk()
+        var current: Chunk? = null
 
         fun flush() {
-            if (current.isEmpty()) {
+            if (current?.isEmpty() == true) {
                 return
             }
-            result.add(current.chunk)
-            current = UnionIndependentEventChunk()
+            result.add(current!!.chunk)
+            current = null
         }
 
         fun add(event: UnionInternalBlockchainEvent) {
-            current.add(event)
+            val chunk = getCurrentChunk(event)
+            if (chunk.isAcceptable(event)) {
+                chunk.add(event)
+            } else {
+                flush()
+                add(event)
+            }
         }
 
-        fun flushAndAdd(event: UnionInternalBlockchainEvent) {
-            flush()
-            current.add(event)
+        private fun getCurrentChunk(event: UnionInternalBlockchainEvent): Chunk {
+            current?.let { return it }
+
+            current = when {
+                OwnershipChunk.EMPTY.isAcceptable(event) -> OwnershipChunk()
+                else -> DefaultChunk()
+            }
+
+            return current!!
         }
     }
 
-    private class UnionIndependentEventChunk {
-
-        // In most cases there will be only 1 event
+    // We consider there is no events with same entityId in batch after squash
+    private abstract class Chunk {
         val chunk = ArrayList<UnionInternalBlockchainEvent>(4)
-        private val typesInChunk = HashSet<Class<*>>(4)
         private val entityIds = HashSet<Any>(4)
 
-        fun add(event: UnionInternalBlockchainEvent) {
+        fun isEmpty() = chunk.isEmpty()
+        open fun add(event: UnionInternalBlockchainEvent) {
             chunk.add(event)
-            typesInChunk.add(event.data().javaClass)
             entityIds.add(event.getEntityId())
         }
 
-        fun containsOnlyTypeOf(event: UnionInternalBlockchainEvent): Boolean {
-            return typesInChunk.size == 1 && containsTypeOf(event)
+        open fun isAcceptable(event: UnionInternalBlockchainEvent): Boolean = !entityIds.contains(event.getEntityId())
+    }
+
+    // By default, we do NOT join events in chunks
+    private class DefaultChunk : Chunk() {
+        override fun isAcceptable(event: UnionInternalBlockchainEvent) = isEmpty()
+    }
+
+    // All Ownership events can be joined to the chunk
+    private class OwnershipChunk : Chunk() {
+
+        private val ownershipIds = HashSet<OwnershipIdDto>(4)
+
+        override fun add(event: UnionInternalBlockchainEvent) {
+            super.add(event)
+            when (val data = event.data()) {
+                is UnionOwnershipEvent -> ownershipIds.add(data.ownershipId)
+                is UnionActivity -> data.ownershipId()?.let { ownershipIds.add(it) }
+            }
         }
 
-        fun containsTypeOf(event: UnionInternalBlockchainEvent): Boolean {
-            return typesInChunk.contains(event.data().javaClass)
+        override fun isAcceptable(event: UnionInternalBlockchainEvent): Boolean {
+            val data = event.data()
+            return super.isAcceptable(event) &&
+                (data is UnionOwnershipEvent || checkActivityCompatibleWithOwnershipEvents(data))
         }
 
-        fun containsId(event: UnionInternalBlockchainEvent): Boolean {
-            return entityIds.contains(event.getEntityId())
+        private fun checkActivityCompatibleWithOwnershipEvents(
+            data: Any
+        ): Boolean {
+            // MatchSell affects Item update, so can't be updated in parallel with other events
+            if (data !is UnionActivity || data is UnionOrderMatchSell) {
+                return false
+            }
+
+            // Such activities can't trigger ownership updates, can be handled in parallel
+            val ownershipId = data.ownershipId() ?: return true
+
+            // There is already something with same ownershipId, chunk should be finalised
+            return !ownershipIds.contains(ownershipId)
         }
 
-        fun isEmpty(): Boolean {
-            return chunk.isEmpty()
+        companion object {
+            val EMPTY = OwnershipChunk()
         }
     }
 }
