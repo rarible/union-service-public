@@ -52,7 +52,9 @@ class EsItemOptimizedSearchService(
         limit: Int,
     ): Slice<EsItemLite> {
         return when (filter) {
-            is EsItemGenericFilter -> optimizeSortByLastUpdatedGeneric(filter, sort, limit)
+            is EsItemGenericFilter -> {
+                optimizeSortByLastUpdatedGeneric(filter, sort, limit)
+            }
         }
     }
 
@@ -74,10 +76,13 @@ class EsItemOptimizedSearchService(
         val result = esItemRepository.search(optimizedFilter, sort, limit)
 
         if (result.entities.size >= limit &&
-            result.continuation != null
+            result.continuation != null ||
+            optimizedFilter == filter
         ) {
+            logger.info("Optimized search items by lastUpdated: $optimizedFilter")
             return result
         }
+        logger.info("Regular search items by lastUpdated: $filter")
         return esItemRepository.search(filter, sort, limit)
     }
 
@@ -87,14 +92,11 @@ class EsItemOptimizedSearchService(
         cursor: String?,
         sort: SortOrder,
     ): LastUpdatedRange {
-        val from = filterFrom ?: Instant.EPOCH
+        val from = filterFrom ?: properties.earliestItemByLastUpdateAt
         val to = filterTo ?: clock.instant()
         return when (sort) {
             ASC -> {
                 val currentFrom = getCursorFrom(cursor) ?: from
-                if (currentFrom == Instant.EPOCH) {
-                    return LastUpdatedRange(from = filterFrom, to = filterTo)
-                }
                 val optimalTo = currentFrom.plus(properties.lastUpdatedSearchPeriod)
                 LastUpdatedRange(from = currentFrom, to = minOf(to, optimalTo))
             }

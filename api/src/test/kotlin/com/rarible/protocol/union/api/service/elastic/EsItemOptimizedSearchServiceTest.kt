@@ -20,7 +20,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Clock
 import java.time.Duration
-import java.time.Instant
 
 class EsItemOptimizedSearchServiceTest {
     private val esItemRepository = mockk<EsItemRepository>()
@@ -143,8 +142,10 @@ class EsItemOptimizedSearchServiceTest {
                 withArg {
                     it as EsItemGenericFilter
                     assertThat(it.cursor).isNull()
-                    assertThat(it.updatedFrom).isNull()
-                    assertThat(it.updatedTo).isNull()
+                    assertThat(it.updatedFrom).isEqualTo(properties.earliestItemByLastUpdateAt)
+                    assertThat(it.updatedTo).isEqualTo(
+                        properties.earliestItemByLastUpdateAt + properties.lastUpdatedSearchPeriod
+                    )
                 },
                 any(),
                 any()
