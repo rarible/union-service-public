@@ -46,5 +46,7 @@ data class FeatureFlagsProperties(
 
     val enableInternalEventChunkAsyncHandling: Boolean = true,
 
-    val enableCollectionAutoReveal: Boolean = true
+    val enableCollectionAutoReveal: Boolean = true,
+
+    val enableOptimizedSearchForItems: Boolean = false,
 )

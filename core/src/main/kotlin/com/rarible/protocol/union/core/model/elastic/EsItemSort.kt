@@ -1,12 +1,14 @@
 package com.rarible.protocol.union.core.model.elastic
 
-enum class EsItemSort {
-    LATEST_FIRST,
-    EARLIEST_FIRST,
-    HIGHEST_SELL_PRICE_FIRST,
-    LOWEST_SELL_PRICE_FIRST,
-    HIGHEST_BID_PRICE_FIRST,
-    LOWEST_BID_PRICE_FIRST;
+import org.elasticsearch.search.sort.SortOrder
+
+enum class EsItemSort(val sortOrder: SortOrder) {
+    LATEST_FIRST(SortOrder.DESC),
+    EARLIEST_FIRST(SortOrder.ASC),
+    HIGHEST_SELL_PRICE_FIRST(SortOrder.DESC),
+    LOWEST_SELL_PRICE_FIRST(SortOrder.ASC),
+    HIGHEST_BID_PRICE_FIRST(SortOrder.DESC),
+    LOWEST_BID_PRICE_FIRST(SortOrder.ASC);
 
     companion object {
         val DEFAULT = LATEST_FIRST
