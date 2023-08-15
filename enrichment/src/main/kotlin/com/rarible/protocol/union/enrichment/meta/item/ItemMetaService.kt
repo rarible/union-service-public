@@ -80,17 +80,15 @@ class ItemMetaService(
             val existedEntity = existedCached?.let {
                 simpleHashConverterService.convertRawToSimpleHashItem(it.data)
             }
-            if (item != existedEntity) {
-                logger.info("Meta for item ${item.nftId} was changed, existed meta: $existedCached, new: ${cacheEntity.data}")
-                // check that we have not nullable meta
-                if (item.hasOriginalsUrls()) {
-                    simpleHashMetrics.onMetaCacheChanged(itemIdDto.blockchain)
-                }
+            // we should process items with original urls only (with meta)
+            if (item != existedEntity && item.hasOriginalsUrls()) {
+                logger.info("Meta for item ${item.nftId} was changed or new, existed meta: $existedCached, new: ${cacheEntity.data}")
+                simpleHashMetrics.onMetaItemChanged(itemIdDto.blockchain)
                 rawMetaCacheRepository.save(cacheEntity)
-                simpleHashMetrics.onMetaCacheSaved(itemIdDto.blockchain)
                 scheduleSimpleHashItemRefresh(item, existedEntity, force)
             } else {
-                logger.info("Meta for item ${item.nftId} wasn't change.")
+                logger.info("Meta for item ${item.nftId} wasn't change or item's meta is empty.")
+                simpleHashMetrics.onMetaItemIgnored(itemIdDto.blockchain)
             }
         } catch (e: Exception) {
             logger.error("Error processing scheduling for item ${item.nftId}", e)
@@ -99,9 +97,10 @@ class ItemMetaService(
 
     suspend fun scheduleSimpleHashItemRefresh(item: SimpleHashItem, existedEntity: SimpleHashItem?, force: Boolean) {
         val itemIdDto = SimpleHashConverter.parseNftId(item.nftId)
+        // We should refresh only if we already have cache for existed item and original urls were changed
         if (force || (existedEntity != null && item.differentOriginalUrls(existedEntity))) {
             schedule(itemIdDto, ItemMetaPipeline.REFRESH, true)
-            simpleHashMetrics.onMetaCacheRefresh(itemIdDto.blockchain)
+            simpleHashMetrics.onMetaItemRefresh(itemIdDto.blockchain)
         }
     }
 
