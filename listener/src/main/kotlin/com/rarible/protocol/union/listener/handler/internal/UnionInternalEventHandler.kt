@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.listener.handler.internal
 
-import com.rarible.core.logging.asyncWithTraceId
+import com.rarible.core.common.asyncWithTraceId
 import com.rarible.protocol.union.core.handler.InternalBatchEventHandler
 import com.rarible.protocol.union.core.handler.InternalEventHandler
 import com.rarible.protocol.union.core.model.UnionInternalActivityEvent
@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.model.UnionInternalCollectionEvent
 import com.rarible.protocol.union.core.model.UnionInternalItemEvent
 import com.rarible.protocol.union.core.model.UnionInternalOrderEvent
 import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
+import com.rarible.protocol.union.dto.BlockchainDto
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -26,35 +27,10 @@ class UnionInternalEventHandler(
     private val internalOrderEventHandler: UnionInternalOrderEventHandler,
     private val internalAuctionEventHandler: UnionInternalAuctionEventHandler,
     private val internalActivityEventHandler: UnionInternalActivityEventHandler,
-    private val internalCollectionEventHandler: UnionInternalCollectionEventHandler,
-    private val unionInternalEventChunker: UnionInternalEventChunker,
-) : InternalBatchEventHandler<UnionInternalBlockchainEvent>, InternalEventHandler<UnionInternalBlockchainEvent> {
+    private val internalCollectionEventHandler: UnionInternalCollectionEventHandler
+) : InternalEventHandler<UnionInternalBlockchainEvent> {
 
-    // Important! Can be used ONLY for sub-batches with same kafka key
-    override suspend fun handle(event: List<UnionInternalBlockchainEvent>) {
-        val start = System.currentTimeMillis()
-
-        // Here events divided in chunks that should be handled consequently,
-        // but events inside each chunk can be handled in parallel
-        // (initially done for case when we got tons of ownerships for same item - they can be handled in parallel)
-        val sequentialChunks = unionInternalEventChunker.toChunks(event)
-        coroutineScope {
-            sequentialChunks.forEach { chunk ->
-                if (chunk.size == 1) {
-                    handle(chunk.first())
-                } else {
-                    chunk.map { event -> asyncWithTraceId(context = NonCancellable) { handle(event) } }.awaitAll()
-                }
-            }
-        }
-
-        logger.info(
-            "Handled {} internal events in {} chunks ({}ms)",
-            event.size,
-            sequentialChunks.size,
-            System.currentTimeMillis() - start
-        )
-    }
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun handle(event: UnionInternalBlockchainEvent) {
         try {
@@ -70,6 +46,47 @@ class UnionInternalEventHandler(
             logger.error("Unexpected exception during handling internal event $event", ex)
         }
     }
+}
 
-    private val logger = LoggerFactory.getLogger(UnionInternalEventHandler::class.java)
+class UnionInternalChunkedEventHandler(
+    private val handler: UnionInternalEventHandler,
+    private val unionInternalEventChunker: UnionInternalEventChunker,
+    private val blockchain: BlockchainDto
+) : InternalBatchEventHandler<UnionInternalBlockchainEvent>, InternalEventHandler<UnionInternalBlockchainEvent> {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    override suspend fun handle(event: List<UnionInternalBlockchainEvent>) {
+        val start = System.currentTimeMillis()
+
+        // Here events divided in chunks that should be handled consequently,
+        // but events inside each chunk can be handled in parallel
+        // (initially done for case when we got tons of ownerships for same item - they can be handled in parallel)
+        val sequentialChunks = unionInternalEventChunker.toChunks(event)
+        coroutineScope {
+            sequentialChunks.forEach { chunk ->
+                if (chunk.size == 1) {
+                    handle(chunk.first())
+                } else {
+                    chunk.map { event ->
+                        asyncWithTraceId(context = NonCancellable) {
+                            handle(event)
+                        }
+                    }.awaitAll()
+                }
+            }
+        }
+
+        logger.info(
+            "Handled {} internal events in {} chunks for {} ({}ms)",
+            event.size,
+            sequentialChunks.size,
+            blockchain,
+            System.currentTimeMillis() - start
+        )
+    }
+
+    override suspend fun handle(event: UnionInternalBlockchainEvent) {
+        handler.handle(event)
+    }
 }

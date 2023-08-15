@@ -12,8 +12,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
     JsonSubTypes.Type(name = "ORDER", value = UnionInternalOrderEvent::class),
     JsonSubTypes.Type(name = "AUCTION", value = UnionAuctionEvent::class),
     JsonSubTypes.Type(name = "ACTIVITY", value = UnionInternalActivityEvent::class),
-    // TODO remove this one later, everything is serialized with "ACTIVITY" now
-    JsonSubTypes.Type(name = "ACTIVITY_", value = UnionInternalActivityEvent::class)
 )
 sealed class UnionInternalBlockchainEvent {
     abstract fun getEntityId(): Any

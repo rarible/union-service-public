@@ -28,7 +28,7 @@ open class DipDupOrderEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun convert(event: DipDupOrder): UnionOrderEvent? {
-        logger.info("Received DipDup order event: {}", mapper.writeValueAsString(event))
+        logger.info("Received {} Order event: {}", blockchain, mapper.writeValueAsString(event))
         return if (enabledPlatforms.contains(event.platform)) {
             val unionOrder = dipDupOrderConverter.convert(event, blockchain)
             UnionOrderUpdateEvent(unionOrder, stubEventMark())

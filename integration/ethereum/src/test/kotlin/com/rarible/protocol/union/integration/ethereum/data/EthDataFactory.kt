@@ -103,9 +103,11 @@ fun randomEthPartDto(account: Address) = PartDto(account, randomInt())
 fun randomEthItemId() = ItemIdDto(BlockchainDto.ETHEREUM, randomEthAddress(), randomBigInt())
 fun randomPolygonItemId() = randomEthItemId().copy(blockchain = BlockchainDto.POLYGON)
 
-fun randomEthOwnershipId() = randomEthOwnershipId(randomEthItemId())
 fun randomPolygonOwnershipId() = randomEthOwnershipId().copy(blockchain = BlockchainDto.POLYGON)
-fun randomEthOwnershipId(itemId: ItemIdDto) = itemId.toOwnership(randomAddressString())
+fun randomEthOwnershipId(
+    itemId: ItemIdDto = randomEthItemId(),
+    owner: String = randomAddressString()
+) = itemId.toOwnership(owner)
 
 fun randomEthNftItemDto() = randomEthNftItemDto(randomEthItemId())
 fun randomEthNftItemDto(itemId: ItemIdDto): NftItemDto {

@@ -9,6 +9,13 @@ import java.math.BigInteger
 @Service
 class EnrichmentItemSellStatsService {
 
+    fun isSellStatsChanged(
+        oldOwnership: ShortOwnership?,
+        newOwnership: ShortOwnership?
+    ): Boolean {
+        return (oldOwnership?.bestSellOrder?.makeStock != newOwnership?.bestSellOrder?.makeStock)
+    }
+
     fun incrementSellStats(
         item: ShortItem,
         oldOwnership: ShortOwnership?,
