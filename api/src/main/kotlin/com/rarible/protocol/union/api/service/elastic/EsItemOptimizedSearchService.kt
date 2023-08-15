@@ -53,7 +53,11 @@ class EsItemOptimizedSearchService(
     ): Slice<EsItemLite> {
         return when (filter) {
             is EsItemGenericFilter -> {
-                optimizeSortByLastUpdatedGeneric(filter, sort, limit)
+                if (canBeOptimized(filter, sort)) {
+                    optimizeSortByLastUpdatedGeneric(filter, sort, limit)
+                } else {
+                    esSearch(filter, sort, limit)
+                }
             }
         }
     }
@@ -73,7 +77,7 @@ class EsItemOptimizedSearchService(
             updatedFrom = lastUpdatedRange.from,
             updatedTo = lastUpdatedRange.to,
         )
-        val result = esItemRepository.search(optimizedFilter, sort, limit)
+        val result = esSearch(optimizedFilter, sort, limit)
 
         if (result.entities.size >= limit &&
             result.continuation != null ||
@@ -83,7 +87,7 @@ class EsItemOptimizedSearchService(
             return result
         }
         logger.info("Regular search items by lastUpdated: $filter")
-        return esItemRepository.search(filter, sort, limit)
+        return esSearch(filter, sort, limit)
     }
 
     private fun getOptimizeFromAndTo(
@@ -116,6 +120,14 @@ class EsItemOptimizedSearchService(
             logger.warn("Can't parse lastUpdated cursor: $cursor", ex)
             null
         }
+    }
+
+    private fun canBeOptimized(filter: EsItemGenericFilter, sort: EsItemSort): Boolean {
+        return filter.itemIds.isNullOrEmpty()
+    }
+
+    private suspend fun esSearch(filter: EsItemFilter, sort: EsItemSort, limit: Int?): Slice<EsItemLite> {
+        return esItemRepository.search(filter, sort, limit)
     }
 
     private data class LastUpdatedRange(

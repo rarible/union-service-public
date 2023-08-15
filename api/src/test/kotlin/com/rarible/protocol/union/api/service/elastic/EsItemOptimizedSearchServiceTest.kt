@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.api.configuration.EsOptimizationProperties
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.elastic.EsItemFilter
@@ -191,6 +192,34 @@ class EsItemOptimizedSearchServiceTest {
                 withArg {
                     it as EsItemGenericFilter
                     assertThat(it.cursor).isEqualTo(expectedResult2.continuation)
+                    assertThat(it.updatedFrom).isNull()
+                    assertThat(it.updatedTo).isNull()
+                },
+                any(),
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `search - no optimizations if filters by ids`() = runBlocking<Unit> {
+        val filter = EsItemGenericFilter(itemIds = setOf(randomString()))
+        val sort = EsItemSort.EARLIEST_FIRST
+        val limit = 1
+
+        val expectedResult = Slice(continuation = null, listOf(randomEsItemLite()))
+
+        coEvery {
+            esItemRepository.search(any<EsItemFilter>(), any(), any())
+        } returns expectedResult
+
+        val result1 = service.search(filter, sort, limit)
+        assertThat(result1).isEqualTo(expectedResult)
+        coVerify {
+            esItemRepository.search(
+                withArg {
+                    it as EsItemGenericFilter
+                    assertThat(it.cursor).isNull()
                     assertThat(it.updatedFrom).isNull()
                     assertThat(it.updatedTo).isNull()
                 },
