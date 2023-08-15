@@ -41,10 +41,9 @@ class UnionInternalEventChunkerTest {
     @Test
     fun `to chunks - individual events`() {
         val marks = stubEventMark()
-        val activity = randomUnionActivityBurn()
 
         val events = listOf(
-            UnionInternalActivityEvent(activity),
+            UnionInternalActivityEvent(randomUnionActivitySale()),
             UnionInternalOrderEvent(UnionOrderUpdateEvent(randomUnionBidOrder(), marks)),
             UnionInternalItemEvent(UnionItemUpdateEvent(randomUnionItem(), marks)),
             UnionInternalItemEvent(UnionItemDeleteEvent(randomEthItemId(), marks)),
