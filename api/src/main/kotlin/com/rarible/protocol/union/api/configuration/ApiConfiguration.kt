@@ -18,13 +18,15 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
 import org.springframework.web.cors.reactive.CorsWebFilter
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
+import java.time.Clock
 
 @Configuration
 @EnableRaribleCorsWebFilter
 @Import(EnrichmentApiConfiguration::class)
 @EnableConfigurationProperties(value = [
     OpenapiProperties::class,
-    DomainProperties::class
+    DomainProperties::class,
+    EsOptimizationProperties::class,
 ])
 class ApiConfiguration {
 
@@ -60,5 +62,10 @@ class ApiConfiguration {
     @Bean
     fun webRequestClientTagContributor(): WebRequestClientTagContributor {
         return WebRequestClientTagContributor()
+    }
+
+    @Bean
+    fun apiClock(): Clock {
+        return Clock.systemUTC()
     }
 }

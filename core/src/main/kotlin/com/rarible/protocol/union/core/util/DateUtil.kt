@@ -6,3 +6,5 @@ import java.time.temporal.ChronoUnit
 fun Instant.truncatedToSeconds(): Instant {
     return truncatedTo(ChronoUnit.SECONDS)
 }
+
+fun Instant?.orNow(): Instant = this ?: Instant.now()

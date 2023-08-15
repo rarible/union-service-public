@@ -9,6 +9,7 @@ class EsEntitySearchAfterCursorService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @Deprecated("Need to remove")
     fun tryFixLegacyCursor(cursor: String?): String? {
         if (cursor.isNullOrBlank()) return cursor
         var fixed = if (cursor.first().isLetter()) {

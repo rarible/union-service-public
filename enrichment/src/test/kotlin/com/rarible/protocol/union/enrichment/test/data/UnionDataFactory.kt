@@ -32,6 +32,7 @@ import com.rarible.protocol.union.core.model.elastic.EsActivityLite
 import com.rarible.protocol.union.core.model.elastic.EsCollection
 import com.rarible.protocol.union.core.model.elastic.EsCollectionLite
 import com.rarible.protocol.union.core.model.elastic.EsItem
+import com.rarible.protocol.union.core.model.elastic.EsItemLite
 import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -368,6 +369,15 @@ fun randomEsItem(): EsItem {
         bestBidAmount = randomDouble(),
         bestBidCurrency = randomString(),
         bestBidMarketplace = randomMarketplace().name,
+    )
+}
+
+fun randomEsItemLite(): EsItemLite {
+    val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed(), randomBigInt())
+    return EsItemLite(
+        id = itemId.value,
+        itemId = itemId.fullId(),
+        blockchain = itemId.blockchain,
     )
 }
 

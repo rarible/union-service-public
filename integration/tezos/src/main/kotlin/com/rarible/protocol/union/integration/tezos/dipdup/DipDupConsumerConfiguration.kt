@@ -15,6 +15,7 @@ import com.rarible.dipdup.listener.model.DipDupItemEvent
 import com.rarible.dipdup.listener.model.DipDupItemMetaEvent
 import com.rarible.dipdup.listener.model.DipDupOwnershipEvent
 import com.rarible.protocol.union.core.event.ConsumerFactory
+import com.rarible.protocol.union.core.event.EventCountMetrics
 import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.BlockchainEventHandlerWrapper
@@ -47,7 +48,8 @@ import org.springframework.context.annotation.Import
 class DipDupConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     private val properties: DipDupIntegrationProperties,
-    private val consumerFactory: ConsumerFactory
+    private val consumerFactory: ConsumerFactory,
+    private val eventCountMetrics: EventCountMetrics
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -232,7 +234,9 @@ class DipDupConsumerConfiguration(
             offsetResetStrategy = OffsetResetStrategy.EARLIEST,
             valueClass = valueClass
         )
+        val eventCounter =
+            eventCountMetrics.eventReceivedCounter(EventCountMetrics.Stage.INDEXER, handler.blockchain, eventType)
         val kafkaConsumerFactory = RaribleKafkaConsumerFactory(env, host, deserializer)
-        return kafkaConsumerFactory.createWorker(settings, BlockchainEventHandlerWrapper(handler))
+        return kafkaConsumerFactory.createWorker(settings, BlockchainEventHandlerWrapper(handler, eventCounter))
     }
 }

@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class ConsumerFactory(
-    private val kafkaConsumerFactory: RaribleKafkaConsumerFactory
+    private val kafkaConsumerFactory: RaribleKafkaConsumerFactory,
+    private val eventCountMetrics: EventCountMetrics
 ) {
 
     fun <T> createBlockchainConsumerWorkerGroup(
@@ -32,7 +33,9 @@ class ConsumerFactory(
             offsetResetStrategy = OffsetResetStrategy.EARLIEST,
             valueClass = valueClass
         )
-        return kafkaConsumerFactory.createWorker(settings, BlockchainEventHandlerWrapper(handler))
+        val eventCounter =
+            eventCountMetrics.eventReceivedCounter(EventCountMetrics.Stage.INDEXER, handler.blockchain, eventType)
+        return kafkaConsumerFactory.createWorker(settings, BlockchainEventHandlerWrapper(handler, eventCounter))
     }
 
     fun consumerGroup(type: EventType): String {

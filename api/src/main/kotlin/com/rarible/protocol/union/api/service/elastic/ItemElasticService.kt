@@ -8,6 +8,7 @@ import com.rarible.protocol.union.api.service.api.ItemEnrichService
 import com.rarible.protocol.union.api.service.api.ItemQueryService
 import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.elastic.EsItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemLite
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
@@ -29,7 +30,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
-import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
+
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -42,7 +43,7 @@ import kotlin.random.Random
 @CaptureSpan(type = SpanType.APP)
 class ItemElasticService(
     private val itemFilterConverter: ItemFilterConverter,
-    private val esItemRepository: EsItemRepository,
+    private val esItemOptimizedSearchService: EsItemOptimizedSearchService,
     private val esOwnershipRepository: EsOwnershipRepository,
     private val ownershipElasticHelper: OwnershipElasticHelper,
     private val router: BlockchainRouter<ItemService>,
@@ -97,7 +98,7 @@ class ItemElasticService(
 
         val filter = itemFilterConverter.getItemsByCollection(collection.fullId(), continuation)
         logger.info("Built filter: $filter")
-        val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, safeSize)
+        val queryResult = search(filter, EsItemSort.DEFAULT, safeSize)
         val items = getItems(queryResult.entities, null)
         val cursor = queryResult.continuation
 
@@ -130,7 +131,7 @@ class ItemElasticService(
             while (true) {
                 val filter = itemFilterConverter.getAllItemIdsByCollection(collectionId.fullId(), cursor.toString())
                 logger.info("Built filter: $filter")
-                val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, pageSize)
+                val queryResult = search(filter, EsItemSort.DEFAULT, pageSize)
                 logger.info(
                     "getAllItemIdsByCollection ES Query result:" +
                         " size=${queryResult.entities.size}, continuation=${queryResult.continuation}"
@@ -162,7 +163,7 @@ class ItemElasticService(
 
         val filter = itemFilterConverter.getItemsByCreator(creator.fullId(), enabledBlockchains, continuation)
         logger.info("Built filter: $filter")
-        val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, safeSize)
+        val queryResult = search(filter, EsItemSort.DEFAULT, safeSize)
         val cursor = queryResult.continuation
 
         if (queryResult.entities.isEmpty()) return ItemsDto()
@@ -272,7 +273,7 @@ class ItemElasticService(
     suspend fun searchItems(request: ItemsSearchRequestDto): ItemsDto {
         val filter = itemFilterConverter.searchItems(request.filter, request.continuation)
         val sort = convertSort(request.sort)
-        val result = esItemRepository.search(filter, sort, request.size)
+        val result = search(filter, sort, request.size)
         if (result.entities.isEmpty()) return ItemsDto()
         val items = getItems(result.entities, null)
         val enriched = itemEnrichService.enrich(items)
@@ -340,7 +341,7 @@ class ItemElasticService(
             evaluatedBlockchains, showDeleted, lastUpdatedFrom, lastUpdatedTo, continuation
         )
         log("Built filter: $filter", requestId)
-        val queryResult = esItemRepository.search(filter, EsItemSort.DEFAULT, size)
+        val queryResult = search(filter, EsItemSort.DEFAULT, size)
         log("Got ${queryResult.entities.size} ES entities", requestId)
         val items = getItems(queryResult.entities, requestId)
         log("Got ${items.size} items", requestId)
@@ -367,6 +368,10 @@ class ItemElasticService(
         }.flatten()
 
         return items
+    }
+
+    suspend fun search(filter: EsItemFilter, sort: EsItemSort, limit: Int?): Slice<EsItemLite> {
+        return esItemOptimizedSearchService.search(filter, sort, limit)
     }
 
     private fun convertSort(sort: ItemsSearchSortDto?): EsItemSort {

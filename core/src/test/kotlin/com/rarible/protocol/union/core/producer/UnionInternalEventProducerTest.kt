@@ -3,6 +3,7 @@ package com.rarible.protocol.union.core.producer
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.KafkaSendResult
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.union.core.event.EventCountMetrics
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
 import com.rarible.protocol.union.core.model.UnionInternalOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -35,7 +36,11 @@ class UnionInternalEventProducerTest {
         )
     )
 
-    private val handler = UnionInternalOrderEventProducer(producer)
+    private val eventCountMetrics = mockk<EventCountMetrics> {
+        coEvery { eventSent(any(), any(), any(), any()) } returns Unit
+    }
+
+    private val handler = UnionInternalOrderEventProducer(producer, eventCountMetrics)
 
     @Test
     fun `single event`() = runBlocking<Unit> {
