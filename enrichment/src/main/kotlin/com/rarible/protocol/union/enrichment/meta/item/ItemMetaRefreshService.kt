@@ -26,6 +26,8 @@ class ItemMetaRefreshService(
     private val itemMetaService: ItemMetaService,
     private val metaRefreshRequestRepository: MetaRefreshRequestRepository,
     private val enrichmentItemService: EnrichmentItemService,
+    private val defaultItemMetaComparator: DefaultItemMetaComparator,
+    private val strictItemMetaComparator: StrictItemMetaComparator,
     private val ff: FeatureFlagsProperties
 ) {
 
@@ -116,8 +118,14 @@ class ItemMetaRefreshService(
         if (!ff.enableCollectionAutoReveal) {
             return false
         }
+
+        val comparator = if (ff.enableStrictMetaComparison) strictItemMetaComparator else defaultItemMetaComparator
+
         // We interested only in cases when meta was exists previously and successfully received again
-        if (previous == null || updated == null || !ItemMetaComparator.hasChanged(itemId, previous, updated)) {
+        if (previous == null ||
+            updated == null ||
+            !comparator.hasChanged(itemId, previous, updated)
+        ) {
             return false
         }
 
@@ -211,7 +219,7 @@ class ItemMetaRefreshService(
                             return@asyncWithTraceId false
                         }
 
-                        ItemMetaComparator.hasChanged(itemId, previous, actual)
+                        defaultItemMetaComparator.hasChanged(itemId, previous, actual)
                     }
                 }.awaitAll()
         }.any { it }
