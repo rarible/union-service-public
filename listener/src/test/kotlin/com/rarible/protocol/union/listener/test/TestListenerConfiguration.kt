@@ -14,6 +14,7 @@ import com.rarible.dipdup.listener.model.DipDupCollectionEvent
 import com.rarible.dipdup.listener.model.DipDupItemMetaEvent
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.dto.ActivityTopicProvider
+import com.rarible.protocol.dto.EthActivityEventDto
 import com.rarible.protocol.dto.FlowActivityDto
 import com.rarible.protocol.dto.FlowActivityEventTopicProvider
 import com.rarible.protocol.dto.FlowNftItemEventDto
@@ -266,12 +267,12 @@ class TestListenerConfiguration(
     }
 
     @Bean
-    fun testEthereumActivityEventProducer(): RaribleKafkaProducer<com.rarible.protocol.dto.ActivityDto> {
+    fun testEthereumActivityEventProducer(): RaribleKafkaProducer<EthActivityEventDto> {
         return RaribleKafkaProducer(
             clientId = "test.union.ethereum.activity",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-            valueClass = com.rarible.protocol.dto.ActivityDto::class.java,
-            defaultTopic = ActivityTopicProvider.getTopic(env, "ethereum"),
+            valueClass = EthActivityEventDto::class.java,
+            defaultTopic = ActivityTopicProvider.getActivityTopic(env, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
@@ -317,7 +318,7 @@ class TestListenerConfiguration(
             clientId = "test.union.flow.activity",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = FlowActivityDto::class.java,
-            defaultTopic = FlowActivityEventTopicProvider.getTopic(env),
+            defaultTopic = FlowActivityEventTopicProvider.getActivityTopic(env),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers()
         )
     }
