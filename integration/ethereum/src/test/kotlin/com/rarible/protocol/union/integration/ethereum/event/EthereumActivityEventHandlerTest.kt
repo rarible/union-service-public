@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.event
 
-import com.rarible.protocol.dto.ActivityDto
+import com.rarible.protocol.dto.EthActivityEventDto
+import com.rarible.protocol.dto.EventTimeMarksDto
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -22,7 +23,7 @@ class EthereumActivityEventHandlerTest {
     private val incomingEventHandler: IncomingEventHandler<UnionActivity> = mockk()
     private val ethAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
     private val ethActivityConverter = EthActivityConverter(ethAuctionConverter)
-    private val handler = EthereumActivityLegacyEventHandler(incomingEventHandler, ethActivityConverter)
+    private val handler = EthereumActivityEventHandler(incomingEventHandler, ethActivityConverter)
 
     @BeforeEach
     fun beforeEach() {
@@ -32,7 +33,7 @@ class EthereumActivityEventHandlerTest {
 
     @Test
     fun `ethereum activity order event`() = runBlocking {
-        val event: ActivityDto = randomEthOrderBidActivity()
+        val event = EthActivityEventDto(randomEthOrderBidActivity(), EventTimeMarksDto("test"))
 
         handler.handle(event)
 
@@ -42,7 +43,7 @@ class EthereumActivityEventHandlerTest {
 
     @Test
     fun `ethereum activity auction event`() = runBlocking {
-        val event: ActivityDto = randomEthAuctionOpenActivity()
+        val event = EthActivityEventDto(randomEthAuctionOpenActivity(), EventTimeMarksDto("test"))
 
         handler.handle(event)
 

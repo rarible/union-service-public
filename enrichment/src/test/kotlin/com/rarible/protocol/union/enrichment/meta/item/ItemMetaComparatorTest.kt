@@ -10,12 +10,14 @@ class ItemMetaComparatorTest {
 
     private val itemId = randomEthItemId()
 
+    private val comparator = StrictItemMetaComparator(DefaultItemMetaComparator())
+
     @Test
     fun `has changed - true, data changed`() {
         val previous = randomUnionMeta()
         val actual = previous.copy(name = "name")
 
-        assertThat(ItemMetaComparator.hasChanged(itemId, previous, actual)).isTrue()
+        assertThat(comparator.hasChanged(itemId, previous, actual)).isTrue()
     }
 
     @Test
@@ -24,14 +26,14 @@ class ItemMetaComparatorTest {
         val meta2 = randomUnionMeta(source = null)
         val meta3 = randomUnionMeta(source = MetaSource.SIMPLE_HASH)
 
-        assertThat(ItemMetaComparator.hasChanged(itemId, meta1, meta2)).isFalse()
-        assertThat(ItemMetaComparator.hasChanged(itemId, meta2, meta1)).isFalse()
+        assertThat(comparator.hasChanged(itemId, meta1, meta2)).isFalse()
+        assertThat(comparator.hasChanged(itemId, meta2, meta1)).isFalse()
 
-        assertThat(ItemMetaComparator.hasChanged(itemId, meta3, meta1)).isFalse()
-        assertThat(ItemMetaComparator.hasChanged(itemId, meta1, meta3)).isFalse()
+        assertThat(comparator.hasChanged(itemId, meta3, meta1)).isFalse()
+        assertThat(comparator.hasChanged(itemId, meta1, meta3)).isFalse()
 
-        assertThat(ItemMetaComparator.hasChanged(itemId, meta3, meta2)).isFalse()
-        assertThat(ItemMetaComparator.hasChanged(itemId, meta2, meta3)).isFalse()
+        assertThat(comparator.hasChanged(itemId, meta3, meta2)).isFalse()
+        assertThat(comparator.hasChanged(itemId, meta2, meta3)).isFalse()
     }
 
     @Test
@@ -39,8 +41,8 @@ class ItemMetaComparatorTest {
         val meta1 = randomUnionMeta()
         val meta2 = randomUnionMeta(contributors = listOf(MetaSource.SIMPLE_HASH))
 
-        assertThat(ItemMetaComparator.hasChanged(itemId, meta1, meta2)).isFalse()
-        assertThat(ItemMetaComparator.hasChanged(itemId, meta2, meta1)).isFalse()
+        assertThat(comparator.hasChanged(itemId, meta1, meta2)).isFalse()
+        assertThat(comparator.hasChanged(itemId, meta2, meta1)).isFalse()
     }
 
     @Test
@@ -48,6 +50,6 @@ class ItemMetaComparatorTest {
         val previous = randomUnionMeta()
         val actual = previous.copy(createdAt = previous.createdAt!!.plusSeconds(1))
 
-        assertThat(ItemMetaComparator.hasChanged(itemId, previous, actual)).isFalse()
+        assertThat(comparator.hasChanged(itemId, previous, actual)).isFalse()
     }
 }

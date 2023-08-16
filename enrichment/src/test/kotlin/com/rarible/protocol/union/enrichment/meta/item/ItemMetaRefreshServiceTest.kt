@@ -22,6 +22,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
+import io.mockk.impl.annotations.SpyK
 import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -51,6 +52,12 @@ internal class ItemMetaRefreshServiceTest {
     @MockK
     private lateinit var enrichmentItemService: EnrichmentItemService
 
+    @SpyK
+    private var defaultItemMetaComparator = DefaultItemMetaComparator()
+
+    @SpyK
+    private var strictItemMetaComparator = StrictItemMetaComparator(defaultItemMetaComparator)
+
     @MockK
     private lateinit var ff: FeatureFlagsProperties
 
@@ -59,6 +66,7 @@ internal class ItemMetaRefreshServiceTest {
         clearMocks(metaRefreshRequestRepository, enrichmentItemService, ff)
         coEvery { metaRefreshRequestRepository.save(any()) } returns Unit
         coEvery { ff.enableCollectionAutoReveal } returns true
+        coEvery { ff.enableStrictMetaComparison } returns true
     }
 
     @Test

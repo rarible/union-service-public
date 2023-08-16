@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.test
 
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.dto.EthActivityEventDto
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
@@ -70,7 +71,7 @@ abstract class AbstractIntegrationTest {
     lateinit var ethOrderProducer: RaribleKafkaProducer<com.rarible.protocol.dto.OrderEventDto>
 
     @Autowired
-    lateinit var ethActivityProducer: RaribleKafkaProducer<com.rarible.protocol.dto.ActivityDto>
+    lateinit var ethActivityProducer: RaribleKafkaProducer<EthActivityEventDto>
 
     @Autowired
     lateinit var testEventHandlers: List<TestUnionEventHandler<*>>
