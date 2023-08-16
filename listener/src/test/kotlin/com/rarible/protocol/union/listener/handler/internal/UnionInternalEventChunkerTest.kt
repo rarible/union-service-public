@@ -11,6 +11,7 @@ import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionItemChangeEvent
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipChangeEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
@@ -18,6 +19,7 @@ import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
 import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.UnionAddress
+import com.rarible.protocol.union.enrichment.test.data.randomSudoSwapAmmDataV1Dto
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityBurn
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityOrderList
@@ -27,6 +29,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrder
 import com.rarible.protocol.union.enrichment.test.data.randomUnionCollection
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
+import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -89,6 +92,43 @@ class UnionInternalEventChunkerTest {
             listOf(events[0]),
             listOf(events[1], events[2]),
             listOf(events[3])
+        )
+        val chunks = unionInternalEventChunker.toChunks(events)
+
+        assertThat(chunks).isEqualTo(expected)
+    }
+
+    @Test
+    fun `to chunks - with order chunk`() {
+        val marks = stubEventMark()
+        val itemId = randomEthItemId()
+
+        val active = randomUnionBidOrder(itemId).copy(status = UnionOrder.Status.ACTIVE)
+        val inactive1 = randomUnionSellOrder(itemId).copy(status = UnionOrder.Status.INACTIVE)
+        val inactive2 = randomUnionBidOrder(itemId).copy(status = UnionOrder.Status.CANCELLED)
+        val inactive3 = randomUnionBidOrder(itemId).copy(status = UnionOrder.Status.INACTIVE)
+        val inactive4 = randomUnionBidOrder(itemId).copy(status = UnionOrder.Status.FILLED)
+        val poolOrder = randomUnionSellOrder(itemId).copy(
+            status = UnionOrder.Status.INACTIVE,
+            data = randomSudoSwapAmmDataV1Dto()
+        )
+
+        val events = listOf(
+            UnionInternalOrderEvent(UnionOrderUpdateEvent(randomUnionBidOrder(), marks)),
+            UnionInternalOrderEvent(UnionOrderUpdateEvent(inactive1, marks)),
+            UnionInternalOrderEvent(UnionOrderUpdateEvent(inactive2, marks)),
+            UnionInternalOrderEvent(UnionOrderUpdateEvent(active, marks)),
+            UnionInternalOrderEvent(UnionOrderUpdateEvent(inactive3, marks)),
+            UnionInternalOrderEvent(UnionOrderUpdateEvent(inactive4, marks)),
+            UnionInternalOrderEvent(UnionOrderUpdateEvent(poolOrder, marks)),
+        )
+
+        val expected = listOf(
+            listOf(events[0]),
+            listOf(events[1], events[2]),
+            listOf(events[3]),
+            listOf(events[4], events[5]),
+            listOf(events[6]),
         )
         val chunks = unionInternalEventChunker.toChunks(events)
 

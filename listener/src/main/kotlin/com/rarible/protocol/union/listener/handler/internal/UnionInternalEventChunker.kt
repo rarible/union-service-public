@@ -8,7 +8,9 @@ import com.rarible.protocol.union.core.model.UnionInternalCollectionEvent
 import com.rarible.protocol.union.core.model.UnionInternalItemEvent
 import com.rarible.protocol.union.core.model.UnionInternalOrderEvent
 import com.rarible.protocol.union.core.model.UnionInternalOwnershipEvent
+import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOrderMatchSell
+import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import org.slf4j.LoggerFactory
@@ -62,6 +64,7 @@ class UnionInternalEventChunker {
 
             current = when {
                 OwnershipChunk.EMPTY.isAcceptable(event) -> OwnershipChunk()
+                OrderChunk.EMPTY.isAcceptable(event) -> OrderChunk()
                 else -> DefaultChunk()
             }
 
@@ -124,6 +127,25 @@ class UnionInternalEventChunker {
 
         companion object {
             val EMPTY = OwnershipChunk()
+        }
+    }
+
+    // Chunk for cases when we get mass order cancellations, in most cases such orders don't change Item,
+    // but potentially here can be rare concurrent modifications - they will be handled by optimisticLock
+    private class OrderChunk : Chunk() {
+
+        override fun isAcceptable(event: UnionInternalBlockchainEvent): Boolean {
+            val data = event.data()
+            return super.isAcceptable(event) &&
+                (data is UnionOrderUpdateEvent && isInactiveOrderUpdate(data))
+        }
+
+        private fun isInactiveOrderUpdate(data: UnionOrderUpdateEvent): Boolean {
+            return !data.order.isPoolOrder() && data.order.status != UnionOrder.Status.ACTIVE
+        }
+
+        companion object {
+            val EMPTY = OrderChunk()
         }
     }
 }
