@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.flow.event
 
+import com.rarible.protocol.dto.FlowActivityEventDto
+import com.rarible.protocol.dto.FlowEventTimeMarksDto
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.integration.flow.converter.FlowActivityConverter
@@ -13,11 +15,11 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class FlowLegacyActivityEventHandlerTest() {
+class FlowActivityEventHandlerTest() {
 
     private val incomingEventHandler: IncomingEventHandler<UnionActivity> = mockk()
     private val converter = FlowActivityConverter(CurrencyMock.currencyServiceMock)
-    private val handler = FlowLegacyActivityEventHandler(incomingEventHandler, converter)
+    private val handler = FlowActivityEventHandler(incomingEventHandler, converter)
 
     @BeforeEach
     fun beforeEach() {
@@ -27,7 +29,7 @@ class FlowLegacyActivityEventHandlerTest() {
 
     @Test
     fun `flow activity event`() = runBlocking {
-        val event = randomFlowCancelListActivityDto()
+        val event = FlowActivityEventDto(randomFlowCancelListActivityDto(), FlowEventTimeMarksDto("test"))
 
         handler.handle(event)
 

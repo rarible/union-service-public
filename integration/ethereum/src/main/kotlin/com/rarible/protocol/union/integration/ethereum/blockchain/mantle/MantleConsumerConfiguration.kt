@@ -3,7 +3,6 @@ package com.rarible.protocol.union.integration.ethereum.blockchain.mantle
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.ethereum.domain.Blockchain
-import com.rarible.protocol.dto.ActivityDto
 import com.rarible.protocol.dto.ActivityTopicProvider
 import com.rarible.protocol.dto.EthActivityEventDto
 import com.rarible.protocol.dto.NftCollectionEventDto
@@ -26,13 +25,11 @@ import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.event.EthActivityEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.EthActivityLegacyEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthCollectionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthItemEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOrderEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOwnershipEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.MantleActivityEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.MantleActivityLegacyEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.MantleCollectionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.MantleItemEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.MantleOrderEventHandler
@@ -96,16 +93,6 @@ class MantleConsumerConfiguration(
         return MantleActivityEventHandler(handler, converter)
     }
 
-    @Bean
-    @Deprecated("Remove later")
-    @Qualifier("mantle.activity.handler.legacy")
-    fun mantleLegacyActivityEventHandler(
-        handler: IncomingEventHandler<UnionActivity>,
-        converter: EthActivityConverter
-    ): EthActivityLegacyEventHandler {
-        return MantleActivityLegacyEventHandler(handler, converter)
-    }
-
     // -------------------- Workers --------------------//
 
     @Bean
@@ -164,19 +151,6 @@ class MantleConsumerConfiguration(
             topic = ActivityTopicProvider.getActivityTopic(env, blockchain.value),
             handler = handler,
             valueClass = EthActivityEventDto::class.java,
-            eventType = EventType.ACTIVITY,
-        )
-    }
-
-    @Bean
-    @Deprecated("Remove later")
-    fun mantleLegacyActivityWorker(
-        @Qualifier("mantle.activity.handler.legacy") handler: BlockchainEventHandler<ActivityDto, UnionActivity>
-    ): RaribleKafkaConsumerWorker<ActivityDto> {
-        return createConsumer(
-            topic = ActivityTopicProvider.getTopic(env, blockchain.value),
-            handler = handler,
-            valueClass = ActivityDto::class.java,
             eventType = EventType.ACTIVITY,
         )
     }

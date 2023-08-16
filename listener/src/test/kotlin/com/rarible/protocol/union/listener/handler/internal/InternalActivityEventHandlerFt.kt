@@ -3,7 +3,9 @@ package com.rarible.protocol.union.listener.handler.internal
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.Erc721AssetTypeDto
+import com.rarible.protocol.dto.EthActivityEventDto
 import com.rarible.protocol.dto.EthAssetTypeDto
+import com.rarible.protocol.dto.EventTimeMarksDto
 import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.dto.OrderActivityDto
 import com.rarible.protocol.dto.OrderActivityMatchDto
@@ -47,7 +49,7 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
         ethActivityProducer.send(
             KafkaMessage(
                 key = activity.id,
-                value = activity
+                value = EthActivityEventDto(activity, EventTimeMarksDto("test"))
             )
         ).ensureSuccess()
 
@@ -89,14 +91,17 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
         ethActivityProducer.send(
             KafkaMessage(
                 key = "1",
-                value = createActivityDto(
-                    saleDate = saleDate.minus(1, ChronoUnit.HOURS),
-                    id = "1",
-                    price = BigDecimal.TEN,
-                    reverted = false,
-                    seller = Address.apply(buyer.value),
-                    buyer = Address.apply(seller.value),
-                ),
+                value = EthActivityEventDto(
+                    createActivityDto(
+                        saleDate = saleDate.minus(1, ChronoUnit.HOURS),
+                        id = "1",
+                        price = BigDecimal.TEN,
+                        reverted = false,
+                        seller = Address.apply(buyer.value),
+                        buyer = Address.apply(seller.value),
+                    ),
+                    EventTimeMarksDto("test")
+                )
             )
         )
 
@@ -120,14 +125,17 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
         ethActivityProducer.send(
             KafkaMessage(
                 key = "1",
-                value = createActivityDto(
-                    saleDate = saleDate,
-                    id = "2",
-                    price = BigDecimal.ONE,
-                    reverted = false,
-                    seller = Address.apply(seller.value),
-                    buyer = Address.apply(buyer.value),
-                ),
+                value = EthActivityEventDto(
+                    createActivityDto(
+                        saleDate = saleDate,
+                        id = "2",
+                        price = BigDecimal.ONE,
+                        reverted = false,
+                        seller = Address.apply(seller.value),
+                        buyer = Address.apply(buyer.value),
+                    ),
+                    EventTimeMarksDto("test")
+                )
             )
         )
 
@@ -151,14 +159,16 @@ class InternalActivityEventHandlerFt : AbstractIntegrationTest() {
         ethActivityProducer.send(
             KafkaMessage(
                 key = "1",
-                value = createActivityDto(
-                    saleDate = saleDate,
-                    id = "2",
-                    price = BigDecimal.ONE,
-                    reverted = true,
-                    seller = Address.apply(seller.value),
-                    buyer = Address.apply(buyer.value),
-                ),
+                value = EthActivityEventDto(
+                    createActivityDto(
+                        saleDate = saleDate,
+                        id = "2",
+                        price = BigDecimal.ONE,
+                        reverted = true,
+                        seller = Address.apply(seller.value),
+                        buyer = Address.apply(buyer.value),
+                    ), EventTimeMarksDto("test")
+                )
             )
         )
 
