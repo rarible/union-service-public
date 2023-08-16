@@ -8,7 +8,16 @@ object ItemMetaComparator {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    fun hasChanged(itemId: ItemIdDto, previous: UnionMeta, updated: UnionMeta): Boolean {
+    fun hasChanged(
+        itemId: ItemIdDto,
+        previous: UnionMeta,
+        updated: UnionMeta,
+        strict: Boolean = true
+    ): Boolean {
+        if (!strict) {
+            return compare(itemId, previous, updated)
+        }
+
         // There is no sense to compare meta from different sources
         if (previous.source == null || updated.source == null || previous.source != updated.source) {
             return false
@@ -21,6 +30,14 @@ object ItemMetaComparator {
             return false
         }
 
+        return compare(itemId, previous, updated)
+    }
+
+    private fun compare(
+        itemId: ItemIdDto,
+        previous: UnionMeta,
+        updated: UnionMeta,
+    ): Boolean {
         val result = previous.toComparable() != updated.toComparable()
         if (result) {
             logger.info(

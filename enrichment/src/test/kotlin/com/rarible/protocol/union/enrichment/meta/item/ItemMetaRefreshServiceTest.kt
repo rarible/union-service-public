@@ -59,6 +59,7 @@ internal class ItemMetaRefreshServiceTest {
         clearMocks(metaRefreshRequestRepository, enrichmentItemService, ff)
         coEvery { metaRefreshRequestRepository.save(any()) } returns Unit
         coEvery { ff.enableCollectionAutoReveal } returns true
+        coEvery { ff.enableStrictMetaComparison } returns true
     }
 
     @Test

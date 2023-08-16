@@ -117,7 +117,10 @@ class ItemMetaRefreshService(
             return false
         }
         // We interested only in cases when meta was exists previously and successfully received again
-        if (previous == null || updated == null || !ItemMetaComparator.hasChanged(itemId, previous, updated)) {
+        if (previous == null ||
+            updated == null ||
+            !ItemMetaComparator.hasChanged(itemId, previous, updated, ff.enableStrictMetaComparison)
+        ) {
             return false
         }
 
@@ -211,7 +214,7 @@ class ItemMetaRefreshService(
                             return@asyncWithTraceId false
                         }
 
-                        ItemMetaComparator.hasChanged(itemId, previous, actual)
+                        ItemMetaComparator.hasChanged(itemId, previous, actual, false)
                     }
                 }.awaitAll()
         }.any { it }
