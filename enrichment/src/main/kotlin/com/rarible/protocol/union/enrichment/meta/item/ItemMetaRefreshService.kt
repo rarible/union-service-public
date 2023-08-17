@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.configuration.EnrichmentProperties
 import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -28,7 +29,8 @@ class ItemMetaRefreshService(
     private val enrichmentItemService: EnrichmentItemService,
     private val defaultItemMetaComparator: DefaultItemMetaComparator,
     private val strictItemMetaComparator: StrictItemMetaComparator,
-    private val ff: FeatureFlagsProperties
+    private val ff: FeatureFlagsProperties,
+    private val enrichmentProperties: EnrichmentProperties,
 ) {
 
     /**
@@ -199,7 +201,10 @@ class ItemMetaRefreshService(
 
     private suspend fun checkMetaChanges(collectionFullId: String): Boolean {
         val result = coroutineScope {
-            esItemRepository.getRandomItemsFromCollection(collectionId = collectionFullId, size = RANDOM_ITEMS_TO_CHECK)
+            esItemRepository.getRandomItemsFromCollection(
+                collectionId = collectionFullId,
+                size = enrichmentProperties.meta.item.numberOfItemsToCheckForMetaChanges
+            )
                 .map { esItem ->
                     asyncWithTraceId {
                         val itemId = IdParser.parseItemId(esItem.itemId)
@@ -249,7 +254,6 @@ class ItemMetaRefreshService(
     companion object {
         private const val COLLECTION_SIZE_THRESHOLD = 1000
         private const val BIG_COLLECTION_SIZE_THRESHOLD = 40000
-        private const val RANDOM_ITEMS_TO_CHECK = 100
         private const val MAX_COLLECTION_REFRESH_COUNT = 3
         private val logger = LoggerFactory.getLogger(ItemMetaRefreshService::class.java)
     }
