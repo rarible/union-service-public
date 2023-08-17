@@ -19,6 +19,7 @@ import com.rarible.protocol.union.dto.OrderDataDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.integration.immutablex.client.Fees
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderFee
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderSide
@@ -26,21 +27,13 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.BigInteger
 
-private const val ERC721 = "ERC721"
 
-private const val ETH = "ETH"
-
-private const val ERC20 = "ERC20"
-
-object ImxOrderConverter {
+open class ImxOrderConverter {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     // private val originFees = setOf("ecosystem", "protocol")
     // private val royalties = setOf("royalty")
-
-    private val originFees = setOf("ecosystem", "protocol", "royalty")
-    private val royalties = emptySet<String>() // TODO in IMX royalties works as originFees
 
     fun convert(order: ImmutablexOrder, blockchain: BlockchainDto): UnionOrder {
         return try {
@@ -51,14 +44,14 @@ object ImxOrderConverter {
         }
     }
 
-    private fun convertInternal(order: ImmutablexOrder, blockchain: BlockchainDto): UnionOrder {
+    open fun convertInternal(order: ImmutablexOrder, blockchain: BlockchainDto): UnionOrder {
         val make = toAsset(order, order.sell, blockchain)
         val take = toAsset(order, order.buy, blockchain)
 
         val (quantity, makePrice, takePrice) = if (make.type.isNft()) {
-            Triple(getQuantityWithFees(order.buy), take.value, null)
+            Triple(getQuantityWithFees(order.buy, order.takerFees), take.value, null)
         } else {
-            Triple(getQuantityWithFees(order.sell), null, make.value)
+            Triple(getQuantityWithFees(order.sell, order.makerFees), null, make.value)
         }
 
         val status = convertStatus(order)
@@ -85,7 +78,7 @@ object ImxOrderConverter {
         )
     }
 
-    private fun makeData(
+    open fun makeData(
         quantityWithFees: BigInteger,
         order: ImmutablexOrder,
         blockchain: BlockchainDto
@@ -108,7 +101,7 @@ object ImxOrderConverter {
         )
     }
 
-    private fun toPayout(quantity: BigInteger, fee: ImmutablexOrderFee, blockchain: BlockchainDto): PayoutDto {
+    fun toPayout(quantity: BigInteger, fee: ImmutablexOrderFee, blockchain: BlockchainDto): PayoutDto {
         // TODO not really sure this is the right way to round it
         val amountBp = fee.amount.multiply(BigDecimal.valueOf(10000L)).toBigInteger()
         return PayoutDto(
@@ -125,7 +118,7 @@ object ImxOrderConverter {
         else -> UnionOrder.Status.HISTORICAL
     }
 
-    fun toAsset(order: ImmutablexOrder, side: ImmutablexOrderSide, blockchain: BlockchainDto): UnionAsset {
+    open fun toAsset(order: ImmutablexOrder, side: ImmutablexOrderSide, blockchain: BlockchainDto): UnionAsset {
         // In the Asset we should specify price WITHOUT fees
         val totalFees = order.fees?.sumOf { it.amount }?.toBigInteger() ?: BigInteger.ZERO
         return when (side.type) {
@@ -175,7 +168,7 @@ object ImxOrderConverter {
         }
     }
 
-    private fun normalizeQuantity(side: ImmutablexOrderSide, totalFees: BigInteger): BigDecimal {
+    open fun normalizeQuantity(side: ImmutablexOrderSide, totalFees: BigInteger): BigDecimal {
         val quantity = side.data.quantityWithFees
         val decimals = side.data.decimals
         if (quantity.isNullOrBlank()) {
@@ -185,7 +178,7 @@ object ImxOrderConverter {
         }
     }
 
-    private fun getQuantityWithFees(side: ImmutablexOrderSide): BigInteger {
+    open fun getQuantityWithFees(side: ImmutablexOrderSide, fees: Fees?): BigInteger {
         return if (side.data.quantityWithFees.isNullOrBlank()) {
             if (side.type == ERC721 && side.data.quantity.isNullOrBlank()) {
                 BigInteger.ONE
@@ -195,5 +188,14 @@ object ImxOrderConverter {
         } else {
             BigInteger(side.data.quantityWithFees)
         }
+    }
+
+    companion object {
+        const val ERC721 = "ERC721"
+        const val ETH = "ETH"
+        const val ERC20 = "ERC20"
+
+        val originFees = setOf("ecosystem", "protocol", "royalty", "taker", "maker")
+        val royalties = emptySet<String>() // TODO in IMX royalties works as originFees
     }
 }

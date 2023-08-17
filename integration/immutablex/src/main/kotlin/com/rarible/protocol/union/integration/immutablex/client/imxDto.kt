@@ -1,7 +1,9 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -72,7 +74,7 @@ data class FeeToken(val type: String, val data: FeeTokenData)
 
 data class FeeTokenData(
     @JsonProperty("contract_address")
-    val contractAddress: String?,
+    val contractAddress: String? = null,
     val decimals: Int,
 )
 
@@ -138,7 +140,10 @@ data class ImmutablexOrder(
     val buy: ImmutablexOrderSide,
     @JsonProperty("expiration_timestamp")
     val expirationTimestamp: Instant,
+
+    @Deprecated("It's used for v1 only")
     val fees: List<ImmutablexOrderFee>?,
+
     val sell: ImmutablexOrderSide,
     val status: String,
     @JsonProperty("timestamp")
@@ -147,7 +152,37 @@ data class ImmutablexOrder(
     val updatedAt: Instant?,
     @JsonProperty("user")
     val creator: String,
+
+    // After migration to v3 model we can make these fields mandatory
+    @JsonProperty("maker_taker_type")
+    val makerTakerType: MakerTakerType? = null,
+    @JsonProperty("taker_fees")
+    val takerFees: Fees? = null,
+    @JsonProperty("maker_fees")
+    val makerFees: Fees? = null
 )
+
+data class Fees(
+    @JsonProperty("quantity_with_fees")
+    val quantityWithFees: String?,
+    @JsonProperty("token_type")
+    val tokenType: String?,
+    val decimals: Int,
+    val symbol: String,
+    val fees: List<ImmutablexOrderFee>
+)
+
+enum class MakerTakerType(@get:JsonValue val value: String) {
+    MAKER("maker"),
+    TAKER("taker");
+
+    companion object {
+        @JsonCreator
+        @JvmStatic
+        fun fromValue(value: String) = MakerTakerType.values().find { it.value == value }
+            ?: throw IllegalArgumentException("Unsupported value '$value'")
+    }
+}
 
 data class ImmutablexOrderSide(
     val data: ImmutablexOrderData,
@@ -158,8 +193,11 @@ data class ImmutablexOrderData(
     val decimals: Int,
     val id: String?,
     val quantity: String?,
+
+    @Deprecated("It's used for v1 only")
     @JsonProperty("quantity_with_fees")
     val quantityWithFees: String?,
+
     @JsonProperty("token_address")
     val tokenAddress: String?,
     @JsonProperty("token_id")

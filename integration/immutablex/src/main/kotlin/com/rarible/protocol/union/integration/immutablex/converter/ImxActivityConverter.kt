@@ -31,7 +31,8 @@ import scalether.domain.Address
 
 @Component
 class ImxActivityConverter(
-    private val currencyService: CurrencyService
+    private val currencyService: CurrencyService,
+    private val imxOrderConverter: ImxOrderConverter
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -104,9 +105,9 @@ class ImxActivityConverter(
             val takeOrder = orders[activity.take.orderId]
                 ?: throw ImxDataException("$blockchain take Order ${activity.take.orderId} not found")
 
-            val makeAsset = ImxOrderConverter.toAsset(makeOrder, makeOrder.sell, blockchain)
+            val makeAsset = imxOrderConverter.toAsset(makeOrder, makeOrder.sell, blockchain)
             val makeType = makeAsset.type
-            val takeAsset = ImxOrderConverter.toAsset(takeOrder, takeOrder.sell, blockchain)
+            val takeAsset = imxOrderConverter.toAsset(takeOrder, takeOrder.sell, blockchain)
             val takeType = takeAsset.type
 
             val maker = UnionAddressConverter.convert(blockchain, makeOrder.creator)

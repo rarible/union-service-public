@@ -9,6 +9,8 @@ import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionCli
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxWebClientFactory
 import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
+import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderConverter
+import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderV3Converter
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionMetaSchemaRepository
 import com.rarible.protocol.union.integration.immutablex.repository.ImxItemMetaRepository
@@ -36,6 +38,9 @@ class ImxApiConfiguration {
     fun imxBlockchain() = BlockchainDto.IMMUTABLEX
 
     @Bean
+    fun imxFeatureFlags(props: ImxIntegrationProperties) = props.featureFlags
+
+    @Bean
     fun imxClientProperties(props: ImxIntegrationProperties): ImxClientProperties {
         return props.client as ImxClientProperties
     }
@@ -47,6 +52,17 @@ class ImxApiConfiguration {
         webClientCustomizer: UnionWebClientCustomizer
     ): WebClient {
         val builder = ImxWebClientFactory.configureClient(props.client!!.url!!, props.apiKey)
+        webClientCustomizer.customize(builder)
+        return builder.build()
+    }
+
+    @Bean
+    @Qualifier("imxWebClientV3")
+    fun imxWebClientV3(
+        props: ImxIntegrationProperties,
+        webClientCustomizer: UnionWebClientCustomizer
+    ): WebClient {
+        val builder = ImxWebClientFactory.configureClient(props.clientV3!!.url!!, props.apiKey)
         webClientCustomizer.customize(builder)
         return builder.build()
     }
@@ -134,9 +150,27 @@ class ImxApiConfiguration {
 
     @Bean
     fun imxOrderService(
-        orderClient: ImxOrderClient
+        featureFlags: ImxFeatureFlags,
+        orderClient: ImxOrderClient,
+        @Qualifier("imxWebClientV3")
+        orderClientV3: ImxOrderClient,
+        imxOrderConverter: ImxOrderConverter
     ): ImxOrderService {
-        return ImxOrderService(orderClient)
+        val client = when(featureFlags.useOrderV3) {
+            true -> orderClientV3
+            else -> orderClient
+        }
+        return ImxOrderService(client, imxOrderConverter)
+    }
+
+    @Bean
+    fun imxOrderConverter(
+        featureFlags: ImxFeatureFlags,
+    ): ImxOrderConverter {
+        return when(featureFlags.useOrderV3) {
+            true -> ImxOrderConverter()
+            else -> ImxOrderV3Converter()
+        }
     }
 
     @Bean

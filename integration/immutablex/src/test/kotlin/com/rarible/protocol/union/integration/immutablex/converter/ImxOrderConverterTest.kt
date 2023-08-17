@@ -18,12 +18,14 @@ import java.math.BigInteger
 
 class ImxOrderConverterTest {
 
+    private val imxOrderConverter = ImxOrderConverter()
+
     @Test
     fun `convert - sell`() {
         val imxOrder = randomImxOrder()
         val payment = imxOrder.buy.data.quantity!!.toBigInteger().toBigDecimal()
 
-        val order = ImxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
+        val order = imxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
 
         assertThat(order.id.value).isEqualTo(imxOrder.orderId.toString())
 
@@ -58,7 +60,7 @@ class ImxOrderConverterTest {
         )
         val payment = imxOrder.sell.data.quantity!!.toBigInteger().toBigDecimal()
 
-        val order = ImxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
+        val order = imxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
 
         assertThat(order.id.value).isEqualTo(imxOrder.orderId.toString())
 
@@ -80,11 +82,11 @@ class ImxOrderConverterTest {
     @Test
     fun `convert data - sell`() {
         val imxOrder = randomImxOrder().copy(
-            buy = randomImxOrderBuySide(quantity = BigInteger("100000"), quantityWithFees = BigInteger("105000")),
+            buy = randomImxOrderBuySide(quantity = BigInteger("100000"), quantityWithFees = null),
             fees = listOf(randomImxOrderFee(type = "royalty", amount = BigDecimal("5000")))
         )
 
-        val converted = ImxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
+        val converted = imxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
         val data = converted.data as ImmutablexOrderDataV1Dto
 
         assertThat(data.originFees[0].value).isEqualTo(500)
@@ -98,7 +100,7 @@ class ImxOrderConverterTest {
             fees = listOf(randomImxOrderFee(type = "ecosystem", amount = BigDecimal("5000")))
         )
 
-        val converted = ImxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
+        val converted = imxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
         val data = converted.data as ImmutablexOrderDataV1Dto
 
         assertThat(data.originFees[0].value).isEqualTo(500)
@@ -112,7 +114,7 @@ class ImxOrderConverterTest {
             decimals = 1
         )
 
-        val asset = ImxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
+        val asset = imxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
 
         assertThat(asset.type).isInstanceOf(UnionEthErc20AssetType::class.java)
         assertThat(asset.value).isEqualTo(BigDecimal("100.0"))
@@ -127,7 +129,7 @@ class ImxOrderConverterTest {
             type = "ERC20"
         )
 
-        val asset = ImxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
+        val asset = imxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
         val type = asset.type as UnionEthErc20AssetType
 
         assertThat(type.contract.value).isEqualTo(side.data.tokenAddress)
@@ -139,7 +141,7 @@ class ImxOrderConverterTest {
         val order = randomImxOrder()
         val side = randomImxOrderSellSide()
 
-        val asset = ImxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
+        val asset = imxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
         val type = asset.type as UnionEthErc721AssetType
 
         assertThat(type.contract.value).isEqualTo(side.data.tokenAddress)
@@ -153,7 +155,7 @@ class ImxOrderConverterTest {
         val data = randomImxOrderSideData(quantity = "")
         val side = randomImxOrderSellSide().copy(data = data)
 
-        val asset = ImxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
+        val asset = imxOrderConverter.toAsset(order, side, BlockchainDto.IMMUTABLEX)
         val type = asset.type as UnionEthErc721AssetType
 
         assertThat(type.contract.value).isEqualTo(side.data.tokenAddress)
@@ -163,8 +165,8 @@ class ImxOrderConverterTest {
 
     @Test
     fun `convert - fill and make stock - sell`() {
-        val activeOrder = ImxOrderConverter.convert(randomImxOrder(), BlockchainDto.IMMUTABLEX)
-        val filledOrder = ImxOrderConverter.convert(randomImxOrder(status = "filled"), BlockchainDto.IMMUTABLEX)
+        val activeOrder = imxOrderConverter.convert(randomImxOrder(), BlockchainDto.IMMUTABLEX)
+        val filledOrder = imxOrderConverter.convert(randomImxOrder(status = "filled"), BlockchainDto.IMMUTABLEX)
 
         assertThat(activeOrder.fill).isEqualTo(BigDecimal.ZERO)
         assertThat(activeOrder.makeStock).isEqualTo(BigDecimal.ONE)
@@ -180,7 +182,7 @@ class ImxOrderConverterTest {
         )
 
         // Buy order can be filled only
-        val filledOrder = ImxOrderConverter.convert(imxOrder.copy(status = "filled"), BlockchainDto.IMMUTABLEX)
+        val filledOrder = imxOrderConverter.convert(imxOrder.copy(status = "filled"), BlockchainDto.IMMUTABLEX)
 
         assertThat(filledOrder.fill).isEqualTo(BigDecimal.ONE)
         assertThat(filledOrder.makeStock).isEqualTo(BigDecimal.ZERO)
@@ -202,7 +204,7 @@ class ImxOrderConverterTest {
         )
 
         // Here we just can check that internally conversion does not fail for swap order
-        val converted = ImxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
+        val converted = imxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
         assertThat(converted).isNotNull
     }
 }

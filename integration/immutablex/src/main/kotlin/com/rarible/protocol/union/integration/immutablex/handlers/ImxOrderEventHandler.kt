@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory
 class ImxOrderEventHandler(
     private val handler: IncomingEventHandler<UnionOrderEvent>,
     private val imxScanMetrics: ImxScanMetrics,
+    private val imxOrderConverter: ImxOrderConverter
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -24,7 +25,7 @@ class ImxOrderEventHandler(
     suspend fun handle(events: List<ImmutablexOrder>) {
         events.forEach { event ->
             val order = try {
-                ImxOrderConverter.convert(event, blockchain)
+                imxOrderConverter.convert(event, blockchain)
             } catch (e: ImxDataException) {
                 // It should not happen on prod, but if there is inconsistent data we can just skip it
                 // and then report to IMX support
