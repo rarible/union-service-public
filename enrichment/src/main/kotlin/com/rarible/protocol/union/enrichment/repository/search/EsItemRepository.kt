@@ -11,13 +11,19 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsEntitySearchAfterCursorService
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsItemQueryBuilderService
 import kotlinx.coroutines.reactive.awaitFirst
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.query.QueryBuilders.existsQuery
 import org.elasticsearch.index.query.QueryBuilders.functionScoreQuery
 import org.elasticsearch.index.query.QueryBuilders.termQuery
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders
+import org.elasticsearch.search.aggregations.AggregationBuilders
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms
+import org.elasticsearch.search.aggregations.metrics.ParsedTopHits
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.SearchHit
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
+import org.springframework.data.elasticsearch.core.document.DocumentAdapters
 import org.springframework.data.elasticsearch.core.query.FetchSourceFilter
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.stereotype.Component
@@ -26,8 +32,8 @@ import org.springframework.stereotype.Component
 class EsItemRepository(
     private val queryBuilderService: EsItemQueryBuilderService,
     private val queryCursorService: EsEntitySearchAfterCursorService,
+    private val elasticsearchConverter: ElasticsearchConverter,
     objectMapper: ObjectMapper,
-    elasticsearchConverter: ElasticsearchConverter,
     esOperations: ReactiveElasticsearchOperations,
     elasticClient: ReactiveElasticsearchClient,
     esNameResolver: EsNameResolver
@@ -99,5 +105,42 @@ class EsItemRepository(
             }
             .collectList()
             .awaitFirst()
+    }
+
+    suspend fun getCheapestItems(collectionId: String): List<EsItem> {
+        val aggregation = AggregationBuilders
+            .terms(EsItem::bestSellCurrency.name)
+            .field(EsItem::bestSellCurrency.name)
+            .size(1000)
+            .subAggregation(
+                AggregationBuilders.topHits("item")
+                    .fetchSource(true)
+                    .size(1)
+                    .sort(EsItem::bestSellAmount.name)
+            )
+        val filter = QueryBuilders.boolQuery()
+            .filter(
+                QueryBuilders.boolQuery()
+                    .must(termQuery(EsItem::collection.name, collectionId))
+                    .must(existsQuery(EsItem::bestSellAmount.name))
+                    .must(existsQuery(EsItem::bestSellCurrency.name))
+            )
+
+        val query = NativeSearchQuery(filter)
+        query.addAggregation(aggregation)
+        return esOperations
+            .aggregate(
+                query,
+                EsItem::class.java,
+                entityDefinition.searchIndexCoordinates,
+            ).map {
+                (it.aggregation() as ParsedStringTerms).buckets.map {
+                    val hit = (it.aggregations.get("item") as ParsedTopHits).hits.first()
+                    elasticsearchConverter.read(EsItem::class.java, DocumentAdapters.from(hit))
+                }
+            }
+            .collectList()
+            .awaitFirst()
+            .flatten()
     }
 }

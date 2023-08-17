@@ -1,25 +1,39 @@
 package com.rarible.protocol.union.api.controller.internal
 
+import com.rarible.protocol.union.api.service.api.CheapestOrderService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import io.mockk.coEvery
 import io.mockk.every
-import io.mockk.mockk
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import randomOrderDto
 import randomOrderId
 import randomUnionOrder
 
+@ExtendWith(MockKExtension::class)
 class AdminControllerTest {
-    private val service = mockk<OrderService>()
-    private val router = mockk<BlockchainRouter<OrderService>>()
-    private val enrichmentOrderService = mockk<EnrichmentOrderService>()
+    @InjectMockKs
+    private lateinit var controller: AdminController
 
-    private val controller = AdminController(router, enrichmentOrderService)
+    @MockK
+    private lateinit var service: OrderService
+
+    @MockK
+    private lateinit var router: BlockchainRouter<OrderService>
+
+    @MockK
+    private lateinit var enrichmentOrderService: EnrichmentOrderService
+
+    @MockK
+    private lateinit var cheapestOrderService: CheapestOrderService
 
     @Test
     fun `cancel order - ok`() = runBlocking<Unit> {
