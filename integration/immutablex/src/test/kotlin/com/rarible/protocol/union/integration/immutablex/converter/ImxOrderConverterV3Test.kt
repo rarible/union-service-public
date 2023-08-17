@@ -16,7 +16,6 @@ import com.rarible.protocol.union.integration.immutablex.client.FeeToken
 import com.rarible.protocol.union.integration.immutablex.client.FeeTokenData
 import com.rarible.protocol.union.integration.immutablex.client.Fees
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrderFee
-import com.rarible.protocol.union.integration.immutablex.client.MakerTakerType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -126,7 +125,7 @@ class ImxOrderConverterV3Test {
                     )
                 )
             ),
-            makerTakerType = MakerTakerType.MAKER
+            makerTakerType = "maker"
         )
 
         val converted = imxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
@@ -182,7 +181,7 @@ class ImxOrderConverterV3Test {
                     )
                 )
             ),
-            makerTakerType = MakerTakerType.MAKER
+            makerTakerType = "maker"
         )
 
         val converted = imxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)
@@ -242,7 +241,7 @@ class ImxOrderConverterV3Test {
                     )
                 )
             ),
-            makerTakerType = MakerTakerType.MAKER
+            makerTakerType = "maker"
         )
 
         val converted = imxOrderConverter.convert(imxOrder, BlockchainDto.IMMUTABLEX)

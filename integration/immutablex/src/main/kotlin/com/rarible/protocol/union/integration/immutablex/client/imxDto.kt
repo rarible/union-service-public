@@ -1,9 +1,7 @@
 package com.rarible.protocol.union.integration.immutablex.client
 
-import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.rarible.protocol.union.dto.ActivityIdDto
@@ -155,7 +153,7 @@ data class ImmutablexOrder(
 
     // After migration to v3 model we can make these fields mandatory
     @JsonProperty("maker_taker_type")
-    val makerTakerType: MakerTakerType? = null,
+    val makerTakerType: String? = null,
     @JsonProperty("taker_fees")
     val takerFees: Fees? = null,
     @JsonProperty("maker_fees")
@@ -171,18 +169,6 @@ data class Fees(
     val symbol: String,
     val fees: List<ImmutablexOrderFee>
 )
-
-enum class MakerTakerType(@get:JsonValue val value: String) {
-    MAKER("maker"),
-    TAKER("taker");
-
-    companion object {
-        @JsonCreator
-        @JvmStatic
-        fun fromValue(value: String) = MakerTakerType.values().find { it.value == value }
-            ?: throw IllegalArgumentException("Unsupported value '$value'")
-    }
-}
 
 data class ImmutablexOrderSide(
     val data: ImmutablexOrderData,
