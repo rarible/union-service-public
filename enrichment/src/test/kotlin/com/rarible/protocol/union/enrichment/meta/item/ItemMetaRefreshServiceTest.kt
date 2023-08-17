@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.configuration.EnrichmentProperties
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
@@ -60,6 +61,9 @@ internal class ItemMetaRefreshServiceTest {
 
     @MockK
     private lateinit var ff: FeatureFlagsProperties
+
+    @SpyK
+    private var enrichmentProperties: EnrichmentProperties = EnrichmentProperties()
 
     @BeforeEach
     fun beforeEach() {
@@ -123,7 +127,7 @@ internal class ItemMetaRefreshServiceTest {
         coEvery {
             esItemRepository.getRandomItemsFromCollection(
                 collectionId = collectionId.fullId(),
-                size = 100
+                size = 10
             )
         } returns listOf(esItem1, esItem2)
 
@@ -242,7 +246,7 @@ internal class ItemMetaRefreshServiceTest {
         coEvery {
             esItemRepository.getRandomItemsFromCollection(
                 collectionId = collectionId.fullId(),
-                size = 100
+                size = 10
             )
         } returns listOf(esItem1, esItem2)
 

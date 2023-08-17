@@ -20,7 +20,8 @@ data class EnrichmentMetaProperties(
 )
 
 class EnrichmentItemMetaProperties(
-    val customizers: EnrichmentItemMetaCustomizerProperties = EnrichmentItemMetaCustomizerProperties()
+    val customizers: EnrichmentItemMetaCustomizerProperties = EnrichmentItemMetaCustomizerProperties(),
+    val numberOfItemsToCheckForMetaChanges: Int = 10,
 )
 
 class EnrichmentItemMetaCustomizerProperties(
