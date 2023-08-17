@@ -156,7 +156,7 @@ class ImxApiConfiguration {
         orderClientV3: ImxOrderClient,
         imxOrderConverter: ImxOrderConverter
     ): ImxOrderService {
-        val client = when(featureFlags.useOrderV3) {
+        val client = when (featureFlags.useOrderV3) {
             true -> orderClientV3
             else -> orderClient
         }
@@ -166,11 +166,9 @@ class ImxApiConfiguration {
     @Bean
     fun imxOrderConverter(
         featureFlags: ImxFeatureFlags,
-    ): ImxOrderConverter {
-        return when(featureFlags.useOrderV3) {
-            true -> ImxOrderConverter()
-            else -> ImxOrderV3Converter()
-        }
+    ) = when (featureFlags.useOrderV3) {
+        true -> ImxOrderConverter()
+        else -> ImxOrderV3Converter()
     }
 
     @Bean

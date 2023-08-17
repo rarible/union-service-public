@@ -27,13 +27,9 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.BigInteger
 
-
 open class ImxOrderConverter {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    // private val originFees = setOf("ecosystem", "protocol")
-    // private val royalties = setOf("royalty")
 
     fun convert(order: ImmutablexOrder, blockchain: BlockchainDto): UnionOrder {
         return try {

@@ -90,7 +90,6 @@ class ImxOrderV3Converter : ImxOrderConverter() {
         }
     }
 
-
     override fun normalizeQuantity(side: ImmutablexOrderSide, totalFees: BigInteger): BigDecimal {
         val quantity = side.data.quantity
         val decimals = side.data.decimals

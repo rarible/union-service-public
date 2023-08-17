@@ -82,7 +82,7 @@ class ImxOrderConverterTest {
     @Test
     fun `convert data - sell`() {
         val imxOrder = randomImxOrder().copy(
-            buy = randomImxOrderBuySide(quantity = BigInteger("100000"), quantityWithFees = null),
+            buy = randomImxOrderBuySide(quantity = BigInteger("100000"), quantityWithFees = BigInteger("105000")),
             fees = listOf(randomImxOrderFee(type = "royalty", amount = BigDecimal("5000")))
         )
 
