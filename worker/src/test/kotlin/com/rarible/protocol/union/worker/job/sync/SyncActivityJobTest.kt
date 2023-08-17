@@ -3,6 +3,7 @@ package com.rarible.protocol.union.worker.job.sync
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.core.event.OutgoingActivityEventListener
+import com.rarible.protocol.union.core.model.ActivityEvent
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -76,7 +77,7 @@ class SyncActivityJobTest {
                 randomEsActivity().copy(activityId = dto.id.fullId())
             }
         }
-        coEvery { outgoingActivityEventListener.onEvents(any()) } returns Unit
+        coEvery { outgoingActivityEventListener.onEvent(any()) } returns Unit
     }
 
     @Test
@@ -86,8 +87,8 @@ class SyncActivityJobTest {
 
         val param = """{
             "blockchain": "ETHEREUM",
-            "scope": "ES", 
-            "sort": "DB_UPDATE_ASC", 
+            "scope": "ES",
+            "sort": "DB_UPDATE_ASC",
             "type": "NFT"
         }"""
 
@@ -117,8 +118,8 @@ class SyncActivityJobTest {
 
         val param = """{
             "blockchain": "ETHEREUM",
-            "scope": "EVENT", 
-            "sort": "DB_UPDATE_ASC", 
+            "scope": "EVENT",
+            "sort": "DB_UPDATE_ASC",
             "type": "NFT"
         }"""
 
@@ -129,14 +130,15 @@ class SyncActivityJobTest {
         job.handle(null, param).toList()
 
         val expectedReverted = EnrichmentActivityConverter.convert(reverted)
-            .let { EnrichmentActivityDtoConverter.convert(it, reverted = true) }
+            .let { ActivityEvent(EnrichmentActivityDtoConverter.convert(it, reverted = true), null) }
 
         val expectedLive = EnrichmentActivityConverter.convert(live)
-            .let { EnrichmentActivityDtoConverter.convert(it, reverted = false) }
+            .let { ActivityEvent(EnrichmentActivityDtoConverter.convert(it, reverted = false), null) }
 
         coVerify(exactly = 1) { enrichmentActivityService.update(reverted) }
         coVerify(exactly = 1) { enrichmentActivityService.update(live) }
-        coVerify(exactly = 1) { outgoingActivityEventListener.onEvents(listOf(expectedReverted, expectedLive)) }
+        coVerify(exactly = 1) { outgoingActivityEventListener.onEvent(expectedReverted) }
+        coVerify(exactly = 1) { outgoingActivityEventListener.onEvent(expectedLive) }
         coVerify { esActivityRepository wasNot Called }
     }
 
@@ -147,8 +149,8 @@ class SyncActivityJobTest {
 
         val param = """{
             "blockchain": "ETHEREUM",
-            "scope": "DB", 
-            "sort": "DB_UPDATE_DESC", 
+            "scope": "DB",
+            "sort": "DB_UPDATE_DESC",
             "type": "ORDER",
             "reverted" : true
         }"""

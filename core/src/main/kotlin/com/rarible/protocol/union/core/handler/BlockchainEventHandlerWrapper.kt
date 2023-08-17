@@ -1,12 +1,12 @@
 package com.rarible.protocol.union.core.handler
 
 import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
-import io.micrometer.core.instrument.Counter
 import org.slf4j.LoggerFactory
+import java.util.concurrent.atomic.AtomicInteger
 
 class BlockchainEventHandlerWrapper<B, U>(
     private val blockchainHandler: BlockchainEventHandler<B, U>,
-    private val eventCounter: Counter
+    private val eventCounter: AtomicInteger
 ) : BlockchainEventHandler<B, U>, /*RaribleKafkaEventHandler<B>,*/ RaribleKafkaBatchEventHandler<B> {
 
     override val eventType = blockchainHandler.eventType
@@ -17,31 +17,35 @@ class BlockchainEventHandlerWrapper<B, U>(
 
     override suspend fun handle(event: B) {
         try {
+            eventCounter.incrementAndGet()
             blockchainHandler.handle(event)
-            eventCounter.increment()
         } catch (ex: EventConversionException) {
             logger.error("Conversion of single event failed [{}]", ex.event, ex.cause)
+            eventCounter.addAndGet(-1)
             throw ex.cause!!
         } catch (ex: Exception) {
             logger.error("Unexpected exception during handling event [{}]", event, ex)
+            eventCounter.addAndGet(-1)
             throw ex
         }
     }
 
     override suspend fun handle(events: List<B>) {
         try {
+            eventCounter.addAndGet(events.size)
             blockchainHandler.handle(events)
-            eventCounter.increment(events.size.toDouble())
         } catch (ex: EventConversionException) {
             logger.error(
                 "Conversion of one of ${events.size} $blockchain ${eventType.name} events failed [{}]",
                 ex.event, ex.cause
             )
+            eventCounter.addAndGet(-events.size)
             throw ex.cause!!
         } catch (ex: Exception) {
             logger.error(
                 "Unexpected exception during handling batch of ${events.size} $blockchain ${eventType.name} events", ex
             )
+            eventCounter.addAndGet(-events.size)
             throw ex
         }
     }

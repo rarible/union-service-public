@@ -34,7 +34,7 @@ class ConsumerFactory(
             valueClass = valueClass
         )
         val eventCounter =
-            eventCountMetrics.eventReceivedCounter(EventCountMetrics.Stage.INDEXER, handler.blockchain, eventType)
+            eventCountMetrics.eventReceivedGauge(EventCountMetrics.Stage.INDEXER, handler.blockchain, eventType)
         return kafkaConsumerFactory.createWorker(settings, BlockchainEventHandlerWrapper(handler, eventCounter))
     }
 

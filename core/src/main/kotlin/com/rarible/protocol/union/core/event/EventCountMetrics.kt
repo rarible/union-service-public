@@ -2,44 +2,68 @@ package com.rarible.protocol.union.core.event
 
 import com.rarible.protocol.union.core.UnionMetrics
 import com.rarible.protocol.union.dto.BlockchainDto
-import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicInteger
 
 @Component
 class EventCountMetrics(meterRegistry: MeterRegistry) : UnionMetrics(meterRegistry) {
-    fun eventReceivedCounter(stage: Stage, blockchain: BlockchainDto, eventType: EventType) = counter(
-        EVENT_RECEIVED_METRIC, stage, blockchain, eventType
-    )
+    private val gaugeMetricCache: MutableMap<GaugeMetricKey, AtomicInteger> = ConcurrentHashMap()
+
+    fun eventReceivedGauge(stage: Stage, blockchain: BlockchainDto, eventType: EventType) =
+        gaugeMetricCache.computeIfAbsent(GaugeMetricKey(EVENT_RECEIVED_METRIC, stage, blockchain, eventType)) {
+            gauge(EVENT_RECEIVED_METRIC, stage, blockchain, eventType)
+        }
 
     fun eventReceived(stage: Stage, blockchain: BlockchainDto, eventType: EventType, count: Int = 1) {
-        eventReceivedCounter(stage, blockchain, eventType).increment(count.toDouble())
+        eventReceivedGauge(stage, blockchain, eventType).addAndGet(count)
     }
 
-    fun eventSentCounter(stage: Stage, blockchain: BlockchainDto, eventType: EventType) = counter(
-        EVENT_SENT_METRIC, stage, blockchain, eventType
-    )
+    fun eventSentGauge(stage: Stage, blockchain: BlockchainDto, eventType: EventType) =
+        gaugeMetricCache.computeIfAbsent(GaugeMetricKey(EVENT_RECEIVED_METRIC, stage, blockchain, eventType)) {
+            gauge(
+                EVENT_SENT_METRIC,
+                stage,
+                blockchain,
+                eventType
+            )
+        }
 
     fun eventSent(stage: Stage, blockchain: BlockchainDto, eventType: EventType, count: Int = 1) {
-        eventSentCounter(stage, blockchain, eventType).increment(count.toDouble())
+        eventSentGauge(stage, blockchain, eventType).addAndGet(count)
     }
 
-    private fun counter(
+    private fun gauge(
         metricName: String,
         stage: Stage,
         blockchain: BlockchainDto,
         eventType: EventType
-    ): Counter = meterRegistry.counter(
-        metricName, listOf(
-            tag(blockchain),
-            tag("stage", stage.name.lowercase()),
-            type(eventType.name.lowercase()),
+    ): AtomicInteger {
+        val i = AtomicInteger(0)
+        meterRegistry.gauge(
+            metricName,
+            listOf(
+                tag(blockchain),
+                tag("stage", stage.name.lowercase()),
+                type(eventType.name.lowercase()),
+            ),
+            i,
+            AtomicInteger::toDouble
         )
-    )
+        return i
+    }
 
     enum class Stage {
         INDEXER, INTERNAL, EXTERNAL
     }
+
+    private data class GaugeMetricKey(
+        val metricName: String,
+        val stage: Stage,
+        val blockchain: BlockchainDto,
+        val eventType: EventType
+    )
 
     companion object {
         const val EVENT_RECEIVED_METRIC = "event_received"
