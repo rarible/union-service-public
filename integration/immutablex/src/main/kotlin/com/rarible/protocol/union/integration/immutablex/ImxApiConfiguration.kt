@@ -152,7 +152,6 @@ class ImxApiConfiguration {
     fun imxOrderService(
         featureFlags: ImxFeatureFlags,
         orderClient: ImxOrderClient,
-        @Qualifier("imxWebClientV3")
         orderClientV3: ImxOrderClient,
         imxOrderConverter: ImxOrderConverter
     ): ImxOrderService {

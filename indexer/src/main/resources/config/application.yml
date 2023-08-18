@@ -125,6 +125,9 @@ integration:
     client:
       url: ${consul.immutablex.api.baseUrl:}
       byIdsChunkSize: 16
+    clientV3:
+      url: ${consul.immutablex.api.baseUrlV3:}
+      byIdsChunkSize: 16
     apiKey: ${consul.immutablex.api.key:}
 common:
   producer:
