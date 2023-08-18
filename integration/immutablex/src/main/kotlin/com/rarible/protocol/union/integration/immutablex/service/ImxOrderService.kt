@@ -22,7 +22,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
 class ImxOrderService(
-    private val orderClient: ImxOrderClient
+    private val orderClient: ImxOrderClient,
+    private val imxOrderConverter: ImxOrderConverter
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), OrderService {
 
     // TODO move out to configuration
@@ -40,7 +41,7 @@ class ImxOrderService(
             size,
             sort,
             status
-        ).map { ImxOrderConverter.convert(it, blockchain) }
+        ).map { imxOrderConverter.convert(it, blockchain) }
 
         val continuationFactory = when (sort) {
             OrderSortDto.LAST_UPDATE_ASC -> UnionOrderContinuation.ByLastUpdatedAndIdAsc
@@ -65,12 +66,12 @@ class ImxOrderService(
 
     override suspend fun getOrderById(id: String): UnionOrder {
         val order = orderClient.getById(id)
-        return ImxOrderConverter.convert(order, blockchain)
+        return imxOrderConverter.convert(order, blockchain)
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {
         return orderClient.getByIds(orderIds).map {
-            ImxOrderConverter.convert(it, blockchain)
+            imxOrderConverter.convert(it, blockchain)
         }
     }
 
@@ -171,7 +172,7 @@ class ImxOrderService(
             token, tokenId, null, null, currencyProbeBatchSize
         ).result + activeOrder.await().result
 
-        return ordersWithAllStatuses.map { ImxOrderConverter.convert(it, blockchain).take.type }
+        return ordersWithAllStatuses.map { imxOrderConverter.convert(it, blockchain).take.type }
             .toSet()
             .filter { it.isCurrency() }
             .toList()
@@ -194,7 +195,7 @@ class ImxOrderService(
         if (!isPlatformSupported(platform)) return Slice.empty()
         origin?.let { return Slice.empty() }
         val orders = orderClient.getSellOrders(continuation, size).map {
-            ImxOrderConverter.convert(it, blockchain)
+            imxOrderConverter.convert(it, blockchain)
         }
         return Paging(UnionOrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
@@ -209,7 +210,7 @@ class ImxOrderService(
         if (!isPlatformSupported(platform)) return Slice.empty()
         origin?.let { return Slice.empty() }
         val orders = orderClient.getSellOrdersByCollection(collection, continuation, size).map {
-            ImxOrderConverter.convert(it, blockchain)
+            imxOrderConverter.convert(it, blockchain)
         }
         return Paging(UnionOrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }
@@ -263,7 +264,7 @@ class ImxOrderService(
             currencyId,
             continuation,
             size
-        ).map { ImxOrderConverter.convert(it, blockchain) }
+        ).map { imxOrderConverter.convert(it, blockchain) }
 
         return Paging(UnionOrderContinuation.BySellPriceUsdAndIdAsc, orders).getSlice(size)
     }
@@ -279,7 +280,7 @@ class ImxOrderService(
         if (!isPlatformSupported(platform)) return Slice.empty()
         origin?.let { return Slice.empty() }
         val orders = orderClient.getSellOrdersByMaker(maker, status, continuation, size).map {
-            ImxOrderConverter.convert(it, blockchain)
+            imxOrderConverter.convert(it, blockchain)
         }
         return Paging(UnionOrderContinuation.ByLastUpdatedAndIdDesc, orders).getSlice(size)
     }

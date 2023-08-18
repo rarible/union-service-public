@@ -19,6 +19,8 @@ class ImxIntegrationProperties(
     auctionContracts: String? = null,
     origins: Map<String, OriginProperties> = emptyMap(),
     val apiKey: String,
+    val clientV3: ImxClientProperties?,
+    val featureFlags: ImxFeatureFlags = ImxFeatureFlags()
 ) : DefaultBlockchainProperties(
     BlockchainDto.IMMUTABLEX,
     enabled,
@@ -33,3 +35,7 @@ class ImxClientProperties(
     url: String,
     val byIdsChunkSize: Int = 16
 ) : DefaultClientProperties(url)
+
+data class ImxFeatureFlags(
+    val useOrderV3: Boolean = false
+)
