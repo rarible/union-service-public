@@ -212,6 +212,7 @@ class ItemRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
+        // TODO make it partial on multi-currency=true
         private val MULTI_CURRENCY_DEFINITION = Index()
             .on(ShortItem::multiCurrency.name, Sort.Direction.DESC)
             .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
@@ -222,6 +223,7 @@ class ItemRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
+        // TODO remove?
         private val AUCTION_DEFINITION = Index()
             .on(ShortItem::auctions.name, Sort.Direction.DESC)
             .background()

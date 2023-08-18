@@ -21,7 +21,6 @@ import org.springframework.data.mongodb.core.index.PartialIndexFilter
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.and
-import org.springframework.data.mongodb.core.query.gt
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lt
@@ -126,6 +125,7 @@ class CollectionRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
+        // TODO make it partial on multi-currency=true
         private val MULTI_CURRENCY_DEFINITION = Index()
             .on(EnrichmentCollection::multiCurrency.name, Sort.Direction.DESC)
             .on(EnrichmentCollection::lastUpdatedAt.name, Sort.Direction.DESC)

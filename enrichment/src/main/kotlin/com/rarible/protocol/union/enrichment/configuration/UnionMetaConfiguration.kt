@@ -20,7 +20,6 @@ import com.rarible.protocol.union.core.client.WebClientFactory
 import com.rarible.protocol.union.core.util.safeSplit
 import com.rarible.protocol.union.enrichment.meta.UnionMetaPackage
 import io.micrometer.core.instrument.MeterRegistry
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -119,7 +118,6 @@ class UnionMetaConfiguration(
     }
 
     @Bean
-    @ConditionalOnProperty("meta.simpleHash.enabled", havingValue = "true")
     fun simpleHashClient(webClientCustomizer: UnionWebClientCustomizer): WebClient {
         val props = unionMetaProperties.simpleHash
         val webClient = WebClientFactory.createClient(props.endpoint, mapOf("X-API-KEY" to props.apiKey))

@@ -11,12 +11,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import kotlin.time.Duration.Companion.seconds
 
 @Component
-@ConditionalOnProperty("meta.simpleHash.enabled", havingValue = "true")
 class RefreshMetaSimpleHashTask(
     private val objectMapper: ObjectMapper,
     private val simpleHashService: SimpleHashService,

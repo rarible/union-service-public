@@ -17,13 +17,11 @@ import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import kotlinx.coroutines.reactor.awaitSingle
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import java.math.BigInteger
 
 @Service
-@ConditionalOnProperty("meta.simpleHash.enabled", havingValue = "true")
 class SimpleHashService(
     private val props: UnionMetaProperties,
     private val simpleHashClient: WebClient,
@@ -38,14 +36,23 @@ class SimpleHashService(
     private val objectMapper = ApiClient.createDefaultObjectMapper()
         .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
 
+    private val enabled = props.simpleHash.enabled
+
     fun isSupported(blockchain: BlockchainDto): Boolean {
-        return blockchain in props.simpleHash.supported
+        return blockchain in props.simpleHash.supported && enabled
     }
 
     suspend fun fetch(key: ItemIdDto): UnionMeta? {
+        return fetchRaw(key)?.let { simpleHashConverterService.convert(it) }
+    }
+
+    suspend fun fetchRaw(key: ItemIdDto): SimpleHashItem? {
+        if (!enabled) {
+            return null
+        }
         val cacheMeta = metaCacheRepository.get(SimpleHashConverter.cacheId(key))
         if (cacheMeta != null && !cacheMeta.hasExpired(props.simpleHash.cacheExpiration)) {
-            return simpleHashConverterService.convertRawToUnionMeta(cacheMeta.data)
+            return simpleHashConverterService.convertRawToSimpleHashItem(cacheMeta.data)
         }
         try {
             if (!isSupported(key.blockchain) || isLazyOrNotFound(key)) {
@@ -64,7 +71,7 @@ class SimpleHashService(
         return null
     }
 
-    private fun parse(key: ItemIdDto, json: String): UnionMeta? {
+    private fun parse(key: ItemIdDto, json: String): SimpleHashItem? {
         if (json == "{}") {
             metrics.onMetaFetchNotFound(key.blockchain, MetaSource.SIMPLE_HASH)
             return null
@@ -72,7 +79,7 @@ class SimpleHashService(
         return try {
             val result = objectMapper.readValue(json, SimpleHashItem::class.java)
             metrics.onMetaFetched(key.blockchain, MetaSource.SIMPLE_HASH)
-            simpleHashConverterService.convert(result)
+            result
         } catch (e: Exception) {
             logger.error("Failed to parse meta from simplehash {}: {}", key, json)
             metrics.onMetaCorruptedDataError(key.blockchain, MetaSource.SIMPLE_HASH)

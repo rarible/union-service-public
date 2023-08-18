@@ -40,10 +40,11 @@ class ArtBlocksCustomCollectionProvider(
                 ?.attributes?.find { it.key == "collection_name" }?.value
 
             artificialCollectionService.createArtificialCollection(
-                collectionId,
-                subCollectionId,
-                name,
-                UnionCollection.Structure.PART
+                originalId = collectionId,
+                surrogateId = subCollectionId,
+                name = name,
+                structure = UnionCollection.Structure.PART,
+                extra = mapOf("project_id" to projectId.toString())
             )
 
             logger.info(
@@ -54,5 +55,9 @@ class ArtBlocksCustomCollectionProvider(
             )
         }
         return subCollectionId
+    }
+
+    companion object {
+        const val MAPPING_NAME = "artblocks"
     }
 }

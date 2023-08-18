@@ -16,7 +16,9 @@ import java.time.Instant
 class SimpleHashArtBlocksResolverTest {
 
     private val simpleHashConverterService = SimpleHashConverterService()
-    private val artBlocksResolver = SimpleHashArtBlocksResolver(simpleHashConverterService.mapper)
+    private val artBlocksResolver = SimpleHashArtBlocksResolver(
+        simpleHashConverterService.mapper
+    )
 
     @Test
     fun `should support for artblocks - ok`() {
