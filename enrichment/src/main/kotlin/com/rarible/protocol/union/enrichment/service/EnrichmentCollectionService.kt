@@ -1,8 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.logging.asyncWithTraceId
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -27,8 +25,6 @@ import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
 import com.rarible.protocol.union.enrichment.util.spent
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
@@ -41,7 +37,6 @@ class EnrichmentCollectionService(
     private val orderApiService: OrderApiMergeService,
     private val collectionMetaService: CollectionMetaService,
     private val metrics: CollectionMetaMetrics,
-    private val ff: FeatureFlagsProperties,
     private val enrichmentHelperService: EnrichmentHelperService,
     private val metaAutoRefreshStateRepository: MetaAutoRefreshStateRepository,
 ) {
@@ -98,7 +93,7 @@ class EnrichmentCollectionService(
         return result
     }
 
-    suspend fun save(collection: EnrichmentCollection): EnrichmentCollection? {
+    suspend fun save(collection: EnrichmentCollection): EnrichmentCollection {
         return collectionRepository.save(collection.withCalculatedFieldsAndUpdatedAt())
     }
 
@@ -107,24 +102,6 @@ class EnrichmentCollectionService(
     }
 
     suspend fun enrichCollection(
-        enrichmentCollection: EnrichmentCollection?,
-        // TODO COLLECTION remove it after switching to union data
-        collection: UnionCollection?,
-        orders: Map<OrderIdDto, UnionOrder> = emptyMap(),
-        metaPipeline: CollectionMetaPipeline
-    ): CollectionDto {
-        require(enrichmentCollection != null || collection != null)
-        if (ff.enableUnionCollections) {
-            if (enrichmentCollection != null) {
-                return enrichCollection(enrichmentCollection, orders, metaPipeline)
-            } else {
-                logger.warn("Enrichment Collection {} not synced!", collection!!.id.fullId())
-            }
-        }
-        return enrichCollectionLegacy(enrichmentCollection, collection, orders, metaPipeline)
-    }
-
-    private suspend fun enrichCollection(
         enrichmentCollection: EnrichmentCollection,
         orders: Map<OrderIdDto, UnionOrder>,
         metaPipeline: CollectionMetaPipeline
@@ -148,60 +125,12 @@ class EnrichmentCollectionService(
         )
     }
 
-    @Deprecated("Remove after the migration to Union data")
-    private suspend fun enrichCollectionLegacy(
-        enrichmentCollection: EnrichmentCollection?,
-        collection: UnionCollection?,
-        orders: Map<OrderIdDto, UnionOrder> = emptyMap(),
-        metaPipeline: CollectionMetaPipeline
-    ) = coroutineScope {
-        require(enrichmentCollection != null || collection != null)
-        val collectionId = enrichmentCollection?.id?.toDto() ?: collection!!.id
-        val fetchedCollection = asyncWithTraceId(context = NonCancellable) {
-            collection ?: fetch(EnrichmentCollectionId(collectionId))
-        }
-
-        val collectionOrders = enrichmentHelperService.getExistingOrders(enrichmentCollection)
-        val bestOrders = enrichmentOrderService.fetchMissingOrders(
-            existing = collectionOrders,
-            orders = orders
-        )
-        val itemBestOrders = collectionOrders.mapNotNull { bestOrders[it.dtoId] }.associateBy { it.id }
-
-        val unionCollection = fetchedCollection.await()
-        val metaEntry = enrichmentCollection?.metaEntry
-        val meta = metaEntry?.data ?: unionCollection.meta
-
-        onMetaEntry(unionCollection.id, metaPipeline, metaEntry)
-
-        CollectionDtoConverter.convertLegacy(
-            collection = unionCollection,
-            // replacing inner IPFS urls with public urls
-            meta = contentMetaService.exposePublicUrls(meta),
-            enrichmentCollection = enrichmentCollection,
-            orders = enrichmentOrderService.enrich(itemBestOrders)
-        )
-    }
-
     suspend fun enrich(
         enrichmentCollections: List<EnrichmentCollection>,
         metaPipeline: CollectionMetaPipeline
     ): List<CollectionDto> {
         if (enrichmentCollections.isEmpty()) {
             return emptyList()
-        }
-
-        if (!ff.enableUnionCollections) {
-            val enrichmentCollectionsById: Map<CollectionIdDto, EnrichmentCollection> =
-                enrichmentCollections.associateBy { it.id.toDto() }
-
-            val groupedIds = enrichmentCollections.groupBy({ it.blockchain }, { it.id.collectionId })
-
-            val unionCollections = groupedIds.flatMap {
-                collectionServiceRouter.getService(it.key).getCollectionsByIds(it.value)
-            }
-
-            return enrichCollections(enrichmentCollectionsById, unionCollections, metaPipeline)
         }
 
         val shortOrderIds = enrichmentHelperService.getExistingOrders(enrichmentCollections)
@@ -212,38 +141,6 @@ class EnrichmentCollectionService(
 
         return enrichmentCollections.map {
             enrichCollection(it, orders, metaPipeline)
-        }
-    }
-
-    @Deprecated("Should be removed in PT-2340")
-    suspend fun enrichUnionCollections(
-        unionCollections: List<UnionCollection>,
-        metaPipeline: CollectionMetaPipeline
-    ): List<CollectionDto> {
-        if (unionCollections.isEmpty()) {
-            return emptyList()
-        }
-        val enrichmentCollections: Map<CollectionIdDto, EnrichmentCollection> =
-            collectionRepository.getAll(unionCollections.map { EnrichmentCollectionId(it.id) })
-                .associateBy { it.id.toDto() }
-
-        return enrichCollections(enrichmentCollections, unionCollections, metaPipeline)
-    }
-
-    @Deprecated("Remove after the migration")
-    private suspend fun enrichCollections(
-        enrichmentCollections: Map<CollectionIdDto, EnrichmentCollection>,
-        unionCollections: List<UnionCollection>,
-        metaPipeline: CollectionMetaPipeline
-    ): List<CollectionDto> {
-        val shortOrderIds = enrichmentHelperService.getExistingOrders(enrichmentCollections.values)
-            .map { it.dtoId }
-
-        val orders = orderApiService.getByIds(shortOrderIds)
-            .associateBy { it.id }
-
-        return unionCollections.map {
-            enrichCollection(enrichmentCollections[it.id], it, orders, metaPipeline)
         }
     }
 

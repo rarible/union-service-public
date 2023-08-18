@@ -221,7 +221,6 @@ class EnrichmentRefreshService(
         val ordersHint = bestOrders.all
         val enriched = enrichmentCollectionService.enrichCollection(
             enrichmentCollection = updatedCollection,
-            collection = unionCollection,
             orders = ordersHint,
             metaPipeline = CollectionMetaPipeline.REFRESH
         )
