@@ -2,9 +2,7 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.FeatureFlagsProperties
-import com.rarible.protocol.union.core.event.OutgoingCollectionEventListener
-import com.rarible.protocol.union.core.event.OutgoingItemEventListener
-import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
+import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -67,9 +65,9 @@ class EnrichmentRefreshService(
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
-    private val collectionEventListeners: List<OutgoingCollectionEventListener>,
-    private val itemEventListeners: List<OutgoingItemEventListener>,
-    private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
+    private val collectionEventListeners: List<OutgoingEventListener<CollectionEventDto>>,
+    private val itemEventListeners: List<OutgoingEventListener<ItemEventDto>>,
+    private val ownershipEventListeners: List<OutgoingEventListener<OwnershipEventDto>>,
     private val auctionContractService: AuctionContractService,
     private val originService: OriginService,
     private val ff: FeatureFlagsProperties

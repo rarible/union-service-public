@@ -13,21 +13,35 @@ abstract class UnionInternalEventProducer<T>(
 ) {
 
     suspend fun send(event: T) {
-        eventProducer.getProducer(getBlockchain(event))
-            .send(toMessage(event))
-        eventCountMetrics.eventSent(EventCountMetrics.Stage.INTERNAL, getBlockchain(event), getEventType(event))
+        try {
+            eventCountMetrics.eventSent(EventCountMetrics.Stage.INTERNAL, getBlockchain(event), getEventType(event))
+            eventProducer.getProducer(getBlockchain(event)).send(toMessage(event))
+        } catch (e: Throwable) {
+            eventCountMetrics.eventSent(EventCountMetrics.Stage.INTERNAL, getBlockchain(event), getEventType(event), -1)
+            throw e
+        }
     }
 
     suspend fun send(events: Collection<T>) {
         events.groupBy { getBlockchain(it) }.forEach { blockchainBatch ->
             val messages = blockchainBatch.value.map { toMessage(it) }
-            eventProducer.getProducer(blockchainBatch.key).send(messages).collect()
-            eventCountMetrics.eventSent(
-                stage = EventCountMetrics.Stage.INTERNAL,
-                blockchain = blockchainBatch.key,
-                eventType = getEventType(blockchainBatch.value.first()),
-                count = messages.size
-            )
+            try {
+                eventCountMetrics.eventSent(
+                    stage = EventCountMetrics.Stage.INTERNAL,
+                    blockchain = blockchainBatch.key,
+                    eventType = getEventType(blockchainBatch.value.first()),
+                    count = messages.size
+                )
+                eventProducer.getProducer(blockchainBatch.key).send(messages).collect()
+            } catch (e: Throwable) {
+                eventCountMetrics.eventSent(
+                    stage = EventCountMetrics.Stage.INTERNAL,
+                    blockchain = blockchainBatch.key,
+                    eventType = getEventType(blockchainBatch.value.first()),
+                    count = -messages.size
+                )
+                throw e
+            }
         }
     }
 

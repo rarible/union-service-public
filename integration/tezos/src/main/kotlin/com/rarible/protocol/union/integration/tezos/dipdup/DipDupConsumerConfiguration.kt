@@ -235,7 +235,7 @@ class DipDupConsumerConfiguration(
             valueClass = valueClass
         )
         val eventCounter =
-            eventCountMetrics.eventReceivedCounter(EventCountMetrics.Stage.INDEXER, handler.blockchain, eventType)
+            eventCountMetrics.eventReceivedGauge(EventCountMetrics.Stage.INDEXER, handler.blockchain, eventType)
         val kafkaConsumerFactory = RaribleKafkaConsumerFactory(env, host, deserializer)
         return kafkaConsumerFactory.createWorker(settings, BlockchainEventHandlerWrapper(handler, eventCounter))
     }

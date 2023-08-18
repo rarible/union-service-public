@@ -22,8 +22,22 @@ class MetricsInternalEventHandler(
     private val handler: InternalEventHandler<UnionInternalBlockchainEvent>
 ) : InternalEventHandler<UnionInternalBlockchainEvent> {
     override suspend fun handle(event: UnionInternalBlockchainEvent) {
-        handler.handle(event)
-        eventCountMetrics.eventReceived(EventCountMetrics.Stage.INTERNAL, event.getBlockchain(), event.getEventType())
+        try {
+            eventCountMetrics.eventReceived(
+                EventCountMetrics.Stage.INTERNAL,
+                event.getBlockchain(),
+                event.getEventType()
+            )
+            handler.handle(event)
+        } catch (e: Throwable) {
+            eventCountMetrics.eventReceived(
+                EventCountMetrics.Stage.INTERNAL,
+                event.getBlockchain(),
+                event.getEventType(),
+                -1
+            )
+            throw e
+        }
     }
 }
 
@@ -32,9 +46,21 @@ class MetricsInternalBatchEventHandler(
     private val handler: InternalBatchEventHandler<UnionInternalBlockchainEvent>
 ) : InternalBatchEventHandler<UnionInternalBlockchainEvent> {
     override suspend fun handle(event: List<UnionInternalBlockchainEvent>) {
-        handler.handle(event)
-        event.forEach {
-            eventCountMetrics.eventReceived(EventCountMetrics.Stage.INTERNAL, it.getBlockchain(), it.getEventType())
+        try {
+            event.forEach {
+                eventCountMetrics.eventReceived(EventCountMetrics.Stage.INTERNAL, it.getBlockchain(), it.getEventType())
+            }
+            handler.handle(event)
+        } catch (e: Throwable) {
+            event.forEach {
+                eventCountMetrics.eventReceived(
+                    EventCountMetrics.Stage.INTERNAL,
+                    it.getBlockchain(),
+                    it.getEventType(),
+                    -1
+                )
+            }
+            throw e
         }
     }
 }

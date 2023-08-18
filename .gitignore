@@ -3,3 +3,4 @@ target
 *.iml
 .flattened-pom.xml
 .sdkmanrc
+.DS_Store
