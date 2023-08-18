@@ -181,12 +181,12 @@ abstract class ElasticSearchRepository<T>(
         }
     }
 
-    protected suspend fun <T> logIfSlow(vararg params: Any, query: suspend () -> T): T {
+    protected suspend fun <T> logIfSlow(vararg params: Any?, query: suspend () -> T): T {
         val start = System.currentTimeMillis()
         val result = query()
         val latency = System.currentTimeMillis() - start
         if (latency >= MAX_SEARCH_LATENCY_MS) {
-            logger.warn("Slow search: {} ms, params: {}", latency, params.contentToString())
+            logger.warn("Slow search: {} ms, params: {}", latency, params.filterNotNull().joinToString())
         }
         return result
     }
