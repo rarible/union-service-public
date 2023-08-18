@@ -37,9 +37,6 @@ data class FeatureFlagsProperties(
 
     val enableCustomCollections: Boolean = false,
 
-    // Union data
-    val enableUnionCollections: Boolean = false,
-
     val enableElasticsearchCompatibilityMode: Boolean = false,
     val enableMongoActivityWrite: Boolean = false,
     val enableMongoActivityRead: Boolean = false,
