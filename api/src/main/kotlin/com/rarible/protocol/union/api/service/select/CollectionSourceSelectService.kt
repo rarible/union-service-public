@@ -7,14 +7,12 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.CollectionsSearchRequestDto
 import com.rarible.protocol.union.dto.UnionAddress
-import com.rarible.protocol.union.enrichment.service.query.collection.CollectionApiMergeService
 import com.rarible.protocol.union.enrichment.service.query.collection.CollectionQueryService
 import org.springframework.stereotype.Service
 
 @Service
 class CollectionSourceSelectService(
     private val featureFlagsProperties: FeatureFlagsProperties,
-    private val collectionApiMergeService: CollectionApiMergeService,
     private val collectionElasticService: CollectionElasticService,
 ) : CollectionQueryService {
 
@@ -42,9 +40,6 @@ class CollectionSourceSelectService(
     }
 
     private fun getQuerySource(): CollectionQueryService {
-        return when (featureFlagsProperties.enableCollectionQueriesToElastic) {
-            true -> collectionElasticService
-            else -> collectionApiMergeService
-        }
+        return collectionElasticService
     }
 }

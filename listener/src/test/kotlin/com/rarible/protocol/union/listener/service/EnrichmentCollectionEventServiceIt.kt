@@ -9,8 +9,8 @@ import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConve
 import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
-import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
+import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollection
@@ -62,11 +62,9 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         val enrichmentCollection = EnrichmentCollectionConverter.convert(unionCollection)
         collectionService.save(enrichmentCollection)!!
 
-        coEvery { testEthereumCollectionApi.getNftCollectionById(collectionId.value) } returns ethCollection.toMono()
-
         collectionEventService.onCollectionChanged(UnionCollectionChangeEvent(collectionId, stubEventMark()))
 
-        val expected = CollectionDtoConverter.convertLegacy(unionCollection)
+        val expected = CollectionDtoConverter.convert(enrichmentCollection)
 
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
@@ -86,7 +84,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionUpdate(UnionCollectionUpdateEvent(unionCollection, stubEventMark()))
 
         val updated = collectionService.get(EnrichmentCollectionId(collectionId))!!
-        val expected = CollectionDtoConverter.convertLegacy(unionCollection)
+        val expected = CollectionDtoConverter.convert(updated)
 
         assertThat(updated.version).isEqualTo(0L)
         waitAssert {
@@ -112,7 +110,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         collectionEventService.onCollectionUpdate(UnionCollectionUpdateEvent(unionCollection, stubEventMark()))
 
         val updated = collectionService.get(current.id)!!
-        val expected = CollectionDtoConverter.convertLegacy(unionCollection)
+        val expected = CollectionDtoConverter.convert(updated)
 
         assertThat(updated.version).isGreaterThan(current.version)
         waitAssert {
@@ -166,7 +164,6 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         val collectionId = randomEthCollectionId()
         val enrichmentCollection = randomEnrichmentCollection(collectionId)
         val ethItem = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
-        val unionCollection = EthCollectionConverter.convert(ethItem, collectionId.blockchain)
 
         val bestBidOrder = randomEthBidOrderDto().copy(
             take = randomEthCollectionAsset(Address.apply(collectionId.value)),
@@ -198,12 +195,10 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
 
         ethereumOrderControllerApiMock.mockGetByIds(whitelistedBidOrder)
 
-        coEvery { testEthereumCollectionApi.getNftCollectionById(collectionId.value) } returns ethItem.toMono()
-
         collectionEventService.onCollectionBestBidOrderUpdate(collectionId, unionBestBid, stubEventMark(), true)
 
         // In result event for Item we expect updated bestSellOrder
-        val expected = CollectionDtoConverter.convertLegacy(unionCollection)
+        val expected = CollectionDtoConverter.convert(enrichmentCollection)
             .copy(
                 bestBidOrder = OrderDtoConverter.convert(unionBestBid),
                 bestBidOrdersByCurrency = listOf(OrderDtoConverter.convert(unionWhitelistedBidOrder)),

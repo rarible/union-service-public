@@ -2,7 +2,6 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.event.OutgoingEventListener
-import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionChangeEvent
 import com.rarible.protocol.union.core.model.UnionCollectionSetBaseUriEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
@@ -52,7 +51,6 @@ class EnrichmentCollectionEventService(
         val existing = optimisticLock { enrichmentCollectionService.update(collection) }
         val updateEvent = buildUpdateEvent(
             enrichmentCollection = existing,
-            unionCollection = collection,
             eventTimeMarks = update.eventTimeMarks
         )
         sendUpdate(updateEvent)
@@ -151,7 +149,6 @@ class EnrichmentCollectionEventService(
     private suspend fun saveAndNotify(
         updated: EnrichmentCollection,
         notificationEnabled: Boolean,
-        collection: UnionCollection? = null,
         order: UnionOrder? = null,
         eventTimeMarks: UnionEventTimeMarks?
     ) {
@@ -160,20 +157,18 @@ class EnrichmentCollectionEventService(
             return
         }
 
-        val event = buildUpdateEvent(updated, collection, order, eventTimeMarks)
+        val event = buildUpdateEvent(updated, order, eventTimeMarks)
         enrichmentCollectionService.save(updated)
         sendUpdate(event)
     }
 
     private suspend fun buildUpdateEvent(
         enrichmentCollection: EnrichmentCollection,
-        unionCollection: UnionCollection? = null,
         order: UnionOrder? = null,
         eventTimeMarks: UnionEventTimeMarks?
     ): CollectionUpdateEventDto {
         val dto = enrichmentCollectionService.enrichCollection(
             enrichmentCollection = enrichmentCollection,
-            collection = unionCollection,
             orders = listOfNotNull(order).associateBy { it.id },
             metaPipeline = CollectionMetaPipeline.EVENT
         )
