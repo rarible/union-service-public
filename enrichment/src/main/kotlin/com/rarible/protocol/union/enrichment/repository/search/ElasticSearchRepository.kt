@@ -195,6 +195,6 @@ abstract class ElasticSearchRepository<T>(
         ?.let { IndexCoordinates.of(it) } ?: entityDefinition.writeIndexCoordinates
 
     protected companion object {
-        const val MAX_SEARCH_LATENCY_MS = 3000
+        const val MAX_SEARCH_LATENCY_MS = 1500
     }
 }
