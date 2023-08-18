@@ -242,7 +242,7 @@ class CollectionControllerFt : AbstractIntegrationTest() {
         flowOwnerId: UnionAddress
     ) {
         val unionCollection =
-            FlowCollectionConverter.convert(collection, BlockchainDto.TEZOS).copy(owner = flowOwnerId)
+            FlowCollectionConverter.convert(collection, BlockchainDto.FLOW).copy(owner = flowOwnerId)
         val enrichmentCollection = EnrichmentCollectionConverter.convert(unionCollection)
         enrichmentCollectionService.save(enrichmentCollection)
         esCollectionRepository.bulk(
