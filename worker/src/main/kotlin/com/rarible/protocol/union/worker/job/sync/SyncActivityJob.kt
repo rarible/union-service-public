@@ -3,6 +3,7 @@ package com.rarible.protocol.union.worker.job.sync
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.core.event.OutgoingActivityEventListener
+import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.ActivityEvent
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.service.ActivityService
@@ -28,7 +29,7 @@ class SyncActivityJob(
     private val enrichmentActivityService: EnrichmentActivityService,
     private val esActivityRepository: EsActivityRepository,
     private val esActivityConverter: EsActivityConverter,
-    private val outgoingActivityEventListener: OutgoingActivityEventListener,
+    private val outgoingActivityEventListener: OutgoingEventListener<ActivityEvent>,
     esRateLimiter: EsRateLimiter
 ) : AbstractSyncJob<UnionActivity, EnrichmentActivity, SyncActivityJobParam>(
     "Activity",

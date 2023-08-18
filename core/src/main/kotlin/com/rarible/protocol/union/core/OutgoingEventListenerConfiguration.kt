@@ -1,6 +1,15 @@
-package com.rarible.protocol.union.core.event
+package com.rarible.protocol.union.core
 
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.protocol.union.core.event.EventCountMetrics
+import com.rarible.protocol.union.core.event.EventType
+import com.rarible.protocol.union.core.event.OutgoingActivityEventListener
+import com.rarible.protocol.union.core.event.OutgoingCollectionEventListener
+import com.rarible.protocol.union.core.event.OutgoingEventListener
+import com.rarible.protocol.union.core.event.CountingOutgoingEventListener
+import com.rarible.protocol.union.core.event.OutgoingItemEventListener
+import com.rarible.protocol.union.core.event.OutgoingOrderEventListener
+import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
 import com.rarible.protocol.union.core.model.ActivityEvent
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -12,11 +21,11 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class OutgoingEventListenerConfiguration(
-    private val eventCountMetrics: EventCountMetrics,
+    val eventCountMetrics: EventCountMetrics,
 ) {
     @Bean
     fun outgoingActivityEventListener(eventsProducer: RaribleKafkaProducer<ActivityDto>): OutgoingEventListener<ActivityEvent> =
-        OutgoingEventListenerWrapper(
+        CountingOutgoingEventListener(
             eventCountMetrics,
             OutgoingActivityEventListener(eventsProducer),
             EventType.ACTIVITY
@@ -24,7 +33,7 @@ class OutgoingEventListenerConfiguration(
 
     @Bean
     fun outgoingCollectionEventListener(eventsProducer: RaribleKafkaProducer<CollectionEventDto>): OutgoingEventListener<CollectionEventDto> =
-        OutgoingEventListenerWrapper(
+        CountingOutgoingEventListener(
             eventCountMetrics,
             OutgoingCollectionEventListener(eventsProducer),
             EventType.COLLECTION
@@ -32,7 +41,7 @@ class OutgoingEventListenerConfiguration(
 
     @Bean
     fun outgoingItemEventListener(eventsProducer: RaribleKafkaProducer<ItemEventDto>): OutgoingEventListener<ItemEventDto> =
-        OutgoingEventListenerWrapper(
+        CountingOutgoingEventListener(
             eventCountMetrics,
             OutgoingItemEventListener(eventsProducer),
             EventType.ITEM
@@ -40,7 +49,7 @@ class OutgoingEventListenerConfiguration(
 
     @Bean
     fun outgoingOrderEventListener(eventsProducer: RaribleKafkaProducer<OrderEventDto>): OutgoingEventListener<OrderEventDto> =
-        OutgoingEventListenerWrapper(
+        CountingOutgoingEventListener(
             eventCountMetrics,
             OutgoingOrderEventListener(eventsProducer),
             EventType.ORDER
@@ -48,7 +57,7 @@ class OutgoingEventListenerConfiguration(
 
     @Bean
     fun outgoingOwnershipEventListener(eventsProducer: RaribleKafkaProducer<OwnershipEventDto>): OutgoingEventListener<OwnershipEventDto> =
-        OutgoingEventListenerWrapper(
+        CountingOutgoingEventListener(
             eventCountMetrics,
             OutgoingOwnershipEventListener(eventsProducer),
             EventType.OWNERSHIP

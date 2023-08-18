@@ -21,11 +21,11 @@ class BlockchainEventHandlerWrapper<B, U>(
             blockchainHandler.handle(event)
         } catch (ex: EventConversionException) {
             logger.error("Conversion of single event failed [{}]", ex.event, ex.cause)
-            eventCounter.addAndGet(-1)
+            eventCounter.decrementAndGet()
             throw ex.cause!!
         } catch (ex: Exception) {
             logger.error("Unexpected exception during handling event [{}]", event, ex)
-            eventCounter.addAndGet(-1)
+            eventCounter.decrementAndGet()
             throw ex
         }
     }

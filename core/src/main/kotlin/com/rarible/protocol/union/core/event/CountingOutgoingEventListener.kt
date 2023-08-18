@@ -2,7 +2,7 @@ package com.rarible.protocol.union.core.event
 
 import com.rarible.protocol.union.dto.BlockchainDto
 
-class OutgoingEventListenerWrapper<T>(
+class CountingOutgoingEventListener<T>(
     private val eventCountMetrics: EventCountMetrics,
     private val delegate: OutgoingEventListener<T>,
     private val eventType: EventType,
