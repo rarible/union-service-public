@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import java.math.BigInteger
+import javax.annotation.PostConstruct
 
 @Service
 class SimpleHashService(
@@ -37,6 +38,12 @@ class SimpleHashService(
         .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
 
     private val enabled = props.simpleHash.enabled
+
+    @PostConstruct
+    fun postInit() {
+        val conf = props.simpleHash.copy(apiKey = "-")
+        logger.info("SimpleHashService is loaded with params: $conf")
+    }
 
     fun isSupported(blockchain: BlockchainDto): Boolean {
         return blockchain in props.simpleHash.supported && enabled
