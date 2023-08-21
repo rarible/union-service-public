@@ -8,6 +8,7 @@ import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTest
 import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.core.test.wait.BlockingWait.waitAssert
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.SimpleHash
 import com.rarible.protocol.union.enrichment.configuration.SimpleHashKafka
 import com.rarible.protocol.union.enrichment.configuration.SimplehashConsumerConfiguration
@@ -39,7 +40,8 @@ class SimpleHashKafkaTest {
                     enabled = true,
                     broker = kafkaBootstrap,
                     topics = listOf(topic)
-                )
+                ),
+                supported = setOf(BlockchainDto.ETHEREUM)
             )
         }
         val applicationEnvironmentInfo = ApplicationEnvironmentInfo("test", "localhost")
