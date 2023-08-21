@@ -15,6 +15,7 @@ import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
@@ -339,6 +340,45 @@ internal class EsItemRepositoryFt {
             // Sometimes it might match
             assertThat(result1).isNotEqualTo(result2)
         }
+    }
+
+    @Test
+    fun getCheapestItems() = runBlocking<Unit> {
+        val collectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().toString()).fullId()
+        val otherCollectionId = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().toString()).fullId()
+        val currency1 = CurrencyIdDto(BlockchainDto.ETHEREUM, randomAddress().toString(), null).fullId()
+        val currency2 = CurrencyIdDto(BlockchainDto.ETHEREUM, randomAddress().toString(), null).fullId()
+        val esItemNotOnSale = randomEsItem(collectionId = collectionId)
+        val esItem1OnSaleCurrency1 = randomEsItem(collectionId = collectionId).copy(
+            bestSellCurrency = currency1,
+            bestSellAmount = 10.0
+        )
+        val esItem2OnSaleCurrency1 = randomEsItem(collectionId = collectionId).copy(
+            bestSellCurrency = currency1,
+            bestSellAmount = 1.0
+        )
+        val esItemOnSaleCurrency2 = randomEsItem(collectionId = collectionId).copy(
+            bestSellCurrency = currency2,
+            bestSellAmount = 2.0
+        )
+        val esItemOnSaleOtherCollection = randomEsItem(collectionId = otherCollectionId).copy(
+            bestSellCurrency = currency2,
+            bestSellAmount = 1.5
+        )
+
+        repository.bulk(
+            entitiesToSave = listOf(
+                esItemNotOnSale,
+                esItem1OnSaleCurrency1,
+                esItem2OnSaleCurrency1,
+                esItemOnSaleCurrency2,
+                esItemOnSaleOtherCollection
+            )
+        )
+
+        val result = repository.getCheapestItems(collectionId)
+
+        assertThat(result).containsExactlyInAnyOrder(esItem2OnSaleCurrency1, esItemOnSaleCurrency2)
     }
 
     fun randomEsItem(

@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
+import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderConverter
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxActivityEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxCollectionEventHandler
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxItemEventHandler
@@ -73,8 +74,9 @@ class ImxConsumerConfiguration {
     @Bean
     fun immutablexOrderEventHandler(
         handler: IncomingEventHandler<UnionOrderEvent>,
-        imxScanMetrics: ImxScanMetrics
-    ) = ImxOrderEventHandler(handler, imxScanMetrics)
+        imxScanMetrics: ImxScanMetrics,
+        imxOrderConverter: ImxOrderConverter
+    ) = ImxOrderEventHandler(handler, imxScanMetrics, imxOrderConverter)
 
     @Bean
     fun imxScanStateRepository(mongo: ReactiveMongoTemplate): ImxScanStateRepository {

@@ -4,7 +4,7 @@ import com.rarible.protocol.union.core.test.ManualTest
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.integration.ImxManualTest
-import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderConverter
+import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderV3Converter
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
@@ -12,9 +12,9 @@ import org.junit.jupiter.api.Test
 import scalether.domain.Address
 
 @ManualTest
-class ImxOrderServiceMt : ImxManualTest() {
+class ImxOrderV3ServiceMt : ImxManualTest() {
 
-    private val service = ImxOrderService(orderClient, ImxOrderConverter())
+    private val service = ImxOrderService(orderV3Client, ImxOrderV3Converter())
 
     @Test
     fun getById() = runBlocking<Unit> {

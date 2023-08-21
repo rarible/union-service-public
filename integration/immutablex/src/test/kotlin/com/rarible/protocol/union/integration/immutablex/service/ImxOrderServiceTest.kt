@@ -11,6 +11,7 @@ import com.rarible.protocol.union.integration.data.randomImxOrderBuySide
 import com.rarible.protocol.union.integration.data.randomImxOrderSellSide
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrdersPage
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
+import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderConverter
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -25,7 +26,7 @@ class ImxOrderServiceTest {
 
     private val orderClient: ImxOrderClient = mockk()
 
-    private val service = ImxOrderService(orderClient)
+    private val service = ImxOrderService(orderClient, ImxOrderConverter())
     private val currencyProbeBatchSize = 64
 
     @BeforeEach

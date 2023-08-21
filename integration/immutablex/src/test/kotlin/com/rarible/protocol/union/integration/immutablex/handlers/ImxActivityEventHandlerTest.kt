@@ -23,6 +23,7 @@ import com.rarible.protocol.union.integration.data.randomImxTransfer
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexTransfer
 import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxItemConverter
+import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxOwnershipConverter
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanMetrics
 import com.rarible.protocol.union.integration.immutablex.service.ImxActivityService
@@ -58,7 +59,8 @@ class ImxActivityEventHandlerTest {
             coEvery {
                 toUsd(any(), any<UnionAssetType>(), any(), any())
             } returns BigDecimal.ONE
-        }
+        },
+        ImxOrderConverter()
     )
 
     private val imxActivityEventHandler = ImxActivityEventHandler(
