@@ -22,6 +22,10 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
 
     protected suspend fun load(key: K): T? {
         val (id, blockchain) = metaContentEnrichmentService.extractBlockchain(key)
+
+        // Check custom providers first - if any of them can be used for meta resolution,
+        // then return result obtained from matched provider (global providers omitted in such case,
+        // since there is no sense to use them or trigger "partial retries")
         customProviders.forEach { provider ->
             val result = provider.fetch(blockchain, id)
             if (result.supported) {
