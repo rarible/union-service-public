@@ -28,5 +28,9 @@ data class UnionMeta(
 
     override fun withContent(content: List<UnionMetaContent>) = this.copy(content = content)
 
-    fun toComparable(): UnionMeta = copy(createdAt = null)
+    fun toComparable(): UnionMeta = copy(
+        createdAt = null,
+        source = null,
+        contributors = emptyList()
+    )
 }
