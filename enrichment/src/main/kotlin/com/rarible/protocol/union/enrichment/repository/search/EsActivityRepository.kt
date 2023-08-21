@@ -57,7 +57,7 @@ class EsActivityRepository(
         query.maxResults = PageSize.ACTIVITY.limit(limit)
         query.trackTotalHits = false
 
-        return logIfSlow(filter, query) {
+        return logIfSlow(filter, query.query, query.elasticsearchSorts) {
             search(query)
         }
     }

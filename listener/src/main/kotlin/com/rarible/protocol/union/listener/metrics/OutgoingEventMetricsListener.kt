@@ -37,7 +37,6 @@ sealed class OutgoingEventMetricsListener<T>(
         } catch (e: Exception) {
             logger.error("Failed to mark event {}", event, e)
         }
-        eventSentMetric(event)
     }
 
     private fun markDelay(event: T) {
@@ -84,15 +83,6 @@ sealed class OutgoingEventMetricsListener<T>(
             from = start.name,
             to = end.name,
             delay = Duration.between(start.date, end.date)
-        )
-    }
-
-    private fun eventSentMetric(event: T) {
-        val blockchain = getBlockchain(event)
-        metrics.eventSent(
-            EventCountMetrics.Stage.EXTERNAL,
-            blockchain,
-            eventType
         )
     }
 }

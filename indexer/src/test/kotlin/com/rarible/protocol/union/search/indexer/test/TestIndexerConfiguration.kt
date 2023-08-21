@@ -5,6 +5,7 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsActivityConverter
+import com.rarible.protocol.union.core.event.EventCountMetrics
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
@@ -45,8 +46,11 @@ class TestIndexerConfiguration(
     }
 
     @Bean
-    fun metricConsumerFactory(indexerMetricFactory: IndexerMetricFactory): MetricConsumerBatchEventHandlerFactory {
-        return MetricConsumerBatchEventHandlerFactory(indexerMetricFactory)
+    fun metricConsumerFactory(
+        indexerMetricFactory: IndexerMetricFactory,
+        eventCountMetrics: EventCountMetrics
+    ): MetricConsumerBatchEventHandlerFactory {
+        return MetricConsumerBatchEventHandlerFactory(indexerMetricFactory, eventCountMetrics)
     }
 
     @Bean
