@@ -41,7 +41,8 @@ class SimpleHashServiceTest {
     private val simpleHashProps = SimpleHash(
         enabled = true,
         endpoint = "http://localhost:${mockServer.port}",
-        mapping = mapOf("ethereum" to "ethereum-goerli")
+        mapping = mapOf("ethereum" to "ethereum-goerli"),
+        supported = setOf(BlockchainDto.ETHEREUM)
     )
     private val props: UnionMetaProperties
         get() {
