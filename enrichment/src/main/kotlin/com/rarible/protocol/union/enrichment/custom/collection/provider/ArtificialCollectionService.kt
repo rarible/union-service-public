@@ -3,6 +3,8 @@ package com.rarible.protocol.union.enrichment.custom.collection.provider
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import org.slf4j.LoggerFactory
@@ -15,7 +17,8 @@ import java.util.concurrent.ConcurrentHashMap
 @Component
 class ArtificialCollectionService(
     private val collectionRepository: CollectionRepository,
-    private val producer: UnionInternalCollectionEventProducer
+    private val producer: UnionInternalCollectionEventProducer,
+    private val collectionMetaService: CollectionMetaService
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -41,22 +44,28 @@ class ArtificialCollectionService(
         originalId: CollectionIdDto,
         surrogateId: CollectionIdDto,
         name: String?,
-        structure: UnionCollection.Structure
+        structure: UnionCollection.Structure,
+        extra: Map<String, String> = emptyMap()
     ) {
         val original = collectionRepository.get(EnrichmentCollectionId(originalId))
             ?: throw IllegalArgumentException("Can't create sub-collection $surrogateId of $originalId - not found")
 
         try {
+            // Since this call can be executed anywhere - listener, API,
+            // we can't download and enrich meta here,
+            // so let's create basic "scratch" and update meta in async way
             collectionRepository.save(
                 original.copy(
                     collectionId = surrogateId.value,
                     name = name ?: original.name, // Nothing to do with it...
                     structure = structure,
                     parent = EnrichmentCollectionId(originalId),
-                    version = null
+                    version = null,
+                    extra = extra
                 )
             )
             producer.sendChangeEvent(surrogateId)
+            collectionMetaService.schedule(surrogateId, CollectionMetaPipeline.REFRESH, true)
         } catch (e: DuplicateKeyException) {
             logger.info("Artificial collection ${surrogateId.fullId()} can't be created, already exists: ${e.message}")
         } catch (e: OptimisticLockingFailureException) {

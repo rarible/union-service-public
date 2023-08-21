@@ -16,7 +16,9 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaContentDto.Representation
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.item.provider.DefaultItemMetaProvider
+import com.rarible.protocol.union.enrichment.meta.item.provider.ItemMetaCustomProvider
 import com.rarible.protocol.union.enrichment.meta.item.provider.SimpleHashItemMetaProvider
+import com.rarible.protocol.union.enrichment.meta.provider.MetaCustomProvider
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionContent
 import com.rarible.protocol.union.enrichment.test.data.randomUnionImageProperties
@@ -24,6 +26,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -45,6 +48,9 @@ class ItemMetaDownloaderTest {
     private val simpleHashService: SimpleHashService = mockk() {
         every { isSupported(blockchain) } returns true
     }
+    private val customItemMetaProvider: ItemMetaCustomProvider = mockk() {
+        coEvery { fetch(any(), any()) } returns MetaCustomProvider.Result(false)
+    }
 
     private val simpleHashMetaItemProvider = SimpleHashItemMetaProvider(simpleHashService)
     private val metaContentEnrichmentService = ItemMetaContentEnrichmentService(
@@ -64,6 +70,7 @@ class ItemMetaDownloaderTest {
             router = router,
             metaContentEnrichmentService = metaContentEnrichmentService,
             providers = listOf(defaultItemMetaProvider, simpleHashMetaItemProvider),
+            customProviders = listOf(customItemMetaProvider),
             metrics = contentMetaMetrics
         )
     }
@@ -174,6 +181,20 @@ class ItemMetaDownloaderTest {
         val meta = downloader.download(itemId.toString())
 
         assertThat(meta.attributes).containsExactly(UnionMetaAttribute("key", "value"))
+    }
+
+    @Test
+    fun `custom download - ok`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val meta = randomUnionMeta(content = listOf(randomUnionContent()))
+
+        coEvery {
+            customItemMetaProvider.fetch(itemId.blockchain, itemId.value)
+        } returns MetaCustomProvider.Result(true, meta)
+
+        val result = downloader.download(itemId.fullId())
+        assertThat(result).isEqualTo(meta)
+        coVerify(exactly = 1) { contentMetaDownloader.enrichContent(itemId.fullId(), itemId.blockchain, meta.content) }
     }
 
     @Test

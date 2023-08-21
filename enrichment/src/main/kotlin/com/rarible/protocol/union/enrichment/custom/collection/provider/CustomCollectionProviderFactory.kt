@@ -11,7 +11,7 @@ class CustomCollectionProviderFactory(
 
     fun create(mapping: CustomCollectionMapping): CustomCollectionProvider {
         return when (mapping.name) {
-            "artblocks" -> artBlocksCustomCollectionProvider
+            ArtBlocksCustomCollectionProvider.MAPPING_NAME -> artBlocksCustomCollectionProvider
             else -> DefaultCustomCollectionProvider(IdParser.parseCollectionId(mapping.name))
         }
     }

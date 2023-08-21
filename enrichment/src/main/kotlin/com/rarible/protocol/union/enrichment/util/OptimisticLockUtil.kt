@@ -2,22 +2,25 @@ package com.rarible.protocol.union.enrichment.util
 
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.dao.OptimisticLockingFailureException
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 
 suspend fun <T, E> optimisticLockWithInitial(initial: T?, attempts: Long = 5, update: suspend (initial: T?) -> E): E {
-    var current = initial
-    var retry = 0
-    var last: Throwable
+    val current = AtomicReference(initial)
+    val retry = AtomicInteger(0)
+    val last = AtomicReference<Throwable?>(null)
 
     do {
-        last = try {
-            return update(current)
+        val exception = try {
+            return update(current.get())
         } catch (ex: OptimisticLockingFailureException) {
             ex
         } catch (ex: DuplicateKeyException) {
             ex
         }
-        current = null
-    } while (++retry < attempts)
+        last.set(exception)
+        current.set(null)
+    } while (retry.incrementAndGet() < attempts)
 
-    throw last
+    throw last.get()!!
 }

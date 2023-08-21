@@ -37,7 +37,15 @@ class ArtBlocksCustomCollectionProviderTest {
     @BeforeEach
     fun beforeEach() {
         clearMocks(artificialCollectionService, customCollectionItemProvider)
-        coEvery { artificialCollectionService.createArtificialCollection(any(), any(), any(), any()) } returns Unit
+        coEvery {
+            artificialCollectionService.createArtificialCollection(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns Unit
     }
 
     @Test
@@ -78,10 +86,11 @@ class ArtBlocksCustomCollectionProviderTest {
         assertThat(result).isEqualTo(subCollection)
         coVerify(exactly = 1) {
             artificialCollectionService.createArtificialCollection(
-                collectionId,
-                subCollection,
-                "123",
-                UnionCollection.Structure.PART
+                originalId = collectionId,
+                surrogateId = subCollection,
+                name = "123",
+                structure = UnionCollection.Structure.PART,
+                extra = mapOf("project_id" to "123")
             )
         }
     }
@@ -100,10 +109,11 @@ class ArtBlocksCustomCollectionProviderTest {
         assertThat(result).isEqualTo(subCollection)
         coVerify(exactly = 1) {
             artificialCollectionService.createArtificialCollection(
-                collectionId,
-                subCollection,
-                null,
-                UnionCollection.Structure.PART
+                originalId = collectionId,
+                surrogateId = subCollection,
+                name = null,
+                structure = UnionCollection.Structure.PART,
+                extra = mapOf("project_id" to "987987")
             )
         }
     }

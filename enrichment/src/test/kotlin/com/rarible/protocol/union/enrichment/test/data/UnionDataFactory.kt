@@ -51,6 +51,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
@@ -84,6 +85,7 @@ import com.rarible.protocol.union.integration.solana.data.randomSolanaTokenDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import kotlinx.coroutines.runBlocking
 import java.time.Instant
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 val CUSTOM_COLLECTION = CollectionIdDto(BlockchainDto.ETHEREUM, "0x7777777777777777777777777777777777777777")
@@ -477,5 +479,91 @@ fun randomUnionImageProperties(): UnionImageProperties {
         available = randomBoolean(),
         width = randomInt(),
         height = randomInt()
+    )
+}
+
+fun randomSimpleHashItem(
+    nftId: String = randomAddressString(),
+    tokenId: String? = randomBigInt().toString(),
+    name: String? = randomString(),
+    description: String? = randomString(),
+    previews: SimpleHashItem.Preview? = randomSimpleHashItemPreview(),
+    imageProperties: SimpleHashItem.ImageProperties? = randomSimpleHashImageProperties(),
+    extraMetadata: SimpleHashItem.ExtraMetadata? = randomSimpleHashImageExtraMetadata(),
+    collection: SimpleHashItem.Collection? = randomSimpleHashItemCollection(),
+    createdDate: LocalDateTime? = LocalDateTime.now(),
+    externalUrl: String? = "http://localhost:8080/sh/external/${randomString()}"
+): SimpleHashItem {
+    return SimpleHashItem(
+        nftId = nftId,
+        tokenId = tokenId,
+        name = name,
+        description = description,
+        previews = previews,
+        imageProperties = imageProperties,
+        extraMetadata = extraMetadata,
+        collection = collection,
+        createdDate = createdDate,
+        externalUrl = externalUrl
+    )
+}
+
+fun randomSimpleHashItemPreview(
+    imageSmallUrl: String? = "http://localhost:8080/sh/small/${randomString()}",
+    imageMediumUrl: String? = "http://localhost:8080/sh/medium/${randomString()}",
+    imageLargeUrl: String? = "http://localhost:8080/sh/large/${randomString()}",
+    imageOpengraphUrl: String? = "http://localhost:8080/sh/opengraph/${randomString()}",
+): SimpleHashItem.Preview {
+    return SimpleHashItem.Preview(
+        imageLargeUrl = imageLargeUrl,
+        imageMediumUrl = imageMediumUrl,
+        imageOpengraphUrl = imageOpengraphUrl,
+        imageSmallUrl = imageSmallUrl
+    )
+}
+
+fun randomSimpleHashImageProperties(
+    width: Int? = randomInt(2000),
+    height: Int? = randomInt(1000),
+    size: Long? = randomLong(10000000),
+    mimeType: String? = "image/png"
+): SimpleHashItem.ImageProperties {
+    return SimpleHashItem.ImageProperties(
+        width = width,
+        height = height,
+        size = size,
+        mimeType = mimeType
+    )
+}
+
+fun randomSimpleHashImageExtraMetadata(
+    imageOriginalUrl: String? = "http://localhost:8080/sh/original/${randomString()}",
+    attributes: List<SimpleHashItem.Attribute> = emptyList(),
+    features: Map<String, String>? = emptyMap(),
+    projectId: String? = null,
+    collectionName: String? = randomString(),
+    metadataOriginalUrl: String? = "http://localhost:8080/sh/meta/${randomString()}",
+): SimpleHashItem.ExtraMetadata {
+    return SimpleHashItem.ExtraMetadata(
+        imageOriginalUrl = imageOriginalUrl,
+        attributes = attributes,
+        features = features,
+        projectId = projectId,
+        collectionName = collectionName,
+        metadataOriginalUrl = metadataOriginalUrl
+    )
+}
+
+fun randomSimpleHashItemCollection(
+    name: String? = "SH Collection ${randomString()}",
+    description: String? = "SH description ${randomString()}",
+    imageUrl: String? = "http://localhost:8080/sh/collection/original/${randomString()}",
+    bannerImageUrl: String? = "http://localhost:8080/sh/collection/banner/${randomString()}",
+): SimpleHashItem.Collection {
+    return SimpleHashItem.Collection(
+        name = name,
+        description = description,
+        imageUrl = imageUrl,
+        bannerImageUrl = bannerImageUrl
     )
 }

@@ -2,6 +2,8 @@ package com.rarible.protocol.union.enrichment.custom.collection.provider
 
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollection
 import io.mockk.coEvery
@@ -23,6 +25,9 @@ class ArtificialCollectionServiceTest {
 
     @MockK
     lateinit var producer: UnionInternalCollectionEventProducer
+
+    @MockK
+    lateinit var collectionMetaService: CollectionMetaService
 
     @InjectMockKs
     lateinit var artificialCollectionService: ArtificialCollectionService
@@ -53,6 +58,7 @@ class ArtificialCollectionServiceTest {
     fun `create - ok`() = runBlocking<Unit> {
         val collection = randomEnrichmentCollection().copy(version = 1)
         val subCollection = randomEnrichmentCollection()
+        val subId = subCollection.id.toDto()
 
         val expected = collection.copy(
             collectionId = subCollection.collectionId,
@@ -64,7 +70,8 @@ class ArtificialCollectionServiceTest {
 
         coEvery { collectionRepository.get(collection.id) } returns collection
         coEvery { collectionRepository.save(expected) } returns expected
-        coEvery { producer.sendChangeEvent(subCollection.id.toDto()) } returns Unit
+        coEvery { producer.sendChangeEvent(subId) } returns Unit
+        coEvery { collectionMetaService.schedule(subId, CollectionMetaPipeline.REFRESH, true) } returns Unit
 
         artificialCollectionService.createArtificialCollection(
             collection.id.toDto(),
@@ -75,6 +82,7 @@ class ArtificialCollectionServiceTest {
 
         coVerify(exactly = 1) { collectionRepository.save(expected) }
         coVerify(exactly = 1) { producer.sendChangeEvent(subCollection.id.toDto()) }
+        coVerify(exactly = 1) { collectionMetaService.schedule(subId, CollectionMetaPipeline.REFRESH, true) }
         assertThat(artificialCollectionService.exists(subCollection.id.toDto())).isTrue()
     }
 

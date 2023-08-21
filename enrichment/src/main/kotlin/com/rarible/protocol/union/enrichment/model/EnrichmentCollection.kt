@@ -50,6 +50,9 @@ data class EnrichmentCollection(
 
     val metaEntry: DownloadEntry<UnionCollectionMeta>? = null,
 
+    // Additional internal data for tech purposes, should not be exposed outside
+    val extra: Map<String, String> = emptyMap(),
+
     @Version
     val version: Long? = null
 ) : BestSellOrderOwner<EnrichmentCollection>,

@@ -7,11 +7,9 @@ import com.rarible.protocol.union.core.model.download.ProviderDownloadException
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 
 @Component
-@ConditionalOnProperty("meta.simpleHash.enabled", havingValue = "true")
 class SimpleHashItemMetaProvider(
     private val simpleHashService: SimpleHashService,
 ) : ItemMetaProvider {

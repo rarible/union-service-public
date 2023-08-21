@@ -45,7 +45,9 @@ data class SimpleHashItem(
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class Collection(
         val name: String?,
-        val description: String?
+        val description: String?,
+        val imageUrl: String?,
+        val bannerImageUrl: String?,
     )
 
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
