@@ -35,6 +35,7 @@ import com.rarible.protocol.union.enrichment.service.query.activity.ActivityQuer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
+import java.util.concurrent.ThreadLocalRandom
 
 @Service
 @CaptureSpan(type = SpanType.APP)
@@ -61,6 +62,9 @@ class ActivityElasticService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        val requestId = ThreadLocalRandom.current().nextLong()
+        val start = System.currentTimeMillis()
+
         val effectiveCursor = cursor ?: continuation
         val enabledBlockchains = router.getEnabledBlockchains(blockchains).toList()
         if (enabledBlockchains.isEmpty()) {
@@ -68,8 +72,9 @@ class ActivityElasticService(
             return ActivitiesDto()
         }
         val filter = filterConverter.convertGetAllActivities(type, enabledBlockchains, bidCurrencies, effectiveCursor)
-        logger.info("Built filter: $filter")
+        logger.info("[$requestId] Built filter: $filter")
         val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
+        logger.info("[$requestId] Get query result: ${queryResult.activities.size}, ${latency(start)}")
 
         val activities = getActivities(queryResult.activities)
         val result = ActivitiesDto(
@@ -79,8 +84,9 @@ class ActivityElasticService(
         )
 
         logger.info(
-            "Response for ES getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
-                " Slice(size={}, continuation={}, cursor={})",
+            "[{}] Response for ES getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
+                " Slice(size={}, continuation={}, cursor={}, latency={})",
+            requestId,
             type,
             blockchains,
             continuation,
@@ -88,7 +94,8 @@ class ActivityElasticService(
             sort,
             result.activities.size,
             result.continuation,
-            result.cursor
+            result.cursor,
+            latency(start)
         )
         return result
     }
@@ -294,5 +301,9 @@ class ActivityElasticService(
             logger.error("Ids found in ES missing in $blockchain: $missingIds")
             missingIdsMetrics[blockchain]!!.increment(missingIds.size.toDouble())
         }
+    }
+
+    private fun latency(start: Long): String {
+        return "${System.currentTimeMillis() - start} ms"
     }
 }
