@@ -31,6 +31,8 @@ data class UnionMeta(
     fun toComparable(): UnionMeta = copy(
         createdAt = null,
         source = null,
-        contributors = emptyList()
+        contributors = emptyList(),
+        // Goal is to check only url and representation
+        content = content.map { it.copy(properties = null, fileName = null) }
     )
 }
