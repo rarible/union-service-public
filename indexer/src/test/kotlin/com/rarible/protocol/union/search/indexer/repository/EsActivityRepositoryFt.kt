@@ -95,7 +95,7 @@ internal class EsActivityRepositoryFt {
         // when
         blockchainToCollections.forEach { (blockchain, collections) ->
             val esCollections =
-                repository.findTradedDistinctCollections(blockchain, Instant.EPOCH)
+                repository.findTradedDistinctCollections(blockchain, Instant.EPOCH, 1000)
             // then
             assertThat(collections).hasSize(esCollections.size)
         }
