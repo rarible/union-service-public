@@ -3,9 +3,9 @@ package com.rarible.protocol.union.api.controller.internal
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.dto.CollectionEventDto
-import com.rarible.protocol.union.dto.ItemEventDto
-import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionMigrator
@@ -31,7 +31,7 @@ class RefreshController(
     )
     suspend fun reconcileCollection(
         @PathVariable("collectionId") collectionId: String
-    ): ResponseEntity<CollectionEventDto> {
+    ): ResponseEntity<CollectionDto> {
         val unionCollectionId = IdParser.parseCollectionId(collectionId)
         val result = refreshService.reconcileCollection(unionCollectionId)
         return ResponseEntity.ok(result)
@@ -44,7 +44,7 @@ class RefreshController(
     suspend fun reconcileItem(
         @PathVariable("itemId") itemId: String,
         @RequestParam(value = "full", required = false, defaultValue = "false") full: Boolean
-    ): ResponseEntity<ItemEventDto> {
+    ): ResponseEntity<ItemDto> {
         val unionItemId = IdParser.parseItemId(itemId)
         val result = refreshService.reconcileItem(unionItemId, full)
         return ResponseEntity.ok(result)
@@ -56,7 +56,7 @@ class RefreshController(
     )
     suspend fun reconcileOwnership(
         @PathVariable("ownershipId") ownershipId: String
-    ): ResponseEntity<OwnershipEventDto> {
+    ): ResponseEntity<OwnershipDto> {
         val unionOwnershipId = OwnershipIdParser.parseFull(ownershipId)
         val result = refreshService.reconcileOwnership(unionOwnershipId)
             ?: throw UnionNotFoundException("Ownership $ownershipId not found")
