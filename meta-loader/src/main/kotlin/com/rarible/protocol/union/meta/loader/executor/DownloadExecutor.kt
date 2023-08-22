@@ -300,6 +300,10 @@ class ItemDownloadExecutor(
             return false
         }
         val collectionId = task.id.substringBeforeLast(":")
+        // TODO should be fixed in right way
+        if (task.id.endsWith(":\$i")) {
+            return true
+        }
         return enrichmentBlacklistService.isBlacklisted(collectionId)
     }
 
