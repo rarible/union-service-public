@@ -54,6 +54,11 @@ sealed class DownloadExecutor<T>(
     }
 
     private suspend fun execute(task: DownloadTask) {
+        // TODO should be fixed in right way
+        if (task.id.endsWith(":\$i")) {
+            logger.warn("Incorrect task id: ${task.id}")
+            return
+        }
         val started = Instant.now()
         val current = repository.get(task.id) ?: getDefault(task)
         if (current.succeedAt != null && task.scheduledAt.isBefore(current.succeedAt)) {
@@ -300,10 +305,6 @@ class ItemDownloadExecutor(
             return false
         }
         val collectionId = task.id.substringBeforeLast(":")
-        // TODO should be fixed in right way
-        if (task.id.endsWith(":\$i")) {
-            return true
-        }
         return enrichmentBlacklistService.isBlacklisted(collectionId)
     }
 
