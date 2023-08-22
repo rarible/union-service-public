@@ -113,6 +113,7 @@ class MetaAutoRefreshProperties(
     val errorDelay: Duration = Duration.ofMinutes(1),
     val createdPeriod: Duration = Duration.ofDays(30),
     val refreshedPeriod: Duration = Duration.ofDays(14),
+    val numberOfCollectionsToCheck: Int = 100
 )
 
 class MetaRefreshProperties(

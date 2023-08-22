@@ -33,6 +33,7 @@ class MetaAutoRefreshJob(
 ) {
     private val createdPeriod = properties.metaAutoRefresh.createdPeriod
     private val refreshedPeriod = properties.metaAutoRefresh.refreshedPeriod
+    private val numberOfCollectionsToCheck = properties.metaAutoRefresh.numberOfCollectionsToCheck
     private val rate = properties.metaAutoRefresh.rate.toMillis()
 
     public override suspend fun handle() {
@@ -61,7 +62,7 @@ class MetaAutoRefreshJob(
         val since = Instant.now().minusMillis(rate)
         return BlockchainDto.values()
             .flatMap { blockchain ->
-                esActivityRepository.findTradedDistinctCollections(blockchain, since)
+                esActivityRepository.findTradedDistinctCollections(blockchain, since, numberOfCollectionsToCheck)
             }
     }
 
