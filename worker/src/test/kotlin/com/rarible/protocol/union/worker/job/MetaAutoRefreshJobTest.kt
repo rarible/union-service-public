@@ -51,7 +51,7 @@ internal class MetaAutoRefreshJobTest {
     @Test
     fun handle() = runTest {
         coEvery {
-            esActivityRepository.findTradedDistinctCollections(any(), any())
+            esActivityRepository.findTradedDistinctCollections(any(), any(), any())
         } returns emptyList()
 
         val collectionId1 = randomEthCollectionId()

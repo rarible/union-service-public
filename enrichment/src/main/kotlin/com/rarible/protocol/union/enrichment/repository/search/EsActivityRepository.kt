@@ -80,7 +80,11 @@ class EsActivityRepository(
         )
     }
 
-    suspend fun findTradedDistinctCollections(blockchain: BlockchainDto, since: Instant): List<CollectionIdDto> {
+    suspend fun findTradedDistinctCollections(
+        blockchain: BlockchainDto,
+        since: Instant,
+        limit: Int
+    ): List<CollectionIdDto> {
         val boolQuery = BoolQueryBuilder()
         boolQuery.mustMatchTerm(blockchain.name, EsActivity::blockchain.name)
         boolQuery.mustMatchRange(since, null, EsActivity::date.name)
@@ -90,7 +94,7 @@ class EsActivityRepository(
                 AggregationBuilders
                     .terms("collections")
                     .field("collection")
-                    .size(1000)
+                    .size(limit)
             )
             .build()
         query.maxResults = 0
