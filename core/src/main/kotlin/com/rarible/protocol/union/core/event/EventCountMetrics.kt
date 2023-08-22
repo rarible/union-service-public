@@ -21,7 +21,7 @@ class EventCountMetrics(meterRegistry: MeterRegistry) : UnionMetrics(meterRegist
     }
 
     fun eventSentGauge(stage: Stage, blockchain: BlockchainDto, eventType: EventType) =
-        gaugeMetricCache.computeIfAbsent(GaugeMetricKey(EVENT_RECEIVED_METRIC, stage, blockchain, eventType)) {
+        gaugeMetricCache.computeIfAbsent(GaugeMetricKey(EVENT_SENT_METRIC, stage, blockchain, eventType)) {
             gauge(
                 EVENT_SENT_METRIC,
                 stage,
