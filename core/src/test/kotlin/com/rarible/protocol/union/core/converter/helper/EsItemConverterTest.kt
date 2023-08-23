@@ -6,6 +6,7 @@ import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
+import com.rarible.protocol.union.core.converter.EsItemConverter.toField
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
@@ -129,10 +130,8 @@ class EsItemConverterTest {
                     assertThat(esItem.name).isEqualTo(it.name)
                     assertThat(esItem.description).isEqualTo(it.description)
 
-                    assertThat(esItem.traits[0].key).isEqualTo(it.attributes[0].key)
-                    assertThat(esItem.traits[0].value).isEqualTo(it.attributes[0].value)
-                    assertThat(esItem.traits[1].key).isEqualTo(it.attributes[1].key)
-                    assertThat(esItem.traits[1].value).isEqualTo(it.attributes[1].value)
+                    assertThat(esItem.traits[it.attributes[0].key.toField()]).isEqualTo(it.attributes[0].value)
+                    assertThat(esItem.traits[it.attributes[1].key.toField()]).isEqualTo(it.attributes[1].value)
                 }
 
                 unionItem.bestSellOrder?.let {

@@ -9,6 +9,7 @@ import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
+import com.rarible.protocol.union.core.converter.EsItemConverter.toField
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionBurnActivity
 import com.rarible.protocol.union.core.model.UnionCollection
@@ -33,7 +34,6 @@ import com.rarible.protocol.union.core.model.elastic.EsCollection
 import com.rarible.protocol.union.core.model.elastic.EsCollectionLite
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsItemLite
-import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
@@ -352,6 +352,8 @@ fun randomEsCollection() = EsCollection(
 
 fun randomEsItem(): EsItem {
     val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed(), randomBigInt())
+    val intTrait = randomInt().toString()
+    val stringTrait = randomString()
     return EsItem(
         id = itemId.value,
         itemId = itemId.fullId(),
@@ -359,7 +361,8 @@ fun randomEsItem(): EsItem {
         collection = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed()).fullId(),
         name = randomString(),
         description = randomString(),
-        traits = listOf(EsTrait(randomString(), randomInt().toString()), EsTrait(randomString(), randomString())),
+        traits = mapOf(randomString().toField() to intTrait, randomString().toField() to stringTrait),
+        traitsValues = listOf(intTrait, stringTrait),
         creators = listOf(randomString()),
         mintedAt = nowMillis(),
         lastUpdatedAt = nowMillis(),

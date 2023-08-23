@@ -18,7 +18,8 @@ data class EsItem(
 
     val name: String?,
     val description: String?,
-    val traits: List<EsTrait>,
+    val traits: Map<String, String?>,
+    val traitsValues: List<String>,
 
     val creators: List<String>,
 
@@ -49,5 +50,3 @@ data class EsItem(
         }
     }
 }
-
-data class EsTrait(val key: String, val value: String?)

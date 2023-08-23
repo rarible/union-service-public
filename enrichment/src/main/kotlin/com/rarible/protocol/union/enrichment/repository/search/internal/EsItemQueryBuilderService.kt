@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
+import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.converter.EsItemConverter.toField
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
@@ -12,6 +14,7 @@ import org.elasticsearch.index.query.MultiMatchQueryBuilder
 import org.elasticsearch.index.query.Operator
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.index.query.QueryBuilders.termQuery
 import org.elasticsearch.index.query.QueryBuilders.termsQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
@@ -23,6 +26,7 @@ class EsItemQueryBuilderService(
     private val scoreService: EsItemQueryScoreService,
     private val sortService: EsItemQuerySortService,
     private val priceFilterService: EsItemQueryPriceFilterService,
+    private val featureFlagsProperties: FeatureFlagsProperties,
 ) {
     companion object {
         private val SCORE_SORT_TYPES: Set<EsItemSort> = setOf(
@@ -80,13 +84,17 @@ class EsItemQueryBuilderService(
 
     private fun BoolQueryBuilder.applyTextFilter(text: String?) {
         if (!text.isNullOrBlank()) {
-            should(
-                QueryBuilders.nestedQuery(
-                    "traits",
-                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery("traits.value.raw", text)),
-                    ScoreMode.None
+            if (featureFlagsProperties.enableFlattenedTraits) {
+                should(termQuery("traitsValues.raw", text))
+            } else {
+                should(
+                    QueryBuilders.nestedQuery(
+                        "traits",
+                        QueryBuilders.boolQuery().must(QueryBuilders.termQuery("traits.value.raw", text)),
+                        ScoreMode.None
+                    )
                 )
-            )
+            }
 
             val trimmedText = text.trim()
             val lastTerm = trimmedText.split(" ").last()
@@ -117,16 +125,24 @@ class EsItemQueryBuilderService(
     }
 
     private fun BoolQueryBuilder.applyTraitsFilter(traits: List<TraitFilter>?) {
-        traits?.forEach {
+        if (featureFlagsProperties.enableFlattenedTraits) {
+            traits?.forEach {
+                if (it.value.isNotBlank()) {
+                    must(termQuery("traits.${it.key.toField()}", it.value))
+                }
+            }
+        } else {
+            traits?.forEach {
 
-            must(
-                QueryBuilders.nestedQuery(
-                    "traits",
-                    QueryBuilders.boolQuery().must(termsQuery("traits.key.raw", it.key))
-                        .must(termsQuery("traits.value.raw", it.value)),
-                    ScoreMode.None
+                must(
+                    QueryBuilders.nestedQuery(
+                        "traits",
+                        QueryBuilders.boolQuery().must(termsQuery("traits.key.raw", it.key))
+                            .must(termsQuery("traits.value.raw", it.value)),
+                        ScoreMode.None
+                    )
                 )
-            )
+            }
         }
     }
 }

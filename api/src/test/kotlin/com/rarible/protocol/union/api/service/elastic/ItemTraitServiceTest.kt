@@ -6,7 +6,6 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elastic.EsItem
-import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.core.model.trait.Trait
 import com.rarible.protocol.union.core.model.trait.TraitEntry
 import com.rarible.protocol.union.core.model.trait.TraitProperty

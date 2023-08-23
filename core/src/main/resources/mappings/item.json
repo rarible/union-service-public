@@ -22,8 +22,8 @@
       "search_analyzer": "stemmer_stop_analyzer",
       "search_quote_analyzer": "stemmer_analyzer",
       "index_prefixes": {
-        "min_chars" : 1,
-        "max_chars" : 10
+        "min_chars": 1,
+        "max_chars": 10
       }
     },
     "description": {
@@ -32,8 +32,8 @@
       "search_analyzer": "stemmer_stop_analyzer",
       "search_quote_analyzer": "stemmer_analyzer",
       "index_prefixes": {
-        "min_chars" : 1,
-        "max_chars" : 10
+        "min_chars": 1,
+        "max_chars": 10
       }
     },
     "owner": {
@@ -43,40 +43,17 @@
       "type": "keyword"
     },
     "traits": {
-      "type": "nested",
-      "properties": {
-        "key": {
-          "type": "text",
-          "fields": {
-            "raw": {
-              "type": "keyword"
-            }
-          },
-          "analyzer": "stemmer_analyzer",
-          "search_analyzer": "stemmer_stop_analyzer",
-          "search_quote_analyzer": "stemmer_analyzer"
+      "type": "flattened"
+    },
+    "traitsValues": {
+      "type": "text",
+      "fields": {
+        "raw": {
+          "type": "keyword"
         },
-        "value": {
-          "type": "text",
-          "fields": {
-            "raw": {
-              "type": "keyword"
-            },
-            "numeric": {
-              "type": "double",
-              "ignore_malformed": true,
-              "coerce": true
-            },
-            "date": {
-              "type": "date",
-              "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||MM//dd/yyyy||epoch_millis",
-              "ignore_malformed": true
-            }
-          },
-          "analyzer": "stemmer_analyzer",
-          "search_analyzer": "stemmer_stop_analyzer",
-          "search_quote_analyzer": "stemmer_analyzer"
-        }
+        "analyzer": "stemmer_analyzer",
+        "search_analyzer": "stemmer_stop_analyzer",
+        "search_quote_analyzer": "stemmer_analyzer"
       }
     },
     "mintedAt": {

@@ -5,11 +5,11 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.converter.EsItemConverter.toField
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
-import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.core.model.elastic.TraitFilter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.test.WaitAssert
@@ -63,7 +63,8 @@ internal class EsItemRepositoryFt {
             collection = "0x02",
             name = "TestItem",
             description = "description",
-            traits = listOf(EsTrait("long", "10"), EsTrait("test", "eye")),
+            traits = mapOf("long".toField() to "10", "test".toField() to "eye"),
+            traitsValues = listOf("10", "eye"),
             creators = listOf("0x01"),
             mintedAt = now,
             lastUpdatedAt = now
@@ -159,25 +160,28 @@ internal class EsItemRepositoryFt {
         val value = randomString()
         val value2 = randomString()
         val esItem1 = randomEsItem().copy(
-            traits = listOf(
-                EsTrait(key, value),
-                EsTrait(key2, value2),
-                EsTrait(randomString(), randomString()),
+            traits = mapOf(
+                key.toField() to value,
+                key2.toField() to value2,
+                randomString().toField() to randomString(),
             ),
+            traitsValues = listOf(value2, value, randomString()),
         )
         val esItem2 = randomEsItem().copy(
-            traits = listOf(
-                EsTrait(key, randomString()),
-                EsTrait(key2, value2),
-                EsTrait(randomString(), randomString()),
+            traits = mapOf(
+                key.toField() to randomString(),
+                key2.toField() to value2,
+                randomString().toField() to randomString(),
             ),
+            traitsValues = listOf(randomString(), randomString(), value2),
         )
         val esItem3 = randomEsItem().copy(
-            traits = listOf(
-                EsTrait(key, value),
-                EsTrait(randomString(), value2),
-                EsTrait(randomString(), randomString()),
+            traits = mapOf(
+                key.toField() to value,
+                randomString().toField() to value2,
+                randomString().toField() to randomString(),
             ),
+            traitsValues = listOf(value, value2, randomString())
         )
         repository.saveAll(listOf(esItem1, esItem2, esItem3))
         val result = repository.search(
@@ -287,7 +291,7 @@ internal class EsItemRepositoryFt {
         repository.saveAll(esItems)
 
         val result = repository.search(
-            EsItemGenericFilter(text = esItems[13].traits[1].value), EsItemSort.DEFAULT, 10
+            EsItemGenericFilter(text = esItems[13].traits["testString".toField()]), EsItemSort.DEFAULT, 10
         ).entities
 
         assertThat(result.size).isEqualTo(1)
@@ -301,7 +305,7 @@ internal class EsItemRepositoryFt {
         repository.saveAll(esItems)
 
         val result = repository.search(
-            EsItemGenericFilter(text = esItems[13].traits[0].value), EsItemSort.DEFAULT, 10
+            EsItemGenericFilter(text = esItems[13].traits["long".toField()]), EsItemSort.DEFAULT, 10
         ).entities
 
         assertThat(result.size).isEqualTo(1)
@@ -314,7 +318,7 @@ internal class EsItemRepositoryFt {
         val esItem = randomEsItem()
         repository.save(esItem)
         val result = repository.search(
-            EsItemGenericFilter(text = esItem.traits[2].value), EsItemSort.DEFAULT, 10
+            EsItemGenericFilter(text = esItem.traits["testDate".toField()]), EsItemSort.DEFAULT, 10
         ).entities
 
         assertThat(result.size).isEqualTo(1)
@@ -383,20 +387,26 @@ internal class EsItemRepositoryFt {
 
     fun randomEsItem(
         collectionId: String = randomAddress().toString(),
-    ) = EsItem(
-        id = randomString(),
-        itemId = randomAddress().toString(),
-        blockchain = BlockchainDto.values().random(),
-        collection = collectionId,
-        name = randomString(),
-        description = randomString(),
-        traits = listOf(
-            EsTrait("long", randomLong().toString()),
-            EsTrait("testString", randomString()),
-            EsTrait("testDate", "2022-05-" + (1..30).random())
-        ),
-        creators = listOf(randomAddress().toString()),
-        mintedAt = nowMillis(),
-        lastUpdatedAt = nowMillis()
-    )
+    ): EsItem {
+        val longTraitValue = randomLong().toString()
+        val stringTraitValue = randomString()
+        val dateTraitValue = "2022-05-" + (1..30).random()
+        return EsItem(
+            id = randomString(),
+            itemId = randomAddress().toString(),
+            blockchain = BlockchainDto.values().random(),
+            collection = collectionId,
+            name = randomString(),
+            description = randomString(),
+            traits = mapOf(
+                "long".toField() to longTraitValue,
+                "testString".toField() to stringTraitValue,
+                "testDate".toField() to dateTraitValue,
+            ),
+            traitsValues = listOf(longTraitValue, stringTraitValue, dateTraitValue),
+            creators = listOf(randomAddress().toString()),
+            mintedAt = nowMillis(),
+            lastUpdatedAt = nowMillis()
+        )
+    }
 }

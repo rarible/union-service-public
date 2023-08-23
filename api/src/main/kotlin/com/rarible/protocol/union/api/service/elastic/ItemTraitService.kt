@@ -46,15 +46,9 @@ class ItemTraitService(
     companion object {
         private const val KEYS_BUCKET_NAME = "trait_keys"
         private const val VALUES_BUCKET_NAME = "trait_values"
-        const val TRAIT_NESTED_FIELD = "traits"
         const val TRAIT_KEY_KEYWORD_FIELD = "traits.key.raw"
         const val TRAIT_VALUE_KEYWORD_FIELD = "traits.value.raw"
         val TRAITS_FIELDS = mapOf("traits.key" to 1f, "traits.value" to 1f)
-        val TRAITS_NESTED_FIELDS = mapOf(
-            TRAIT_NESTED_FIELD to mapOf(
-                "traits.key" to 1f, "traits.value" to 1f
-            )
-        )
     }
 
     suspend fun searchTraits(filter: String, collectionIds: List<String>): TraitsDto {
