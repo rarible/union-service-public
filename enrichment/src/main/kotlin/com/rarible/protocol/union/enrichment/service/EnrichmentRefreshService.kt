@@ -2,33 +2,27 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.FeatureFlagsProperties
-import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
+import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
+import com.rarible.protocol.union.core.producer.UnionInternalItemEventProducer
+import com.rarible.protocol.union.core.producer.UnionInternalOwnershipEventProducer
 import com.rarible.protocol.union.core.service.AuctionContractService
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.OriginService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
-import com.rarible.protocol.union.dto.CollectionDto
-import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.CollectionUpdateEventDto
-import com.rarible.protocol.union.dto.ItemDeleteEventDto
-import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.OwnershipDto
-import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
-import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
+import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.evaluator.BestOrderProviderFactory
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderComparator
@@ -51,7 +45,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.UUID
 
 @Component
 class EnrichmentRefreshService(
@@ -65,9 +58,9 @@ class EnrichmentRefreshService(
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val enrichmentItemService: EnrichmentItemService,
     private val enrichmentOwnershipService: EnrichmentOwnershipService,
-    private val collectionEventListeners: List<OutgoingEventListener<CollectionEventDto>>,
-    private val itemEventListeners: List<OutgoingEventListener<ItemEventDto>>,
-    private val ownershipEventListeners: List<OutgoingEventListener<OwnershipEventDto>>,
+    private val internalItemProducer: UnionInternalItemEventProducer,
+    private val internalCollectionProducer: UnionInternalCollectionEventProducer,
+    private val internalOwnershipProducer: UnionInternalOwnershipEventProducer,
     private val auctionContractService: AuctionContractService,
     private val originService: OriginService,
     private val ff: FeatureFlagsProperties
@@ -222,7 +215,8 @@ class EnrichmentRefreshService(
             orders = ordersHint,
             metaPipeline = CollectionMetaPipeline.REFRESH
         )
-        notifyUpdate(enriched)
+        internalCollectionProducer.sendChangeEvent(enriched.id)
+        enriched
     }
 
     private suspend fun reconcileItem(
@@ -279,8 +273,9 @@ class EnrichmentRefreshService(
             currentItem
         }
 
-        val event = if (itemDto.deleted) {
-            notifyDelete(itemDto.id)
+        if (itemDto.deleted) {
+            internalItemProducer.sendDeleteEvent(itemId)
+            ItemDtoConverter.convert(itemDto)
         } else {
             val ordersHint = bestOrders.all
             val auctionsHint = auctions.associateBy { it.id }
@@ -291,9 +286,9 @@ class EnrichmentRefreshService(
                 auctions = auctionsHint,
                 metaPipeline = ItemMetaPipeline.REFRESH
             )
-            notifyUpdate(enriched)
+            internalItemProducer.sendChangeEvent(itemDto.id)
+            enriched
         }
-        event
     }
 
     private suspend fun reconcileOwnership(
@@ -338,56 +333,19 @@ class EnrichmentRefreshService(
         ownership: UnionOwnership,
         orders: Map<OrderIdDto, UnionOrder> = emptyMap(),
         auctions: Map<OwnershipIdDto, AuctionDto> = emptyMap()
-    ): OwnershipEventDto {
+    ): OwnershipDto {
         val enriched = ownershipService.enrichOwnership(short, ownership, orders)
         val dto = ownershipService.mergeWithAuction(enriched, auctions[enriched.id])
-        return notifyUpdate(dto)
+        internalOwnershipProducer.sendChangeEvent(dto.id)
+        return dto
     }
 
     private suspend fun notifyUpdate(
         auction: AuctionDto
-    ): OwnershipEventDto? {
+    ): OwnershipDto? {
         val dto = enrichmentOwnershipService.disguiseAuctionWithEnrichment(auction)
-        return dto?.let { notifyUpdate(dto) }
-    }
-
-    private suspend fun notifyUpdate(dto: OwnershipDto): OwnershipEventDto {
-        val event = OwnershipUpdateEventDto(
-            ownershipId = dto.id,
-            ownership = dto,
-            eventId = UUID.randomUUID().toString()
-        )
-        ownershipEventListeners.forEach { it.onEvent(event) }
-        return event
-    }
-
-    private suspend fun notifyDelete(itemId: ItemIdDto): ItemEventDto {
-        val event = ItemDeleteEventDto(
-            itemId = itemId,
-            eventId = UUID.randomUUID().toString()
-        )
-        itemEventListeners.forEach { it.onEvent(event) }
-        return event
-    }
-
-    private suspend fun notifyUpdate(itemDto: ItemDto): ItemEventDto {
-        val event = ItemUpdateEventDto(
-            itemId = itemDto.id,
-            item = itemDto,
-            eventId = UUID.randomUUID().toString()
-        )
-        itemEventListeners.forEach { it.onEvent(event) }
-        return event
-    }
-
-    private suspend fun notifyUpdate(collectionDto: CollectionDto): CollectionEventDto {
-        val event = CollectionUpdateEventDto(
-            collectionId = collectionDto.id,
-            collection = collectionDto,
-            eventId = UUID.randomUUID().toString()
-        )
-        collectionEventListeners.forEach { it.onEvent(event) }
-        return event
+        dto?.let { internalOwnershipProducer.sendChangeEvent(dto.id) }
+        return dto
     }
 
     private suspend fun getBidCurrencies(itemId: ItemIdDto): List<String> {

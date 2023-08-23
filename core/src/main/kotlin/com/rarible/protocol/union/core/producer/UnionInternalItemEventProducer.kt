@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.event.EventCountMetrics
 import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.UnionItemChangeEvent
+import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.offchainEventMark
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -23,6 +24,12 @@ class UnionInternalItemEventProducer(
     suspend fun sendChangeEvents(ids: Collection<ItemIdDto>) = send(
         ids.map {
             UnionItemChangeEvent(it, offchainEventMark("enrichment-in"))
+        }
+    )
+    suspend fun sendDeleteEvent(id: ItemIdDto) = sendChangeEvents(listOf(id))
+    suspend fun sendDeleteEvents(ids: Collection<ItemIdDto>) = send(
+        ids.map {
+            UnionItemDeleteEvent(it, offchainEventMark("enrichment-in"))
         }
     )
 }

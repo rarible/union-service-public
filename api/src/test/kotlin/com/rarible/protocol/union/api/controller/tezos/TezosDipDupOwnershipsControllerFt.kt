@@ -10,7 +10,7 @@ import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderIdDto
-import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -122,7 +122,7 @@ class TezosDipDupOwnershipsControllerFt : AbstractIntegrationTest() {
         } returns Page(listOf(randomTzktItemMintActivity("123")), null)
 
         val uri = "$baseUri/v0.1/refresh/ownership/${ownerId.fullId()}/reconcile"
-        val result = testRestTemplate.postForEntity(uri, null, OwnershipEventDto::class.java).body!!
+        val result = testRestTemplate.postForEntity(uri, null, OwnershipDto::class.java).body!!
 
         assertThat(result).isNotNull
     }

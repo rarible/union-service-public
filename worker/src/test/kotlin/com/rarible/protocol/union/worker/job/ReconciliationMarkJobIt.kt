@@ -2,8 +2,8 @@ package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionEventDto
-import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentRefreshService
@@ -31,9 +31,9 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
 
     lateinit var jobHandler: ReconciliationMarkJobHandler
 
-    private val itemEvent: ItemEventDto = mockk()
+    private val itemEvent: ItemDto = mockk()
 
-    private val collectionEvent: CollectionEventDto = mockk()
+    private val collectionEvent: CollectionDto = mockk()
 
     @BeforeEach
     fun beforeEach() {

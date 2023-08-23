@@ -1,13 +1,10 @@
 package com.rarible.protocol.union.worker.job
 
-import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
+import com.rarible.protocol.union.core.producer.UnionInternalOwnershipEventProducer
 import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
-import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
-import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -30,8 +27,7 @@ class PlatformBestSellOrderOwnershipCleanupJobIt {
     @Autowired
     lateinit var ownershipRepository: OwnershipRepository
 
-    val ownershipService: EnrichmentOwnershipService = mockk()
-    val listener: OutgoingOwnershipEventListener = mockk()
+    val internalOwnershipEventProducer: UnionInternalOwnershipEventProducer = mockk()
     val properties = mockk<WorkerProperties>() {
         every { platformBestSellCleanup } returns PlatformBestSellCleanUpProperties(enabled = true)
     }
@@ -41,13 +37,9 @@ class PlatformBestSellOrderOwnershipCleanupJobIt {
     @BeforeEach
     fun beforeEach() {
         job = PlatformBestSellOrderOwnershipCleanupJob(
-            ownershipRepository, ownershipService, listOf(listener), properties
+            ownershipRepository, internalOwnershipEventProducer, properties
         )
-        coEvery { listener.onEvent(any()) } returns Unit
-        coEvery { ownershipService.enrichOwnership(any()) } answers {
-            val shortOwnership = it.invocation.args[0] as ShortOwnership
-            OwnershipDtoConverter.convert(randomUnionOwnership(shortOwnership.id.toDto()))
-        }
+        coEvery { internalOwnershipEventProducer.sendChangeEvent(any()) } returns Unit
     }
 
     @Test
