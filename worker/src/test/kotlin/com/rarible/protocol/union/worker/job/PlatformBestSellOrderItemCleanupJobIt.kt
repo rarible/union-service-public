@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.worker.job
 
-import com.rarible.protocol.union.core.event.OutgoingItemEventListener
+import com.rarible.protocol.union.core.producer.UnionInternalItemEventProducer
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
@@ -32,7 +32,7 @@ class PlatformBestSellOrderItemCleanupJobIt {
     lateinit var itemRepository: ItemRepository
 
     val itemService: EnrichmentItemService = mockk()
-    val listener: OutgoingItemEventListener = mockk()
+    val internalItemEventProducer: UnionInternalItemEventProducer = mockk()
     val properties = mockk<WorkerProperties>() {
         every { platformBestSellCleanup } returns PlatformBestSellCleanUpProperties(enabled = true)
     }
@@ -43,9 +43,9 @@ class PlatformBestSellOrderItemCleanupJobIt {
     fun beforeEach() = runBlocking<Unit> {
         itemRepository.createIndices()
         job = PlatformBestSellOrderItemCleanupJob(
-            itemRepository, itemService, listOf(listener), properties
+            itemRepository, itemService, internalItemEventProducer, properties
         )
-        coEvery { listener.onEvent(any()) } returns Unit
+        coEvery { internalItemEventProducer.sendChangeEvent(any()) } returns Unit
         coEvery { itemService.enrichItem(shortItem = any(), metaPipeline = any()) } answers {
             val shortItem = it.invocation.args[0] as ShortItem
             ItemDtoConverter.convert(randomUnionItem(shortItem.id.toDto()), shortItem)

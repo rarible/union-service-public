@@ -1,13 +1,10 @@
 package com.rarible.protocol.union.worker.job
 
-import com.rarible.core.client.WebClientResponseProxyException
-import com.rarible.protocol.union.core.event.OutgoingOwnershipEventListener
-import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
+import com.rarible.protocol.union.core.producer.UnionInternalOwnershipEventProducer
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
-import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -18,13 +15,11 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.UUID
 
 @Component
 class PlatformBestSellOrderOwnershipCleanupJob(
     private val ownershipRepository: OwnershipRepository,
-    private val ownershipService: EnrichmentOwnershipService,
-    private val ownershipEventListeners: List<OutgoingOwnershipEventListener>,
+    private val internalOwnershipEventProducer: UnionInternalOwnershipEventProducer,
     properties: WorkerProperties
 ) {
 
@@ -70,26 +65,6 @@ class PlatformBestSellOrderOwnershipCleanupJob(
         logger.info("Updated ownership [{}], OpenSea order removed: [{}]", updated, order.id)
         ownershipRepository.save(updated.withCalculatedFields())
 
-        ignoreApi404 {
-            val dto = ownershipService.enrichOwnership(updated)
-
-            val event = OwnershipUpdateEventDto(
-                eventId = UUID.randomUUID().toString(),
-                ownershipId = dto.id,
-                ownership = dto
-            )
-
-            ownershipEventListeners.forEach { it.onEvent(event) }
-        }
-    }
-
-    private suspend fun ignoreApi404(call: suspend () -> Unit) {
-        try {
-            call()
-        } catch (ex: WebClientResponseProxyException) {
-            logger.warn(
-                "Received NOT_FOUND code from client during ownership update: {}, message: {}", ex.data, ex.message
-            )
-        }
+        internalOwnershipEventProducer.sendChangeEvent(updated.id.toDto())
     }
 }

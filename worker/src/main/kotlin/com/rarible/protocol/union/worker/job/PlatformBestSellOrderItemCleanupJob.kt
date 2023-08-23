@@ -1,8 +1,6 @@
 package com.rarible.protocol.union.worker.job
 
-import com.rarible.core.client.WebClientResponseProxyException
-import com.rarible.protocol.union.core.event.OutgoingItemEventListener
-import com.rarible.protocol.union.dto.ItemUpdateEventDto
+import com.rarible.protocol.union.core.producer.UnionInternalItemEventProducer
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -19,13 +17,12 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.UUID
 
 @Component
 class PlatformBestSellOrderItemCleanupJob(
     private val itemRepository: ItemRepository,
     private val itemService: EnrichmentItemService,
-    private val itemEventListeners: List<OutgoingItemEventListener>,
+    private val internalItemEventProducer: UnionInternalItemEventProducer,
     properties: WorkerProperties
 ) {
 
@@ -76,24 +73,6 @@ class PlatformBestSellOrderItemCleanupJob(
             metaPipeline = ItemMetaPipeline.SYNC
         )
 
-        ignoreApi404 {
-            val event = ItemUpdateEventDto(
-                itemId = dto.id,
-                item = dto,
-                eventId = UUID.randomUUID().toString()
-            )
-
-            itemEventListeners.forEach { it.onEvent(event) }
-        }
-    }
-
-    private suspend fun ignoreApi404(call: suspend () -> Unit) {
-        try {
-            call()
-        } catch (ex: WebClientResponseProxyException) {
-            logger.warn(
-                "Received NOT_FOUND code from client during item update: {}, message: {}", ex.data, ex.message
-            )
-        }
+        internalItemEventProducer.sendChangeEvent(dto.id)
     }
 }

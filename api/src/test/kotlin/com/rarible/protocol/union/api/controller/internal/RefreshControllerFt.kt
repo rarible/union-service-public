@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.controller.internal
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.ninjasquad.springmockk.MockkBean
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomWord
@@ -13,18 +14,17 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.model.download.MetaSource
+import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
+import com.rarible.protocol.union.core.producer.UnionInternalItemEventProducer
+import com.rarible.protocol.union.core.producer.UnionInternalOwnershipEventProducer
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.CollectionEventDto
+import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.dto.CollectionUpdateEventDto
-import com.rarible.protocol.union.dto.ItemDeleteEventDto
-import com.rarible.protocol.union.dto.ItemEventDto
+import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.dto.ItemUpdateEventDto
-import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipSourceDto
-import com.rarible.protocol.union.dto.OwnershipUpdateEventDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
@@ -62,6 +62,7 @@ import io.mockk.every
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -89,9 +90,26 @@ class RefreshControllerFt : AbstractIntegrationTest() {
     @Autowired
     lateinit var rawMetaCacheRepository: RawMetaCacheRepository
 
+    @MockkBean
+    lateinit var internalItemProducer: UnionInternalItemEventProducer
+
+    @MockkBean
+    lateinit var internalCollectionProducer: UnionInternalCollectionEventProducer
+
+    @MockkBean
+    lateinit var internalOwnershipProducer: UnionInternalOwnershipEventProducer
+
     private val origin = "0xWhitelabel"
     private val ethOriginCollection = "0xf3348949db80297c78ec17d19611c263fc61f988" // from application.yaml
     private val active = listOf(com.rarible.protocol.dto.OrderStatusDto.ACTIVE)
+
+    @BeforeEach
+    fun setUp() {
+        coEvery { internalItemProducer.sendDeleteEvent(any()) } returns Unit
+        coEvery { internalItemProducer.sendChangeEvent(any()) } returns Unit
+        coEvery { internalCollectionProducer.sendChangeEvent(any()) } returns Unit
+        coEvery { internalOwnershipProducer.sendChangeEvent(any()) } returns Unit
+    }
 
     @Test
     fun `reconcile item - full`() = runBlocking<Unit> {
@@ -184,8 +202,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         mockLastSellActivity(itemId, activity)
 
         val uri = "$baseUri/v0.1/refresh/item/${itemId.fullId()}/reconcile?full=true"
-        val result = testRestTemplate.postForEntity(uri, null, ItemEventDto::class.java).body!!
-        val reconciled = (result as ItemUpdateEventDto).item
+        val reconciled = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
         val savedShortItem = enrichmentItemService.get(shortItem.id)!!
         val savedShortOwnership = enrichmentOwnershipService.get(shortOwnership.id)!!
 
@@ -215,21 +232,13 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(reconciled.originOrders).hasSize(1)
 
         coVerify {
-            testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
-                message.value is ItemUpdateEventDto && message.value.itemId == itemId
-            })
+            internalItemProducer.sendChangeEvent(itemId)
         }
         coVerify(exactly = 1) {
-            testOwnershipEventProducer.send(match<KafkaMessage<OwnershipEventDto>> { message ->
-                val ownership = (message.value as OwnershipUpdateEventDto).ownership
-                ownership.id == ethFreeOwnershipId && ownership.bestSellOrder!!.id == unionAmmOrder.id
-            })
+            internalOwnershipProducer.sendChangeEvent(ethFreeOwnershipId)
         }
         coVerify(exactly = 1) {
-            testOwnershipEventProducer.send(match<KafkaMessage<OwnershipEventDto>> { message ->
-                val ownership = (message.value as OwnershipUpdateEventDto).ownership
-                ownership.id == ethAuctionedOwnershipId && ownership.auction == auction
-            })
+            internalOwnershipProducer.sendChangeEvent(ethAuctionedOwnershipId)
         }
     }
 
@@ -279,8 +288,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumOrderControllerApiMock.mockGetAmmOrdersByItem(ethItemId)
 
         val uri = "$baseUri/v0.1/refresh/ownership/${ethOwnershipId.fullId()}/reconcile"
-        val result = testRestTemplate.postForEntity(uri, null, OwnershipEventDto::class.java).body!!
-        val reconciled = (result as OwnershipUpdateEventDto).ownership
+        val reconciled = testRestTemplate.postForEntity(uri, null, OwnershipDto::class.java).body!!
         val savedShortOwnership = enrichmentOwnershipService.get(shortOwnership.id)!!
 
         assertThat(savedShortOwnership.source).isEqualTo(OwnershipSourceDto.MINT)
@@ -291,9 +299,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(reconciled.auction).isEqualTo(auction)
 
         coVerify(exactly = 1) {
-            testOwnershipEventProducer.send(match<KafkaMessage<OwnershipEventDto>> { message ->
-                message.value is OwnershipUpdateEventDto && message.value.ownershipId == ethOwnershipId
-            })
+            internalOwnershipProducer.sendChangeEvent(ethOwnershipId)
         }
     }
 
@@ -318,8 +324,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumOrderControllerApiMock.mockGetCurrenciesBySellOrdersOfItem(ethItemId, active)
 
         val uri = "$baseUri/v0.1/refresh/ownership/${ethOwnershipId.fullId()}/reconcile"
-        val result = testRestTemplate.postForEntity(uri, null, OwnershipEventDto::class.java).body!!
-        val reconciled = (result as OwnershipUpdateEventDto).ownership
+        val reconciled = testRestTemplate.postForEntity(uri, null, OwnershipDto::class.java).body!!
 
         // Nothing to save - there should not be enrichment data for fully-auctioned ownerships
         assertThat(enrichmentOwnershipService.get(ShortOwnershipId(auctionOwnershipId))).isNull()
@@ -328,9 +333,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(reconciled.auction).isEqualTo(auction)
 
         coVerify(exactly = 1) {
-            testOwnershipEventProducer.send(match<KafkaMessage<OwnershipEventDto>> { message ->
-                message.value is OwnershipUpdateEventDto && message.value.ownershipId == ethOwnershipId
-            })
+            internalOwnershipProducer.sendChangeEvent(ethOwnershipId)
         }
     }
 
@@ -368,13 +371,11 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         mockLastSellActivity(ethItemId, null)
 
         val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
-        val result = testRestTemplate.postForEntity(uri, null, ItemEventDto::class.java).body!!
-        assertThat(result).isInstanceOf(ItemDeleteEventDto::class.java)
+        val reconciled = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
+        assertThat(reconciled.deleted).isTrue()
 
         coVerify {
-            testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
-                message.value is ItemDeleteEventDto && message.value.itemId == ethItemId
-            })
+            internalItemProducer.sendDeleteEvent(ethItemId)
         }
     }
 
@@ -410,8 +411,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(fakeItemId, currencyId, origin, bidOrder)
 
         val uri = "$baseUri/v0.1/refresh/collection/${collectionId.fullId()}/reconcile"
-        val result = testRestTemplate.postForEntity(uri, null, CollectionUpdateEventDto::class.java).body!!
-        val reconciled = result.collection
+        val reconciled = testRestTemplate.postForEntity(uri, null, CollectionDto::class.java).body!!
         val originOrders = reconciled.originOrders!!.toList()[0]
 
         assertThat(reconciled.bestBidOrder!!.take.type.ext.isCollectionAsset).isTrue
@@ -423,9 +423,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(originOrders.bestBidOrder!!.id).isEqualTo(unionBestBid.id)
 
         coVerify {
-            testCollectionEventProducer.send(match<KafkaMessage<CollectionEventDto>> { message ->
-                message.value is CollectionUpdateEventDto && message.value.collectionId == collectionId
-            })
+            internalCollectionProducer.sendChangeEvent(collectionId)
         }
     }
 
@@ -450,17 +448,14 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(fakeItemId, currencyId, bidOrder)
 
         val uri = "$baseUri/v0.1/refresh/collection/${collectionId.fullId()}/reconcile"
-        val result = testRestTemplate.postForEntity(uri, null, CollectionUpdateEventDto::class.java).body!!
-        val reconciled = result.collection
+        val reconciled = testRestTemplate.postForEntity(uri, null, CollectionDto::class.java).body!!
 
         assertThat(reconciled.id).isEqualTo(collectionId)
         assertThat(reconciled.bestBidOrder).isNull()
         assertThat(reconciled.bestSellOrder).isNull()
 
         coVerify {
-            testCollectionEventProducer.send(match<KafkaMessage<CollectionEventDto>> { message ->
-                message.value is CollectionUpdateEventDto && message.value.collectionId == collectionId
-            })
+            internalCollectionProducer.sendChangeEvent(collectionId)
         }
     }
 
@@ -501,8 +496,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         mockLastSellActivity(ethItemId, null)
 
         val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
-        val result = testRestTemplate.postForEntity(uri, null, ItemEventDto::class.java).body!!
-        val reconciled = (result as ItemUpdateEventDto).item
+        val reconciled = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
         assertThat(reconciled.bestSellOrder).isNull()
         assertThat(reconciled.bestBidOrder).isNotNull()
 
@@ -511,9 +505,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(savedShortItem.bestSellOrders).isEmpty()
 
         coVerify {
-            testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
-                message.value is ItemUpdateEventDto && message.value.itemId == ethItemId
-            })
+            internalItemProducer.sendChangeEvent(ethItemId)
         }
     }
 
@@ -580,9 +572,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         mockLastSellActivity(ethItemId, null)
 
         val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
-        val result = testRestTemplate.postForEntity(uri, null, ItemEventDto::class.java).body!!
-        val reconciled = (result as ItemUpdateEventDto).item
-
+        val reconciled = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
         assertThat(reconciled.bestSellOrder!!.id).isEqualTo(unionBestSell.id)
 
         val savedShortItem = enrichmentItemService.get(shortItem.id)!!
@@ -590,9 +580,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(savedShortItem.bestSellOrders[unionBestSell.sellCurrencyId()]!!.id).isEqualTo(shortBestSell.id)
 
         coVerify {
-            testItemEventProducer.send(match<KafkaMessage<ItemEventDto>> { message ->
-                message.value is ItemUpdateEventDto && message.value.itemId == ethItemId
-            })
+            internalItemProducer.sendChangeEvent(ethItemId)
         }
     }
 
