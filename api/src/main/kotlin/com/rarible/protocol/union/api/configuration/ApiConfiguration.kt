@@ -26,7 +26,6 @@ import java.time.Clock
 @EnableConfigurationProperties(value = [
     OpenapiProperties::class,
     DomainProperties::class,
-    EsOptimizationProperties::class,
 ])
 class ApiConfiguration {
 

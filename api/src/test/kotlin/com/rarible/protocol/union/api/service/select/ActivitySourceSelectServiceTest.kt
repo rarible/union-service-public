@@ -65,12 +65,14 @@ class ActivitySourceSelectServiceTest {
         fun testArguments() = Stream.of(
             Arguments.of(
                 true,
+                false,
                 null,
                 false,
                 ActivitySortDto.EARLIEST_FIRST,
                 elasticResponse,
             ),
             Arguments.of(
+                false,
                 false,
                 null,
                 false,
@@ -79,12 +81,14 @@ class ActivitySourceSelectServiceTest {
             ),
             Arguments.of(
                 true,
+                false,
                 SearchEngineDto.LEGACY,
                 false,
                 ActivitySortDto.EARLIEST_FIRST,
                 apiMergeResponse,
             ),
             Arguments.of(
+                false,
                 false,
                 SearchEngineDto.V1,
                 false,
@@ -93,6 +97,7 @@ class ActivitySourceSelectServiceTest {
             ),
             Arguments.of(
                 true,
+                false,
                 null,
                 true,
                 ActivitySortDto.EARLIEST_FIRST,
@@ -100,6 +105,15 @@ class ActivitySourceSelectServiceTest {
             ),
             Arguments.of(
                 true,
+                true,
+                null,
+                true,
+                ActivitySortDto.EARLIEST_FIRST,
+                elasticResponse,
+            ),
+            Arguments.of(
+                true,
+                false,
                 null,
                 true,
                 ActivitySortDto.LATEST_FIRST,
@@ -112,6 +126,7 @@ class ActivitySourceSelectServiceTest {
     @MethodSource("testArguments")
     fun `should get all activities`(
         elasticFeatureFlag: Boolean,
+        optimizationFeatureFlag: Boolean,
         searchEngine: SearchEngineDto?,
         ascQueriesFeatureFlag: Boolean,
         sort: ActivitySortDto,
@@ -119,6 +134,7 @@ class ActivitySourceSelectServiceTest {
     ) = runBlocking<Unit> {
         // given
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
+        every { featureFlagsProperties.enableOptimizedSearchForActivities } returns optimizationFeatureFlag
         every { featureFlagsProperties.enableActivityAscQueriesWithApiMerge } returns ascQueriesFeatureFlag
         coEvery {
             activityElasticService.getAllActivities(type, blockchains, bidCurrencies, continuation, cursor, size, sort)
@@ -165,6 +181,7 @@ class ActivitySourceSelectServiceTest {
     @MethodSource("testArguments")
     fun `should get activities by collection - select elastic`(
         elasticFeatureFlag: Boolean,
+        optimizationFeatureFlag: Boolean,
         searchEngine: SearchEngineDto?,
         ascQueriesFeatureFlag: Boolean,
         sort: ActivitySortDto,
@@ -173,6 +190,7 @@ class ActivitySourceSelectServiceTest {
         // given
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
         every { featureFlagsProperties.enableActivityAscQueriesWithApiMerge } returns ascQueriesFeatureFlag
+        every { featureFlagsProperties.enableOptimizedSearchForActivities } returns optimizationFeatureFlag
         coEvery {
             activityElasticService.getActivitiesByCollection(
                 type,
@@ -235,6 +253,7 @@ class ActivitySourceSelectServiceTest {
     @MethodSource("testArguments")
     fun `should get activities by item - select elastic`(
         elasticFeatureFlag: Boolean,
+        optimizationFeatureFlag: Boolean,
         searchEngine: SearchEngineDto?,
         ascQueriesFeatureFlag: Boolean,
         sort: ActivitySortDto,
@@ -243,6 +262,7 @@ class ActivitySourceSelectServiceTest {
         // given
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
         every { featureFlagsProperties.enableActivityAscQueriesWithApiMerge } returns ascQueriesFeatureFlag
+        every { featureFlagsProperties.enableOptimizedSearchForActivities } returns optimizationFeatureFlag
         coEvery {
             activityElasticService.getActivitiesByItem(type, itemId, bidCurrencies, continuation, cursor, size, sort)
         } returns elasticResponse
@@ -288,6 +308,7 @@ class ActivitySourceSelectServiceTest {
     @MethodSource("testArguments")
     fun `should get activities by user - select elastic`(
         elasticFeatureFlag: Boolean,
+        optimizationFeatureFlag: Boolean,
         searchEngine: SearchEngineDto?,
         ascQueriesFeatureFlag: Boolean,
         sort: ActivitySortDto,
@@ -296,6 +317,7 @@ class ActivitySourceSelectServiceTest {
         // given
         every { featureFlagsProperties.enableActivityQueriesToElasticSearch } returns elasticFeatureFlag
         every { featureFlagsProperties.enableActivityAscQueriesWithApiMerge } returns ascQueriesFeatureFlag
+        every { featureFlagsProperties.enableOptimizedSearchForActivities } returns optimizationFeatureFlag
         coEvery {
             activityElasticService.getActivitiesByUser(
                 userType,

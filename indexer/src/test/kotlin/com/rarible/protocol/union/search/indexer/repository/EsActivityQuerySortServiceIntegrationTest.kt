@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.search.indexer.repository
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivitySort
@@ -10,6 +11,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.elasticsearch.index.query.QueryBuilders
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -49,15 +51,19 @@ internal class EsActivityQuerySortServiceIntegrationTest {
         val sixth = activityWithSortFields(120, 2100, 39000, 0)
         val seventh = activityWithSortFields(150, 1000, 20000, 40)
         val eighth = activityWithSortFields(150, 1000, 20000, 60)
+        val nine = activityWithSortFields(nowMillis().toEpochMilli(), 1000, 20000, 60)
 
-        repository.saveAll(listOf(second, fourth, sixth, eighth, seventh, fifth, third, first))
+        repository.saveAll(listOf(second, fourth, sixth, eighth, seventh, fifth, third, first, nine))
 
+        val query = QueryBuilders.boolQuery()
+            .must(QueryBuilders.matchAllQuery())
         // when
-        service.applySort(builder, EsActivitySort(latestFirst = false))
-        val actual = repository.search(builder.build())
+
+        service.applySort(query, builder, EsActivitySort(latestFirst = false), null, null)
+        val actual = repository.search(builder.withQuery(query).build())
 
         // then
-        assertThat(actual.activities).containsExactly(first, second, third, fourth, fifth, sixth, seventh, eighth)
+        assertThat(actual.activities).containsExactly(first, second, third, fourth, fifth, sixth, seventh, eighth, nine)
     }
 
     @Test
@@ -75,9 +81,11 @@ internal class EsActivityQuerySortServiceIntegrationTest {
 
         repository.saveAll(listOf(second, fourth, sixth, eighth, seventh, fifth, third, first))
 
+        val query = QueryBuilders.boolQuery()
+
         // when
-        service.applySort(builder, EsActivitySort(latestFirst = true))
-        val actual = repository.search(builder.build())
+        service.applySort(query, builder, EsActivitySort(latestFirst = true), null, null)
+        val actual = repository.search(builder.withQuery(query).build())
 
         // then
         assertThat(actual.activities).containsExactly(eighth, seventh, sixth, fifth, fourth, third, second, first)

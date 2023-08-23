@@ -19,7 +19,7 @@ import org.springframework.context.annotation.PropertySource
         EnrichmentServicePackage::class,
         EnrichmentRepositoryPackage::class,
         EnrichmentConverterPackage::class,
-        EnrichmentCustomComponentsPackage::class
+        EnrichmentCustomComponentsPackage::class,
     ]
 )
 @PropertySource(

@@ -120,7 +120,8 @@ class ActivitySourceSelectService(
         }
 
         return if (featureFlagsProperties.enableActivityQueriesToElasticSearch) {
-            if (featureFlagsProperties.enableActivityAscQueriesWithApiMerge) {
+            if (featureFlagsProperties.enableActivityAscQueriesWithApiMerge &&
+                !featureFlagsProperties.enableOptimizedSearchForActivities) {
                 if (sort == ActivitySortDto.EARLIEST_FIRST) {
                     activityApiMergeService
                 } else {
