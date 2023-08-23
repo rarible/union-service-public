@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.worker.job
 
-import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.producer.UnionInternalItemEventProducer
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
@@ -74,18 +73,6 @@ class PlatformBestSellOrderItemCleanupJob(
             metaPipeline = ItemMetaPipeline.SYNC
         )
 
-        ignoreApi404 {
-            internalItemEventProducer.sendChangeEvent(dto.id)
-        }
-    }
-
-    private suspend fun ignoreApi404(call: suspend () -> Unit) {
-        try {
-            call()
-        } catch (ex: WebClientResponseProxyException) {
-            logger.warn(
-                "Received NOT_FOUND code from client during item update: {}, message: {}", ex.data, ex.message
-            )
-        }
+        internalItemEventProducer.sendChangeEvent(dto.id)
     }
 }

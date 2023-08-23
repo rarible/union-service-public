@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.worker.job
 
-import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.producer.UnionInternalOwnershipEventProducer
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -66,18 +65,6 @@ class PlatformBestSellOrderOwnershipCleanupJob(
         logger.info("Updated ownership [{}], OpenSea order removed: [{}]", updated, order.id)
         ownershipRepository.save(updated.withCalculatedFields())
 
-        ignoreApi404 {
-            internalOwnershipEventProducer.sendChangeEvent(updated.id.toDto())
-        }
-    }
-
-    private suspend fun ignoreApi404(call: suspend () -> Unit) {
-        try {
-            call()
-        } catch (ex: WebClientResponseProxyException) {
-            logger.warn(
-                "Received NOT_FOUND code from client during ownership update: {}, message: {}", ex.data, ex.message
-            )
-        }
+        internalOwnershipEventProducer.sendChangeEvent(updated.id.toDto())
     }
 }
