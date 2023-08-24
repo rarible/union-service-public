@@ -58,10 +58,7 @@ class EsActivityRepository(
         query.trackTotalHits = false
 
         return logIfSlow(filter, query.query, query.elasticsearchSorts) {
-            logger.info("ES Activity query: ${query.query}, filter: ${query.filter}, sort: ${query.elasticsearchSorts}")
-            val result = search(query)
-            logger.info("Result: $result")
-            result
+            search(query)
         }
     }
 
