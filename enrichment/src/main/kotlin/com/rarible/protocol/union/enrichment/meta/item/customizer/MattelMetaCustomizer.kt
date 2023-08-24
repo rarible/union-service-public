@@ -160,6 +160,30 @@ class HotWheelsPackMetaCustomizer(
 }
 
 @Component
+class HotWheelsTokenMetaCustomizer(
+    properties: EnrichmentMattelMetaCustomizerProperties
+) : MattelCollectionMetaCustomizer() {
+
+    override val collectionIds = properties.hwToken.map { IdParser.parseCollectionId(it) }
+
+    override fun getName(helper: ItemMetaCustomizerHelper): String? {
+        return helper.attribute(*fieldName)
+    }
+
+    private val fieldName = fields("carName", "originalCarName")
+    override val fieldDescription = fields()
+    override val fieldContentUrl = fields("imageCID")
+    override val fieldRights = fields()
+    override val fieldRightsUri = fields()
+
+    override val attributesWhiteList = setOf(
+        "tokenExpireDate",
+        "tokenExpirationDate",
+        "tokenReleaseDate",
+    )
+}
+
+@Component
 class BarbieCardMetaCustomizer(
     properties: EnrichmentMattelMetaCustomizerProperties
 ) : MattelCollectionMetaCustomizer() {

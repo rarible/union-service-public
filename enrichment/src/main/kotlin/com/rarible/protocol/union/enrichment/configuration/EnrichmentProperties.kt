@@ -34,6 +34,7 @@ class EnrichmentMattelMetaCustomizerProperties(
     val barbiePack: List<String> = emptyList(),
     val hwCard: List<String> = emptyList(),
     val hwPack: List<String> = emptyList(),
+    val hwToken: List<String> = emptyList(),
 )
 
 data class EnrichmentCurrenciesProperties(

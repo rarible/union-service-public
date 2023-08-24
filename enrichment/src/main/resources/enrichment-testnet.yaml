@@ -47,6 +47,8 @@ enrichment:
             - "FLOW:A.6f6702697b205c18.HWGaragePackV2"
             - "FLOW:A.80102bce1de42dc4.HWGaragePack"
             - "FLOW:A.80102bce1de42dc4.HWGaragePackV2"
+          hwToken:
+            - "FLOW:A.6f6702697b205c18.HWGarageTokenV2"
 
   currencies:
     bestBidByCurrencyWhitelist:

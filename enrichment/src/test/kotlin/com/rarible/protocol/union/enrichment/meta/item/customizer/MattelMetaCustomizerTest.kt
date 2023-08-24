@@ -82,6 +82,27 @@ class MattelMetaCustomizerTest {
     }
 
     @Test
+    fun `customize - hw token`() = runBlocking<Unit> {
+        val whiteListAttributes = listOf(
+            UnionMetaAttribute("tokenReleaseDate", "tokenReleaseDate_value"),
+            UnionMetaAttribute("tokenExpireDate", "tokenExpireDate_value"),
+        )
+        val attributes = listOf(
+            UnionMetaAttribute("carName", "carName_value"),
+            UnionMetaAttribute("template_ID", "template_ID_value")
+        ) + whiteListAttributes
+
+        val meta = randomUnionMeta().copy(attributes = attributes)
+
+        val customizer = MattelMetaCustomizer(listOf(HotWheelsPackMetaCustomizer(properties)))
+
+        val customized = customizer.customize(itemId, meta)
+
+        assertThat(customized.name).isEqualTo("carName_value")
+        assertThat(customized.attributes).isEqualTo(whiteListAttributes)
+    }
+
+    @Test
     fun `customize - barbie card`() = runBlocking<Unit> {
         val whitListAttributes = listOf(
             UnionMetaAttribute("lips", "lips_value"),
