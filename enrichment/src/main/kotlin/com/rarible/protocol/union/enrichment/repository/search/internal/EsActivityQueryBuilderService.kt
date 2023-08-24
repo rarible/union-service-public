@@ -33,12 +33,12 @@ class EsActivityQueryBuilderService(
 
     fun build(filter: ElasticActivityFilter, sort: EsActivitySort): NativeSearchQuery {
         val builder = NativeSearchQueryBuilder()
-        val query = BoolQueryBuilder()
-        query.mustMatchTerms(filter.blockchains, blockchain)
-        query.mustMatchTerms(filter.activityTypes, type)
-        query.anyMustMatchTerms(filter.anyUsers, userFrom, userTo)
-        query.mustMatchTerms(filter.usersFrom, userFrom)
-        query.mustMatchTerms(filter.usersTo, userTo)
+        val queryFilter = BoolQueryBuilder()
+        queryFilter.mustMatchTerms(filter.blockchains, blockchain)
+        queryFilter.mustMatchTerms(filter.activityTypes, type)
+        queryFilter.anyMustMatchTerms(filter.anyUsers, userFrom, userTo)
+        queryFilter.mustMatchTerms(filter.usersFrom, userFrom)
+        queryFilter.mustMatchTerms(filter.usersTo, userTo)
         if (filter.collections.isNotEmpty()) {
             val collectionQuery = QueryBuilders.boolQuery()
             filter.collections.forEach { (blockchain, address) ->
@@ -46,7 +46,7 @@ class EsActivityQueryBuilderService(
                     matchCollection(blockchain, address)
                 )
             }
-            query.must(collectionQuery)
+            queryFilter.must(collectionQuery)
         }
         if (filter.bidCurrencies.isNotEmpty()) {
             val currenciesQuery = QueryBuilders.boolQuery()
@@ -55,9 +55,9 @@ class EsActivityQueryBuilderService(
                     matchCurrency(blockchain, value)
                 )
             }
-            query.must(currenciesQuery)
+            queryFilter.must(currenciesQuery)
         }
-        query.mustMatchKeyword(filter.item, item)
+        queryFilter.mustMatchKeyword(filter.item, item)
 
         if (filter.from != null || filter.to != null) {
             val rangeQueryBuilder = RangeQueryBuilder(EsActivity::date.name)
@@ -67,10 +67,11 @@ class EsActivityQueryBuilderService(
             if (filter.to != null) {
                 rangeQueryBuilder.lte(filter.to)
             }
-            query.must(rangeQueryBuilder)
+            queryFilter.must(rangeQueryBuilder)
         }
+        val query = QueryBuilders.boolQuery().filter(queryFilter)
         sortService.applySort(builder, sort)
-        cursorService.applyCursor(query, sort, filter.cursor)
+        cursorService.applyCursor(queryFilter, sort, filter.cursor)
 
         builder.withQuery(query)
         return builder.build()

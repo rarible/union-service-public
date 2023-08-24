@@ -46,6 +46,7 @@ class ActivityElasticService(
     private val router: BlockchainRouter<ActivityService>,
     private val activityRepository: ActivityRepository,
     private val featureFlagsProperties: FeatureFlagsProperties,
+    private val esActivityOptimizedSearchService: EsActivityOptimizedSearchService,
     elasticMetricsFactory: ElasticMetricsFactory,
 ) : ActivityQueryService {
 
@@ -73,13 +74,13 @@ class ActivityElasticService(
         }
         val filter = filterConverter.convertGetAllActivities(type, enabledBlockchains, bidCurrencies, effectiveCursor)
         logger.info("[$requestId] Built filter: $filter")
-        val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
-        logger.info("[$requestId] Get query result: ${queryResult.activities.size}, ${latency(start)}")
+        val queryResult = esActivityOptimizedSearchService.search(filter, convertSort(sort), size)
+        logger.info("[$requestId] Get query result: ${queryResult.entities.size}, ${latency(start)}")
 
-        val activities = getActivities(queryResult.activities)
+        val activities = getActivities(queryResult.entities)
         val result = ActivitiesDto(
             continuation = null,
-            cursor = queryResult.cursor,
+            cursor = queryResult.continuation,
             activities = activities
         )
 

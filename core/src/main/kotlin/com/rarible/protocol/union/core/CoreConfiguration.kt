@@ -49,6 +49,7 @@ import org.springframework.web.reactive.function.client.WebClient
         FeatureFlagsProperties::class,
         EsActivityEnrichmentProperties::class,
         EsProperties::class,
+        EsOptimizationProperties::class,
     ]
 )
 class CoreConfiguration(

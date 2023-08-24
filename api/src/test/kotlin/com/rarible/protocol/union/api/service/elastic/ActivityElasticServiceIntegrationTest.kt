@@ -88,6 +88,9 @@ internal class ActivityElasticServiceIntegrationTest {
     @Autowired
     private lateinit var activityRepository: ActivityRepository
 
+    @Autowired
+    private lateinit var esActivityOptimizedSearchService: EsActivityOptimizedSearchService
+
     private lateinit var service: ActivityElasticService
 
     private lateinit var one: EsActivity
@@ -332,6 +335,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 FeatureFlagsProperties(
                     enableMongoActivityRead = false,
                 ),
+                esActivityOptimizedSearchService,
                 metricsFactory,
             )
         }
@@ -447,6 +451,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 FeatureFlagsProperties(
                     enableMongoActivityRead = true,
                 ),
+                esActivityOptimizedSearchService,
                 metricsFactory,
             )
         }
@@ -490,6 +495,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 FeatureFlagsProperties(
                     enableMongoActivityRead = false,
                 ),
+                esActivityOptimizedSearchService,
                 metricsFactory,
             )
         }
@@ -539,6 +545,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 FeatureFlagsProperties(
                     enableMongoActivityRead = true,
                 ),
+                esActivityOptimizedSearchService,
                 metricsFactory,
             )
         }
@@ -577,6 +584,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 FeatureFlagsProperties(
                     enableMongoActivityRead = false,
                 ),
+                esActivityOptimizedSearchService,
                 metricsFactory,
             )
         }
@@ -627,6 +635,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 FeatureFlagsProperties(
                     enableMongoActivityRead = true,
                 ),
+                esActivityOptimizedSearchService,
                 metricsFactory,
             )
         }
@@ -666,6 +675,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 FeatureFlagsProperties(
                     enableMongoActivityRead = false,
                 ),
+                esActivityOptimizedSearchService,
                 metricsFactory,
             )
         }
@@ -738,6 +748,7 @@ internal class ActivityElasticServiceIntegrationTest {
                 FeatureFlagsProperties(
                     enableMongoActivityRead = true,
                 ),
+                esActivityOptimizedSearchService,
                 metricsFactory,
             )
         }

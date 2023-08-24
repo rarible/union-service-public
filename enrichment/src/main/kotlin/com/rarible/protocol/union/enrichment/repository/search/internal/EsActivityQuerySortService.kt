@@ -2,7 +2,6 @@ package com.rarible.protocol.union.enrichment.repository.search.internal
 
 import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivitySort
-import org.elasticsearch.search.sort.SortOrder
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import org.springframework.stereotype.Component
 
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Component
 class EsActivityQuerySortService {
 
     fun applySort(builder: NativeSearchQueryBuilder, sort: EsActivitySort) {
-        val sortOrder = if (sort.latestFirst) SortOrder.DESC else SortOrder.ASC
+        val sortOrder = sort.sortOrder
         builder.sortByField(EsActivity::date, sortOrder)
         builder.sortByField(EsActivity::blockNumber, sortOrder)
         builder.sortByField(EsActivity::logIndex, sortOrder)

@@ -46,5 +46,6 @@ data class FeatureFlagsProperties(
     val enableCollectionAutoReveal: Boolean = true,
 
     val enableOptimizedSearchForItems: Boolean = false,
-    val enableStrictMetaComparison: Boolean = false
+    val enableStrictMetaComparison: Boolean = false,
+    val enableOptimizedSearchForActivities: Boolean = true,
 )

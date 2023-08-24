@@ -2,7 +2,7 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.api.configuration.EsOptimizationProperties
+import com.rarible.protocol.union.core.EsOptimizationProperties
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.elastic.EsItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
