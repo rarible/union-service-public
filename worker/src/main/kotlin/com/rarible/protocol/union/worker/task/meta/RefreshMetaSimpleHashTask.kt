@@ -25,8 +25,12 @@ class RefreshMetaSimpleHashTask(
     override fun runLongTask(from: Unit?, param: String): Flow<Unit> = flow<Unit> {
         logger.info("Starting RefreshSimpleHashTask from=$from, param=$param")
         val parsedParam = objectMapper.readValue(param, RefreshSimpleHashTaskParam::class.java)
-        simpleHashService.refreshContract(IdParser.parseCollectionId(parsedParam.collectionId))
-        delay(30.seconds)
+        try {
+            simpleHashService.refreshContract(IdParser.parseCollectionId(parsedParam.collectionId))
+            delay(30.seconds)
+        } catch (e: Exception) {
+            logger.warn("Failed to refresh ${parsedParam.collectionId} on simplehash")
+        }
         metaRefreshSchedulingService.scheduleTask(
             MetaRefreshRequest(
                 collectionId = parsedParam.collectionId,
