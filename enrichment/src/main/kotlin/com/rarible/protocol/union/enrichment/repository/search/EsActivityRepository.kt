@@ -58,6 +58,7 @@ class EsActivityRepository(
         query.trackTotalHits = false
 
         return logIfSlow(filter, query.query, query.elasticsearchSorts) {
+            logger.info("ES Activity query: $query")
             search(query)
         }
     }

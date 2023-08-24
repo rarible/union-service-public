@@ -49,10 +49,10 @@ abstract class AbstractOptimizedSearchService<T, F : DateRangeFilter<F>, S : Ord
             result.continuation != null ||
             optimizedFilter == filter
         ) {
-            logger.info("Optimized search success: $optimizedFilter")
+            logger.info("Optimized search success: optimizedFilter: $optimizedFilter, filter: $filter")
             return result
         }
-        logger.info("Optimized search failed: $filter")
+        logger.info("Optimized search failed: optimizedFilter: $optimizedFilter, filter: $filter")
         return esSearch(filter, sort, limit)
     }
 
