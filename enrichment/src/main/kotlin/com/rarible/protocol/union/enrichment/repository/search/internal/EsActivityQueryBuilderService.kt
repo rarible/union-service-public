@@ -69,9 +69,8 @@ class EsActivityQueryBuilderService(
             }
             queryFilter.must(rangeQueryBuilder)
         }
-        val query = QueryBuilders.boolQuery().must(QueryBuilders.matchAllQuery())
-            .filter(queryFilter)
-        sortService.applySort(query, builder, sort, filter.cursor, filter.from)
+        val query = QueryBuilders.boolQuery().filter(queryFilter)
+        sortService.applySort(builder, sort)
         cursorService.applyCursor(queryFilter, sort, filter.cursor)
 
         builder.withQuery(query)

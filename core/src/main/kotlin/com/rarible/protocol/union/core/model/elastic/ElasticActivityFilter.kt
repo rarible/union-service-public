@@ -15,7 +15,13 @@ data class ElasticActivityFilter(
     val collections: Set<CollectionIdDto> = emptySet(),
     val bidCurrencies: Set<CurrencyIdDto> = emptySet(),
     val item: String? = null,
-    val from: Instant? = null,
-    val to: Instant? = null,
+    override val from: Instant? = null,
+    override val to: Instant? = null,
     val cursor: String? = null,
-)
+) : DateRangeFilter<ElasticActivityFilter> {
+
+    override fun applyDateRange(range: DateRange): ElasticActivityFilter = copy(
+        from = range.from,
+        to = range.to,
+    )
+}

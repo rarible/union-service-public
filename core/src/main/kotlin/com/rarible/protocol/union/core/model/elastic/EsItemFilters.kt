@@ -11,7 +11,7 @@ data class EsItemGenericFilter(
     override val blockchains: Set<String>? = null,
     val itemIds: Set<String>? = null,
     val creators: Set<String> = emptySet(),
-    val owners: Set<String> ? = null,
+    val owners: Set<String>? = null,
     val collections: Set<String>? = null,
     val mintedFrom: Instant? = null,
     val mintedTo: Instant? = null,
@@ -30,6 +30,15 @@ data class EsItemGenericFilter(
     val bidPriceFrom: Double? = null,
     val bidPriceTo: Double? = null,
     override val cursor: String? = null,
-) : EsItemFilter()
+) : EsItemFilter(), DateRangeFilter<EsItemGenericFilter> {
+    override val from: Instant?
+        get() = updatedFrom
+
+    override val to: Instant?
+        get() = updatedTo
+
+    override fun applyDateRange(range: DateRange): EsItemGenericFilter =
+        copy(updatedFrom = range.from, updatedTo = range.to)
+}
 
 data class TraitFilter(val key: String, val value: String)
