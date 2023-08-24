@@ -178,6 +178,7 @@ class HotWheelsTokenMetaCustomizer(
 
     override val attributesWhiteList = setOf(
         "tokenExpireDate",
+        "tokenExpirationDate",
         "tokenReleaseDate",
     )
 }
