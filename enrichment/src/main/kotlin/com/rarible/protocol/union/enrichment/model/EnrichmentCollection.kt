@@ -20,7 +20,7 @@ import java.time.Instant
 /**
  * Table with additional info about collection, e.g. best sell/bid orders.
  */
-@Document("enrichment_collection")
+@Document(EnrichmentCollection.COLLECTION)
 data class EnrichmentCollection(
     override val blockchain: BlockchainDto,
     val collectionId: String,
@@ -134,5 +134,9 @@ data class EnrichmentCollection(
 
     override fun getAllBestOrders(): List<ShortOrder> {
         return listOfNotNull(bestSellOrder, bestBidOrder) + getAllOriginBestOrders()
+    }
+
+    companion object {
+        const val COLLECTION = "enrichment_collection"
     }
 }

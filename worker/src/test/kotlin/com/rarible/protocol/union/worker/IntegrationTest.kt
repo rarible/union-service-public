@@ -4,6 +4,7 @@ import com.rarible.core.test.ext.ElasticsearchTest
 import com.rarible.core.test.ext.KafkaTest
 import com.rarible.core.test.ext.MongoCleanup
 import com.rarible.core.test.ext.MongoTest
+import com.rarible.protocol.union.core.es.ElasticsearchBootstrapperTestConfig
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.worker.config.WorkerConfiguration
@@ -34,6 +35,8 @@ import org.springframework.test.context.ActiveProfiles
         TestWorkerConfiguration::class,
         EnrichmentApiConfiguration::class,
         SearchConfiguration::class,
-        WorkerConfiguration::class]
+        WorkerConfiguration::class,
+        ElasticsearchBootstrapperTestConfig::class
+    ]
 )
 annotation class IntegrationTest
