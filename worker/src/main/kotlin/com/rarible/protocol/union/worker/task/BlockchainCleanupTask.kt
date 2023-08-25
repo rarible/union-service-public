@@ -61,17 +61,23 @@ class BlockchainCleanupJob(
         mongoCollection: String,
         esRepository: ElasticSearchRepository<*>
     ) = coroutineScope {
+        try {
+            logger.info("Deleting $blockchain entities from $mongoCollection")
 
-        logger.info("Deleting $blockchain entities from $mongoCollection")
+            val mongoQuery = Query(Criteria("_id.blockchain").isEqualTo(blockchain))
+            val mongo = async { template.remove(mongoQuery, mongoCollection).awaitSingle() }
+            val esResult = esRepository.deleteByBlockchain(blockchain)
+            val mongoResult = mongo.await()
 
-        val mongoQuery = Query(Criteria("_id.blockchain").isEqualTo(blockchain))
-        val mongo = async { template.remove(mongoQuery, mongoCollection).awaitSingle() }
-        val esResult = esRepository.deleteByBlockchain(blockchain)
-        val mongoResult = mongo.await()
-
-        logger.info(
-            "Deleted ${mongoResult.deletedCount} $blockchain entities from $mongoCollection " +
-                "and ${esResult.deleted} records from ES"
-        )
+            logger.info(
+                "Deleted ${mongoResult.deletedCount} $blockchain entities from $mongoCollection " +
+                    "and ${esResult.deleted} records from ES"
+            )
+        } catch (e: Exception) {
+            logger.info(
+                "Deletion of $blockchain entities from " +
+                    "$mongoCollection takes a lot of time, stop waiting for the result", e
+            )
+        }
     }
 }
