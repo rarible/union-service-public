@@ -24,8 +24,8 @@ fun randomEnrichmentCollection(id: CollectionIdDto = randomEthCollectionId()) = 
     collection = randomUnionCollection(id)
 )
 
-fun randomEnrichmentMintActivity() = EnrichmentActivityConverter.convert(
-    source = randomUnionActivityMint(randomEthItemId())
+fun randomEnrichmentMintActivity(itemId: ItemIdDto = randomEthItemId()) = EnrichmentActivityConverter.convert(
+    source = randomUnionActivityMint(itemId)
 )
 
 fun randomShortOwnership() = ShortOwnershipConverter.convert(randomUnionOwnership())

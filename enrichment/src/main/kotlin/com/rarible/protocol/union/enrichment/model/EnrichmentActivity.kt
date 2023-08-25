@@ -21,7 +21,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
 
-@Document("enrichment_activity")
+@Document(EnrichmentActivity.COLLECTION)
 sealed class EnrichmentActivity {
     abstract val id: EnrichmentActivityId
     abstract val blockchain: BlockchainDto
@@ -34,6 +34,10 @@ sealed class EnrichmentActivity {
 
     abstract val date: Instant
     abstract val lastUpdatedAt: Instant?
+
+    companion object {
+        const val COLLECTION = "enrichment_activity"
+    }
 }
 
 data class EnrichmentMintActivity(

@@ -4,19 +4,25 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.union.core.elasticsearch.EsHelper
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.repository.search.internal.mustMatchTerm
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.action.bulk.BulkRequest
 import org.elasticsearch.action.support.WriteRequest
 import org.elasticsearch.client.Requests
+import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.xcontent.XContentType
 import org.slf4j.LoggerFactory
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
+import org.springframework.data.elasticsearch.core.query.ByQueryResponse
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.annotation.PostConstruct
@@ -179,6 +185,13 @@ abstract class ElasticSearchRepository<T>(
         } catch (e: IOException) {
             throw RuntimeException(entityDefinition.writeAliasName + " refreshModifyIndex failed", e)
         }
+    }
+
+    suspend fun deleteByBlockchain(blockchain: BlockchainDto): ByQueryResponse {
+        val query = BoolQueryBuilder()
+        query.mustMatchTerm(blockchain.name, "blockchain")
+        val nativeQuery = NativeSearchQueryBuilder().withQuery(query).build()
+        return esOperations.delete(nativeQuery, entityType, entityDefinition.searchIndexCoordinates).awaitSingle()
     }
 
     protected suspend fun <T> logIfSlow(vararg params: Any?, query: suspend () -> T): T {
