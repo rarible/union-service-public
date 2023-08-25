@@ -48,8 +48,10 @@ sealed class DownloadExecutor<T>(
     abstract suspend fun isBlacklisted(task: DownloadTask): Boolean
 
     suspend fun execute(tasks: List<DownloadTask>) {
-        tasks.map {
-            pool.submitAsync { execute(it) }
+        tasks.groupBy { it.id }.values.map { group ->
+            pool.submitAsync {
+                group.forEach { execute(it) }
+            }
         }.awaitAll()
     }
 
