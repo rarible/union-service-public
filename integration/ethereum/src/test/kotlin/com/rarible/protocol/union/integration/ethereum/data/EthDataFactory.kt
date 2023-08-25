@@ -550,6 +550,7 @@ fun randomEthOnChainOrderDto(): OnChainOrderDto {
 }
 
 fun randomEthCollectionId() = CollectionIdDto(BlockchainDto.ETHEREUM, randomEthAddress())
+fun randomPolygonCollectionId() = CollectionIdDto(BlockchainDto.POLYGON, randomEthAddress())
 
 fun randomEthCollectionDto() = randomEthCollectionDto(randomAddress())
 fun randomEthCollectionDto(id: Address): NftCollectionDto {
