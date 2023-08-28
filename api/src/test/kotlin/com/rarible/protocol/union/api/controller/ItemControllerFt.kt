@@ -223,6 +223,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     fun `reset item meta by id - ethereum`() = runBlocking<Unit> {
         val itemId = randomEthItemId()
 
+        coEvery { testEthereumItemApi.getNftItemById(itemId.value) } returns Mono.just(randomEthNftItemDto())
         coEvery { testEthereumItemApi.resetNftItemMetaById(itemId.value) } returns Mono.empty()
         coEvery { testEthereumItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomEthItemMeta())
 
@@ -246,6 +247,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
     fun `reset item meta by id - flow`() = runBlocking<Unit> {
         val itemId = randomFlowItemId()
 
+        coEvery { testFlowItemApi.getNftItemById(itemId.value) } returns Mono.just(randomFlowNftItemDto())
         coEvery { testFlowItemApi.resetItemMeta(itemId.value) } returns Mono.empty()
         coEvery { testFlowItemApi.getNftItemMetaById(itemId.value) } returns Mono.just(randomFlowMetaDto())
 

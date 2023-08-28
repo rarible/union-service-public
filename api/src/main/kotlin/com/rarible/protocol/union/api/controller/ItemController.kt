@@ -168,6 +168,8 @@ class ItemController(
     override suspend fun resetItemMeta(itemId: String, sync: Boolean?): ResponseEntity<Unit> {
         // TODO: handle sync
         val fullItemId = IdParser.parseItemId(itemId)
+        // it will throw 404 if item doesn't exist
+        enrichmentItemService.fetch(ShortItemId(fullItemId))
         val safeSync = sync ?: false
 
         LogUtils.addToMdc(fullItemId, router) {
