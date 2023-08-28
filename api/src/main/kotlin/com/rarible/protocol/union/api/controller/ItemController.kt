@@ -16,10 +16,8 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.core.util.checkNullIds
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BlockchainIdFormatException
 import com.rarible.protocol.union.dto.ExtendedTraitPropertiesDto
 import com.rarible.protocol.union.dto.ItemDto
-import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
@@ -39,7 +37,6 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.time.withTimeout
-import org.apache.commons.lang3.math.NumberUtils
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
@@ -115,7 +112,7 @@ class ItemController(
         return try {
             withTimeout(timeoutSyncLoadingMeta) {
                 itemMetaService.get(
-                    itemId = safeParseItemId(itemId),
+                    itemId = IdParser.parseItemId(itemId),
                     sync = true,
                     pipeline = ItemMetaPipeline.API
                 )
@@ -132,7 +129,7 @@ class ItemController(
     override suspend fun getItemById(
         itemId: String
     ): ResponseEntity<ItemDto> {
-        val fullItemId = safeParseItemId(itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
         val shortItemId = ShortItemId(fullItemId)
         val unionItem = enrichmentItemService.fetch(shortItemId)
         val enrichedUnionItem = enrichmentItemService.enrichItems(listOf(unionItem), ItemMetaPipeline.API)
@@ -150,7 +147,7 @@ class ItemController(
     override suspend fun getItemRoyaltiesById(
         itemId: String
     ): ResponseEntity<RoyaltiesDto> {
-        val fullItemId = safeParseItemId(itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
         val royalties = router.getService(fullItemId.blockchain).getItemRoyaltiesById(fullItemId.value)
         return ResponseEntity.ok(RoyaltiesDto(royalties))
     }
@@ -159,7 +156,7 @@ class ItemController(
         itemId: String,
         restrictionCheckFormDto: RestrictionCheckFormDto
     ): ResponseEntity<RestrictionCheckResultDto> {
-        val fullItemId = safeParseItemId(itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
         val checkResult = restrictionService.checkRestriction(fullItemId, restrictionCheckFormDto)
         val dto = RestrictionCheckResultDto(
             success = checkResult.success,
@@ -170,7 +167,7 @@ class ItemController(
 
     override suspend fun resetItemMeta(itemId: String, sync: Boolean?): ResponseEntity<Unit> {
         // TODO: handle sync
-        val fullItemId = safeParseItemId(itemId)
+        val fullItemId = IdParser.parseItemId(itemId)
         val safeSync = sync ?: false
 
         LogUtils.addToMdc(fullItemId, router) {
@@ -305,15 +302,4 @@ class ItemController(
             ).map { it.toApiDto() })
         )
     }
-}
-
-fun safeParseItemId(itemId: String): ItemIdDto {
-    val fullItemId = IdParser.parseItemId(itemId)
-    if (fullItemId.blockchain != BlockchainDto.SOLANA) {
-        val parts = fullItemId.value.split(":")
-        if (parts.size != 2 || !NumberUtils.isDigits(parts[1])) {
-            throw BlockchainIdFormatException("Invalid item id format: $itemId")
-        }
-    }
-    return fullItemId
 }
