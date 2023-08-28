@@ -29,7 +29,7 @@ protocol-union-meta-loader:
   environments:
     # The most sensitive pipeline, should be handled ASAP without delay
     META_LOADER_DOWNLOADER_ITEM_EVENT_WORKERS: 8
-    META_LOADER_DOWNLOADER_ITEM_EVENT_BATCH_SIZE: 64
+    META_LOADER_DOWNLOADER_ITEM_EVENT_BATCH_SIZE: 256
     META_LOADER_DOWNLOADER_ITEM_EVENT_POOL_SIZE: 256
     # Less sensitive pipeline since most of new items should be handled in EVENT pipeline, but has high priority too
     META_LOADER_DOWNLOADER_ITEM_API_WORKERS: 8
