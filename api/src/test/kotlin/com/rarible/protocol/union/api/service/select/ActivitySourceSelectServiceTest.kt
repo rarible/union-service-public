@@ -50,7 +50,7 @@ class ActivitySourceSelectServiceTest {
     private val cursor = "some cursor"
     private val size = 42
     private val collection = IdParser.parseCollectionId("ETHEREUM:some collection")
-    private val itemId = IdParser.parseItemId("ETHEREUM:some item id")
+    private val itemId = IdParser.parseItemId("ETHEREUM:some item id:1")
     private val userType = listOf(mockk<UserActivityTypeDto>())
     private val user = listOf(IdParser.parseAddress("ETHEREUM:some user"))
     private val from = Instant.ofEpochSecond(12345)
