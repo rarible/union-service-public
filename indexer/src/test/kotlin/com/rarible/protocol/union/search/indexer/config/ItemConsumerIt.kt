@@ -14,7 +14,7 @@ import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.codec.digest.DigestUtils
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import randomItemId
@@ -46,7 +46,7 @@ class ItemConsumerIt {
     )
 
     @Test
-    @Ignore("enable after merging ALPHA-424")
+    @Disabled("enable after merging ALPHA-424")
     internal fun `should save and find by id and feeRecipient`() {
         runBlocking {
 
