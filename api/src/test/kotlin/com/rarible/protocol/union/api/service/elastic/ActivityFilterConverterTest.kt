@@ -137,7 +137,7 @@ class ActivityFilterConverterTest {
                 .ignoringFields("activityTypes", "item", "blockchains", "cursor", "bidCurrencies")
                 .isEqualTo(emptyGenericFilter)
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(*types.toTypedArray())
-            assertThat(actual.item).isEqualTo("0x00000012345")
+            assertThat(actual.item).isEqualTo("0x00000012345:1")
             assertThat(actual.blockchains).containsExactly(BlockchainDto.TEZOS)
             assertThat(actual.cursor).isEqualTo(cursor)
             assertThat(actual.bidCurrencies).isEqualTo(bidCurrencies.toSet())
