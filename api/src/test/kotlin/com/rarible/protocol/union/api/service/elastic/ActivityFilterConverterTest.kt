@@ -119,7 +119,7 @@ class ActivityFilterConverterTest {
         fun `should convert - happy path`() {
             // given
             val types = listOf(ActivityTypeDto.CANCEL_LIST, ActivityTypeDto.CANCEL_BID)
-            val itemId = "TEZOS:0x00000012345"
+            val itemId = "TEZOS:0x00000012345:1"
             val cursor = "some cursor"
             val bidCurrencies = listOf(
                 CurrencyIdDto(

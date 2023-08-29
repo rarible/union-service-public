@@ -6,6 +6,8 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
+import com.rarible.protocol.union.integration.tezos.data.randomTezosDipDupItemDto
+import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
@@ -48,8 +50,8 @@ class TezosDipDupItemControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `should return 404 on non-existed item`() = runBlocking<Unit> {
-        val tezosAddress = randomTezosAddress()
-        val url = "${baseUrl()}/items/${tezosAddress.fullId()}"
+        val tezosItemId = randomTezosItemId()
+        val url = "${baseUrl()}/items/${tezosItemId.fullId()}"
 
         coEvery {
             dipdupTokenClient.getTokenById(any())
