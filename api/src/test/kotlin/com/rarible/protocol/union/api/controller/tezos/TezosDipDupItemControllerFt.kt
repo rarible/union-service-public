@@ -5,8 +5,6 @@ import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.model.UnionCollection
-import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
-import com.rarible.protocol.union.integration.tezos.data.randomTezosDipDupItemDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
