@@ -19,6 +19,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Ignore
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomItemId
 import java.math.BigInteger
 
 @IntegrationTest
@@ -32,7 +33,7 @@ class ItemConsumerIt {
 
     private val blockchain = BlockchainDto.ETHEREUM
 
-    private val itemId = ItemIdDto(blockchain, "${randomAddress()}")
+    private val itemId = randomItemId(blockchain)
     private val item = ItemDto(
         id = itemId,
         blockchain = BlockchainDto.ETHEREUM,
