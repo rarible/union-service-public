@@ -2,23 +2,22 @@ package com.rarible.protocol.union.search.indexer.config
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.kafka.RaribleKafkaProducer
-import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemEventDto
-import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.codec.digest.DigestUtils
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomItemId
 import java.math.BigInteger
 
 @IntegrationTest
@@ -32,7 +31,7 @@ class ItemConsumerIt {
 
     private val blockchain = BlockchainDto.ETHEREUM
 
-    private val itemId = ItemIdDto(blockchain, "${randomAddress()}")
+    private val itemId = randomItemId(blockchain)
     private val item = ItemDto(
         id = itemId,
         blockchain = BlockchainDto.ETHEREUM,
@@ -47,7 +46,7 @@ class ItemConsumerIt {
     )
 
     @Test
-    @Ignore("enable after merging ALPHA-424")
+    @Disabled("enable after merging ALPHA-424")
     internal fun `should save and find by id and feeRecipient`() {
         runBlocking {
 

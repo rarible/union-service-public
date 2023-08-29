@@ -20,7 +20,7 @@ class SimpleHashKafkaHandlerTest {
         coEvery { metrics.onEventIncomingFailed(any()) } returns Unit
         coEvery { metrics.onEventIncomingFailed() } returns Unit
         val handler = SimpleHashKafkaHandler(itemMetaService, metrics)
-        val event = nft.newBuilder().setNftId("ethereum.test").build()
+        val event = nft.newBuilder().setNftId("ethereum.1.1").build()
 
         handler.handle(listOf(event))
 

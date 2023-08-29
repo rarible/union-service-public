@@ -9,6 +9,7 @@ import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.EsCollectionConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -43,6 +44,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.server.LocalServerPort
@@ -71,6 +73,9 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     @Autowired
     lateinit var esCollectionRepository: EsCollectionRepository
 
+    @Autowired
+    lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
     @LocalServerPort
     var port: Int = 0
 
@@ -79,6 +84,11 @@ class CollectionControllerFt : AbstractIntegrationTest() {
 
     private fun baseUrl(): String {
         return "http://localhost:$port/v0.1"
+    }
+
+    @BeforeEach
+    fun setUp() {
+        elasticsearchTestBootstrapper.bootstrap()
     }
 
     @Test

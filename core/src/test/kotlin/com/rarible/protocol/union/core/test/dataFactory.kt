@@ -113,7 +113,7 @@ fun randomOrderId(
 
 fun randomItemId(
     blockchain: BlockchainDto = BlockchainDto.values().random(),
-    value: String = "${randomString()}.${randomBigInt(6)}",
+    value: String = "${randomString()}:${randomBigInt(6)}",
 ) = ItemIdDto(blockchain, value)
 
 fun randomInstant(): Instant = nowMillis().minusMillis(randomLong(14400000)).truncatedTo(ChronoUnit.MILLIS)
