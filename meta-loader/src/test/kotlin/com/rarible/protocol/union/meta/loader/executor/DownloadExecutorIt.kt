@@ -318,6 +318,29 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `forced task - retries exhausted, but partially downloaded`() = runBlocking<Unit> {
+        val entry = randomMetaEntry(fullItemId).copy(
+            retries = maxRetries,
+            status = DownloadStatus.RETRY,
+            data = null
+        )
+        createItem(itemId, entry)
+        val partialMeta = randomUnionMeta()
+        mockGetMetaPartiallyFailed(fullItemId, partialMeta, listOf(MetaSource.SIMPLE_HASH))
+
+        downloadExecutor.execute(listOf(randomTask(fullItemId)))
+
+        val saved = repository.get(fullItemId)!!
+        assertThat(saved.data).isEqualTo(partialMeta)
+        assertThat(saved.status).isEqualTo(DownloadStatus.FAILED)
+        assertThat(saved.downloads).isEqualTo(entry.downloads)
+        assertThat(saved.fails).isEqualTo(entry.fails + 1)
+
+        coVerify(exactly = 1) { notifier.notify(saved) }
+        coVerify(exactly = 1) { enrichmentItemService.fetchOrNull(ShortItemId(itemId)) }
+    }
+
+    @Test
     fun `forced task - sill fails`() = runBlocking<Unit> {
         val entry = randomMetaEntry(fullItemId).copy(retries = maxRetries + 1, status = DownloadStatus.FAILED)
         createItem(itemId, entry)
@@ -471,5 +494,9 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
     private fun mockGetMetaFailed(itemId: String, message: String) {
         coEvery { downloader.download(itemId) } throws IllegalArgumentException(message)
+    }
+
+    private fun mockGetMetaPartiallyFailed(itemId: String, meta: UnionMeta, failedProviders: List<MetaSource>) {
+        coEvery { downloader.download(itemId) } throws PartialDownloadException(failedProviders, meta)
     }
 }

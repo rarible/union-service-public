@@ -45,7 +45,7 @@ class ItemMetaRefreshService(
         withSimpleHash: Boolean = false
     ) = collections.map { scheduleRefreshIfNotRunning(it, full, scheduledAt, withSimpleHash) }
 
-    suspend fun scheduleRefreshIfNotRunning(
+    private suspend fun scheduleRefreshIfNotRunning(
         collectionId: CollectionIdDto,
         full: Boolean,
         scheduledAt: Instant,
@@ -60,7 +60,8 @@ class ItemMetaRefreshService(
                 collectionId = collectionId,
                 full = full,
                 scheduledAt = scheduledAt,
-                withSimpleHash = withSimpleHash
+                withSimpleHash = withSimpleHash,
+                priority = MetaRefreshRequest.Priority.PRIORITY_HIGHEST
             )
         } catch (e: Exception) {
             logger.error("Failed to schedule refresh for Items in $collectionId", e)
@@ -74,7 +75,8 @@ class ItemMetaRefreshService(
     suspend fun runRefreshIfAllowed(
         collectionId: CollectionIdDto,
         full: Boolean,
-        withSimpleHash: Boolean = false
+        priority: Int,
+        withSimpleHash: Boolean = false,
     ): Boolean {
         val collectionFullId = collectionId.fullId()
         if (!isRefreshAllowed(collectionFullId)) {
@@ -83,7 +85,8 @@ class ItemMetaRefreshService(
         scheduleRefresh(
             collectionId = collectionId,
             full = full,
-            withSimpleHash = withSimpleHash
+            withSimpleHash = withSimpleHash,
+            priority = priority
         )
         return true
     }
@@ -106,7 +109,8 @@ class ItemMetaRefreshService(
         scheduleRefresh(
             collectionId = collectionId,
             full = true,
-            withSimpleHash = withSimpleHash
+            withSimpleHash = withSimpleHash,
+            priority = MetaRefreshRequest.Priority.PRIORITY_LOW
         )
         return true
     }
@@ -141,7 +145,8 @@ class ItemMetaRefreshService(
         scheduleRefresh(
             collectionId = collectionId,
             full = true,
-            withSimpleHash = withSimpleHash
+            withSimpleHash = withSimpleHash,
+            priority = MetaRefreshRequest.Priority.PRIORITY_MEDIUM
         )
         return true
     }
@@ -153,14 +158,16 @@ class ItemMetaRefreshService(
         collectionId: CollectionIdDto,
         full: Boolean,
         scheduledAt: Instant = Instant.now(),
-        withSimpleHash: Boolean = false
+        withSimpleHash: Boolean = false,
+        priority: Int
     ) {
         metaRefreshRequestRepository.save(
             MetaRefreshRequest(
                 collectionId = collectionId.fullId(),
                 full = full,
                 scheduledAt = scheduledAt,
-                withSimpleHash = withSimpleHash
+                withSimpleHash = withSimpleHash,
+                priority = priority
             )
         )
     }

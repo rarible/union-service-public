@@ -185,7 +185,19 @@ sealed class DownloadExecutor<T>(
 
             val updated = when (failed.status) {
                 // Nothing to do here, we don't want to replace existing data, just update fail counters
-                DownloadStatus.SUCCESS, DownloadStatus.FAILED -> failed
+                DownloadStatus.SUCCESS -> failed
+                // If meta downloaded partially, we can put it instead of empty 'failed' entry
+                DownloadStatus.FAILED -> when {
+                    data != null -> {
+                        failed.copy(
+                            status = DownloadStatus.SUCCESS,
+                            data = data,
+                            failedProviders = failedProviders ?: failed.failedProviders
+                        )
+                    }
+
+                    else -> failed
+                }
                 // Failed on retry, just update status, retry counter should be managed by job
                 // Status can be changed here if retry limit exceeded
                 DownloadStatus.RETRY,
