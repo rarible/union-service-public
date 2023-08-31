@@ -15,6 +15,7 @@ import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
@@ -68,6 +69,7 @@ class CollectionController(
             collectionId = collectionId,
             full = true,
             withSimpleHash = unionMetaProperties.simpleHash.enabled,
+            priority = MetaRefreshRequest.Priority.PRIORITY_CRITICAL
         )
         ResponseEntity.noContent().build()
     }

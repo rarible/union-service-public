@@ -83,9 +83,8 @@ class MetaRefreshRequestRepository(
                 where(MetaRefreshRequest::scheduled).isEqualTo(false)
                     .and(MetaRefreshRequest::scheduledAt).lt(Instant.now())
             ).with(
-                Sort.by(
-                    MetaRefreshRequest::createdAt.name
-                )
+                Sort.by(MetaRefreshRequest::priority.name).descending()
+                    .and(Sort.by(MetaRefreshRequest::createdAt.name).ascending())
             ).limit(size),
             MetaRefreshRequest::class.java
         ).asFlow().toList()
