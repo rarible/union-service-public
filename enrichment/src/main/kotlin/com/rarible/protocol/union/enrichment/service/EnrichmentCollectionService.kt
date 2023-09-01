@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -39,6 +40,7 @@ class EnrichmentCollectionService(
     private val metrics: CollectionMetaMetrics,
     private val enrichmentHelperService: EnrichmentHelperService,
     private val metaAutoRefreshStateRepository: MetaAutoRefreshStateRepository,
+    private val ff: FeatureFlagsProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(EnrichmentCollectionService::class.java)
@@ -80,7 +82,8 @@ class EnrichmentCollectionService(
             updated.withCalculatedFields()
         }
         val result = collectionRepository.save(withCalculatedFields)
-        if (existingCollection == null) {
+
+        if (ff.enableCollectionAutoRefreshOnCreation && existingCollection == null) {
             LogUtils.addToMdc(result.id.toDto()) {
                 logger.info("Create meta auto refresh state for ${result.id}")
             }
