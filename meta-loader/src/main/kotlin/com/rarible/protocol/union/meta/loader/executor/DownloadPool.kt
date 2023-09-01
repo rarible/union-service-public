@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.meta.loader.executor
 
+import com.rarible.core.common.asyncWithTraceId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
@@ -22,7 +22,7 @@ class DownloadPool(
     private val scope = CoroutineScope(SupervisorJob() + daemonDispatcher)
 
     suspend fun submitAsync(block: suspend () -> Unit): Deferred<Unit> {
-        return scope.async { block() }
+        return scope.asyncWithTraceId { block() }
     }
 
     override fun close() {
