@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.meta.loader.executor
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
@@ -22,6 +23,7 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.meta.loader.config.DownloadLimit
 import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -38,10 +40,14 @@ sealed class DownloadExecutor<T>(
     private val pool: DownloadPool,
     private val metrics: DownloadExecutorMetrics,
     private val maxRetries: Int,
+    limits: List<DownloadLimit>,
+    private val ff: FeatureFlagsProperties,
     protected val blockchainExtractor: (id: String) -> BlockchainDto,
 ) : AutoCloseable {
 
     protected val logger = LoggerFactory.getLogger(javaClass)
+
+    private val descLimits = limits.sortedByDescending { it.iterations }
 
     abstract val type: String
 
@@ -63,9 +69,7 @@ sealed class DownloadExecutor<T>(
         }
         val started = Instant.now()
         val current = repository.get(task.id) ?: getDefault(task)
-        if (current.succeedAt != null && task.scheduledAt.isBefore(current.succeedAt)) {
-            val retry = if (current.status != DownloadStatus.SUCCESS) current.retries else 0
-            metrics.onSkippedTask(type, blockchainExtractor(task.id), started, task, retry)
+        if (!checkOutdated(current, task) || !checkAllowed(current, task)) {
             return
         }
 
@@ -110,6 +114,37 @@ sealed class DownloadExecutor<T>(
                 failedProviders = null
             )
         }
+    }
+
+    private fun checkOutdated(current: DownloadEntry<T>, task: DownloadTask): Boolean {
+        if (current.updatedAt == null || task.scheduledAt.isAfter(current.updatedAt)) {
+            return true
+        }
+        val retry = if (current.status != DownloadStatus.SUCCESS) current.retries else 0
+        metrics.onSkippedTask(type, blockchainExtractor(task.id), nowMillis(), task, retry)
+        logger.info(
+            "Download {} task for {} scheduled at {}, but entry already updated at {}, skip it",
+            type, task.id, task.scheduledAt, current.updatedAt
+        )
+        return false
+    }
+
+    // To prevent spam - some of the items are refreshed too frequently
+    private fun checkAllowed(current: DownloadEntry<T>, task: DownloadTask): Boolean {
+        val sinceLastDownload = System.currentTimeMillis() - (current.updatedAt?.toEpochMilli() ?: 0)
+        val iterations = current.downloads + current.fails
+        val interval = descLimits.find { (iterations >= it.iterations) }?.interval ?: return true
+        val result = interval.toMillis() < sinceLastDownload
+        if (result) {
+            return true
+        }
+        val retry = if (current.status != DownloadStatus.SUCCESS) current.retries else 0
+        metrics.onForbiddenTask(type, blockchainExtractor(task.id), nowMillis(), task, retry)
+        logger.info(
+            "{} {} has too much downloads ({} ok, {} fails), last update was at {}, skip it",
+            type, task.id, current.downloads, current.fails, current.updatedAt
+        )
+        return false
     }
 
     private suspend fun onSuccess(started: Instant, task: DownloadTask, data: T) {
@@ -185,7 +220,19 @@ sealed class DownloadExecutor<T>(
 
             val updated = when (failed.status) {
                 // Nothing to do here, we don't want to replace existing data, just update fail counters
-                DownloadStatus.SUCCESS, DownloadStatus.FAILED -> failed
+                DownloadStatus.SUCCESS -> failed
+                // If meta downloaded partially, we can put it instead of empty 'failed' entry
+                DownloadStatus.FAILED -> when {
+                    data != null -> {
+                        failed.copy(
+                            status = DownloadStatus.SUCCESS,
+                            data = data,
+                            failedProviders = failedProviders ?: failed.failedProviders
+                        )
+                    }
+
+                    else -> failed
+                }
                 // Failed on retry, just update status, retry counter should be managed by job
                 // Status can be changed here if retry limit exceeded
                 DownloadStatus.RETRY,
@@ -287,6 +334,8 @@ class ItemDownloadExecutor(
     pool: DownloadPool,
     metrics: DownloadExecutorMetrics,
     maxRetries: Int,
+    limits: List<DownloadLimit>,
+    ff: FeatureFlagsProperties,
     private val simpleHashEnabled: Boolean
 ) : DownloadExecutor<UnionMeta>(
     enrichmentBlacklistService,
@@ -296,6 +345,8 @@ class ItemDownloadExecutor(
     pool,
     metrics,
     maxRetries,
+    limits,
+    ff,
     { IdParser.parseItemId(it).blockchain }
 ) {
 
@@ -345,6 +396,8 @@ class CollectionDownloadExecutor(
     pool: DownloadPool,
     metrics: DownloadExecutorMetrics,
     maxRetries: Int,
+    ff: FeatureFlagsProperties,
+    limits: List<DownloadLimit>,
 ) : DownloadExecutor<UnionCollectionMeta>(
     enrichmentBlacklistService,
     repository,
@@ -353,6 +406,8 @@ class CollectionDownloadExecutor(
     pool,
     metrics,
     maxRetries,
+    limits,
+    ff,
     { IdParser.parseCollectionId(it).blockchain }
 ) {
 

@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.meta.loader.executor
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.model.download.DownloadException
@@ -23,6 +24,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
+import com.rarible.protocol.union.meta.loader.config.DownloadLimit
 import com.rarible.protocol.union.meta.loader.test.AbstractIntegrationTest
 import com.rarible.protocol.union.meta.loader.test.IntegrationTest
 import com.rarible.protocol.union.meta.loader.test.data.randomFailedMetaEntry
@@ -40,10 +42,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigInteger
+import java.time.Duration
 import java.time.Instant
 
 @IntegrationTest
-class DownloadExecutorIt : AbstractIntegrationTest() {
+class ItemDownloadExecutorIt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var repository: ItemMetaRepository
@@ -70,6 +73,10 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     val notifier: DownloadNotifier<UnionMeta> = mockk { coEvery { notify(any()) } returns Unit }
     val pool = DownloadPool(2, "item-meta-test")
     val maxRetries = 2
+    val limits = listOf(
+        DownloadLimit(10, Duration.ofMillis(10000)),
+        DownloadLimit(50, Duration.ofMillis(50000)),
+    )
 
     lateinit var downloadExecutor: DownloadExecutor<UnionMeta>
 
@@ -91,6 +98,8 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
             pool,
             metrics,
             maxRetries,
+            limits,
+            FeatureFlagsProperties(),
             false
         )
         now = nowMillis()
@@ -318,6 +327,29 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `forced task - retries exhausted, but partially downloaded`() = runBlocking<Unit> {
+        val entry = randomMetaEntry(fullItemId).copy(
+            retries = maxRetries,
+            status = DownloadStatus.RETRY,
+            data = null
+        )
+        createItem(itemId, entry)
+        val partialMeta = randomUnionMeta()
+        mockGetMetaPartiallyFailed(fullItemId, partialMeta, listOf(MetaSource.SIMPLE_HASH))
+
+        downloadExecutor.execute(listOf(randomTask(fullItemId)))
+
+        val saved = repository.get(fullItemId)!!
+        assertThat(saved.data).isEqualTo(partialMeta)
+        assertThat(saved.status).isEqualTo(DownloadStatus.FAILED)
+        assertThat(saved.downloads).isEqualTo(entry.downloads)
+        assertThat(saved.fails).isEqualTo(entry.fails + 1)
+
+        coVerify(exactly = 1) { notifier.notify(saved) }
+        coVerify(exactly = 1) { enrichmentItemService.fetchOrNull(ShortItemId(itemId)) }
+    }
+
+    @Test
     fun `forced task - sill fails`() = runBlocking<Unit> {
         val entry = randomMetaEntry(fullItemId).copy(retries = maxRetries + 1, status = DownloadStatus.FAILED)
         createItem(itemId, entry)
@@ -338,11 +370,49 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `forced task - debounce`() = runBlocking {
+    fun `forced task - outdated`() = runBlocking {
         createItem(itemId, randomMetaEntry(fullItemId))
         downloadExecutor.execute(listOf(randomTask(fullItemId).copy(scheduledAt = Instant.now().minusSeconds(1))))
 
         coVerify(exactly = 0) { downloader.download(any()) }
+        coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
+    }
+
+    @Test
+    fun `forced task - not allowed`() = runBlocking {
+        val itemId1 = randomEthItemId().copy(value = "1")
+        val taskId1 = itemId1.fullId()
+        createItem(
+            itemId1, randomMetaEntry(taskId1).copy(
+                fails = 11,
+                updatedAt = now.minusSeconds(5)
+            )
+        )
+
+        val itemId2 = randomEthItemId().copy(value = "2")
+        val taskId2 = itemId2.fullId()
+        createItem(
+            itemId2, randomMetaEntry(taskId2).copy(
+                downloads = 51,
+                updatedAt = now.minusSeconds(25)
+            )
+        )
+
+        // Ok, last update was long ago enough
+        val itemId3 = randomEthItemId().copy(value = "3")
+        val taskId3 = itemId3.fullId()
+        mockGetMetaFailed(taskId3, "error")
+        createItem(
+            itemId3, randomMetaEntry(taskId3).copy(
+                downloads = 15,
+                updatedAt = now.minusSeconds(51)
+            )
+        )
+
+        downloadExecutor.execute(listOf(randomTask(taskId1), randomTask(taskId2), randomTask(taskId3)))
+
+        coVerify(exactly = 1) { downloader.download(any()) }
+        coVerify(exactly = 1) { downloader.download(taskId3) }
         coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
     }
 
@@ -413,6 +483,7 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
                 fails = 1,
                 downloads = 0,
                 succeedAt = null,
+                updatedAt = null
             )
         )
 
@@ -471,5 +542,9 @@ class DownloadExecutorIt : AbstractIntegrationTest() {
 
     private fun mockGetMetaFailed(itemId: String, message: String) {
         coEvery { downloader.download(itemId) } throws IllegalArgumentException(message)
+    }
+
+    private fun mockGetMetaPartiallyFailed(itemId: String, meta: UnionMeta, failedProviders: List<MetaSource>) {
+        coEvery { downloader.download(itemId) } throws PartialDownloadException(failedProviders, meta)
     }
 }

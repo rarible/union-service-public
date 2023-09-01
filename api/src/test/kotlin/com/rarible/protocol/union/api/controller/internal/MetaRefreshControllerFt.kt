@@ -41,10 +41,12 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
     @ParameterizedTest
     @MethodSource("testCases")
     fun `schedule full refresh - without scheduledAt`(testCase: TestCase) = runBlocking<Unit> {
+        // Low priority
         metaRefreshRequestRepository.save(
             MetaRefreshRequest(
                 collectionId = "ETHEREUM:${Address.ONE()}",
-                full = testCase.existingFull
+                full = testCase.existingFull,
+                priority = MetaRefreshRequest.Priority.PRIORITY_LOW
             )
         )
 
@@ -57,12 +59,12 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
 
         val collections = metaRefreshRequestRepository.findToScheduleAndUpdate(10)
         assertThat(collections).hasSize(3)
-        assertThat(collections[0].collectionId).isEqualTo("ETHEREUM:${Address.ONE()}")
-        assertThat(collections[0].full).isEqualTo(testCase.existingFull)
-        assertThat(collections[1].collectionId).isEqualTo("POLYGON:${Address.TWO()}")
+        assertThat(collections[0].collectionId).isEqualTo("POLYGON:${Address.TWO()}")
+        assertThat(collections[0].full).isEqualTo(testCase.newFull)
+        assertThat(collections[1].collectionId).isEqualTo("TEZOS:ccc")
         assertThat(collections[1].full).isEqualTo(testCase.newFull)
-        assertThat(collections[2].collectionId).isEqualTo("TEZOS:ccc")
-        assertThat(collections[2].full).isEqualTo(testCase.newFull)
+        assertThat(collections[2].collectionId).isEqualTo("ETHEREUM:${Address.ONE()}")
+        assertThat(collections[2].full).isEqualTo(testCase.existingFull)
     }
 
     @ParameterizedTest

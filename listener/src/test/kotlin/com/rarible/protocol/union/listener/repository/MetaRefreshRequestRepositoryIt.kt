@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.repository
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
@@ -69,6 +70,9 @@ class MetaRefreshRequestRepositoryIt : AbstractIntegrationTest() {
         val collectionId3 = randomEthCollectionId().fullId()
         val collectionId4 = randomEthCollectionId().fullId()
         val collectionId5 = randomEthCollectionId().fullId()
+
+        val now = nowMillis()
+
         metaRefreshRequestRepository.save(
             MetaRefreshRequest(
                 collectionId = collectionId1,
@@ -78,26 +82,30 @@ class MetaRefreshRequestRepositoryIt : AbstractIntegrationTest() {
         metaRefreshRequestRepository.save(
             MetaRefreshRequest(
                 collectionId = collectionId2,
-                scheduledAt = Instant.now().plusSeconds(60)
+                scheduledAt = now.plusSeconds(60)
             )
         )
         metaRefreshRequestRepository.save(
             MetaRefreshRequest(
-                collectionId = collectionId3
+                collectionId = collectionId3,
+                scheduledAt = now.minusSeconds(1)
             )
         )
         metaRefreshRequestRepository.save(
             MetaRefreshRequest(
-                collectionId = collectionId4
+                collectionId = collectionId4,
+                priority = 1,
+                scheduledAt = now.minusSeconds(2)
             )
         )
         metaRefreshRequestRepository.save(
             MetaRefreshRequest(
-                collectionId = collectionId5
+                collectionId = collectionId5,
+                scheduledAt = now.minusSeconds(3)
             )
         )
 
         val result = metaRefreshRequestRepository.findToScheduleAndUpdate(2)
-        assertThat(result.map { it.collectionId }).containsExactly(collectionId3, collectionId4)
+        assertThat(result.map { it.collectionId }).containsExactly(collectionId4, collectionId3)
     }
 }

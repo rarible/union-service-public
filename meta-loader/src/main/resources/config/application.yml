@@ -157,6 +157,8 @@ integration:
       url: ${consul.immutablex.api.baseUrlV3:}
       byIdsChunkSize: 16
     apiKey: ${consul.immutablex.api.key:}
+    featureFlags:
+      useOrderV3: ${consul.immutablex.api.useOrderV3:false}
 
 #  Not needed in the meta-loader module. Transitive dependency onto the "core" module
 common:
@@ -166,6 +168,15 @@ common:
 meta-loader:
   brokerReplicaSet: ${kafka.hosts}
   downloader:
+    limits:
+      - iterations: 50
+        interval: "PT1M"
+      - iterations: 100
+        interval: "PT5M"
+      - iterations: 200
+        interval: "PT30M"
+      - iterations: 500
+        interval: "P1D"
     item:
       event:
         workers: 3

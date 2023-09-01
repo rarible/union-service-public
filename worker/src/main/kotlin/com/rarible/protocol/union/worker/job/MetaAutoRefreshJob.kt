@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.MetaAutoRefreshState
 import com.rarible.protocol.union.enrichment.model.MetaAutoRefreshStatus
+import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.worker.config.WorkerProperties
@@ -42,7 +43,8 @@ class MetaAutoRefreshJob(
             itemMetaRefreshService.runRefreshIfAllowed(
                 collectionId = collectionId,
                 full = true,
-                withSimpleHash = simpleHashEnabled
+                withSimpleHash = simpleHashEnabled,
+                priority = MetaRefreshRequest.Priority.PRIORITY_HIGH
             )
         }
         metaAutoRefreshStateRepository.loadToCheckCreated(Instant.now().minus(createdPeriod)).collect {

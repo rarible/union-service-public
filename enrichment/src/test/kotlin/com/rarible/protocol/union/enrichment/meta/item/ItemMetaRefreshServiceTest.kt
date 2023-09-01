@@ -78,7 +78,7 @@ internal class ItemMetaRefreshServiceTest {
         val collectionId = randomEthCollectionId()
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns randomLong(1000)
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true)).isTrue()
+        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isTrue()
         coVerify(exactly = 1) {
             metaRefreshRequestRepository.save(match { it.collectionId == collectionId.fullId() })
         }
@@ -89,7 +89,7 @@ internal class ItemMetaRefreshServiceTest {
         val collectionId = randomEthCollectionId()
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns 40000 + randomLong(1000)
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true)).isFalse()
+        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isFalse()
         assertThat(itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId, true)).isFalse()
         coVerify(exactly = 0) { metaRefreshRequestRepository.save(any()) }
     }
@@ -100,7 +100,7 @@ internal class ItemMetaRefreshServiceTest {
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns 1000 + randomLong(1000)
         coEvery { metaRefreshRequestRepository.countForCollectionId(collectionId.fullId()) } returns 3
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true)).isFalse()
+        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isFalse()
     }
 
     @Test
@@ -110,7 +110,7 @@ internal class ItemMetaRefreshServiceTest {
         coEvery { metaRefreshRequestRepository.countForCollectionId(collectionId.fullId()) } returns 1
         coEvery { metaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId.fullId()) } returns 1
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true)).isFalse()
+        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isFalse()
     }
 
     @Test
@@ -148,7 +148,7 @@ internal class ItemMetaRefreshServiceTest {
             itemMetaService.download(itemId = itemId2, pipeline = ItemMetaPipeline.REFRESH, force = true)
         } returns meta2.copy(createdAt = Instant.now())
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true)).isFalse()
+        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isFalse()
         assertThat(itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId, true)).isFalse()
     }
 
@@ -160,7 +160,7 @@ internal class ItemMetaRefreshServiceTest {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
         } returns randomUnionMeta()
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true)).isTrue()
+        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isTrue()
         assertThat(itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId, true)).isTrue()
 
         coVerify(exactly = 2) {
@@ -176,7 +176,7 @@ internal class ItemMetaRefreshServiceTest {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
         } throws PartialDownloadException(failedProviders = emptyList(), data = randomUnionMeta())
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true)).isTrue()
+        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isTrue()
         assertThat(itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId, true)).isTrue()
 
         coVerify(exactly = 2) {
@@ -192,7 +192,7 @@ internal class ItemMetaRefreshServiceTest {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
         } throws RuntimeException()
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true)).isFalse()
+        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isFalse()
         assertThat(itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId, true)).isFalse()
 
         coVerify(exactly = 2) {
