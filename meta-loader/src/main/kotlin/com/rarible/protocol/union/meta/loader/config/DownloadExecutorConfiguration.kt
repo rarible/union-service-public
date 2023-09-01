@@ -6,6 +6,7 @@ import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumerWorkerGroup
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.kafka.KafkaGroupFactory
 import com.rarible.protocol.union.core.kafka.KafkaGroupFactory.Companion.COLLECTION_TYPE
@@ -49,6 +50,7 @@ class DownloadExecutorConfiguration(
     private val metaLoaderProperties: UnionMetaLoaderProperties,
     private val kafkaGroupFactory: KafkaGroupFactory,
     private val kafkaConsumerFactory: RaribleKafkaConsumerFactory,
+    private val ff: FeatureFlagsProperties,
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
 ) {
 
@@ -87,6 +89,8 @@ class DownloadExecutorConfiguration(
                 pool,
                 itemDownloadExecutorMetrics,
                 maxRetries,
+                metaLoaderProperties.downloader.limits,
+                ff,
                 metaProperties.simpleHash.enabled
             )
             executors[pipeline] = executor
@@ -139,7 +143,9 @@ class DownloadExecutorConfiguration(
                 collectionMetaNotifier,
                 pool,
                 collectionDownloadExecutorMetrics,
-                maxRetries
+                maxRetries,
+                ff,
+                metaLoaderProperties.downloader.limits,
             )
             executors[pipeline] = executor
             logger.info(

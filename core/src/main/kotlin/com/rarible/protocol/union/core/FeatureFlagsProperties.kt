@@ -47,5 +47,6 @@ data class FeatureFlagsProperties(
 
     val enableOptimizedSearchForItems: Boolean = false,
     val enableStrictMetaComparison: Boolean = false,
-    val enableCollectionAutoRefreshOnCreation: Boolean = false
+    val enableCollectionAutoRefreshOnCreation: Boolean = false,
+    val enableMetaDownloadLimit: Boolean = true
 )

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.meta.loader.executor
 
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.download.DownloadEntry
@@ -62,6 +63,8 @@ class CollectionDownloadExecutorIt : AbstractIntegrationTest() {
             pool,
             metrics,
             maxRetries,
+            FeatureFlagsProperties(),
+            emptyList()
         )
     }
 

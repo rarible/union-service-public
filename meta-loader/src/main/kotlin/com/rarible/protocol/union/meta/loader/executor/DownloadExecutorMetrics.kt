@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.meta.loader.executor
 
+import com.rarible.protocol.union.core.UnionMetrics
 import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.core.UnionMetrics
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 import java.time.Duration
@@ -23,6 +23,10 @@ class DownloadExecutorMetrics(
     // Task debounced
     fun onSkippedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask, retry: Int) {
         onTaskHandled(started, blockchain, type, "skip", task, retry)
+    }
+
+    fun onForbiddenTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask, retry: Int) {
+        onTaskHandled(started, blockchain, type, "forbidden", task, retry)
     }
 
     // Download failed, new status of the task is FAILED
