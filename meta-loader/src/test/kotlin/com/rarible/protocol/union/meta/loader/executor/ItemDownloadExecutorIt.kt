@@ -23,6 +23,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
+import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.meta.loader.config.DownloadLimit
 import com.rarible.protocol.union.meta.loader.test.AbstractIntegrationTest
@@ -380,7 +381,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
 
     @Test
     fun `forced task - not allowed`() = runBlocking {
-        val itemId1 = randomEthItemId().copy(value = "1")
+        val itemId1 = randomEthItemId().copy(value = "${randomEthAddress()}:1")
         val taskId1 = itemId1.fullId()
         createItem(
             itemId1, randomMetaEntry(taskId1).copy(
@@ -389,7 +390,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
             )
         )
 
-        val itemId2 = randomEthItemId().copy(value = "2")
+        val itemId2 = randomEthItemId().copy(value = "${randomEthAddress()}:2")
         val taskId2 = itemId2.fullId()
         createItem(
             itemId2, randomMetaEntry(taskId2).copy(
@@ -399,7 +400,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
         )
 
         // Ok, last update was long ago enough
-        val itemId3 = randomEthItemId().copy(value = "3")
+        val itemId3 = randomEthItemId().copy(value = "${randomEthAddress()}:3")
         val taskId3 = itemId3.fullId()
         mockGetMetaFailed(taskId3, "error")
         createItem(
