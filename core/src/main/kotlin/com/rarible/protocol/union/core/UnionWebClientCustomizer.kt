@@ -24,7 +24,7 @@ class UnionWebClientCustomizer(
 
         val provider = if (ff.enableWebClientConnectionPool) {
             ConnectionProvider.builder("protocol-connection-provider")
-                .maxConnections(500)
+                .maxConnections(768)
                 .pendingAcquireMaxCount(-1)
                 .maxIdleTime(timeout)
                 .maxLifeTime(timeout)

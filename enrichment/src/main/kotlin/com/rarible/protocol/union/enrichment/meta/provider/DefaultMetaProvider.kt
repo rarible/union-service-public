@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.model.download.ProviderDownloadException
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.meta.MetaMetrics
+import io.netty.handler.timeout.ReadTimeoutException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 
@@ -46,6 +47,8 @@ abstract class DefaultMetaProvider<T : ContentOwner<T>>(
             } else {
                 onMetaUnknownError(id, blockchain, e)
             }
+        } catch (e: ReadTimeoutException) {
+            onMetaTimeout(id, blockchain, e)
         } catch (e: Exception) {
             onMetaUnknownError(id, blockchain, e)
         }
@@ -53,14 +56,19 @@ abstract class DefaultMetaProvider<T : ContentOwner<T>>(
     }
 
     private fun onMetaUnknownError(id: String, blockchain: BlockchainDto, exception: Exception) {
-        logger.error("Meta fetching failed with code: UNKNOWN for $type {}", id)
+        logger.error("Meta fetching failed with code: UNKNOWN for {} {}", type, id)
         metrics.onMetaError(blockchain)
 
         throw exception
     }
 
     private fun onMetaNotFound(id: String, blockchain: BlockchainDto) {
-        logger.warn("Meta fetching failed with code: NOT_FOUND for $type {}", id)
+        logger.warn("Meta fetching failed with code: NOT_FOUND for {} {}", type, id)
         metrics.onMetaFetchNotFound(blockchain)
+    }
+
+    private fun onMetaTimeout(id: String, blockchain: BlockchainDto, e: Exception) {
+        logger.warn("Meta fetching failed with code: TIMEOUT for {} {}: {}", type, id, e.message)
+        metrics.onMetaFetchTimeout(blockchain)
     }
 }
