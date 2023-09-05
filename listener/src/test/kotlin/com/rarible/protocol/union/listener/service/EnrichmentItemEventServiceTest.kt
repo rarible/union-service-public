@@ -4,7 +4,6 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.model.stubEventMark
-import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
@@ -13,6 +12,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemSellStatsService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityBurn
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivitySale

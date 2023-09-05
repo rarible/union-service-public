@@ -8,7 +8,6 @@ import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OriginService
-import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto

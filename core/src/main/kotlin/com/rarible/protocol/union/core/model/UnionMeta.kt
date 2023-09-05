@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.core.model
 
-import com.rarible.protocol.union.core.model.download.MetaSource
 import java.time.Instant
 
 data class UnionMeta(

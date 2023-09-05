@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.enrichment.meta.provider
 
 import com.rarible.protocol.union.core.model.ContentOwner
-import com.rarible.protocol.union.core.model.download.MetaSource
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.dto.BlockchainDto
 
 /**

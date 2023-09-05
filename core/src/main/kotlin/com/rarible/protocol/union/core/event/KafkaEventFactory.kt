@@ -1,8 +1,6 @@
 package com.rarible.protocol.union.core.event
 
 import com.rarible.core.kafka.KafkaMessage
-import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
-import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionAuctionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
@@ -18,16 +16,12 @@ import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionPoolOrderUpdateEvent
-import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
-import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemEventDto
-import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
-import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import java.util.UUID
 
@@ -173,38 +167,6 @@ object KafkaEventFactory {
             key = key,
             value = UnionInternalActivityEvent(dto),
             headers = ACTIVITY_EVENT_HEADERS
-        )
-    }
-
-    fun reconciliationItemMarkEvent(itemId: ItemIdDto): KafkaMessage<ReconciliationMarkEvent> {
-        return KafkaMessage(
-            id = UUID.randomUUID().toString(),
-            key = itemId.fullId(),
-            value = ReconciliationMarkEvent(itemId.fullId(), ReconciliationMarkType.ITEM),
-        )
-    }
-
-    fun reconciliationOwnershipMarkEvent(ownershipId: OwnershipIdDto): KafkaMessage<ReconciliationMarkEvent> {
-        return KafkaMessage(
-            id = UUID.randomUUID().toString(),
-            key = ownershipId.fullId(),
-            value = ReconciliationMarkEvent(ownershipId.fullId(), ReconciliationMarkType.OWNERSHIP),
-        )
-    }
-
-    fun reconciliationCollectionMarkEvent(collectionId: CollectionIdDto): KafkaMessage<ReconciliationMarkEvent> {
-        return KafkaMessage(
-            id = UUID.randomUUID().toString(),
-            key = collectionId.fullId(),
-            value = ReconciliationMarkEvent(collectionId.fullId(), ReconciliationMarkType.COLLECTION)
-        )
-    }
-
-    fun downloadTaskEvent(task: DownloadTask): KafkaMessage<DownloadTask> {
-        return KafkaMessage(
-            id = UUID.randomUUID().toString(),
-            key = task.id,
-            value = task
         )
     }
 }

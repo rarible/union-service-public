@@ -1,4 +1,4 @@
-package com.rarible.protocol.union.core.model.download
+package com.rarible.protocol.union.core.model
 
 enum class MetaSource(val value: String) {
     ORIGINAL("original"),

@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.enrichment.meta
 
-import com.rarible.protocol.union.core.model.download.MetaSource
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.core.UnionMetrics
+import com.rarible.protocol.union.core.model.MetaSource
+import com.rarible.protocol.union.dto.BlockchainDto
 import io.micrometer.core.instrument.MeterRegistry
 
 open class MetaMetrics(

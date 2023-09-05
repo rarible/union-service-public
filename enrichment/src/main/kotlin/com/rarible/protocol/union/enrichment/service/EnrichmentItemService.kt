@@ -4,8 +4,6 @@ import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionOrder
-import com.rarible.protocol.union.core.model.download.DownloadEntry
-import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.OriginService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -18,6 +16,8 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolutionRequest
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
+import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline

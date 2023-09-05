@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.enrichment.meta.item
 
-import com.rarible.protocol.union.core.model.download.MetaSource
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import org.assertj.core.api.Assertions.assertThat

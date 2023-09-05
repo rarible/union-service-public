@@ -13,8 +13,8 @@ import com.rarible.protocol.union.core.kafka.KafkaGroupFactory.Companion.COLLECT
 import com.rarible.protocol.union.core.kafka.KafkaGroupFactory.Companion.ITEM_TYPE
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaNotifier
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
@@ -105,7 +105,7 @@ class DownloadExecutorConfiguration(
     fun itemMetaDownloadTaskConsumer(
         @Qualifier("item.meta.download.executor.manager")
         executorManager: DownloadExecutorManager
-    ): RaribleKafkaConsumerWorker<DownloadTask> {
+    ): RaribleKafkaConsumerWorker<DownloadTaskEvent> {
         val workers = ItemMetaPipeline.values().map { it.name.lowercase() }.map { pipeline ->
             val conf = getItemPipelineConfiguration(pipeline)
             val handler = DownloadExecutorHandler(pipeline, executorManager)
@@ -159,7 +159,7 @@ class DownloadExecutorConfiguration(
     fun collectionMetaDownloadTaskConsumer(
         @Qualifier("collection.meta.download.executor.manager")
         executorManager: DownloadExecutorManager
-    ): RaribleKafkaConsumerWorker<DownloadTask> {
+    ): RaribleKafkaConsumerWorker<DownloadTaskEvent> {
         val consumers = CollectionMetaPipeline.values().map { it.name.lowercase() }.map { pipeline ->
             val conf = getCollectionPipelineConfiguration(pipeline)
             val handler = DownloadExecutorHandler(pipeline, executorManager)
@@ -181,8 +181,8 @@ class DownloadExecutorConfiguration(
         pipeline: String,
         concurrency: Int,
         batchSize: Int,
-        handler: RaribleKafkaBatchEventHandler<DownloadTask>
-    ): RaribleKafkaConsumerWorker<DownloadTask> {
+        handler: RaribleKafkaBatchEventHandler<DownloadTaskEvent>
+    ): RaribleKafkaConsumerWorker<DownloadTaskEvent> {
         val topic = when (type) {
             COLLECTION_TYPE -> UnionInternalTopicProvider.getCollectionMetaDownloadTaskExecutorTopic(env, pipeline)
             ITEM_TYPE -> UnionInternalTopicProvider.getItemMetaDownloadTaskExecutorTopic(env, pipeline)
@@ -196,7 +196,7 @@ class DownloadExecutorConfiguration(
             batchSize = batchSize,
             async = false,
             offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = DownloadTask::class.java
+            valueClass = DownloadTaskEvent::class.java
         )
         logger.info(
             "Created $concurrency consumers for $type-download-executor (pipeline: $pipeline, batchSize: $batchSize)"

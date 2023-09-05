@@ -1,13 +1,13 @@
-package com.rarible.protocol.union.core.service
+package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.kafka.RaribleKafkaProducer
-import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.enrichment.event.EnrichmentKafkaEventFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -17,19 +17,19 @@ class ReconciliationEventService(
 
     suspend fun onCorruptedItem(itemId: ItemIdDto) {
         eventsProducer.send(
-            KafkaEventFactory.reconciliationItemMarkEvent(itemId)
+            EnrichmentKafkaEventFactory.reconciliationItemMarkEvent(itemId)
         ).ensureSuccess()
     }
 
     suspend fun onCorruptedOwnership(ownershipId: OwnershipIdDto) {
         eventsProducer.send(
-            KafkaEventFactory.reconciliationOwnershipMarkEvent(ownershipId)
+            EnrichmentKafkaEventFactory.reconciliationOwnershipMarkEvent(ownershipId)
         ).ensureSuccess()
     }
 
     suspend fun onCorruptedCollection(collectionId: CollectionIdDto) {
         eventsProducer.send(
-            KafkaEventFactory.reconciliationCollectionMarkEvent(collectionId)
+            EnrichmentKafkaEventFactory.reconciliationCollectionMarkEvent(collectionId)
         ).ensureSuccess()
     }
 

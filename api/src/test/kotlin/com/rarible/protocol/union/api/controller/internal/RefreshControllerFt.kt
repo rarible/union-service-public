@@ -12,8 +12,7 @@ import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.core.model.download.DownloadTask
-import com.rarible.protocol.union.core.model.download.MetaSource
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
 import com.rarible.protocol.union.core.producer.UnionInternalItemEventProducer
 import com.rarible.protocol.union.core.producer.UnionInternalOwnershipEventProducer
@@ -30,6 +29,7 @@ import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashNftMetadataUpdate
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -609,9 +609,9 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(code).isEqualTo(HttpStatus.NO_CONTENT)
 
         coVerify(exactly = 1) {
-            testDownloadTaskProducer.send(withArg<List<KafkaMessage<DownloadTask>>> {
+            testDownloadTaskProducer.send(withArg<List<KafkaMessage<DownloadTaskEvent>>> {
                 assertThat(it).hasSize(1)
-                assertThat(it[0].value).isInstanceOf(DownloadTask::class.java)
+                assertThat(it[0].value).isInstanceOf(DownloadTaskEvent::class.java)
                 val task = it[0].value
                 assertThat(task.id).isEqualTo(expectedItemIdDtp.fullId())
             })
@@ -630,7 +630,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(code).isEqualTo(HttpStatus.NO_CONTENT)
 
         coVerify(exactly = 0) {
-            testDownloadTaskProducer.send(any<List<KafkaMessage<DownloadTask>>>())
+            testDownloadTaskProducer.send(any<List<KafkaMessage<DownloadTaskEvent>>>())
         }
     }
 

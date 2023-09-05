@@ -3,10 +3,10 @@ package com.rarible.protocol.union.enrichment.model
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
-import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.evaluator.BestBidOrderOwner
 import com.rarible.protocol.union.enrichment.evaluator.BestSellOrderOwner
 import com.rarible.protocol.union.enrichment.evaluator.BlockchainAware

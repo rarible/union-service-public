@@ -3,12 +3,12 @@ package com.rarible.protocol.union.enrichment.meta.collection.provider
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMetaContent
-import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentCollectionProperties
 import com.rarible.protocol.union.enrichment.custom.collection.provider.ArtBlocksCustomCollectionProvider
+import com.rarible.protocol.union.enrichment.download.DownloadException
 import com.rarible.protocol.union.enrichment.meta.provider.MetaCustomProvider
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId

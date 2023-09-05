@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.worker.job.meta.retry
 
-import com.rarible.protocol.union.core.model.download.DownloadEntry
-import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
+import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId

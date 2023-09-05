@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.PropertySource
 
 @EnableRaribleMongo
-@Import(value = [CoreConfiguration::class])
+@Import(value = [CoreConfiguration::class, EnrichmentProducerConfiguration::class])
 @ComponentScan(
     basePackageClasses = [
         EnrichmentServicePackage::class,

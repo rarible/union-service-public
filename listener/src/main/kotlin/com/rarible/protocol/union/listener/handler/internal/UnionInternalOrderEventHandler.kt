@@ -12,12 +12,12 @@ import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOrderUpdateEvent
 import com.rarible.protocol.union.core.model.UnionPoolNftUpdateEvent
 import com.rarible.protocol.union.core.model.UnionPoolOrderUpdateEvent
-import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
+import com.rarible.protocol.union.enrichment.service.ReconciliationEventService
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory

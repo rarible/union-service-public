@@ -4,10 +4,10 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.protocol.union.core.model.UnionAsset
 import com.rarible.protocol.union.core.model.UnionEthErc20AssetType
-import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityEventService
+import com.rarible.protocol.union.enrichment.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionActivitySale
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import io.mockk.Called

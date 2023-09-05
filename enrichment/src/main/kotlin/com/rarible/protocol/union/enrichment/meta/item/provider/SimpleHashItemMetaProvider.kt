@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.enrichment.meta.item.provider
 
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
-import com.rarible.protocol.union.core.model.download.MetaSource
-import com.rarible.protocol.union.core.model.download.ProviderDownloadException
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.download.ProviderDownloadException
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
 import org.springframework.stereotype.Component
 

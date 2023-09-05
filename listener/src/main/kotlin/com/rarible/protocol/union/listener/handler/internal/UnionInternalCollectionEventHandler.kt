@@ -5,8 +5,8 @@ import com.rarible.protocol.union.core.model.UnionCollectionChangeEvent
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionSetBaseUriEvent
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
-import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionEventService
+import com.rarible.protocol.union.enrichment.service.ReconciliationEventService
 import org.springframework.stereotype.Component
 
 @Component
