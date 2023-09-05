@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.config
 
 import com.rarible.core.daemon.DaemonWorkerProperties
+import com.rarible.core.kafka.Compression
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
@@ -16,6 +17,7 @@ data class UnionListenerProperties(
 
 class InternalConsumerProperties(
     val brokerReplicaSet: String,
+    val compression: Compression = Compression.SNAPPY,
     private val workers: Map<String, BlockchainWorkerProperties> = emptyMap()
 ) {
 
