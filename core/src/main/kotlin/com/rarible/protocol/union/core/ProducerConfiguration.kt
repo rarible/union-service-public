@@ -24,7 +24,7 @@ import org.springframework.context.annotation.Configuration
 @EnableConfigurationProperties(value = [ProducerProperties::class])
 class ProducerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-    properties: ProducerProperties
+    private val properties: ProducerProperties
 ) {
 
     private val env = applicationEnvironmentInfo.name
@@ -101,7 +101,8 @@ class ProducerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = type,
             defaultTopic = topic,
-            bootstrapServers = producerBrokerReplicaSet
+            bootstrapServers = producerBrokerReplicaSet,
+            compression = properties.compression,
         )
     }
 }

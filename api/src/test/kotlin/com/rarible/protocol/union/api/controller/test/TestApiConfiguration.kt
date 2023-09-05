@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.Compression
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
@@ -396,7 +397,8 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = NftItemEventDto::class.java,
             defaultTopic = NftItemEventTopicProvider.getTopic(applicationEnvironmentInfo.name, "ethereum"),
-            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -407,7 +409,8 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = NftOwnershipEventDto::class.java,
             defaultTopic = NftOwnershipEventTopicProvider.getTopic(applicationEnvironmentInfo.name, "ethereum"),
-            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -431,7 +434,8 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = type,
             defaultTopic = topic,
-            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
