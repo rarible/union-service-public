@@ -35,7 +35,6 @@ import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig
 import com.rarible.protocol.union.core.test.TestUnionEventHandler
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -46,6 +45,7 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.SubscriptionEventDto
 import com.rarible.protocol.union.dto.SubscriptionRequestDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.coEvery
@@ -143,7 +143,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Bean
     @Primary
     @Qualifier("download.scheduler.task.producer.item-meta")
-    fun testDownloadTaskProducer(): RaribleKafkaProducer<DownloadTask> =
+    fun testDownloadTaskProducer(): RaribleKafkaProducer<DownloadTaskEvent> =
         mockk { coEvery { close() } returns Unit }
 
     @Bean

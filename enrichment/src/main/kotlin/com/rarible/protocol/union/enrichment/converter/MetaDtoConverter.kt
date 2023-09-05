@@ -9,7 +9,6 @@ import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
-import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.dto.AudioContentDto
 import com.rarible.protocol.union.dto.CollectionMetaDto
 import com.rarible.protocol.union.dto.HtmlContentDto
@@ -19,6 +18,7 @@ import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.MetaDto
 import com.rarible.protocol.union.dto.Model3dContentDto
 import com.rarible.protocol.union.dto.VideoContentDto
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
 
 object MetaDtoConverter {
 

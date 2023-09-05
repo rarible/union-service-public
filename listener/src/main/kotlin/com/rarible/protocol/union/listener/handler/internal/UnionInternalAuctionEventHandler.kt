@@ -6,8 +6,8 @@ import com.rarible.protocol.union.core.model.UnionAuctionEvent
 import com.rarible.protocol.union.core.model.UnionAuctionUpdateEvent
 import com.rarible.protocol.union.core.model.getItemId
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
-import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentAuctionEventService
+import com.rarible.protocol.union.enrichment.service.ReconciliationEventService
 import org.springframework.stereotype.Component
 
 @Component

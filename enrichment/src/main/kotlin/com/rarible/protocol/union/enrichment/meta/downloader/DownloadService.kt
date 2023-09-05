@@ -1,13 +1,13 @@
 package com.rarible.protocol.union.enrichment.meta.downloader
 
 import com.rarible.core.common.nowMillis
-import com.rarible.protocol.union.core.model.download.DownloadEntry
-import com.rarible.protocol.union.core.model.download.DownloadException
-import com.rarible.protocol.union.core.model.download.DownloadStatus
-import com.rarible.protocol.union.core.model.download.DownloadTask
-import com.rarible.protocol.union.core.model.download.DownloadTaskSource
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
+import com.rarible.protocol.union.enrichment.download.DownloadException
+import com.rarible.protocol.union.enrichment.download.DownloadStatus
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import org.slf4j.LoggerFactory
 
 /**
@@ -113,7 +113,7 @@ abstract class DownloadService<K, T>(
     private suspend fun schedule(ids: Collection<K>, pipeline: String, force: Boolean, source: DownloadTaskSource) {
         val tasks = ids.map { key ->
             metrics.onTaskScheduled(getBlockchain(key), type, pipeline, force)
-            DownloadTask(
+            DownloadTaskEvent(
                 id = toId(key),
                 pipeline = pipeline,
                 force = force,

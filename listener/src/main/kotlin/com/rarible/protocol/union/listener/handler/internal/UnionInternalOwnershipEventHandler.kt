@@ -5,8 +5,8 @@ import com.rarible.protocol.union.core.model.UnionOwnershipChangeEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipDeleteEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipUpdateEvent
-import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipEventService
+import com.rarible.protocol.union.enrichment.service.ReconciliationEventService
 import org.springframework.stereotype.Component
 
 @Component

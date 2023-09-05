@@ -2,11 +2,11 @@ package com.rarible.protocol.union.listener.downloader.item
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.download.DownloadEntry
-import com.rarible.protocol.union.core.model.download.DownloadStatus
-import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
+import com.rarible.protocol.union.enrichment.download.DownloadStatus
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
@@ -57,7 +57,7 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Test
     fun `not forced task - entry doesn't exist`() = runBlocking {
         val id = randomEthItemId().fullId()
-        val task = DownloadTask(
+        val task = DownloadTaskEvent(
             id = id,
             pipeline = "api",
             force = false,
@@ -79,7 +79,7 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Test
     fun `not forced task - entry exists`() = runBlocking {
         val exist = save(randomItemMetaDownloadEntry())
-        val task = DownloadTask(
+        val task = DownloadTaskEvent(
             id = exist.id,
             pipeline = "api",
             force = false,
@@ -99,19 +99,19 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Test
     fun `not forced task - several tasks for same non-existing entry`() = runBlocking {
         val id = randomEthItemId().fullId()
-        val task1 = DownloadTask(
+        val task1 = DownloadTaskEvent(
             id = id,
             pipeline = "api",
             force = false,
             scheduledAt = nowMillis()
         )
-        val task2 = DownloadTask(
+        val task2 = DownloadTaskEvent(
             id = id,
             pipeline = "api",
             force = false,
             scheduledAt = nowMillis()
         )
-        val task3 = DownloadTask(
+        val task3 = DownloadTaskEvent(
             id = id,
             pipeline = "listener",
             force = false,
@@ -131,7 +131,7 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Test
     fun `forced task - entry exists`() = runBlocking {
         val exist = save(randomItemMetaDownloadEntry())
-        val task = DownloadTask(
+        val task = DownloadTaskEvent(
             id = exist.id,
             pipeline = "api",
             force = true,
@@ -151,13 +151,13 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Test
     fun `mixed tasks - entry exists`() = runBlocking {
         val exist = save(randomItemMetaDownloadEntry())
-        val task1 = DownloadTask(
+        val task1 = DownloadTaskEvent(
             id = exist.id,
             pipeline = "api",
             force = true,
             scheduledAt = nowMillis()
         )
-        val task2 = DownloadTask(
+        val task2 = DownloadTaskEvent(
             id = exist.id,
             pipeline = "listener",
             force = false,

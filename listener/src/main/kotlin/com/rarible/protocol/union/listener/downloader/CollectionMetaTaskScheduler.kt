@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.listener.downloader
 
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
-import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.enrichment.repository.CollectionMetaRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -22,9 +22,9 @@ class CollectionMetaTaskScheduler(
     // TODO duplicated code with CollectionTaskExecutor, refactoring required
     override val type = "Collection"
 
-    override fun getBlockchain(task: DownloadTask) = IdParser.parseCollectionId(task.id).blockchain
+    override fun getBlockchain(task: DownloadTaskEvent) = IdParser.parseCollectionId(task.id).blockchain
 
-    override suspend fun logScheduledTask(task: DownloadTask) {
+    override suspend fun logScheduledTask(task: DownloadTaskEvent) {
         val collectionId = IdParser.parseCollectionId(task.id)
         LogUtils.addToMdc(collectionId) {
             logger.info("Scheduling $type meta download for $collectionId")

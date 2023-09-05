@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.enrichment.meta.downloader
 
-import com.rarible.protocol.union.core.model.download.DownloadException
+import com.rarible.protocol.union.enrichment.download.DownloadException
 
 /**
  * Interface for downloaders, who perform log-running operations to fetch data
