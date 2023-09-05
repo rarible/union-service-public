@@ -1,16 +1,16 @@
 package com.rarible.protocol.union.enrichment.meta.item
 
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.download.DownloadTaskSource
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadMetrics
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadService
 import com.rarible.protocol.union.enrichment.meta.simplehash.HookEventType
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverterService
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
-import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashNftMetadataUpdate
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItemMetrics
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashNftMetadataUpdate
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import org.slf4j.Logger

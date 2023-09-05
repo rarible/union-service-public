@@ -18,11 +18,11 @@ import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
-import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderUpdateEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.integration.ethereum.mock.EthActivityControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthAuctionControllerApiMock
 import com.rarible.protocol.union.integration.ethereum.mock.EthItemControllerApiMock
@@ -69,7 +69,7 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     @Qualifier("download.scheduler.task.producer.item-meta")
-    protected lateinit var testDownloadTaskProducer: RaribleKafkaProducer<DownloadTask>
+    protected lateinit var testDownloadTaskProducer: RaribleKafkaProducer<DownloadTaskEvent>
 
     // --------------------- CURRENCY ---------------------//
 
@@ -282,10 +282,10 @@ abstract class AbstractIntegrationTest {
         } returns KafkaSendResult.Success("")
 
         coEvery {
-            testDownloadTaskProducer.send(any() as List<KafkaMessage<DownloadTask>>)
+            testDownloadTaskProducer.send(any() as List<KafkaMessage<DownloadTaskEvent>>)
         } answers {
             @Suppress("UNCHECKED_CAST")
-            val tasks = it.invocation.args[0] as List<KafkaMessage<DownloadTask>>
+            val tasks = it.invocation.args[0] as List<KafkaMessage<DownloadTaskEvent>>
             tasks.map { KafkaSendResult.Success("") }.asFlow()
         }
 

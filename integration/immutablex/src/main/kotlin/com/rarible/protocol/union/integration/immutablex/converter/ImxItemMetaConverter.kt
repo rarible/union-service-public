@@ -1,12 +1,12 @@
 package com.rarible.protocol.union.integration.immutablex.converter
 
 import com.rarible.core.logging.Logger
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionVideoProperties
-import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexAsset

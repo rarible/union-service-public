@@ -1,6 +1,7 @@
-package com.rarible.protocol.union.core.model.download
+package com.rarible.protocol.union.enrichment.download
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.core.util.trimToLength
 import java.time.Instant
 

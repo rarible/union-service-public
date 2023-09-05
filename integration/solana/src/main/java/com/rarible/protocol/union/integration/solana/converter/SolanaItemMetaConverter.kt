@@ -3,10 +3,10 @@ package com.rarible.protocol.union.integration.solana.converter
 import com.rarible.protocol.solana.dto.TokenMetaAttributeDto
 import com.rarible.protocol.solana.dto.TokenMetaContentDto
 import com.rarible.protocol.solana.dto.TokenMetaDto
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
-import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.dto.MetaContentDto
 
 object SolanaItemMetaConverter {

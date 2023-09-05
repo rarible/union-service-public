@@ -4,9 +4,9 @@ import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.protocol.union.core.exception.UnionMetaException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.ContentOwner
-import com.rarible.protocol.union.core.model.download.MetaSource
-import com.rarible.protocol.union.core.model.download.ProviderDownloadException
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.download.ProviderDownloadException
 import com.rarible.protocol.union.enrichment.meta.MetaMetrics
 import io.netty.handler.timeout.ReadTimeoutException
 import org.slf4j.LoggerFactory

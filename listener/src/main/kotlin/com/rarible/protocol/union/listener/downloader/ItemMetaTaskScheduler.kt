@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.listener.downloader
 
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -25,9 +25,9 @@ class ItemMetaTaskScheduler(
     // TODO duplicated code with ItemTaskExecutor, refactoring required
     override val type = "Item"
 
-    override fun getBlockchain(task: DownloadTask) = IdParser.parseItemId(task.id).blockchain
+    override fun getBlockchain(task: DownloadTaskEvent) = IdParser.parseItemId(task.id).blockchain
 
-    override suspend fun logScheduledTask(task: DownloadTask) {
+    override suspend fun logScheduledTask(task: DownloadTaskEvent) {
         val itemId = IdParser.parseItemId(task.id)
 
         LogUtils.addToMdc(itemId, blockchainRouter) {

@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.enrichment.meta
 
 import com.rarible.protocol.union.core.model.ContentOwner
-import com.rarible.protocol.union.core.model.download.MetaSource
-import com.rarible.protocol.union.core.model.download.PartialDownloadException
-import com.rarible.protocol.union.core.model.download.ProviderDownloadException
+import com.rarible.protocol.union.core.model.MetaSource
+import com.rarible.protocol.union.enrichment.download.PartialDownloadException
+import com.rarible.protocol.union.enrichment.download.ProviderDownloadException
 import com.rarible.protocol.union.enrichment.meta.content.MetaContentEnrichmentService
 import com.rarible.protocol.union.enrichment.meta.provider.MetaCustomProvider
 import com.rarible.protocol.union.enrichment.meta.provider.MetaProvider

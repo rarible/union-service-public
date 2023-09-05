@@ -2,12 +2,12 @@ package com.rarible.protocol.union.core.service
 
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.core.model.Restriction
 import com.rarible.protocol.union.core.model.RestrictionApiRule
 import com.rarible.protocol.union.core.model.RestrictionCheckResult
 import com.rarible.protocol.union.core.model.RestrictionRule
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.restriction.RestrictionApiRuleChecker
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto

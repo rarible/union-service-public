@@ -1,15 +1,15 @@
 package com.rarible.protocol.union.enrichment.meta.item
 
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.download.DownloadException
-import com.rarible.protocol.union.core.model.download.MetaSource
-import com.rarible.protocol.union.core.model.download.PartialDownloadException
-import com.rarible.protocol.union.core.model.download.ProviderDownloadException
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.download.DownloadException
+import com.rarible.protocol.union.enrichment.download.PartialDownloadException
+import com.rarible.protocol.union.enrichment.download.ProviderDownloadException
 import com.rarible.protocol.union.enrichment.meta.downloader.Downloader
 import com.rarible.protocol.union.enrichment.meta.item.provider.ItemMetaProvider
 import com.rarible.protocol.union.enrichment.model.ShortItem

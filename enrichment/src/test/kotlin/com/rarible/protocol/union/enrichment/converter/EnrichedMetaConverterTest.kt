@@ -6,11 +6,11 @@ import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
-import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.AudioContentDto
 import com.rarible.protocol.union.dto.ImageContentDto
 import com.rarible.protocol.union.dto.Model3dContentDto
 import com.rarible.protocol.union.dto.VideoContentDto
+import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.enrichment.test.data.randomUnionCollectionMeta
 import com.rarible.protocol.union.enrichment.test.data.randomUnionContent

@@ -8,6 +8,7 @@ import com.rarible.protocol.dto.Model3dContentDto
 import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.UnknownContentDto
 import com.rarible.protocol.dto.VideoContentDto
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionHtmlProperties
@@ -18,7 +19,6 @@ import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionUnknownProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
-import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.MetaContentDto
 
