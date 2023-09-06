@@ -61,6 +61,9 @@ class MetaAutoRefreshJob(
     }
 
     private suspend fun loadTradableCollections(): List<CollectionIdDto> {
+        if (numberOfCollectionsToCheck == 0) {
+            return emptyList()
+        }
         val since = Instant.now().minusMillis(rate)
         return BlockchainDto.values()
             .flatMap { blockchain ->
