@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.service
 
 import com.rarible.core.common.optimisticLock
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.OutgoingEventListener
 import com.rarible.protocol.union.core.model.UnionCollectionChangeEvent
 import com.rarible.protocol.union.core.model.UnionCollectionSetBaseUriEvent
@@ -33,6 +34,7 @@ class EnrichmentCollectionEventService(
     private val originService: OriginService,
     private val itemMetaRefreshService: ItemMetaRefreshService,
     private val unionMetaProperties: UnionMetaProperties,
+    private val ff: FeatureFlagsProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -58,6 +60,9 @@ class EnrichmentCollectionEventService(
     }
 
     suspend fun onCollectionSetBaseUri(event: UnionCollectionSetBaseUriEvent) {
+        if (!ff.enableCollectionSetBaseUriEvent) {
+            return
+        }
         val collectionId = event.collectionId
         itemMetaRefreshService.scheduleRefresh(
             collectionId = collectionId,
