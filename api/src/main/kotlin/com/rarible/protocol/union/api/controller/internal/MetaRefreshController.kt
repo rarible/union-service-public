@@ -25,7 +25,7 @@ class MetaRefreshController(
     private val itemMetaRefreshService: ItemMetaRefreshService,
     private val unionMetaProperties: UnionMetaProperties,
     private val taskRepository: TaskRepository,
-    private val objectMapper: ObjectMapper,
+    private val objectMapper: ObjectMapper
 ) {
 
     @PostMapping(

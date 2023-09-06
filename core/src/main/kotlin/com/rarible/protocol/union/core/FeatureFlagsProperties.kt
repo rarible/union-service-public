@@ -44,11 +44,13 @@ data class FeatureFlagsProperties(
     val enableInternalEventChunkAsyncHandling: Boolean = true,
 
     val enableCollectionAutoReveal: Boolean = true,
+    val enableCollectionSetBaseUriEvent: Boolean = true,
+    val enableCollectionAutoRefreshOnCreation: Boolean = false,
+    val enableCollectionItemMetaRefreshApi: Boolean = true,
 
     val enableOptimizedSearchForItems: Boolean = false,
     val enableOptimizedSearchForActivities: Boolean = true,
 
     val enableStrictMetaComparison: Boolean = false,
-    val enableCollectionAutoRefreshOnCreation: Boolean = false,
     val enableMetaDownloadLimit: Boolean = true
 )
