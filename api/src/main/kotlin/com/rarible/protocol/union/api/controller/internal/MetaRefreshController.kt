@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.withTraceId
 import com.rarible.core.task.TaskRepository
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
@@ -26,6 +27,7 @@ class MetaRefreshController(
     private val unionMetaProperties: UnionMetaProperties,
     private val taskRepository: TaskRepository,
     private val objectMapper: ObjectMapper,
+    private val ff: FeatureFlagsProperties
 ) {
 
     @PostMapping(
@@ -38,6 +40,9 @@ class MetaRefreshController(
         @RequestBody body: String,
         @RequestParam(value = "withSimpleHash", required = false, defaultValue = "false") withSimpleHash: Boolean
     ): Unit = withTraceId {
+        if (!ff.enableCollectionItemMetaRefreshApi) {
+            return@withTraceId
+        }
         itemMetaRefreshService.scheduleRefreshIfNotRunning(
             collections = parseCollectionsFromBody(body),
             full = "full" == mode,
