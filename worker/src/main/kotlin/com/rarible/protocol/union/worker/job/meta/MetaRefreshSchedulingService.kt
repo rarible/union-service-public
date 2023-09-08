@@ -19,15 +19,20 @@ class MetaRefreshSchedulingService(
     private val objectMapper: ObjectMapper
 ) {
 
-    suspend fun scheduleTask(collection: MetaRefreshRequest) {
-        logger.info("Scheduling collection refresh $collection")
+    suspend fun scheduleTask(request: MetaRefreshRequest) {
+        logger.info("Scheduling collection refresh $request")
         val (jobParam, type) = when {
-            collection.withSimpleHash -> Pair(
-                RefreshSimpleHashTaskParam(collectionId = collection.collectionId),
+            request.withSimpleHash -> Pair(
+                RefreshSimpleHashTaskParam(collectionId = request.collectionId),
                 RefreshMetaSimpleHashTask.META_REFRESH_SIMPLEHASH_TASK
             )
+
             else -> Pair(
-                RefreshMetaTaskParam(collectionId = collection.collectionId, full = collection.full),
+                RefreshMetaTaskParam(
+                    collectionId = request.collectionId,
+                    full = request.full,
+                    priority = request.priority
+                ),
                 RefreshMetaTask.META_REFRESH_TASK
             )
         }

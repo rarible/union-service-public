@@ -4,6 +4,7 @@ import com.github.cloudyrock.mongock.ChangeLog
 import com.github.cloudyrock.mongock.ChangeSet
 import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
+import com.rarible.protocol.union.enrichment.repository.DownloadTaskRepository
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
@@ -31,6 +32,7 @@ class ChangeLog99999CreateIndices {
         @NonLockGuarded activityRepository: ActivityRepository,
         @NonLockGuarded metaAutoRefreshStateRepository: MetaAutoRefreshStateRepository,
         @NonLockGuarded metaRefreshRequestRepository: MetaRefreshRequestRepository,
+        @NonLockGuarded downloadTaskRepository: DownloadTaskRepository
     ) = runBlocking {
         ownershipRepository.createIndices()
         itemRepository.createIndices()

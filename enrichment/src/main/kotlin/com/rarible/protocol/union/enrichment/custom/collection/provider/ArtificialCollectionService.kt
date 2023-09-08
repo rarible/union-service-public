@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
@@ -65,7 +66,12 @@ class ArtificialCollectionService(
                 )
             )
             producer.sendChangeEvent(surrogateId)
-            collectionMetaService.schedule(surrogateId, CollectionMetaPipeline.REFRESH, true)
+            collectionMetaService.schedule(
+                collectionId = surrogateId,
+                pipeline = CollectionMetaPipeline.REFRESH,
+                force = true,
+                priority = MetaDownloadPriority.HIGH
+            )
         } catch (e: DuplicateKeyException) {
             logger.info("Artificial collection ${surrogateId.fullId()} can't be created, already exists: ${e.message}")
         } catch (e: OptimisticLockingFailureException) {

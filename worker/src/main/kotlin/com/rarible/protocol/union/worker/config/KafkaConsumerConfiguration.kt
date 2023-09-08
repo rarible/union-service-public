@@ -33,8 +33,7 @@ class KafkaConsumerConfiguration(
     fun lagService(
         kafkaConsumer: KafkaConsumer<String, String>,
         kafkaGroupFactory: KafkaGroupFactory,
-        applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-        workerProperties: WorkerProperties,
+        applicationEnvironmentInfo: ApplicationEnvironmentInfo
     ): LagService = LagService(
         kafkaConsumer = kafkaConsumer,
         bootstrapServers = producerProperties.brokerReplicaSet,
@@ -42,7 +41,6 @@ class KafkaConsumerConfiguration(
         refreshTopic = UnionInternalTopicProvider.getItemMetaDownloadTaskExecutorTopic(
             applicationEnvironmentInfo.name,
             ItemMetaPipeline.REFRESH.pipeline
-        ),
-        maxLag = workerProperties.metaRefresh.maxKafkaLag,
+        )
     )
 }

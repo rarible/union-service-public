@@ -15,7 +15,6 @@ import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
-import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
@@ -65,11 +64,10 @@ class CollectionController(
     override suspend fun refreshCollectionMeta(collection: String): ResponseEntity<Unit> = withTraceId {
         logger.info("Received request to refresh meta for collection: $collection")
         val collectionId = IdParser.parseCollectionId(collection)
-        itemMetaRefreshService.runRefreshIfAllowed(
+        itemMetaRefreshService.scheduleUserRefresh(
             collectionId = collectionId,
             full = true,
-            withSimpleHash = unionMetaProperties.simpleHash.enabled,
-            priority = MetaRefreshRequest.Priority.PRIORITY_CRITICAL
+            withSimpleHash = unionMetaProperties.simpleHash.enabled
         )
         ResponseEntity.noContent().build()
     }

@@ -8,4 +8,5 @@ data class DownloadTaskEvent(
     val force: Boolean,
     val source: DownloadTaskSource = DownloadTaskSource.INTERNAL,
     val scheduledAt: Instant,
+    val priority: Int = 0
 )

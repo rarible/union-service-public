@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.worker.task.search.EsRateLimiter
@@ -51,7 +52,12 @@ class SyncCollectionJob(
             chunk.mapAsync { collection ->
                 val enrichmentCollection = enrichmentCollectionService.update(collection, false)
                 if (enrichmentCollection.metaEntry == null) {
-                    collectionMetaService.schedule(collection.id, CollectionMetaPipeline.SYNC, false)
+                    collectionMetaService.schedule(
+                        collectionId = collection.id,
+                        pipeline = CollectionMetaPipeline.SYNC,
+                        force = false,
+                        priority = MetaDownloadPriority.NOBODY_CARES
+                    )
                 }
                 enrichmentCollection
             }

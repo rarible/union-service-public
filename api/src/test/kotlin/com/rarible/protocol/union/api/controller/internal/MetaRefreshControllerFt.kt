@@ -46,7 +46,7 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
             MetaRefreshRequest(
                 collectionId = "ETHEREUM:${Address.ONE()}",
                 full = testCase.existingFull,
-                priority = MetaRefreshRequest.Priority.PRIORITY_LOW
+                priority = 0
             )
         )
 

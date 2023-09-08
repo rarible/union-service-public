@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 class ItemMetaTaskScheduler(
     @Qualifier("item.meta.schedule.router")
-    metaTaskRouter: MetaTaskRouter,
+    metaTaskRouter: DownloadTaskRouter,
     repository: ItemMetaRepository,
     metrics: DownloadSchedulerMetrics,
     val blockchainRouter: BlockchainRouter<ItemService>

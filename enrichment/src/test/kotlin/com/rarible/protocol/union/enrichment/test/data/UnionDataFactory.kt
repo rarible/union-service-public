@@ -51,6 +51,8 @@ import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
 import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.download.DownloadStatus
+import com.rarible.protocol.union.enrichment.download.DownloadTask
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
@@ -565,5 +567,29 @@ fun randomSimpleHashItemCollection(
         description = description,
         imageUrl = imageUrl,
         bannerImageUrl = bannerImageUrl
+    )
+}
+
+fun randomDownloadTask(
+    id: String = randomEthItemId().fullId(),
+    type: String = "item",
+    pipeline: String = randomString(),
+    force: Boolean = true,
+    source: DownloadTaskSource = DownloadTaskSource.EXTERNAL,
+    priority: Int = 0,
+    scheduledAt: Instant = nowMillis(),
+    startedAt: Instant? = null,
+    inProgress: Boolean = false
+): DownloadTask {
+    return DownloadTask(
+        id = id,
+        type = type,
+        pipeline = pipeline,
+        force = force,
+        source = source,
+        priority = priority,
+        scheduledAt = scheduledAt,
+        startedAt = startedAt,
+        inProgress = inProgress,
     )
 }

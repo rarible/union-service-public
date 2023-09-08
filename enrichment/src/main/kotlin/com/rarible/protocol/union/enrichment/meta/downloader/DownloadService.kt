@@ -8,6 +8,7 @@ import com.rarible.protocol.union.enrichment.download.DownloadException
 import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import org.slf4j.LoggerFactory
 
 /**
@@ -51,7 +52,7 @@ abstract class DownloadService<K, T>(
 
         // There is no current entry, async scheduling should be performed
         if (current == null) {
-            schedule(key, pipeline, false, DownloadTaskSource.INTERNAL)
+            schedule(key, pipeline, false, DownloadTaskSource.INTERNAL, MetaDownloadPriority.ASAP)
         }
         return null
     }
@@ -81,7 +82,7 @@ abstract class DownloadService<K, T>(
                     "Direct download of {} with ID [{}] failed, scheduling download: {}",
                     type, id, e.message
                 )
-                schedule(key, pipeline, force, source)
+                schedule(key, pipeline, force, source, MetaDownloadPriority.HIGH)
             }
             return null
         }
@@ -97,8 +98,14 @@ abstract class DownloadService<K, T>(
      * Schedule async task to download data. If task is forced, it will be executed anyway.
      * Otherwise, task will be executed only if there is no entry in DB (with any status)
      */
-    protected suspend fun schedule(key: K, pipeline: String, force: Boolean, source: DownloadTaskSource) {
-        schedule(listOf(key), pipeline, force, source)
+    protected suspend fun schedule(
+        key: K,
+        pipeline: String,
+        force: Boolean,
+        source: DownloadTaskSource,
+        priority: Int
+    ) {
+        schedule(listOf(key), pipeline, force, source, priority)
     }
 
     /**
@@ -110,7 +117,13 @@ abstract class DownloadService<K, T>(
         updateSuccessful(toId(key), getBlockchain(key), data)
     }
 
-    private suspend fun schedule(ids: Collection<K>, pipeline: String, force: Boolean, source: DownloadTaskSource) {
+    private suspend fun schedule(
+        ids: Collection<K>,
+        pipeline: String,
+        force: Boolean,
+        source: DownloadTaskSource,
+        priority: Int
+    ) {
         val tasks = ids.map { key ->
             metrics.onTaskScheduled(getBlockchain(key), type, pipeline, force)
             DownloadTaskEvent(
@@ -119,6 +132,7 @@ abstract class DownloadService<K, T>(
                 force = force,
                 scheduledAt = nowMillis(),
                 source = source,
+                priority = priority
             )
         }
         if (tasks.isNotEmpty()) {
