@@ -1,10 +1,11 @@
 package com.rarible.protocol.union.enrichment.meta.downloader
 
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.core.UnionMetrics
+import com.rarible.protocol.union.dto.BlockchainDto
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 
+// TODO move to MetaMetrics
 @Component
 class DownloadMetrics(
     meterRegistry: MeterRegistry

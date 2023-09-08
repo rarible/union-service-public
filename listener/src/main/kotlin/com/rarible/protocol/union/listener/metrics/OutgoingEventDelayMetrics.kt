@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.listener.metrics
 
+import com.rarible.protocol.union.core.UnionMetrics
 import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.core.UnionMetrics
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 import java.time.Duration
@@ -51,16 +51,15 @@ class OutgoingEventDelayMetrics(
         to: String,
         delay: Duration
     ) {
-        meterRegistry.timer(
+        record(
             name,
-            listOf(
-                tag(blockchain),
-                type(type.value),
-                tag("source", source),
-                tag("from", from),
-                tag("to", to),
-            )
-        ).record(delay)
+            delay,
+            tag(blockchain),
+            type(type.value),
+            tag("source", source),
+            tag("from", from),
+            tag("to", to)
+        )
     }
 
     private companion object {
