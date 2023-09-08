@@ -52,7 +52,13 @@ abstract class DownloadService<K, T>(
 
         // There is no current entry, async scheduling should be performed
         if (current == null) {
-            schedule(key, pipeline, false, DownloadTaskSource.INTERNAL, MetaDownloadPriority.ASAP)
+            schedule(
+                key = key,
+                pipeline = pipeline,
+                force = false,
+                source = DownloadTaskSource.INTERNAL,
+                priority = MetaDownloadPriority.ASAP,
+            )
         }
         return null
     }
@@ -82,7 +88,13 @@ abstract class DownloadService<K, T>(
                     "Direct download of {} with ID [{}] failed, scheduling download: {}",
                     type, id, e.message
                 )
-                schedule(key, pipeline, force, source, MetaDownloadPriority.HIGH)
+                schedule(
+                    key = key,
+                    pipeline = pipeline,
+                    force = force,
+                    source = source,
+                    priority = MetaDownloadPriority.HIGH,
+                )
             }
             return null
         }
@@ -105,7 +117,13 @@ abstract class DownloadService<K, T>(
         source: DownloadTaskSource,
         priority: Int
     ) {
-        schedule(listOf(key), pipeline, force, source, priority)
+        schedule(
+            keys = listOf(key),
+            pipeline = pipeline,
+            force = force,
+            source = source,
+            priority = priority
+        )
     }
 
     /**
@@ -118,13 +136,13 @@ abstract class DownloadService<K, T>(
     }
 
     private suspend fun schedule(
-        ids: Collection<K>,
+        keys: Collection<K>,
         pipeline: String,
         force: Boolean,
         source: DownloadTaskSource,
         priority: Int
     ) {
-        val tasks = ids.map { key ->
+        val tasks = keys.map { key ->
             metrics.onTaskScheduled(getBlockchain(key), type, pipeline, force)
             DownloadTaskEvent(
                 id = toId(key),

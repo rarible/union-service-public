@@ -2,6 +2,8 @@ package com.rarible.protocol.union.enrichment.repository
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.enrichment.download.DownloadTask
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -58,12 +60,12 @@ class DownloadTaskRepository(
         return template.find<DownloadTask>(Query(criteria)).collectList().awaitSingle()
     }
 
-    suspend fun deleteByIds(ids: List<String>) {
-        val criteria = Criteria("_id").inValues(ids)
+    suspend fun delete(id: String) {
+        val criteria = Criteria("_id").isEqualTo(id)
         template.remove<DownloadTask>(Query(criteria)).awaitSingle()
     }
 
-    suspend fun findForExecution(type: String, pipeline: String, limit: Int): List<DownloadTask> {
+    suspend fun findForExecution(type: String, pipeline: String, limit: Int): Flow<DownloadTask> {
         val criteria = Criteria().andOperator(
             DownloadTask::type isEqualTo type,
             DownloadTask::pipeline isEqualTo pipeline,
@@ -74,7 +76,7 @@ class DownloadTaskRepository(
                 .and(Sort.by(Sort.Direction.ASC, DownloadTask::scheduledAt.name))
         ).limit(limit)
 
-        return template.find<DownloadTask>(query).collectList().awaitSingle()
+        return template.find<DownloadTask>(query).asFlow()
     }
 
     suspend fun reactivateStuckTasks(inProgressLimit: Duration): Long {

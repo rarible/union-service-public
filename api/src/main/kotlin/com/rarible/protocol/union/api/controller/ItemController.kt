@@ -183,7 +183,7 @@ class ItemController(
                 itemId = fullItemId,
                 pipeline = ItemMetaPipeline.REFRESH,
                 force = true,
-                source = DownloadTaskSource.EXTERNAL
+                source = DownloadTaskSource.EXTERNAL,
             )
         } else {
             itemMetaService.schedule(
@@ -191,7 +191,7 @@ class ItemController(
                 pipeline = ItemMetaPipeline.REFRESH,
                 force = true,
                 source = DownloadTaskSource.EXTERNAL,
-                priority = MetaDownloadPriority.ASAP
+                priority = MetaDownloadPriority.ASAP,
             )
         }
 

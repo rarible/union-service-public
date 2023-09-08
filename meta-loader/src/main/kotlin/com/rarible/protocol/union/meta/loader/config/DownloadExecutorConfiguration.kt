@@ -25,7 +25,6 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.meta.item.PartialItemMetaDownloader
 import com.rarible.protocol.union.enrichment.repository.CollectionMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
-import com.rarible.protocol.union.enrichment.repository.LockRepository
 import com.rarible.protocol.union.enrichment.service.DownloadTaskService
 import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
@@ -57,7 +56,6 @@ class DownloadExecutorConfiguration(
     private val kafkaConsumerFactory: RaribleKafkaConsumerFactory,
     private val meterRegistry: MeterRegistry,
     private val downloadTaskService: DownloadTaskService,
-    private val lockRepository: LockRepository,
     private val ff: FeatureFlagsProperties,
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
 ) {
@@ -255,7 +253,6 @@ class DownloadExecutorConfiguration(
             workerName = "meta_${type}_downloader_$pipeline",
             downloadTaskService = downloadTaskService,
             executor = executorManager.getExecutor(pipeline),
-            lockRepository = lockRepository,
             pipeline = pipeline,
             poolSize = conf.poolSize
         )

@@ -7,6 +7,7 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.util.truncatedToSeconds
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import kotlinx.coroutines.reactor.awaitSingle
@@ -46,7 +47,7 @@ internal class MetaRefreshControllerFt : AbstractIntegrationTest() {
             MetaRefreshRequest(
                 collectionId = "ETHEREUM:${Address.ONE()}",
                 full = testCase.existingFull,
-                priority = 0
+                priority = MetaDownloadPriority.NOBODY_CARES
             )
         )
 

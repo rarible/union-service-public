@@ -9,6 +9,9 @@ import com.rarible.protocol.union.enrichment.util.optimisticLockWithInitial
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.stereotype.Component
@@ -66,8 +69,8 @@ class DownloadTaskService(
         }
     }
 
-    suspend fun delete(events: List<DownloadTaskEvent>) {
-        downloadTaskRepository.deleteByIds(events.map { it.id })
+    suspend fun delete(event: DownloadTaskEvent) {
+        downloadTaskRepository.delete(event.id)
     }
 
     suspend fun getForExecution(type: String, pipeline: String, limit: Int): List<DownloadTask> {
@@ -81,7 +84,7 @@ class DownloadTaskService(
             } catch (ex: DuplicateKeyException) {
                 null
             }
-        }
+        }.take(limit).toList()
     }
 
     suspend fun reactivateStuckTasks(): Long {

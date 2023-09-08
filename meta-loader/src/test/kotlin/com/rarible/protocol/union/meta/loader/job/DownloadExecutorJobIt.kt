@@ -2,7 +2,6 @@ package com.rarible.protocol.union.meta.loader.job
 
 import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.enrichment.repository.DownloadTaskRepository
-import com.rarible.protocol.union.enrichment.repository.LockRepository
 import com.rarible.protocol.union.enrichment.service.DownloadTaskService
 import com.rarible.protocol.union.enrichment.test.data.randomDownloadTask
 import com.rarible.protocol.union.meta.loader.executor.ItemDownloadExecutor
@@ -32,9 +31,6 @@ class DownloadExecutorJobIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var downloadTaskRepository: DownloadTaskRepository
 
-    @Autowired
-    lateinit var lockRepository: LockRepository
-
     lateinit var downloadExecutorJob: DownloadExecutorJob
 
     @BeforeEach
@@ -53,7 +49,6 @@ class DownloadExecutorJobIt : AbstractIntegrationTest() {
             workerName = "test_worker",
             executor = executor,
             downloadTaskService = downloadTaskService,
-            lockRepository = lockRepository,
             pipeline = "test",
             poolSize = 4
         )
@@ -75,7 +70,6 @@ class DownloadExecutorJobIt : AbstractIntegrationTest() {
         assertThat(downloadTaskRepository.get(skip1.id)).isEqualTo(skip1)
         assertThat(downloadTaskRepository.get(skip2.id)).isEqualTo(skip2)
         assertThat(downloadTaskRepository.get(skip3.id)).isEqualTo(skip3)
-        assertThat(lockRepository.get("meta_download_executor_item_test")!!.acquired).isFalse()
 
         coVerify(exactly = 16) { executor.submit(any(), any()) }
         toBeHandled.forEach { id -> coVerify(exactly = 1) { executor.submit(match { it.id == id }, any()) } }
