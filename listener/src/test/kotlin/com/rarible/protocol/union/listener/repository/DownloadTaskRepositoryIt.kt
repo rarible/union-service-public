@@ -32,11 +32,8 @@ class DownloadTaskRepositoryIt : AbstractIntegrationTest() {
         createTask(priority = 30, pipeline = "event")
         createTask(priority = 30, type = "collection")
 
-        assertThat(downloadTaskRepository.findForExecution("item", "api", 5))
+        assertThat(downloadTaskRepository.findForExecution("item", "api"))
             .isEqualTo(listOf(api1, api3, api2, api5))
-
-        assertThat(downloadTaskRepository.findForExecution("item", "api", 2))
-            .isEqualTo(listOf(api1, api3))
     }
 
     @Test
@@ -47,7 +44,7 @@ class DownloadTaskRepositoryIt : AbstractIntegrationTest() {
 
         downloadTaskRepository.reactivateStuckTasks(Duration.ofSeconds(20))
 
-        assertThat(downloadTaskRepository.findForExecution("item", "api", 2))
+        assertThat(downloadTaskRepository.findForExecution("item", "api"))
             .isEqualTo(listOf(api2.copy(inProgress = false, startedAt = null, version = 1)))
     }
 

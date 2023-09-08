@@ -74,7 +74,7 @@ class DownloadTaskService(
     }
 
     suspend fun getForExecution(type: String, pipeline: String, limit: Int): List<DownloadTask> {
-        val result = downloadTaskRepository.findForExecution(type, pipeline, limit)
+        val result = downloadTaskRepository.findForExecution(type, pipeline)
         return result.mapNotNull {
             try {
                 // If there is concurrency problem, let's just skip this task - and handle it in next batch

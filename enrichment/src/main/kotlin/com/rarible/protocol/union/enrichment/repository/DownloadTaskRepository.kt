@@ -65,7 +65,7 @@ class DownloadTaskRepository(
         template.remove<DownloadTask>(Query(criteria)).awaitSingle()
     }
 
-    suspend fun findForExecution(type: String, pipeline: String, limit: Int): Flow<DownloadTask> {
+    suspend fun findForExecution(type: String, pipeline: String): Flow<DownloadTask> {
         val criteria = Criteria().andOperator(
             DownloadTask::type isEqualTo type,
             DownloadTask::pipeline isEqualTo pipeline,
