@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.logging.withTraceId
 import com.rarible.protocol.union.api.service.select.CollectionSourceSelectService
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.service.CollectionService
@@ -32,6 +33,7 @@ class CollectionController(
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val itemMetaRefreshService: ItemMetaRefreshService,
     private val unionMetaProperties: UnionMetaProperties,
+    private val ff: FeatureFlagsProperties
 ) : CollectionControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -62,6 +64,9 @@ class CollectionController(
     }
 
     override suspend fun refreshCollectionMeta(collection: String): ResponseEntity<Unit> = withTraceId {
+        if (!ff.enableCollectionItemMetaRefreshApi) {
+            return@withTraceId ResponseEntity.noContent().build()
+        }
         logger.info("Received request to refresh meta for collection: $collection")
         val collectionId = IdParser.parseCollectionId(collection)
         itemMetaRefreshService.scheduleUserRefresh(

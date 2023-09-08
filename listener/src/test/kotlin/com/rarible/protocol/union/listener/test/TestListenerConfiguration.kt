@@ -2,6 +2,7 @@ package com.rarible.protocol.union.listener.test
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
+import com.rarible.core.kafka.Compression
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
@@ -185,7 +186,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = NftItemEventDto::class.java,
             defaultTopic = NftItemEventTopicProvider.getTopic(env, "ethereum"),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -196,7 +198,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = NftOwnershipEventDto::class.java,
             defaultTopic = NftOwnershipEventTopicProvider.getTopic(env, "ethereum"),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -207,7 +210,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = com.rarible.protocol.dto.OrderEventDto::class.java,
             defaultTopic = OrderIndexerTopicProvider.getOrderUpdateTopic(env, "ethereum"),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -218,7 +222,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupOrder::class.java,
             defaultTopic = DipDupTopicProvider.getOrderTopic("test"),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -229,7 +234,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupActivity::class.java,
             defaultTopic = DipDupTopicProvider.getActivityTopic("test"),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -240,7 +246,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupItemMetaEvent::class.java,
             defaultTopic = DipDupTopicProvider.getItemMetaTopic("test"),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -251,7 +258,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = DipDupCollectionEvent::class.java,
             defaultTopic = DipDupTopicProvider.getCollectionTopic("test"),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -262,7 +270,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = com.rarible.protocol.dto.NftCollectionEventDto::class.java,
             defaultTopic = NftCollectionEventTopicProvider.getTopic(env, "ethereum"),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -273,7 +282,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = EthActivityEventDto::class.java,
             defaultTopic = ActivityTopicProvider.getActivityTopic(env, "ethereum"),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -286,7 +296,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = FlowNftItemEventDto::class.java,
             defaultTopic = FlowNftItemEventTopicProvider.getTopic(env),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -297,7 +308,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = FlowOwnershipEventDto::class.java,
             defaultTopic = FlowNftOwnershipEventTopicProvider.getTopic(env),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -308,7 +320,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = FlowOrderEventDto::class.java,
             defaultTopic = FlowOrderEventTopicProvider.getTopic(env),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -319,7 +332,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = FlowActivityDto::class.java,
             defaultTopic = FlowActivityEventTopicProvider.getActivityTopic(env),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -332,7 +346,8 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = TokenMetaEventDto::class.java,
             defaultTopic = SolanaEventTopicProvider.getTokenMetaTopic(env),
-            bootstrapServers = kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 

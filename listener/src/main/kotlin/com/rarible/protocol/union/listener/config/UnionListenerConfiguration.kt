@@ -152,7 +152,8 @@ class UnionListenerConfiguration(
                 valueSerializerClass = UnionKafkaJsonSerializer::class.java,
                 valueClass = DownloadTaskEvent::class.java,
                 defaultTopic = topic,
-                bootstrapServers = properties.brokerReplicaSet
+                bootstrapServers = properties.brokerReplicaSet,
+                compression = properties.compression,
             )
             producers[pipeline] = producer
         }
@@ -193,7 +194,8 @@ class UnionListenerConfiguration(
                 valueSerializerClass = UnionKafkaJsonSerializer::class.java,
                 valueClass = DownloadTaskEvent::class.java,
                 defaultTopic = topic,
-                bootstrapServers = properties.brokerReplicaSet
+                bootstrapServers = properties.brokerReplicaSet,
+                compression = properties.compression,
             )
             producers[pipeline] = producer
         }
