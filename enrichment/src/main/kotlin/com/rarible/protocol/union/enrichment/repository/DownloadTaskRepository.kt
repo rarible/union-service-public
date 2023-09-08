@@ -74,7 +74,7 @@ class DownloadTaskRepository(
         val query = Query(criteria).with(
             Sort.by(Sort.Direction.DESC, DownloadTask::priority.name)
                 .and(Sort.by(Sort.Direction.ASC, DownloadTask::scheduledAt.name))
-        ).limit(limit)
+        )
 
         return template.find<DownloadTask>(query).asFlow()
     }
