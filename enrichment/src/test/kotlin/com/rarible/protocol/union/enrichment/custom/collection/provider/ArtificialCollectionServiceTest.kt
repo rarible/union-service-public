@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollection
 import io.mockk.coEvery
@@ -71,7 +72,14 @@ class ArtificialCollectionServiceTest {
         coEvery { collectionRepository.get(collection.id) } returns collection
         coEvery { collectionRepository.save(expected) } returns expected
         coEvery { producer.sendChangeEvent(subId) } returns Unit
-        coEvery { collectionMetaService.schedule(subId, CollectionMetaPipeline.REFRESH, true) } returns Unit
+        coEvery {
+            collectionMetaService.schedule(
+                subId,
+                CollectionMetaPipeline.REFRESH,
+                true,
+                MetaDownloadPriority.HIGH
+            )
+        } returns Unit
 
         artificialCollectionService.createArtificialCollection(
             collection.id.toDto(),
@@ -82,7 +90,14 @@ class ArtificialCollectionServiceTest {
 
         coVerify(exactly = 1) { collectionRepository.save(expected) }
         coVerify(exactly = 1) { producer.sendChangeEvent(subCollection.id.toDto()) }
-        coVerify(exactly = 1) { collectionMetaService.schedule(subId, CollectionMetaPipeline.REFRESH, true) }
+        coVerify(exactly = 1) {
+            collectionMetaService.schedule(
+                subId,
+                CollectionMetaPipeline.REFRESH,
+                true,
+                MetaDownloadPriority.HIGH
+            )
+        }
         assertThat(artificialCollectionService.exists(subCollection.id.toDto())).isTrue()
     }
 

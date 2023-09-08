@@ -9,6 +9,7 @@ import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.test.data.randomCollectionMetaDownloadEntry
@@ -84,7 +85,14 @@ class SyncCollectionJobTest {
 
         coEvery { enrichmentCollectionService.update(collection1, false) } returns updated1
         coEvery { enrichmentCollectionService.update(collection2, false) } returns updated2
-        coEvery { collectionMetaService.schedule(collection1.id, CollectionMetaPipeline.SYNC, false) } returns Unit
+        coEvery {
+            collectionMetaService.schedule(
+                collection1.id,
+                CollectionMetaPipeline.SYNC,
+                false,
+                MetaDownloadPriority.NOBODY_CARES
+            )
+        } returns Unit
 
         coEvery { enrichmentCollectionService.enrich(enrichmentCollections, CollectionMetaPipeline.SYNC) } returns dto
 
@@ -94,7 +102,7 @@ class SyncCollectionJobTest {
         coVerify(exactly = 1) { enrichmentCollectionService.update(collection1, false) }
         coVerify(exactly = 1) { enrichmentCollectionService.update(collection2, false) }
         // Only collection without meta should be triggered
-        coVerify(exactly = 1) { collectionMetaService.schedule(any(), any(), any()) }
+        coVerify(exactly = 1) { collectionMetaService.schedule(any(), any(), any(), any()) }
 
         coVerify(exactly = 1) {
             esCollectionRepository.bulk(match { batch ->
@@ -129,7 +137,7 @@ class SyncCollectionJobTest {
 
         coVerify(exactly = 1) { enrichmentCollectionService.update(collection1, false) }
         coVerify(exactly = 1) { enrichmentCollectionService.update(collection2, false) }
-        coVerify(exactly = 0) { collectionMetaService.schedule(any(), any(), any()) }
+        coVerify(exactly = 0) { collectionMetaService.schedule(any(), any(), any(), any()) }
 
         coVerify(exactly = 1) { producer.sendChangeEvents(listOf(collection1.id, collection2.id)) }
     }

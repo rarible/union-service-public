@@ -35,7 +35,7 @@ class ArtBlocksCollectionProjectJobIt {
     val properties = EnrichmentCollectionProperties(mappings = listOf(artBlocksMapping))
 
     val collectionMetaService: CollectionMetaService = mockk {
-        coEvery { schedule(any(), any(), any()) } returns Unit
+        coEvery { schedule(any(), any(), any(), any()) } returns Unit
     }
 
     @Autowired

@@ -93,10 +93,10 @@ internal class MetaAutoRefreshJobTest {
             })
         } returns flowOf(state3, state4)
 
-        coEvery { itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId1, simpleHashEnabled) } returns false
-        coEvery { itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId2, simpleHashEnabled) } returns true
-        coEvery { itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId3, simpleHashEnabled) } returns false
-        coEvery { itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId4, simpleHashEnabled) } returns true
+        coEvery { itemMetaRefreshService.scheduleAutoRefresh(collectionId1, simpleHashEnabled) } returns false
+        coEvery { itemMetaRefreshService.scheduleAutoRefresh(collectionId2, simpleHashEnabled) } returns true
+        coEvery { itemMetaRefreshService.scheduleAutoRefresh(collectionId3, simpleHashEnabled) } returns false
+        coEvery { itemMetaRefreshService.scheduleAutoRefresh(collectionId4, simpleHashEnabled) } returns true
 
         coEvery { metaAutoRefreshStateRepository.save(any()) } returns Unit
 

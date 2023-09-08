@@ -96,7 +96,8 @@ internal class RefreshMetaTaskTest {
             itemMetaService.schedule(
                 itemId = itemId1,
                 pipeline = ItemMetaPipeline.REFRESH,
-                force = true
+                force = true,
+                priority = 10
             )
         } returns Unit
 
@@ -104,13 +105,14 @@ internal class RefreshMetaTaskTest {
             itemMetaService.schedule(
                 itemId = itemId2,
                 pipeline = ItemMetaPipeline.REFRESH,
-                force = true
+                force = true,
+                priority = 10
             )
         } returns Unit
 
         val result = refreshMetaTask.runLongTask(
             "from",
-            """{"collectionId":"$collectionId","full":true}"""
+            """{"collectionId":"$collectionId","full":true,"priority":10}"""
         ).toList()
 
         assertThat(result).containsExactly("continuation2")
@@ -119,12 +121,14 @@ internal class RefreshMetaTaskTest {
             itemMetaService.schedule(
                 itemId = itemId1,
                 pipeline = ItemMetaPipeline.REFRESH,
-                force = true
+                force = true,
+                priority = 10
             )
             itemMetaService.schedule(
                 itemId = itemId2,
                 pipeline = ItemMetaPipeline.REFRESH,
-                force = true
+                force = true,
+                priority = 10
             )
         }
     }
@@ -170,7 +174,8 @@ internal class RefreshMetaTaskTest {
             itemMetaService.schedule(
                 itemId = itemId2,
                 pipeline = ItemMetaPipeline.REFRESH,
-                force = true
+                force = true,
+                priority = 0
             )
         } returns Unit
 
@@ -185,7 +190,8 @@ internal class RefreshMetaTaskTest {
             itemMetaService.schedule(
                 itemId = itemId1,
                 pipeline = ItemMetaPipeline.REFRESH,
-                force = true
+                force = true,
+                priority = 0
             )
         }
 
@@ -193,7 +199,8 @@ internal class RefreshMetaTaskTest {
             itemMetaService.schedule(
                 itemId = itemId2,
                 pipeline = ItemMetaPipeline.REFRESH,
-                force = true
+                force = true,
+                priority = 0
             )
         }
     }

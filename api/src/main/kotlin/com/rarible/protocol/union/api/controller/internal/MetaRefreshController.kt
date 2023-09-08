@@ -38,7 +38,7 @@ class MetaRefreshController(
         @RequestBody body: String,
         @RequestParam(value = "withSimpleHash", required = false, defaultValue = "false") withSimpleHash: Boolean
     ): Unit = withTraceId {
-        itemMetaRefreshService.scheduleRefreshIfNotRunning(
+        itemMetaRefreshService.scheduleInternalRefresh(
             collections = parseCollectionsFromBody(body),
             full = "full" == mode,
             scheduledAt = scheduledAt ?: nowMillis(),

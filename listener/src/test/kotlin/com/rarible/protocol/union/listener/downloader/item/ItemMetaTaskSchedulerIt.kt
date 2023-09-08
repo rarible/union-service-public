@@ -14,8 +14,8 @@ import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.listener.downloader.DownloadSchedulerMetrics
+import com.rarible.protocol.union.listener.downloader.DownloadTaskRouter
 import com.rarible.protocol.union.listener.downloader.ItemMetaTaskScheduler
-import com.rarible.protocol.union.listener.downloader.MetaTaskRouter
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.clearMocks
@@ -43,7 +43,7 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     @Autowired
     lateinit var blockchainRouter: BlockchainRouter<ItemService>
 
-    private val router: MetaTaskRouter = mockk()
+    private val router: DownloadTaskRouter = mockk()
 
     lateinit var scheduler: ItemMetaTaskScheduler
 

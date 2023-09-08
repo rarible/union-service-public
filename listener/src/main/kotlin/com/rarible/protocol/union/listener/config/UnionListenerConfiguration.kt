@@ -22,7 +22,10 @@ import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
-import com.rarible.protocol.union.listener.downloader.MetaTaskRouter
+import com.rarible.protocol.union.enrichment.service.DownloadTaskService
+import com.rarible.protocol.union.listener.downloader.DownloadTaskRouter
+import com.rarible.protocol.union.listener.downloader.KafkaMetaTaskRouter
+import com.rarible.protocol.union.listener.downloader.MongoMetaTaskRouter
 import com.rarible.protocol.union.listener.handler.MetricsInternalEventHandlerFactory
 import com.rarible.protocol.union.listener.handler.internal.CollectionMetaTaskSchedulerHandler
 import com.rarible.protocol.union.listener.handler.internal.ItemMetaTaskSchedulerHandler
@@ -44,6 +47,7 @@ import org.springframework.context.annotation.Import
 @Import(value = [EnrichmentConsumerConfiguration::class, SearchConfiguration::class])
 @EnableConfigurationProperties(value = [UnionListenerProperties::class])
 class UnionListenerConfiguration(
+    private val downloadTaskService: DownloadTaskService,
     private val listenerProperties: UnionListenerProperties,
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     private val meterRegistry: MeterRegistry,
@@ -136,7 +140,10 @@ class UnionListenerConfiguration(
 
     @Bean
     @Qualifier("item.meta.schedule.router")
-    fun itemMetaTaskRouter(): MetaTaskRouter {
+    fun itemMetaTaskRouter(): DownloadTaskRouter {
+        if (ff.enableMetaMongoPipeline) {
+            return MongoMetaTaskRouter("item", downloadTaskService)
+        }
         val producers = HashMap<String, RaribleKafkaProducer<DownloadTaskEvent>>()
         ItemMetaPipeline.values().map { it.pipeline }.forEach { pipeline ->
             val topic = UnionInternalTopicProvider.getItemMetaDownloadTaskExecutorTopic(env, pipeline)
@@ -150,7 +157,7 @@ class UnionListenerConfiguration(
             )
             producers[pipeline] = producer
         }
-        return MetaTaskRouter(producers)
+        return KafkaMetaTaskRouter(producers)
     }
 
     @Bean
@@ -175,7 +182,10 @@ class UnionListenerConfiguration(
 
     @Bean
     @Qualifier("collection.meta.schedule.router")
-    fun collectionMetaTaskRouter(): MetaTaskRouter {
+    fun collectionMetaTaskRouter(): DownloadTaskRouter {
+        if (ff.enableMetaMongoPipeline) {
+            return MongoMetaTaskRouter("collection", downloadTaskService)
+        }
         val producers = HashMap<String, RaribleKafkaProducer<DownloadTaskEvent>>()
         CollectionMetaPipeline.values().map { it.pipeline }.forEach { pipeline ->
             val topic = UnionInternalTopicProvider.getCollectionMetaDownloadTaskExecutorTopic(env, pipeline)
@@ -189,7 +199,7 @@ class UnionListenerConfiguration(
             )
             producers[pipeline] = producer
         }
-        return MetaTaskRouter(producers)
+        return KafkaMetaTaskRouter(producers)
     }
 
     // --------------- Meta 3.0 beans END

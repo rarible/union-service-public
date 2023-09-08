@@ -8,6 +8,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentProperties
 import com.rarible.protocol.union.enrichment.download.PartialDownloadException
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -29,8 +30,8 @@ class ItemMetaRefreshService(
     private val enrichmentItemService: EnrichmentItemService,
     private val defaultItemMetaComparator: DefaultItemMetaComparator,
     private val strictItemMetaComparator: StrictItemMetaComparator,
-    private val ff: FeatureFlagsProperties,
     private val enrichmentProperties: EnrichmentProperties,
+    private val ff: FeatureFlagsProperties,
 ) {
 
     /**
@@ -38,14 +39,14 @@ class ItemMetaRefreshService(
      * Can be run even if there are postponed refresh scheduled for this collection.
      * For internal usage, you should understand what are you doing!
      */
-    suspend fun scheduleRefreshIfNotRunning(
+    suspend fun scheduleInternalRefresh(
         collections: List<CollectionIdDto>,
         full: Boolean,
         scheduledAt: Instant,
         withSimpleHash: Boolean = false
-    ) = collections.map { scheduleRefreshIfNotRunning(it, full, scheduledAt, withSimpleHash) }
+    ) = collections.map { scheduleInternalRefresh(it, full, scheduledAt, withSimpleHash) }
 
-    private suspend fun scheduleRefreshIfNotRunning(
+    private suspend fun scheduleInternalRefresh(
         collectionId: CollectionIdDto,
         full: Boolean,
         scheduledAt: Instant,
@@ -54,39 +55,34 @@ class ItemMetaRefreshService(
         if (metaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId.fullId()) > 0L) {
             return
         }
-        try {
-            logger.info("Scheduling refresh for Items in $collectionId, full=$full at $scheduledAt")
-            scheduleRefresh(
-                collectionId = collectionId,
-                full = full,
-                scheduledAt = scheduledAt,
-                withSimpleHash = withSimpleHash,
-                priority = MetaRefreshRequest.Priority.PRIORITY_HIGHEST
-            )
-        } catch (e: Exception) {
-            logger.error("Failed to schedule refresh for Items in $collectionId", e)
-        }
+        logger.info("Scheduling refresh for Items in $collectionId, full=$full at $scheduledAt")
+
+        scheduleRefresh(
+            collectionId = collectionId,
+            full = full,
+            scheduledAt = scheduledAt,
+            withSimpleHash = withSimpleHash,
+            priority = MetaDownloadPriority.RIGHT_NOW
+        )
     }
 
     /**
      * Run refresh for Collection's Items if all conditions for that are met.
      * This method can be used by users, so there are several constraints for this procedure.
      */
-    suspend fun runRefreshIfAllowed(
+    suspend fun scheduleUserRefresh(
         collectionId: CollectionIdDto,
         full: Boolean,
-        priority: Int,
         withSimpleHash: Boolean = false,
     ): Boolean {
-        val collectionFullId = collectionId.fullId()
-        if (!isRefreshAllowed(collectionFullId)) {
+        if (!isRefreshAllowed(collectionId.fullId())) {
             return false
         }
         scheduleRefresh(
             collectionId = collectionId,
             full = full,
             withSimpleHash = withSimpleHash,
-            priority = priority
+            priority = MetaDownloadPriority.MEDIUM
         )
         return true
     }
@@ -97,7 +93,7 @@ class ItemMetaRefreshService(
      * Launch of such refresh can be not allowed, for example, if collection is too big or there are
      * already several refreshes are running
      */
-    suspend fun runAutoRefreshIfAllowed(
+    suspend fun scheduleAutoRefresh(
         collectionId: CollectionIdDto,
         withSimpleHash: Boolean
     ): Boolean {
@@ -110,12 +106,24 @@ class ItemMetaRefreshService(
             collectionId = collectionId,
             full = true,
             withSimpleHash = withSimpleHash,
-            priority = MetaRefreshRequest.Priority.PRIORITY_LOW
+            priority = MetaDownloadPriority.NOBODY_CARES
         )
         return true
     }
 
-    suspend fun runRefreshIfItemMetaChanged(
+    suspend fun scheduleAutoRefreshOnBaseUriChanged(
+        collectionId: CollectionIdDto,
+        withSimpleHash: Boolean
+    ) {
+        scheduleRefresh(
+            collectionId = collectionId,
+            full = true,
+            withSimpleHash = withSimpleHash,
+            priority = MetaDownloadPriority.HIGH
+        )
+    }
+
+    suspend fun scheduleAutoRefreshOnItemMetaChanged(
         itemId: ItemIdDto,
         previous: UnionMeta?,
         updated: UnionMeta?,
@@ -128,10 +136,7 @@ class ItemMetaRefreshService(
         val comparator = if (ff.enableStrictMetaComparison) strictItemMetaComparator else defaultItemMetaComparator
 
         // We interested only in cases when meta was exists previously and successfully received again
-        if (previous == null ||
-            updated == null ||
-            !comparator.hasChanged(itemId, previous, updated)
-        ) {
+        if (previous == null || updated == null || !comparator.hasChanged(itemId, previous, updated)) {
             return false
         }
 
@@ -146,7 +151,7 @@ class ItemMetaRefreshService(
             collectionId = collectionId,
             full = true,
             withSimpleHash = withSimpleHash,
-            priority = MetaRefreshRequest.Priority.PRIORITY_MEDIUM
+            priority = MetaDownloadPriority.LOW
         )
         return true
     }
@@ -154,7 +159,7 @@ class ItemMetaRefreshService(
     /**
      * Schedule or run refresh for Collection's Items without any condition checks.
      */
-    suspend fun scheduleRefresh(
+    private suspend fun scheduleRefresh(
         collectionId: CollectionIdDto,
         full: Boolean,
         scheduledAt: Instant = Instant.now(),

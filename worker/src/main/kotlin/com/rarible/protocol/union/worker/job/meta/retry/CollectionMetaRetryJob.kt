@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.micrometer.core.instrument.MeterRegistry
@@ -48,17 +49,30 @@ class CollectionMetaRetryJobHandler(
         val now = nowMillis()
         val retryIntervals = metaProperties.retryIntervals
 
-        for (i in retryIntervals.indices) {
-            val collectionFlow = repository.getCollectionsForMetaRetry(now, retryIntervals[i], i)
+        for (attempt in retryIntervals.indices) {
+            val collectionFlow = repository.getCollectionsForMetaRetry(now, retryIntervals[attempt], attempt)
 
             collectionFlow.collect { collection ->
                 val collectionId = collection.id.toDto()
 
                 LogUtils.addToMdc(collectionId) {
-                    logger.info("Scheduling Collection meta download (retry = $i) for $collectionId")
+                    logger.info("Scheduling Collection meta download (retry = $attempt) for $collectionId")
                 }
 
-                metaService.schedule(collectionId, CollectionMetaPipeline.RETRY, true)
+                val priority = when (attempt) {
+                    0 -> MetaDownloadPriority.ASAP
+                    1 -> MetaDownloadPriority.HIGH
+                    2 -> MetaDownloadPriority.MEDIUM
+                    3 -> MetaDownloadPriority.LOW
+                    else -> MetaDownloadPriority.NOBODY_CARES
+                }
+
+                metaService.schedule(
+                    collectionId = collectionId,
+                    pipeline = CollectionMetaPipeline.RETRY,
+                    force = true,
+                    priority = priority
+                )
                 repository.save(collection.withNextRetry())
             }
         }

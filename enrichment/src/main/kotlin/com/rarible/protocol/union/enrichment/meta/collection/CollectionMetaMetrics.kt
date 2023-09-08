@@ -7,4 +7,8 @@ import org.springframework.stereotype.Component
 @Component
 class CollectionMetaMetrics(
     meterRegistry: MeterRegistry
-) : MetaMetrics(meterRegistry, "collection")
+) : MetaMetrics(
+    meterRegistry,
+    "collection",
+    CollectionMetaPipeline.values().map { it.pipeline }
+)

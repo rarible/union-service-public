@@ -22,6 +22,7 @@ import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.MetaAutoRefreshState
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
@@ -155,7 +156,13 @@ class EnrichmentCollectionService(
         when {
             // No entry - it means we see this item/meta first time, not cached at all
             entry == null -> {
-                collectionMetaService.schedule(collectionId, metaPipeline, false)
+                collectionMetaService.schedule(
+                    collectionId = collectionId,
+                    pipeline = metaPipeline,
+                    force = false,
+                    // TODO potentially we can customize priority for specific collections here
+                    priority = MetaDownloadPriority.RIGHT_NOW
+                )
                 metrics.onMetaCacheMiss(collectionId.blockchain)
             }
             // Downloaded - cool, we hit cache!

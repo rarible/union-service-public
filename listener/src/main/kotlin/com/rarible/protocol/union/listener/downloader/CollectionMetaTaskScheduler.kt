@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 class CollectionMetaTaskScheduler(
     @Qualifier("collection.meta.schedule.router")
-    metaTaskRouter: MetaTaskRouter,
+    metaTaskRouter: DownloadTaskRouter,
     repository: CollectionMetaRepository,
     metrics: DownloadSchedulerMetrics
 ) : DownloadScheduler<UnionCollectionMeta>(metaTaskRouter, repository, metrics) {

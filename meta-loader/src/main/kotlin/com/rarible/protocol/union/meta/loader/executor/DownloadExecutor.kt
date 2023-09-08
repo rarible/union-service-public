@@ -24,6 +24,7 @@ import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.meta.loader.config.DownloadLimit
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory
 import java.time.Instant
@@ -53,6 +54,13 @@ sealed class DownloadExecutor<T>(
 
     abstract suspend fun isBlacklisted(task: DownloadTaskEvent): Boolean
 
+    suspend fun submit(task: DownloadTaskEvent, callback: suspend (task: DownloadTaskEvent) -> Unit): Deferred<Unit> {
+        return pool.submitAsync {
+            execute(task)
+            callback(task)
+        }
+    }
+
     suspend fun execute(tasks: List<DownloadTaskEvent>) {
         tasks.groupBy { it.id }.values.map { group ->
             pool.submitAsync {
@@ -62,23 +70,18 @@ sealed class DownloadExecutor<T>(
     }
 
     private suspend fun execute(task: DownloadTaskEvent) {
-        // TODO should be fixed in right way
-        if (task.id.endsWith(":\$i")) {
-            logger.warn("Incorrect task id: ${task.id}")
-            return
-        }
         val started = Instant.now()
-        val current = repository.get(task.id) ?: getDefault(task)
-        if (!checkOutdated(current, task) || !checkAllowed(current, task)) {
-            return
-        }
-
-        if (isBlacklisted(task)) {
-            onBlacklisted(started, task)
-            return
-        }
-
         try {
+            val current = repository.get(task.id) ?: getDefault(task)
+            if (!checkOutdated(current, task) || !checkAllowed(current, task)) {
+                return
+            }
+
+            if (isBlacklisted(task)) {
+                onBlacklisted(started, task)
+                return
+            }
+
             val data = download(task.id, current)
             onSuccess(started, task, data)
         } catch (e: DownloadException) {
@@ -376,7 +379,7 @@ class ItemDownloadExecutor(
             return
         }
         try {
-            itemMetaRefreshService.runRefreshIfItemMetaChanged(
+            itemMetaRefreshService.scheduleAutoRefreshOnItemMetaChanged(
                 itemId = IdParser.parseItemId(task.id),
                 previous = previous,
                 updated = updated,

@@ -6,6 +6,7 @@ import com.rarible.core.daemon.sequential.SequentialDaemonWorker
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.ItemMetaCustomAttributes
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.repository.ItemMetaCustomAttributesRepository
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.micrometer.core.instrument.MeterRegistry
@@ -72,7 +73,8 @@ class ItemMetaCustomAttributesJobHandler(
                     itemMetaService.schedule(
                         itemId = attributes.id,
                         pipeline = ItemMetaPipeline.REFRESH,
-                        force = true
+                        force = true,
+                        priority = MetaDownloadPriority.HIGH
                     )
                     changed++
                 }

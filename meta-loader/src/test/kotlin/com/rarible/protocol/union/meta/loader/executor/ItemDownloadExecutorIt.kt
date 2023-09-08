@@ -65,7 +65,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
     lateinit var enrichmentBlacklistService: EnrichmentBlacklistService
 
     private val itemMetaRefreshService: ItemMetaRefreshService = mockk {
-        coEvery { runRefreshIfItemMetaChanged(any(), any(), any(), any()) } returns true
+        coEvery { scheduleAutoRefreshOnItemMetaChanged(any(), any(), any(), any()) } returns true
     }
 
     private val enrichmentItemService: EnrichmentItemService = mockk()
@@ -259,7 +259,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
         val saved = repository.get(fullItemId)!!
 
         coVerify(exactly = 1) { notifier.notify(saved) }
-        coVerify(exactly = 1) { itemMetaRefreshService.runRefreshIfItemMetaChanged(itemId, meta, meta, false) }
+        coVerify(exactly = 1) { itemMetaRefreshService.scheduleAutoRefreshOnItemMetaChanged(itemId, meta, meta, false) }
         coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
         verifyItemUpdated(itemId, currentItem)
     }
@@ -280,7 +280,14 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
         val saved = repository.get(fullItemId)!!
 
         coVerify(exactly = 1) { notifier.notify(saved) }
-        coVerify(exactly = 0) { itemMetaRefreshService.runRefreshIfItemMetaChanged(any(), any(), any(), any()) }
+        coVerify(exactly = 0) {
+            itemMetaRefreshService.scheduleAutoRefreshOnItemMetaChanged(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        }
         coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
         verifyItemUpdated(itemId, currentItem)
     }

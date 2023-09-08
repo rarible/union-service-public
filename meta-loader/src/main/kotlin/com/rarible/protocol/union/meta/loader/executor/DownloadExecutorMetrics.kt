@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.Instant
 
+// TODO move to MetaMetrics
 @Component
 class DownloadExecutorMetrics(
     meterRegistry: MeterRegistry
@@ -61,17 +62,16 @@ class DownloadExecutorMetrics(
         retry: Int,
         status: SuccessfulDownloadStatus,
     ) {
-        meterRegistry.timer(
+        record(
             DOWNLOAD_DELAY,
-            listOf(
-                tag(blockchain),
-                type(type.lowercase()),
-                tag("pipeline", task.pipeline.lowercase()),
-                tag("retry", retry.toString()),
-                tag("force", task.force.toString()),
-                tag("status", status.name.lowercase())
-            )
-        ).record(Duration.between(start, Instant.now()))
+            Duration.between(start, Instant.now()),
+            tag(blockchain),
+            type(type.lowercase()),
+            tag("pipeline", task.pipeline.lowercase()),
+            tag("retry", retry.toString()),
+            tag("force", task.force.toString()),
+            tag("status", status.name.lowercase())
+        )
     }
 
     private fun onTaskHandled(
@@ -82,17 +82,16 @@ class DownloadExecutorMetrics(
         task: DownloadTaskEvent,
         retry: Int
     ) {
-        meterRegistry.timer(
+        record(
             DOWNLOAD_TASK,
-            listOf(
-                tag(blockchain),
-                type(type.lowercase()),
-                status(status.lowercase()),
-                tag("pipeline", task.pipeline.lowercase()),
-                tag("retry", retry.toString()),
-                tag("force", task.force.toString())
-            )
-        ).record(Duration.between(started, Instant.now()))
+            Duration.between(started, Instant.now()),
+            tag(blockchain),
+            type(type.lowercase()),
+            status(status.lowercase()),
+            tag("pipeline", task.pipeline.lowercase()),
+            tag("retry", retry.toString()),
+            tag("force", task.force.toString())
+        )
     }
 
     private fun onTaskDone(
@@ -101,16 +100,15 @@ class DownloadExecutorMetrics(
         status: String,
         task: DownloadTaskEvent,
     ) {
-        meterRegistry.timer(
+        record(
             DOWNLOAD_TASK_TOTAL,
-            listOf(
-                tag(blockchain),
-                type(type.lowercase()),
-                status(status.lowercase()),
-                tag("pipeline", task.pipeline.lowercase()),
-                tag("force", task.force.toString())
-            )
-        ).record(Duration.between(task.scheduledAt, Instant.now()))
+            Duration.between(task.scheduledAt, Instant.now()),
+            tag(blockchain),
+            type(type.lowercase()),
+            status(status.lowercase()),
+            tag("pipeline", task.pipeline.lowercase()),
+            tag("force", task.force.toString())
+        )
     }
 
     private companion object {

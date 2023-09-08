@@ -113,13 +113,27 @@ class ItemMetaRetryJobIt {
 
         handler.handle()
 
-        coVerify(exactly = 0) { metaService.schedule(idNow, ItemMetaPipeline.RETRY, true) }
-        coVerify(exactly = 1) { metaService.schedule(id2h, ItemMetaPipeline.RETRY, true) }
-        coVerify(exactly = 0) { metaService.schedule(id25h, ItemMetaPipeline.RETRY, true) }
+        coVerify(exactly = 0) { metaService.schedule(idNow, ItemMetaPipeline.RETRY, true, priority = any()) }
+        coVerify(exactly = 1) { metaService.schedule(id2h, ItemMetaPipeline.RETRY, true, priority = any()) }
+        coVerify(exactly = 0) { metaService.schedule(id25h, ItemMetaPipeline.RETRY, true, priority = any()) }
 
-        coVerify(exactly = 0) { metaService.schedule(partialNow, ItemMetaPipeline.RETRY_PARTIAL, true) }
-        coVerify(exactly = 1) { metaService.schedule(partial2h, ItemMetaPipeline.RETRY_PARTIAL, true) }
-        coVerify(exactly = 0) { metaService.schedule(id25h, ItemMetaPipeline.RETRY_PARTIAL, true) }
+        coVerify(exactly = 0) {
+            metaService.schedule(
+                partialNow,
+                ItemMetaPipeline.RETRY_PARTIAL,
+                true,
+                priority = any()
+            )
+        }
+        coVerify(exactly = 1) {
+            metaService.schedule(
+                partial2h,
+                ItemMetaPipeline.RETRY_PARTIAL,
+                true,
+                priority = any()
+            )
+        }
+        coVerify(exactly = 0) { metaService.schedule(id25h, ItemMetaPipeline.RETRY_PARTIAL, true, priority = any()) }
 
         assertEquals(0, itemRepository.get(ShortItemId(idNow))?.metaEntry?.retries)
         assertEquals(1, itemRepository.get(ShortItemId(id2h))?.metaEntry?.retries)

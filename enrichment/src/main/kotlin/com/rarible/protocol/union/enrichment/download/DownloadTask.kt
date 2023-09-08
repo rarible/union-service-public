@@ -1,11 +1,14 @@
 package com.rarible.protocol.union.enrichment.download
 
+import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
-@Document("download_task")
+@Document(DownloadTask.COLLECTION)
 data class DownloadTask(
     // Task ID, the same as entity ID related to the task
+    @Id
     val id: String,
     // Entity type
     val type: String,
@@ -22,7 +25,10 @@ data class DownloadTask(
     // Date when task taken to execution
     val startedAt: Instant? = null,
     // Indicates task currently in progress
-    val inProgress: Boolean = false
+    val inProgress: Boolean = false,
+
+    @Version
+    val version: Long? = null
 ) {
 
     fun toEvent(): DownloadTaskEvent {
@@ -34,6 +40,10 @@ data class DownloadTask(
             scheduledAt = scheduledAt,
             priority = priority
         )
+    }
+
+    companion object {
+        const val COLLECTION = "download_task"
     }
 }
 

@@ -1,6 +1,10 @@
 logging:
   level.org.springframework.data.mongodb.core.ReactiveMongoTemplate: DEBUG
 
+common:
+  featureFlags:
+    enableMetaMongoPipeline: false
+
 rarible:
   core:
     apm:
@@ -9,7 +13,7 @@ rarible:
   loader:
     workers: 1
     retry:
-      backoffDelaysMillis: []
+      backoffDelaysMillis: [ ]
       job:
         runner:
         period: 1000000000000000000 # Disable in the tests. Run RetryTasksService manually.
