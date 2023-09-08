@@ -6,6 +6,7 @@ import com.rarible.protocol.union.enrichment.repository.DownloadTaskRepository
 import com.rarible.protocol.union.enrichment.test.data.randomDownloadTask
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -32,7 +33,7 @@ class DownloadTaskRepositoryIt : AbstractIntegrationTest() {
         createTask(priority = 30, pipeline = "event")
         createTask(priority = 30, type = "collection")
 
-        assertThat(downloadTaskRepository.findForExecution("item", "api"))
+        assertThat(downloadTaskRepository.findForExecution("item", "api").toList())
             .isEqualTo(listOf(api1, api3, api2, api5))
     }
 
@@ -44,7 +45,7 @@ class DownloadTaskRepositoryIt : AbstractIntegrationTest() {
 
         downloadTaskRepository.reactivateStuckTasks(Duration.ofSeconds(20))
 
-        assertThat(downloadTaskRepository.findForExecution("item", "api"))
+        assertThat(downloadTaskRepository.findForExecution("item", "api").toList())
             .isEqualTo(listOf(api2.copy(inProgress = false, startedAt = null, version = 1)))
     }
 
