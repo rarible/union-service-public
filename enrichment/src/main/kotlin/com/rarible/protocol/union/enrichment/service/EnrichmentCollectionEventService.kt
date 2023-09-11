@@ -58,6 +58,9 @@ class EnrichmentCollectionEventService(
     }
 
     suspend fun onCollectionSetBaseUri(event: UnionCollectionSetBaseUriEvent) {
+        if (!ff.enableCollectionSetBaseUriEvent) {
+            return
+        }
         itemMetaRefreshService.scheduleAutoRefreshOnBaseUriChanged(
             collectionId = event.collectionId,
             withSimpleHash = unionMetaProperties.simpleHash.enabled,
