@@ -78,6 +78,7 @@ class UnionListenerConfiguration(
                 topic = UnionInternalTopicProvider.getInternalBlockchainTopic(env, blockchain),
                 group = consumerGroup("blockchain.${blockchain.name.lowercase()}"),
                 concurrency = workers.concurrency,
+                coroutineThreadCount = workers.coroutineThreadCount,
                 batchSize = workers.batchSize,
                 // Mandatory to be true with InternalBatchEventHandler, do not set it FALSE!
                 // Sync handling won't work with UnionInternalEventChunker, can cause bugs
