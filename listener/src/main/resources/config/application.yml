@@ -177,6 +177,9 @@ listener:
       batchSize: 512
   metrics:
     root-path: "protocol.union.listener"
+  workers:
+    polygon:
+      coroutineThreadCount: 4
 
 meta:
   ipfsGateway: "https://ipfs.io,https://nftstorage.link"

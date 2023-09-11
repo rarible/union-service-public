@@ -2,11 +2,11 @@ package com.rarible.protocol.union.enrichment.meta.item
 
 import com.rarible.core.test.data.randomLong
 import com.rarible.protocol.union.core.FeatureFlagsProperties
-import com.rarible.protocol.union.core.model.download.PartialDownloadException
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentProperties
+import com.rarible.protocol.union.enrichment.download.PartialDownloadException
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
@@ -78,7 +78,7 @@ internal class ItemMetaRefreshServiceTest {
         val collectionId = randomEthCollectionId()
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns randomLong(1000)
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isTrue()
+        assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isTrue()
         coVerify(exactly = 1) {
             metaRefreshRequestRepository.save(match { it.collectionId == collectionId.fullId() })
         }
@@ -89,8 +89,8 @@ internal class ItemMetaRefreshServiceTest {
         val collectionId = randomEthCollectionId()
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns 40000 + randomLong(1000)
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isFalse()
-        assertThat(itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId, true)).isFalse()
+        assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isFalse()
+        assertThat(itemMetaRefreshService.scheduleAutoRefresh(collectionId, true)).isFalse()
         coVerify(exactly = 0) { metaRefreshRequestRepository.save(any()) }
     }
 
@@ -100,7 +100,7 @@ internal class ItemMetaRefreshServiceTest {
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns 1000 + randomLong(1000)
         coEvery { metaRefreshRequestRepository.countForCollectionId(collectionId.fullId()) } returns 3
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isFalse()
+        assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isFalse()
     }
 
     @Test
@@ -110,7 +110,7 @@ internal class ItemMetaRefreshServiceTest {
         coEvery { metaRefreshRequestRepository.countForCollectionId(collectionId.fullId()) } returns 1
         coEvery { metaRefreshRequestRepository.countNotScheduledForCollectionId(collectionId.fullId()) } returns 1
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isFalse()
+        assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isFalse()
     }
 
     @Test
@@ -148,8 +148,8 @@ internal class ItemMetaRefreshServiceTest {
             itemMetaService.download(itemId = itemId2, pipeline = ItemMetaPipeline.REFRESH, force = true)
         } returns meta2.copy(createdAt = Instant.now())
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isFalse()
-        assertThat(itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId, true)).isFalse()
+        assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isFalse()
+        assertThat(itemMetaRefreshService.scheduleAutoRefresh(collectionId, true)).isFalse()
     }
 
     @Test
@@ -160,8 +160,8 @@ internal class ItemMetaRefreshServiceTest {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
         } returns randomUnionMeta()
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isTrue()
-        assertThat(itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId, true)).isTrue()
+        assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isTrue()
+        assertThat(itemMetaRefreshService.scheduleAutoRefresh(collectionId, true)).isTrue()
 
         coVerify(exactly = 2) {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
@@ -176,8 +176,8 @@ internal class ItemMetaRefreshServiceTest {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
         } throws PartialDownloadException(failedProviders = emptyList(), data = randomUnionMeta())
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isTrue()
-        assertThat(itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId, true)).isTrue()
+        assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isTrue()
+        assertThat(itemMetaRefreshService.scheduleAutoRefresh(collectionId, true)).isTrue()
 
         coVerify(exactly = 2) {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
@@ -192,8 +192,8 @@ internal class ItemMetaRefreshServiceTest {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
         } throws RuntimeException()
 
-        assertThat(itemMetaRefreshService.runRefreshIfAllowed(collectionId, true, 0)).isFalse()
-        assertThat(itemMetaRefreshService.runAutoRefreshIfAllowed(collectionId, true)).isFalse()
+        assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isFalse()
+        assertThat(itemMetaRefreshService.scheduleAutoRefresh(collectionId, true)).isFalse()
 
         coVerify(exactly = 2) {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
@@ -208,7 +208,7 @@ internal class ItemMetaRefreshServiceTest {
 
         coEvery { enrichmentItemService.getItemCollection(ShortItemId(itemId)) } returns collectionId
 
-        assertThat(itemMetaRefreshService.runRefreshIfItemMetaChanged(itemId, meta1, meta2, true)).isTrue()
+        assertThat(itemMetaRefreshService.scheduleAutoRefreshOnItemMetaChanged(itemId, meta1, meta2, true)).isTrue()
     }
 
     @Test
@@ -217,7 +217,7 @@ internal class ItemMetaRefreshServiceTest {
         val meta1 = randomUnionMeta()
 
         coEvery { enrichmentItemService.getItemCollection(ShortItemId(itemId)) } returns collectionId
-        assertThat(itemMetaRefreshService.runRefreshIfItemMetaChanged(itemId, meta1, meta1, true)).isFalse()
+        assertThat(itemMetaRefreshService.scheduleAutoRefreshOnItemMetaChanged(itemId, meta1, meta1, true)).isFalse()
     }
 
     @Test
@@ -230,7 +230,7 @@ internal class ItemMetaRefreshServiceTest {
         coEvery { enrichmentItemService.getItemCollection(ShortItemId(itemId)) } returns collectionId
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns 40000 + randomLong(1000)
 
-        assertThat(itemMetaRefreshService.runRefreshIfItemMetaChanged(itemId, meta1, meta2, true)).isFalse()
+        assertThat(itemMetaRefreshService.scheduleAutoRefreshOnItemMetaChanged(itemId, meta1, meta2, true)).isFalse()
     }
 
     private suspend fun prepareData(): Pair<CollectionIdDto, ItemIdDto> {

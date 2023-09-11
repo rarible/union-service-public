@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.meta.simplehash
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.common.nowMillis
+import com.rarible.core.kafka.Compression
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
 import com.rarible.core.kafka.RaribleKafkaProducer
@@ -69,7 +70,8 @@ class SimpleHashKafkaTest {
             properties = mapOf(
                 "auto.register.schemas" to "false",
                 "schema.registry.url" to "http://localhost"
-            )
+            ),
+            compression = Compression.SNAPPY,
         )
 
         // preparing & sending event

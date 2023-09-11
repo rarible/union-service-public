@@ -4,14 +4,15 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.daemon.job.JobHandler
 import com.rarible.core.daemon.sequential.SequentialDaemonWorker
-import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.micrometer.core.instrument.MeterRegistry
@@ -53,18 +54,18 @@ class ItemMetaRetryJobHandler(
         val now = nowMillis()
         val retryIntervals = metaProperties.retryIntervals
 
-        for (i in retryIntervals.indices) {
+        for (attempt in retryIntervals.indices) {
             processInterval(
                 now = now,
-                period = retryIntervals[i],
-                i = i,
+                period = retryIntervals[attempt],
+                attempt = attempt,
                 status = DownloadStatus.RETRY,
                 pipeline = ItemMetaPipeline.RETRY
             )
             processInterval(
                 now = now,
-                period = retryIntervals[i],
-                i = i,
+                period = retryIntervals[attempt],
+                attempt = attempt,
                 status = DownloadStatus.RETRY_PARTIAL,
                 pipeline = ItemMetaPipeline.RETRY_PARTIAL
             )
@@ -74,14 +75,14 @@ class ItemMetaRetryJobHandler(
     private suspend fun processInterval(
         now: Instant,
         period: Duration,
-        i: Int,
+        attempt: Int,
         status: DownloadStatus,
         pipeline: ItemMetaPipeline,
     ) {
         val itemFlow = repository.getItemForMetaRetry(
             now = now,
             retryPeriod = period,
-            attempt = i,
+            attempt = attempt,
             status = status
         )
 
@@ -93,10 +94,23 @@ class ItemMetaRetryJobHandler(
                 item.collectionId?.let { CollectionIdDto(item.blockchain, it) },
                 router
             ) {
-                logger.info("Scheduling item meta download (retry = $i) for $itemId")
+                logger.info("Scheduling item meta download (retry = $attempt) for $itemId")
             }
 
-            metaService.schedule(itemId = itemId, pipeline = pipeline, force = true)
+            val priority = when (attempt) {
+                0 -> MetaDownloadPriority.ASAP
+                1 -> MetaDownloadPriority.HIGH
+                2 -> MetaDownloadPriority.MEDIUM
+                3 -> MetaDownloadPriority.LOW
+                else -> MetaDownloadPriority.NOBODY_CARES
+            }
+
+            metaService.schedule(
+                itemId = itemId,
+                pipeline = pipeline,
+                force = true,
+                priority = priority
+            )
             repository.save(item.withNextRetry())
         }
     }

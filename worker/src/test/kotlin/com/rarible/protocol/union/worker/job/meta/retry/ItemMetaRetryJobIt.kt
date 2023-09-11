@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.worker.job.meta.retry
 
-import com.rarible.protocol.union.core.model.download.DownloadEntry
-import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
+import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
@@ -113,13 +113,27 @@ class ItemMetaRetryJobIt {
 
         handler.handle()
 
-        coVerify(exactly = 0) { metaService.schedule(idNow, ItemMetaPipeline.RETRY, true) }
-        coVerify(exactly = 1) { metaService.schedule(id2h, ItemMetaPipeline.RETRY, true) }
-        coVerify(exactly = 0) { metaService.schedule(id25h, ItemMetaPipeline.RETRY, true) }
+        coVerify(exactly = 0) { metaService.schedule(idNow, ItemMetaPipeline.RETRY, true, priority = any()) }
+        coVerify(exactly = 1) { metaService.schedule(id2h, ItemMetaPipeline.RETRY, true, priority = any()) }
+        coVerify(exactly = 0) { metaService.schedule(id25h, ItemMetaPipeline.RETRY, true, priority = any()) }
 
-        coVerify(exactly = 0) { metaService.schedule(partialNow, ItemMetaPipeline.RETRY_PARTIAL, true) }
-        coVerify(exactly = 1) { metaService.schedule(partial2h, ItemMetaPipeline.RETRY_PARTIAL, true) }
-        coVerify(exactly = 0) { metaService.schedule(id25h, ItemMetaPipeline.RETRY_PARTIAL, true) }
+        coVerify(exactly = 0) {
+            metaService.schedule(
+                partialNow,
+                ItemMetaPipeline.RETRY_PARTIAL,
+                true,
+                priority = any()
+            )
+        }
+        coVerify(exactly = 1) {
+            metaService.schedule(
+                partial2h,
+                ItemMetaPipeline.RETRY_PARTIAL,
+                true,
+                priority = any()
+            )
+        }
+        coVerify(exactly = 0) { metaService.schedule(id25h, ItemMetaPipeline.RETRY_PARTIAL, true, priority = any()) }
 
         assertEquals(0, itemRepository.get(ShortItemId(idNow))?.metaEntry?.retries)
         assertEquals(1, itemRepository.get(ShortItemId(id2h))?.metaEntry?.retries)

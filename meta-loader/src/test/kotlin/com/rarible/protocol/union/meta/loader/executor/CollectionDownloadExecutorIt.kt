@@ -3,10 +3,10 @@ package com.rarible.protocol.union.meta.loader.executor
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.enrichment.configuration.MetaTrimmingProperties
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadNotifier
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
@@ -18,7 +18,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollectio
 import com.rarible.protocol.union.enrichment.test.data.randomUnionCollectionMeta
 import com.rarible.protocol.union.meta.loader.test.AbstractIntegrationTest
 import com.rarible.protocol.union.meta.loader.test.IntegrationTest
-import com.rarible.protocol.union.meta.loader.test.data.randomTask
+import com.rarible.protocol.union.meta.loader.test.data.randomTaskEvent
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -71,7 +71,7 @@ class CollectionDownloadExecutorIt : AbstractIntegrationTest() {
     @Test
     fun `initial task - success, trim`() = runBlocking<Unit> {
         val collectionId = CollectionIdDto(BlockchainDto.ETHEREUM, "0x0")
-        val task = randomTask(collectionId.fullId())
+        val task = randomTaskEvent(collectionId.fullId())
         createCollection(collectionId, null)
         collectionRepository.get(EnrichmentCollectionId(collectionId))!!
 

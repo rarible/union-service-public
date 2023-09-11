@@ -2,8 +2,8 @@ package com.rarible.protocol.union.enrichment.service
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.rarible.protocol.union.api.ApiClient
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto

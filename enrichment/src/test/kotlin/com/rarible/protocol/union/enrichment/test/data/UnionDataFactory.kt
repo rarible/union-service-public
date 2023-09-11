@@ -10,6 +10,7 @@ import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.core.model.UnionBurnActivity
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
@@ -24,9 +25,6 @@ import com.rarible.protocol.union.core.model.UnionOrderBidActivity
 import com.rarible.protocol.union.core.model.UnionOrderListActivity
 import com.rarible.protocol.union.core.model.UnionOrderMatchSell
 import com.rarible.protocol.union.core.model.UnionTransferActivity
-import com.rarible.protocol.union.core.model.download.DownloadEntry
-import com.rarible.protocol.union.core.model.download.DownloadStatus
-import com.rarible.protocol.union.core.model.download.MetaSource
 import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivityLite
 import com.rarible.protocol.union.core.model.elastic.EsCollection
@@ -51,6 +49,10 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.converter.OwnershipDtoConverter
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
+import com.rarible.protocol.union.enrichment.download.DownloadStatus
+import com.rarible.protocol.union.enrichment.download.DownloadTask
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
@@ -565,5 +567,29 @@ fun randomSimpleHashItemCollection(
         description = description,
         imageUrl = imageUrl,
         bannerImageUrl = bannerImageUrl
+    )
+}
+
+fun randomDownloadTask(
+    id: String = randomEthItemId().fullId(),
+    type: String = "item",
+    pipeline: String = randomString(),
+    force: Boolean = true,
+    source: DownloadTaskSource = DownloadTaskSource.EXTERNAL,
+    priority: Int = 0,
+    scheduledAt: Instant = nowMillis(),
+    startedAt: Instant? = null,
+    inProgress: Boolean = false
+): DownloadTask {
+    return DownloadTask(
+        id = id,
+        type = type,
+        pipeline = pipeline,
+        force = force,
+        source = source,
+        priority = priority,
+        scheduledAt = scheduledAt,
+        startedAt = startedAt,
+        inProgress = inProgress,
     )
 }

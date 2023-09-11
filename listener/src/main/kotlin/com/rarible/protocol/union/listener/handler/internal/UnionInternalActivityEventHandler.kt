@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.protocol.union.core.model.UnionActivity
-import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityEventService
+import com.rarible.protocol.union.enrichment.service.ReconciliationEventService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 

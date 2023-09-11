@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.Compression
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
@@ -34,7 +35,6 @@ import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig
 import com.rarible.protocol.union.core.test.TestUnionEventHandler
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -45,6 +45,7 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.SubscriptionEventDto
 import com.rarible.protocol.union.dto.SubscriptionRequestDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.coEvery
@@ -142,7 +143,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Bean
     @Primary
     @Qualifier("download.scheduler.task.producer.item-meta")
-    fun testDownloadTaskProducer(): RaribleKafkaProducer<DownloadTask> =
+    fun testDownloadTaskProducer(): RaribleKafkaProducer<DownloadTaskEvent> =
         mockk { coEvery { close() } returns Unit }
 
     @Bean
@@ -396,7 +397,8 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = NftItemEventDto::class.java,
             defaultTopic = NftItemEventTopicProvider.getTopic(applicationEnvironmentInfo.name, "ethereum"),
-            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -407,7 +409,8 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = NftOwnershipEventDto::class.java,
             defaultTopic = NftOwnershipEventTopicProvider.getTopic(applicationEnvironmentInfo.name, "ethereum"),
-            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 
@@ -431,7 +434,8 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = type,
             defaultTopic = topic,
-            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers()
+            bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
         )
     }
 

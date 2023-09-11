@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.enrichment.meta.collection
 
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
-import com.rarible.protocol.union.core.model.download.DownloadException
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.download.DownloadException
 import com.rarible.protocol.union.enrichment.meta.MetaDownloader
 import com.rarible.protocol.union.enrichment.meta.collection.provider.CollectionMetaCustomProvider
 import com.rarible.protocol.union.enrichment.meta.collection.provider.CollectionMetaProvider

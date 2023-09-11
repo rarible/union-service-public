@@ -1,16 +1,17 @@
 package com.rarible.protocol.union.enrichment.meta.item
 
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.download.DownloadTaskSource
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadMetrics
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadService
 import com.rarible.protocol.union.enrichment.meta.simplehash.HookEventType
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverterService
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
-import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashNftMetadataUpdate
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItemMetrics
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashNftMetadataUpdate
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import org.slf4j.Logger
@@ -51,7 +52,8 @@ class ItemMetaService(
         pipeline: ItemMetaPipeline,
         force: Boolean,
         source: DownloadTaskSource = DownloadTaskSource.INTERNAL,
-    ) = schedule(itemId, pipeline.pipeline, force, source)
+        priority: Int
+    ) = schedule(itemId, pipeline.pipeline, force, source, priority)
 
     suspend fun handleSimpleHashWebhook(update: String) {
         val updateDto = SimpleHashConverter.safeConvertToMetaUpdate(update) ?: run {
@@ -99,7 +101,12 @@ class ItemMetaService(
         val itemIdDto = SimpleHashConverter.parseNftId(item.nftId)
         // We should refresh only if we already have cache for existed item and original urls were changed
         if (force || (existedEntity != null && item.differentOriginalUrls(existedEntity))) {
-            schedule(itemIdDto, ItemMetaPipeline.REFRESH, true)
+            schedule(
+                itemId = itemIdDto,
+                pipeline = ItemMetaPipeline.REFRESH,
+                force = true,
+                priority = MetaDownloadPriority.MEDIUM
+            )
             simpleHashMetrics.onMetaItemRefresh(itemIdDto.blockchain)
         }
     }

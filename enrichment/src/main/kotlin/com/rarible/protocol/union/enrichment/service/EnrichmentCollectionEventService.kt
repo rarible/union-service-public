@@ -9,7 +9,6 @@ import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
 import com.rarible.protocol.union.core.model.UnionEventTimeMarks
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OriginService
-import com.rarible.protocol.union.core.service.ReconciliationEventService
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
@@ -18,7 +17,6 @@ import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipel
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
-import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.validator.EntityValidator
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -63,12 +61,9 @@ class EnrichmentCollectionEventService(
         if (!ff.enableCollectionSetBaseUriEvent) {
             return
         }
-        val collectionId = event.collectionId
-        itemMetaRefreshService.scheduleRefresh(
-            collectionId = collectionId,
-            full = true,
+        itemMetaRefreshService.scheduleAutoRefreshOnBaseUriChanged(
+            collectionId = event.collectionId,
             withSimpleHash = unionMetaProperties.simpleHash.enabled,
-            priority = MetaRefreshRequest.Priority.PRIORITY_HIGH
         )
     }
 

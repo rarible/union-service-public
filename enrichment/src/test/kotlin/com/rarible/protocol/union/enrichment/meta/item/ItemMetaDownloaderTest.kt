@@ -2,18 +2,18 @@ package com.rarible.protocol.union.enrichment.meta.item
 
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.model.UnionMetaContent
-import com.rarible.protocol.union.core.model.download.DownloadException
-import com.rarible.protocol.union.core.model.download.MetaSource
-import com.rarible.protocol.union.core.model.download.PartialDownloadException
-import com.rarible.protocol.union.core.model.download.ProviderDownloadException
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaContentDto.Representation
+import com.rarible.protocol.union.enrichment.download.DownloadException
+import com.rarible.protocol.union.enrichment.download.PartialDownloadException
+import com.rarible.protocol.union.enrichment.download.ProviderDownloadException
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.item.provider.DefaultItemMetaProvider
 import com.rarible.protocol.union.enrichment.meta.item.provider.ItemMetaCustomProvider

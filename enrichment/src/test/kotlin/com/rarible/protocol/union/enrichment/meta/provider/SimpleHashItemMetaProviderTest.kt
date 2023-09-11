@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.enrichment.meta.provider
 
-import com.rarible.protocol.union.core.model.download.MetaSource
-import com.rarible.protocol.union.core.model.download.ProviderDownloadException
+import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.download.ProviderDownloadException
 import com.rarible.protocol.union.enrichment.meta.item.provider.SimpleHashItemMetaProvider
 import com.rarible.protocol.union.enrichment.service.SimpleHashService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta

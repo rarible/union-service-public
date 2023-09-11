@@ -24,7 +24,9 @@ class ItemMetaCustomAttributesJobHandlerTest {
     @Autowired
     lateinit var repository: ItemMetaCustomAttributesRepository
 
-    private val itemMetaService: ItemMetaService = mockk { coEvery { schedule(any(), any(), any()) } returns Unit }
+    private val itemMetaService: ItemMetaService =
+        mockk { coEvery { schedule(any(), any(), any(), any(), any()) } returns Unit }
+
     private val provider: MetaCustomAttributesProvider = mockk { every { name } returns "test" }
     private lateinit var handler: ItemMetaCustomAttributesJobHandler
 
@@ -48,7 +50,7 @@ class ItemMetaCustomAttributesJobHandlerTest {
         val updated = repository.get(itemId)
 
         assertThat(updated?.attributes).isEqualTo(listOf(extraAttribute))
-        coVerify(exactly = 1) { itemMetaService.schedule(itemId, ItemMetaPipeline.REFRESH, true) }
+        coVerify(exactly = 1) { itemMetaService.schedule(itemId, ItemMetaPipeline.REFRESH, true, any(), any()) }
     }
 
     @Test
@@ -64,7 +66,7 @@ class ItemMetaCustomAttributesJobHandlerTest {
         val updated = repository.get(itemId)
 
         assertThat(updated?.attributes).isEqualTo(listOf(extraAttribute))
-        coVerify(exactly = 1) { itemMetaService.schedule(itemId, ItemMetaPipeline.REFRESH, true) }
+        coVerify(exactly = 1) { itemMetaService.schedule(itemId, ItemMetaPipeline.REFRESH, true, any(), any()) }
     }
 
     @Test
@@ -80,6 +82,6 @@ class ItemMetaCustomAttributesJobHandlerTest {
         val updated = repository.get(itemId)
 
         assertThat(updated?.attributes).isEqualTo(listOf(extraAttribute))
-        coVerify(exactly = 0) { itemMetaService.schedule(itemId, ItemMetaPipeline.REFRESH, true) }
+        coVerify(exactly = 0) { itemMetaService.schedule(itemId, ItemMetaPipeline.REFRESH, true, any(), any()) }
     }
 }

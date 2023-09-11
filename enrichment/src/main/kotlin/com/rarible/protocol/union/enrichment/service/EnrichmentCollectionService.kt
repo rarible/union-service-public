@@ -5,8 +5,6 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionOrder
-import com.rarible.protocol.union.core.model.download.DownloadEntry
-import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
@@ -15,6 +13,8 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
+import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
@@ -22,6 +22,7 @@ import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.MetaAutoRefreshState
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
 import com.rarible.protocol.union.enrichment.service.query.order.OrderApiMergeService
@@ -155,7 +156,13 @@ class EnrichmentCollectionService(
         when {
             // No entry - it means we see this item/meta first time, not cached at all
             entry == null -> {
-                collectionMetaService.schedule(collectionId, metaPipeline, false)
+                collectionMetaService.schedule(
+                    collectionId = collectionId,
+                    pipeline = metaPipeline,
+                    force = false,
+                    // TODO potentially we can customize priority for specific collections here
+                    priority = MetaDownloadPriority.RIGHT_NOW
+                )
                 metrics.onMetaCacheMiss(collectionId.blockchain)
             }
             // Downloaded - cool, we hit cache!

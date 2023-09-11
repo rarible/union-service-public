@@ -7,6 +7,7 @@ import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipel
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.util.optimisticLockWithInitial
 import com.rarible.protocol.union.worker.job.AbstractBatchJob
 import kotlinx.coroutines.reactive.awaitSingle
@@ -75,7 +76,12 @@ class ArtBlocksCollectionProjectJob(
             template.save(collection.copy(extra = mapOf("project_id" to projectId.toString())))
                 .awaitSingle()
         }
-        collectionMetaService.schedule(collection.id.toDto(), CollectionMetaPipeline.REFRESH, true)
+        collectionMetaService.schedule(
+            collectionId = collection.id.toDto(),
+            pipeline = CollectionMetaPipeline.REFRESH,
+            force = true,
+            priority = MetaDownloadPriority.RIGHT_NOW
+        )
         logger.info(
             "Updated ArtBlocks collection {} (parent={}) with projectId={}",
             collection.id,

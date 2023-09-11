@@ -2,10 +2,10 @@ package com.rarible.protocol.union.enrichment.repository
 
 import com.rarible.core.common.optimisticLock
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.download.DownloadEntry
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import com.rarible.protocol.union.enrichment.meta.item.MetaTrimmer
 import com.rarible.protocol.union.enrichment.model.ShortItem

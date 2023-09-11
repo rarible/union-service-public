@@ -4,8 +4,6 @@ import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionOrder
-import com.rarible.protocol.union.core.model.download.DownloadEntry
-import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.OriginService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -18,11 +16,14 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolutionRequest
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionResolver
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
+import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.meta.content.ContentMetaService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.meta.item.MetaTrimmer
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -205,7 +206,13 @@ class EnrichmentItemService(
         when {
             // No entry - it means we see this item/meta first time, not cached at all
             entry == null -> {
-                itemMetaService.schedule(itemId, metaPipeline, false)
+                itemMetaService.schedule(
+                    itemId = itemId,
+                    pipeline = metaPipeline,
+                    force = false,
+                    // TODO potentially we can customize priority for specific collections here
+                    priority = MetaDownloadPriority.RIGHT_NOW
+                )
                 metrics.onMetaCacheMiss(itemId.blockchain)
             }
             // Downloaded - cool, we hit cache!

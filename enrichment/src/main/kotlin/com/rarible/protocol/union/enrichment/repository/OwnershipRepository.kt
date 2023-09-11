@@ -38,7 +38,6 @@ import java.time.Instant
 class OwnershipRepository(
     private val template: ReactiveMongoTemplate
 ) {
-
     private val logger = LoggerFactory.getLogger(OwnershipRepository::class.java)
 
     val collection: String = template.getCollectionName(ShortOwnership::class.java)

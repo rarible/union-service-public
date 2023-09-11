@@ -1,10 +1,11 @@
 package com.rarible.protocol.union.enrichment.meta.downloader
 
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.model.download.DownloadEntry
-import com.rarible.protocol.union.core.model.download.DownloadException
-import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
+import com.rarible.protocol.union.enrichment.download.DownloadException
+import com.rarible.protocol.union.enrichment.download.DownloadStatus
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaNotifier
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
@@ -139,7 +140,7 @@ class DownloadServiceTest {
 
     @Test
     fun `schedule - ok`() = runBlocking<Unit> {
-        downloadService.schedule(itemId, pipeline, false)
+        downloadService.schedule(itemId, pipeline, false, DownloadTaskSource.INTERNAL, 0)
 
         // Nothing to update, just scheduled
         coVerify(exactly = 0) { repository.update(eq(itemId.fullId()), any()) }

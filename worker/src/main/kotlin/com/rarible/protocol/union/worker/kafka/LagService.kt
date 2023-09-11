@@ -12,10 +12,9 @@ class LagService(
     private val kafkaConsumer: KafkaConsumer<String, String>,
     private val metaConsumerGroup: String,
     private val bootstrapServers: String,
-    private val refreshTopic: String,
-    private val maxLag: Long,
+    private val refreshTopic: String
 ) {
-    suspend fun isLagOk(): Boolean {
+    suspend fun isLagOk(maxLag: Long): Boolean {
         val lag =
             AdminClient.create(mapOf(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG to bootstrapServers)).use { admin ->
                 val offsets = admin.listConsumerGroupOffsets(metaConsumerGroup).partitionsToOffsetAndMetadata()

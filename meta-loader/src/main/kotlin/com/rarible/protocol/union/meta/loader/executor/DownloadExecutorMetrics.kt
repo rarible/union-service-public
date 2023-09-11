@@ -1,13 +1,14 @@
 package com.rarible.protocol.union.meta.loader.executor
 
 import com.rarible.protocol.union.core.UnionMetrics
-import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.Instant
 
+// TODO move to MetaMetrics
 @Component
 class DownloadExecutorMetrics(
     meterRegistry: MeterRegistry
@@ -15,28 +16,40 @@ class DownloadExecutorMetrics(
     meterRegistry
 ) {
 
-    fun onSuccessfulTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask, retry: Int) {
+    fun onSuccessfulTask(
+        type: String,
+        blockchain: BlockchainDto,
+        started: Instant,
+        task: DownloadTaskEvent,
+        retry: Int
+    ) {
         onTaskHandled(started, blockchain, type, "ok", task, retry)
         onTaskDone(blockchain, type, "ok", task)
     }
 
     // Task debounced
-    fun onSkippedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask, retry: Int) {
+    fun onSkippedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTaskEvent, retry: Int) {
         onTaskHandled(started, blockchain, type, "skip", task, retry)
     }
 
-    fun onForbiddenTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask, retry: Int) {
+    fun onForbiddenTask(
+        type: String,
+        blockchain: BlockchainDto,
+        started: Instant,
+        task: DownloadTaskEvent,
+        retry: Int
+    ) {
         onTaskHandled(started, blockchain, type, "forbidden", task, retry)
     }
 
     // Download failed, new status of the task is FAILED
-    fun onFailedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask, retry: Int) {
+    fun onFailedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTaskEvent, retry: Int) {
         onTaskHandled(started, blockchain, type, "fail", task, retry)
         onTaskDone(blockchain, type, "fail", task)
     }
 
     // Download failed, but new status of task is RETRY
-    fun onRetriedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTask, retry: Int) {
+    fun onRetriedTask(type: String, blockchain: BlockchainDto, started: Instant, task: DownloadTaskEvent, retry: Int) {
         onTaskHandled(started, blockchain, type, "retry", task, retry)
     }
 
@@ -45,21 +58,20 @@ class DownloadExecutorMetrics(
         type: String,
         blockchain: BlockchainDto,
         start: Instant,
-        task: DownloadTask,
+        task: DownloadTaskEvent,
         retry: Int,
         status: SuccessfulDownloadStatus,
     ) {
-        meterRegistry.timer(
+        record(
             DOWNLOAD_DELAY,
-            listOf(
-                tag(blockchain),
-                type(type.lowercase()),
-                tag("pipeline", task.pipeline.lowercase()),
-                tag("retry", retry.toString()),
-                tag("force", task.force.toString()),
-                tag("status", status.name.lowercase())
-            )
-        ).record(Duration.between(start, Instant.now()))
+            Duration.between(start, Instant.now()),
+            tag(blockchain),
+            type(type.lowercase()),
+            tag("pipeline", task.pipeline.lowercase()),
+            tag("retry", retry.toString()),
+            tag("force", task.force.toString()),
+            tag("status", status.name.lowercase())
+        )
     }
 
     private fun onTaskHandled(
@@ -67,38 +79,36 @@ class DownloadExecutorMetrics(
         blockchain: BlockchainDto,
         type: String,
         status: String,
-        task: DownloadTask,
+        task: DownloadTaskEvent,
         retry: Int
     ) {
-        meterRegistry.timer(
+        record(
             DOWNLOAD_TASK,
-            listOf(
-                tag(blockchain),
-                type(type.lowercase()),
-                status(status.lowercase()),
-                tag("pipeline", task.pipeline.lowercase()),
-                tag("retry", retry.toString()),
-                tag("force", task.force.toString())
-            )
-        ).record(Duration.between(started, Instant.now()))
+            Duration.between(started, Instant.now()),
+            tag(blockchain),
+            type(type.lowercase()),
+            status(status.lowercase()),
+            tag("pipeline", task.pipeline.lowercase()),
+            tag("retry", retry.toString()),
+            tag("force", task.force.toString())
+        )
     }
 
     private fun onTaskDone(
         blockchain: BlockchainDto,
         type: String,
         status: String,
-        task: DownloadTask,
+        task: DownloadTaskEvent,
     ) {
-        meterRegistry.timer(
+        record(
             DOWNLOAD_TASK_TOTAL,
-            listOf(
-                tag(blockchain),
-                type(type.lowercase()),
-                status(status.lowercase()),
-                tag("pipeline", task.pipeline.lowercase()),
-                tag("force", task.force.toString())
-            )
-        ).record(Duration.between(task.scheduledAt, Instant.now()))
+            Duration.between(task.scheduledAt, Instant.now()),
+            tag(blockchain),
+            type(type.lowercase()),
+            status(status.lowercase()),
+            tag("pipeline", task.pipeline.lowercase()),
+            tag("force", task.force.toString())
+        )
     }
 
     private companion object {

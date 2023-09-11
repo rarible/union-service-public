@@ -1,13 +1,22 @@
 package com.rarible.protocol.union.core
 
+import com.google.common.util.concurrent.AtomicDouble
 import com.rarible.protocol.union.dto.BlockchainDto
+import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.ImmutableTag
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tag
+import io.micrometer.core.instrument.Timer
+import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
 
 abstract class UnionMetrics(
     protected val meterRegistry: MeterRegistry
 ) {
+
+    private val gauges = Meters(::createGauge)
+    private val counters = Meters(::createCounter)
+    private val timers = Meters(::createTimer)
 
     protected fun tag(blockchain: BlockchainDto): Tag {
         return tag("blockchain", blockchain.name.lowercase())
@@ -34,6 +43,40 @@ abstract class UnionMetrics(
     }
 
     protected fun increment(name: String, vararg tags: Tag) {
-        return meterRegistry.counter(name, tags.toList()).increment()
+        counters.getOrCreate(name, tags.toList()).increment()
     }
+
+    protected fun record(name: String, duration: Duration, vararg tags: Tag) {
+        timers.getOrCreate(name, tags.toList()).record(duration)
+    }
+
+    protected fun set(name: String, value: Number, vararg tags: Tag) {
+        gauges.getOrCreate(name, tags.toList()).set(value.toDouble())
+    }
+
+    private fun createGauge(name: String, tags: List<Tag>): AtomicDouble {
+        val gauge = AtomicDouble()
+        meterRegistry.gauge(name, tags, gauge) { it.get() }
+        return gauge
+    }
+
+    private fun createTimer(name: String, tags: List<Tag>): Timer {
+        return meterRegistry.timer(name, tags)
+    }
+
+    private fun createCounter(name: String, tags: List<Tag>): Counter {
+        return meterRegistry.counter(name, tags)
+    }
+
+    private class Meters<T>(private val constructor: (name: String, tags: List<Tag>) -> T) {
+        private val meters = ConcurrentHashMap<MeterId, T>()
+        fun getOrCreate(name: String, tags: List<Tag>) = meters.computeIfAbsent(MeterId(name, tags)) {
+            constructor(name, tags)
+        }
+    }
+
+    private data class MeterId(
+        val name: String,
+        val tags: List<Tag> = emptyList()
+    )
 }

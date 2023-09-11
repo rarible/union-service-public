@@ -42,20 +42,21 @@ internal class LagServiceIt : AbstractIntegrationTest() {
 
     private lateinit var lagService: LagService
 
+    private val maxLag = 2L
+
     @BeforeEach
     fun before() {
         lagService = LagService(
             kafkaConsumer = kafkaConsumer,
             bootstrapServers = producerProperties.brokerReplicaSet,
             metaConsumerGroup = consumerGroup,
-            refreshTopic = "test-topic",
-            maxLag = 2
+            refreshTopic = "test-topic"
         )
     }
 
     @Test
     fun `check lag ok`() = runBlocking<Unit> {
-        assertThat(lagService.isLagOk()).isTrue
+        assertThat(lagService.isLagOk(maxLag)).isTrue
 
         val consumer = KafkaConsumer<String, String>(properties)
         val consumer2 = KafkaConsumer<String, String>(properties)
@@ -65,7 +66,7 @@ internal class LagServiceIt : AbstractIntegrationTest() {
         consumer2.subscribe(listOf("test-topic2"))
         consumer2.poll(Duration.ofMillis(5000))
 
-        assertThat(lagService.isLagOk()).isTrue
+        assertThat(lagService.isLagOk(maxLag)).isTrue
 
         withContext(Dispatchers.IO) {
             producer.send(ProducerRecord("test-topic", "key1", "test1")).get()
@@ -82,12 +83,12 @@ internal class LagServiceIt : AbstractIntegrationTest() {
         consumer.commitSync()
         assertThat(records.records("test-topic").toList()[0].value()).isEqualTo("test1")
 
-        assertThat(lagService.isLagOk()).isFalse
+        assertThat(lagService.isLagOk(maxLag)).isFalse
         consumer.poll(Duration.ofSeconds(1))
         consumer.poll(Duration.ofSeconds(1))
         consumer.poll(Duration.ofSeconds(1))
         consumer.poll(Duration.ofSeconds(1))
         consumer.commitSync()
-        assertThat(lagService.isLagOk()).isTrue
+        assertThat(lagService.isLagOk(maxLag)).isTrue
     }
 }

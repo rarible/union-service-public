@@ -41,7 +41,12 @@ class RefreshMetaTask(
             shortItems.forEach { item ->
                 if (parsedParam.full || item.metaEntry == null || item.metaEntry?.isDownloaded() == false) {
                     logger.info("Reset meta for item ${item.id}")
-                    itemMetaService.schedule(itemId = item.id.toDto(), pipeline = ItemMetaPipeline.REFRESH, true)
+                    itemMetaService.schedule(
+                        itemId = item.id.toDto(),
+                        pipeline = ItemMetaPipeline.REFRESH,
+                        force = true,
+                        priority = parsedParam.priority
+                    )
                 }
             }
             currentContinuation.set(items.continuation)
@@ -62,4 +67,5 @@ class RefreshMetaTask(
 data class RefreshMetaTaskParam(
     val collectionId: String,
     val full: Boolean,
+    val priority: Int = 0
 )

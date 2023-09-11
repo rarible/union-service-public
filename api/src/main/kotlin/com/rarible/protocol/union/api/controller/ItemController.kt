@@ -9,7 +9,6 @@ import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionVideoProperties
-import com.rarible.protocol.union.core.model.download.DownloadTaskSource
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -30,8 +29,10 @@ import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.TraitsDto
 import com.rarible.protocol.union.dto.TraitsRarityRequestDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import kotlinx.coroutines.CancellationException
@@ -190,6 +191,7 @@ class ItemController(
                 pipeline = ItemMetaPipeline.REFRESH,
                 force = true,
                 source = DownloadTaskSource.EXTERNAL,
+                priority = MetaDownloadPriority.ASAP,
             )
         }
 

@@ -1,10 +1,10 @@
 package com.rarible.protocol.union.listener.downloader
 
 import com.rarible.core.common.mapAsync
-import com.rarible.protocol.union.core.model.download.DownloadEntry
-import com.rarible.protocol.union.core.model.download.DownloadStatus
-import com.rarible.protocol.union.core.model.download.DownloadTask
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.download.DownloadEntry
+import com.rarible.protocol.union.enrichment.download.DownloadStatus
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
 import org.slf4j.LoggerFactory
 
@@ -23,14 +23,14 @@ abstract class DownloadScheduler<T>(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     abstract val type: String
-    abstract fun getBlockchain(task: DownloadTask): BlockchainDto
-    abstract suspend fun logScheduledTask(task: DownloadTask)
+    abstract fun getBlockchain(task: DownloadTaskEvent): BlockchainDto
+    abstract suspend fun logScheduledTask(task: DownloadTaskEvent)
 
-    suspend fun schedule(task: DownloadTask) {
+    suspend fun schedule(task: DownloadTaskEvent) {
         schedule(listOf(task))
     }
 
-    suspend fun schedule(tasks: Collection<DownloadTask>) {
+    suspend fun schedule(tasks: Collection<DownloadTaskEvent>) {
 
         val created = createInitialEntries(tasks)
 
@@ -52,7 +52,7 @@ abstract class DownloadScheduler<T>(
         }
     }
 
-    private suspend fun createInitialEntries(tasks: Collection<DownloadTask>): Set<String> {
+    private suspend fun createInitialEntries(tasks: Collection<DownloadTaskEvent>): Set<String> {
         // Initial download, entry should be created here in order to do not perform
         // such write queries during service's work (in API, for example)
         val ids = tasks.map { it.id }.toSet()
@@ -86,7 +86,7 @@ abstract class DownloadScheduler<T>(
         return current == null
     }
 
-    private fun createInitialEntry(task: DownloadTask): DownloadEntry<T> {
+    private fun createInitialEntry(task: DownloadTaskEvent): DownloadEntry<T> {
         logger.info("Initial entry created: id={}, scheduledAt={}", task.id, task.scheduledAt)
         return DownloadEntry<T>(
             id = task.id,

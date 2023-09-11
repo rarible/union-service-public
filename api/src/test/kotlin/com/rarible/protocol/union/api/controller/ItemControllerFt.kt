@@ -16,8 +16,6 @@ import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionVideoProperties
-import com.rarible.protocol.union.core.model.download.DownloadTask
-import com.rarible.protocol.union.core.model.download.DownloadTaskSource
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
@@ -30,6 +28,8 @@ import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -231,7 +231,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         verify(exactly = 1) { testEthereumItemApi.resetNftItemMetaById(itemId.value) }
         coVerify {
-            testDownloadTaskProducer.send(match<Collection<KafkaMessage<DownloadTask>>> { events ->
+            testDownloadTaskProducer.send(match<Collection<KafkaMessage<DownloadTaskEvent>>> { events ->
                 assertThat(events).hasSize(1)
                 val task = events.first().value
                 assertThat(task.id).isEqualTo(itemId.fullId())

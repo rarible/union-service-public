@@ -8,8 +8,10 @@ import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaRefreshEvent
 import com.rarible.protocol.union.core.model.UnionItemMetaUpdateEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import org.slf4j.LoggerFactory
@@ -29,7 +31,13 @@ class UnionItemMetaEventHandler(
         when (event) {
             is UnionItemMetaRefreshEvent -> {
                 logger.info("Refreshing meta for item {} by request of ItemMetaRefreshEvent", event.itemId)
-                itemMetaService.schedule(event.itemId, ItemMetaPipeline.EVENT, true)
+                itemMetaService.schedule(
+                    itemId = event.itemId,
+                    pipeline = ItemMetaPipeline.EVENT,
+                    force = true,
+                    source = DownloadTaskSource.INTERNAL,
+                    priority = MetaDownloadPriority.HIGH
+                )
             }
             // TODO not used, should be removed
             is UnionItemMetaUpdateEvent -> {

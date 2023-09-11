@@ -1,13 +1,14 @@
 package com.rarible.protocol.union.enrichment.meta
 
-import com.rarible.protocol.union.core.model.download.MetaSource
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.core.UnionMetrics
+import com.rarible.protocol.union.core.model.MetaSource
+import com.rarible.protocol.union.dto.BlockchainDto
 import io.micrometer.core.instrument.MeterRegistry
 
 open class MetaMetrics(
     meterRegistry: MeterRegistry,
-    private val type: String
+    val type: String,
+    val pipelines: List<String>
 ) : UnionMetrics(meterRegistry) {
 
     // -------------------- Meta fetch -----------------------//
@@ -96,9 +97,15 @@ open class MetaMetrics(
         increment(META_CACHE, type(type), tag(blockchain), status("miss"))
     }
 
+    // --------------------- Meta queue ----------------------//
+    fun onMetaQueueSizeUpdated(pipeline: String, size: Long) {
+        set(DOWNLOAD_QUEUE, size, tag("pipeline", pipeline))
+    }
+
     private companion object {
 
         const val META_FETCH = "meta_fetch"
         const val META_CACHE = "meta_cache"
+        const val DOWNLOAD_QUEUE = "download_queue"
     }
 }

@@ -52,5 +52,6 @@ data class FeatureFlagsProperties(
     val enableOptimizedSearchForActivities: Boolean = true,
 
     val enableStrictMetaComparison: Boolean = false,
-    val enableMetaDownloadLimit: Boolean = true
+    val enableMetaDownloadLimit: Boolean = true,
+    val enableMetaMongoPipeline: Boolean = true
 )
