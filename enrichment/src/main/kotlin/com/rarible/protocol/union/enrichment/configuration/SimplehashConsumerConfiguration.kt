@@ -2,16 +2,20 @@ package com.rarible.protocol.union.enrichment.configuration
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
-import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
-import com.rarible.protocol.apikey.kafka.RaribleKafkaMessageListenerFactory
+import com.rarible.core.kafka.RaribleKafkaMessageListenerFactory
 import com.rarible.simplehash.client.subcriber.SimplehashKafkaAvroDeserializer
 import com.simplehash.v0.nft
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.ApplicationEventPublisherAware
 import org.springframework.context.annotation.Bean
+import org.springframework.kafka.listener.AbstractMessageListenerContainer
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import java.util.UUID
 
@@ -75,6 +79,27 @@ class SimplehashConsumerConfiguration(
             container
         }
 
-        return RaribleKafkaConsumerFactory.RaribleKafkaConsumerWorkerWrapper(containers)
+        return SimplehashConsumerWorkerWrapper(containers)
+    }
+
+    private class SimplehashConsumerWorkerWrapper<K, V>(
+        private val containers: List<AbstractMessageListenerContainer<K, V>>
+    ) : RaribleKafkaConsumerWorker<V>, ApplicationEventPublisherAware, ApplicationContextAware {
+
+        override fun start() {
+            containers.forEach(AbstractMessageListenerContainer<K, V>::start)
+        }
+
+        override fun close() {
+            containers.forEach(AbstractMessageListenerContainer<K, V>::start)
+        }
+
+        override fun setApplicationEventPublisher(applicationEventPublisher: ApplicationEventPublisher) {
+            containers.forEach { it.setApplicationEventPublisher(applicationEventPublisher) }
+        }
+
+        override fun setApplicationContext(applicationContext: ApplicationContext) {
+            containers.forEach { it.setApplicationContext(applicationContext) }
+        }
     }
 }
