@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.worker.job
 
+import com.rarible.core.client.WebClientResponseProxyException
 import com.rarible.core.common.nowMillis
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.daemon.job.JobHandler
@@ -67,7 +68,7 @@ class BestOrderCheckJobHandler(
         val itemsUpdated = itemRepository.findWithMultiCurrency(notUpdatedSince)
             .filter { enabledBlockchains.contains(it.blockchain) }
             .map {
-                withIgnoredOptimisticLock {
+                withIgnoredOptimisticLockAnd404 {
                     enrichmentItemEventService.recalculateBestOrders(it, offchainEventMark("enrichment-in"))
                 }
             }.sum()
@@ -78,7 +79,7 @@ class BestOrderCheckJobHandler(
         val collectionsUpdated = collectionRepository.findWithMultiCurrency(notUpdatedSince)
             .filter { enabledBlockchains.contains(it.blockchain) }
             .map {
-                withIgnoredOptimisticLock {
+                withIgnoredOptimisticLockAnd404 {
                     enrichmentCollectionEventService.recalculateBestOrders(it, offchainEventMark("enrichment-in"))
                 }
             }.sum()
@@ -89,7 +90,7 @@ class BestOrderCheckJobHandler(
         val ownershipsUpdated = ownershipRepository.findWithMultiCurrency(notUpdatedSince)
             .filter { enabledBlockchains.contains(it.blockchain) }
             .map {
-                withIgnoredOptimisticLock {
+                withIgnoredOptimisticLockAnd404 {
                     enrichmentOwnershipEventService.recalculateBestOrders(it, offchainEventMark("enrichment-in"))
                 }
             }.sum()
@@ -97,13 +98,18 @@ class BestOrderCheckJobHandler(
         logger.info("Recalculated best Orders for {} Ownerships", ownershipsUpdated)
     }
 
-    private suspend fun withIgnoredOptimisticLock(call: suspend () -> Boolean): Int {
+    private suspend fun withIgnoredOptimisticLockAnd404(call: suspend () -> Boolean): Int {
         return try {
             val updated = call()
             if (updated) 1 else 0
         } catch (ex: OptimisticLockingFailureException) {
             // ignoring this exception - if entity was updated by somebody during job,
             // it means item/ownership already actualized, and we don't need to recalculate it
+            0
+        } catch (ex: WebClientResponseProxyException) {
+            if (ex.rawStatusCode != 404) {
+                throw ex
+            }
             0
         }
     }
