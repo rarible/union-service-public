@@ -9,6 +9,7 @@ import com.rarible.protocol.dto.NftCollectionEventDto
 import com.rarible.protocol.dto.NftCollectionEventTopicProvider
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemEventTopicProvider
+import com.rarible.protocol.dto.NftItemMetaEventDto
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
 import com.rarible.protocol.dto.OrderEventDto
@@ -20,6 +21,7 @@ import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
+import com.rarible.protocol.union.core.model.UnionItemMetaEvent
 import com.rarible.protocol.union.core.model.UnionOrderEvent
 import com.rarible.protocol.union.core.model.UnionOwnershipEvent
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
@@ -27,13 +29,16 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConvert
 import com.rarible.protocol.union.integration.ethereum.event.EthActivityEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthCollectionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthItemEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.EthItemMetaEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOrderEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOwnershipEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.MantleActivityEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.MantleCollectionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.MantleItemEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.MantleItemMetaEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.MantleOrderEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.MantleOwnershipEventHandler
+import com.rarible.protocol.union.integration.ethereum.event.PolygonItemMetaEventHandler
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
@@ -61,6 +66,12 @@ class MantleConsumerConfiguration(
     @Qualifier("mantle.item.handler")
     fun mantleItemEventHandler(handler: IncomingEventHandler<UnionItemEvent>): EthItemEventHandler {
         return MantleItemEventHandler(handler)
+    }
+
+    @Bean
+    @Qualifier("mantle.itemMeta.handler")
+    fun mantleItemMetaEventHandler(handler: IncomingEventHandler<UnionItemMetaEvent>): EthItemMetaEventHandler {
+        return MantleItemMetaEventHandler(handler)
     }
 
     @Bean
@@ -103,6 +114,18 @@ class MantleConsumerConfiguration(
             topic = NftItemEventTopicProvider.getTopic(env, blockchain.value),
             handler = handler,
             valueClass = NftItemEventDto::class.java,
+            eventType = EventType.ITEM,
+        )
+    }
+
+    @Bean
+    fun mantleItemMetaWorker(
+        @Qualifier("mantle.itemMeta.handler") handler: BlockchainEventHandler<NftItemMetaEventDto, UnionItemMetaEvent>
+    ): RaribleKafkaConsumerWorker<NftItemMetaEventDto> {
+        return createConsumer(
+            topic = NftItemEventTopicProvider.getItemMetaTopic(env, blockchain.value),
+            handler = handler,
+            valueClass = NftItemMetaEventDto::class.java,
             eventType = EventType.ITEM,
         )
     }

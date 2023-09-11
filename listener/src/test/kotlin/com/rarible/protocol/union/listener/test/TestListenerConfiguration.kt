@@ -27,6 +27,7 @@ import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.dto.NftCollectionEventTopicProvider
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemEventTopicProvider
+import com.rarible.protocol.dto.NftItemMetaEventDto
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
 import com.rarible.protocol.dto.OrderIndexerTopicProvider
@@ -40,6 +41,7 @@ import com.rarible.protocol.solana.api.client.TokenControllerApi
 import com.rarible.protocol.solana.dto.SolanaEventTopicProvider
 import com.rarible.protocol.solana.dto.TokenMetaEventDto
 import com.rarible.protocol.union.core.CoreConfiguration
+import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.test.TestUnionEventHandler
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -47,6 +49,8 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
@@ -177,6 +181,25 @@ class TestListenerConfiguration(
         return kafkaConsumerFactory.createWorker(settings, handler)
     }
 
+    @Bean
+    fun testDownloadTaskEventHandler() = TestUnionEventHandler<DownloadTaskEvent>()
+
+    @Bean
+    fun testDownloadTaskEventConsumer(handler: TestUnionEventHandler<DownloadTaskEvent>): RaribleKafkaConsumerWorker<DownloadTaskEvent> {
+        val topic = UnionInternalTopicProvider.getItemMetaDownloadTaskSchedulerTopic(env)
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = kafkaContainer.kafkaBoostrapServers(),
+            topic = topic,
+            group = "test-union-download-task-event-group",
+            concurrency = 1,
+            batchSize = 10,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = DownloadTaskEvent::class.java
+        )
+        return kafkaConsumerFactory.createWorker(settings, handler)
+    }
+
     // ---------------- ETHEREUM producers ----------------//
 
     @Bean
@@ -186,6 +209,18 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = NftItemEventDto::class.java,
             defaultTopic = NftItemEventTopicProvider.getTopic(env, "ethereum"),
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
+        )
+    }
+
+    @Bean
+    fun testEthereumItemMetaEventProducer(): RaribleKafkaProducer<NftItemMetaEventDto> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.ethereum.item.meta",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = NftItemMetaEventDto::class.java,
+            defaultTopic = NftItemEventTopicProvider.getItemMetaTopic(env, "ethereum"),
             bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
             compression = Compression.SNAPPY,
         )
