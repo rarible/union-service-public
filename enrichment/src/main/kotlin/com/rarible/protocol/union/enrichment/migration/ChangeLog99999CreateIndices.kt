@@ -42,7 +42,5 @@ class ChangeLog99999CreateIndices {
         metaAutoRefreshStateRepository.createIndices()
         metaRefreshRequestRepository.createIndices()
         downloadTaskRepository.createIndices()
-
-        itemRepository.dropOldIndices()
     }
 }

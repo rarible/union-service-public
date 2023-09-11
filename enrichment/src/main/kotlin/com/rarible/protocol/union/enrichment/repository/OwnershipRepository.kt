@@ -6,6 +6,7 @@ import com.rarible.core.mongo.util.div
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortDateIdOwnership
+import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
+import org.springframework.data.mongodb.core.index.PartialIndexFilter
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.exists
@@ -89,7 +91,7 @@ class OwnershipRepository(
                 ShortOwnership::multiCurrency isEqualTo true,
                 ShortOwnership::lastUpdatedAt lte lastUpdateAt
             )
-        ).withHint(Indices.MULTI_CURRENCY_OWNERSHIP.indexKeys)
+        )
 
         return template.find(query, ShortOwnership::class.java).asFlow()
     }
@@ -152,18 +154,38 @@ class OwnershipRepository(
 
     object Indices {
 
+        private const val BEST_SELL_PLATFORM_FIELD = "bestSellOrder.platform"
+
         private val BLOCKCHAIN_ITEM_ID: Index = Index()
             .on(ShortOwnership::blockchain.name, Sort.Direction.ASC)
             .on(ShortOwnership::itemId.name, Sort.Direction.ASC)
             .background()
 
-        val MULTI_CURRENCY_OWNERSHIP: Index = Index()
+        @Deprecated("Replace with MULTI_CURRENCY_DEFINITION")
+        val MULTI_CURRENCY_OWNERSHIP_LEGACY: Index = Index()
             .on(ShortOwnership::multiCurrency.name, Sort.Direction.DESC)
             .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
-        private val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
+        private val MULTI_CURRENCY_OWNERSHIP = Index()
+            .partial(PartialIndexFilter.of(ShortItem::multiCurrency isEqualTo true))
+            .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
+            // Originally we don't need it here, but without it there can be collisions in future
+            // with other partial indices based on partial filter and lastUpdateAt only
+            .on(ShortItem::multiCurrency.name, Sort.Direction.DESC)
+            .background()
+
+        @Deprecated("Replace with BY_BEST_SELL_PLATFORM_DEFINITION")
+        private val BY_BEST_SELL_PLATFORM_DEFINITION_LEGACY = Index()
             .on("${ShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", Sort.Direction.ASC)
+            .on("_id", Sort.Direction.ASC)
+            .background()
+
+        // TODO findByPlatformWithSell should be updated before switch to this index
+        private val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
+            .partial(PartialIndexFilter.of(Criteria.where(BEST_SELL_PLATFORM_FIELD).exists(true)))
+            .on(BEST_SELL_PLATFORM_FIELD, Sort.Direction.ASC)
+            .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
             .on("_id", Sort.Direction.ASC)
             .background()
 
@@ -174,8 +196,10 @@ class OwnershipRepository(
 
         val ALL = listOf(
             BY_BEST_SELL_PLATFORM_DEFINITION,
+            BY_BEST_SELL_PLATFORM_DEFINITION_LEGACY,
             BLOCKCHAIN_ITEM_ID,
             MULTI_CURRENCY_OWNERSHIP,
+            MULTI_CURRENCY_OWNERSHIP_LEGACY,
             LAST_UPDATED_AT_ID
         )
     }
