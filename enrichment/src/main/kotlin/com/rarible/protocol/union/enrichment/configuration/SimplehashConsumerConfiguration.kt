@@ -91,7 +91,7 @@ class SimplehashConsumerConfiguration(
         }
 
         override fun close() {
-            containers.forEach(AbstractMessageListenerContainer<K, V>::start)
+            containers.forEach(AbstractMessageListenerContainer<K, V>::stop)
         }
 
         override fun setApplicationEventPublisher(applicationEventPublisher: ApplicationEventPublisher) {
