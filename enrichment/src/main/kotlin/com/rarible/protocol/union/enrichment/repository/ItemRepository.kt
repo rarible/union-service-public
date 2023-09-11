@@ -18,7 +18,6 @@ import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.bson.Document
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
@@ -26,6 +25,7 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
+import org.springframework.data.mongodb.core.index.PartialIndexFilter
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.and
@@ -52,13 +52,6 @@ class ItemRepository(
         ALL_INDEXES.forEach { index ->
             logger.info("Ensure index '{}' for collection '{}'", index, collection)
             template.indexOps(collection).ensureIndex(index).awaitSingle()
-        }
-    }
-
-    suspend fun dropOldIndices() {
-        try {
-            template.indexOps(collection).dropIndex("metaEntry.retries_1_metaEntry.retriedAt_1").awaitSingleOrNull()
-        } catch (e: Exception) {
         }
     }
 
@@ -99,7 +92,7 @@ class ItemRepository(
                 ShortItem::multiCurrency isEqualTo true,
                 ShortItem::lastUpdatedAt lte lastUpdateAt
             )
-        ).withHint(MULTI_CURRENCY_DEFINITION.indexKeys)
+        )
 
         return template.find(query, ShortItem::class.java).asFlow()
     }
@@ -140,7 +133,6 @@ class ItemRepository(
         )
         val query = Query(criteria)
             .with(Sort.by("${ShortItem::bestSellOrder.name}.${ShortOrder::platform.name}", "_id"))
-            .withHint(BY_BEST_SELL_PLATFORM_DEFINITION.indexKeys)
 
         limit?.let { query.limit(it) }
 
@@ -200,6 +192,7 @@ class ItemRepository(
 
         // Not really sure why, but Mongo saves id field of SHortOrder as _id
         private const val POOL_ORDER_ID_FIELD = "poolSellOrders.order._id"
+        private const val BEST_SELL_PLATFORM_FIELD = "bestSellOrder.platform"
 
         private val STATUS_RETRIES_FAILED_AT_DEFINITION = Index()
             .on("${ShortItem::metaEntry.name}.${DownloadEntry<*>::status.name}", Sort.Direction.ASC)
@@ -212,27 +205,46 @@ class ItemRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
-        // TODO make it partial on multi-currency=true
-        private val MULTI_CURRENCY_DEFINITION = Index()
+        @Deprecated("Replace with MULTI_CURRENCY_DEFINITION")
+        private val MULTI_CURRENCY_DEFINITION_LEGACY = Index()
             .on(ShortItem::multiCurrency.name, Sort.Direction.DESC)
             .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
-        private val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
-            .on("${ShortItem::bestSellOrder.name}.${ShortOrder::platform.name}", Sort.Direction.ASC)
+        private val MULTI_CURRENCY_DEFINITION = Index()
+            .partial(PartialIndexFilter.of(ShortItem::multiCurrency isEqualTo true))
+            .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
+            // Originally we don't need it here, but without it there can be collisions in future
+            // with other partial indices based on partial filter and lastUpdateAt only
+            .on(ShortItem::multiCurrency.name, Sort.Direction.DESC)
+            .background()
+
+        @Deprecated("Replace with BY_BEST_SELL_PLATFORM_DEFINITION")
+        private val BY_BEST_SELL_PLATFORM_DEFINITION_LEGACY = Index()
+            .on(BEST_SELL_PLATFORM_FIELD, Sort.Direction.ASC)
             .on("_id", Sort.Direction.ASC)
             .background()
 
-        // TODO remove?
-        private val AUCTION_DEFINITION = Index()
-            .on(ShortItem::auctions.name, Sort.Direction.DESC)
+        // TODO findByPlatformWithSell should be updated before switch to this index
+        private val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
+            .partial(PartialIndexFilter.of(Criteria.where(BEST_SELL_PLATFORM_FIELD).exists(true)))
+            .on(BEST_SELL_PLATFORM_FIELD, Sort.Direction.ASC)
+            .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
+            .on("_id", Sort.Direction.ASC)
             .background()
 
-        private val POOL_ORDER_DEFINITION = Index()
+        @Deprecated("Replace with POOL_ORDER_DEFINITION")
+        private val POOL_ORDER_DEFINITION_LEGACY = Index()
             .on(POOL_ORDER_ID_FIELD, Sort.Direction.ASC)
             .on(ShortItem::blockchain.name, Sort.Direction.ASC) // Just for case of orderId collision
             .on("_id", Sort.Direction.ASC)
             .sparse()
+            .background()
+
+        // TODO findByPoolOrder should be updated before switch to this index
+        private val POOL_ORDER_DEFINITION = Index()
+            .partial(PartialIndexFilter.of(Criteria.where(BEST_SELL_PLATFORM_FIELD).exists(true)))
+            .on(POOL_ORDER_ID_FIELD, Sort.Direction.ASC)
             .background()
 
         private val LAST_UPDATED_AT_ID: Index = Index()
@@ -240,20 +252,16 @@ class ItemRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
-        private val COLLECTION_DEFINITION = Index()
-            .on(ShortItem::collectionId.name, Sort.Direction.ASC)
-            .on("_id", Sort.Direction.ASC)
-            .background()
-
         private val ALL_INDEXES = listOf(
             STATUS_RETRIES_FAILED_AT_DEFINITION,
             BLOCKCHAIN_DEFINITION,
             MULTI_CURRENCY_DEFINITION,
+            MULTI_CURRENCY_DEFINITION_LEGACY,
             BY_BEST_SELL_PLATFORM_DEFINITION,
-            AUCTION_DEFINITION,
+            BY_BEST_SELL_PLATFORM_DEFINITION_LEGACY,
             POOL_ORDER_DEFINITION,
-            LAST_UPDATED_AT_ID,
-            COLLECTION_DEFINITION
+            POOL_ORDER_DEFINITION_LEGACY,
+            LAST_UPDATED_AT_ID
         )
     }
 }
