@@ -15,7 +15,6 @@ data class DownloaderProperties(
     val item: Map<String, ExecutorPipelineProperties>,
     val collection: Map<String, ExecutorPipelineProperties>,
     val limits: List<DownloadLimit>
-    // Add the same for the collection
 )
 
 data class ExecutorPipelineProperties(

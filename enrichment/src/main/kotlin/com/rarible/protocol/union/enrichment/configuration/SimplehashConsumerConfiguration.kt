@@ -2,7 +2,7 @@ package com.rarible.protocol.union.enrichment.configuration
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
-import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaContainerFactorySettings
 import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.core.kafka.RaribleKafkaMessageListenerFactory
 import com.rarible.simplehash.client.subcriber.SimplehashKafkaAvroDeserializer
@@ -10,12 +10,8 @@ import com.simplehash.v0.nft
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
-import org.springframework.context.ApplicationContext
-import org.springframework.context.ApplicationContextAware
-import org.springframework.context.ApplicationEventPublisher
-import org.springframework.context.ApplicationEventPublisherAware
 import org.springframework.context.annotation.Bean
-import org.springframework.kafka.listener.AbstractMessageListenerContainer
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import java.util.UUID
 
@@ -42,7 +38,13 @@ class SimplehashConsumerConfiguration(
             ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS to SimplehashKafkaAvroDeserializer::class.java
         )
         val settings = if (!kafkaProps.username.isNullOrEmpty()) {
-            logger.info("Connecting to ${kafkaProps.broker} using username=${kafkaProps.username} and password=****${kafkaProps.password?.takeLast(5)}")
+            logger.info(
+                "Connecting to ${kafkaProps.broker} using username=${kafkaProps.username} and password=****${
+                    kafkaProps.password?.takeLast(
+                        5
+                    )
+                }"
+            )
             avroConfig + mapOf(
                 "security.protocol" to "SASL_SSL",
                 "sasl.mechanism" to "PLAIN",
@@ -54,12 +56,14 @@ class SimplehashConsumerConfiguration(
             avroConfig
         }
         return RaribleKafkaListenerContainerFactory(
-            hosts = kafkaProps.broker,
-            concurrency = kafkaProps.concurrency,
-            batchSize = kafkaProps.batchSize,
-            offsetResetStrategy = OffsetResetStrategy.LATEST,
-            valueClass = nft::class.java,
-            customSettings = settings
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = kafkaProps.broker,
+                concurrency = kafkaProps.concurrency,
+                batchSize = kafkaProps.batchSize,
+                offsetResetStrategy = OffsetResetStrategy.LATEST,
+                valueClass = nft::class.java,
+                customSettings = settings,
+            )
         )
     }
 
@@ -68,38 +72,14 @@ class SimplehashConsumerConfiguration(
         props: UnionMetaProperties,
         factory: RaribleKafkaListenerContainerFactory<nft>,
         handler: RaribleKafkaBatchEventHandler<nft>
-    ): RaribleKafkaConsumerWorker<nft> {
+    ): ConcurrentMessageListenerContainer<String, nft> {
         val listener = RaribleKafkaMessageListenerFactory.create(handler, true)
         logger.info("Creating consumers for topics: ${props.simpleHash.kafka.topics}")
-        val containers = props.simpleHash.kafka.topics.map {
-            val container = factory.createContainer(it)
-            container.setupMessageListener(listener)
-            container.containerProperties.groupId = "rarible-$env"
-            container.containerProperties.clientId = "rarible-$clientId"
-            container
-        }
 
-        return SimplehashConsumerWorkerWrapper(containers)
-    }
-
-    private class SimplehashConsumerWorkerWrapper<K, V>(
-        private val containers: List<AbstractMessageListenerContainer<K, V>>
-    ) : RaribleKafkaConsumerWorker<V>, ApplicationEventPublisherAware, ApplicationContextAware {
-
-        override fun start() {
-            containers.forEach(AbstractMessageListenerContainer<K, V>::start)
-        }
-
-        override fun close() {
-            containers.forEach(AbstractMessageListenerContainer<K, V>::stop)
-        }
-
-        override fun setApplicationEventPublisher(applicationEventPublisher: ApplicationEventPublisher) {
-            containers.forEach { it.setApplicationEventPublisher(applicationEventPublisher) }
-        }
-
-        override fun setApplicationContext(applicationContext: ApplicationContext) {
-            containers.forEach { it.setApplicationContext(applicationContext) }
-        }
+        val container = factory.createContainer(*props.simpleHash.kafka.topics.toTypedArray())
+        container.setupMessageListener(listener)
+        container.containerProperties.groupId = "rarible-$env"
+        container.containerProperties.clientId = "rarible-$clientId"
+        return container
     }
 }

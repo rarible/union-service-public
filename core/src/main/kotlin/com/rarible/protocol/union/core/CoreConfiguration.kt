@@ -25,7 +25,6 @@ import com.rarible.protocol.union.core.service.dummy.DummySignatureService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -71,7 +70,6 @@ class CoreConfiguration(
     fun raribleKafkaConsumerFactory() = RaribleKafkaConsumerFactory(
         applicationEnvironmentInfo.name,
         applicationEnvironmentInfo.host,
-        UnionKafkaJsonDeserializer::class.java
     )
 
     @Bean

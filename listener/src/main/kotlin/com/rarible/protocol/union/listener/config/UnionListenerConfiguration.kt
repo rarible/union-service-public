@@ -3,8 +3,8 @@ package com.rarible.protocol.union.listener.config
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
-import com.rarible.core.kafka.RaribleKafkaConsumerWorker
-import com.rarible.core.kafka.RaribleKafkaConsumerWorkerGroup
+import com.rarible.core.kafka.RaribleKafkaContainerFactorySettings
+import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
@@ -35,13 +35,13 @@ import com.rarible.protocol.union.listener.handler.internal.UnionInternalEventHa
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
-import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 
 @Configuration
 @Import(value = [EnrichmentConsumerConfiguration::class, SearchConfiguration::class])
@@ -51,8 +51,10 @@ class UnionListenerConfiguration(
     private val listenerProperties: UnionListenerProperties,
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     private val meterRegistry: MeterRegistry,
-    activeBlockchains: List<BlockchainDto>,
-    private val ff: FeatureFlagsProperties
+    private val ff: FeatureFlagsProperties,
+    private val handlerWrapperFactory: MetricsInternalEventHandlerFactory,
+    private val handler: UnionInternalEventHandler,
+    private val chunker: UnionInternalEventChunker,
 ) {
 
     private val env = applicationEnvironmentInfo.name
@@ -60,83 +62,225 @@ class UnionListenerConfiguration(
     private val kafkaConsumerFactory = RaribleKafkaConsumerFactory(
         env = env,
         host = host,
-        deserializer = UnionKafkaJsonDeserializer::class.java
     )
-    private val blockchains = activeBlockchains.toSet()
     private val properties = listenerProperties.consumer
 
     @Bean
-    fun unionBlockchainEventWorker(
-        handlerWrapperFactory: MetricsInternalEventHandlerFactory,
-        handler: UnionInternalEventHandler,
-        chunker: UnionInternalEventChunker
-    ): RaribleKafkaConsumerWorker<UnionInternalBlockchainEvent> {
-        val consumers = blockchains.map { blockchain ->
-            val workers = properties.getWorkerProperties(blockchain)
-            val settings = RaribleKafkaConsumerSettings(
+    fun ethereumUnionBlockchainEventContainerFactory(): RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainerFactory(
+            blockchain = BlockchainDto.ETHEREUM,
+        )
+    }
+
+    @Bean
+    fun ethereumUnionBlockchainEventContainer(
+        ethereumUnionBlockchainEventContainerFactory: RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent>,
+    ): ConcurrentMessageListenerContainer<String, UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainer(
+            blockchain = BlockchainDto.ETHEREUM,
+            unionBlockchainEventContainerFactory = ethereumUnionBlockchainEventContainerFactory,
+        )
+    }
+
+    @Bean
+    fun polygonUnionBlockchainEventContainerFactory(): RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainerFactory(
+            blockchain = BlockchainDto.POLYGON,
+        )
+    }
+
+    @Bean
+    fun polygonUnionBlockchainEventContainer(
+        polygonUnionBlockchainEventContainerFactory: RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent>,
+    ): ConcurrentMessageListenerContainer<String, UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainer(
+            blockchain = BlockchainDto.POLYGON,
+            unionBlockchainEventContainerFactory = polygonUnionBlockchainEventContainerFactory,
+        )
+    }
+
+    @Bean
+    fun mantleUnionBlockchainEventContainerFactory(): RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainerFactory(
+            blockchain = BlockchainDto.MANTLE,
+        )
+    }
+
+    @Bean
+    fun mantleUnionBlockchainEventContainer(
+        mantleUnionBlockchainEventContainerFactory: RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent>,
+    ): ConcurrentMessageListenerContainer<String, UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainer(
+            blockchain = BlockchainDto.MANTLE,
+            unionBlockchainEventContainerFactory = mantleUnionBlockchainEventContainerFactory,
+        )
+    }
+
+    @Bean
+    fun immutablexUnionBlockchainEventContainerFactory(): RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainerFactory(
+            blockchain = BlockchainDto.IMMUTABLEX,
+        )
+    }
+
+    @Bean
+    fun immutablexUnionBlockchainEventContainer(
+        immutablexUnionBlockchainEventContainerFactory: RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent>,
+    ): ConcurrentMessageListenerContainer<String, UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainer(
+            blockchain = BlockchainDto.IMMUTABLEX,
+            unionBlockchainEventContainerFactory = immutablexUnionBlockchainEventContainerFactory,
+        )
+    }
+
+    @Bean
+    fun flowUnionBlockchainEventContainerFactory(): RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainerFactory(
+            blockchain = BlockchainDto.FLOW,
+        )
+    }
+
+    @Bean
+    fun flowUnionBlockchainEventContainer(
+        flowUnionBlockchainEventContainerFactory: RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent>,
+    ): ConcurrentMessageListenerContainer<String, UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainer(
+            blockchain = BlockchainDto.FLOW,
+            unionBlockchainEventContainerFactory = flowUnionBlockchainEventContainerFactory,
+        )
+    }
+
+    @Bean
+    fun tezosUnionBlockchainEventContainerFactory(): RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainerFactory(
+            blockchain = BlockchainDto.TEZOS,
+        )
+    }
+
+    @Bean
+    fun tezosUnionBlockchainEventContainer(
+        tezosUnionBlockchainEventContainerFactory: RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent>,
+    ): ConcurrentMessageListenerContainer<String, UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainer(
+            blockchain = BlockchainDto.TEZOS,
+            unionBlockchainEventContainerFactory = tezosUnionBlockchainEventContainerFactory,
+        )
+    }
+
+    @Bean
+    fun solanaUnionBlockchainEventContainerFactory(): RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainerFactory(
+            blockchain = BlockchainDto.SOLANA,
+        )
+    }
+
+    @Bean
+    fun solanaUnionBlockchainEventContainer(
+        solanaUnionBlockchainEventContainerFactory: RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent>,
+    ): ConcurrentMessageListenerContainer<String, UnionInternalBlockchainEvent> {
+        return unionBlockchainEventContainer(
+            blockchain = BlockchainDto.SOLANA,
+            unionBlockchainEventContainerFactory = solanaUnionBlockchainEventContainerFactory,
+        )
+    }
+
+    private fun unionBlockchainEventContainerFactory(
+        blockchain: BlockchainDto,
+    ): RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent> {
+        val workers = properties.getWorkerProperties(blockchain)
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
                 hosts = properties.brokerReplicaSet,
-                topic = UnionInternalTopicProvider.getInternalBlockchainTopic(env, blockchain),
-                group = consumerGroup("blockchain.${blockchain.name.lowercase()}"),
+                valueClass = UnionInternalBlockchainEvent::class.java,
                 concurrency = workers.concurrency,
-                coroutineThreadCount = workers.coroutineThreadCount,
                 batchSize = workers.batchSize,
-                // Mandatory to be true with InternalBatchEventHandler, do not set it FALSE!
-                // Sync handling won't work with UnionInternalEventChunker, can cause bugs
-                async = true,
-                offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-                valueClass = UnionInternalBlockchainEvent::class.java
+                deserializer = UnionKafkaJsonDeserializer::class.java,
             )
-            val chunkedHandler = UnionInternalChunkedEventHandler(handler, chunker, blockchain)
-            if (ff.enableInternalEventChunkAsyncHandling) {
-                kafkaConsumerFactory.createWorker(
-                    settings,
-                    handlerWrapperFactory.create(chunkedHandler as InternalBatchEventHandler<UnionInternalBlockchainEvent>)
-                )
-            } else {
-                kafkaConsumerFactory.createWorker(
-                    settings,
-                    handlerWrapperFactory.create(chunkedHandler as InternalEventHandler<UnionInternalBlockchainEvent>)
-                )
-            }
+        )
+    }
+
+    private fun unionBlockchainEventContainer(
+        blockchain: BlockchainDto,
+        unionBlockchainEventContainerFactory: RaribleKafkaListenerContainerFactory<UnionInternalBlockchainEvent>,
+    ): ConcurrentMessageListenerContainer<String, UnionInternalBlockchainEvent> {
+        val workers = properties.getWorkerProperties(blockchain)
+        val settings = RaribleKafkaConsumerSettings(
+            topic = UnionInternalTopicProvider.getInternalBlockchainTopic(env, blockchain),
+            group = consumerGroup("blockchain.${blockchain.name.lowercase()}"),
+            coroutineThreadCount = workers.coroutineThreadCount,
+            // Mandatory to be true with InternalBatchEventHandler, do not set it FALSE!
+            // Sync handling won't work with UnionInternalEventChunker, can cause bugs
+            async = true,
+        )
+        val chunkedHandler = UnionInternalChunkedEventHandler(handler, chunker, blockchain)
+        return if (ff.enableInternalEventChunkAsyncHandling) {
+            kafkaConsumerFactory.createWorker(
+                settings,
+                handlerWrapperFactory.create(chunkedHandler as InternalBatchEventHandler<UnionInternalBlockchainEvent>),
+                unionBlockchainEventContainerFactory
+            )
+        } else {
+            kafkaConsumerFactory.createWorker(
+                settings,
+                handlerWrapperFactory.create(chunkedHandler as InternalEventHandler<UnionInternalBlockchainEvent>),
+                unionBlockchainEventContainerFactory,
+            )
         }
-        return RaribleKafkaConsumerWorkerGroup(consumers)
     }
 
     @Bean
     fun unionReconciliationMarkEventWorker(
-        handler: InternalEventHandler<ReconciliationMarkEvent>
-    ): RaribleKafkaConsumerWorker<ReconciliationMarkEvent> {
+        handler: InternalEventHandler<ReconciliationMarkEvent>,
+        unionReconciliationMarkEventContainerFactory: RaribleKafkaListenerContainerFactory<ReconciliationMarkEvent>,
+    ): ConcurrentMessageListenerContainer<String, ReconciliationMarkEvent> {
         val settings = RaribleKafkaConsumerSettings(
-            hosts = properties.brokerReplicaSet,
             topic = UnionInternalTopicProvider.getReconciliationMarkTopic(env),
             group = consumerGroup("reconciliation"),
-            concurrency = 1,
-            batchSize = 50,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = ReconciliationMarkEvent::class.java
         )
-        return kafkaConsumerFactory.createWorker(settings, handler)
+        return kafkaConsumerFactory.createWorker(settings, handler, unionReconciliationMarkEventContainerFactory)
+    }
+
+    @Bean
+    fun unionReconciliationMarkEventContainerFactory(): RaribleKafkaListenerContainerFactory<ReconciliationMarkEvent> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = properties.brokerReplicaSet,
+                valueClass = ReconciliationMarkEvent::class.java,
+                concurrency = 1,
+                batchSize = 50,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
     }
 
     // --------------- Meta 3.0 beans START
     @Bean
-    fun itemMetaDownloadScheduleWorker(
-        handler: ItemMetaTaskSchedulerHandler
-    ): RaribleKafkaConsumerWorker<DownloadTaskEvent> {
-        val consumerGroupSuffix = "meta.item"
+    fun itemDownloadTaskEventContainerFactory(): RaribleKafkaListenerContainerFactory<DownloadTaskEvent> {
         val itemProperties = listenerProperties.metaScheduling.item
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = properties.brokerReplicaSet,
+                valueClass = DownloadTaskEvent::class.java,
+                concurrency = itemProperties.workers,
+                batchSize = itemProperties.batchSize,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
+    }
+
+    @Bean
+    fun itemMetaDownloadScheduleWorker(
+        handler: ItemMetaTaskSchedulerHandler,
+        itemDownloadTaskEventContainerFactory: RaribleKafkaListenerContainerFactory<DownloadTaskEvent>,
+    ): ConcurrentMessageListenerContainer<String, DownloadTaskEvent> {
+        val consumerGroupSuffix = "meta.item"
         val settings = RaribleKafkaConsumerSettings(
-            hosts = properties.brokerReplicaSet,
             topic = UnionInternalTopicProvider.getItemMetaDownloadTaskSchedulerTopic(env),
             group = consumerGroup("download.scheduler.$consumerGroupSuffix"),
-            concurrency = itemProperties.workers,
-            batchSize = itemProperties.batchSize,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = DownloadTaskEvent::class.java
         )
-        return kafkaConsumerFactory.createWorker(settings, handler)
+        return kafkaConsumerFactory.createWorker(settings, handler, itemDownloadTaskEventContainerFactory)
     }
 
     @Bean
@@ -162,23 +306,32 @@ class UnionListenerConfiguration(
     }
 
     @Bean
-    fun collectionMetaDownloadScheduleWorker(
-        handler: CollectionMetaTaskSchedulerHandler
-    ): RaribleKafkaConsumerWorker<DownloadTaskEvent> {
+    fun collectionDownloadTaskEventContainerFactory(): RaribleKafkaListenerContainerFactory<DownloadTaskEvent> {
         val collectionProperties = listenerProperties.metaScheduling.collection
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = properties.brokerReplicaSet,
+                valueClass = DownloadTaskEvent::class.java,
+                concurrency = collectionProperties.workers,
+                batchSize = collectionProperties.batchSize,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
+    }
+
+    @Bean
+    fun collectionMetaDownloadScheduleWorker(
+        handler: CollectionMetaTaskSchedulerHandler,
+        collectionDownloadTaskEventContainerFactory: RaribleKafkaListenerContainerFactory<DownloadTaskEvent>,
+    ): ConcurrentMessageListenerContainer<String, DownloadTaskEvent> {
         val consumerGroupSuffix = "meta.collection"
 
         val settings = RaribleKafkaConsumerSettings(
-            hosts = properties.brokerReplicaSet,
             topic = UnionInternalTopicProvider.getCollectionMetaDownloadTaskSchedulerTopic(env),
             group = consumerGroup("download.scheduler.$consumerGroupSuffix"),
-            concurrency = collectionProperties.workers,
-            batchSize = collectionProperties.batchSize,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = DownloadTaskEvent::class.java
         )
-        return kafkaConsumerFactory.createWorker(settings, handler)
+        return kafkaConsumerFactory.createWorker(settings, handler, collectionDownloadTaskEventContainerFactory)
     }
 
     @Bean

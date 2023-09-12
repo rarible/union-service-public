@@ -7,7 +7,7 @@ import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.Compression
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
-import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
@@ -50,7 +50,6 @@ import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.coEvery
 import io.mockk.mockk
-import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.elasticsearch.action.support.IndicesOptions
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -74,6 +73,7 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchTemplate
 import org.springframework.data.elasticsearch.core.RefreshPolicy
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.socket.WebSocketMessage
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient
@@ -352,20 +352,16 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Bean
     fun testItemConsumer(
         handler: TestUnionEventHandler<ItemEventDto>,
-        kafkaConsumerFactory: RaribleKafkaConsumerFactory
-    ): RaribleKafkaConsumerWorker<ItemEventDto> {
+        kafkaConsumerFactory: RaribleKafkaConsumerFactory,
+        itemContainerFactory: RaribleKafkaListenerContainerFactory<ItemEventDto>,
+    ): ConcurrentMessageListenerContainer<String, ItemEventDto> {
         val topic = UnionEventTopicProvider.getItemTopic(applicationEnvironmentInfo.name)
         val settings = RaribleKafkaConsumerSettings(
-            hosts = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
             topic = topic,
             group = "test-union-item-group",
-            concurrency = 1,
-            batchSize = 10,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = ItemEventDto::class.java
         )
-        return kafkaConsumerFactory.createWorker(settings, handler)
+        return kafkaConsumerFactory.createWorker(settings, handler, itemContainerFactory)
     }
 
     @Bean
@@ -374,20 +370,16 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Bean
     fun testOwnershipConsumer(
         handler: TestUnionEventHandler<OwnershipEventDto>,
-        kafkaConsumerFactory: RaribleKafkaConsumerFactory
-    ): RaribleKafkaConsumerWorker<OwnershipEventDto> {
+        kafkaConsumerFactory: RaribleKafkaConsumerFactory,
+        ownershipContainerFactory: RaribleKafkaListenerContainerFactory<OwnershipEventDto>,
+    ): ConcurrentMessageListenerContainer<String, OwnershipEventDto> {
         val topic = UnionEventTopicProvider.getOwnershipTopic(applicationEnvironmentInfo.name)
         val settings = RaribleKafkaConsumerSettings(
-            hosts = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
             topic = topic,
             group = "test-union-ownership-group",
-            concurrency = 1,
-            batchSize = 10,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = OwnershipEventDto::class.java
         )
-        return kafkaConsumerFactory.createWorker(settings, handler)
+        return kafkaConsumerFactory.createWorker(settings, handler, ownershipContainerFactory)
     }
 
     @Bean

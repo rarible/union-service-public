@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.blockchain.mantle
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.ActivityTopicProvider
 import com.rarible.protocol.dto.EthActivityEventDto
@@ -37,6 +37,7 @@ import com.rarible.protocol.union.integration.ethereum.event.MantleOwnershipEven
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 
 @MantleConfiguration
 @Import(MantleApiConfiguration::class)
@@ -97,78 +98,80 @@ class MantleConsumerConfiguration(
 
     @Bean
     fun mantleItemWorker(
-        @Qualifier("mantle.item.handler") handler: BlockchainEventHandler<NftItemEventDto, UnionItemEvent>
-    ): RaribleKafkaConsumerWorker<NftItemEventDto> {
+        @Qualifier("mantle.item.handler") handler: BlockchainEventHandler<NftItemEventDto, UnionItemEvent>,
+        itemContainerFactory: RaribleKafkaListenerContainerFactory<NftItemEventDto>,
+    ): ConcurrentMessageListenerContainer<String, NftItemEventDto> {
         return createConsumer(
             topic = NftItemEventTopicProvider.getTopic(env, blockchain.value),
             handler = handler,
-            valueClass = NftItemEventDto::class.java,
             eventType = EventType.ITEM,
+            factory = itemContainerFactory,
         )
     }
 
     @Bean
     fun mantleOwnershipWorker(
-        @Qualifier("mantle.ownership.handler") handler: BlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>
-    ): RaribleKafkaConsumerWorker<NftOwnershipEventDto> {
+        @Qualifier("mantle.ownership.handler") handler: BlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>,
+        ownershipContainerFactory: RaribleKafkaListenerContainerFactory<NftOwnershipEventDto>,
+    ): ConcurrentMessageListenerContainer<String, NftOwnershipEventDto> {
         return createConsumer(
             topic = NftOwnershipEventTopicProvider.getTopic(env, blockchain.value),
             handler = handler,
-            valueClass = NftOwnershipEventDto::class.java,
             eventType = EventType.OWNERSHIP,
+            factory = ownershipContainerFactory,
         )
     }
 
     @Bean
     fun mantleCollectionWorker(
-        @Qualifier("mantle.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>
-    ): RaribleKafkaConsumerWorker<NftCollectionEventDto> {
+        @Qualifier("mantle.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>,
+        collectionContainerFactory: RaribleKafkaListenerContainerFactory<NftCollectionEventDto>,
+    ): ConcurrentMessageListenerContainer<String, NftCollectionEventDto> {
         return createConsumer(
             topic = NftCollectionEventTopicProvider.getTopic(env, blockchain.value),
             handler = handler,
-            valueClass = NftCollectionEventDto::class.java,
             eventType = EventType.COLLECTION,
+            factory = collectionContainerFactory,
         )
     }
 
     @Bean
     fun mantleOrderWorker(
-        @Qualifier("mantle.order.handler") handler: BlockchainEventHandler<OrderEventDto, UnionOrderEvent>
-    ): RaribleKafkaConsumerWorker<OrderEventDto> {
+        @Qualifier("mantle.order.handler") handler: BlockchainEventHandler<OrderEventDto, UnionOrderEvent>,
+        orderContainerFactory: RaribleKafkaListenerContainerFactory<OrderEventDto>,
+    ): ConcurrentMessageListenerContainer<String, OrderEventDto> {
         return createConsumer(
             topic = OrderIndexerTopicProvider.getOrderUpdateTopic(env, blockchain.value),
             handler = handler,
-            valueClass = OrderEventDto::class.java,
             eventType = EventType.ORDER,
+            factory = orderContainerFactory,
         )
     }
 
     @Bean
     fun mantleActivityWorker(
-        @Qualifier("mantle.activity.handler") handler: BlockchainEventHandler<EthActivityEventDto, UnionActivity>
-    ): RaribleKafkaConsumerWorker<EthActivityEventDto> {
+        @Qualifier("mantle.activity.handler") handler: BlockchainEventHandler<EthActivityEventDto, UnionActivity>,
+        activityContainerFactory: RaribleKafkaListenerContainerFactory<EthActivityEventDto>,
+    ): ConcurrentMessageListenerContainer<String, EthActivityEventDto> {
         return createConsumer(
             topic = ActivityTopicProvider.getActivityTopic(env, blockchain.value),
             handler = handler,
-            valueClass = EthActivityEventDto::class.java,
             eventType = EventType.ACTIVITY,
+            factory = activityContainerFactory,
         )
     }
 
     private fun <B, U> createConsumer(
         topic: String,
         handler: BlockchainEventHandler<B, U>,
-        valueClass: Class<B>,
-        eventType: EventType
-    ): RaribleKafkaConsumerWorker<B> {
+        eventType: EventType,
+        factory: RaribleKafkaListenerContainerFactory<B>,
+    ): ConcurrentMessageListenerContainer<String, B> {
         return consumerFactory.createBlockchainConsumerWorkerGroup(
-            hosts = consumer.brokerReplicaSet!!,
             topic = topic,
             handler = handler,
-            valueClass = valueClass,
-            workers = workers,
             eventType = eventType,
-            batchSize = batchSize
+            factory = factory,
         )
     }
 }

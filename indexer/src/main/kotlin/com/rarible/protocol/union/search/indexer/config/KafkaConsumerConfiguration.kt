@@ -4,7 +4,8 @@ import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
-import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaContainerFactorySettings
+import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
@@ -17,10 +18,12 @@ import com.rarible.protocol.union.search.indexer.handler.ItemEventHandler
 import com.rarible.protocol.union.search.indexer.handler.OrderEventHandler
 import com.rarible.protocol.union.search.indexer.handler.OwnershipEventHandler
 import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEventHandlerFactory
+import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 
 @Configuration
 class KafkaConsumerConfiguration(
@@ -42,52 +45,56 @@ class KafkaConsumerConfiguration(
     @Bean
     @ConditionalOnProperty(prefix = "handler.activity", name = ["enabled"], havingValue = "true")
     fun activityWorker(
-        handler: ActivityEventHandler
-    ): RaribleKafkaConsumerWorker<ActivityDto> {
+        handler: ActivityEventHandler,
+        activityContainerFactory: RaribleKafkaListenerContainerFactory<ActivityDto>,
+    ): ConcurrentMessageListenerContainer<String, ActivityDto> {
         return entityWorker(
             topic = UnionEventTopicProvider.getActivityTopic(env),
             group = consumerGroup(ACTIVITY),
-            valueClass = ActivityDto::class.java,
-            handler = metricEventHandlerFactory.wrapActivity(handler)
+            handler = metricEventHandlerFactory.wrapActivity(handler),
+            factory = activityContainerFactory,
         )
     }
 
     @Bean
     @ConditionalOnProperty(prefix = "handler.order", name = ["enabled"], havingValue = "true")
     fun orderWorker(
-        handler: OrderEventHandler
-    ): RaribleKafkaConsumerWorker<OrderEventDto> {
+        handler: OrderEventHandler,
+        orderContainerFactory: RaribleKafkaListenerContainerFactory<OrderEventDto>,
+    ): ConcurrentMessageListenerContainer<String, OrderEventDto> {
         return entityWorker(
             topic = UnionEventTopicProvider.getOrderTopic(env),
             group = consumerGroup(ORDER),
-            valueClass = OrderEventDto::class.java,
-            handler = metricEventHandlerFactory.wrapOrder(handler)
+            handler = metricEventHandlerFactory.wrapOrder(handler),
+            factory = orderContainerFactory,
         )
     }
 
     @Bean
     @ConditionalOnProperty(prefix = "handler.collection", name = ["enabled"], havingValue = "true")
     fun collectionWorker(
-        handler: CollectionEventHandler
-    ): RaribleKafkaConsumerWorker<CollectionEventDto> {
+        handler: CollectionEventHandler,
+        collectionContainerFactory: RaribleKafkaListenerContainerFactory<CollectionEventDto>,
+    ): ConcurrentMessageListenerContainer<String, CollectionEventDto> {
         return entityWorker(
             topic = UnionEventTopicProvider.getCollectionTopic(env),
             group = consumerGroup(COLLECTION),
-            valueClass = CollectionEventDto::class.java,
-            handler = metricEventHandlerFactory.wrapCollection(handler)
+            handler = metricEventHandlerFactory.wrapCollection(handler),
+            factory = collectionContainerFactory,
         )
     }
 
     @Bean
     @ConditionalOnProperty(prefix = "handler.item", name = ["enabled"], havingValue = "true")
     fun itemWorker(
-        handler: ItemEventHandler
-    ): RaribleKafkaConsumerWorker<ItemEventDto> {
+        handler: ItemEventHandler,
+        itemContainerFactory: RaribleKafkaListenerContainerFactory<ItemEventDto>,
+    ): ConcurrentMessageListenerContainer<String, ItemEventDto> {
         return entityWorker(
             topic = UnionEventTopicProvider.getItemTopic(env),
             group = consumerGroup(ITEM),
-            valueClass = ItemEventDto::class.java,
-            handler = metricEventHandlerFactory.wrapItem(handler)
+            handler = metricEventHandlerFactory.wrapItem(handler),
+            factory = itemContainerFactory,
         )
     }
 
@@ -95,34 +102,98 @@ class KafkaConsumerConfiguration(
     @ConditionalOnProperty(prefix = "handler.ownership", name = ["enabled"], havingValue = "true")
     fun ownershipWorker(
         handler: OwnershipEventHandler,
-    ): RaribleKafkaConsumerWorker<OwnershipEventDto> {
+        ownershipContainerFactory: RaribleKafkaListenerContainerFactory<OwnershipEventDto>,
+    ): ConcurrentMessageListenerContainer<String, OwnershipEventDto> {
         return entityWorker(
             topic = UnionEventTopicProvider.getOwnershipTopic(env),
             group = consumerGroup(OWNERSHIP),
-            valueClass = OwnershipEventDto::class.java,
-            handler = metricEventHandlerFactory.wrapOwnership(handler)
+            handler = metricEventHandlerFactory.wrapOwnership(handler),
+            factory = ownershipContainerFactory,
+        )
+    }
+
+    @Bean
+    fun activityContainerFactory(): RaribleKafkaListenerContainerFactory<ActivityDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = kafkaProperties.brokerReplicaSet,
+                concurrency = kafkaProperties.workerCount,
+                batchSize = kafkaProperties.daemon.consumerBatchSize,
+                offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+                valueClass = ActivityDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
+    }
+
+    @Bean
+    fun orderContainerFactory(): RaribleKafkaListenerContainerFactory<OrderEventDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = kafkaProperties.brokerReplicaSet,
+                concurrency = kafkaProperties.workerCount,
+                batchSize = kafkaProperties.daemon.consumerBatchSize,
+                offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+                valueClass = OrderEventDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
+    }
+
+    @Bean
+    fun collectionContainerFactory(): RaribleKafkaListenerContainerFactory<CollectionEventDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = kafkaProperties.brokerReplicaSet,
+                concurrency = kafkaProperties.workerCount,
+                batchSize = kafkaProperties.daemon.consumerBatchSize,
+                offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+                valueClass = CollectionEventDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
+    }
+
+    @Bean
+    fun itemContainerFactory(): RaribleKafkaListenerContainerFactory<ItemEventDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = kafkaProperties.brokerReplicaSet,
+                concurrency = kafkaProperties.workerCount,
+                batchSize = kafkaProperties.daemon.consumerBatchSize,
+                offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+                valueClass = ItemEventDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
+    }
+
+    @Bean
+    fun ownershipContainerFactory(): RaribleKafkaListenerContainerFactory<OwnershipEventDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = kafkaProperties.brokerReplicaSet,
+                concurrency = kafkaProperties.workerCount,
+                batchSize = kafkaProperties.daemon.consumerBatchSize,
+                offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+                valueClass = OwnershipEventDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
         )
     }
 
     fun <T> entityWorker(
         topic: String,
         group: String,
-        valueClass: Class<T>,
         handler: RaribleKafkaBatchEventHandler<T>,
-        workers: Int = kafkaProperties.workerCount,
-        batchSize: Int = kafkaProperties.daemon.consumerBatchSize,
-    ): RaribleKafkaConsumerWorker<T> {
+        factory: RaribleKafkaListenerContainerFactory<T>,
+    ): ConcurrentMessageListenerContainer<String, T> {
         val settings = RaribleKafkaConsumerSettings(
-            hosts = kafkaProperties.brokerReplicaSet,
             topic = topic,
             group = group,
-            concurrency = workers,
-            batchSize = batchSize,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = valueClass
         )
-        return kafkaConsumerFactory.createWorker(settings, handler)
+        return kafkaConsumerFactory.createWorker(settings, handler, factory)
     }
 
     private fun consumerGroup(suffix: String): String {

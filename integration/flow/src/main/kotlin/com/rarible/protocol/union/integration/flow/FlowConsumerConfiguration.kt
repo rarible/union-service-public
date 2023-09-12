@@ -1,7 +1,8 @@
 package com.rarible.protocol.union.integration.flow
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaContainerFactorySettings
+import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.protocol.dto.FlowActivityEventDto
 import com.rarible.protocol.dto.FlowActivityEventTopicProvider
 import com.rarible.protocol.dto.FlowCollectionEventDto
@@ -28,8 +29,10 @@ import com.rarible.protocol.union.integration.flow.event.FlowCollectionEventHand
 import com.rarible.protocol.union.integration.flow.event.FlowItemEventHandler
 import com.rarible.protocol.union.integration.flow.event.FlowOrderEventHandler
 import com.rarible.protocol.union.integration.flow.event.FlowOwnershipEventHandler
+import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 
 @FlowConfiguration
 @Import(FlowApiConfiguration::class)
@@ -83,78 +86,113 @@ class FlowConsumerConfiguration(
 
     @Bean
     fun flowItemWorker(
-        handler: BlockchainEventHandler<FlowNftItemEventDto, UnionItemEvent>
-    ): RaribleKafkaConsumerWorker<FlowNftItemEventDto> {
+        handler: BlockchainEventHandler<FlowNftItemEventDto, UnionItemEvent>,
+        itemContainerFactory: RaribleKafkaListenerContainerFactory<FlowNftItemEventDto>,
+    ): ConcurrentMessageListenerContainer<String, FlowNftItemEventDto> {
         return createConsumer(
             topic = FlowNftItemEventTopicProvider.getTopic(env),
             handler = handler,
-            valueClass = FlowNftItemEventDto::class.java,
             eventType = EventType.ITEM,
+            factory = itemContainerFactory,
         )
     }
 
     @Bean
     fun flowOwnershipWorker(
-        handler: BlockchainEventHandler<FlowOwnershipEventDto, UnionOwnershipEvent>
-    ): RaribleKafkaConsumerWorker<FlowOwnershipEventDto> {
+        handler: BlockchainEventHandler<FlowOwnershipEventDto, UnionOwnershipEvent>,
+        ownershipContainerFactory: RaribleKafkaListenerContainerFactory<FlowOwnershipEventDto>,
+    ): ConcurrentMessageListenerContainer<String, FlowOwnershipEventDto> {
         return createConsumer(
             topic = FlowNftOwnershipEventTopicProvider.getTopic(env),
             handler = handler,
-            valueClass = FlowOwnershipEventDto::class.java,
             eventType = EventType.OWNERSHIP,
+            factory = ownershipContainerFactory,
         )
     }
 
     @Bean
     fun flowCollectionWorker(
-        handler: BlockchainEventHandler<FlowCollectionEventDto, UnionCollectionEvent>
-    ): RaribleKafkaConsumerWorker<FlowCollectionEventDto> {
+        handler: BlockchainEventHandler<FlowCollectionEventDto, UnionCollectionEvent>,
+        collectionContainerFactory: RaribleKafkaListenerContainerFactory<FlowCollectionEventDto>,
+    ): ConcurrentMessageListenerContainer<String, FlowCollectionEventDto> {
         return createConsumer(
             topic = FlowNftCollectionEventTopicProvider.getTopic(env),
             handler = handler,
-            valueClass = FlowCollectionEventDto::class.java,
             eventType = EventType.COLLECTION,
+            factory = collectionContainerFactory,
         )
     }
 
     @Bean
     fun flowOrderWorker(
-        handler: BlockchainEventHandler<FlowOrderEventDto, UnionOrderEvent>
-    ): RaribleKafkaConsumerWorker<FlowOrderEventDto> {
+        handler: BlockchainEventHandler<FlowOrderEventDto, UnionOrderEvent>,
+        orderContainerFactory: RaribleKafkaListenerContainerFactory<FlowOrderEventDto>,
+    ): ConcurrentMessageListenerContainer<String, FlowOrderEventDto> {
         return createConsumer(
             topic = FlowOrderEventTopicProvider.getTopic(env),
             handler = handler,
-            valueClass = FlowOrderEventDto::class.java,
             eventType = EventType.ORDER,
+            factory = orderContainerFactory,
         )
     }
 
     @Bean
     fun flowActivityWorker(
-        handler: BlockchainEventHandler<FlowActivityEventDto, UnionActivity>
-    ): RaribleKafkaConsumerWorker<FlowActivityEventDto> {
+        handler: BlockchainEventHandler<FlowActivityEventDto, UnionActivity>,
+        activityContainerFactory: RaribleKafkaListenerContainerFactory<FlowActivityEventDto>,
+    ): ConcurrentMessageListenerContainer<String, FlowActivityEventDto> {
         return createConsumer(
             topic = FlowActivityEventTopicProvider.getActivityTopic(env),
             handler = handler,
-            valueClass = FlowActivityEventDto::class.java,
             eventType = EventType.ACTIVITY,
+            factory = activityContainerFactory,
         )
     }
+
+    @Bean
+    fun flowItemContainerFactory(): RaribleKafkaListenerContainerFactory<FlowNftItemEventDto> =
+        createContainerFactory(eventType = EventType.ITEM, valueClass = FlowNftItemEventDto::class.java)
+
+    @Bean
+    fun flowOwnershipContainerFactory(): RaribleKafkaListenerContainerFactory<FlowOwnershipEventDto> =
+        createContainerFactory(eventType = EventType.OWNERSHIP, valueClass = FlowOwnershipEventDto::class.java)
+
+    @Bean
+    fun flowCollectionContainerFactory(): RaribleKafkaListenerContainerFactory<FlowCollectionEventDto> =
+        createContainerFactory(eventType = EventType.COLLECTION, valueClass = FlowCollectionEventDto::class.java)
+
+    @Bean
+    fun flowOrderContainerFactory(): RaribleKafkaListenerContainerFactory<FlowOrderEventDto> =
+        createContainerFactory(eventType = EventType.ORDER, valueClass = FlowOrderEventDto::class.java)
+
+    @Bean
+    fun flowActivityContainerFactory(): RaribleKafkaListenerContainerFactory<FlowActivityEventDto> =
+        createContainerFactory(eventType = EventType.ORDER, valueClass = FlowActivityEventDto::class.java)
+
+    fun <T> createContainerFactory(
+        eventType: EventType,
+        valueClass: Class<T>,
+    ): RaribleKafkaListenerContainerFactory<T> = RaribleKafkaListenerContainerFactory(
+        settings = RaribleKafkaContainerFactorySettings(
+            hosts = consumer.brokerReplicaSet!!,
+            valueClass = valueClass,
+            concurrency = workers.getOrDefault(eventType.value, 9),
+            batchSize = batchSize,
+            deserializer = UnionKafkaJsonDeserializer::class.java,
+        )
+    )
 
     private fun <B, U> createConsumer(
         topic: String,
         handler: BlockchainEventHandler<B, U>,
-        valueClass: Class<B>,
-        eventType: EventType
-    ): RaribleKafkaConsumerWorker<B> {
+        eventType: EventType,
+        factory: RaribleKafkaListenerContainerFactory<B>,
+    ): ConcurrentMessageListenerContainer<String, B> {
         return consumerFactory.createBlockchainConsumerWorkerGroup(
-            hosts = consumer.brokerReplicaSet!!,
             topic = topic,
             handler = handler,
-            valueClass = valueClass,
-            workers = workers,
             eventType = eventType,
-            batchSize = batchSize
+            factory = factory,
         )
     }
 }

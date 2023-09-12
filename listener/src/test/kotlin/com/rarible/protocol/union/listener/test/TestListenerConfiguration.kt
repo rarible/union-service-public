@@ -5,7 +5,8 @@ import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.core.kafka.Compression
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
-import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaContainerFactorySettings
+import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension.Companion.kafkaContainer
 import com.rarible.dipdup.client.core.model.DipDupActivity
@@ -47,6 +48,7 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
+import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
@@ -56,6 +58,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 
 @TestConfiguration
 @Import(CoreConfiguration::class)
@@ -79,20 +82,16 @@ class TestListenerConfiguration(
 
     @Bean
     fun testCollectionConsumer(
-        handler: TestUnionEventHandler<CollectionEventDto>
-    ): RaribleKafkaConsumerWorker<CollectionEventDto> {
+        handler: TestUnionEventHandler<CollectionEventDto>,
+        collectionContainerFactory: RaribleKafkaListenerContainerFactory<CollectionEventDto>,
+    ): ConcurrentMessageListenerContainer<String, CollectionEventDto> {
         val topic = UnionEventTopicProvider.getCollectionTopic(env)
         val settings = RaribleKafkaConsumerSettings(
-            hosts = kafkaContainer.kafkaBoostrapServers(),
             topic = topic,
             group = "test-union-collection-group",
-            concurrency = 1,
-            batchSize = 10,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = CollectionEventDto::class.java
         )
-        return kafkaConsumerFactory.createWorker(settings, handler)
+        return kafkaConsumerFactory.createWorker(settings, handler, collectionContainerFactory)
     }
 
     @Bean
@@ -100,20 +99,16 @@ class TestListenerConfiguration(
 
     @Bean
     fun testItemConsumer(
-        handler: TestUnionEventHandler<ItemEventDto>
-    ): RaribleKafkaConsumerWorker<ItemEventDto> {
+        handler: TestUnionEventHandler<ItemEventDto>,
+        itemContainerFactory: RaribleKafkaListenerContainerFactory<ItemEventDto>,
+    ): ConcurrentMessageListenerContainer<String, ItemEventDto> {
         val topic = UnionEventTopicProvider.getItemTopic(env)
         val settings = RaribleKafkaConsumerSettings(
-            hosts = kafkaContainer.kafkaBoostrapServers(),
             topic = topic,
             group = "test-union-item-group",
-            concurrency = 1,
-            batchSize = 10,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = ItemEventDto::class.java
         )
-        return kafkaConsumerFactory.createWorker(settings, handler)
+        return kafkaConsumerFactory.createWorker(settings, handler, itemContainerFactory)
     }
 
     @Bean
@@ -121,20 +116,16 @@ class TestListenerConfiguration(
 
     @Bean
     fun testOwnershipConsumer(
-        handler: TestUnionEventHandler<OwnershipEventDto>
-    ): RaribleKafkaConsumerWorker<OwnershipEventDto> {
+        handler: TestUnionEventHandler<OwnershipEventDto>,
+        ownershipContainerFactory: RaribleKafkaListenerContainerFactory<OwnershipEventDto>,
+    ): ConcurrentMessageListenerContainer<String, OwnershipEventDto> {
         val topic = UnionEventTopicProvider.getOwnershipTopic(env)
         val settings = RaribleKafkaConsumerSettings(
-            hosts = kafkaContainer.kafkaBoostrapServers(),
             topic = topic,
             group = "test-union-ownership-group",
-            concurrency = 1,
-            batchSize = 10,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = OwnershipEventDto::class.java
         )
-        return kafkaConsumerFactory.createWorker(settings, handler)
+        return kafkaConsumerFactory.createWorker(settings, handler, ownershipContainerFactory)
     }
 
     @Bean
@@ -142,39 +133,103 @@ class TestListenerConfiguration(
 
     @Bean
     fun testOrderConsumer(
-        handler: TestUnionEventHandler<OrderEventDto>
-    ): RaribleKafkaConsumerWorker<OrderEventDto> {
+        handler: TestUnionEventHandler<OrderEventDto>,
+        orderContainerFactory: RaribleKafkaListenerContainerFactory<OrderEventDto>,
+    ): ConcurrentMessageListenerContainer<String, OrderEventDto> {
         val topic = UnionEventTopicProvider.getOrderTopic(env)
         val settings = RaribleKafkaConsumerSettings(
-            hosts = kafkaContainer.kafkaBoostrapServers(),
             topic = topic,
             group = "test-union-order-group",
-            concurrency = 1,
-            batchSize = 10,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = OrderEventDto::class.java
         )
-        return kafkaConsumerFactory.createWorker(settings, handler)
+        return kafkaConsumerFactory.createWorker(settings, handler, orderContainerFactory)
     }
 
     @Bean
     fun testActivityHandler() = TestUnionEventHandler<ActivityDto>()
 
     @Bean
-    fun testActivityConsumer(handler: TestUnionEventHandler<ActivityDto>): RaribleKafkaConsumerWorker<ActivityDto> {
+    fun testActivityConsumer(
+        handler: TestUnionEventHandler<ActivityDto>,
+        activityContainerFactory: RaribleKafkaListenerContainerFactory<ActivityDto>,
+    ): ConcurrentMessageListenerContainer<String, ActivityDto> {
         val topic = UnionEventTopicProvider.getActivityTopic(env)
         val settings = RaribleKafkaConsumerSettings(
-            hosts = kafkaContainer.kafkaBoostrapServers(),
             topic = topic,
             group = "test-union-activity-group",
-            concurrency = 1,
-            batchSize = 10,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = ActivityDto::class.java
         )
-        return kafkaConsumerFactory.createWorker(settings, handler)
+        return kafkaConsumerFactory.createWorker(settings, handler, activityContainerFactory)
+    }
+
+    @Bean
+    fun activityContainerFactory(): RaribleKafkaListenerContainerFactory<ActivityDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = kafkaContainer.kafkaBoostrapServers(),
+                concurrency = 1,
+                batchSize = 10,
+                offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+                valueClass = ActivityDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
+    }
+
+    @Bean
+    fun orderContainerFactory(): RaribleKafkaListenerContainerFactory<OrderEventDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = kafkaContainer.kafkaBoostrapServers(),
+                concurrency = 1,
+                batchSize = 10,
+                offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+                valueClass = OrderEventDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
+    }
+
+    @Bean
+    fun collectionContainerFactory(): RaribleKafkaListenerContainerFactory<CollectionEventDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = kafkaContainer.kafkaBoostrapServers(),
+                concurrency = 1,
+                batchSize = 10,
+                offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+                valueClass = CollectionEventDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
+    }
+
+    @Bean
+    fun itemContainerFactory(): RaribleKafkaListenerContainerFactory<ItemEventDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = kafkaContainer.kafkaBoostrapServers(),
+                concurrency = 1,
+                batchSize = 10,
+                offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+                valueClass = ItemEventDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
+    }
+
+    @Bean
+    fun ownershipContainerFactory(): RaribleKafkaListenerContainerFactory<OwnershipEventDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = kafkaContainer.kafkaBoostrapServers(),
+                concurrency = 1,
+                batchSize = 10,
+                offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+                valueClass = OwnershipEventDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
     }
 
     // ---------------- ETHEREUM producers ----------------//

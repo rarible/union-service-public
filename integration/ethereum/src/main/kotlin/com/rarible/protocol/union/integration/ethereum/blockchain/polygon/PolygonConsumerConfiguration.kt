@@ -1,7 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.blockchain.polygon
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.ethereum.domain.Blockchain
 import com.rarible.protocol.dto.ActivityTopicProvider
 import com.rarible.protocol.dto.EthActivityEventDto
@@ -37,6 +37,7 @@ import com.rarible.protocol.union.integration.ethereum.event.PolygonOwnershipEve
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 
 @PolygonConfiguration
 @Import(PolygonApiConfiguration::class)
@@ -97,78 +98,80 @@ class PolygonConsumerConfiguration(
 
     @Bean
     fun polygonItemWorker(
-        @Qualifier("polygon.item.handler") handler: BlockchainEventHandler<NftItemEventDto, UnionItemEvent>
-    ): RaribleKafkaConsumerWorker<NftItemEventDto> {
+        @Qualifier("polygon.item.handler") handler: BlockchainEventHandler<NftItemEventDto, UnionItemEvent>,
+        itemContainerFactory: RaribleKafkaListenerContainerFactory<NftItemEventDto>,
+    ): ConcurrentMessageListenerContainer<String, NftItemEventDto> {
         return createConsumer(
             topic = NftItemEventTopicProvider.getTopic(env, blockchain.value),
             handler = handler,
-            valueClass = NftItemEventDto::class.java,
             eventType = EventType.ITEM,
+            factory = itemContainerFactory,
         )
     }
 
     @Bean
     fun polygonOwnershipWorker(
-        @Qualifier("polygon.ownership.handler") handler: BlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>
-    ): RaribleKafkaConsumerWorker<NftOwnershipEventDto> {
+        @Qualifier("polygon.ownership.handler") handler: BlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>,
+        ownershipContainerFactory: RaribleKafkaListenerContainerFactory<NftOwnershipEventDto>,
+    ): ConcurrentMessageListenerContainer<String, NftOwnershipEventDto> {
         return createConsumer(
             topic = NftOwnershipEventTopicProvider.getTopic(env, blockchain.value),
             handler = handler,
-            valueClass = NftOwnershipEventDto::class.java,
             eventType = EventType.OWNERSHIP,
+            factory = ownershipContainerFactory,
         )
     }
 
     @Bean
     fun polygonCollectionWorker(
-        @Qualifier("polygon.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>
-    ): RaribleKafkaConsumerWorker<NftCollectionEventDto> {
+        @Qualifier("polygon.collection.handler") handler: BlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>,
+        collectionContainerFactory: RaribleKafkaListenerContainerFactory<NftCollectionEventDto>,
+    ): ConcurrentMessageListenerContainer<String, NftCollectionEventDto> {
         return createConsumer(
             topic = NftCollectionEventTopicProvider.getTopic(env, blockchain.value),
             handler = handler,
-            valueClass = NftCollectionEventDto::class.java,
             eventType = EventType.COLLECTION,
+            factory = collectionContainerFactory,
         )
     }
 
     @Bean
     fun polygonOrderWorker(
-        @Qualifier("polygon.order.handler") handler: BlockchainEventHandler<OrderEventDto, UnionOrderEvent>
-    ): RaribleKafkaConsumerWorker<OrderEventDto> {
+        @Qualifier("polygon.order.handler") handler: BlockchainEventHandler<OrderEventDto, UnionOrderEvent>,
+        orderContainerFactory: RaribleKafkaListenerContainerFactory<OrderEventDto>,
+    ): ConcurrentMessageListenerContainer<String, OrderEventDto> {
         return createConsumer(
             topic = OrderIndexerTopicProvider.getOrderUpdateTopic(env, blockchain.value),
             handler = handler,
-            valueClass = OrderEventDto::class.java,
             eventType = EventType.ORDER,
+            factory = orderContainerFactory,
         )
     }
 
     @Bean
     fun polygonActivityWorker(
-        @Qualifier("polygon.activity.handler") handler: BlockchainEventHandler<EthActivityEventDto, UnionActivity>
-    ): RaribleKafkaConsumerWorker<EthActivityEventDto> {
+        @Qualifier("polygon.activity.handler") handler: BlockchainEventHandler<EthActivityEventDto, UnionActivity>,
+        activityContainerFactory: RaribleKafkaListenerContainerFactory<EthActivityEventDto>,
+    ): ConcurrentMessageListenerContainer<String, EthActivityEventDto> {
         return createConsumer(
             topic = ActivityTopicProvider.getActivityTopic(env, blockchain.value),
             handler = handler,
-            valueClass = EthActivityEventDto::class.java,
             eventType = EventType.ACTIVITY,
+            factory = activityContainerFactory,
         )
     }
 
     private fun <B, U> createConsumer(
         topic: String,
         handler: BlockchainEventHandler<B, U>,
-        valueClass: Class<B>,
-        eventType: EventType
-    ): RaribleKafkaConsumerWorker<B> {
+        eventType: EventType,
+        factory: RaribleKafkaListenerContainerFactory<B>,
+    ): ConcurrentMessageListenerContainer<String, B> {
         return consumerFactory.createBlockchainConsumerWorkerGroup(
-            hosts = consumer.brokerReplicaSet!!,
             topic = topic,
             handler = handler,
-            valueClass = valueClass,
-            workers = workers,
             eventType = eventType,
-            batchSize = batchSize
+            factory = factory,
         )
     }
 }

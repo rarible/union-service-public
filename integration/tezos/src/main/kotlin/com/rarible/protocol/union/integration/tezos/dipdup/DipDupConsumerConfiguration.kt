@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
-import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaContainerFactorySettings
+import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.dipdup.client.core.model.DipDupActivity
 import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.listener.config.DipDupDeserializer
@@ -38,10 +39,10 @@ import com.rarible.protocol.union.integration.tezos.dipdup.event.DipDupTransfers
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktCollectionService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
-import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 
 @DipDupConfiguration
 @Import(DipDupApiConfiguration::class)
@@ -84,14 +85,14 @@ class DipDupConsumerConfiguration(
     @Bean
     fun dipDupOrderEventWorker(
         factory: DipDupEventsConsumerFactory,
-        handler: DipDupOrderEventHandler
-    ): RaribleKafkaConsumerWorker<DipDupOrder> {
+        handler: DipDupOrderEventHandler,
+        orderContainerFactory: RaribleKafkaListenerContainerFactory<DipDupOrder>,
+    ): ConcurrentMessageListenerContainer<String, DipDupOrder> {
         return createConsumer(
             topic = DipDupTopicProvider.getOrderTopic(env),
             handler = handler,
-            valueClass = DipDupOrder::class.java,
             eventType = EventType.ORDER,
-            deserializer = DipDupDeserializer.OrderJsonSerializer::class.java
+            factory = orderContainerFactory,
         )
     }
 
@@ -119,14 +120,14 @@ class DipDupConsumerConfiguration(
     @Bean
     fun dipDupActivityEventWorker(
         factory: DipDupEventsConsumerFactory,
-        handler: DipDupActivityEventHandler
-    ): RaribleKafkaConsumerWorker<DipDupActivity> {
+        handler: DipDupActivityEventHandler,
+        activityContainerFactory: RaribleKafkaListenerContainerFactory<DipDupActivity>,
+    ): ConcurrentMessageListenerContainer<String, DipDupActivity> {
         return createConsumer(
             topic = DipDupTopicProvider.getActivityTopic(env),
             handler = handler,
-            valueClass = DipDupActivity::class.java,
             eventType = EventType.ACTIVITY,
-            deserializer = DipDupDeserializer.ActivityJsonSerializer::class.java
+            factory = activityContainerFactory,
         )
     }
 
@@ -143,14 +144,14 @@ class DipDupConsumerConfiguration(
     @Bean
     fun dipDupCollectionEventWorker(
         factory: DipDupEventsConsumerFactory,
-        handler: DipDupCollectionEventHandler
-    ): RaribleKafkaConsumerWorker<DipDupCollectionEvent> {
+        handler: DipDupCollectionEventHandler,
+        collectionContainerFactory: RaribleKafkaListenerContainerFactory<DipDupCollectionEvent>,
+    ): ConcurrentMessageListenerContainer<String, DipDupCollectionEvent> {
         return createConsumer(
             topic = DipDupTopicProvider.getCollectionTopic(env),
             handler = handler,
-            valueClass = DipDupCollectionEvent::class.java,
             eventType = EventType.COLLECTION,
-            deserializer = DipDupDeserializer.CollectionJsonSerializer::class.java
+            factory = collectionContainerFactory,
         )
     }
 
@@ -165,14 +166,14 @@ class DipDupConsumerConfiguration(
     @Bean
     fun dipDupItemEventWorker(
         factory: DipDupEventsConsumerFactory,
-        handler: DipDupItemEventHandler
-    ): RaribleKafkaConsumerWorker<DipDupItemEvent> {
+        handler: DipDupItemEventHandler,
+        itemContainerFactory: RaribleKafkaListenerContainerFactory<DipDupItemEvent>,
+    ): ConcurrentMessageListenerContainer<String, DipDupItemEvent> {
         return createConsumer(
             topic = DipDupTopicProvider.getItemTopic(env),
             handler = handler,
-            valueClass = DipDupItemEvent::class.java,
             eventType = EventType.ITEM,
-            deserializer = DipDupDeserializer.ItemEventJsonSerializer::class.java
+            factory = itemContainerFactory,
         )
     }
 
@@ -184,14 +185,14 @@ class DipDupConsumerConfiguration(
     @Bean
     fun dipDupItemMetaEventWorker(
         factory: DipDupEventsConsumerFactory,
-        handler: BlockchainEventHandler<DipDupItemMetaEvent, UnionItemMetaEvent>
-    ): RaribleKafkaConsumerWorker<DipDupItemMetaEvent> {
+        handler: BlockchainEventHandler<DipDupItemMetaEvent, UnionItemMetaEvent>,
+        itemMetaContainerFactory: RaribleKafkaListenerContainerFactory<DipDupItemMetaEvent>,
+    ): ConcurrentMessageListenerContainer<String, DipDupItemMetaEvent> {
         return createConsumer(
             topic = DipDupTopicProvider.getItemMetaTopic(env),
             handler = handler,
-            valueClass = DipDupItemMetaEvent::class.java,
             eventType = EventType.ITEM_META,
-            deserializer = DipDupDeserializer.ItemMetaEventJsonSerializer::class.java
+            factory = itemMetaContainerFactory,
         )
     }
 
@@ -206,37 +207,97 @@ class DipDupConsumerConfiguration(
     @Bean
     fun dipDupOwnershipEventWorker(
         factory: DipDupEventsConsumerFactory,
-        handler: DipDupOwnershipEventHandler
-    ): RaribleKafkaConsumerWorker<DipDupOwnershipEvent> {
+        handler: DipDupOwnershipEventHandler,
+        ownershipContainerFactory: RaribleKafkaListenerContainerFactory<DipDupOwnershipEvent>,
+    ): ConcurrentMessageListenerContainer<String, DipDupOwnershipEvent> {
         return createConsumer(
             topic = DipDupTopicProvider.getOwnershipTopic(env),
             handler = handler,
-            valueClass = DipDupOwnershipEvent::class.java,
             eventType = EventType.OWNERSHIP,
-            deserializer = DipDupDeserializer.OwnershipEventJsonSerializer::class.java
+            factory = ownershipContainerFactory,
         )
     }
+
+    @Bean
+    fun didpdupOrderContainerFactory(): RaribleKafkaListenerContainerFactory<DipDupOrder> =
+        createContainerFactory(
+            eventType = EventType.ORDER,
+            valueClass = DipDupOrder::class.java,
+            deserializer = DipDupDeserializer.OrderJsonSerializer::class.java
+        )
+
+    @Bean
+    fun didpdupActivityContainerFactory(): RaribleKafkaListenerContainerFactory<DipDupActivity> =
+        createContainerFactory(
+            eventType = EventType.ACTIVITY,
+            valueClass = DipDupActivity::class.java,
+            deserializer = DipDupDeserializer.ActivityJsonSerializer::class.java
+        )
+
+    @Bean
+    fun didpdupItemContainerFactory(): RaribleKafkaListenerContainerFactory<DipDupItemEvent> =
+        createContainerFactory(
+            eventType = EventType.ITEM,
+            valueClass = DipDupItemEvent::class.java,
+            deserializer = DipDupDeserializer.ItemEventJsonSerializer::class.java
+        )
+
+    @Bean
+    fun didpdupItemMetaContainerFactory(): RaribleKafkaListenerContainerFactory<DipDupItemMetaEvent> =
+        createContainerFactory(
+            eventType = EventType.ITEM_META,
+            valueClass = DipDupItemMetaEvent::class.java,
+            deserializer = DipDupDeserializer.ItemMetaEventJsonSerializer::class.java
+        )
+
+    @Bean
+    fun didpdupOwnershipContainerFactory(): RaribleKafkaListenerContainerFactory<DipDupOwnershipEvent> =
+        createContainerFactory(
+            eventType = EventType.OWNERSHIP,
+            valueClass = DipDupOwnershipEvent::class.java,
+            deserializer = DipDupDeserializer.OwnershipEventJsonSerializer::class.java
+        )
+
+    @Bean
+    fun didpdupCollectionContainerFactory(): RaribleKafkaListenerContainerFactory<DipDupCollectionEvent> =
+        createContainerFactory(
+            eventType = EventType.COLLECTION,
+            valueClass = DipDupCollectionEvent::class.java,
+            deserializer = DipDupDeserializer.CollectionJsonSerializer::class.java
+        )
+
+    fun <T> createContainerFactory(
+        eventType: EventType,
+        valueClass: Class<T>,
+        deserializer: Class<*>,
+    ): RaribleKafkaListenerContainerFactory<T> = RaribleKafkaListenerContainerFactory(
+        settings = RaribleKafkaContainerFactorySettings(
+            hosts = consumer.brokerReplicaSet!!,
+            valueClass = valueClass,
+            concurrency = workers.getOrDefault(eventType.value, 9),
+            batchSize = batchSize,
+            deserializer = deserializer,
+        )
+    )
 
     private fun <B, U> createConsumer(
         topic: String,
         handler: BlockchainEventHandler<B, U>,
-        valueClass: Class<B>,
         eventType: EventType,
-        deserializer: Class<*>
-    ): RaribleKafkaConsumerWorker<B> {
+        factory: RaribleKafkaListenerContainerFactory<B>,
+    ): ConcurrentMessageListenerContainer<String, B> {
         val settings = RaribleKafkaConsumerSettings(
-            hosts = consumer.brokerReplicaSet!!,
             topic = topic,
             group = consumerFactory.consumerGroup(eventType),
-            concurrency = workers.getOrDefault(eventType.value, 9),
-            batchSize = batchSize,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
-            valueClass = valueClass
         )
         val eventCounter =
             eventCountMetrics.eventReceivedGauge(EventCountMetrics.Stage.INDEXER, handler.blockchain, eventType)
-        val kafkaConsumerFactory = RaribleKafkaConsumerFactory(env, host, deserializer)
-        return kafkaConsumerFactory.createWorker(settings, BlockchainEventHandlerWrapper(handler, eventCounter))
+        val kafkaConsumerFactory = RaribleKafkaConsumerFactory(env, host)
+        return kafkaConsumerFactory.createWorker(
+            settings,
+            BlockchainEventHandlerWrapper(handler, eventCounter),
+            factory
+        )
     }
 }

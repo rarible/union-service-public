@@ -1,7 +1,8 @@
 package com.rarible.protocol.union.integration.solana
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
-import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaContainerFactorySettings
+import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.protocol.solana.dto.BalanceEventDto
 import com.rarible.protocol.solana.dto.SolanaEventTopicProvider
 import com.rarible.protocol.solana.dto.TokenEventDto
@@ -25,8 +26,10 @@ import com.rarible.protocol.union.integration.solana.event.SolanaItemEventHandle
 import com.rarible.protocol.union.integration.solana.event.SolanaItemMetaEventHandler
 import com.rarible.protocol.union.integration.solana.event.SolanaOrderEventHandler
 import com.rarible.protocol.union.integration.solana.event.SolanaOwnershipEventHandler
+import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 
 @SolanaConfiguration
 @Import(SolanaApiConfiguration::class)
@@ -93,95 +96,144 @@ class SolanaConsumerConfiguration(
     @Bean
     fun solanaItemWorker(
         factory: SolanaEventsConsumerFactory,
-        handler: BlockchainEventHandler<TokenEventDto, UnionItemEvent>
-    ): RaribleKafkaConsumerWorker<TokenEventDto> {
+        handler: BlockchainEventHandler<TokenEventDto, UnionItemEvent>,
+        tokenContainerFactory: RaribleKafkaListenerContainerFactory<TokenEventDto>,
+    ): ConcurrentMessageListenerContainer<String, TokenEventDto> {
         return createConsumer(
             topic = SolanaEventTopicProvider.getTokenTopic(env),
             handler = handler,
-            valueClass = TokenEventDto::class.java,
-            eventType = EventType.ITEM_META,
+            eventType = EventType.ITEM,
+            factory = tokenContainerFactory,
         )
     }
 
     @Bean
     fun solanaItemMetaWorker(
         factory: SolanaEventsConsumerFactory,
-        handler: BlockchainEventHandler<TokenMetaEventDto, UnionItemMetaEvent>
-    ): RaribleKafkaConsumerWorker<TokenMetaEventDto> {
+        handler: BlockchainEventHandler<TokenMetaEventDto, UnionItemMetaEvent>,
+        tokenMetaContainerFactory: RaribleKafkaListenerContainerFactory<TokenMetaEventDto>,
+    ): ConcurrentMessageListenerContainer<String, TokenMetaEventDto> {
         return createConsumer(
             topic = SolanaEventTopicProvider.getTokenMetaTopic(env),
             handler = handler,
-            valueClass = TokenMetaEventDto::class.java,
             eventType = EventType.ITEM_META,
+            factory = tokenMetaContainerFactory,
         )
     }
 
     @Bean
     fun solanaOwnershipWorker(
         factory: SolanaEventsConsumerFactory,
-        handler: BlockchainEventHandler<BalanceEventDto, UnionOwnershipEvent>
-    ): RaribleKafkaConsumerWorker<BalanceEventDto> {
+        handler: BlockchainEventHandler<BalanceEventDto, UnionOwnershipEvent>,
+        balanceContainerFactory: RaribleKafkaListenerContainerFactory<BalanceEventDto>,
+    ): ConcurrentMessageListenerContainer<String, BalanceEventDto> {
         return createConsumer(
             topic = SolanaEventTopicProvider.getBalanceTopic(env),
             handler = handler,
-            valueClass = BalanceEventDto::class.java,
             eventType = EventType.OWNERSHIP,
+            factory = balanceContainerFactory,
         )
     }
 
     @Bean
     fun solanaCollectionWorker(
         factory: SolanaEventsConsumerFactory,
-        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.CollectionEventDto, UnionCollectionEvent>
-    ): RaribleKafkaConsumerWorker<com.rarible.protocol.solana.dto.CollectionEventDto> {
+        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.CollectionEventDto, UnionCollectionEvent>,
+        collectionContainerFactory: RaribleKafkaListenerContainerFactory<com.rarible.protocol.solana.dto.CollectionEventDto>,
+    ): ConcurrentMessageListenerContainer<String, com.rarible.protocol.solana.dto.CollectionEventDto> {
         return createConsumer(
             topic = SolanaEventTopicProvider.getCollectionTopic(env),
             handler = handler,
-            valueClass = com.rarible.protocol.solana.dto.CollectionEventDto::class.java,
             eventType = EventType.COLLECTION,
+            factory = collectionContainerFactory,
         )
     }
 
     @Bean
     fun solanaOrderWorker(
         factory: SolanaEventsConsumerFactory,
-        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.OrderEventDto, UnionOrderEvent>
-    ): RaribleKafkaConsumerWorker<com.rarible.protocol.solana.dto.OrderEventDto> {
+        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.OrderEventDto, UnionOrderEvent>,
+        orderContainerFactory: RaribleKafkaListenerContainerFactory<com.rarible.protocol.solana.dto.OrderEventDto>,
+    ): ConcurrentMessageListenerContainer<String, com.rarible.protocol.solana.dto.OrderEventDto> {
         return createConsumer(
             topic = SolanaEventTopicProvider.getOrderTopic(env),
             handler = handler,
-            valueClass = com.rarible.protocol.solana.dto.OrderEventDto::class.java,
             eventType = EventType.ORDER,
+            factory = orderContainerFactory,
         )
     }
 
     @Bean
     fun solanaActivityWorker(
         factory: SolanaEventsConsumerFactory,
-        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.ActivityDto, UnionActivity>
-    ): RaribleKafkaConsumerWorker<com.rarible.protocol.solana.dto.ActivityDto> {
+        handler: BlockchainEventHandler<com.rarible.protocol.solana.dto.ActivityDto, UnionActivity>,
+        activityContainerFactory: RaribleKafkaListenerContainerFactory<com.rarible.protocol.solana.dto.ActivityDto>,
+    ): ConcurrentMessageListenerContainer<String, com.rarible.protocol.solana.dto.ActivityDto> {
         return createConsumer(
             topic = SolanaEventTopicProvider.getActivityTopic(env),
             handler = handler,
-            valueClass = com.rarible.protocol.solana.dto.ActivityDto::class.java,
             eventType = EventType.ACTIVITY,
+            factory = activityContainerFactory,
         )
     }
+
+    @Bean
+    fun solanaTokenContainerFactory(): RaribleKafkaListenerContainerFactory<TokenEventDto> =
+        createContainerFactory(eventType = EventType.ITEM, valueClass = TokenEventDto::class.java)
+
+    @Bean
+    fun solanaTokenMetaContainerFactory(): RaribleKafkaListenerContainerFactory<TokenMetaEventDto> =
+        createContainerFactory(eventType = EventType.ITEM_META, valueClass = TokenMetaEventDto::class.java)
+
+    @Bean
+    fun solanaBalanceContainerFactory(): RaribleKafkaListenerContainerFactory<BalanceEventDto> =
+        createContainerFactory(eventType = EventType.OWNERSHIP, valueClass = BalanceEventDto::class.java)
+
+    @Bean
+    fun solanaCollectionContainerFactory(): RaribleKafkaListenerContainerFactory<com.rarible.protocol.solana.dto.CollectionEventDto> =
+        createContainerFactory(
+            eventType = EventType.COLLECTION,
+            valueClass = com.rarible.protocol.solana.dto.CollectionEventDto::class.java
+        )
+
+    @Bean
+    fun solanaOrderContainerFactory(): RaribleKafkaListenerContainerFactory<com.rarible.protocol.solana.dto.OrderEventDto> =
+        createContainerFactory(
+            eventType = EventType.ORDER,
+            valueClass = com.rarible.protocol.solana.dto.OrderEventDto::class.java
+        )
+
+    @Bean
+    fun solanaActivityContainerFactory(): RaribleKafkaListenerContainerFactory<com.rarible.protocol.solana.dto.ActivityDto> =
+        createContainerFactory(
+            eventType = EventType.ACTIVITY,
+            valueClass = com.rarible.protocol.solana.dto.ActivityDto::class.java
+        )
+
+    fun <T> createContainerFactory(
+        eventType: EventType,
+        valueClass: Class<T>,
+    ): RaribleKafkaListenerContainerFactory<T> = RaribleKafkaListenerContainerFactory(
+        settings = RaribleKafkaContainerFactorySettings(
+            hosts = consumer.brokerReplicaSet!!,
+            valueClass = valueClass,
+            concurrency = workers.getOrDefault(eventType.value, 9),
+            batchSize = batchSize,
+            deserializer = UnionKafkaJsonDeserializer::class.java,
+        )
+    )
 
     private fun <B, U> createConsumer(
         topic: String,
         handler: BlockchainEventHandler<B, U>,
-        valueClass: Class<B>,
-        eventType: EventType
-    ): RaribleKafkaConsumerWorker<B> {
+        eventType: EventType,
+        factory: RaribleKafkaListenerContainerFactory<B>,
+    ): ConcurrentMessageListenerContainer<String, B> {
         return consumerFactory.createBlockchainConsumerWorkerGroup(
-            hosts = consumer.brokerReplicaSet!!,
             topic = topic,
             handler = handler,
-            valueClass = valueClass,
-            workers = workers,
             eventType = eventType,
-            batchSize = batchSize
+            factory = factory,
         )
     }
 }

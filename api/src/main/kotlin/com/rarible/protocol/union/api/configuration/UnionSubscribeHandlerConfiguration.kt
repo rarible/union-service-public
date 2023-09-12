@@ -3,8 +3,9 @@ package com.rarible.protocol.union.api.configuration
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
-import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.core.kafka.RaribleKafkaContainerFactorySettings
 import com.rarible.core.kafka.RaribleKafkaEventHandler
+import com.rarible.core.kafka.RaribleKafkaListenerContainerFactory
 import com.rarible.protocol.union.api.handler.UnionSubscribeItemEventHandler
 import com.rarible.protocol.union.api.handler.UnionSubscribeOrderEventHandler
 import com.rarible.protocol.union.api.handler.UnionSubscribeOwnershipEventHandler
@@ -13,11 +14,13 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
+import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import com.rarible.protocol.union.subscriber.autoconfigure.UnionEventsSubscriberProperties
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer
 import java.util.UUID
 
 @Configuration
@@ -33,37 +36,82 @@ class UnionSubscribeHandlerConfiguration(
 
     @Bean
     fun unionSubscribeItemWorker(
-        handler: UnionSubscribeItemEventHandler
-    ): RaribleKafkaConsumerWorker<ItemEventDto> {
+        handler: UnionSubscribeItemEventHandler,
+        itemContainerFactory: RaribleKafkaListenerContainerFactory<ItemEventDto>,
+    ): ConcurrentMessageListenerContainer<String, ItemEventDto> {
         return createSubscribeWorker(
             type = EventType.ITEM,
             topic = UnionEventTopicProvider.getItemTopic(env),
             handler = handler,
-            valueClass = ItemEventDto::class.java
+            factory = itemContainerFactory,
         )
     }
 
     @Bean
     fun unionSubscribeOwnershipWorker(
-        handler: UnionSubscribeOwnershipEventHandler
-    ): RaribleKafkaConsumerWorker<OwnershipEventDto> {
+        handler: UnionSubscribeOwnershipEventHandler,
+        ownershipContainerFactory: RaribleKafkaListenerContainerFactory<OwnershipEventDto>
+    ): ConcurrentMessageListenerContainer<String, OwnershipEventDto> {
         return createSubscribeWorker(
             type = EventType.OWNERSHIP,
             topic = UnionEventTopicProvider.getOwnershipTopic(env),
             handler = handler,
-            valueClass = OwnershipEventDto::class.java
+            factory = ownershipContainerFactory,
         )
     }
 
     @Bean
     fun unionSubscribeOrderWorker(
-        handler: UnionSubscribeOrderEventHandler
-    ): RaribleKafkaConsumerWorker<OrderEventDto> {
+        handler: UnionSubscribeOrderEventHandler,
+        orderContainerFactory: RaribleKafkaListenerContainerFactory<OrderEventDto>,
+    ): ConcurrentMessageListenerContainer<String, OrderEventDto> {
         return createSubscribeWorker(
             type = EventType.ORDER,
             topic = UnionEventTopicProvider.getOrderTopic(env),
             handler = handler,
-            valueClass = OrderEventDto::class.java
+            factory = orderContainerFactory,
+        )
+    }
+
+    @Bean
+    fun orderContainerFactory(): RaribleKafkaListenerContainerFactory<OrderEventDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = unionSubscriberProperties.brokerReplicaSet,
+                concurrency = properties.workers.getOrDefault(EventType.ORDER.value, 9),
+                batchSize = 100,
+                offsetResetStrategy = OffsetResetStrategy.LATEST,
+                valueClass = OrderEventDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
+    }
+
+    @Bean
+    fun itemContainerFactory(): RaribleKafkaListenerContainerFactory<ItemEventDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = unionSubscriberProperties.brokerReplicaSet,
+                concurrency = properties.workers.getOrDefault(EventType.ITEM.value, 9),
+                batchSize = 100,
+                offsetResetStrategy = OffsetResetStrategy.LATEST,
+                valueClass = ItemEventDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
+        )
+    }
+
+    @Bean
+    fun ownershipContainerFactory(): RaribleKafkaListenerContainerFactory<OwnershipEventDto> {
+        return RaribleKafkaListenerContainerFactory(
+            settings = RaribleKafkaContainerFactorySettings(
+                hosts = unionSubscriberProperties.brokerReplicaSet,
+                concurrency = properties.workers.getOrDefault(EventType.OWNERSHIP.value, 9),
+                batchSize = 100,
+                offsetResetStrategy = OffsetResetStrategy.LATEST,
+                valueClass = OwnershipEventDto::class.java,
+                deserializer = UnionKafkaJsonDeserializer::class.java,
+            )
         )
     }
 
@@ -71,19 +119,14 @@ class UnionSubscribeHandlerConfiguration(
         type: EventType,
         topic: String,
         handler: RaribleKafkaEventHandler<T>,
-        valueClass: Class<T>
-    ): RaribleKafkaConsumerWorker<T> {
+        factory: RaribleKafkaListenerContainerFactory<T>,
+    ): ConcurrentMessageListenerContainer<String, T> {
         val settings = RaribleKafkaConsumerSettings(
-            hosts = unionSubscriberProperties.brokerReplicaSet,
             topic = topic,
             group = "${subscribeConsumerGroup(type)}.${UUID.randomUUID()}",
-            concurrency = properties.workers.getOrDefault(type.value, 9),
-            batchSize = 100,
             async = false,
-            offsetResetStrategy = OffsetResetStrategy.LATEST,
-            valueClass = valueClass
         )
-        return kafkaConsumerFactory.createWorker(settings, handler)
+        return kafkaConsumerFactory.createWorker(settings, handler, factory)
     }
 
     private fun subscribeConsumerGroup(type: EventType): String {
