@@ -10,7 +10,6 @@ import java.time.Instant
     JsonSubTypes.Type(name = "UPDATE", value = UnionItemUpdateEvent::class),
     JsonSubTypes.Type(name = "DELETE", value = UnionItemDeleteEvent::class),
     JsonSubTypes.Type(name = "CHANGE", value = UnionItemChangeEvent::class),
-//    JsonSubTypes.Type(name = "URI_REVEAL", value = UnionItemUriRevealEvent::class),
 )
 sealed class UnionItemEvent {
 
@@ -51,13 +50,3 @@ data class UnionItemChangeEvent(
         return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
     }
 }
-
-//data class UnionItemUriRevealEvent(
-//    override val itemId: ItemIdDto,
-//    override val eventTimeMarks: UnionEventTimeMarks?
-//) : UnionItemEvent() {
-//
-//    override fun addTimeMark(name: String, date: Instant?): UnionItemUriRevealEvent {
-//        return this.copy(eventTimeMarks = this.eventTimeMarks?.add(name, date))
-//    }
-//}
