@@ -38,7 +38,6 @@ import com.rarible.protocol.union.integration.ethereum.event.MantleItemEventHand
 import com.rarible.protocol.union.integration.ethereum.event.MantleItemMetaEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.MantleOrderEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.MantleOwnershipEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.PolygonItemMetaEventHandler
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import

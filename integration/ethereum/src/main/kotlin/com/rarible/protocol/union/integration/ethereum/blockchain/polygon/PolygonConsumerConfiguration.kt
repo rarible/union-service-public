@@ -32,7 +32,6 @@ import com.rarible.protocol.union.integration.ethereum.event.EthItemEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthItemMetaEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOrderEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.EthOwnershipEventHandler
-import com.rarible.protocol.union.integration.ethereum.event.EthereumItemMetaEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.PolygonActivityEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.PolygonCollectionEventHandler
 import com.rarible.protocol.union.integration.ethereum.event.PolygonItemEventHandler
