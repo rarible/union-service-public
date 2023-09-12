@@ -243,7 +243,8 @@ class ItemRepository(
 
         // TODO findByPoolOrder should be updated before switch to this index
         private val POOL_ORDER_DEFINITION = Index()
-            .partial(PartialIndexFilter.of(Criteria.where(BEST_SELL_PLATFORM_FIELD).exists(true)))
+            .partial(PartialIndexFilter.of(Criteria.where(POOL_ORDER_ID_FIELD).exists(true)))
+            .on(ShortItem::blockchain.name, Sort.Direction.ASC) // Just for case of orderId collision
             .on(POOL_ORDER_ID_FIELD, Sort.Direction.ASC)
             .background()
 
