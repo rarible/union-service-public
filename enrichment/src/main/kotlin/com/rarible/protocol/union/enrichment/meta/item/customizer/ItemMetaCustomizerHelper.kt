@@ -12,8 +12,13 @@ class ItemMetaCustomizerHelper(
     // Just for case if there are duplicated attributes - should not be so, originally
     private val associatedAttributes = meta.attributes.groupBy { it.key }
 
-    fun filterAttributes(whitelist: Set<String>): List<UnionMetaAttribute> {
-        return meta.attributes.filter { it.key in whitelist }
+    fun filterAttributes(
+        keyWhiteList: Set<String>,
+        valueBlacklist: Map<String, Set<String>>
+    ): List<UnionMetaAttribute> {
+        return meta.attributes.filter {
+            it.key in keyWhiteList && valueBlacklist[it.key]?.contains(it.value) != true
+        }
     }
 
     fun attribute(vararg keys: String): String? {
