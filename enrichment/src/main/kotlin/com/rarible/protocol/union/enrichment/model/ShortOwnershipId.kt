@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.model
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 
 data class ShortOwnershipId(
     val blockchain: BlockchainDto,
@@ -30,5 +31,12 @@ data class ShortOwnershipId(
 
     fun getItemId(): ShortItemId {
         return ShortItemId(blockchain, itemId)
+    }
+
+    companion object {
+
+        fun of(ownershipId: String): ShortOwnershipId {
+            return ShortOwnershipId(OwnershipIdParser.parseFull(ownershipId))
+        }
     }
 }
