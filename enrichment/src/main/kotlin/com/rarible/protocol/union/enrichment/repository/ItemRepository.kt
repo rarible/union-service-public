@@ -3,7 +3,6 @@ package com.rarible.protocol.union.enrichment.repository
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.mongo.util.div
-import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.download.DownloadEntry
@@ -11,7 +10,6 @@ import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.model.ShortDateIdItem
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
-import com.rarible.protocol.union.enrichment.model.ShortOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
@@ -115,24 +113,27 @@ class ItemRepository(
         return template.find(query, ShortItem::class.java).asFlow()
     }
 
-    fun findByAuction(auctionId: AuctionIdDto): Flow<ShortItem> {
-        val query = Query(ShortItem::auctions isEqualTo auctionId)
-        return template.find(query, ShortItem::class.java).asFlow()
-    }
-
     fun findByPlatformWithSell(
         platform: PlatformDto,
-        fromItemId: ShortItemId?,
-        limit: Int?
+        fromItemId: ShortItemId? = null,
+        fromLastUpdatedAt: Instant = Instant.now(),
+        limit: Int? = null
     ): Flow<ShortItem> {
         val criteria = Criteria().andOperator(
             listOfNotNull(
-                ShortItem::bestSellOrder / ShortOrder::platform isEqualTo platform.name,
+                Criteria(BEST_SELL_PLATFORM_FIELD).exists(true),
+                Criteria(BEST_SELL_PLATFORM_FIELD).isEqualTo(platform.name),
+                Criteria(ShortItem::lastUpdatedAt.name).lte(fromLastUpdatedAt),
                 fromItemId?.let { Criteria.where("_id").gt(it) }
             )
         )
-        val query = Query(criteria)
-            .with(Sort.by("${ShortItem::bestSellOrder.name}.${ShortOrder::platform.name}", "_id"))
+        val query = Query(criteria).with(
+            Sort.by(
+                Sort.Order.asc(BEST_SELL_PLATFORM_FIELD),
+                Sort.Order.desc(ShortItem::lastUpdatedAt.name),
+                Sort.Order.asc("_id"),
+            )
+        )
 
         limit?.let { query.limit(it) }
 
@@ -140,9 +141,13 @@ class ItemRepository(
     }
 
     fun findByPoolOrder(blockchain: BlockchainDto, orderId: String): Flow<ShortItemId> {
-        val criteria = Criteria
-            .where(ShortItem::blockchain.name).isEqualTo(blockchain)
-            .and(POOL_ORDER_ID_FIELD).isEqualTo(orderId)
+        val criteria = Criteria().andOperator(
+            listOfNotNull(
+                Criteria(POOL_ORDER_ID_FIELD).exists(true),
+                Criteria(ShortItem::blockchain.name).isEqualTo(blockchain),
+                Criteria(POOL_ORDER_ID_FIELD).isEqualTo(orderId),
+            )
+        )
 
         val query = Query(criteria)
         query.fields().include(ShortItem::itemId.name)
@@ -205,12 +210,6 @@ class ItemRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
-        @Deprecated("Replace with MULTI_CURRENCY_DEFINITION")
-        private val MULTI_CURRENCY_DEFINITION_LEGACY = Index()
-            .on(ShortItem::multiCurrency.name, Sort.Direction.DESC)
-            .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
-            .background()
-
         private val MULTI_CURRENCY_DEFINITION = Index()
             .partial(PartialIndexFilter.of(ShortItem::multiCurrency isEqualTo true))
             .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
@@ -219,13 +218,6 @@ class ItemRepository(
             .on(ShortItem::multiCurrency.name, Sort.Direction.DESC)
             .background()
 
-        @Deprecated("Replace with BY_BEST_SELL_PLATFORM_DEFINITION")
-        private val BY_BEST_SELL_PLATFORM_DEFINITION_LEGACY = Index()
-            .on(BEST_SELL_PLATFORM_FIELD, Sort.Direction.ASC)
-            .on("_id", Sort.Direction.ASC)
-            .background()
-
-        // TODO findByPlatformWithSell should be updated before switch to this index
         private val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
             .partial(PartialIndexFilter.of(Criteria.where(BEST_SELL_PLATFORM_FIELD).exists(true)))
             .on(BEST_SELL_PLATFORM_FIELD, Sort.Direction.ASC)
@@ -233,17 +225,9 @@ class ItemRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
-        @Deprecated("Replace with POOL_ORDER_DEFINITION")
-        private val POOL_ORDER_DEFINITION_LEGACY = Index()
-            .on(POOL_ORDER_ID_FIELD, Sort.Direction.ASC)
-            .on(ShortItem::blockchain.name, Sort.Direction.ASC) // Just for case of orderId collision
-            .on("_id", Sort.Direction.ASC)
-            .sparse()
-            .background()
-
-        // TODO findByPoolOrder should be updated before switch to this index
         private val POOL_ORDER_DEFINITION = Index()
-            .partial(PartialIndexFilter.of(Criteria.where(BEST_SELL_PLATFORM_FIELD).exists(true)))
+            .partial(PartialIndexFilter.of(Criteria.where(POOL_ORDER_ID_FIELD).exists(true)))
+            .on(ShortItem::blockchain.name, Sort.Direction.ASC) // Just for case of orderId collision
             .on(POOL_ORDER_ID_FIELD, Sort.Direction.ASC)
             .background()
 
@@ -256,12 +240,9 @@ class ItemRepository(
             STATUS_RETRIES_FAILED_AT_DEFINITION,
             BLOCKCHAIN_DEFINITION,
             MULTI_CURRENCY_DEFINITION,
-            MULTI_CURRENCY_DEFINITION_LEGACY,
             BY_BEST_SELL_PLATFORM_DEFINITION,
-            BY_BEST_SELL_PLATFORM_DEFINITION_LEGACY,
             POOL_ORDER_DEFINITION,
-            POOL_ORDER_DEFINITION_LEGACY,
-            LAST_UPDATED_AT_ID
+            LAST_UPDATED_AT_ID,
         )
     }
 }

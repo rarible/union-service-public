@@ -59,7 +59,7 @@ class PlatformBestSellOrderOwnershipCleanupJobIt {
         ownershipRepository.save(withOpenSea)
         ownershipRepository.save(withoutOpenSea)
 
-        job.execute(PlatformDto.OPEN_SEA, null).collect()
+        job.handle(null, PlatformDto.OPEN_SEA.name).collect()
 
         val updatedOpenSea = ownershipRepository.get(withOpenSea.id)
 
