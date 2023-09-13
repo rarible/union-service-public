@@ -115,13 +115,15 @@ class ItemRepository(
 
     fun findByPlatformWithSell(
         platform: PlatformDto,
-        fromItemId: ShortItemId?,
-        limit: Int?
+        fromItemId: ShortItemId? = null,
+        fromLastUpdatedAt: Instant = Instant.now(),
+        limit: Int? = null
     ): Flow<ShortItem> {
         val criteria = Criteria().andOperator(
             listOfNotNull(
                 Criteria(BEST_SELL_PLATFORM_FIELD).exists(true),
                 Criteria(BEST_SELL_PLATFORM_FIELD).isEqualTo(platform.name),
+                Criteria(ShortItem::lastUpdatedAt.name).lte(fromLastUpdatedAt),
                 fromItemId?.let { Criteria.where("_id").gt(it) }
             )
         )
