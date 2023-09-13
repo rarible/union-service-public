@@ -5,7 +5,6 @@ import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortDateIdOwnership
-import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
@@ -81,7 +80,7 @@ class OwnershipRepository(
         val query = Query(criteria).with(
             Sort.by(
                 Sort.Order.asc(Indices.BEST_SELL_PLATFORM_FIELD),
-                Sort.Order.desc(ShortItem::lastUpdatedAt.name),
+                Sort.Order.desc(ShortOwnership::lastUpdatedAt.name),
                 Sort.Order.asc("_id"),
             )
         )
@@ -168,17 +167,17 @@ class OwnershipRepository(
             .background()
 
         private val MULTI_CURRENCY_OWNERSHIP = Index()
-            .partial(PartialIndexFilter.of(ShortItem::multiCurrency isEqualTo true))
-            .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
+            .partial(PartialIndexFilter.of(ShortOwnership::multiCurrency isEqualTo true))
+            .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.DESC)
             // Originally we don't need it here, but without it there can be collisions in future
             // with other partial indices based on partial filter and lastUpdateAt only
-            .on(ShortItem::multiCurrency.name, Sort.Direction.DESC)
+            .on(ShortOwnership::multiCurrency.name, Sort.Direction.DESC)
             .background()
 
         private val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
             .partial(PartialIndexFilter.of(Criteria.where(BEST_SELL_PLATFORM_FIELD).exists(true)))
             .on(BEST_SELL_PLATFORM_FIELD, Sort.Direction.ASC)
-            .on(ShortItem::lastUpdatedAt.name, Sort.Direction.DESC)
+            .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.DESC)
             .on("_id", Sort.Direction.ASC)
             .background()
 
