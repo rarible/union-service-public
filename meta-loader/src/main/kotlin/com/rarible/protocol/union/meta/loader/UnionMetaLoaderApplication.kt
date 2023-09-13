@@ -6,7 +6,6 @@ import com.rarible.protocol.union.meta.loader.job.DownloadExecutorWorker
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
 
 @SpringBootApplication
 class UnionMetaLoaderApplication(
