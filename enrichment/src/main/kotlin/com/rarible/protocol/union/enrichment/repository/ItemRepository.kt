@@ -142,7 +142,7 @@ class ItemRepository(
         val criteria = Criteria().andOperator(
             listOfNotNull(
                 Criteria(POOL_ORDER_ID_FIELD).exists(true),
-                Criteria(ShortItem::blockchain.name).isEqualTo(orderId),
+                Criteria(ShortItem::blockchain.name).isEqualTo(blockchain),
                 Criteria(POOL_ORDER_ID_FIELD).isEqualTo(orderId),
             )
         )
