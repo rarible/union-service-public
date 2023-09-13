@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.repository
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -35,16 +36,35 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
 
     @Test
     fun `should find all items with target platform`() = runBlocking<Unit> {
-        val item1 = itemRepository.save(randomShortItem().copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA)))
-        val item2 = itemRepository.save(randomShortItem().copy(bestSellOrder = randomSellOrder(PlatformDto.RARIBLE)))
-        val item3 = itemRepository.save(randomShortItem().copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA)))
-        val item4 = itemRepository.save(randomShortItem().copy(bestSellOrder = randomSellOrder(PlatformDto.RARIBLE)))
-        val item5 = itemRepository.save(randomShortItem().copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA)))
-        val item6 = itemRepository.save(randomShortItem().copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA)))
-        val item7 = itemRepository.save(randomShortItem().copy(bestSellOrder = null))
+        val itemId1 = ItemIdDto(BlockchainDto.ETHEREUM, "${Address.ONE().hex()}:0")
+        val itemId3 = ItemIdDto(BlockchainDto.ETHEREUM, "${Address.ONE().hex()}:3")
+        val itemId5 = ItemIdDto(BlockchainDto.ETHEREUM, "${Address.ONE().hex()}:5")
+        val itemId6 = ItemIdDto(BlockchainDto.ETHEREUM, "${Address.ONE().hex()}:6")
+
+        val now = nowMillis()
+
+        val item1 = itemRepository.save(
+            randomShortItem(itemId1).copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA), lastUpdatedAt = now)
+        )
+        val item2 = itemRepository.save(
+            randomShortItem().copy(bestSellOrder = randomSellOrder(PlatformDto.RARIBLE), lastUpdatedAt = now)
+        )
+        val item3 = itemRepository.save(
+            randomShortItem(itemId3).copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA), lastUpdatedAt = now)
+        )
+        val item4 = itemRepository.save(
+            randomShortItem().copy(bestSellOrder = randomSellOrder(PlatformDto.RARIBLE), lastUpdatedAt = now)
+        )
+        val item5 = itemRepository.save(
+            randomShortItem(itemId5).copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA), lastUpdatedAt = now)
+        )
+        val item6 = itemRepository.save(
+            randomShortItem(itemId6).copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA), lastUpdatedAt = now)
+        )
+        val item7 = itemRepository.save(randomShortItem().copy(bestSellOrder = null, lastUpdatedAt = now))
 
         val openSeaItems = itemRepository.findByPlatformWithSell(PlatformDto.OPEN_SEA, null, null).toList()
-        assertThat(openSeaItems.map { it.id }).containsExactlyInAnyOrder(item1.id, item3.id, item5.id, item6.id)
+        assertThat(openSeaItems.map { it.id }).containsExactly(item1.id, item3.id, item5.id, item6.id)
 
         val fromOpenSeaItems = itemRepository.findByPlatformWithSell(PlatformDto.OPEN_SEA, openSeaItems[1].id, null)
             .toList()
@@ -90,41 +110,55 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
 
     @Test
     fun findIdsByLastUpdatedAt() = runBlocking<Unit> {
-        val item1 = itemRepository.save(randomShortItem().copy(
-            lastUpdatedAt = Instant.ofEpochMilli(1000),
-            blockchain = BlockchainDto.ETHEREUM,
-            itemId = "1"
-        ))
-        val item2 = itemRepository.save(randomShortItem().copy(
-            lastUpdatedAt = Instant.ofEpochMilli(2000),
-            blockchain = BlockchainDto.ETHEREUM,
-            itemId = "2"
-        ))
-        val item3 = itemRepository.save(randomShortItem().copy(
-            lastUpdatedAt = Instant.ofEpochMilli(3000),
-            blockchain = BlockchainDto.ETHEREUM,
-            itemId = "3"
-        ))
-        val item4 = itemRepository.save(randomShortItem().copy(
-            lastUpdatedAt = Instant.ofEpochMilli(4000),
-            blockchain = BlockchainDto.ETHEREUM,
-            itemId = "4"
-        ))
-        val item5 = itemRepository.save(randomShortItem().copy(
-            lastUpdatedAt = Instant.ofEpochMilli(4000),
-            blockchain = BlockchainDto.ETHEREUM,
-            itemId = "5"
-        ))
-        val item6 = itemRepository.save(randomShortItem().copy(
-            lastUpdatedAt = Instant.ofEpochMilli(6000),
-            blockchain = BlockchainDto.ETHEREUM,
-            itemId = "6"
-        ))
-        itemRepository.save(randomShortItem().copy(
-            lastUpdatedAt = Instant.ofEpochMilli(8000),
-            blockchain = BlockchainDto.ETHEREUM,
-            itemId = "7"
-        ))
+        val item1 = itemRepository.save(
+            randomShortItem().copy(
+                lastUpdatedAt = Instant.ofEpochMilli(1000),
+                blockchain = BlockchainDto.ETHEREUM,
+                itemId = "1"
+            )
+        )
+        val item2 = itemRepository.save(
+            randomShortItem().copy(
+                lastUpdatedAt = Instant.ofEpochMilli(2000),
+                blockchain = BlockchainDto.ETHEREUM,
+                itemId = "2"
+            )
+        )
+        val item3 = itemRepository.save(
+            randomShortItem().copy(
+                lastUpdatedAt = Instant.ofEpochMilli(3000),
+                blockchain = BlockchainDto.ETHEREUM,
+                itemId = "3"
+            )
+        )
+        val item4 = itemRepository.save(
+            randomShortItem().copy(
+                lastUpdatedAt = Instant.ofEpochMilli(4000),
+                blockchain = BlockchainDto.ETHEREUM,
+                itemId = "4"
+            )
+        )
+        val item5 = itemRepository.save(
+            randomShortItem().copy(
+                lastUpdatedAt = Instant.ofEpochMilli(4000),
+                blockchain = BlockchainDto.ETHEREUM,
+                itemId = "5"
+            )
+        )
+        val item6 = itemRepository.save(
+            randomShortItem().copy(
+                lastUpdatedAt = Instant.ofEpochMilli(6000),
+                blockchain = BlockchainDto.ETHEREUM,
+                itemId = "6"
+            )
+        )
+        itemRepository.save(
+            randomShortItem().copy(
+                lastUpdatedAt = Instant.ofEpochMilli(8000),
+                blockchain = BlockchainDto.ETHEREUM,
+                itemId = "7"
+            )
+        )
 
         var result = itemRepository.findIdsByLastUpdatedAt(
             lastUpdatedFrom = Instant.ofEpochMilli(500),
