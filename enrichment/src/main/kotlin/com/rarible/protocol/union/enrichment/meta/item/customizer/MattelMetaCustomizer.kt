@@ -134,7 +134,7 @@ class HotWheelsCardMetaCustomizer(
     )
 
     override val attributesValuesBlackList = mapOf(
-        "type" to setOf("Yes", "No")
+        "type" to setOf("Yes", "No", "N/A")
     )
 }
 
