@@ -3,8 +3,6 @@ package com.rarible.protocol.union.enrichment.repository
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
 import com.rarible.core.mongo.util.div
-import com.rarible.protocol.union.core.model.download.DownloadEntry
-import com.rarible.protocol.union.core.model.download.DownloadStatus
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.download.DownloadEntry
