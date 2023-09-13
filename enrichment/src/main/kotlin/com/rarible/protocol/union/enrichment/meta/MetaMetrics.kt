@@ -99,7 +99,7 @@ open class MetaMetrics(
 
     // --------------------- Meta queue ----------------------//
     fun onMetaQueueSizeUpdated(pipeline: String, size: Long) {
-        set(DOWNLOAD_QUEUE, size, tag("pipeline", pipeline))
+        set(DOWNLOAD_QUEUE, size, type(type), tag("pipeline", pipeline))
     }
 
     private companion object {

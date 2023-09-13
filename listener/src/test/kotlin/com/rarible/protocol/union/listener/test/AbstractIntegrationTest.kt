@@ -65,6 +65,9 @@ abstract class AbstractIntegrationTest {
     lateinit var ethItemProducer: RaribleKafkaProducer<com.rarible.protocol.dto.NftItemEventDto>
 
     @Autowired
+    lateinit var ethItemMetaProducer: RaribleKafkaProducer<com.rarible.protocol.dto.NftItemMetaEventDto>
+
+    @Autowired
     lateinit var ethOwnershipProducer: RaribleKafkaProducer<com.rarible.protocol.dto.NftOwnershipEventDto>
 
     @Autowired

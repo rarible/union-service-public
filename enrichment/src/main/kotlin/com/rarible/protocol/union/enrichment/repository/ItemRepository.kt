@@ -242,7 +242,7 @@ class ItemRepository(
             MULTI_CURRENCY_DEFINITION,
             BY_BEST_SELL_PLATFORM_DEFINITION,
             POOL_ORDER_DEFINITION,
-            LAST_UPDATED_AT_ID
+            LAST_UPDATED_AT_ID,
         )
     }
 }
