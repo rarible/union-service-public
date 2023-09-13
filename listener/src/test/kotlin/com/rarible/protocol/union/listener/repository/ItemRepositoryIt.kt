@@ -5,6 +5,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.model.ShortPoolOrder
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -35,41 +36,49 @@ internal class ItemRepositoryIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `should find all items with target platform`() = runBlocking<Unit> {
-        val itemId1 = ItemIdDto(BlockchainDto.ETHEREUM, "${Address.ONE().hex()}:0")
+    fun `find by platform with sell order - ok`() = runBlocking<Unit> {
         val itemId3 = ItemIdDto(BlockchainDto.ETHEREUM, "${Address.ONE().hex()}:3")
-        val itemId5 = ItemIdDto(BlockchainDto.ETHEREUM, "${Address.ONE().hex()}:5")
         val itemId6 = ItemIdDto(BlockchainDto.ETHEREUM, "${Address.ONE().hex()}:6")
 
-        val now = nowMillis()
+        val now = nowMillis().minusSeconds(1)
 
-        val item1 = itemRepository.save(
-            randomShortItem(itemId1).copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA), lastUpdatedAt = now)
-        )
-        val item2 = itemRepository.save(
-            randomShortItem().copy(bestSellOrder = randomSellOrder(PlatformDto.RARIBLE), lastUpdatedAt = now)
-        )
-        val item3 = itemRepository.save(
-            randomShortItem(itemId3).copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA), lastUpdatedAt = now)
-        )
-        val item4 = itemRepository.save(
-            randomShortItem().copy(bestSellOrder = randomSellOrder(PlatformDto.RARIBLE), lastUpdatedAt = now)
-        )
-        val item5 = itemRepository.save(
-            randomShortItem(itemId5).copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA), lastUpdatedAt = now)
-        )
-        val item6 = itemRepository.save(
-            randomShortItem(itemId6).copy(bestSellOrder = randomSellOrder(PlatformDto.OPEN_SEA), lastUpdatedAt = now)
-        )
-        val item7 = itemRepository.save(randomShortItem().copy(bestSellOrder = null, lastUpdatedAt = now))
+        val item1 = randomShortItem(randomEthItemId(), now.minusSeconds(1), PlatformDto.OPEN_SEA)
+        val item2 = randomShortItem(randomEthItemId(), now, PlatformDto.RARIBLE)
+        val item3 = randomShortItem(itemId3, now, PlatformDto.OPEN_SEA)
+        val item4 = randomShortItem(randomEthItemId(), now, PlatformDto.RARIBLE)
+        val item5 = randomShortItem(randomEthItemId(), now.minusSeconds(3), PlatformDto.OPEN_SEA)
+        val item6 = randomShortItem(itemId6, now, PlatformDto.OPEN_SEA)
+        val item7 = randomShortItem(randomEthItemId(), now, null)
 
-        val openSeaItems = itemRepository.findByPlatformWithSell(PlatformDto.OPEN_SEA, null, null).toList()
-        assertThat(openSeaItems.map { it.id }).containsExactly(item1.id, item3.id, item5.id, item6.id)
+        val openSeaItems = itemRepository.findByPlatformWithSell(
+            platform = PlatformDto.OPEN_SEA,
+            fromItemId = null,
+            fromLastUpdatedAt = Instant.now(),
+            limit = null
+        ).toList()
 
-        val fromOpenSeaItems = itemRepository.findByPlatformWithSell(PlatformDto.OPEN_SEA, openSeaItems[1].id, null)
-            .toList()
-        assertThat(fromOpenSeaItems.size).isEqualTo(2)
-        assertThat(fromOpenSeaItems.map { it.id }).contains(openSeaItems[2].id, openSeaItems[3].id)
+        assertThat(openSeaItems.map { it.id }).isEqualTo(listOf(item3.id, item6.id, item1.id, item5.id))
+
+        val fromOpenSeaItems = itemRepository.findByPlatformWithSell(
+            PlatformDto.OPEN_SEA,
+            fromItemId = item3.id,
+            fromLastUpdatedAt = item3.lastUpdatedAt
+        ).toList()
+
+        assertThat(fromOpenSeaItems.map { it.id }).isEqualTo(listOf(item6.id, item1.id, item5.id))
+    }
+
+    private suspend fun randomShortItem(
+        itemId: ItemIdDto,
+        lastUpdatedAt: Instant,
+        platform: PlatformDto? = null,
+    ): ShortItem {
+        return itemRepository.save(
+            randomShortItem(itemId).copy(
+                bestSellOrder = platform?.let { randomSellOrder(platform) },
+                lastUpdatedAt = lastUpdatedAt
+            )
+        )
     }
 
     @Test

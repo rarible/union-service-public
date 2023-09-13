@@ -67,14 +67,16 @@ class OwnershipRepository(
 
     fun findByPlatformWithSell(
         platform: PlatformDto,
-        fromShortOwnershipId: ShortOwnershipId?,
-        limit: Int?
+        fromOwnershipId: ShortOwnershipId?,
+        fromLastUpdatedAt: Instant = Instant.now(),
+        limit: Int? = null
     ): Flow<ShortOwnership> {
         val criteria = Criteria().andOperator(
             listOfNotNull(
                 Criteria(Indices.BEST_SELL_PLATFORM_FIELD).exists(true),
                 Criteria(Indices.BEST_SELL_PLATFORM_FIELD).isEqualTo(platform.name),
-                fromShortOwnershipId?.let { Criteria.where("_id").gt(it) }
+                Criteria(ShortOwnership::lastUpdatedAt.name).lte(fromLastUpdatedAt),
+                fromOwnershipId?.let { Criteria.where("_id").gt(it) }
             )
         )
         val query = Query(criteria).with(

@@ -85,7 +85,7 @@ class PlatformBestSellOrderItemCleanupJobIt {
         itemRepository.save(withoutOpenSea)
         itemRepository.save(withOpenSeaEmpty)
 
-        job.execute(PlatformDto.OPEN_SEA, null).collect()
+        job.handle(null, PlatformDto.OPEN_SEA.name).collect()
 
         val updatedOpenSea = itemRepository.get(withOpenSea.id)!!
 
