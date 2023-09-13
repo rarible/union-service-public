@@ -42,7 +42,8 @@ class MattelMetaCustomizerTest {
         )
         val attributes = listOf(
             UnionMetaAttribute("carName", "carName_value"),
-            UnionMetaAttribute("licensorLegal", "licensorLegal_value")
+            UnionMetaAttribute("licensorLegal", "licensorLegal_value"),
+            UnionMetaAttribute("type", "Yes"), // should be filtered due to blacklist
         ) + whitListAttributes
 
         val meta = randomUnionMeta().copy(attributes = attributes)
