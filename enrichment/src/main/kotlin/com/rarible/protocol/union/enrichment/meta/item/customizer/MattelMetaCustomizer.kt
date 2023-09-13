@@ -45,7 +45,10 @@ class MattelMetaCustomizer(
             description = helper.attribute(*customizer.fieldDescription),
             rights = helper.attribute(*customizer.fieldRights),
             rightsUri = helper.attribute(*customizer.fieldRightsUri),
-            attributes = helper.filterAttributes(customizer.attributesWhiteList),
+            attributes = helper.filterAttributes(
+                customizer.attributesWhiteList,
+                customizer.attributesValuesBlackList
+            ),
             content = fixContentType(meta.content, helper.attribute(*customizer.fieldContentUrl))
         )
     }
@@ -93,6 +96,7 @@ abstract class MattelCollectionMetaCustomizer {
     abstract val fieldRights: Array<String>
     abstract val fieldRightsUri: Array<String>
     abstract val attributesWhiteList: Set<String>
+    open val attributesValuesBlackList: Map<String, Set<String>> = emptyMap()
 
     protected fun fields(vararg fields: String): Array<String> {
         return fields.toList().toTypedArray()
@@ -127,6 +131,10 @@ class HotWheelsCardMetaCustomizer(
         "totalSupply",
         "cardId",
         "miniCollection"
+    )
+
+    override val attributesValuesBlackList = mapOf(
+        "type" to setOf("Yes", "No")
     )
 }
 
