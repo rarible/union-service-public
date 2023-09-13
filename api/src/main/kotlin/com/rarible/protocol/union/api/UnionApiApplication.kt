@@ -1,8 +1,10 @@
 package com.rarible.protocol.union.api
 
-import ch.sbb.esta.openshift.gracefullshutdown.GracefulshutdownSpringApplication
+import ch.sbb.esta.openshift.gracefullshutdown.GracefulShutdownHook
+import com.rarible.core.kafka.KafkaShutdownHook
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import org.springframework.boot.CommandLineRunner
+import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 
 @SpringBootApplication
@@ -16,5 +18,8 @@ class UnionApiApplication(
 }
 
 fun main(args: Array<String>) {
-    GracefulshutdownSpringApplication.run(UnionApiApplication::class.java, *args)
+    val app = SpringApplication(UnionApiApplication::class.java)
+    app.setRegisterShutdownHook(false)
+    val context = app.run(*args)
+    Runtime.getRuntime().addShutdownHook(Thread(KafkaShutdownHook(context, GracefulShutdownHook(context))))
 }
