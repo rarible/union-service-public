@@ -2,7 +2,6 @@ package com.rarible.protocol.union.enrichment.repository
 
 import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.apm.SpanType
-import com.rarible.core.mongo.util.div
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortDateIdOwnership
@@ -74,12 +73,18 @@ class OwnershipRepository(
     ): Flow<ShortOwnership> {
         val criteria = Criteria().andOperator(
             listOfNotNull(
-                ShortOwnership::bestSellOrder / ShortOrder::platform isEqualTo platform.name,
+                Criteria(Indices.BEST_SELL_PLATFORM_FIELD).exists(true),
+                Criteria(Indices.BEST_SELL_PLATFORM_FIELD).isEqualTo(platform.name),
                 fromShortOwnershipId?.let { Criteria.where("_id").gt(it) }
             )
         )
-        val query = Query(criteria)
-            .with(Sort.by("${ShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", "_id"))
+        val query = Query(criteria).with(
+            Sort.by(
+                Sort.Order.asc(Indices.BEST_SELL_PLATFORM_FIELD),
+                Sort.Order.desc(ShortItem::lastUpdatedAt.name),
+                Sort.Order.asc("_id"),
+            )
+        )
 
         limit?.let { query.limit(it) }
 
@@ -155,17 +160,11 @@ class OwnershipRepository(
 
     object Indices {
 
-        private const val BEST_SELL_PLATFORM_FIELD = "bestSellOrder.platform"
+        const val BEST_SELL_PLATFORM_FIELD = "bestSellOrder.platform"
 
         private val BLOCKCHAIN_ITEM_ID: Index = Index()
             .on(ShortOwnership::blockchain.name, Sort.Direction.ASC)
             .on(ShortOwnership::itemId.name, Sort.Direction.ASC)
-            .background()
-
-        @Deprecated("Replace with MULTI_CURRENCY_DEFINITION")
-        val MULTI_CURRENCY_OWNERSHIP_LEGACY: Index = Index()
-            .on(ShortOwnership::multiCurrency.name, Sort.Direction.DESC)
-            .on(ShortOwnership::lastUpdatedAt.name, Sort.Direction.DESC)
             .background()
 
         private val MULTI_CURRENCY_OWNERSHIP = Index()
@@ -176,13 +175,6 @@ class OwnershipRepository(
             .on(ShortItem::multiCurrency.name, Sort.Direction.DESC)
             .background()
 
-        @Deprecated("Replace with BY_BEST_SELL_PLATFORM_DEFINITION")
-        private val BY_BEST_SELL_PLATFORM_DEFINITION_LEGACY = Index()
-            .on("${ShortOwnership::bestSellOrder.name}.${ShortOrder::platform.name}", Sort.Direction.ASC)
-            .on("_id", Sort.Direction.ASC)
-            .background()
-
-        // TODO findByPlatformWithSell should be updated before switch to this index
         private val BY_BEST_SELL_PLATFORM_DEFINITION = Index()
             .partial(PartialIndexFilter.of(Criteria.where(BEST_SELL_PLATFORM_FIELD).exists(true)))
             .on(BEST_SELL_PLATFORM_FIELD, Sort.Direction.ASC)
@@ -197,10 +189,8 @@ class OwnershipRepository(
 
         val ALL = listOf(
             BY_BEST_SELL_PLATFORM_DEFINITION,
-            BY_BEST_SELL_PLATFORM_DEFINITION_LEGACY,
             BLOCKCHAIN_ITEM_ID,
             MULTI_CURRENCY_OWNERSHIP,
-            MULTI_CURRENCY_OWNERSHIP_LEGACY,
             LAST_UPDATED_AT_ID
         )
     }

@@ -22,6 +22,7 @@ class ChangeLog99998DeleteLegacyIndices {
             // TODO uncomment after new indices have been created
             // "multiCurrency_-1_lastUpdatedAt_-1",
             // "poolSellOrders.order._id_1_blockchain_1__id_1",
+            // "poolSellOrders.order._id_1",
             // "bestSellOrder.platform_1__id_1",
         ),
         ShortOwnership.COLLECTION to listOf(
