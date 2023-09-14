@@ -26,7 +26,7 @@ class PartialItemMetaDownloader(
     private val itemRepository: ItemRepository,
 ) : Downloader<UnionMeta> {
 
-    override val type = "Item_Partial"
+    override val type = "Item"
 
     override suspend fun download(id: String): UnionMeta {
         val result = try {
