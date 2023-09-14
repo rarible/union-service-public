@@ -1,10 +1,11 @@
 package com.rarible.protocol.union.meta.loader
 
+import com.rarible.core.kafka.KafkaShutdownHook
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.protocol.union.meta.loader.job.DownloadExecutorWorker
 import org.springframework.boot.CommandLineRunner
+import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
 
 @SpringBootApplication
 class UnionMetaLoaderApplication(
@@ -19,5 +20,8 @@ class UnionMetaLoaderApplication(
 }
 
 fun main(args: Array<String>) {
-    runApplication<UnionMetaLoaderApplication>(*args)
+    val app = SpringApplication(UnionMetaLoaderApplication::class.java)
+    app.setRegisterShutdownHook(false)
+    val context = app.run(*args)
+    Runtime.getRuntime().addShutdownHook(Thread(KafkaShutdownHook(context, context::close)))
 }

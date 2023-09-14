@@ -1,9 +1,10 @@
 package com.rarible.protocol.union.listener
 
+import com.rarible.core.kafka.KafkaShutdownHook
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import org.springframework.boot.CommandLineRunner
+import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.runApplication
 
 @SpringBootApplication
 class UnionListenerApplication(
@@ -16,5 +17,8 @@ class UnionListenerApplication(
 }
 
 fun main(args: Array<String>) {
-    runApplication<UnionListenerApplication>(*args)
+    val app = SpringApplication(UnionListenerApplication::class.java)
+    app.setRegisterShutdownHook(false)
+    val context = app.run(*args)
+    Runtime.getRuntime().addShutdownHook(Thread(KafkaShutdownHook(context, context::close)))
 }
