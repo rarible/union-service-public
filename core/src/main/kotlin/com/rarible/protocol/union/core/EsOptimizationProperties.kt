@@ -12,4 +12,6 @@ data class EsOptimizationProperties(
     val earliestItemByLastUpdateAt: Instant = Instant.parse("2016-04-26T20:30:48.000Z"),
     val earliestActivityByDate: Instant = Instant.parse("2016-04-26T06:08:46.000Z"),
     val activityDateSearchPeriod: Duration = Duration.ofDays(7),
+    val earliestOwnershipDate: Instant = Instant.parse("2016-04-26T20:30:48.000Z"),
+    val ownershipDateSearchPeriod: Duration = Duration.ofDays(7),
 )

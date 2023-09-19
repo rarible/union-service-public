@@ -50,6 +50,7 @@ data class FeatureFlagsProperties(
 
     val enableOptimizedSearchForItems: Boolean = false,
     val enableOptimizedSearchForActivities: Boolean = true,
+    val enableOptimizedSearchForOwnerships: Boolean = true,
 
     val enableStrictMetaComparison: Boolean = false,
     val enableMetaDownloadLimit: Boolean = true,

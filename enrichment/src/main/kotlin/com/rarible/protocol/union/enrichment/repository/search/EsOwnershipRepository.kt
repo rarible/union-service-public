@@ -47,7 +47,7 @@ class EsOwnershipRepository(
         query.maxResults = PageSize.OWNERSHIP.limit(limit)
         query.trackTotalHits = false
 
-        val searchHits = logIfSlow(filter, query) {
+        val searchHits = logIfSlow(filter, sort, query) {
             esOperations
                 .search(query, EsOwnership::class.java, entityDefinition.searchIndexCoordinates)
                 .collectList().awaitFirst()

@@ -45,7 +45,7 @@ data class EsOwnershipsSearchFilter(
     val sellPriceCurrency: String? = null,
     val sellPriceFrom: Double? = null,
     val sellPriceTo: Double? = null,
-) : EsOwnershipFilter {
+) : EsOwnershipFilter, DateRangeFilter<EsOwnershipsSearchFilter> {
     constructor(request: OwnershipSearchRequestDto) : this(
         cursor = request.continuation,
         blockchains = request.filter.blockchains?.toSet(),
@@ -60,5 +60,16 @@ data class EsOwnershipsSearchFilter(
         sellPriceCurrency = request.filter.sellCurrency,
         sellPriceFrom = request.filter.sellPriceFrom,
         sellPriceTo = request.filter.sellPriceTo,
+    )
+
+    override val from: Instant?
+        get() = afterDate
+
+    override val to: Instant?
+        get() = beforeDate
+
+    override fun applyDateRange(range: DateRange): EsOwnershipsSearchFilter = copy(
+        afterDate = range.from,
+        beforeDate = range.to,
     )
 }
