@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.core.common.optimisticLock
 import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -56,9 +57,9 @@ class EnrichmentItemService(
         return itemRepository.get(itemId)
     }
 
-    suspend fun getOrCreateWithLastUpdatedAtUpdate(itemId: ShortItemId): ShortItem {
+    suspend fun getOrCreateWithLastUpdatedAtUpdate(itemId: ShortItemId): ShortItem = optimisticLock {
         val item = itemRepository.get(itemId) ?: ShortItem.empty(itemId)
-        return itemRepository.save(item.withCalculatedFields())
+        itemRepository.save(item.withCalculatedFields())
     }
 
     suspend fun getItemCollection(itemId: ShortItemId): CollectionIdDto? {
