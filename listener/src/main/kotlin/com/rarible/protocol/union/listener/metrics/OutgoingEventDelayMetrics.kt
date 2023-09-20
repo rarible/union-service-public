@@ -54,6 +54,7 @@ class OutgoingEventDelayMetrics(
         record(
             name,
             delay,
+            PERCENTILES_99_95_75,
             tag(blockchain),
             type(type.value),
             tag("source", source),

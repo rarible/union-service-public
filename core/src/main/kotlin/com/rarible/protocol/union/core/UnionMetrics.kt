@@ -50,6 +50,16 @@ abstract class UnionMetrics(
         timers.getOrCreate(name, tags.toList()).record(duration)
     }
 
+    protected fun record(name: String, duration: Duration, percentiles: List<Double>, vararg tags: Tag) {
+        timers.getOrCreate(name, tags.toList()) { inputName, inputTags ->
+            Timer.builder(inputName)
+                .tags(inputTags)
+                .publishPercentiles(*percentiles.toDoubleArray())
+                .publishPercentileHistogram()
+                .register(meterRegistry)
+        }.record(duration)
+    }
+
     protected fun set(name: String, value: Number, vararg tags: Tag) {
         gauges.getOrCreate(name, tags.toList()).set(value.toDouble())
     }
@@ -68,10 +78,14 @@ abstract class UnionMetrics(
         return meterRegistry.counter(name, tags)
     }
 
-    private class Meters<T>(private val constructor: (name: String, tags: List<Tag>) -> T) {
+    private class Meters<T>(private val defaultConstructor: (name: String, tags: List<Tag>) -> T) {
         private val meters = ConcurrentHashMap<MeterId, T>()
-        fun getOrCreate(name: String, tags: List<Tag>) = meters.computeIfAbsent(MeterId(name, tags)) {
-            constructor(name, tags)
+        fun getOrCreate(name: String, tags: List<Tag>) = getOrCreate(name, tags, defaultConstructor)
+
+        fun getOrCreate(name: String, tags: List<Tag>, constructor: (name: String, tags: List<Tag>) -> T): T {
+            return meters.computeIfAbsent(MeterId(name, tags)) {
+                constructor(name, tags)
+            }
         }
     }
 
@@ -79,4 +93,8 @@ abstract class UnionMetrics(
         val name: String,
         val tags: List<Tag> = emptyList()
     )
+
+    companion object {
+        val PERCENTILES_99_95_75 = listOf(0.99, 0.95, 0.75)
+    }
 }

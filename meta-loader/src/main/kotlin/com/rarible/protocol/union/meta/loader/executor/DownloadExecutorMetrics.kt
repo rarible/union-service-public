@@ -65,6 +65,7 @@ class DownloadExecutorMetrics(
         record(
             DOWNLOAD_DELAY,
             Duration.between(start, Instant.now()),
+            PERCENTILES_99_95_75,
             tag(blockchain),
             type(type.lowercase()),
             tag("pipeline", task.pipeline.lowercase()),
