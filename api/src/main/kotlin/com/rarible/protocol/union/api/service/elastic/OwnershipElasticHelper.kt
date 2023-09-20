@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component
 @Component
 class OwnershipElasticHelper(
     private val repository: EsOwnershipRepository,
+    private val esOwnershipOptimizedSearchService: EsOwnershipOptimizedSearchService,
     private val router: BlockchainRouter<OwnershipService>,
 ) {
 
@@ -63,7 +64,7 @@ class OwnershipElasticHelper(
     suspend fun getRawOwnershipsBySearchRequest(request: OwnershipSearchRequestDto): Slice<UnionOwnership> {
         val filter = EsOwnershipsSearchFilter(request)
         val sort = convertSort(request.sort)
-        val ownerships = repository.search(filter, sort, request.size)
+        val ownerships = esOwnershipOptimizedSearchService.search(filter, sort, request.size)
         return Slice(
             continuation = ownerships.continuation,
             entities = getOwnerships(ownerships.entities)
