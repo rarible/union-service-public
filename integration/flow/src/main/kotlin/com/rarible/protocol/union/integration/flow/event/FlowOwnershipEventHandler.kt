@@ -19,7 +19,7 @@ open class FlowOwnershipEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun convert(event: FlowOwnershipEventDto): UnionOwnershipEvent? {
-        logger.info("Received {} Ownership event: {}", blockchain, event)
+        logger.info("Received {} Ownership event: {}:{}", blockchain, event::class.simpleName, event.ownershipId)
         return FlowOwnershipConverter.convert(event, blockchain)
     }
 }

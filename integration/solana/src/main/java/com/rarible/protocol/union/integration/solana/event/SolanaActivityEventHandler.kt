@@ -19,7 +19,12 @@ open class SolanaActivityEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun convert(event: com.rarible.protocol.solana.dto.ActivityDto): UnionActivity {
-        logger.debug("Received Solana ({}) Activity event: type={}", event, event::class.java.simpleName)
+        logger.info(
+            "Received {} Activity event: {}:{}",
+            blockchain,
+            event::class.simpleName,
+            event.id
+        )
         return solanaActivityConverter.convert(event, blockchain)
     }
 }

@@ -20,7 +20,12 @@ open class FlowActivityEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun convert(event: FlowActivityEventDto): UnionActivity {
-        logger.info("Received {} Activity event: {}", blockchain, event)
+        logger.info(
+            "Received {} Activity event: {}:{}",
+            blockchain,
+            event.activity::class.simpleName,
+            event.activity.id
+        )
         return flowActivityConverter.convert(event)
     }
 }

@@ -77,13 +77,18 @@ class UnionInternalChunkedEventHandler(
             }
         }
 
-        logger.info(
-            "Handled {} internal events in {} chunks for {} ({}ms)",
-            event.size,
-            sequentialChunks.size,
-            blockchain,
-            System.currentTimeMillis() - start
-        )
+        val spent = System.currentTimeMillis() - start
+
+        // Just to avoid spam
+        if (spent > 200) {
+            logger.info(
+                "Handled {} internal events in {} chunks for {} ({}ms)",
+                event.size,
+                sequentialChunks.size,
+                blockchain,
+                spent
+            )
+        }
     }
 
     override suspend fun handle(event: UnionInternalBlockchainEvent) {

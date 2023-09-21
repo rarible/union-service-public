@@ -119,23 +119,23 @@ object LogUtils {
 
     private fun MetaDto.trim(): MetaDto {
         return this.copy(
-            name = trimToLength(name, 1000, "...")!!,
-            description = trimToLength(description, 1000, "..."),
-            attributes = attributes.take(100).map { it.trim() }
+            name = trimToLength(name, 100, "...")!!,
+            description = trimToLength(description, 100, "..."),
+            attributes = attributes.take(20).map { it.trim() }
         )
     }
 
     private fun CollectionMetaDto.trim(): CollectionMetaDto {
         return this.copy(
-            name = trimToLength(name, 1000, "...")!!,
-            description = trimToLength(description, 1000, "...")
+            name = trimToLength(name, 100, "...")!!,
+            description = trimToLength(description, 100, "...")
         )
     }
 
     private fun MetaAttributeDto.trim(): MetaAttributeDto {
         return this.copy(
-            key = trimToLength(key, 100, "...")!!,
-            value = trimToLength(value, 100)
+            key = trimToLength(key, 20, "...")!!,
+            value = trimToLength(value, 20)
         )
     }
 }

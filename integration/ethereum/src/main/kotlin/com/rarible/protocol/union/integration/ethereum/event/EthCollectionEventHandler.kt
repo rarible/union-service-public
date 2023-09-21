@@ -20,7 +20,7 @@ abstract class EthCollectionEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun convert(event: NftCollectionEventDto): UnionCollectionEvent {
-        logger.info("Received {} collection event: {}", blockchain, event)
+        logger.info("Received {} Collection event: {}", blockchain, event)
         return EthCollectionConverter.convert(event, blockchain)
     }
 }
