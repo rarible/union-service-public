@@ -59,7 +59,6 @@ class OutgoingEventDelayMetrics(
         )
     }
 
-
     private companion object {
 
         const val PROTOCOL_EVENT_STAGE_DELAY = "protocol_event_stage_delay"
