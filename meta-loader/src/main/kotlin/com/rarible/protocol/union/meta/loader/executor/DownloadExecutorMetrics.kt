@@ -65,7 +65,7 @@ class DownloadExecutorMetrics(
         record(
             DOWNLOAD_DELAY,
             Duration.between(start, Instant.now()),
-            PERCENTILES_99_95_75,
+            DOWNLOAD_DELAY_OBJECTIVES,
             tag(blockchain),
             type(type.lowercase()),
             tag("pipeline", task.pipeline.lowercase()),
@@ -117,6 +117,17 @@ class DownloadExecutorMetrics(
         const val DOWNLOAD_TASK = "download_task"
         const val DOWNLOAD_TASK_TOTAL = "download_task_total"
         const val DOWNLOAD_DELAY = "download_delay"
+        val DOWNLOAD_DELAY_OBJECTIVES = listOf(
+            Duration.ofSeconds(3),
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(12),
+            Duration.ofSeconds(15),
+            Duration.ofSeconds(30),
+            Duration.ofMinutes(1),
+            Duration.ofMinutes(2),
+            Duration.ofMinutes(5),
+            Duration.ofDays(365 * 10) // Max value
+        )
     }
 }
 

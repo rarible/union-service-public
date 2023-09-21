@@ -25,7 +25,15 @@ class OutgoingEventDelayMetrics(
         to: String,
         delay: Duration
     ) {
-        markDelay(PROTOCOL_EVENT_STAGE_DELAY, blockchain, type, source, from, to, delay)
+        record(
+            PROTOCOL_EVENT_STAGE_DELAY,
+            delay,
+            tag(blockchain),
+            type(type.value),
+            source(source),
+            tag("from", from),
+            tag("to", to)
+        )
     }
 
     /**
@@ -39,33 +47,33 @@ class OutgoingEventDelayMetrics(
         to: String,
         delay: Duration
     ) {
-        markDelay(PROTOCOL_EVENT_GLOBAL_DELAY, blockchain, type, source, from, to, delay)
-    }
-
-    private fun markDelay(
-        name: String,
-        blockchain: BlockchainDto,
-        type: EventType,
-        source: String,
-        from: String,
-        to: String,
-        delay: Duration
-    ) {
         record(
-            name,
+            PROTOCOL_EVENT_GLOBAL_DELAY,
             delay,
-            PERCENTILES_99_95_75,
+            PROTOCOL_EVENT_GLOBAL_DELAY_OBJECTIVES,
             tag(blockchain),
             type(type.value),
-            tag("source", source),
+            source(source),
             tag("from", from),
             tag("to", to)
         )
     }
 
+
     private companion object {
 
         const val PROTOCOL_EVENT_STAGE_DELAY = "protocol_event_stage_delay"
         const val PROTOCOL_EVENT_GLOBAL_DELAY = "protocol_event_global_delay"
+        val PROTOCOL_EVENT_GLOBAL_DELAY_OBJECTIVES = listOf(
+            Duration.ofSeconds(1),
+            Duration.ofSeconds(3),
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(12),
+            Duration.ofSeconds(15),
+            Duration.ofSeconds(30),
+            Duration.ofMinutes(1),
+            Duration.ofMinutes(2),
+            Duration.ofDays(365 * 10) // Max value
+        )
     }
 }
