@@ -110,10 +110,9 @@ class DipDupConsumerConfiguration(
         handler: IncomingEventHandler<UnionActivity>,
         converter: DipDupActivityConverter,
         transfersEventHandler: DipDupTransfersEventHandler,
-        properties: DipDupIntegrationProperties,
-        mapper: ObjectMapper
+        properties: DipDupIntegrationProperties
     ): DipDupActivityEventHandler {
-        return DipDupActivityEventHandler(handler, converter, transfersEventHandler, properties, mapper)
+        return DipDupActivityEventHandler(handler, converter, transfersEventHandler, properties)
     }
 
     @Bean
