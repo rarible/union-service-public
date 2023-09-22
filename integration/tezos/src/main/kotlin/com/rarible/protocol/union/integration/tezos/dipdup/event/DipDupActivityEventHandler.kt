@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos.dipdup.event
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.dipdup.client.core.model.DipDupActivity
 import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.exception.UnionDataFormatException
@@ -16,8 +15,7 @@ open class DipDupActivityEventHandler(
     override val handler: IncomingEventHandler<UnionActivity>,
     private val dipDupOrderConverter: DipDupActivityConverter,
     private val dipDupTransfersEventHandler: DipDupTransfersEventHandler,
-    private val properties: DipDupIntegrationProperties,
-    private val mapper: ObjectMapper
+    private val properties: DipDupIntegrationProperties
 ) : AbstractBlockchainEventHandler<DipDupActivity, UnionActivity>(
     BlockchainDto.TEZOS,
     EventType.ACTIVITY
@@ -26,7 +24,12 @@ open class DipDupActivityEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun convert(event: DipDupActivity): UnionActivity? {
-        logger.info("Received {} Activity event: {}", blockchain, mapper.writeValueAsString(event))
+        logger.info(
+            "Received {} Activity event: {}:{}",
+            blockchain,
+            event::class.simpleName,
+            event.id
+        )
         return try {
             if (properties.useDipDupTokens) {
                 val unionEvent = dipDupOrderConverter.convert(event, blockchain)

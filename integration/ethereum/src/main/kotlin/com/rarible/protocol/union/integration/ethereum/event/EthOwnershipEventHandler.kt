@@ -20,7 +20,7 @@ abstract class EthOwnershipEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun convert(event: NftOwnershipEventDto): UnionOwnershipEvent {
-        logger.info("Received {} Ownership event: {}", blockchain, event)
+        logger.info("Received {} Ownership event: {}:{}", blockchain, event::class.simpleName, event.ownershipId)
         return EthOwnershipConverter.convert(event, blockchain)
     }
 }

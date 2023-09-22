@@ -28,7 +28,7 @@ open class DipDupOwnershipEventHandler(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     override suspend fun convert(event: DipDupOwnershipEvent): UnionOwnershipEvent {
-        logger.info("Received {} Ownership event: {}", blockchain, mapper.writeValueAsString(event))
+        logger.info("Received {} Ownership event: {}:{}", blockchain, event::class.simpleName, event.ownershipId)
         return when (event) {
             is DipDupUpdateOwnershipEvent -> {
                 val ownership = DipDupOwnershipConverter.convert(event.ownership)
