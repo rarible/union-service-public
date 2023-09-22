@@ -133,7 +133,7 @@ internal class EsOwnershipRepositoryFt {
         val c1 = repository.search(EsOwnershipByOwnerFilter(owner = id.owner), limit = 3).let { (cursor, result) ->
             println(null)
             println(result.joinToString("\n"))
-            assertThat(result).containsExactly(data[9], data[6], data[7])
+            assertThat(result).containsExactly(data[9], data[8], data[7])
             cursor
         }
 
@@ -141,7 +141,7 @@ internal class EsOwnershipRepositoryFt {
             .let { (cursor, result) ->
                 println(c1)
                 println(result.joinToString("\n"))
-                assertThat(result).containsExactly(data[8], data[3], data[4])
+                assertThat(result).containsExactly(data[6], data[5], data[4])
                 cursor
             }
 
@@ -149,7 +149,7 @@ internal class EsOwnershipRepositoryFt {
             .let { (cursor, result) ->
                 println(c2)
                 println(result.joinToString("\n"))
-                assertThat(result).containsExactly(data[5], data[0], data[1])
+                assertThat(result).containsExactly(data[3], data[2], data[1])
                 cursor
             }
 
@@ -157,7 +157,7 @@ internal class EsOwnershipRepositoryFt {
             .let { (cursor, result) ->
                 println(c3)
                 println(result.joinToString("\n"))
-                assertThat(result).containsExactly(data[2])
+                assertThat(result).containsExactly(data[0])
                 cursor
             }
 
@@ -193,7 +193,7 @@ internal class EsOwnershipRepositoryFt {
         val c1 = repository.search(EsOwnershipByItemFilter(id.getItemId()), limit = 3).let { (cursor, result) ->
             println(null)
             println(result.joinToString("\n"))
-            assertThat(result).containsExactly(data[9], data[6], data[7])
+            assertThat(result).containsExactly(data[9], data[8], data[7])
             cursor
         }
 
@@ -201,7 +201,7 @@ internal class EsOwnershipRepositoryFt {
             .let { (cursor, result) ->
                 println(c1)
                 println(result.joinToString("\n"))
-                assertThat(result).containsExactly(data[8], data[3], data[4])
+                assertThat(result).containsExactly(data[6], data[5], data[4])
                 cursor
             }
 
@@ -209,7 +209,7 @@ internal class EsOwnershipRepositoryFt {
             .let { (cursor, result) ->
                 println(c2)
                 println(result.joinToString("\n"))
-                assertThat(result).containsExactly(data[5], data[0], data[1])
+                assertThat(result).containsExactly(data[3], data[2], data[1])
                 cursor
             }
 
@@ -217,7 +217,7 @@ internal class EsOwnershipRepositoryFt {
             .let { (cursor, result) ->
                 println(c3)
                 println(result.joinToString("\n"))
-                assertThat(result).containsExactly(data[2])
+                assertThat(result).containsExactly(data[0])
                 cursor
             }
 

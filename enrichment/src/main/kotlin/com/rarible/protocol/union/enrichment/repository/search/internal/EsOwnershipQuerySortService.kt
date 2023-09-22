@@ -16,21 +16,21 @@ class EsOwnershipQuerySortService {
     fun applySort(builder: NativeSearchQueryBuilder, sort: EsOwnershipSort) {
         when (sort) {
             LATEST_FIRST,
-            EARLIEST_FIRST -> sortByLastUpdatedAt(builder, sort == LATEST_FIRST)
+            EARLIEST_FIRST -> sortByLastUpdatedAt(builder, sort)
             HIGHEST_SELL_PRICE_FIRST,
             LOWEST_SELL_PRICE_FIRST -> sortByPrice(builder, sort == HIGHEST_SELL_PRICE_FIRST)
         }
     }
 
-    private fun sortByLastUpdatedAt(builder: NativeSearchQueryBuilder, latestFirst: Boolean) {
-        val sortOrder = if (latestFirst) SortOrder.DESC else SortOrder.ASC
+    private fun sortByLastUpdatedAt(builder: NativeSearchQueryBuilder, sort: EsOwnershipSort) {
+        val sortOrder = sort.sortOrder
         builder.sortByField(EsOwnership::date, sortOrder)
-        builder.sortByField(EsOwnership::ownershipId, SortOrder.ASC)
+        builder.sortByField(EsOwnership::ownershipId, sortOrder)
     }
 
     private fun sortByPrice(builder: NativeSearchQueryBuilder, latestFirst: Boolean) {
         val sortOrder = if (latestFirst) SortOrder.DESC else SortOrder.ASC
         builder.sortByField("_score", sortOrder)
-        builder.sortByField(EsOwnership::ownershipId, SortOrder.ASC)
+        builder.sortByField(EsOwnership::ownershipId, sortOrder)
     }
 }
