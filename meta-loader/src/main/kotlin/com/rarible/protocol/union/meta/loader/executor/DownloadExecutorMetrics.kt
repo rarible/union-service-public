@@ -125,8 +125,7 @@ class DownloadExecutorMetrics(
             Duration.ofSeconds(30),
             Duration.ofMinutes(1),
             Duration.ofMinutes(2),
-            Duration.ofMinutes(5),
-            Duration.ofDays(365 * 10) // Max value
+            Duration.ofMinutes(5)
         )
     }
 }
