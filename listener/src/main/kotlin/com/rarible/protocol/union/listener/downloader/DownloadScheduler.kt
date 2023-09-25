@@ -6,6 +6,7 @@ import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
+import com.rarible.protocol.union.enrichment.service.DownloadTaskService
 import org.slf4j.LoggerFactory
 
 /**
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory
  * for entries never downloaded before.
  */
 abstract class DownloadScheduler<T>(
-    private val router: DownloadTaskRouter,
+    private val downloadTaskService: DownloadTaskService,
     private val repository: DownloadEntryRepository<T>,
     private val metrics: DownloadSchedulerMetrics
 ) {
@@ -24,7 +25,6 @@ abstract class DownloadScheduler<T>(
 
     abstract val type: String
     abstract fun getBlockchain(task: DownloadTaskEvent): BlockchainDto
-    abstract suspend fun logScheduledTask(task: DownloadTaskEvent)
 
     suspend fun schedule(task: DownloadTaskEvent) {
         schedule(listOf(task))
@@ -46,10 +46,8 @@ abstract class DownloadScheduler<T>(
             shouldBeExecuted
         }
 
-        deduplicated.groupBy { it.pipeline }.forEach { (pipeline, tasks) ->
-            router.send(tasks, pipeline)
-            tasks.forEach { logScheduledTask(it) }
-        }
+        downloadTaskService.update(type, deduplicated)
+        tasks.forEach { logger.info("Scheduling $type meta download for ${it.id}") }
     }
 
     private suspend fun createInitialEntries(tasks: Collection<DownloadTaskEvent>): Set<String> {

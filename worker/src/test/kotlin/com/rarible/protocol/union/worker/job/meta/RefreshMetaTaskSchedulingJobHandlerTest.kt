@@ -4,14 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.service.DownloadTaskService
 import com.rarible.protocol.union.worker.AbstractIntegrationTest
 import com.rarible.protocol.union.worker.IntegrationTest
 import com.rarible.protocol.union.worker.config.WorkerProperties
-import com.rarible.protocol.union.worker.kafka.LagService
 import com.rarible.protocol.union.worker.metrics.MetaRefreshMetrics
 import com.rarible.protocol.union.worker.task.meta.RefreshMetaTask
 import com.rarible.protocol.union.worker.task.meta.RefreshMetaTaskParam
@@ -44,8 +42,6 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
 
     private lateinit var refreshMetaTaskSchedulingJobHandler: RefreshMetaTaskSchedulingJobHandler
 
-    private lateinit var lagService: LagService
-
     private lateinit var downloadTaskService: DownloadTaskService
 
     @Autowired
@@ -55,13 +51,12 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
 
     @BeforeEach
     fun before() {
-        lagService = mockk()
         downloadTaskService = mockk()
+        createJob()
     }
 
     @Test
     fun `too many tasks`() = runBlocking<Unit> {
-        createJob(false)
         (1..10).forEach {
             taskRepository.save(
                 Task(
@@ -86,8 +81,7 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
 
     @Test
     fun `start new tasks`() = runBlocking<Unit> {
-        createJob(false)
-        coEvery { lagService.isLagOk(properties.metaRefresh.maxKafkaLag) } returns true
+        coEvery { downloadTaskService.isPipelineQueueFull(any(), any(), any()) } returns false
         val runningTasks = (1..8).map {
             taskRepository.save(
                 Task(
@@ -155,30 +149,12 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
     }
 
     @Test
-    fun `lag is too big - kafka`() = runBlocking<Unit> {
-        createJob(false)
-        coEvery { lagService.isLagOk(properties.metaRefresh.maxKafkaLag) } returns false
-        metaRefreshRequestRepository.save(
-            MetaRefreshRequest(
-                collectionId = "test",
-                full = true
-            )
-        )
-
-        refreshMetaTaskSchedulingJobHandler.handle()
-
-        assertThat(taskRepository.count().awaitSingle()).isEqualTo(0)
-        assertThat(metaRefreshRequestRepository.findToScheduleAndUpdate(1)).isNotEmpty
-    }
-
-    @Test
     fun `lag is too big - mongo`() = runBlocking<Unit> {
-        createJob(true)
         coEvery {
             downloadTaskService.isPipelineQueueFull(
                 "item",
                 "refresh",
-                properties.metaRefresh.maxKafkaLag
+                properties.metaRefresh.maxTaskQueueSize
             )
         } returns true
         metaRefreshRequestRepository.save(
@@ -194,16 +170,14 @@ internal class RefreshMetaTaskSchedulingJobHandlerTest : AbstractIntegrationTest
         assertThat(metaRefreshRequestRepository.findToScheduleAndUpdate(1)).isNotEmpty
     }
 
-    private fun createJob(enableMetaMongoPipeline: Boolean) {
+    private fun createJob() {
         refreshMetaTaskSchedulingJobHandler = RefreshMetaTaskSchedulingJobHandler(
             taskRepository = taskRepository,
             properties = properties,
             metaRefreshRequestRepository = metaRefreshRequestRepository,
-            lagService = lagService,
             metaRefreshSchedulingService = metaRefreshSchedulingService,
             metaRefreshMetrics = metaRefreshMetrics,
             downloadTaskService = downloadTaskService,
-            ff = FeatureFlagsProperties(enableMetaMongoPipeline = enableMetaMongoPipeline)
         )
     }
 }

@@ -54,5 +54,4 @@ data class FeatureFlagsProperties(
 
     val enableStrictMetaComparison: Boolean = false,
     val enableMetaDownloadLimit: Boolean = true,
-    val enableMetaMongoPipeline: Boolean = true
 )

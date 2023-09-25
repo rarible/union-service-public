@@ -5,7 +5,6 @@ import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumerWorkerGroup
-import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.InternalBatchEventHandler
@@ -20,12 +19,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
-import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
-import com.rarible.protocol.union.enrichment.service.DownloadTaskService
-import com.rarible.protocol.union.listener.downloader.DownloadTaskRouter
-import com.rarible.protocol.union.listener.downloader.KafkaMetaTaskRouter
-import com.rarible.protocol.union.listener.downloader.MongoMetaTaskRouter
 import com.rarible.protocol.union.listener.handler.MetricsInternalEventHandlerFactory
 import com.rarible.protocol.union.listener.handler.internal.CollectionMetaTaskSchedulerHandler
 import com.rarible.protocol.union.listener.handler.internal.ItemMetaTaskSchedulerHandler
@@ -33,11 +26,9 @@ import com.rarible.protocol.union.listener.handler.internal.UnionInternalChunked
 import com.rarible.protocol.union.listener.handler.internal.UnionInternalEventChunker
 import com.rarible.protocol.union.listener.handler.internal.UnionInternalEventHandler
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
-import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import io.micrometer.core.instrument.MeterRegistry
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -47,7 +38,6 @@ import org.springframework.context.annotation.Import
 @Import(value = [EnrichmentConsumerConfiguration::class, SearchConfiguration::class])
 @EnableConfigurationProperties(value = [UnionListenerProperties::class])
 class UnionListenerConfiguration(
-    private val downloadTaskService: DownloadTaskService,
     private val listenerProperties: UnionListenerProperties,
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     private val meterRegistry: MeterRegistry,
@@ -140,28 +130,6 @@ class UnionListenerConfiguration(
     }
 
     @Bean
-    @Qualifier("item.meta.schedule.router")
-    fun itemMetaTaskRouter(): DownloadTaskRouter {
-        if (ff.enableMetaMongoPipeline) {
-            return MongoMetaTaskRouter("item", downloadTaskService)
-        }
-        val producers = HashMap<String, RaribleKafkaProducer<DownloadTaskEvent>>()
-        ItemMetaPipeline.values().map { it.pipeline }.forEach { pipeline ->
-            val topic = UnionInternalTopicProvider.getItemMetaDownloadTaskExecutorTopic(env, pipeline)
-            val producer = RaribleKafkaProducer(
-                clientId = "$env.protocol-union-service.meta.scheduler",
-                valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-                valueClass = DownloadTaskEvent::class.java,
-                defaultTopic = topic,
-                bootstrapServers = properties.brokerReplicaSet,
-                compression = properties.compression,
-            )
-            producers[pipeline] = producer
-        }
-        return KafkaMetaTaskRouter(producers)
-    }
-
-    @Bean
     fun collectionMetaDownloadScheduleWorker(
         handler: CollectionMetaTaskSchedulerHandler
     ): RaribleKafkaConsumerWorker<DownloadTaskEvent> {
@@ -179,28 +147,6 @@ class UnionListenerConfiguration(
             valueClass = DownloadTaskEvent::class.java
         )
         return kafkaConsumerFactory.createWorker(settings, handler)
-    }
-
-    @Bean
-    @Qualifier("collection.meta.schedule.router")
-    fun collectionMetaTaskRouter(): DownloadTaskRouter {
-        if (ff.enableMetaMongoPipeline) {
-            return MongoMetaTaskRouter("collection", downloadTaskService)
-        }
-        val producers = HashMap<String, RaribleKafkaProducer<DownloadTaskEvent>>()
-        CollectionMetaPipeline.values().map { it.pipeline }.forEach { pipeline ->
-            val topic = UnionInternalTopicProvider.getCollectionMetaDownloadTaskExecutorTopic(env, pipeline)
-            val producer = RaribleKafkaProducer(
-                clientId = "$env.protocol-union-service.meta.scheduler",
-                valueSerializerClass = UnionKafkaJsonSerializer::class.java,
-                valueClass = DownloadTaskEvent::class.java,
-                defaultTopic = topic,
-                bootstrapServers = properties.brokerReplicaSet,
-                compression = properties.compression,
-            )
-            producers[pipeline] = producer
-        }
-        return KafkaMetaTaskRouter(producers)
     }
 
     // --------------- Meta 3.0 beans END

@@ -3,7 +3,7 @@ package com.rarible.protocol.union.meta.loader.job
 import com.rarible.core.daemon.sequential.SequentialDaemonWorker
 
 class DownloadExecutorWorker(
-    private val enabled: Boolean,
+    private val enabled: Boolean = true,
     private val workers: List<SequentialDaemonWorker>
 ) : AutoCloseable {
 

@@ -6,13 +6,10 @@ import com.rarible.core.daemon.sequential.SequentialDaemonWorker
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.core.task.TaskStatus
-import com.rarible.protocol.union.core.FeatureFlagsProperties
-import com.rarible.protocol.union.core.kafka.KafkaGroupFactory
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.service.DownloadTaskService
 import com.rarible.protocol.union.worker.config.WorkerProperties
-import com.rarible.protocol.union.worker.kafka.LagService
 import com.rarible.protocol.union.worker.metrics.MetaRefreshMetrics
 import com.rarible.protocol.union.worker.task.meta.RefreshMetaSimpleHashTask
 import com.rarible.protocol.union.worker.task.meta.RefreshMetaTask
@@ -59,11 +56,9 @@ class RefreshMetaTaskSchedulingJobHandler(
     private val taskRepository: TaskRepository,
     properties: WorkerProperties,
     private val metaRefreshRequestRepository: MetaRefreshRequestRepository,
-    private val lagService: LagService,
     private val metaRefreshSchedulingService: MetaRefreshSchedulingService,
     private val metaRefreshMetrics: MetaRefreshMetrics,
     private val downloadTaskService: DownloadTaskService,
-    private val ff: FeatureFlagsProperties
 ) : JobHandler {
 
     private val concurrency: Int = properties.metaRefresh.concurrency
@@ -82,14 +77,10 @@ class RefreshMetaTaskSchedulingJobHandler(
             )
             return
         }
-        if (!ff.enableMetaMongoPipeline && !lagService.isLagOk(metaRefreshProperties.maxKafkaLag)) {
-            logger.info("Lag is too big. Skipping RefreshMetaTaskSchedulingJob")
-            return
-        }
-        if (ff.enableMetaMongoPipeline && downloadTaskService.isPipelineQueueFull(
-                KafkaGroupFactory.ITEM_TYPE, // TODO rename later
+        if (downloadTaskService.isPipelineQueueFull(
+                "item",
                 ItemMetaPipeline.REFRESH.pipeline,
-                metaRefreshProperties.maxKafkaLag // TODO rename later
+                metaRefreshProperties.maxTaskQueueSize // TODO rename later
             )
         ) {
             logger.info("Queue is too big. Skipping RefreshMetaTaskSchedulingJob")

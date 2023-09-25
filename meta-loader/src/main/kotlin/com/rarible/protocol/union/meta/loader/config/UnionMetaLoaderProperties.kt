@@ -7,7 +7,6 @@ import java.time.Duration
 @ConstructorBinding
 @ConfigurationProperties("meta-loader")
 class UnionMetaLoaderProperties(
-    val brokerReplicaSet: String,
     val downloader: DownloaderProperties
 )
 
@@ -19,8 +18,6 @@ data class DownloaderProperties(
 )
 
 data class ExecutorPipelineProperties(
-    val workers: Int = 3,
-    val batchSize: Int = 32,
     val poolSize: Int = 16
 )
 

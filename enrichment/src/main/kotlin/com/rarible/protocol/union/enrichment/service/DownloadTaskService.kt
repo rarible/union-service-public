@@ -28,9 +28,10 @@ class DownloadTaskService(
 
     suspend fun update(type: String, events: List<DownloadTaskEvent>) {
         val (toUpdate, exist) = optimisticLock {
-            val exists = downloadTaskRepository.getByIds(events.map { it.id }).associateBy { it.id }
+            val grouped = events.groupBy { it.id }.mapValues { it.value.maxByOrNull { it.priority }!! }
+            val exists = downloadTaskRepository.getByIds(grouped.keys).associateBy { it.id }
             val toUpdate = ArrayList<DownloadTaskEvent>(events.size)
-            val toInsert = events.filter {
+            val toInsert = grouped.values.filter {
                 val current = exists[it.id]
                 when {
                     // New task, should be inserted
