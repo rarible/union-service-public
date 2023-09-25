@@ -25,7 +25,6 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentBlacklistService
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.meta.loader.config.DownloadLimit
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.awaitAll
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
@@ -59,14 +58,6 @@ sealed class DownloadExecutor<T>(
             execute(task)
             callback(task)
         }
-    }
-
-    suspend fun execute(tasks: List<DownloadTaskEvent>) {
-        tasks.groupBy { it.id }.values.map { group ->
-            pool.submitAsync {
-                group.forEach { execute(it) }
-            }
-        }.awaitAll()
     }
 
     private suspend fun execute(task: DownloadTaskEvent) {

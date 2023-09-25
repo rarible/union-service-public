@@ -2,29 +2,21 @@ package com.rarible.protocol.union.listener.downloader.item
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.UnionMeta
-import com.rarible.protocol.union.core.service.ItemService
-import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.repository.DownloadTaskRepository
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.listener.downloader.DownloadSchedulerMetrics
-import com.rarible.protocol.union.listener.downloader.DownloadTaskRouter
 import com.rarible.protocol.union.listener.downloader.ItemMetaTaskScheduler
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
-import io.mockk.clearMocks
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -38,24 +30,13 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
     lateinit var itemRepository: ItemRepository
 
     @Autowired
-    lateinit var metrics: DownloadSchedulerMetrics
+    lateinit var downloadTaskRepository: DownloadTaskRepository
 
     @Autowired
-    lateinit var blockchainRouter: BlockchainRouter<ItemService>
-
-    private val router: DownloadTaskRouter = mockk()
-
     lateinit var scheduler: ItemMetaTaskScheduler
 
-    @BeforeEach
-    fun beforeEach() {
-        clearMocks(router)
-        coEvery { router.send(any(), any()) } returns Unit
-        scheduler = ItemMetaTaskScheduler(router, repository, metrics, blockchainRouter)
-    }
-
     @Test
-    fun `not forced task - entry doesn't exist`() = runBlocking {
+    fun `not forced task - entry doesn't exist`() = runBlocking<Unit> {
         val id = randomEthItemId().fullId()
         val task = DownloadTaskEvent(
             id = id,
@@ -68,12 +49,14 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
 
         val entry = repository.get(id)!!
 
-        // Entry should be created with default state, task should be routed to the executor
+        // Entry should be created with default state, task should be created
         assertThat(entry.status).isEqualTo(DownloadStatus.SCHEDULED)
         assertThat(entry.scheduledAt).isEqualTo(task.scheduledAt)
         assertThat(entry.data).isNull()
 
-        coVerify(exactly = 1) { router.send(listOf(task), task.pipeline) }
+        val downloadTask = downloadTaskRepository.get(id)!!
+        assertThat(downloadTask.scheduledAt).isEqualTo(task.scheduledAt)
+        assertThat(downloadTask.pipeline).isEqualTo(task.pipeline)
     }
 
     @Test
@@ -93,11 +76,11 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
         // Entry not changed, nothing sent
         assertThat(entry).isEqualTo(exist)
 
-        coVerify(exactly = 0) { router.send(any(), task.pipeline) }
+        assertThat(downloadTaskRepository.get(task.id)).isNull()
     }
 
     @Test
-    fun `not forced task - several tasks for same non-existing entry`() = runBlocking {
+    fun `not forced task - several tasks for same non-existing entry`() = runBlocking<Unit> {
         val id = randomEthItemId().fullId()
         val task1 = DownloadTaskEvent(
             id = id,
@@ -109,6 +92,7 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
             id = id,
             pipeline = "api",
             force = false,
+            priority = 100,
             scheduledAt = nowMillis()
         )
         val task3 = DownloadTaskEvent(
@@ -123,13 +107,14 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
         val entry = repository.get(id)
         assertThat(entry).isNotNull
 
-        // Two batches sent to different pipelines
-        coVerify(exactly = 1) { router.send(listOf(task1, task2), task1.pipeline) }
-        coVerify(exactly = 1) { router.send(listOf(task3), task3.pipeline) }
+        val downloadTask = downloadTaskRepository.get(id)!!
+        assertThat(downloadTask.scheduledAt).isEqualTo(task2.scheduledAt)
+        assertThat(downloadTask.pipeline).isEqualTo(task2.pipeline)
+        assertThat(downloadTask.priority).isEqualTo(task2.priority)
     }
 
     @Test
-    fun `forced task - entry exists`() = runBlocking {
+    fun `forced task - entry exists`() = runBlocking<Unit> {
         val exist = save(randomItemMetaDownloadEntry())
         val task = DownloadTaskEvent(
             id = exist.id,
@@ -145,11 +130,13 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
         // Entry not changed, but task sent
         assertThat(entry).isEqualTo(exist)
 
-        coVerify(exactly = 1) { router.send(listOf(task), task.pipeline) }
+        val downloadTask = downloadTaskRepository.get(task.id)!!
+        assertThat(downloadTask.scheduledAt).isEqualTo(task.scheduledAt)
+        assertThat(downloadTask.pipeline).isEqualTo(task.pipeline)
     }
 
     @Test
-    fun `mixed tasks - entry exists`() = runBlocking {
+    fun `mixed tasks - entry exists`() = runBlocking<Unit> {
         val exist = save(randomItemMetaDownloadEntry())
         val task1 = DownloadTaskEvent(
             id = exist.id,
@@ -166,9 +153,10 @@ class ItemMetaTaskSchedulerIt : AbstractIntegrationTest() {
 
         scheduler.schedule(listOf(task1, task2))
 
-        // Only forced task routed
-        coVerify(exactly = 1) { router.send(listOf(task1), task1.pipeline) }
-        coVerify(exactly = 0) { router.send(listOf(task2), task2.pipeline) }
+        // Only forced task created
+        val downloadTask = downloadTaskRepository.get(task1.id)!!
+        assertThat(downloadTask.scheduledAt).isEqualTo(task1.scheduledAt)
+        assertThat(downloadTask.pipeline).isEqualTo(task1.pipeline)
     }
 
     private suspend fun save(entry: DownloadEntry<UnionMeta>): DownloadEntry<UnionMeta> {

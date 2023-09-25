@@ -117,7 +117,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
 
         mockGetMeta(fullItemId, meta)
 
-        downloadExecutor.execute(listOf(task))
+        downloadExecutor.submit(task) {}.await()
 
         val saved = repository.get(fullItemId)!!
 
@@ -149,7 +149,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
             )
         )
 
-        downloadExecutor.execute(listOf(task))
+        downloadExecutor.submit(task) {}.await()
 
         val saved = repository.get(fullItemId)!!
 
@@ -167,7 +167,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
 
         mockGetMetaFailed(fullItemId, "failed")
 
-        downloadExecutor.execute(listOf(task))
+        downloadExecutor.submit(task) {}.await()
 
         val saved = repository.get(fullItemId)!!
 
@@ -192,7 +192,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
         val currentItem = createItem(itemId, entry)
         mockGetMeta(fullItemId, meta)
 
-        downloadExecutor.execute(listOf(randomTaskEvent(fullItemId)))
+        downloadExecutor.submit(randomTaskEvent(fullItemId)) {}.await()
 
         val saved = repository.get(fullItemId)!!
         assertThat(saved.data).isEqualTo(meta)
@@ -211,7 +211,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
         val currentItem = createItem(itemId, entry)
         mockGetMeta(fullItemId, meta)
 
-        downloadExecutor.execute(listOf(randomTaskEvent(fullItemId)))
+        downloadExecutor.submit(randomTaskEvent(fullItemId)) {}.await()
 
         val saved = repository.get(fullItemId)!!
         assertThat(saved.data).isEqualTo(meta)
@@ -230,7 +230,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
         val currentItem = createItem(itemId, entry)
         mockGetMeta(fullItemId, meta)
 
-        downloadExecutor.execute(listOf(randomTaskEvent(fullItemId)))
+        downloadExecutor.submit(randomTaskEvent(fullItemId)) {}.await()
 
         val saved = repository.get(fullItemId)!!
         assertThat(saved.data).isEqualTo(meta)
@@ -254,7 +254,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
             source = DownloadTaskSource.EXTERNAL
         )
 
-        downloadExecutor.execute(listOf(task))
+        downloadExecutor.submit(task) {}.await()
 
         val saved = repository.get(fullItemId)!!
 
@@ -275,7 +275,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
             source = DownloadTaskSource.INTERNAL
         )
 
-        downloadExecutor.execute(listOf(task))
+        downloadExecutor.submit(task) {}.await()
 
         val saved = repository.get(fullItemId)!!
 
@@ -298,7 +298,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
         val currentItem = createItem(itemId, entry)
         mockGetMetaFailed(fullItemId, "error")
 
-        downloadExecutor.execute(listOf(randomTaskEvent(fullItemId)))
+        downloadExecutor.submit(randomTaskEvent(fullItemId)) {}.await()
 
         val saved = repository.get(fullItemId)!!
         assertThat(saved.data).isEqualTo(entry.data)
@@ -321,7 +321,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
         val currentItem = createItem(itemId, entry)
         mockGetMetaFailed(fullItemId, "error")
 
-        downloadExecutor.execute(listOf(randomTaskEvent(fullItemId)))
+        downloadExecutor.submit(randomTaskEvent(fullItemId)) {}.await()
 
         val saved = repository.get(fullItemId)!!
         assertThat(saved.data).isEqualTo(entry.data)
@@ -345,7 +345,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
         val partialMeta = randomUnionMeta()
         mockGetMetaPartiallyFailed(fullItemId, partialMeta, listOf(MetaSource.SIMPLE_HASH))
 
-        downloadExecutor.execute(listOf(randomTaskEvent(fullItemId)))
+        downloadExecutor.submit(randomTaskEvent(fullItemId)) {}.await()
 
         val saved = repository.get(fullItemId)!!
         assertThat(saved.data).isEqualTo(partialMeta)
@@ -363,7 +363,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
         createItem(itemId, entry)
         mockGetMetaFailed(fullItemId, "error")
 
-        downloadExecutor.execute(listOf(randomTaskEvent(fullItemId)))
+        downloadExecutor.submit(randomTaskEvent(fullItemId)) {}.await()
 
         val saved = repository.get(fullItemId)!!
         assertThat(saved.data).isEqualTo(entry.data)
@@ -380,7 +380,8 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
     @Test
     fun `forced task - outdated`() = runBlocking {
         createItem(itemId, randomMetaEntry(fullItemId))
-        downloadExecutor.execute(listOf(randomTaskEvent(fullItemId).copy(scheduledAt = Instant.now().minusSeconds(1))))
+        val task = randomTaskEvent(fullItemId).copy(scheduledAt = Instant.now().minusSeconds(1))
+        downloadExecutor.submit(task) {}.await()
 
         coVerify(exactly = 0) { downloader.download(any()) }
         coVerify(exactly = 0) { enrichmentItemService.fetchOrNull(any()) }
@@ -417,7 +418,9 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
             )
         )
 
-        downloadExecutor.execute(listOf(randomTaskEvent(taskId1), randomTaskEvent(taskId2), randomTaskEvent(taskId3)))
+        downloadExecutor.submit(randomTaskEvent(taskId1)) {}.await()
+        downloadExecutor.submit(randomTaskEvent(taskId2)) {}.await()
+        downloadExecutor.submit(randomTaskEvent(taskId3)) {}.await()
 
         coVerify(exactly = 1) { downloader.download(any()) }
         coVerify(exactly = 1) { downloader.download(taskId3) }
@@ -434,7 +437,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
         val currentItem = createItem(itemId, entry)
         mockGetMetaFailed(fullItemId, "error")
 
-        downloadExecutor.execute(listOf(randomTaskEvent(fullItemId)))
+        downloadExecutor.submit(randomTaskEvent(fullItemId)) {}.await()
 
         val saved = repository.get(fullItemId)!!
         assertThat(saved.data).isEqualTo(entry.data)
@@ -459,7 +462,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
             data = partialMeta,
         )
 
-        downloadExecutor.execute(listOf(task))
+        downloadExecutor.submit(task) {}.await()
 
         val saved = repository.get(fullItemId)!!
 
@@ -497,7 +500,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
 
         coEvery { downloader.download(fullItemId) } throws DownloadException("failed")
 
-        downloadExecutor.execute(listOf(task))
+        downloadExecutor.submit(task) {}.await()
 
         val saved = repository.get(fullItemId)!!
 

@@ -38,7 +38,6 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
     value = [
         EnrichmentApiConfiguration::class,
         SearchConfiguration::class,
-        KafkaConsumerConfiguration::class,
     ]
 )
 @EnableRaribleTask

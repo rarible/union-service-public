@@ -118,7 +118,7 @@ class MetaAutoRefreshProperties(
 
 class MetaRefreshProperties(
     val enabled: Boolean = true,
-    val maxKafkaLag: Long = 1000,
+    val maxTaskQueueSize: Long = 1000,
     val concurrency: Int = 10,
     val rate: Duration = Duration.ofSeconds(30),
 )

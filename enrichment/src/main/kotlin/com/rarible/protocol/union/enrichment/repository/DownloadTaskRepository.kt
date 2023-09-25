@@ -55,7 +55,7 @@ class DownloadTaskRepository(
         return template.findById<DownloadTask>(id).awaitSingleOrNull()
     }
 
-    suspend fun getByIds(ids: List<String>): List<DownloadTask> {
+    suspend fun getByIds(ids: Collection<String>): List<DownloadTask> {
         val criteria = Criteria("_id").inValues(ids)
         return template.find<DownloadTask>(Query(criteria)).collectList().awaitSingle()
     }
