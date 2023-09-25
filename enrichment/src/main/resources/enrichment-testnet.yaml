@@ -16,6 +16,9 @@ enrichment:
         collections:
           - "ETHEREUM:0xda62f67be7194775a75be91cbf9feedcc5776d4b"
           - "ETHEREUM:0xb614c578062a62714c927cd8193f0b8bfb90055c"
+      - name: "FLOW:A.6f6702697b205c18.HWGarageCardV2"
+        collections:
+          - "FLOW:A.6f6702697b205c18.HWGarageCard"
   meta:
     item:
       customizers:
