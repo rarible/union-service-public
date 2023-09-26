@@ -7,13 +7,17 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.api.service.api.ItemEnrichService
 import com.rarible.protocol.union.api.service.api.ItemQueryService
 import com.rarible.protocol.union.core.converter.ItemOwnershipConverter
+import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.elastic.EsItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemLite
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsItemSortType
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
 import com.rarible.protocol.union.core.model.elastic.EsOwnershipByOwnerFilter
 import com.rarible.protocol.union.core.model.elastic.EsOwnershipSort
+import com.rarible.protocol.union.core.model.elastic.SortType
+import com.rarible.protocol.union.core.model.elastic.TraitSort
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.PageSize
@@ -26,6 +30,8 @@ import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsSearchSortDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
+import com.rarible.protocol.union.dto.SortOrderDto
+import com.rarible.protocol.union.dto.SortTypeDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
@@ -35,6 +41,7 @@ import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipReposi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import org.elasticsearch.search.sort.SortOrder
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import kotlin.random.Random
@@ -272,7 +279,7 @@ class ItemElasticService(
 
     suspend fun searchItems(request: ItemsSearchRequestDto): ItemsDto {
         val filter = itemFilterConverter.searchItems(request.filter, request.continuation)
-        val sort = convertSort(request.sort)
+        val sort = convertSort(request)
         val result = search(filter, sort, request.size)
         if (result.entities.isEmpty()) return ItemsDto()
         val items = getItems(result.entities, null)
@@ -374,16 +381,41 @@ class ItemElasticService(
         return esItemOptimizedSearchService.search(filter, sort, limit)
     }
 
-    private fun convertSort(sort: ItemsSearchSortDto?): EsItemSort {
-        if (sort == null) return EsItemSort.DEFAULT
+    private fun convertSort(request: ItemsSearchRequestDto): EsItemSort {
+        val sort = request.sort ?: return EsItemSort.DEFAULT
         return when (sort) {
-            ItemsSearchSortDto.LATEST -> EsItemSort.LATEST_FIRST
-            ItemsSearchSortDto.EARLIEST -> EsItemSort.EARLIEST_FIRST
-            ItemsSearchSortDto.HIGHEST_SELL -> EsItemSort.HIGHEST_SELL_PRICE_FIRST
-            ItemsSearchSortDto.LOWEST_SELL -> EsItemSort.LOWEST_SELL_PRICE_FIRST
-            ItemsSearchSortDto.HIGHEST_BID -> EsItemSort.HIGHEST_BID_PRICE_FIRST
-            ItemsSearchSortDto.LOWEST_BID -> EsItemSort.LOWEST_BID_PRICE_FIRST
+            ItemsSearchSortDto.LATEST -> EsItemSort(type = EsItemSortType.LATEST_FIRST)
+            ItemsSearchSortDto.EARLIEST -> EsItemSort(type = EsItemSortType.EARLIEST_FIRST)
+            ItemsSearchSortDto.HIGHEST_SELL -> EsItemSort(type = EsItemSortType.HIGHEST_SELL_PRICE_FIRST)
+            ItemsSearchSortDto.LOWEST_SELL -> EsItemSort(type = EsItemSortType.LOWEST_SELL_PRICE_FIRST)
+            ItemsSearchSortDto.HIGHEST_BID -> EsItemSort(type = EsItemSortType.HIGHEST_BID_PRICE_FIRST)
+            ItemsSearchSortDto.LOWEST_BID -> EsItemSort(type = EsItemSortType.LOWEST_BID_PRICE_FIRST)
+            ItemsSearchSortDto.TRAIT -> {
+                val traitSort =
+                    request.traitSort ?: throw UnionValidationException("traitSort is required when sort  = TRAIT")
+                if (request.filter.collections.isNullOrEmpty()) {
+                    throw UnionValidationException("collections is required when sort = TRAIT")
+                }
+                EsItemSort(
+                    type = EsItemSortType.TRAIT,
+                    traitSort = TraitSort(
+                        key = traitSort.key,
+                        sortType = traitSort.type?.toSortType() ?: SortType.TEXT,
+                        sortOrder = traitSort.order?.toSortOrder() ?: SortOrder.ASC,
+                    )
+                )
+            }
         }
+    }
+
+    private fun SortTypeDto.toSortType(): SortType = when (this) {
+        SortTypeDto.NUMERIC -> SortType.NUMERIC
+        SortTypeDto.TEXT -> SortType.TEXT
+    }
+
+    private fun SortOrderDto.toSortOrder(): SortOrder = when (this) {
+        SortOrderDto.ASC -> SortOrder.ASC
+        SortOrderDto.DESC -> SortOrder.DESC
     }
 
     private fun log(message: String, requestId: Long?) {
