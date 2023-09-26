@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.elastic.EsItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemLite
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsItemSortType
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.internal.EsEntitySearchAfterCursorService
@@ -39,7 +40,7 @@ class EsItemOptimizedSearchServiceTest {
     @Test
     fun `search - desc`() = runBlocking<Unit> {
         val filter = EsItemGenericFilter()
-        val sort = EsItemSort.LATEST_FIRST
+        val sort = EsItemSort(type = EsItemSortType.LATEST_FIRST)
         val limit = 1
         val now = nowMillis()
 
@@ -120,7 +121,7 @@ class EsItemOptimizedSearchServiceTest {
     @Test
     fun `search - acs`() = runBlocking<Unit> {
         val filter = EsItemGenericFilter()
-        val sort = EsItemSort.EARLIEST_FIRST
+        val sort = EsItemSort(type = EsItemSortType.EARLIEST_FIRST)
         val limit = 1
         val now = nowMillis()
 
@@ -204,7 +205,7 @@ class EsItemOptimizedSearchServiceTest {
     @Test
     fun `search - no optimizations if filters by ids`() = runBlocking<Unit> {
         val filter = EsItemGenericFilter(itemIds = setOf(randomString()))
-        val sort = EsItemSort.EARLIEST_FIRST
+        val sort = EsItemSort(type = EsItemSortType.EARLIEST_FIRST)
         val limit = 1
 
         val expectedResult = Slice(continuation = null, listOf(randomEsItemLite()))

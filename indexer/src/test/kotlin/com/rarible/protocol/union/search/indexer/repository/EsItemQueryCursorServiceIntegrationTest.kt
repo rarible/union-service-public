@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.CurrencyRate
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsItemSortType
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -49,19 +50,27 @@ class EsItemQueryCursorServiceIntegrationTest {
         coEvery {
             currencyService.getAllCurrencyRates()
         } returns listOf(
-            CurrencyRate(BlockchainDto.ETHEREUM, "ETHEREUM:0x0000000000000000000000000000000000000000", BigDecimal(1500)),
+            CurrencyRate(
+                BlockchainDto.ETHEREUM,
+                "ETHEREUM:0x0000000000000000000000000000000000000000",
+                BigDecimal(1500)
+            ),
             CurrencyRate(BlockchainDto.POLYGON, "POLYGON:0x0000000000000000000000000000000000000000", BigDecimal(150)),
             CurrencyRate(BlockchainDto.POLYGON, "ETHEREUM:0xfca59cd816ab1ead66534d82bc21e7515ce441cf", BigDecimal(15)),
             CurrencyRate(BlockchainDto.SOLANA, "SOLANA:So11111111111111111111111111111111111111112", BigDecimal(50)),
         )
-        val sort = if (descending) EsItemSort.LATEST_FIRST else EsItemSort.EARLIEST_FIRST
+        val sort = if (descending) {
+            EsItemSort(type = EsItemSortType.LATEST_FIRST)
+        } else {
+            EsItemSort(type = EsItemSortType.EARLIEST_FIRST)
+        }
         val now = nowMillis()
         val first = randomEsItem().copy(
-            lastUpdatedAt = now.plusSeconds(50),
+            lastUpdatedAt = now.plusSeconds(10),
             itemId = "A",
         )
         val second = randomEsItem().copy(
-            lastUpdatedAt = now.plusSeconds(50),
+            lastUpdatedAt = now.plusSeconds(10),
             itemId = "B",
         )
         val third = randomEsItem().copy(
@@ -69,11 +78,11 @@ class EsItemQueryCursorServiceIntegrationTest {
             itemId = "C",
         )
         val fourth = randomEsItem().copy(
-            lastUpdatedAt = now.plusSeconds(10),
+            lastUpdatedAt = now.plusSeconds(50),
             itemId = "D",
         )
         val fifth = randomEsItem().copy(
-            lastUpdatedAt = now.plusSeconds(10),
+            lastUpdatedAt = now.plusSeconds(50),
             itemId = "E",
         )
         repository.saveAll(listOf(first, second, third, fourth, fifth).shuffled())
@@ -91,12 +100,12 @@ class EsItemQueryCursorServiceIntegrationTest {
 
         // then
         if (descending) {
-            assertThat(result1.entities.map { it.itemId }).containsExactly(first.itemId, second.itemId, third.itemId)
-            assertThat(result2.entities.map { it.itemId }).containsExactly(fourth.itemId, fifth.itemId)
+            assertThat(result1.entities.map { it.itemId }).containsExactly(fifth.itemId, fourth.itemId, third.itemId)
+            assertThat(result2.entities.map { it.itemId }).containsExactly(second.itemId, first.itemId)
             assertThat(result3.entities).isEmpty()
         } else {
-            assertThat(result1.entities.map { it.itemId }).containsExactly(fourth.itemId, fifth.itemId, third.itemId)
-            assertThat(result2.entities.map { it.itemId }).containsExactly(first.itemId, second.itemId)
+            assertThat(result1.entities.map { it.itemId }).containsExactly(first.itemId, second.itemId, third.itemId)
+            assertThat(result2.entities.map { it.itemId }).containsExactly(fourth.itemId, fifth.itemId)
             assertThat(result3.entities.map { it.itemId }).isEmpty()
         }
         assertThat(cursor3).isNullOrEmpty()
@@ -106,16 +115,20 @@ class EsItemQueryCursorServiceIntegrationTest {
     @ValueSource(booleans = [true, false])
     fun `should search with cursor by sell price`(descending: Boolean) = runBlocking<Unit> {
         // given
-        val sort = if (descending) EsItemSort.HIGHEST_SELL_PRICE_FIRST else EsItemSort.LOWEST_SELL_PRICE_FIRST
+        val sort = if (descending) {
+            EsItemSort(type = EsItemSortType.HIGHEST_SELL_PRICE_FIRST)
+        } else {
+            EsItemSort(type = EsItemSortType.LOWEST_SELL_PRICE_FIRST)
+        }
         val first = randomEsItem().copy(
             blockchain = BlockchainDto.ETHEREUM,
-            bestSellAmount = 50.0,
+            bestSellAmount = 10.0,
             bestSellCurrency = "ETHEREUM:0x0000000000000000000000000000000000000000",
             itemId = "A",
         )
         val second = randomEsItem().copy(
             blockchain = BlockchainDto.ETHEREUM,
-            bestSellAmount = 50.0,
+            bestSellAmount = 10.0,
             bestSellCurrency = "ETHEREUM:0x0000000000000000000000000000000000000000",
             itemId = "B",
         )
@@ -127,13 +140,13 @@ class EsItemQueryCursorServiceIntegrationTest {
         )
         val fourth = randomEsItem().copy(
             blockchain = BlockchainDto.ETHEREUM,
-            bestSellAmount = 10.0,
+            bestSellAmount = 50.0,
             bestSellCurrency = "ETHEREUM:0x0000000000000000000000000000000000000000",
             itemId = "D",
         )
         val fifth = randomEsItem().copy(
             blockchain = BlockchainDto.ETHEREUM,
-            bestSellAmount = 10.0,
+            bestSellAmount = 50.0,
             bestSellCurrency = "ETHEREUM:0x0000000000000000000000000000000000000000",
             itemId = "E",
         )
@@ -157,12 +170,12 @@ class EsItemQueryCursorServiceIntegrationTest {
 
         // then
         if (descending) {
-            assertThat(result1.entities.map { it.itemId }).containsExactly(first.itemId, second.itemId, third.itemId)
-            assertThat(result2.entities.map { it.itemId }).containsExactly(fourth.itemId, fifth.itemId)
+            assertThat(result1.entities.map { it.itemId }).containsExactly(fifth.itemId, fourth.itemId, third.itemId)
+            assertThat(result2.entities.map { it.itemId }).containsExactly(second.itemId, first.itemId)
             assertThat(result3.entities.map { it.itemId }).isEmpty()
         } else {
-            assertThat(result1.entities.map { it.itemId }).containsExactly(fourth.itemId, fifth.itemId, third.itemId)
-            assertThat(result2.entities.map { it.itemId }).containsExactly(first.itemId, second.itemId)
+            assertThat(result1.entities.map { it.itemId }).containsExactly(first.itemId, second.itemId, third.itemId)
+            assertThat(result2.entities.map { it.itemId }).containsExactly(fourth.itemId, fifth.itemId)
             assertThat(result3.entities.map { it.itemId }).isEmpty()
         }
         assertThat(cursor3).isNullOrEmpty()

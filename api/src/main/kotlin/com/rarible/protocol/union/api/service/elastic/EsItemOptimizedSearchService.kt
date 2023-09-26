@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.model.elastic.EsItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemLite
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsItemSortType
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
@@ -33,19 +34,20 @@ class EsItemOptimizedSearchService(
             return esItemRepository.search(filter, sort, limit)
         }
         val max = PageSize.ITEM.limit(limit)
-        return when (sort) {
-            EsItemSort.LATEST_FIRST,
-            EsItemSort.EARLIEST_FIRST -> {
+        return when (sort.type) {
+            EsItemSortType.LATEST_FIRST,
+            EsItemSortType.EARLIEST_FIRST -> {
                 if (filter is EsItemGenericFilter) {
                     optimizeSearchIfSupported(filter, sort, max)
                 } else {
                     esItemRepository.search(filter, sort, limit)
                 }
             }
-            EsItemSort.HIGHEST_SELL_PRICE_FIRST,
-            EsItemSort.LOWEST_SELL_PRICE_FIRST,
-            EsItemSort.HIGHEST_BID_PRICE_FIRST,
-            EsItemSort.LOWEST_BID_PRICE_FIRST -> {
+            EsItemSortType.TRAIT,
+            EsItemSortType.HIGHEST_SELL_PRICE_FIRST,
+            EsItemSortType.LOWEST_SELL_PRICE_FIRST,
+            EsItemSortType.HIGHEST_BID_PRICE_FIRST,
+            EsItemSortType.LOWEST_BID_PRICE_FIRST -> {
                 esItemRepository.search(filter, sort, max)
             }
         }

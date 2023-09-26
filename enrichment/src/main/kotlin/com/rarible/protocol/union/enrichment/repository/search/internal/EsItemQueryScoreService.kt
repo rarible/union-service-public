@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.repository.search.internal
 
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsItemSortType
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder
@@ -17,21 +18,22 @@ class EsItemQueryScoreService(
         sort: EsItemSort,
         blockchains: Set<BlockchainDto>
     ): FunctionScoreQueryBuilder {
-        return when (sort) {
-            EsItemSort.LATEST_FIRST,
-            EsItemSort.EARLIEST_FIRST -> throw UnsupportedOperationException("ScoreService can't be used with $sort")
-            EsItemSort.HIGHEST_SELL_PRICE_FIRST,
-            EsItemSort.LOWEST_SELL_PRICE_FIRST -> esEntityQueryScoreService.buildQuery(
+        return when (sort.type) {
+            EsItemSortType.TRAIT,
+            EsItemSortType.LATEST_FIRST,
+            EsItemSortType.EARLIEST_FIRST -> throw UnsupportedOperationException("ScoreService can't be used with $sort")
+            EsItemSortType.HIGHEST_SELL_PRICE_FIRST,
+            EsItemSortType.LOWEST_SELL_PRICE_FIRST -> esEntityQueryScoreService.buildQuery(
                 boolQuery,
-                sort == EsItemSort.HIGHEST_SELL_PRICE_FIRST,
+                sort.type == EsItemSortType.HIGHEST_SELL_PRICE_FIRST,
                 EsItem::bestSellCurrency.name,
                 EsItem::bestSellAmount.name,
                 blockchains,
             )
-            EsItemSort.HIGHEST_BID_PRICE_FIRST,
-            EsItemSort.LOWEST_BID_PRICE_FIRST -> esEntityQueryScoreService.buildQuery(
+            EsItemSortType.HIGHEST_BID_PRICE_FIRST,
+            EsItemSortType.LOWEST_BID_PRICE_FIRST -> esEntityQueryScoreService.buildQuery(
                 boolQuery,
-                sort == EsItemSort.HIGHEST_BID_PRICE_FIRST,
+                sort.type == EsItemSortType.HIGHEST_BID_PRICE_FIRST,
                 EsItem::bestBidCurrency.name,
                 EsItem::bestBidAmount.name,
                 blockchains,

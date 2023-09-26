@@ -4,6 +4,7 @@ import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsItemSortType
 import com.rarible.protocol.union.core.model.elastic.TraitFilter
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.apache.lucene.search.join.ScoreMode
@@ -25,17 +26,17 @@ class EsItemQueryBuilderService(
     private val priceFilterService: EsItemQueryPriceFilterService,
 ) {
     companion object {
-        private val SCORE_SORT_TYPES: Set<EsItemSort> = setOf(
-            EsItemSort.LOWEST_SELL_PRICE_FIRST,
-            EsItemSort.HIGHEST_SELL_PRICE_FIRST,
-            EsItemSort.LOWEST_BID_PRICE_FIRST,
-            EsItemSort.HIGHEST_BID_PRICE_FIRST
+        private val SCORE_SORT_TYPES: Set<EsItemSortType> = setOf(
+            EsItemSortType.LOWEST_SELL_PRICE_FIRST,
+            EsItemSortType.HIGHEST_SELL_PRICE_FIRST,
+            EsItemSortType.LOWEST_BID_PRICE_FIRST,
+            EsItemSortType.HIGHEST_BID_PRICE_FIRST
         )
     }
 
     suspend fun build(filter: EsItemFilter, sort: EsItemSort): NativeSearchQuery {
         val builder = NativeSearchQueryBuilder()
-        val isScoreSort = SCORE_SORT_TYPES.contains(sort)
+        val isScoreSort = SCORE_SORT_TYPES.contains(sort.type)
 
         val blockchains = if (filter.blockchains.isNullOrEmpty()) {
             BlockchainDto.values().toSet()

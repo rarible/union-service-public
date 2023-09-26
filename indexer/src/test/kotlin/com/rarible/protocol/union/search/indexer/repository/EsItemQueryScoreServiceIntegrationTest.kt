@@ -6,6 +6,9 @@ import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.CurrencyRate
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsItemSortType
+import com.rarible.protocol.union.core.model.elastic.SortType
+import com.rarible.protocol.union.core.model.elastic.TraitSort
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -20,6 +23,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.elasticsearch.index.query.BoolQueryBuilder
+import org.elasticsearch.search.sort.SortOrder
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -60,7 +64,11 @@ class EsItemQueryScoreServiceIntegrationTest {
     @ValueSource(booleans = [true, false])
     fun `should build score function by sell price`(descending: Boolean) = runBlocking<Unit> {
         // given
-        val sort = if (descending) EsItemSort.HIGHEST_SELL_PRICE_FIRST else EsItemSort.LOWEST_SELL_PRICE_FIRST
+        val sort = if (descending) {
+            EsItemSort(type = EsItemSortType.HIGHEST_SELL_PRICE_FIRST)
+        } else {
+            EsItemSort(type = EsItemSortType.LOWEST_SELL_PRICE_FIRST)
+        }
         val builder = NativeSearchQueryBuilder()
         val first = randomEsItem().copy(
             blockchain = BlockchainDto.ETHEREUM,
@@ -106,11 +114,15 @@ class EsItemQueryScoreServiceIntegrationTest {
         coEvery {
             currencyService.getAllCurrencyRates()
         } returns listOf(
-            CurrencyRate(BlockchainDto.ETHEREUM, "ETHEREUM:0x0000000000000000000000000000000000000000", BigDecimal(1500)),
+            CurrencyRate(
+                BlockchainDto.ETHEREUM,
+                "ETHEREUM:0x0000000000000000000000000000000000000000",
+                BigDecimal(1500)
+            ),
             CurrencyRate(BlockchainDto.POLYGON, "POLYGON:0x0000000000000000000000000000000000000000", BigDecimal(150)),
             CurrencyRate(BlockchainDto.POLYGON, "ETHEREUM:0xfca59cd816ab1ead66534d82bc21e7515ce441cf", BigDecimal(15)),
             CurrencyRate(BlockchainDto.SOLANA, "SOLANA:So11111111111111111111111111111111111111112", BigDecimal(50)),
-            )
+        )
         val boolQueryBuilder = BoolQueryBuilder()
         val blockchains = setOf(BlockchainDto.ETHEREUM, BlockchainDto.POLYGON)
         boolQueryBuilder.mustMatchTerms(blockchains, EsItem::blockchain.name)
@@ -129,7 +141,11 @@ class EsItemQueryScoreServiceIntegrationTest {
     @ValueSource(booleans = [true, false])
     fun `should build score function by bid price`(descending: Boolean) = runBlocking<Unit> {
         // given
-        val sort = if (descending) EsItemSort.HIGHEST_BID_PRICE_FIRST else EsItemSort.LOWEST_BID_PRICE_FIRST
+        val sort = if (descending) {
+            EsItemSort(type = EsItemSortType.HIGHEST_BID_PRICE_FIRST)
+        } else {
+            EsItemSort(type = EsItemSortType.LOWEST_BID_PRICE_FIRST)
+        }
         val builder = NativeSearchQueryBuilder()
         val first = randomEsItem().copy(
             blockchain = BlockchainDto.ETHEREUM,
@@ -175,7 +191,11 @@ class EsItemQueryScoreServiceIntegrationTest {
         coEvery {
             currencyService.getAllCurrencyRates()
         } returns listOf(
-            CurrencyRate(BlockchainDto.ETHEREUM, "ETHEREUM:0x0000000000000000000000000000000000000000", BigDecimal(1500)),
+            CurrencyRate(
+                BlockchainDto.ETHEREUM,
+                "ETHEREUM:0x0000000000000000000000000000000000000000",
+                BigDecimal(1500)
+            ),
             CurrencyRate(BlockchainDto.POLYGON, "POLYGON:0x0000000000000000000000000000000000000000", BigDecimal(150)),
             CurrencyRate(BlockchainDto.POLYGON, "ETHEREUM:0xfca59cd816ab1ead66534d82bc21e7515ce441cf", BigDecimal(15)),
             CurrencyRate(BlockchainDto.SOLANA, "SOLANA:So11111111111111111111111111111111111111112", BigDecimal(50)),
@@ -200,7 +220,13 @@ class EsItemQueryScoreServiceIntegrationTest {
         coEvery { currencyService.getAllCurrencyRates() } returns emptyList()
         // when, then
         assertThatCode {
-            runBlocking { service.buildQuery(BoolQueryBuilder(), EsItemSort.LATEST_FIRST, setOf(BlockchainDto.ETHEREUM)) }
+            runBlocking {
+                service.buildQuery(
+                    BoolQueryBuilder(),
+                    EsItemSort(type = EsItemSortType.LATEST_FIRST),
+                    setOf(BlockchainDto.ETHEREUM)
+                )
+            }
         }.isExactlyInstanceOf(UnsupportedOperationException::class.java)
     }
 
@@ -210,7 +236,32 @@ class EsItemQueryScoreServiceIntegrationTest {
         coEvery { currencyService.getAllCurrencyRates() } returns emptyList()
         // when, then
         assertThatCode {
-            runBlocking { service.buildQuery(BoolQueryBuilder(), EsItemSort.EARLIEST_FIRST, setOf(BlockchainDto.ETHEREUM)) }
+            runBlocking {
+                service.buildQuery(
+                    BoolQueryBuilder(),
+                    EsItemSort(type = EsItemSortType.EARLIEST_FIRST),
+                    setOf(BlockchainDto.ETHEREUM)
+                )
+            }
+        }.isExactlyInstanceOf(UnsupportedOperationException::class.java)
+    }
+
+    @Test
+    fun `should throw exception when scoring with TRAIT sort`() {
+        // given
+        coEvery { currencyService.getAllCurrencyRates() } returns emptyList()
+        // when, then
+        assertThatCode {
+            runBlocking {
+                service.buildQuery(
+                    BoolQueryBuilder(),
+                    EsItemSort(
+                        type = EsItemSortType.TRAIT,
+                        traitSort = TraitSort(key = "test", sortOrder = SortOrder.DESC, sortType = SortType.TEXT)
+                    ),
+                    setOf(BlockchainDto.ETHEREUM)
+                )
+            }
         }.isExactlyInstanceOf(UnsupportedOperationException::class.java)
     }
 }
