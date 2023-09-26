@@ -20,6 +20,7 @@ data class EsItemGenericFilter(
     val deleted: Boolean? = null,
     val text: String? = null,
     val traits: List<TraitFilter>? = null,
+    val traitRanges: List<TraitRangeFilter>? = null,
     val descriptions: Set<String>? = null,
     val sellPlatforms: Set<String>? = null,
     val bidPlatforms: Set<String>? = null,
@@ -42,3 +43,5 @@ data class EsItemGenericFilter(
 }
 
 data class TraitFilter(val key: String, val value: String)
+data class TraitRangeFilter(val key: String, val valueRange: Range)
+data class Range(val from: Float?, val to: Float?)

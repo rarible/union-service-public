@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
 import com.rarible.protocol.union.core.model.elastic.EsItemSortType
 import com.rarible.protocol.union.core.model.elastic.TraitFilter
+import com.rarible.protocol.union.core.model.elastic.TraitRangeFilter
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.index.query.BoolQueryBuilder
@@ -77,6 +78,7 @@ class EsItemQueryBuilderService(
         mustMatchRange(filter.updatedFrom, filter.updatedTo, EsItem::lastUpdatedAt.name)
         applyTextFilter(filter.text)
         applyTraitsFilter(filter.traits)
+        applyTraitRangesFilter(filter.traitRanges)
     }
 
     private fun BoolQueryBuilder.applyTextFilter(text: String?) {
@@ -125,6 +127,23 @@ class EsItemQueryBuilderService(
                     "traits",
                     QueryBuilders.boolQuery().must(termsQuery("traits.key.raw", it.key))
                         .must(termsQuery("traits.value.raw", it.value)),
+                    ScoreMode.None
+                )
+            )
+        }
+    }
+
+    private fun BoolQueryBuilder.applyTraitRangesFilter(traits: List<TraitRangeFilter>?) {
+        traits?.filter { it.valueRange.from != null || it.valueRange.to != null }?.forEach {
+            val rangeQuery = QueryBuilders.rangeQuery("traits.value.numeric")
+            it.valueRange.from?.let { rangeQuery.gte(it) }
+            it.valueRange.to?.let { rangeQuery.lte(it) }
+            must(
+                QueryBuilders.nestedQuery(
+                    "traits",
+                    QueryBuilders.boolQuery()
+                        .must(QueryBuilders.termQuery("traits.key.raw", it.key))
+                        .must(rangeQuery),
                     ScoreMode.None
                 )
             )
