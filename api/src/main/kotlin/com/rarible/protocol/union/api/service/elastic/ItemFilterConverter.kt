@@ -2,7 +2,9 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.core.model.elastic.EsItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
+import com.rarible.protocol.union.core.model.elastic.Range
 import com.rarible.protocol.union.core.model.elastic.TraitFilter
+import com.rarible.protocol.union.core.model.elastic.TraitRangeFilter
 import com.rarible.protocol.union.dto.ItemsSearchFilterDto
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -73,6 +75,9 @@ class ItemFilterConverter() {
             deleted = filter.deleted,
             descriptions = filter.descriptions?.toSet(),
             traits = filter.traits?.map { TraitFilter(it.key, it.value) },
+            traitRanges = filter.traitRanges?.map {
+                TraitRangeFilter(key = it.key, valueRange = Range(from = it.valueRange.from, to = it.valueRange.to))
+            },
             sellPlatforms = filter.sellPlatforms?.map { it.name }?.toSet(),
             sellPriceCurrency = filter.sellCurrency,
             sellPriceFrom = filter.sellPriceFrom,

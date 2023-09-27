@@ -10,7 +10,9 @@ import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
 import com.rarible.protocol.union.core.model.elastic.EsTrait
+import com.rarible.protocol.union.core.model.elastic.Range
 import com.rarible.protocol.union.core.model.elastic.TraitFilter
+import com.rarible.protocol.union.core.model.elastic.TraitRangeFilter
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -189,6 +191,45 @@ internal class EsItemRepositoryFt {
         assertThat(result.size).isEqualTo(1)
 
         assertThat(result[0].itemId).isEqualTo(esItem1.itemId)
+    }
+
+    @Test
+    fun `should search by trait ranges`(): Unit = runBlocking {
+        val key = randomString()
+        val key2 = randomString()
+        val esItem1 = randomEsItem().copy(
+            traits = listOf(
+                EsTrait(key, "1"),
+                EsTrait(key2, "2"),
+            ),
+        )
+        val esItem2 = randomEsItem().copy(
+            traits = listOf(
+                EsTrait(key, "2"),
+                EsTrait(key2, "3"),
+            ),
+        )
+        val esItem3 = randomEsItem().copy(
+            traits = listOf(
+                EsTrait(key, "3"),
+                EsTrait(key2, "4"),
+            ),
+        )
+        repository.saveAll(listOf(esItem1, esItem2, esItem3))
+        val result = repository.search(
+            filter = EsItemGenericFilter(
+                traitRanges = listOf(
+                    TraitRangeFilter(
+                        key = key,
+                        valueRange = Range(from = 0.5f, to = 2.5f),
+                    ),
+                )
+            ),
+            sort = EsItemSort.DEFAULT,
+            limit = 10
+        ).entities
+
+        assertThat(result.map { it.itemId }).containsExactlyInAnyOrder(esItem1.itemId, esItem2.itemId)
     }
 
     @Test
