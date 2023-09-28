@@ -27,7 +27,7 @@ class ItemMetaDownloader(
     providers = providers,
     customProviders = customProviders,
     metrics = metrics,
-    type = "Item"
+    type = "item"
 ) {
 
     override suspend fun download(id: String): UnionMeta {

@@ -17,7 +17,7 @@ class DefaultItemMetaProvider(
     metrics: ItemMetaMetrics
 ) : ItemMetaProvider, DefaultMetaProvider<UnionMeta>(
     metrics,
-    type = "Item"
+    type = "item"
 ) {
     override suspend fun fetch(blockchain: BlockchainDto, key: String): UnionMeta {
         return router.getService(blockchain).getItemMetaById(key)

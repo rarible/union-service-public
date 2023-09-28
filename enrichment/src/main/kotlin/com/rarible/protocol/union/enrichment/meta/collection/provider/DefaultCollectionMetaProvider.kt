@@ -17,7 +17,7 @@ class DefaultCollectionMetaProvider(
     metrics: ItemMetaMetrics
 ) : CollectionMetaProvider, DefaultMetaProvider<UnionCollectionMeta>(
     metrics,
-    type = "Collection"
+    type = "collection"
 ) {
     override suspend fun fetch(blockchain: BlockchainDto, key: String): UnionCollectionMeta {
         return router.getService(blockchain).getCollectionMetaById(key)

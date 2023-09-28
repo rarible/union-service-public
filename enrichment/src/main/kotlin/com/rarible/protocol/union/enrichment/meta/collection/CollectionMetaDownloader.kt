@@ -22,7 +22,7 @@ class CollectionMetaDownloader(
     providers = providers,
     customProviders = customProviders,
     metrics = metrics,
-    type = "Collection"
+    type = "collection"
 ) {
 
     override suspend fun download(id: String): UnionCollectionMeta {
