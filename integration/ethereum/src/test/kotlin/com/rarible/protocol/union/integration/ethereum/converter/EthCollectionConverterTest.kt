@@ -29,6 +29,7 @@ class EthCollectionConverterTest {
         assertThat(converted.status).isEqualTo(UnionCollection.Status.PENDING)
         assertThat(converted.owner!!.value).isEqualTo(dto.owner!!.prefixed())
         assertThat(converted.features.map { it.name }).isEqualTo(dto.features.map { it.name })
+        assertThat(converted.scam).isEqualTo(dto.scam)
     }
 
     @Test

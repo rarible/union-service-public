@@ -21,6 +21,7 @@ object EnrichmentCollectionConverter {
             parent = collection.parent?.let { EnrichmentCollectionId(it) },
             symbol = collection.symbol,
             self = collection.self,
+            scam = collection.scam,
 
             // Default enrichment data
             bestSellOrders = emptyMap(),

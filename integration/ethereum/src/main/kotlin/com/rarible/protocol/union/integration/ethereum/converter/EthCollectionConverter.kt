@@ -60,7 +60,8 @@ object EthCollectionConverter {
             features = source.features.map { convert(it) },
             minters = source.minters?.let { minters -> minters.map { EthConverter.convert(it, blockchain) } },
             // meta = source.meta?.let { EthMetaConverter.convert(it, blockchain) },
-            self = source.isRaribleContract
+            self = source.isRaribleContract,
+            scam = source.scam ?: false,
         )
     }
 

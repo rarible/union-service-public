@@ -16,6 +16,7 @@ common:
     enableMongoActivityWrite: true
     enableMongoActivityRead: true
     enableItemBestBidsByCurrency: true
+    enableCollectionAutoRefreshOnCreation: true
 
 enrichment:
   collection:
