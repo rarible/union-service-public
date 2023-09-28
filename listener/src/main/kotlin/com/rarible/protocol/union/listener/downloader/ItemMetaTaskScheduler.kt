@@ -14,6 +14,6 @@ class ItemMetaTaskScheduler(
     metrics: DownloadSchedulerMetrics
 ) : DownloadScheduler<UnionMeta>(downloadTaskService, repository, metrics) {
     // TODO duplicated code with ItemTaskExecutor, refactoring required
-    override val type = "Item"
+    override val type = "item"
     override fun getBlockchain(task: DownloadTaskEvent) = IdParser.parseItemId(task.id).blockchain
 }

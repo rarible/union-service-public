@@ -70,7 +70,7 @@ class ItemDownloadExecutorIt : AbstractIntegrationTest() {
 
     private val enrichmentItemService: EnrichmentItemService = mockk()
 
-    val downloader: ItemMetaDownloader = mockk() { every { type } returns "Item" }
+    val downloader: ItemMetaDownloader = mockk() { every { type } returns "item" }
     val notifier: DownloadNotifier<UnionMeta> = mockk { coEvery { notify(any()) } returns Unit }
     val pool = DownloadPool(2, "item-meta-test")
     val maxRetries = 2

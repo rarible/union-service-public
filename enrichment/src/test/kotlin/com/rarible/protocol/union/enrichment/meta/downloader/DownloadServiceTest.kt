@@ -42,7 +42,7 @@ class DownloadServiceTest {
 
     private val metrics: DownloadMetrics = DownloadMetrics(LoggingMeterRegistry())
 
-    private val downloader: ItemMetaDownloader = mockk() { every { type } returns "Item" }
+    private val downloader: ItemMetaDownloader = mockk() { every { type } returns "item" }
 
     private val downloadService = ItemMetaService(
         rawMetaCacheRepository,
