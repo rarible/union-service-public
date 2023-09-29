@@ -69,6 +69,7 @@ class OutgoingEventDelayMetrics(
             Duration.ofSeconds(5),
             Duration.ofSeconds(12),
             Duration.ofSeconds(15),
+            Duration.ofSeconds(20),
             Duration.ofSeconds(30),
             Duration.ofMinutes(1),
             Duration.ofMinutes(2)
