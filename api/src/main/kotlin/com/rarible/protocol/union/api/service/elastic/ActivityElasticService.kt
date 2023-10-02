@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.core.common.flatMapAsync
 import com.rarible.protocol.union.api.dto.applyCursor
 import com.rarible.protocol.union.api.metrics.ElasticMetricsFactory
@@ -38,7 +36,6 @@ import java.time.Instant
 import java.util.concurrent.ThreadLocalRandom
 
 @Service
-@CaptureSpan(type = SpanType.APP)
 class ActivityElasticService(
     private val filterConverter: ActivityFilterConverter,
     private val esActivityRepository: EsActivityRepository,

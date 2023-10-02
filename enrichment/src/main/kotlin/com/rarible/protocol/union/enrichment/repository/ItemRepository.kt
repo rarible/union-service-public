@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.enrichment.repository
 
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.core.mongo.util.div
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -37,7 +35,6 @@ import java.time.Duration
 import java.time.Instant
 
 @Component
-@CaptureSpan(type = SpanType.DB)
 class ItemRepository(
     private val template: ReactiveMongoTemplate
 ) {

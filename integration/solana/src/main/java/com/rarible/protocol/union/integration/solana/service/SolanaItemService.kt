@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.solana.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.TokenControllerApi
 import com.rarible.protocol.solana.dto.TokenIdsDto
 import com.rarible.protocol.solana.dto.TokenMetaDto
@@ -18,7 +17,6 @@ import com.rarible.protocol.union.integration.solana.converter.SolanaItemMetaCon
 import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.http.HttpStatus
 
-@CaptureSpan(type = "blockchain")
 open class SolanaItemService(
     private val tokenApi: TokenControllerApi
 ) : AbstractBlockchainService(BlockchainDto.SOLANA), ItemService {

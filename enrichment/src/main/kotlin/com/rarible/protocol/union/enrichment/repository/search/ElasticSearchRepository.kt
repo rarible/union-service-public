@@ -27,7 +27,6 @@ import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.annotation.PostConstruct
 
-// @CaptureSpan(type = SpanType.DB)
 abstract class ElasticSearchRepository<T>(
     val objectMapper: ObjectMapper,
     val esOperations: ReactiveElasticsearchOperations,

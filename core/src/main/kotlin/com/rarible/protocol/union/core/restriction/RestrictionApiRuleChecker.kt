@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.core.restriction
 
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.model.RestrictionApiRule
 import com.rarible.protocol.union.core.model.RestrictionCheckResult
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -12,7 +10,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 
 @Component
-@CaptureSpan(type = SpanType.EXT)
 class RestrictionApiRuleChecker(
     private val webClient: WebClient
 ) : RestrictionRuleChecker<RestrictionApiRule> {

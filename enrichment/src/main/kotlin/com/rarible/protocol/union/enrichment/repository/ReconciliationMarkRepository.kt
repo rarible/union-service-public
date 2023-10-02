@@ -1,8 +1,6 @@
 package com.rarible.protocol.union.enrichment.repository
 
 import com.mongodb.client.result.DeleteResult
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ReconciliationMark
 import kotlinx.coroutines.reactive.awaitFirst
@@ -17,7 +15,6 @@ import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = SpanType.DB)
 class ReconciliationMarkRepository(
     private val template: ReactiveMongoTemplate
 ) {

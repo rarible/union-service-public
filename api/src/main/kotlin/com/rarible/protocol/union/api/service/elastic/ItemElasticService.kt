@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.api.service.api.ItemEnrichService
@@ -47,7 +45,6 @@ import org.springframework.stereotype.Service
 import kotlin.random.Random
 
 @Service
-@CaptureSpan(type = SpanType.APP)
 class ItemElasticService(
     private val itemFilterConverter: ItemFilterConverter,
     private val esItemOptimizedSearchService: EsItemOptimizedSearchService,

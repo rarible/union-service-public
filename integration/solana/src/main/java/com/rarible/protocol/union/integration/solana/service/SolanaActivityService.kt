@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.solana.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.ActivityControllerApi
 import com.rarible.protocol.solana.dto.ActivitiesByIdRequestDto
 import com.rarible.protocol.solana.dto.ActivityFilterAllDto
@@ -25,7 +24,6 @@ import com.rarible.protocol.union.integration.solana.converter.SolanaConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
 
-@CaptureSpan(type = "blockchain")
 open class SolanaActivityService(
     private val activityApi: ActivityControllerApi,
     private val activityConverter: SolanaActivityConverter

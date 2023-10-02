@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.listener.handler.internal
 
-import com.rarible.core.apm.CaptureTransaction
 import com.rarible.core.logging.asyncWithTraceId
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
@@ -35,7 +34,6 @@ class UnionInternalOrderEventHandler(
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @CaptureTransaction("UnionOrderEvent")
     suspend fun onEvent(event: UnionOrderEvent) {
         try {
             when (event) {

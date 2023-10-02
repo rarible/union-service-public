@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.enrichment.repository
 
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
@@ -24,7 +22,6 @@ import org.springframework.stereotype.Component
 import java.time.Instant
 
 @Component
-@CaptureSpan(type = SpanType.DB)
 class MetaRefreshRequestRepository(
     private val template: ReactiveMongoTemplate
 ) {

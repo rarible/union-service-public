@@ -59,10 +59,6 @@
         </dependency>
         <dependency>
             <groupId>com.rarible.core</groupId>
-            <artifactId>rarible-core-apm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.rarible.core</groupId>
             <artifactId>rarible-core-meta-resource</artifactId>
         </dependency>
         <dependency>

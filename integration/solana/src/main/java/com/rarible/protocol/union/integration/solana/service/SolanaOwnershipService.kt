@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.solana.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.BalanceControllerApi
 import com.rarible.protocol.solana.dto.BalanceIdsDto
 import com.rarible.protocol.union.core.model.UnionOwnership
@@ -15,7 +14,6 @@ import kotlinx.coroutines.reactive.awaitFirst
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClientResponseException
 
-@CaptureSpan(type = "blockchain")
 open class SolanaOwnershipService(
     private val balanceApi: BalanceControllerApi
 ) : AbstractBlockchainService(BlockchainDto.SOLANA), OwnershipService {

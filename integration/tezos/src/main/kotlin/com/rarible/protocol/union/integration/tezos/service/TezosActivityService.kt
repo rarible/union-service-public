@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.core.logging.Logger
 import com.rarible.dipdup.client.ActivityClient
 import com.rarible.dipdup.client.OrderActivityClient
@@ -33,7 +32,6 @@ import java.time.Instant
 import java.util.regex.Pattern
 
 // TODO UNION add tests when tezos add sorting
-@CaptureSpan(type = "blockchain")
 open class TezosActivityService(
     private val orderActivityClient: OrderActivityClient,
     private val dipdupOrderActivityService: DipdupOrderActivityService,

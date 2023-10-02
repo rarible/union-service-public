@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
@@ -13,7 +12,6 @@ import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupItemSer
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupRoyaltyService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktItemService
 
-@CaptureSpan(type = "blockchain")
 open class TezosItemService(
     private val tzktItemService: TzktItemService,
     private val dipDupItemService: DipDupItemService,

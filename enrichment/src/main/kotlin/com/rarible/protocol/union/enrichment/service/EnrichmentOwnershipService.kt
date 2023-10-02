@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.enrichment.service
 
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.core.common.mapAsync
 import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.asyncWithTraceId
@@ -35,7 +33,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClientResponseException
 
 @Component
-@CaptureSpan(type = SpanType.APP)
 class EnrichmentOwnershipService(
     private val ownershipServiceRouter: BlockchainRouter<OwnershipService>,
     private val ownershipRepository: OwnershipRepository,

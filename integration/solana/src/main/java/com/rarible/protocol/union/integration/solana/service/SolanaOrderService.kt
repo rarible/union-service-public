@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.solana.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.OrderControllerApi
 import com.rarible.protocol.solana.dto.OrderIdsDto
 import com.rarible.protocol.union.core.exception.UnionException
@@ -19,7 +18,6 @@ import com.rarible.protocol.union.integration.solana.converter.SolanaConverter
 import com.rarible.protocol.union.integration.solana.converter.SolanaOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
-@CaptureSpan(type = "blockchain")
 open class SolanaOrderService(
     private val orderApi: OrderControllerApi,
     private val solanaOrderConverter: SolanaOrderConverter

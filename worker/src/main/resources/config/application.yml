@@ -25,16 +25,6 @@ mongock:
 
 rarible:
   core:
-    apm:
-      agent:
-        enabled: true
-        server: http://elk_apm-server:8200
-        packages: com.rarible.protocol.union.worker
-      web:
-        filter:
-          enabled: false
-      annotation:
-        enabled: true
     client:
       name: rarible-protocol
 

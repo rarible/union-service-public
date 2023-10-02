@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.flow.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
 import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.core.service.SignatureService
@@ -9,7 +8,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import kotlinx.coroutines.reactive.awaitFirst
 import org.apache.commons.lang3.StringUtils
 
-@CaptureSpan(type = "blockchain")
 open class FlowSignatureService(
     private val signatureControllerApi: FlowNftCryptoControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), SignatureService {

@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -18,7 +17,6 @@ import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupConve
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
 import java.util.regex.Pattern
 
-@CaptureSpan(type = "blockchain")
 open class TezosOrderService(
     private val dipdupOrderService: DipdupOrderService,
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), OrderService {

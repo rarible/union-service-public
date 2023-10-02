@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.enrichment.repository
 
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -29,7 +27,6 @@ import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = SpanType.DB)
 class ActivityRepository(
     private val template: ReactiveMongoTemplate
 ) {
