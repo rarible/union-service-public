@@ -19,16 +19,6 @@ spring:
 
 rarible:
   core:
-    apm:
-      agent:
-        enabled: false
-        server: http://elk_apm-server:8200
-        packages: com.rarible.protocol.union.api
-      web:
-        filter:
-          enabled: false
-      annotation:
-        enabled: false
     client:
       name: rarible-protocol
   ethereum:

@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.TokenId
@@ -17,7 +16,6 @@ import com.rarible.protocol.union.integration.tezos.entity.TezosCollectionReposi
 import org.slf4j.LoggerFactory
 import java.math.BigInteger
 
-@CaptureSpan(type = "blockchain")
 open class TezosCollectionService(
     private val tzktCollectionService: TzktCollectionService,
     private val dipdupCollectionService: DipDupCollectionService,

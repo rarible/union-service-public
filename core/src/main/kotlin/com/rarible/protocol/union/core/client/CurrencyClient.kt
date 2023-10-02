@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.core.client
 
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.Logger
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
@@ -14,7 +12,6 @@ import org.springframework.stereotype.Component
 import java.time.Instant
 
 @Component
-@CaptureSpan(type = SpanType.EXT)
 class CurrencyClient(
     private val currencyControllerApi: CurrencyControllerApi
 ) {

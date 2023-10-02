@@ -14,10 +14,6 @@ spring:
       uris: ${elasticsearch.api-nodes}
 
 rarible:
-  core:
-    apm:
-      agent:
-        enabled: false
   loader:
     enableWorkers: true
     workers: 1

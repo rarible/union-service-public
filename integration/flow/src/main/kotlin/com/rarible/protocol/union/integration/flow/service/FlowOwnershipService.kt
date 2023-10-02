@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.flow.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.NftOwnershipsByIdRequestDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.union.core.model.UnionOwnership
@@ -13,7 +12,6 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.flow.converter.FlowOwnershipConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
-@CaptureSpan(type = "blockchain")
 open class FlowOwnershipService(
     private val ownershipControllerApi: FlowNftOwnershipControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), OwnershipService {

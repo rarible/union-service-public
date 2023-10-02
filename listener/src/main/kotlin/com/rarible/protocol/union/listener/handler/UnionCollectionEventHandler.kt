@@ -1,14 +1,11 @@
 package com.rarible.protocol.union.listener.handler
 
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
 import org.springframework.stereotype.Component
 
 @Component
-@CaptureSpan(type = SpanType.EVENT)
 class UnionCollectionEventHandler(
     private val producer: UnionInternalCollectionEventProducer
 ) : IncomingEventHandler<UnionCollectionEvent> {

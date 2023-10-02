@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.core.model.elastic.EsCollectionCursor.Companion.fromCollectionLite
 import com.rarible.protocol.union.core.model.elastic.EsCollectionGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsCollectionLite
@@ -22,7 +20,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
-@CaptureSpan(type = SpanType.APP)
 class CollectionElasticService(
     private val repository: EsCollectionRepository,
     private val router: BlockchainRouter<CollectionService>,

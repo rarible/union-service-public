@@ -29,9 +29,6 @@ enrichment:
       - POLYGON:0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa
 rarible:
   core:
-    apm:
-      agent:
-        enabled: false
     task:
       enabled: false
       initialDelay: 600000

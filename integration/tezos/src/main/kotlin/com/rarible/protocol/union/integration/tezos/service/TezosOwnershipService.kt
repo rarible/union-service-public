@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.tezos.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
@@ -11,7 +10,6 @@ import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProp
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipDupOwnershipService
 import com.rarible.protocol.union.integration.tezos.dipdup.service.TzktOwnershipService
 
-@CaptureSpan(type = "blockchain")
 open class TezosOwnershipService(
     private val tzktOwnershipService: TzktOwnershipService,
     private val dipdupOwnershipService: DipDupOwnershipService,

@@ -6,10 +6,6 @@ common:
     enableMetaMongoPipeline: false
 
 rarible:
-  core:
-    apm:
-      agent:
-        enabled: false
   loader:
     workers: 1
     retry:

@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.flow.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.FlowOrderIdsDto
 import com.rarible.protocol.flow.nft.api.client.FlowBidOrderControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
@@ -22,7 +21,6 @@ import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import java.time.Instant
 
-@CaptureSpan(type = "blockchain")
 open class FlowOrderService(
     private val orderControllerApi: FlowOrderControllerApi,
     private val bidControllerApi: FlowBidOrderControllerApi,

@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.solana.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.solana.api.client.CollectionControllerApi
 import com.rarible.protocol.solana.dto.CollectionsByIdRequestDto
 import com.rarible.protocol.union.core.exception.UnionException
@@ -16,7 +15,6 @@ import com.rarible.protocol.union.integration.solana.converter.SolanaCollectionC
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 
-@CaptureSpan(type = "blockchain")
 open class SolanaCollectionService(
     private val collectionApi: CollectionControllerApi
 ) : AbstractBlockchainService(BlockchainDto.SOLANA), CollectionService {

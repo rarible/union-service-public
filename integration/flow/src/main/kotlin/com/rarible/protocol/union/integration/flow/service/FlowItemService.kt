@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.integration.flow.service
 
-import com.rarible.core.apm.CaptureSpan
 import com.rarible.protocol.dto.FlowItemIdsDto
 import com.rarible.protocol.dto.FlowMetaDto
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
@@ -19,7 +18,6 @@ import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClientResponseException
 
-@CaptureSpan(type = "blockchain")
 open class FlowItemService(
     private val flowNftItemControllerApi: FlowNftItemControllerApi
 ) : AbstractBlockchainService(BlockchainDto.FLOW), ItemService {

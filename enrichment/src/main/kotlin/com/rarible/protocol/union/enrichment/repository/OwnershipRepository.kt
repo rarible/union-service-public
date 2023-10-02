@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.enrichment.repository
 
-import com.rarible.core.apm.CaptureSpan
-import com.rarible.core.apm.SpanType
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortDateIdOwnership
@@ -34,7 +32,6 @@ import java.math.BigInteger
 import java.time.Instant
 
 @Component
-@CaptureSpan(type = SpanType.DB)
 class OwnershipRepository(
     private val template: ReactiveMongoTemplate
 ) {
