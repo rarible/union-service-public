@@ -29,7 +29,7 @@ abstract class ImxManualTest {
     private val chunkSize = 16
 
     protected val assetClient = ImxAssetClient(webClient, chunkSize)
-    protected val activityClient = ImxActivityClient(webClient, chunkSize)
+    protected val activityClient = ImxActivityClient(webClient, webClientV3, chunkSize)
     protected val collectionClient = ImxCollectionClient(webClient, chunkSize)
     protected val orderClient = ImxOrderClient(webClient, chunkSize)
     protected val orderV3Client = ImxOrderClient(webClientV3, chunkSize)

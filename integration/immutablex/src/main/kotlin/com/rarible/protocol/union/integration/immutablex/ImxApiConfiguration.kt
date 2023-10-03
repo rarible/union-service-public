@@ -76,10 +76,12 @@ class ImxApiConfiguration {
 
     @Bean
     fun imxActivityClient(
-        @Qualifier("imxWebClientV3")
+        @Qualifier("imxWebClient")
         imxWebClient: WebClient,
+        @Qualifier("imxWebClientV3")
+        imxWebClientV3: WebClient,
         clientProperties: ImxClientProperties
-    ) = ImxActivityClient(imxWebClient, clientProperties.byIdsChunkSize)
+    ) = ImxActivityClient(imxWebClient, imxWebClientV3, clientProperties.byIdsChunkSize)
 
     @Bean
     fun imxCollectionClient(
