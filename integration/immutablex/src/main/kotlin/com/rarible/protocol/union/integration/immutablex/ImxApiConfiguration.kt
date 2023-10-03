@@ -90,7 +90,7 @@ class ImxApiConfiguration {
 
     @Bean
     fun imxOrderClient(
-        @Qualifier("imxWebClient")
+        @Qualifier("imxWebClientV3")
         imxWebClient: WebClient,
         clientProperties: ImxClientProperties
     ) = ImxOrderClient(imxWebClient, clientProperties.byIdsChunkSize)
