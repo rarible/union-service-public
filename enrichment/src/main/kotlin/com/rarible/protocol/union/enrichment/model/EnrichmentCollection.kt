@@ -35,6 +35,7 @@ data class EnrichmentCollection(
     val parent: EnrichmentCollectionId? = null,
     val symbol: String? = null,
     val self: Boolean? = null,
+    val scam: Boolean = false,
 
     override val bestSellOrder: ShortOrder? = null,
     override val bestSellOrders: Map<String, ShortOrder>,

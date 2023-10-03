@@ -564,7 +564,8 @@ fun randomEthCollectionDto(id: Address): NftCollectionDto {
         supportsLazyMint = true,
         status = NftCollectionDto.Status.CONFIRMED,
         // meta = randomEthCollectionMetaDto(),
-        minters = emptyList()
+        minters = emptyList(),
+        scam = randomBoolean(),
     )
 }
 

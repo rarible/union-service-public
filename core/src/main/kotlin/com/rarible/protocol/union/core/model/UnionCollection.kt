@@ -17,6 +17,7 @@ data class UnionCollection(
     val parent: CollectionIdDto? = null,
     val symbol: String? = null,
     val self: Boolean? = null,
+    val scam: Boolean = false,
 ) {
 
     enum class Features {

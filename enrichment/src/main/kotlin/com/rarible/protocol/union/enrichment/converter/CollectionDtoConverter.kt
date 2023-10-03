@@ -32,6 +32,7 @@ object CollectionDtoConverter {
             structure = convert(collection.structure!!), // TODO Must be required after the migration
             type = convert(collection.id, collection.type), // TODO Must be required after the migration
             self = collection.self,
+            scam = collection.scam,
             meta = meta?.let { MetaDtoConverter.convert(it) },
             bestSellOrder = collection.bestSellOrder?.let { orders[it.dtoId] },
             bestBidOrder = collection.bestBidOrder?.let { orders[it.dtoId] },

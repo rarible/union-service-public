@@ -76,7 +76,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `on collection updated - ok, collection inserted`() = runBlocking {
+    fun `on collection updated - ok, collection inserted`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         val ethCollection = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
 
@@ -91,6 +91,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].collectionId).isEqualTo(collectionId)
+            assertThat(messages[0].collection.scam).isEqualTo(ethCollection.scam)
             // TODO COLLECTION update meta check after the migration
             assertThat(messages[0].collection.copy(meta = null)).isEqualTo(expected)
         }
@@ -125,7 +126,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `on best sell order updated - collection exists`() = runBlocking {
+    fun `on best sell order updated - collection exists`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         val enrichmentCollection = randomEnrichmentCollection(collectionId)
         val ethCollection = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
@@ -160,7 +161,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun `on best bid order updated - collection exists`() = runBlocking {
+    fun `on best bid order updated - collection exists`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         val enrichmentCollection = randomEnrichmentCollection(collectionId)
         val ethItem = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
