@@ -10,6 +10,7 @@ import java.time.Instant
 
 class ImxActivityClient(
     webClient: WebClient,
+    private val webClientV3: WebClient,
     private val byIdsChunkSize: Int
 ) : AbstractImxClient(
     webClient
@@ -31,6 +32,7 @@ class ImxActivityClient(
 
     suspend fun getLastMint(): ImmutablexMint {
         val result = getActivities<ImmutablexMintsPage>(
+            webClient = webClient,
             pageSize = 1,
             sort = ActivitySortDto.LATEST_FIRST,
             type = ActivityType.MINT
@@ -40,6 +42,7 @@ class ImxActivityClient(
 
     suspend fun getMintEvents(pageSize: Int, transactionId: String): List<ImmutablexMint> {
         return getActivityEvents<ImmutablexMintsPage>(
+            webClient,
             pageSize,
             transactionId,
             ActivityType.MINT
@@ -56,6 +59,7 @@ class ImxActivityClient(
         user: String? = null,
         sort: ActivitySortDto? = null
     ) = getActivities<ImmutablexMintsPage>(
+        webClient,
         pageSize,
         continuation,
         token,
@@ -78,6 +82,7 @@ class ImxActivityClient(
     // Also, may include Burns, but for scanner it is totally fine
     suspend fun getLastTransfer(): ImmutablexTransfer {
         val result = getActivities<ImmutablexTransfersPage>(
+            webClient = webClient,
             pageSize = 1,
             sort = ActivitySortDto.LATEST_FIRST,
             type = ActivityType.TRANSFER
@@ -87,6 +92,7 @@ class ImxActivityClient(
 
     suspend fun getTransferEvents(pageSize: Int, transactionId: String): List<ImmutablexTransfer> {
         return getActivityEvents<ImmutablexTransfersPage>(
+            webClient,
             pageSize,
             transactionId,
             ActivityType.TRANSFER
@@ -108,13 +114,13 @@ class ImxActivityClient(
             // Both, Transfers and Burns will be included into response
             TransferFilter.ALL -> {
                 getActivities<ImmutablexTransfersPage>(
-                    pageSize, continuation, token, tokenId, from, to, user, sort, ActivityType.TRANSFER
+                    webClient, pageSize, continuation, token, tokenId, from, to, user, sort, ActivityType.TRANSFER
                 )
             }
             // Only burns will be included into the response
             // There is no way to get transfers only without burns
             TransferFilter.BURNS -> {
-                getActivities<ImmutablexTransfersPage> {
+                getActivities<ImmutablexTransfersPage>(webClient) {
                     val builder = TransferQueryBuilder(it)
                     val safeSort = sort ?: ActivitySortDto.LATEST_FIRST
 
@@ -141,6 +147,7 @@ class ImxActivityClient(
 
     suspend fun getLastTrade(): ImmutablexTrade {
         val result = getActivities<ImmutablexTradesPage>(
+            webClientV3,
             pageSize = 1,
             sort = ActivitySortDto.LATEST_FIRST,
             type = ActivityType.TRADE
@@ -150,6 +157,7 @@ class ImxActivityClient(
 
     suspend fun getTradeEvents(pageSize: Int, transactionId: String): List<ImmutablexTrade> {
         return getActivityEvents<ImmutablexTradesPage>(
+            webClientV3,
             pageSize,
             transactionId,
             ActivityType.TRADE
@@ -179,6 +187,7 @@ class ImxActivityClient(
             pageSize
         }
         val page = getActivities<ImmutablexTradesPage>(
+            webClientV3,
             hackedPageSize,
             continuation,
             token,
@@ -199,6 +208,7 @@ class ImxActivityClient(
     }
 
     private suspend inline fun <reified T> getActivities(
+        webClient: WebClient,
         pageSize: Int,
         continuation: String? = null,
         token: String? = null,
@@ -208,7 +218,7 @@ class ImxActivityClient(
         user: String? = null,
         sort: ActivitySortDto? = null,
         type: ActivityType
-    ) = getActivities<T> {
+    ) = getActivities<T>(webClient) {
 
         val builder = ImxActivityQueryBuilder.getQueryBuilder(type, it)
         val safeSort = sort ?: ActivitySortDto.LATEST_FIRST
@@ -223,10 +233,11 @@ class ImxActivityClient(
     }
 
     private suspend inline fun <reified T> getActivityEvents(
+        webClient: WebClient,
         pageSize: Int,
         transactionId: String,
         type: ActivityType
-    ) = getActivities<T> {
+    ) = getActivities<T>(webClient) {
 
         val builder = ImxActivityQueryBuilder.getQueryBuilder(type, it)
 
@@ -236,7 +247,10 @@ class ImxActivityClient(
         builder.build()
     }
 
-    private suspend inline fun <reified T> getActivities(crossinline build: (builder: UriBuilder) -> Unit): T? {
+    private suspend inline fun <reified T> getActivities(
+        webClient: WebClient,
+        crossinline build: (builder: UriBuilder) -> Unit
+    ): T? {
         return webClient.get().uri {
             build(it)
             it.build()
