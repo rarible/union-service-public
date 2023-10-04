@@ -140,8 +140,6 @@ object FlowItemConverter {
                 )
             },
             content = content,
-            // TODO FLOW - implement it
-            restrictions = emptyList(),
             source = MetaSource.ORIGINAL,
         )
     }

@@ -71,8 +71,6 @@ object TzktItemConverter {
             attributes = meta.attributes.map(::convert),
             tags = meta.tags,
             content = meta.content.map(::convert),
-            // TODO TEZOS - implement it
-            restrictions = listOf(),
             source = MetaSource.ORIGINAL,
         )
     }

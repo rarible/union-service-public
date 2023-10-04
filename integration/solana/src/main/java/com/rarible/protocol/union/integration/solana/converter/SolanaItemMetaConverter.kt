@@ -18,7 +18,6 @@ object SolanaItemMetaConverter {
             description = tokenMeta.description,
             attributes = tokenMeta.attributes.map { convert(it) },
             content = tokenMeta.content.map { convert(it) },
-            restrictions = emptyList(),
             source = MetaSource.ORIGINAL,
         )
 

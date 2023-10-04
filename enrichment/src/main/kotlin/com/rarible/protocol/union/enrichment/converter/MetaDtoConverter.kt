@@ -55,7 +55,6 @@ object MetaDtoConverter {
             originalMetaUri = meta.originalMetaUri,
             attributes = meta.attributes.map(::convert),
             content = meta.content.map { convert(it) },
-            restrictions = meta.restrictions.map { it.type }.distinct()
         )
     }
 
@@ -75,7 +74,6 @@ object MetaDtoConverter {
             originalMetaUri = meta.originalMetaUri,
             attributes = meta.attributes.map(::convert),
             content = meta.content.map { convert(it) },
-            restrictions = meta.restrictions.map { it.type }.distinct()
         )
     }
 
