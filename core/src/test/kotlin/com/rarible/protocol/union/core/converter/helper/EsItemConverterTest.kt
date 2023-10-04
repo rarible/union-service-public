@@ -67,7 +67,6 @@ class EsItemConverterTest {
                         MetaAttributeDto(randomString(), randomString())
                     ),
                     content = emptyList(),
-                    restrictions = emptyList()
                 ),
                 bestSellOrder = randomOrderDto(
                     take = AssetDto(

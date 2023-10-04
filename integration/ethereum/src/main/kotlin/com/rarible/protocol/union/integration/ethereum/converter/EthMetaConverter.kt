@@ -46,8 +46,6 @@ object EthMetaConverter {
                 )
             },
             content = source.content.map { convert(it) },
-            // TODO deprecated, remove later
-            restrictions = emptyList(),
             source = MetaSource.ORIGINAL,
         )
     }

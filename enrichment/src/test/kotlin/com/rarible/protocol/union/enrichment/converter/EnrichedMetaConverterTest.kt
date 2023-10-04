@@ -38,7 +38,6 @@ class EnrichedMetaConverterTest {
         assertThat(converted.externalUri).isEqualTo(meta.externalUri)
         assertThat(converted.originalMetaUri).isEqualTo(meta.originalMetaUri)
         assertThat(converted.attributes).isEqualTo(meta.attributes.map { MetaDtoConverter.convert(it) })
-        assertThat(converted.restrictions).isEqualTo(meta.restrictions.map { it.type })
     }
 
     @Test

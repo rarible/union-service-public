@@ -10,7 +10,6 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.core.service.ItemService
-import com.rarible.protocol.union.core.service.RestrictionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.core.util.checkNullIds
@@ -22,8 +21,6 @@ import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import com.rarible.protocol.union.dto.MetaContentDto
-import com.rarible.protocol.union.dto.RestrictionCheckFormDto
-import com.rarible.protocol.union.dto.RestrictionCheckResultDto
 import com.rarible.protocol.union.dto.RoyaltiesDto
 import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.TraitsDto
@@ -57,7 +54,6 @@ class ItemController(
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
     private val itemMetaService: ItemMetaService,
-    private val restrictionService: RestrictionService,
     private val itemTraitService: ItemTraitService,
 ) : ItemControllerApi {
 
@@ -151,19 +147,6 @@ class ItemController(
         val fullItemId = IdParser.parseItemId(itemId)
         val royalties = router.getService(fullItemId.blockchain).getItemRoyaltiesById(fullItemId.value)
         return ResponseEntity.ok(RoyaltiesDto(royalties))
-    }
-
-    override suspend fun checkItemRestriction(
-        itemId: String,
-        restrictionCheckFormDto: RestrictionCheckFormDto
-    ): ResponseEntity<RestrictionCheckResultDto> {
-        val fullItemId = IdParser.parseItemId(itemId)
-        val checkResult = restrictionService.checkRestriction(fullItemId, restrictionCheckFormDto)
-        val dto = RestrictionCheckResultDto(
-            success = checkResult.success,
-            message = checkResult.message
-        )
-        return ResponseEntity.ok(dto)
     }
 
     override suspend fun resetItemMeta(itemId: String, sync: Boolean?): ResponseEntity<Unit> {

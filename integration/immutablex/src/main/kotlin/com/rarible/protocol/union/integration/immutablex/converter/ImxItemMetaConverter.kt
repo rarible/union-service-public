@@ -41,7 +41,6 @@ object ImxItemMetaConverter {
                     value = "${it.value}"
                 )
             } ?: emptyList(),
-            restrictions = emptyList(),
             originalMetaUri = asset.uri,
             source = MetaSource.ORIGINAL,
         )

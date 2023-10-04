@@ -233,7 +233,6 @@ class SimpleHashServiceTest {
                 )
             )
         ),
-        restrictions = emptyList(),
         originalMetaUri = "https://boredapeyachtclub.com/api/mutants/2691",
         source = MetaSource.SIMPLE_HASH,
     )

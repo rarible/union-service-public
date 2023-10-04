@@ -153,7 +153,6 @@ fun randomUnionMeta(
         originalMetaUri = randomString(),
         attributes = attributes,
         content = content,
-        restrictions = listOf(),
         source = source,
         contributors = contributors
     )

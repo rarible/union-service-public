@@ -34,7 +34,6 @@ open class SimpleHashResolver(
             originalMetaUri = source.extraMetadata?.metadataOriginalUrl,
             attributes = attributes(source),
             content = content(source),
-            restrictions = emptyList(),
             source = MetaSource.SIMPLE_HASH,
         )
     }
