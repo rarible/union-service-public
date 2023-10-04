@@ -148,7 +148,6 @@ internal class ItemMetaRefreshServiceTest {
             itemMetaService.download(itemId = itemId2, pipeline = ItemMetaPipeline.REFRESH, force = true)
         } returns meta2.copy(createdAt = Instant.now())
 
-        assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isFalse()
         assertThat(itemMetaRefreshService.scheduleAutoRefresh(collectionId, true)).isFalse()
     }
 
@@ -163,7 +162,7 @@ internal class ItemMetaRefreshServiceTest {
         assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isTrue()
         assertThat(itemMetaRefreshService.scheduleAutoRefresh(collectionId, true)).isTrue()
 
-        coVerify(exactly = 2) {
+        coVerify(exactly = 1) {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
         }
     }
@@ -179,7 +178,7 @@ internal class ItemMetaRefreshServiceTest {
         assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isTrue()
         assertThat(itemMetaRefreshService.scheduleAutoRefresh(collectionId, true)).isTrue()
 
-        coVerify(exactly = 2) {
+        coVerify(exactly = 1) {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
         }
     }
@@ -192,10 +191,10 @@ internal class ItemMetaRefreshServiceTest {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
         } throws RuntimeException()
 
-        assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isFalse()
+        assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isTrue()
         assertThat(itemMetaRefreshService.scheduleAutoRefresh(collectionId, true)).isFalse()
 
-        coVerify(exactly = 2) {
+        coVerify(exactly = 1) {
             itemMetaService.download(itemId = itemId, pipeline = ItemMetaPipeline.REFRESH, force = true)
         }
     }

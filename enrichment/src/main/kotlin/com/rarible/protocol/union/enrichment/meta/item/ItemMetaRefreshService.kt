@@ -208,7 +208,10 @@ class ItemMetaRefreshService(
             logger.info("Collection refresh already pending for $collectionFullId. Will not refresh")
             return false
         }
-        return checkMetaChanges(collectionFullId)
+        // since this check is used user's API request, we can't spend a lot of time here to check changed metadata
+        // also, there are not a lot of such requests - few per day ATM
+        return true
+        // return checkMetaChanges(collectionFullId)
     }
 
     private suspend fun checkMetaChanges(collectionFullId: String): Boolean {
