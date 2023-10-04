@@ -64,14 +64,7 @@ enrichment:
           - "ETHEREUM:0x99a9b7c1116f9ceeb1652de04d5969cce509b069"
           - "ETHEREUM:0x942bc2d3e7a589fe5bd4a5c6ef9727dfd82f5c8a"
           - "ETHEREUM:0xea698596b6009a622c3ed00dd5a8b5d1cae4fc36"
-      - name: "Pursuit by Per Kristian Stoveland"
-        enabled: true
-        range:
-          - "ETHEREUM:0x8cdbd7010bd197848e95c1fd7f6e870aac9b0d3c:0..999999"
-      - name: "Echo of Intensity by Per Kristian Stoveland"
-        enabled: true
-        range:
-          - "ETHEREUM:0x8cdbd7010bd197848e95c1fd7f6e870aac9b0d3c:1000000..1999999"
+          - "ETHEREUM:0x8cdbd7010bd197848e95c1fd7f6e870aac9b0d3c"
 
   meta:
     item:
