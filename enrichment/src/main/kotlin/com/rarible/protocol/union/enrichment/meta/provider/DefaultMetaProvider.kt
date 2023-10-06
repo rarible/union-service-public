@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.ContentOwner
 import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.download.ProviderDownloadException
 import com.rarible.protocol.union.enrichment.meta.MetaMetrics
 import io.netty.handler.timeout.ReadTimeoutException
@@ -29,7 +30,7 @@ abstract class DefaultMetaProvider<T : ContentOwner<T>>(
             metrics.onMetaFetched(blockchain)
             return result
         } catch (e: UnionMetaException) {
-            logger.error("Meta fetching failed with code: {} for $type {}", e.code.name, id)
+            logger.error("Meta fetching failed with code: {} for $type {}", e.code.name, ItemIdDto(blockchain, id))
 
             when (e.code) {
                 UnionMetaException.ErrorCode.NOT_FOUND -> metrics.onMetaFetchNotFound(blockchain)
