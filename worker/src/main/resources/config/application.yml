@@ -249,6 +249,8 @@ worker:
           enabled: true
         - blockchain: IMMUTABLEX
           enabled: true
+  communityMarketplace:
+    communityMarketplaceUrl: http://web.${application.environment}-whitelabel:8080
 
 ratelimiter:
   period: ${consul.worker.ratelimiter.period:10000}

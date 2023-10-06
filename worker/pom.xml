@@ -76,6 +76,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.rarible.marketplace</groupId>
+            <artifactId>whitelabel-internal-client</artifactId>
+        </dependency>
 
         <!-- ================== Test =================== -->
         <dependency>

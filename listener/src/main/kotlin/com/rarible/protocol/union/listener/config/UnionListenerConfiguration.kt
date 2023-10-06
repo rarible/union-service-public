@@ -1,10 +1,12 @@
 package com.rarible.protocol.union.listener.config
 
 import com.rarible.core.application.ApplicationEnvironmentInfo
+import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaConsumerWorkerGroup
+import com.rarible.marketplace.generated.whitelabelinternal.dto.MarketplaceEventDto
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.handler.InternalBatchEventHandler
@@ -150,6 +152,23 @@ class UnionListenerConfiguration(
     }
 
     // --------------- Meta 3.0 beans END
+
+    @Bean
+    fun communityMarketplaceWorker(
+        handler: RaribleKafkaBatchEventHandler<MarketplaceEventDto>
+    ): RaribleKafkaConsumerWorker<MarketplaceEventDto> {
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = properties.brokerReplicaSet,
+            topic = listenerProperties.communityMarketplace.topic,
+            group = consumerGroup("marketplaces"),
+            concurrency = 1,
+            batchSize = 50,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = MarketplaceEventDto::class.java
+        )
+        return kafkaConsumerFactory.createWorker(settings, handler)
+    }
 
     private fun consumerGroup(suffix: String): String {
         return "protocol.union.$suffix"

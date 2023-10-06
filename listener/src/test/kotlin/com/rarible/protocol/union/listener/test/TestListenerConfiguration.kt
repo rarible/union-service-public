@@ -13,6 +13,7 @@ import com.rarible.dipdup.client.core.model.DipDupOrder
 import com.rarible.dipdup.listener.config.DipDupTopicProvider
 import com.rarible.dipdup.listener.model.DipDupCollectionEvent
 import com.rarible.dipdup.listener.model.DipDupItemMetaEvent
+import com.rarible.marketplace.generated.whitelabelinternal.dto.MarketplaceEventDto
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.dto.ActivityTopicProvider
 import com.rarible.protocol.dto.EthActivityEventDto
@@ -50,6 +51,7 @@ import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
+import com.rarible.protocol.union.listener.config.UnionListenerProperties
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
@@ -64,7 +66,8 @@ import org.springframework.context.annotation.Primary
 @Import(CoreConfiguration::class)
 class TestListenerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-    private val kafkaConsumerFactory: RaribleKafkaConsumerFactory
+    private val kafkaConsumerFactory: RaribleKafkaConsumerFactory,
+    private val listenerProperties: UnionListenerProperties,
 ) {
 
     private val env = applicationEnvironmentInfo.name
@@ -380,6 +383,20 @@ class TestListenerConfiguration(
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = TokenMetaEventDto::class.java,
             defaultTopic = SolanaEventTopicProvider.getTokenMetaTopic(env),
+            bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
+            compression = Compression.SNAPPY,
+        )
+    }
+
+    // ---------------- Community marketplace producers ----------------//
+
+    @Bean
+    fun testCommunityMarketplaceEventProducer(): RaribleKafkaProducer<MarketplaceEventDto> {
+        return RaribleKafkaProducer(
+            clientId = "test.union.marketplace",
+            valueSerializerClass = UnionKafkaJsonSerializer::class.java,
+            valueClass = MarketplaceEventDto::class.java,
+            defaultTopic = listenerProperties.communityMarketplace.topic,
             bootstrapServers = kafkaContainer.kafkaBoostrapServers(),
             compression = Compression.SNAPPY,
         )

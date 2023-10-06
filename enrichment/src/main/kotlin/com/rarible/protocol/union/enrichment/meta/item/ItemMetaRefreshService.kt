@@ -8,9 +8,11 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentProperties
 import com.rarible.protocol.union.enrichment.download.PartialDownloadException
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.model.MetaRefreshRequest
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
@@ -31,6 +33,7 @@ class ItemMetaRefreshService(
     private val defaultItemMetaComparator: DefaultItemMetaComparator,
     private val strictItemMetaComparator: StrictItemMetaComparator,
     private val enrichmentProperties: EnrichmentProperties,
+    private val collectionRepository: CollectionRepository,
     private val ff: FeatureFlagsProperties,
 ) {
 
@@ -62,8 +65,12 @@ class ItemMetaRefreshService(
             full = full,
             scheduledAt = scheduledAt,
             withSimpleHash = withSimpleHash,
-            priority = MetaDownloadPriority.RIGHT_NOW
+            priority = getCollectionMetaRefreshPriority(collectionId) ?: MetaDownloadPriority.RIGHT_NOW
         )
+    }
+
+    private suspend fun getCollectionMetaRefreshPriority(collectionId: CollectionIdDto): Int? {
+        return collectionRepository.get(EnrichmentCollectionId(collectionId))?.metaRefreshPriority
     }
 
     /**
@@ -82,7 +89,7 @@ class ItemMetaRefreshService(
             collectionId = collectionId,
             full = full,
             withSimpleHash = withSimpleHash,
-            priority = MetaDownloadPriority.MEDIUM
+            priority = getCollectionMetaRefreshPriority(collectionId) ?: MetaDownloadPriority.MEDIUM
         )
         return true
     }
@@ -106,7 +113,7 @@ class ItemMetaRefreshService(
             collectionId = collectionId,
             full = true,
             withSimpleHash = withSimpleHash,
-            priority = MetaDownloadPriority.NOBODY_CARES
+            priority = getCollectionMetaRefreshPriority(collectionId) ?: MetaDownloadPriority.NOBODY_CARES
         )
         return true
     }
@@ -119,7 +126,7 @@ class ItemMetaRefreshService(
             collectionId = collectionId,
             full = true,
             withSimpleHash = withSimpleHash,
-            priority = MetaDownloadPriority.HIGH
+            priority = getCollectionMetaRefreshPriority(collectionId) ?: MetaDownloadPriority.HIGH
         )
     }
 
@@ -151,7 +158,7 @@ class ItemMetaRefreshService(
             collectionId = collectionId,
             full = true,
             withSimpleHash = withSimpleHash,
-            priority = MetaDownloadPriority.LOW
+            priority = getCollectionMetaRefreshPriority(collectionId) ?: MetaDownloadPriority.LOW
         )
         return true
     }

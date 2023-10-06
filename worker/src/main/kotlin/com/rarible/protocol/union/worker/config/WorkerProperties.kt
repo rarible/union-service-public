@@ -19,7 +19,8 @@ data class WorkerProperties(
     val reconcileMarks: ReconcileMarksProperties = ReconcileMarksProperties(),
     val metaItemRetry: MetaRetry = MetaRetry(),
     val metaCollectionRetry: MetaRetry = MetaRetry(),
-    val itemMetaCustomAttributesJob: ItemMetaCustomAttributesJobProperties = ItemMetaCustomAttributesJobProperties()
+    val itemMetaCustomAttributesJob: ItemMetaCustomAttributesJobProperties = ItemMetaCustomAttributesJobProperties(),
+    val communityMarketplace: CommunityMarketplaceProperties = CommunityMarketplaceProperties(),
 )
 
 data class SearchReindexProperties(
@@ -149,4 +150,8 @@ class MocaXpCustomAttributesProviderProperties(
     val collection: String = "",
     val uri: String = "",
     val apiKey: String = "",
+)
+
+data class CommunityMarketplaceProperties(
+    val communityMarketplaceUrl: String = "http://127.0.0.1:8080",
 )

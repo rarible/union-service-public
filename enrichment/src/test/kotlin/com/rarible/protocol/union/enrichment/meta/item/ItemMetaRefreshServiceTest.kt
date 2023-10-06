@@ -7,18 +7,21 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentProperties
 import com.rarible.protocol.union.enrichment.download.PartialDownloadException
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
+import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollection
 import com.rarible.protocol.union.enrichment.test.data.randomEsItem
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.impl.annotations.InjectMockKs
@@ -62,12 +65,14 @@ internal class ItemMetaRefreshServiceTest {
     @MockK
     private lateinit var ff: FeatureFlagsProperties
 
+    @MockK
+    private lateinit var collectionRepository: CollectionRepository
+
     @SpyK
     private var enrichmentProperties: EnrichmentProperties = EnrichmentProperties()
 
     @BeforeEach
     fun beforeEach() {
-        clearMocks(metaRefreshRequestRepository, enrichmentItemService, ff)
         coEvery { metaRefreshRequestRepository.save(any()) } returns Unit
         coEvery { ff.enableCollectionAutoReveal } returns true
         coEvery { ff.enableStrictMetaComparison } returns true
@@ -77,10 +82,30 @@ internal class ItemMetaRefreshServiceTest {
     fun `run refresh - ok, small collection`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
         coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns randomLong(1000)
+        coEvery { collectionRepository.get(EnrichmentCollectionId(collectionId)) } returns randomEnrichmentCollection()
 
         assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isTrue()
         coVerify(exactly = 1) {
-            metaRefreshRequestRepository.save(match { it.collectionId == collectionId.fullId() })
+            metaRefreshRequestRepository.save(match {
+                it.collectionId == collectionId.fullId() &&
+                    it.priority == MetaDownloadPriority.MEDIUM
+            })
+        }
+    }
+
+    @Test
+    fun `run refresh - ok, small collection with priority`() = runBlocking<Unit> {
+        val collectionId = randomEthCollectionId()
+        coEvery { esItemRepository.countItemsInCollection(collectionId.fullId()) } returns randomLong(1000)
+        coEvery { collectionRepository.get(EnrichmentCollectionId(collectionId)) } returns
+            randomEnrichmentCollection().copy(metaRefreshPriority = 1000)
+
+        assertThat(itemMetaRefreshService.scheduleUserRefresh(collectionId, true)).isTrue()
+        coVerify(exactly = 1) {
+            metaRefreshRequestRepository.save(match {
+                it.collectionId == collectionId.fullId() &&
+                    it.priority == 1000
+            })
         }
     }
 
@@ -257,6 +282,8 @@ internal class ItemMetaRefreshServiceTest {
         coEvery {
             itemRepository.get(ShortItemId(itemId2))
         } returns null
+
+        coEvery { collectionRepository.get(EnrichmentCollectionId(collectionId)) } returns randomEnrichmentCollection()
 
         return Pair(collectionId, itemId1)
     }
