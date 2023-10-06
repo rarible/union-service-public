@@ -78,7 +78,8 @@ open class SimpleHashResolver(
     }
 
     open fun attributes(source: SimpleHashItem): List<UnionMetaAttribute> {
-        return source.extraMetadata?.attributes?.map {
+        return source.extraMetadata?.attributes?.mapNotNull {
+            it.traitType ?: return@mapNotNull null
             UnionMetaAttribute(key = it.traitType, value = it.value)
         } ?: emptyList()
     }

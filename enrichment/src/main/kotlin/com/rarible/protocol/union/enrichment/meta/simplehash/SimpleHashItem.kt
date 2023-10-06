@@ -53,7 +53,7 @@ data class SimpleHashItem(
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class Attribute(
-        val traitType: String,
+        val traitType: String?,
         val value: String?,
         val displayType: String?
     )
