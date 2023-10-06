@@ -53,17 +53,23 @@ class CurrencyService(
     // Return current rate (cached)
     suspend fun getCurrentRate(blockchain: BlockchainDto, address: String): CurrencyUsdRateDto? {
         val blockchainCache = caches[blockchain]!!
-        var cached = blockchainCache[address]
-        if (cached == null) {
-            cached = fetchRateSafe(blockchain, address, nowMillis())
-            if (cached == null) {
-                logger.info("Currency {}:[{}] updated, but doesn't support USD conversion", blockchain.name, address)
-                cached = CurrencyUsdRateDto(address, "", BigDecimal(-1), nowMillis())
-            }
-            blockchainCache[address] = cached
-        }
+        val cached = blockchainCache[address] ?: refreshCache(blockchain, address)
         val supported = cached.rate >= BigDecimal.ZERO
         return if (supported) cached else null
+    }
+
+    private suspend fun refreshCache(blockchain: BlockchainDto, address: String): CurrencyUsdRateDto {
+        val blockchainCache = caches[blockchain]!!
+        val fetched = fetchRateSafe(blockchain, address, nowMillis())
+        if (fetched != null) {
+            blockchainCache[address] = fetched
+            return fetched
+        }
+
+        logger.info("Currency {}:[{}] updated, but doesn't support USD conversion", blockchain.name, address)
+        val stub = CurrencyUsdRateDto(address, "", BigDecimal(-1), nowMillis())
+        blockchainCache[address] = stub
+        return stub
     }
 
     suspend fun toUsd(
