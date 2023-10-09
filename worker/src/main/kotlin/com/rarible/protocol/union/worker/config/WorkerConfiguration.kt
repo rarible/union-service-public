@@ -38,6 +38,7 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
     value = [
         EnrichmentApiConfiguration::class,
         SearchConfiguration::class,
+        CommunityMarketplaceConfiguration::class,
     ]
 )
 @EnableRaribleTask

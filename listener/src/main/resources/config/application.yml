@@ -170,6 +170,8 @@ listener:
   workers:
     polygon:
       coroutineThreadCount: 4
+  communityMarketplace:
+    topic: whitelabel.${application.environment}.marketplace
 
 meta:
   ipfsGateway: "https://ipfs.io,https://nftstorage.link"

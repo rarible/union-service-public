@@ -22,6 +22,10 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>com.rarible.marketplace</groupId>
+            <artifactId>whitelabel-internal-client</artifactId>
+        </dependency>
         <!-- =========== Internal dependencies =========== -->
         <dependency>
             <groupId>com.rarible.protocol.union</groupId>

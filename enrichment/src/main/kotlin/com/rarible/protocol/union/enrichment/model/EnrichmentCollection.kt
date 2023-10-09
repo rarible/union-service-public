@@ -54,6 +54,8 @@ data class EnrichmentCollection(
     // Additional internal data for tech purposes, should not be exposed outside
     val extra: Map<String, String> = emptyMap(),
 
+    val metaRefreshPriority: Int? = null,
+
     @Version
     val version: Long? = null
 ) : BestSellOrderOwner<EnrichmentCollection>,

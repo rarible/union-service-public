@@ -21,6 +21,19 @@
             <url>https://repo.rarible.org/repository/maven-public/</url>
         </repository>
         <repository>
+            <id>nexus</id>
+            <name>nexus</name>
+            <url>http://nexus.rarible.int/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>nexus-snapshots</id>
+            <name>nexus-snapshots</name>
+            <url>http://nexus.rarible.int/repository/maven-snapshots/</url>
+            <snapshots>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
@@ -59,6 +72,8 @@
         <rarible.protocol.union.version>1.65.0</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
+
+        <whitelabel-internal.version>1.1.46</whitelabel-internal.version>
     </properties>
 
     <dependencyManagement>
@@ -222,6 +237,11 @@
                 <groupId>com.rarible.protocol.union</groupId>
                 <artifactId>rarible-union-search-core</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rarible.marketplace</groupId>
+                <artifactId>whitelabel-internal-client</artifactId>
+                <version>${whitelabel-internal.version}</version>
             </dependency>
 
             <!-- ========== Currency Protocol-API ========= -->

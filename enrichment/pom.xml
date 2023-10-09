@@ -35,6 +35,10 @@
     <dependencies>
         <!-- ============ Internal dependencies ============ -->
         <dependency>
+            <groupId>com.rarible.marketplace</groupId>
+            <artifactId>whitelabel-internal-client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.rarible.protocol.union</groupId>
             <artifactId>rarible-union-integration-ethereum</artifactId>
         </dependency>

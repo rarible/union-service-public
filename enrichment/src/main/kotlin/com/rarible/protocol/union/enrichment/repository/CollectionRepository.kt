@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.repository
 
+import com.rarible.core.common.nowMillis
 import com.rarible.core.mongo.util.div
 import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.download.DownloadStatus
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -18,6 +20,7 @@ import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.index.PartialIndexFilter
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.data.mongodb.core.query.and
 import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
@@ -108,6 +111,23 @@ class CollectionRepository(
         ).with(Sort.by(EnrichmentCollection::id.name)),
         EnrichmentCollection::class.java
     ).asFlow()
+
+    suspend fun updatePriority(collectionIds: Set<EnrichmentCollectionId>, priority: Int?) {
+        template.updateMulti(
+            Query(where(EnrichmentCollection::id).inValues(collectionIds)),
+            Update()
+                .apply {
+                    if (priority == null) {
+                        unset(EnrichmentCollection::metaRefreshPriority.name)
+                    } else {
+                        set(EnrichmentCollection::metaRefreshPriority.name, priority)
+                    }
+                }
+                .set(EnrichmentCollection::lastUpdatedAt.name, nowMillis())
+                .inc(EnrichmentCollection::version.name, 1),
+            EnrichmentCollection::class.java,
+        ).awaitSingleOrNull()
+    }
 
     companion object {
 

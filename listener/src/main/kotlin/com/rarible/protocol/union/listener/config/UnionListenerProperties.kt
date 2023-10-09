@@ -12,7 +12,8 @@ data class UnionListenerProperties(
     val consumer: InternalConsumerProperties,
     val monitoringWorker: DaemonWorkerProperties = DaemonWorkerProperties(),
     val metaScheduling: MetaSchedulingProperties,
-    val metrics: MetricsProperties
+    val metrics: MetricsProperties,
+    val communityMarketplace: CommunityMarketplaceProperties = CommunityMarketplaceProperties(),
 )
 
 class InternalConsumerProperties(
@@ -44,4 +45,8 @@ data class BlockchainWorkerProperties(
     val concurrency: Int = 9,
     val batchSize: Int = 500,
     val coroutineThreadCount: Int = 1
+)
+
+data class CommunityMarketplaceProperties(
+    val topic: String = "",
 )
