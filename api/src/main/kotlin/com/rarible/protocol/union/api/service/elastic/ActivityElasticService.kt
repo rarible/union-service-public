@@ -83,7 +83,7 @@ class ActivityElasticService(
 
         logger.info(
             "[{}] Response for ES getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
-                " Slice(size={}, continuation={}, cursor={}, latency={})",
+                " Slice(size={}, continuation={}, cursor={}) ({}ms)",
             requestId,
             type,
             blockchains,
@@ -127,9 +127,9 @@ class ActivityElasticService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        val start = System.currentTimeMillis()
         val filteredCollections = collection.filter { router.isBlockchainEnabled(it.blockchain) }
         if (filteredCollections.isEmpty()) {
-            logger.info("Unable to find enabled blockchains for getActivitiesByCollection(), collection={}", collection)
             return ActivitiesDto()
         }
         val effectiveCursor = cursor ?: continuation
@@ -150,9 +150,9 @@ class ActivityElasticService(
         )
 
         logger.info(
-            "Response for ES getActivitiesByCollection(type={}, collection={}, continuation={}, size={}, sort={}): " +
-                "Slice(size={}, continuation={}) ",
-            type, collection, continuation, size, sort, result.activities.size, result.continuation
+            "Response for ES getActivitiesByCollection(type={}, collection={}, cursor={}, size={}, sort={}): " +
+                "Slice(size={}, cursor={}) ({}ms)",
+            type, collection, effectiveCursor, size, sort, result.activities.size, result.cursor, latency(start)
         )
 
         return result
@@ -167,8 +167,8 @@ class ActivityElasticService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        val start = System.currentTimeMillis()
         if (!router.isBlockchainEnabled(itemId.blockchain)) {
-            logger.info("Unable to find enabled blockchains for getActivitiesByItem(), item={}", itemId)
             return ActivitiesDto()
         }
         val effectiveCursor = cursor ?: continuation
@@ -183,9 +183,9 @@ class ActivityElasticService(
         )
 
         logger.info(
-            "Response for ES getActivitiesByItem(type={}, itemId={} continuation={}, size={}, sort={}): " +
-                "Slice(size={}, continuation={}) ",
-            type, itemId, continuation, size, sort, result.activities.size, result.continuation
+            "Response for ES getActivitiesByItem(type={}, itemId={} cursor={}, size={}, sort={}): " +
+                "Slice(size={}, cursor={}) ({}ms)",
+            type, itemId, effectiveCursor, size, sort, result.activities.size, result.cursor, latency(start)
         )
         return result
     }
@@ -202,12 +202,9 @@ class ActivityElasticService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
+        val start = System.currentTimeMillis()
         val enabledBlockchains = router.getEnabledBlockchains(blockchains).toList()
         if (enabledBlockchains.isEmpty()) {
-            logger.info(
-                "Unable to find enabled blockchains for getActivitiesByUser() where user={} and blockchains={}",
-                user, blockchains
-            )
             return ActivitiesDto()
         }
 
@@ -231,10 +228,9 @@ class ActivityElasticService(
         )
 
         logger.info(
-            "Response for ES getActivitiesByUser(type={}, users={}, continuation={}, size={}, sort={}):" +
-                " Slice(size={}, continuation={}, cursor={})",
-            type, user, continuation, size, sort,
-            result.activities.size, result.continuation, result.cursor
+            "Response for ES getActivitiesByUser(type={}, users={}, cursor={}, size={}, sort={}):" +
+                " Slice(size={}, cursor={}) ({}ms)",
+            type, user, effectiveCursor, size, sort, result.activities.size, result.cursor, latency(start)
         )
 
         return result
@@ -287,21 +283,18 @@ class ActivityElasticService(
         ids: List<TypedActivityId>,
         response: List<UnionActivity>
     ) {
-        val foundIds = mutableSetOf<String>()
-        response.mapTo(foundIds) { it.id.value }
-        val missingIds = mutableListOf<String>()
-        for (id in ids) {
-            if (!foundIds.contains(id.id)) {
-                missingIds.add(id.id)
-            }
+        if (ids.size == response.size) {
+            return
         }
-        if (missingIds.isNotEmpty()) {
-            logger.error("Ids found in ES missing in $blockchain: $missingIds")
-            missingIdsMetrics[blockchain]!!.increment(missingIds.size.toDouble())
-        }
+
+        val missing = ids.map { it.id }.toHashSet()
+        missing.removeAll(response.map { it.id.value }.toHashSet())
+
+        logger.error("Ids found in ES are missing in $blockchain: $missing")
+        missingIdsMetrics[blockchain]!!.increment(missing.size.toDouble())
     }
 
-    private fun latency(start: Long): String {
-        return "${System.currentTimeMillis() - start} ms"
+    private fun latency(start: Long): Long {
+        return System.currentTimeMillis() - start
     }
 }

@@ -22,27 +22,41 @@ class SellActivityEnricher(
         val volumeNative: Double,
     )
 
+    private val unknownSellVolumeInfo = SellVolumeInfo(
+        sellCurrency = "ERROR",
+        volumeUsd = 0.0,
+        volumeSell = 0.0,
+        volumeNative = 0.0
+    )
+
     suspend fun provideVolumeInfo(source: OrderMatchSellDto): SellVolumeInfo {
         try {
-            val nativeCurrency = currencyService.getNativeCurrency(source.id.blockchain)
             val sellCurrency = extractSellCurrency(source)
             val volumeUsd = extractVolumeUsd(source)
-            val volumeSell = extractVolumeSell(source)
-            val volumeNative = extractVolumeNative(source, volumeUsd, sellCurrency, nativeCurrency)
+
+            if (volumeUsd == null) {
+                logger.warn(
+                    "USD price in OrderMatchSell ${source.id} for Order ${source.orderId}" +
+                        "can't be evaluated: $sellCurrency has no rate"
+                )
+                return unknownSellVolumeInfo
+            }
+
+            val volumeNative = extractNativeVolume(
+                source = source,
+                volumeUsd = volumeUsd,
+                sellCurrency = sellCurrency,
+                nativeCurrency = currencyService.getNativeCurrency(source.id.blockchain)
+            )
             return SellVolumeInfo(
-                sellCurrency,
-                volumeUsd,
-                volumeSell,
-                volumeNative
+                sellCurrency = sellCurrency,
+                volumeUsd = volumeUsd,
+                volumeSell = extractSellVolume(source),
+                volumeNative = volumeNative
             )
         } catch (e: RuntimeException) {
-            logger.error("Error while enriching sell activity $source", e)
-            return SellVolumeInfo(
-                sellCurrency = "ERROR",
-                volumeUsd = 0.0,
-                volumeSell = 0.0,
-                volumeNative = 0.0
-            )
+            logger.error("Error during evaluation of USD price in OrderMatchSell: $source", e)
+            return unknownSellVolumeInfo
         }
     }
 
@@ -50,20 +64,24 @@ class SellActivityEnricher(
         return source.id.blockchain.name + ":" + source.payment.type.ext.currencyAddress()
     }
 
-    private suspend fun extractVolumeUsd(source: OrderMatchSellDto): Double {
-        return if (source.amountUsd != null) {
-            source.amountUsd!!.toDouble()
-        } else {
-            currencyService.toUsd(source.id.blockchain, source.payment.type, source.payment.value, source.date)!!
-                .toDouble()
-        }
-    }
-
-    private fun extractVolumeSell(source: OrderMatchSellDto): Double {
+    private fun extractSellVolume(source: OrderMatchSellDto): Double {
         return source.payment.value.toDouble()
     }
 
-    private suspend fun extractVolumeNative(
+    private suspend fun extractVolumeUsd(source: OrderMatchSellDto): Double? {
+        if (source.amountUsd != null) {
+            return source.amountUsd!!.toDouble()
+        }
+
+        return currencyService.toUsd(
+            blockchain = source.id.blockchain,
+            assetType = source.payment.type,
+            value = source.payment.value,
+            at = source.date
+        )?.toDouble()
+    }
+
+    private suspend fun extractNativeVolume(
         source: OrderMatchSellDto,
         volumeUsd: Double,
         sellCurrency: String,
