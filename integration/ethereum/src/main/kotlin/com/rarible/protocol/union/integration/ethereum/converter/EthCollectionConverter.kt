@@ -98,6 +98,8 @@ object EthCollectionConverter {
             NftCollectionDto.Features.MINT_WITH_ADDRESS -> UnionCollection.Features.MINT_WITH_ADDRESS
             NftCollectionDto.Features.SECONDARY_SALE_FEES -> UnionCollection.Features.SECONDARY_SALE_FEES
             NftCollectionDto.Features.SET_URI_PREFIX -> UnionCollection.Features.SET_URI_PREFIX
+            NftCollectionDto.Features.PAUSABLE -> UnionCollection.Features.PAUSABLE
+            NftCollectionDto.Features.NOT_FOR_SALE -> UnionCollection.Features.NOT_FOR_SALE
         }
     }
 
