@@ -5,21 +5,31 @@ import com.rarible.core.test.data.randomBinary
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.EthereumSignatureValidationFormDto
 import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import io.mockk.coEvery
-import io.mockk.mockk
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
 
+@ExtendWith(MockKExtension::class)
 class EthSignatureServiceTest {
 
-    private val signatureControllerApi: OrderSignatureControllerApi = mockk()
-    private val service = EthereumSignatureService(signatureControllerApi)
+    private val blockchain = BlockchainDto.ETHEREUM
+
+    @MockK
+    private lateinit var signatureControllerApi: OrderSignatureControllerApi
+
+    @InjectMockKs
+    lateinit var service: EthSignatureService
 
     @Test
-    fun `ethereum validate`() = runBlocking {
+    fun `ethereum validate`() = runBlocking<Unit> {
         val expected = EthereumSignatureValidationFormDto(
             signer = randomAddress(),
             signature = randomBinary(),

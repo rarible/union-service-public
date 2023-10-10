@@ -17,7 +17,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import io.daonomic.rpc.domain.Word
 import kotlinx.coroutines.reactive.awaitFirst
 
-open class EthAuctionService(
+class EthAuctionService(
     override val blockchain: BlockchainDto,
     private val auctionControllerApi: AuctionControllerApi,
     private val ethAuctionConverter: EthAuctionConverter
@@ -130,30 +130,3 @@ open class EthAuctionService(
         return ethAuctionConverter.convert(auctions, blockchain)
     }
 }
-
-open class EthereumAuctionService(
-    auctionControllerApi: AuctionControllerApi,
-    ethAuctionConverter: EthAuctionConverter
-) : EthAuctionService(
-    BlockchainDto.ETHEREUM,
-    auctionControllerApi,
-    ethAuctionConverter
-)
-
-open class PolygonAuctionService(
-    auctionControllerApi: AuctionControllerApi,
-    ethAuctionConverter: EthAuctionConverter
-) : EthAuctionService(
-    BlockchainDto.POLYGON,
-    auctionControllerApi,
-    ethAuctionConverter
-)
-
-open class MantleAuctionService(
-    auctionControllerApi: AuctionControllerApi,
-    ethAuctionConverter: EthAuctionConverter
-) : EthAuctionService(
-    BlockchainDto.MANTLE,
-    auctionControllerApi,
-    ethAuctionConverter
-)

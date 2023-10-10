@@ -10,6 +10,7 @@ import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.core.test.data.randomWord
+import com.rarible.protocol.dto.AmmPriceInfoDto
 import com.rarible.protocol.dto.AssetDto
 import com.rarible.protocol.dto.AuctionActivityBidDto
 import com.rarible.protocol.dto.AuctionActivityCancelDto
@@ -989,3 +990,14 @@ fun randomEthLooksRareOrderDto(): LooksRareOrderDto {
         priceHistory = listOf()
     )
 }
+
+fun randomAmmPriceInfoDto(
+    price: BigInteger = randomBigInt(),
+    priceValue: BigDecimal = randomBigDecimal(),
+    priceUsd: BigDecimal? = randomBigDecimal()
+) =
+    AmmPriceInfoDto(
+        price = price,
+        priceValue = priceValue,
+        priceUsd = priceUsd
+    )

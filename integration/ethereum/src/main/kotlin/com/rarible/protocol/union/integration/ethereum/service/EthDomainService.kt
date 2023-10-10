@@ -7,7 +7,7 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import kotlinx.coroutines.reactive.awaitFirst
 
-open class EthDomainService(
+class EthDomainService(
     blockchain: BlockchainDto,
     private val nftDomainControllerApi: NftDomainControllerApi
 ) : AbstractBlockchainService(blockchain), DomainService {
@@ -17,24 +17,3 @@ open class EthDomainService(
         return UnionDomainResolveResult(blockchain, result.registrant)
     }
 }
-
-open class EthereumDomainService(
-    nftDomainControllerApi: NftDomainControllerApi
-) : EthDomainService(
-    BlockchainDto.ETHEREUM,
-    nftDomainControllerApi
-)
-
-open class PolygonDomainService(
-    nftDomainControllerApi: NftDomainControllerApi
-) : EthDomainService(
-    BlockchainDto.POLYGON,
-    nftDomainControllerApi
-)
-
-open class MantleDomainService(
-    nftDomainControllerApi: NftDomainControllerApi
-) : EthDomainService(
-    BlockchainDto.MANTLE,
-    nftDomainControllerApi
-)

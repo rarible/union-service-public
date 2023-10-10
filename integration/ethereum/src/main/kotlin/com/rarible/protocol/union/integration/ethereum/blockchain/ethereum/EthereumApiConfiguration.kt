@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.blockchain.ethereum
 
+import com.rarible.protocol.erc20.api.client.BalanceControllerApi
+import com.rarible.protocol.erc20.api.client.Erc20IndexerApiClientFactory
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftDomainControllerApi
@@ -20,20 +22,13 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConve
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.service.EthActivityService
 import com.rarible.protocol.union.integration.ethereum.service.EthAuctionService
+import com.rarible.protocol.union.integration.ethereum.service.EthBalanceService
 import com.rarible.protocol.union.integration.ethereum.service.EthCollectionService
 import com.rarible.protocol.union.integration.ethereum.service.EthDomainService
 import com.rarible.protocol.union.integration.ethereum.service.EthItemService
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import com.rarible.protocol.union.integration.ethereum.service.EthOwnershipService
 import com.rarible.protocol.union.integration.ethereum.service.EthSignatureService
-import com.rarible.protocol.union.integration.ethereum.service.EthereumActivityService
-import com.rarible.protocol.union.integration.ethereum.service.EthereumAuctionService
-import com.rarible.protocol.union.integration.ethereum.service.EthereumCollectionService
-import com.rarible.protocol.union.integration.ethereum.service.EthereumDomainService
-import com.rarible.protocol.union.integration.ethereum.service.EthereumItemService
-import com.rarible.protocol.union.integration.ethereum.service.EthereumOrderService
-import com.rarible.protocol.union.integration.ethereum.service.EthereumOwnershipService
-import com.rarible.protocol.union.integration.ethereum.service.EthereumSignatureService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -44,91 +39,104 @@ import org.springframework.context.annotation.Import
 @EnableConfigurationProperties(value = [EthereumIntegrationProperties::class])
 class EthereumApiConfiguration {
 
-    private val ethereum = BlockchainDto.ETHEREUM.name.lowercase()
+    private val blockchain = BlockchainDto.ETHEREUM
+    private val blockchainName = blockchain.name.lowercase()
 
     @Bean
     fun ethereumBlockchain(): BlockchainDto {
-        return BlockchainDto.ETHEREUM
+        return blockchain
     }
 
     // -------------------- API --------------------//
 
     @Bean
+    @Qualifier("ethereum.balance.api")
+    fun ethereumBalanceApi(factory: Erc20IndexerApiClientFactory): BalanceControllerApi =
+        factory.createBalanceApiClient(blockchainName)
+
+    @Bean
     @Qualifier("ethereum.item.api")
     fun ethereumItemApi(factory: NftIndexerApiClientFactory): NftItemControllerApi =
-        factory.createNftItemApiClient(ethereum)
+        factory.createNftItemApiClient(blockchainName)
 
     @Bean
     @Qualifier("ethereum.ownership.api")
     fun ethereumOwnershipApi(factory: NftIndexerApiClientFactory): NftOwnershipControllerApi =
-        factory.createNftOwnershipApiClient(ethereum)
+        factory.createNftOwnershipApiClient(blockchainName)
 
     @Bean
     @Qualifier("ethereum.collection.api")
     fun ethereumCollectionApi(factory: NftIndexerApiClientFactory): NftCollectionControllerApi =
-        factory.createNftCollectionApiClient(ethereum)
+        factory.createNftCollectionApiClient(blockchainName)
 
     @Bean
     @Qualifier("ethereum.order.api")
     fun ethereumOrderApi(factory: OrderIndexerApiClientFactory): OrderControllerApi =
-        factory.createOrderApiClient(ethereum)
+        factory.createOrderApiClient(blockchainName)
 
     @Bean
     @Qualifier("ethereum.auction.api")
     fun ethereumAuctionApi(factory: OrderIndexerApiClientFactory): AuctionControllerApi =
-        factory.createAuctionApiClient(ethereum)
+        factory.createAuctionApiClient(blockchainName)
 
     @Bean
     @Qualifier("ethereum.signature.api")
     fun ethereumSignatureApi(factory: OrderIndexerApiClientFactory): OrderSignatureControllerApi =
-        factory.createOrderSignatureApiClient(ethereum)
+        factory.createOrderSignatureApiClient(blockchainName)
 
     @Bean
     @Qualifier("ethereum.admin.api.order")
     fun ethereumOrderAdminApi(factory: OrderIndexerApiClientFactory): OrderAdminControllerApi =
-        factory.createOrderAdminApiClient(ethereum)
+        factory.createOrderAdminApiClient(blockchainName)
 
     @Bean
     @Qualifier("ethereum.domain.api")
     fun ethereumDomainApi(factory: NftIndexerApiClientFactory): NftDomainControllerApi =
-        factory.createNftDomainApiClient(ethereum)
+        factory.createNftDomainApiClient(blockchainName)
 
     @Bean
     @Qualifier("ethereum.activity.api.item")
     fun ethereumActivityItemApi(factory: NftIndexerApiClientFactory): NftActivityControllerApi =
-        factory.createNftActivityApiClient(ethereum)
+        factory.createNftActivityApiClient(blockchainName)
 
     @Bean
     @Qualifier("ethereum.activity.api.order")
     fun ethereumActivityOrderApi(factory: OrderIndexerApiClientFactory): OrderActivityControllerApi =
-        factory.createOrderActivityApiClient(ethereum)
+        factory.createOrderActivityApiClient(blockchainName)
 
     @Bean
     @Qualifier("ethereum.activity.api.auction")
     fun ethereumActivityAuctionApi(factory: OrderIndexerApiClientFactory): AuctionActivityControllerApi =
-        factory.createAuctionActivityApiClient(ethereum)
+        factory.createAuctionActivityApiClient(blockchainName)
 
     // -------------------- Services --------------------//
+
+    @Bean
+    fun ethereumBalanceService(
+        @Qualifier("ethereum.balance.api") controllerApi: BalanceControllerApi
+    ): EthBalanceService {
+        return EthBalanceService(blockchain, controllerApi)
+    }
 
     @Bean
     fun ethereumItemService(
         @Qualifier("ethereum.item.api") controllerApi: NftItemControllerApi
     ): EthItemService {
-        return EthereumItemService(controllerApi)
+        return EthItemService(blockchain, controllerApi)
     }
 
     @Bean
     fun ethereumOwnershipService(
         @Qualifier("ethereum.ownership.api") controllerApi: NftOwnershipControllerApi
     ): EthOwnershipService {
-        return EthereumOwnershipService(controllerApi)
+        return EthOwnershipService(blockchain, controllerApi)
     }
 
     @Bean
     fun ethereumCollectionService(
         @Qualifier("ethereum.collection.api") controllerApi: NftCollectionControllerApi
     ): EthCollectionService {
-        return EthereumCollectionService(controllerApi)
+        return EthCollectionService(blockchain, controllerApi)
     }
 
     @Bean
@@ -137,7 +145,7 @@ class EthereumApiConfiguration {
         @Qualifier("ethereum.admin.api.order") adminControllerApi: OrderAdminControllerApi,
         converter: EthOrderConverter
     ): EthOrderService {
-        return EthereumOrderService(controllerApi, adminControllerApi, converter)
+        return EthOrderService(blockchain, controllerApi, adminControllerApi, converter)
     }
 
     @Bean
@@ -145,21 +153,21 @@ class EthereumApiConfiguration {
         @Qualifier("ethereum.auction.api") auctionApi: AuctionControllerApi,
         converter: EthAuctionConverter
     ): EthAuctionService {
-        return EthereumAuctionService(auctionApi, converter)
+        return EthAuctionService(blockchain, auctionApi, converter)
     }
 
     @Bean
     fun ethereumSignatureService(
         @Qualifier("ethereum.signature.api") controllerApi: OrderSignatureControllerApi
     ): EthSignatureService {
-        return EthereumSignatureService(controllerApi)
+        return EthSignatureService(blockchain, controllerApi)
     }
 
     @Bean
     fun ethereumDomainService(
         @Qualifier("ethereum.domain.api") controllerApi: NftDomainControllerApi,
     ): EthDomainService {
-        return EthereumDomainService(controllerApi)
+        return EthDomainService(blockchain, controllerApi)
     }
 
     @Bean
@@ -169,6 +177,6 @@ class EthereumApiConfiguration {
         @Qualifier("ethereum.activity.api.auction") auctionActivityApi: AuctionActivityControllerApi,
         converter: EthActivityConverter
     ): EthActivityService {
-        return EthereumActivityService(itemActivityApi, orderActivityApi, auctionActivityApi, converter)
+        return EthActivityService(blockchain, itemActivityApi, orderActivityApi, auctionActivityApi, converter)
     }
 }

@@ -4,16 +4,19 @@ import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.core.test.data.randomWord
+import com.rarible.protocol.dto.AmmTradeInfoDto
 import com.rarible.protocol.dto.HoldNftItemIdsDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.order.api.client.OrderAdminControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
+import com.rarible.protocol.union.integration.ethereum.data.randomAmmPriceInfoDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOpenSeaV1OrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
@@ -21,18 +24,30 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.coEvery
 import io.mockk.confirmVerified
-import io.mockk.mockk
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
 
+@ExtendWith(MockKExtension::class)
 class EthOrderServiceTest {
 
-    private val orderControllerApi: OrderControllerApi = mockk()
-    private val orderAdminControllerApi: OrderAdminControllerApi = mockk()
+    private val blockchain = BlockchainDto.ETHEREUM
+
+    @MockK
+    private lateinit var orderControllerApi: OrderControllerApi
+
+    @MockK
+    private lateinit var orderAdminControllerApi: OrderAdminControllerApi
+
     private val converter = EthOrderConverter(CurrencyMock.currencyServiceMock)
-    private val service = EthereumOrderService(orderControllerApi, orderAdminControllerApi, converter)
+
+    @InjectMockKs
+    private lateinit var service: EthOrderService
 
     @Test
     fun `ethereum get all`() = runBlocking<Unit> {
@@ -152,5 +167,19 @@ class EthOrderServiceTest {
         val result = service.cancelOrder(orderId)
 
         assertThat(result.id.value).isEqualTo(EthConverter.convert(canceledOrder.hash))
+    }
+
+    @Test
+    fun `get amm trade info - ok`() = runBlocking<Unit> {
+        val orderId = randomWord()
+        val price = randomAmmPriceInfoDto()
+
+        coEvery {
+            orderControllerApi.getAmmBuyInfo(orderId, 1)
+        } returns AmmTradeInfoDto(listOf(price)).toMono()
+
+        val result = service.getAmmOrderTradeInfo(orderId, 1)
+
+        assertThat(result.orderId).isEqualTo(OrderIdDto(blockchain, orderId))
     }
 }

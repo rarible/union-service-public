@@ -4,6 +4,7 @@ import com.rarible.protocol.dto.FlowOrderIdsDto
 import com.rarible.protocol.flow.nft.api.client.FlowBidOrderControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
@@ -64,6 +65,10 @@ open class FlowOrderService(
         val ids = orderIds.map { it.toLong() }
         val orders = orderControllerApi.getOrdersByIds(FlowOrderIdsDto(ids)).collectList().awaitFirst()
         return orders.map { flowOrderConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getAmmOrderTradeInfo(id: String, itemCount: Int): UnionAmmTradeInfo {
+        throw UnionException("Operation is not supported for $blockchain")
     }
 
     override suspend fun getBidCurrencies(
@@ -267,7 +272,7 @@ open class FlowOrderService(
     }
 
     override suspend fun cancelOrder(id: String): UnionOrder {
-        throw UnionException("Operation is not supported for this blockchain")
+        throw UnionException("Operation is not supported for $blockchain")
     }
 
     override suspend fun getAmmOrdersAll(

@@ -19,7 +19,7 @@ import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.http.HttpStatus
 
-open class EthCollectionService(
+class EthCollectionService(
     blockchain: BlockchainDto,
     private val collectionControllerApi: NftCollectionControllerApi
 ) : AbstractBlockchainService(blockchain), CollectionService {
@@ -84,24 +84,3 @@ open class EthCollectionService(
         return EthCollectionConverter.convert(items, blockchain)
     }
 }
-
-open class EthereumCollectionService(
-    collectionControllerApi: NftCollectionControllerApi
-) : EthCollectionService(
-    BlockchainDto.ETHEREUM,
-    collectionControllerApi
-)
-
-open class PolygonCollectionService(
-    collectionControllerApi: NftCollectionControllerApi
-) : EthCollectionService(
-    BlockchainDto.POLYGON,
-    collectionControllerApi
-)
-
-open class MantleCollectionService(
-    collectionControllerApi: NftCollectionControllerApi
-) : EthCollectionService(
-    BlockchainDto.MANTLE,
-    collectionControllerApi
-)

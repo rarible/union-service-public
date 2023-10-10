@@ -8,7 +8,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import kotlinx.coroutines.reactive.awaitFirst
 
-open class EthSignatureService(
+class EthSignatureService(
     blockchain: BlockchainDto,
     private val signatureControllerApi: OrderSignatureControllerApi
 ) : AbstractBlockchainService(blockchain), SignatureService {
@@ -27,24 +27,3 @@ open class EthSignatureService(
         return signatureControllerApi.validate(ethereumForm).awaitFirst()
     }
 }
-
-open class EthereumSignatureService(
-    signatureControllerApi: OrderSignatureControllerApi
-) : EthSignatureService(
-    BlockchainDto.ETHEREUM,
-    signatureControllerApi
-)
-
-open class PolygonSignatureService(
-    signatureControllerApi: OrderSignatureControllerApi
-) : EthSignatureService(
-    BlockchainDto.POLYGON,
-    signatureControllerApi
-)
-
-open class MantleSignatureService(
-    signatureControllerApi: OrderSignatureControllerApi
-) : EthSignatureService(
-    BlockchainDto.MANTLE,
-    signatureControllerApi
-)

@@ -8,6 +8,7 @@ import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.AuctionService
+import com.rarible.protocol.union.core.service.BalanceService
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.DomainService
 import com.rarible.protocol.union.core.service.ItemService
@@ -16,6 +17,7 @@ import com.rarible.protocol.union.core.service.OwnershipService
 import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.dummy.DummyActivityService
 import com.rarible.protocol.union.core.service.dummy.DummyAuctionService
+import com.rarible.protocol.union.core.service.dummy.DummyBalanceService
 import com.rarible.protocol.union.core.service.dummy.DummyCollectionService
 import com.rarible.protocol.union.core.service.dummy.DummyDomainService
 import com.rarible.protocol.union.core.service.dummy.DummyItemService
@@ -87,6 +89,18 @@ class CoreConfiguration(
         val webClient = WebClient.builder().exchangeStrategies(strategies)
         webClientCustomizer.customize(webClient)
         return webClient.build()
+    }
+
+    @Bean
+    fun balanceServiceRouter(services: List<BalanceService>): BlockchainRouter<BalanceService> {
+        val result = ArrayList(services)
+        val disabled = getDisabledBlockchains(services)
+        disabled.forEach {
+            result.add(DummyBalanceService(it))
+            logger.info("BalanceService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
+        }
+        val blockchains = enabledBlockchains.toMutableList()
+        return BlockchainRouter(result, blockchains)
     }
 
     @Bean

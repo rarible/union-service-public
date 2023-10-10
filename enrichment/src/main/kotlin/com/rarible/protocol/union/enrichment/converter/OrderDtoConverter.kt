@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.converter
 
+import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionAsset
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOnChainAmmOrder
@@ -8,6 +9,8 @@ import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionPendingOrder
 import com.rarible.protocol.union.core.model.UnionPendingOrderCancel
 import com.rarible.protocol.union.core.model.UnionPendingOrderMatch
+import com.rarible.protocol.union.core.model.UnionSudoSwapTradeInfo
+import com.rarible.protocol.union.dto.AmmTradeInfoDto
 import com.rarible.protocol.union.dto.AssetDto
 import com.rarible.protocol.union.dto.AssetTypeDto
 import com.rarible.protocol.union.dto.OnChainAmmOrderDto
@@ -18,6 +21,8 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PendingOrderCancelDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PendingOrderMatchDto
+import com.rarible.protocol.union.dto.SudoSwapPriceInfoDto
+import com.rarible.protocol.union.dto.SudoSwapTradeInfoDto
 import com.rarible.protocol.union.enrichment.converter.data.EnrichmentAssetData
 import com.rarible.protocol.union.enrichment.converter.data.EnrichmentOrderData
 
@@ -50,6 +55,21 @@ object OrderDtoConverter {
             pending = source.pending?.map { convert(it, data) } ?: emptyList(),
             data = source.data,
         )
+    }
+
+    fun convert(source: UnionAmmTradeInfo): AmmTradeInfoDto {
+        return when (source) {
+            is UnionSudoSwapTradeInfo -> SudoSwapTradeInfoDto(
+                orderId = source.orderId,
+                prices = source.prices.map {
+                    SudoSwapPriceInfoDto(
+                        price = it.price,
+                        priceUsd = it.priceUsd,
+                        priceValue = it.priceValue,
+                    )
+                }
+            )
+        }
     }
 
     private fun convert(source: UnionOrder.Status): OrderStatusDto {

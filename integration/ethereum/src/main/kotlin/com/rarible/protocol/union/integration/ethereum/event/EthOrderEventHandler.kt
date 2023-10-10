@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import org.slf4j.LoggerFactory
 
-abstract class EthOrderEventHandler(
+class EthOrderEventHandler(
     blockchain: BlockchainDto,
     override val handler: IncomingEventHandler<UnionOrderEvent>,
     private val ethOrderConverter: EthOrderConverter
@@ -25,18 +25,3 @@ abstract class EthOrderEventHandler(
         return ethOrderConverter.convert(event, blockchain)
     }
 }
-
-open class EthereumOrderEventHandler(
-    handler: IncomingEventHandler<UnionOrderEvent>,
-    ethOrderConverter: EthOrderConverter
-) : EthOrderEventHandler(BlockchainDto.ETHEREUM, handler, ethOrderConverter)
-
-open class PolygonOrderEventHandler(
-    handler: IncomingEventHandler<UnionOrderEvent>,
-    ethOrderConverter: EthOrderConverter
-) : EthOrderEventHandler(BlockchainDto.POLYGON, handler, ethOrderConverter)
-
-open class MantleOrderEventHandler(
-    handler: IncomingEventHandler<UnionOrderEvent>,
-    ethOrderConverter: EthOrderConverter
-) : EthOrderEventHandler(BlockchainDto.MANTLE, handler, ethOrderConverter)

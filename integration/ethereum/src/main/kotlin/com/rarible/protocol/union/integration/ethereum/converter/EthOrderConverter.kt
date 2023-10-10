@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.protocol.dto.AmmOrderDto
 import com.rarible.protocol.dto.AmmOrderNftUpdateEventDto
+import com.rarible.protocol.dto.AmmTradeInfoDto
 import com.rarible.protocol.dto.CryptoPunkOrderDto
 import com.rarible.protocol.dto.LegacyOrderDto
 import com.rarible.protocol.dto.LooksRareOrderDto
@@ -29,6 +30,7 @@ import com.rarible.protocol.dto.SeaportOfferDto
 import com.rarible.protocol.dto.SeaportOrderTypeDto
 import com.rarible.protocol.dto.SeaportV1OrderDto
 import com.rarible.protocol.dto.X2Y2OrderDto
+import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionOnChainAmmOrder
 import com.rarible.protocol.union.core.model.UnionOnChainOrder
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -38,6 +40,8 @@ import com.rarible.protocol.union.core.model.UnionPendingOrder
 import com.rarible.protocol.union.core.model.UnionPendingOrderCancel
 import com.rarible.protocol.union.core.model.UnionPendingOrderMatch
 import com.rarible.protocol.union.core.model.UnionPoolNftUpdateEvent
+import com.rarible.protocol.union.core.model.UnionSudoSwapPriceInfoDto
+import com.rarible.protocol.union.core.model.UnionSudoSwapTradeInfo
 import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
@@ -161,6 +165,7 @@ class EthOrderConverter(
                     optionalRoyalties = optionalRoyalties,
                 )
             }
+
             is RaribleV2OrderDto -> {
                 UnionOrder(
                     id = orderId,
@@ -189,6 +194,7 @@ class EthOrderConverter(
                     optionalRoyalties = optionalRoyalties,
                 )
             }
+
             is OpenSeaV1OrderDto -> {
                 UnionOrder(
                     id = orderId,
@@ -233,6 +239,7 @@ class EthOrderConverter(
                     optionalRoyalties = optionalRoyalties,
                 )
             }
+
             is CryptoPunkOrderDto -> {
                 UnionOrder(
                     id = orderId,
@@ -261,6 +268,7 @@ class EthOrderConverter(
                     optionalRoyalties = optionalRoyalties,
                 )
             }
+
             is SeaportV1OrderDto -> {
                 UnionOrder(
                     id = orderId,
@@ -301,6 +309,7 @@ class EthOrderConverter(
                     optionalRoyalties = optionalRoyalties,
                 )
             }
+
             is X2Y2OrderDto -> {
                 UnionOrder(
                     id = orderId,
@@ -335,6 +344,7 @@ class EthOrderConverter(
                     optionalRoyalties = optionalRoyalties,
                 )
             }
+
             is LooksRareOrderDto -> {
                 UnionOrder(
                     id = orderId,
@@ -368,6 +378,7 @@ class EthOrderConverter(
                     optionalRoyalties = optionalRoyalties,
                 )
             }
+
             is AmmOrderDto -> {
                 val (data, platform) = when (val data = order.data) {
                     is OrderSudoSwapAmmDataV1Dto -> {
@@ -506,12 +517,14 @@ class EthOrderConverter(
                     originFees = source.originFees.map { EthConverter.convertToPayout(it, blockchain) }
                 )
             }
+
             is OrderRaribleV2DataV1Dto -> {
                 EthOrderDataRaribleV2DataV1Dto(
                     payouts = source.payouts.map { EthConverter.convertToPayout(it, blockchain) },
                     originFees = source.originFees.map { EthConverter.convertToPayout(it, blockchain) }
                 )
             }
+
             is OrderRaribleV2DataV3SellDto -> {
                 EthOrderDataRaribleV2DataV3SellDto(
                     payout = source.payout?.let { EthConverter.convertToPayout(it, blockchain) },
@@ -521,6 +534,7 @@ class EthOrderConverter(
                     marketplaceMarker = source.marketplaceMarker?.let { EthConverter.convert(it) }
                 )
             }
+
             is OrderRaribleV2DataV3BuyDto -> {
                 EthOrderDataRaribleV2DataV3BuyDto(
                     payout = source.payout?.let { EthConverter.convertToPayout(it, blockchain) },
@@ -577,6 +591,19 @@ class EthOrderConverter(
 
     fun convert(source: List<OrderStatusDto>?): List<com.rarible.protocol.dto.OrderStatusDto>? {
         return source?.map { convert(it) } ?: emptyList()
+    }
+
+    fun convert(orderId: OrderIdDto, source: AmmTradeInfoDto): UnionAmmTradeInfo {
+        return UnionSudoSwapTradeInfo(
+            orderId = orderId,
+            prices = source.prices.map {
+                UnionSudoSwapPriceInfoDto(
+                    price = it.price,
+                    priceUsd = it.priceUsd, // TODO replace with evaluation in Union?
+                    priceValue = it.priceValue
+                )
+            }
+        )
     }
 
     private fun convert(source: OrderOpenSeaV1DataV1Dto.FeeMethod): EthOrderOpenSeaV1DataV1Dto.FeeMethod {

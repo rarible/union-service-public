@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.router.BlockchainService
@@ -32,6 +33,11 @@ interface OrderService : BlockchainService {
     suspend fun getOrdersByIds(
         orderIds: List<String>
     ): List<UnionOrder>
+
+    suspend fun getAmmOrderTradeInfo(
+        orderId: String,
+        itemCount: Int
+    ): UnionAmmTradeInfo
 
     suspend fun getBidCurrencies(
         itemId: String,

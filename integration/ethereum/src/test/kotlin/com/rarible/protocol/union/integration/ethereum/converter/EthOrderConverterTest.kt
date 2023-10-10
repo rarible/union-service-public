@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.core.test.data.randomAddress
+import com.rarible.core.test.data.randomWord
+import com.rarible.protocol.dto.AmmTradeInfoDto
 import com.rarible.protocol.dto.OrderCancelDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.dto.OrderSideMatchDto
@@ -12,6 +14,7 @@ import com.rarible.protocol.union.core.model.UnionOnChainOrder
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.model.UnionPendingOrderCancel
 import com.rarible.protocol.union.core.model.UnionPendingOrderMatch
+import com.rarible.protocol.union.core.model.UnionSudoSwapTradeInfo
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthLooksRareOrderDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
@@ -22,8 +25,10 @@ import com.rarible.protocol.union.dto.EthOrderSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthSeaportItemTypeDto
 import com.rarible.protocol.union.dto.EthSeaportOrderTypeDto
 import com.rarible.protocol.union.dto.EthX2Y2OrderDataV1Dto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.integration.ethereum.data.randomAmmPriceInfoDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCryptoPunksOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthLooksRareOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOnChainOrderDto
@@ -512,5 +517,21 @@ class EthOrderConverterTest {
         assertThat(data.nonce).isEqualTo(dto.data.nonce)
         assertThat(data.strategy.value).isEqualTo(dto.data.strategy.prefixed())
         assertThat(data.minPercentageToAsk).isEqualTo(dto.data.minPercentageToAsk)
+    }
+
+    @Test
+    fun `amm trade info`() = runBlocking<Unit> {
+        val orderId = OrderIdDto(BlockchainDto.ETHEREUM, randomWord())
+        val price = randomAmmPriceInfoDto()
+        val dto = AmmTradeInfoDto(listOf(price))
+
+        val converted = ethOrderConverter.convert(orderId, dto) as UnionSudoSwapTradeInfo
+        val convertedPrice = converted.prices[0]
+
+        assertThat(converted.orderId).isEqualTo(orderId)
+        assertThat(converted.prices).hasSize(1)
+        assertThat(convertedPrice.price).isEqualTo(price.price)
+        assertThat(convertedPrice.priceUsd).isEqualTo(price.priceUsd)
+        assertThat(convertedPrice.priceValue).isEqualTo(price.priceValue)
     }
 }

@@ -15,6 +15,7 @@ import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemEventTopicProvider
 import com.rarible.protocol.dto.NftOwnershipEventDto
 import com.rarible.protocol.dto.NftOwnershipEventTopicProvider
+import com.rarible.protocol.erc20.api.client.BalanceControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
@@ -181,6 +182,9 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Bean
     fun testCurrencyControllerApi(factory: UnionApiClientFactory) = factory.createCurrencyApiClient()
 
+    @Bean
+    fun testBalanceControllerApi(factory: UnionApiClientFactory) = factory.createBalanceApiClient()
+
     // --------------------- CURRENCY ---------------------//
 
     @Bean
@@ -188,6 +192,11 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     fun testCurrencyApi(): CurrencyControllerApi = CurrencyMock.currencyControllerApiMock
 
     // --------------------- ETHEREUM ---------------------//
+    @Bean
+    @Primary
+    @Qualifier("ethereum.balance.api")
+    fun testEthereumBalanceApi(): BalanceControllerApi = mockk()
+
     @Bean
     @Primary
     @Qualifier("ethereum.item.api")

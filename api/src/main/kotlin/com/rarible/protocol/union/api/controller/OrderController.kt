@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.protocol.union.api.service.select.OrderSourceSelectService
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.util.checkNullIds
+import com.rarible.protocol.union.dto.AmmTradeInfoDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdsDto
@@ -15,6 +16,7 @@ import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.CurrencyIdParser
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.converter.OrderDtoConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentOrderService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.springframework.http.ResponseEntity
@@ -49,6 +51,14 @@ class OrderController(
     ): ResponseEntity<OrdersDto> {
         val result = orderSourceSelector.getAllSync(blockchain, continuation, size, sort)
         return ResponseEntity.ok(toDto(result))
+    }
+
+    override suspend fun getAmmOrderTradeInfo(
+        id: String,
+        itemCount: Int
+    ): ResponseEntity<AmmTradeInfoDto> {
+        val result = orderSourceSelector.getAmmOrderTradeInfo(IdParser.parseOrderId(id), itemCount)
+        return ResponseEntity.ok(OrderDtoConverter.convert(result))
     }
 
     override suspend fun getOrderBidsByItem(

@@ -10,15 +10,24 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionD
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.mockk
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-class EthereumCollectionEventHandlerTest {
+@ExtendWith(MockKExtension::class)
+class EthCollectionEventHandlerTest {
 
-    private val incomingEventHandler: IncomingEventHandler<UnionCollectionEvent> = mockk()
-    private val handler = EthereumCollectionEventHandler(incomingEventHandler)
+    private val blockchain = BlockchainDto.ETHEREUM
+
+    @MockK
+    private lateinit var incomingEventHandler: IncomingEventHandler<UnionCollectionEvent>
+
+    @InjectMockKs
+    private lateinit var handler: EthCollectionEventHandler
 
     @BeforeEach
     fun beforeEach() {

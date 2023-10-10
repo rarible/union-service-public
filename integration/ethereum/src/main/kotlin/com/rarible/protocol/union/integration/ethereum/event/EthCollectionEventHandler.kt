@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import org.slf4j.LoggerFactory
 
-abstract class EthCollectionEventHandler(
+class EthCollectionEventHandler(
     blockchain: BlockchainDto,
     override val handler: IncomingEventHandler<UnionCollectionEvent>
 ) : AbstractBlockchainEventHandler<NftCollectionEventDto, UnionCollectionEvent>(
@@ -24,15 +24,3 @@ abstract class EthCollectionEventHandler(
         return EthCollectionConverter.convert(event, blockchain)
     }
 }
-
-open class EthereumCollectionEventHandler(
-    handler: IncomingEventHandler<UnionCollectionEvent>
-) : EthCollectionEventHandler(BlockchainDto.ETHEREUM, handler)
-
-open class PolygonCollectionEventHandler(
-    handler: IncomingEventHandler<UnionCollectionEvent>
-) : EthCollectionEventHandler(BlockchainDto.POLYGON, handler)
-
-open class MantleCollectionEventHandler(
-    handler: IncomingEventHandler<UnionCollectionEvent>
-) : EthCollectionEventHandler(BlockchainDto.MANTLE, handler)

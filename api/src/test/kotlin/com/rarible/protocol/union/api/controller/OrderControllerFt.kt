@@ -3,6 +3,8 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
+import com.rarible.core.test.data.randomWord
+import com.rarible.protocol.dto.AmmTradeInfoDto
 import com.rarible.protocol.dto.Erc20AssetTypeDto
 import com.rarible.protocol.dto.FlowOrdersPaginationDto
 import com.rarible.protocol.dto.OrderCurrenciesDto
@@ -18,6 +20,7 @@ import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
+import com.rarible.protocol.union.dto.SudoSwapTradeInfoDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -26,6 +29,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomAmmPriceInfoDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -37,6 +41,7 @@ import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
 import io.mockk.coEvery
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
@@ -522,5 +527,27 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         // Should be 0 without sub-requests
         assertThat(result.orders).hasSize(0)
+    }
+
+    @Test
+    fun `get amm trade info - sudo swap`() = runBlocking<Unit> {
+        val orderId = randomWord()
+        val fullOrderId = OrderIdDto(BlockchainDto.ETHEREUM, orderId)
+        val price = randomAmmPriceInfoDto()
+
+        coEvery {
+            testEthereumOrderApi.getAmmBuyInfo(orderId, 1)
+        } returns AmmTradeInfoDto(listOf(price)).toMono()
+
+        val result = orderControllerClient.getAmmOrderTradeInfo(fullOrderId.fullId(), 1)
+            .awaitSingle() as SudoSwapTradeInfoDto
+
+        val convertedPrice = result.prices[0]
+
+        assertThat(result.orderId).isEqualTo(fullOrderId)
+        assertThat(result.prices).hasSize(1)
+        assertThat(convertedPrice.price).isEqualTo(price.price)
+        assertThat(convertedPrice.priceUsd).isEqualTo(price.priceUsd)
+        assertThat(convertedPrice.priceValue).isEqualTo(price.priceValue)
     }
 }

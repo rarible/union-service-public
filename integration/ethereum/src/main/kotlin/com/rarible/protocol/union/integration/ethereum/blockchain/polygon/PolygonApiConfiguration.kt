@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.blockchain.polygon
 
+import com.rarible.protocol.erc20.api.client.BalanceControllerApi
+import com.rarible.protocol.erc20.api.client.Erc20IndexerApiClientFactory
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftDomainControllerApi
@@ -20,20 +22,13 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConve
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.service.EthActivityService
 import com.rarible.protocol.union.integration.ethereum.service.EthAuctionService
+import com.rarible.protocol.union.integration.ethereum.service.EthBalanceService
 import com.rarible.protocol.union.integration.ethereum.service.EthCollectionService
 import com.rarible.protocol.union.integration.ethereum.service.EthDomainService
 import com.rarible.protocol.union.integration.ethereum.service.EthItemService
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import com.rarible.protocol.union.integration.ethereum.service.EthOwnershipService
 import com.rarible.protocol.union.integration.ethereum.service.EthSignatureService
-import com.rarible.protocol.union.integration.ethereum.service.PolygonActivityService
-import com.rarible.protocol.union.integration.ethereum.service.PolygonAuctionService
-import com.rarible.protocol.union.integration.ethereum.service.PolygonCollectionService
-import com.rarible.protocol.union.integration.ethereum.service.PolygonDomainService
-import com.rarible.protocol.union.integration.ethereum.service.PolygonItemService
-import com.rarible.protocol.union.integration.ethereum.service.PolygonOrderService
-import com.rarible.protocol.union.integration.ethereum.service.PolygonOwnershipService
-import com.rarible.protocol.union.integration.ethereum.service.PolygonSignatureService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -44,91 +39,104 @@ import org.springframework.context.annotation.Import
 @EnableConfigurationProperties(value = [PolygonIntegrationProperties::class])
 class PolygonApiConfiguration {
 
-    private val polygon = BlockchainDto.POLYGON.name.lowercase()
+    private val blockchain = BlockchainDto.POLYGON
+    private val blockchainName = blockchain.name.lowercase()
 
     @Bean
     fun polygonBlockchain(): BlockchainDto {
-        return BlockchainDto.POLYGON
+        return blockchain
     }
 
     // -------------------- API --------------------//
 
     @Bean
+    @Qualifier("polygon.balance.api")
+    fun polygonBalanceApi(factory: Erc20IndexerApiClientFactory): BalanceControllerApi =
+        factory.createBalanceApiClient(blockchainName)
+
+    @Bean
     @Qualifier("polygon.item.api")
     fun polygonItemApi(factory: NftIndexerApiClientFactory): NftItemControllerApi =
-        factory.createNftItemApiClient(polygon)
+        factory.createNftItemApiClient(blockchainName)
 
     @Bean
     @Qualifier("polygon.ownership.api")
     fun polygonOwnershipApi(factory: NftIndexerApiClientFactory): NftOwnershipControllerApi =
-        factory.createNftOwnershipApiClient(polygon)
+        factory.createNftOwnershipApiClient(blockchainName)
 
     @Bean
     @Qualifier("polygon.collection.api")
     fun polygonCollectionApi(factory: NftIndexerApiClientFactory): NftCollectionControllerApi =
-        factory.createNftCollectionApiClient(polygon)
+        factory.createNftCollectionApiClient(blockchainName)
 
     @Bean
     @Qualifier("polygon.order.api")
     fun polygonOrderApi(factory: OrderIndexerApiClientFactory): OrderControllerApi =
-        factory.createOrderApiClient(polygon)
+        factory.createOrderApiClient(blockchainName)
 
     @Bean
     @Qualifier("polygon.auction.api")
     fun polygonAuctionApi(factory: OrderIndexerApiClientFactory): AuctionControllerApi =
-        factory.createAuctionApiClient(polygon)
+        factory.createAuctionApiClient(blockchainName)
 
     @Bean
     @Qualifier("polygon.signature.api")
     fun polygonSignatureApi(factory: OrderIndexerApiClientFactory): OrderSignatureControllerApi =
-        factory.createOrderSignatureApiClient(polygon)
+        factory.createOrderSignatureApiClient(blockchainName)
 
     @Bean
     @Qualifier("polygon.admin.api.order")
     fun polygonOrderAdminApi(factory: OrderIndexerApiClientFactory): OrderAdminControllerApi =
-        factory.createOrderAdminApiClient(polygon)
+        factory.createOrderAdminApiClient(blockchainName)
 
     @Bean
     @Qualifier("polygon.domain.api")
     fun polygonDomainApi(factory: NftIndexerApiClientFactory): NftDomainControllerApi =
-        factory.createNftDomainApiClient(polygon)
+        factory.createNftDomainApiClient(blockchainName)
 
     @Bean
     @Qualifier("polygon.activity.api.item")
     fun polygonActivityItemApi(factory: NftIndexerApiClientFactory): NftActivityControllerApi =
-        factory.createNftActivityApiClient(polygon)
+        factory.createNftActivityApiClient(blockchainName)
 
     @Bean
     @Qualifier("polygon.activity.api.order")
     fun polygonActivityOrderApi(factory: OrderIndexerApiClientFactory): OrderActivityControllerApi =
-        factory.createOrderActivityApiClient(polygon)
+        factory.createOrderActivityApiClient(blockchainName)
 
     @Bean
     @Qualifier("polygon.activity.api.auction")
     fun polygonActivityAuctionApi(factory: OrderIndexerApiClientFactory): AuctionActivityControllerApi =
-        factory.createAuctionActivityApiClient(polygon)
+        factory.createAuctionActivityApiClient(blockchainName)
 
     // -------------------- Services --------------------//
+
+    @Bean
+    fun polygonBalanceService(
+        @Qualifier("polygon.balance.api") controllerApi: BalanceControllerApi
+    ): EthBalanceService {
+        return EthBalanceService(blockchain, controllerApi)
+    }
 
     @Bean
     fun polygonItemService(
         @Qualifier("polygon.item.api") controllerApi: NftItemControllerApi
     ): EthItemService {
-        return PolygonItemService(controllerApi)
+        return EthItemService(blockchain, controllerApi)
     }
 
     @Bean
     fun polygonOwnershipService(
         @Qualifier("polygon.ownership.api") controllerApi: NftOwnershipControllerApi
     ): EthOwnershipService {
-        return PolygonOwnershipService(controllerApi)
+        return EthOwnershipService(blockchain, controllerApi)
     }
 
     @Bean
     fun polygonCollectionService(
         @Qualifier("polygon.collection.api") controllerApi: NftCollectionControllerApi
     ): EthCollectionService {
-        return PolygonCollectionService(controllerApi)
+        return EthCollectionService(blockchain, controllerApi)
     }
 
     @Bean
@@ -137,7 +145,7 @@ class PolygonApiConfiguration {
         @Qualifier("polygon.admin.api.order") adminControllerApi: OrderAdminControllerApi,
         converter: EthOrderConverter
     ): EthOrderService {
-        return PolygonOrderService(controllerApi, adminControllerApi, converter)
+        return EthOrderService(blockchain, controllerApi, adminControllerApi, converter)
     }
 
     @Bean
@@ -145,21 +153,21 @@ class PolygonApiConfiguration {
         @Qualifier("polygon.auction.api") auctionApi: AuctionControllerApi,
         converter: EthAuctionConverter
     ): EthAuctionService {
-        return PolygonAuctionService(auctionApi, converter)
+        return EthAuctionService(blockchain, auctionApi, converter)
     }
 
     @Bean
     fun polygonSignatureService(
         @Qualifier("polygon.signature.api") controllerApi: OrderSignatureControllerApi
     ): EthSignatureService {
-        return PolygonSignatureService(controllerApi)
+        return EthSignatureService(blockchain, controllerApi)
     }
 
     @Bean
     fun polygonDomainService(
         @Qualifier("polygon.domain.api") controllerApi: NftDomainControllerApi,
     ): EthDomainService {
-        return PolygonDomainService(controllerApi)
+        return EthDomainService(blockchain, controllerApi)
     }
 
     @Bean
@@ -169,6 +177,6 @@ class PolygonApiConfiguration {
         @Qualifier("polygon.activity.api.auction") auctionActivityApi: AuctionActivityControllerApi,
         converter: EthActivityConverter
     ): EthActivityService {
-        return PolygonActivityService(itemActivityApi, orderActivityApi, auctionActivityApi, converter)
+        return EthActivityService(blockchain, itemActivityApi, orderActivityApi, auctionActivityApi, converter)
     }
 }
