@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import org.slf4j.LoggerFactory
 
-abstract class EthActivityEventHandler(
+class EthActivityEventHandler(
     blockchain: BlockchainDto,
     override val handler: IncomingEventHandler<UnionActivity>,
     private val ethActivityConverter: EthActivityConverter
@@ -30,18 +30,3 @@ abstract class EthActivityEventHandler(
         return ethActivityConverter.convert(event, blockchain)
     }
 }
-
-open class EthereumActivityEventHandler(
-    handler: IncomingEventHandler<UnionActivity>,
-    ethActivityConverter: EthActivityConverter
-) : EthActivityEventHandler(BlockchainDto.ETHEREUM, handler, ethActivityConverter)
-
-open class PolygonActivityEventHandler(
-    handler: IncomingEventHandler<UnionActivity>,
-    ethActivityConverter: EthActivityConverter
-) : EthActivityEventHandler(BlockchainDto.POLYGON, handler, ethActivityConverter)
-
-open class MantleActivityEventHandler(
-    handler: IncomingEventHandler<UnionActivity>,
-    ethActivityConverter: EthActivityConverter
-) : EthActivityEventHandler(BlockchainDto.MANTLE, handler, ethActivityConverter)

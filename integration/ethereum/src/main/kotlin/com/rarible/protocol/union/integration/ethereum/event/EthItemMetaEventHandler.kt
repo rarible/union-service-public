@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemMetaConverter
 import org.slf4j.LoggerFactory
 
-abstract class EthItemMetaEventHandler(
+class EthItemMetaEventHandler(
     blockchain: BlockchainDto,
     override val handler: IncomingEventHandler<UnionItemMetaEvent>
 ) : AbstractBlockchainEventHandler<NftItemMetaEventDto, UnionItemMetaEvent>(
@@ -24,15 +24,3 @@ abstract class EthItemMetaEventHandler(
         return EthItemMetaConverter.convert(event, blockchain)
     }
 }
-
-open class EthereumItemMetaEventHandler(
-    handler: IncomingEventHandler<UnionItemMetaEvent>
-) : EthItemMetaEventHandler(BlockchainDto.ETHEREUM, handler)
-
-open class PolygonItemMetaEventHandler(
-    handler: IncomingEventHandler<UnionItemMetaEvent>
-) : EthItemMetaEventHandler(BlockchainDto.POLYGON, handler)
-
-open class MantleItemMetaEventHandler(
-    handler: IncomingEventHandler<UnionItemMetaEvent>
-) : EthItemMetaEventHandler(BlockchainDto.MANTLE, handler)

@@ -10,16 +10,25 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import io.mockk.coEvery
-import io.mockk.mockk
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
 
+@ExtendWith(MockKExtension::class)
 class EthCollectionServiceTest {
 
-    private val collectionControllerApi: NftCollectionControllerApi = mockk()
-    private val service = EthereumCollectionService(collectionControllerApi)
+    private val blockchain = BlockchainDto.ETHEREUM
+
+    @MockK
+    private lateinit var collectionControllerApi: NftCollectionControllerApi
+
+    @InjectMockKs
+    private lateinit var service: EthCollectionService
 
     @Test
     fun `ethereum get all collections`() = runBlocking<Unit> {
@@ -57,16 +66,16 @@ class EthCollectionServiceTest {
 
         assertThat(result).isEqualTo(expected)
     }
-/*
-    @Test
-    fun `ethereum refresh collection meta`() = runBlocking<Unit> {
-        val collectionId = randomAddressString()
-        coEvery {
-            collectionControllerApi.resetNftCollectionMetaById(collectionId)
-        } returns Mono.empty()
-        service.refreshCollectionMeta(collectionId)
-        coVerify(exactly = 1) { collectionControllerApi.resetNftCollectionMetaById(collectionId) }
-    }*/
+    /*
+        @Test
+        fun `ethereum refresh collection meta`() = runBlocking<Unit> {
+            val collectionId = randomAddressString()
+            coEvery {
+                collectionControllerApi.resetNftCollectionMetaById(collectionId)
+            } returns Mono.empty()
+            service.refreshCollectionMeta(collectionId)
+            coVerify(exactly = 1) { collectionControllerApi.resetNftCollectionMetaById(collectionId) }
+        }*/
 
     @Test
     fun `ethereum get collections by owner`() = runBlocking<Unit> {

@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum
 
+import com.rarible.protocol.erc20.api.client.Erc20IndexerApiClientFactory
+import com.rarible.protocol.erc20.api.client.Erc20IndexerApiServiceUriProvider
 import com.rarible.protocol.nft.api.client.NftIndexerApiClientFactory
 import com.rarible.protocol.nft.api.client.NftIndexerApiServiceUriProvider
 import com.rarible.protocol.order.api.client.OrderIndexerApiClientFactory
@@ -27,5 +29,10 @@ class EthApiFactoryConfiguration(
     @Bean
     fun ethOrderIndexerApiClientFactory(uriProvider: OrderIndexerApiServiceUriProvider): OrderIndexerApiClientFactory {
         return OrderIndexerApiClientFactory(uriProvider, webClientCustomizer)
+    }
+
+    @Bean
+    fun ethErc20IndexerApiClientFactory(uriProvider: Erc20IndexerApiServiceUriProvider): Erc20IndexerApiClientFactory {
+        return Erc20IndexerApiClientFactory(uriProvider, webClientCustomizer)
     }
 }

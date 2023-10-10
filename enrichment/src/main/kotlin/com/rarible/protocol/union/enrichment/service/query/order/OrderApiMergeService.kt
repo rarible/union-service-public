@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.service.query.order
 import com.rarible.core.common.flatMapAsync
 import com.rarible.core.common.mapAsync
 import com.rarible.protocol.union.core.continuation.UnionOrderContinuation
+import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -64,6 +65,16 @@ class OrderApiMergeService(
             .map { IdParser.parseOrderId(it) }
 
         return getByIds(ids)
+    }
+
+    suspend fun getAmmOrderTradeInfo(
+        id: OrderIdDto,
+        itemCount: Int
+    ): UnionAmmTradeInfo {
+        return router.getService(id.blockchain).getAmmOrderTradeInfo(
+            orderId = id.value,
+            itemCount = itemCount
+        )
     }
 
     override suspend fun getSellOrdersByItem(
@@ -185,9 +196,9 @@ class OrderApiMergeService(
         if (!ensureSameBlockchain(
                 makerBlockchainGroups +
                     listOf(
-                            itemId.blockchain.group(),
-                            originAddress?.blockchainGroup
-                        ),
+                        itemId.blockchain.group(),
+                        originAddress?.blockchainGroup
+                    ),
             )
         ) {
             logger.warn(

@@ -6,6 +6,7 @@ import com.rarible.core.kafka.KafkaSendResult
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.currency.dto.CurrencyRateDto
+import com.rarible.protocol.erc20.api.client.BalanceControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCollectionControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowNftItemControllerApi
@@ -77,6 +78,10 @@ abstract class AbstractIntegrationTest {
     lateinit var testCurrencyApi: CurrencyControllerApi
 
     // --------------------- ETHEREUM ---------------------//
+    @Autowired
+    @Qualifier("ethereum.balance.api")
+    lateinit var testEthereumBalanceApi: BalanceControllerApi
+
     @Autowired
     @Qualifier("ethereum.item.api")
     lateinit var testEthereumItemApi: NftItemControllerApi

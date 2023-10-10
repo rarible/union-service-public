@@ -58,18 +58,15 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.reactive.awaitFirst
-import org.slf4j.LoggerFactory
 import java.time.Instant
 
-open class EthActivityService(
+class EthActivityService(
     blockchain: BlockchainDto,
     private val activityItemControllerApi: NftActivityControllerApi,
     private val activityOrderControllerApi: OrderActivityControllerApi,
     private val activityAuctionControllerApi: AuctionActivityControllerApi,
     private val ethActivityConverter: EthActivityConverter
 ) : AbstractBlockchainService(blockchain), ActivityService {
-
-    private val logger = LoggerFactory.getLogger(javaClass)
 
     companion object {
 
@@ -459,42 +456,3 @@ open class EthActivityService(
         }
     }
 }
-
-open class EthereumActivityService(
-    activityItemControllerApi: NftActivityControllerApi,
-    activityOrderControllerApi: OrderActivityControllerApi,
-    activityAuctionControllerApi: AuctionActivityControllerApi,
-    ethActivityConverter: EthActivityConverter
-) : EthActivityService(
-    BlockchainDto.ETHEREUM,
-    activityItemControllerApi,
-    activityOrderControllerApi,
-    activityAuctionControllerApi,
-    ethActivityConverter
-)
-
-open class PolygonActivityService(
-    activityItemControllerApi: NftActivityControllerApi,
-    activityOrderControllerApi: OrderActivityControllerApi,
-    activityAuctionControllerApi: AuctionActivityControllerApi,
-    ethActivityConverter: EthActivityConverter
-) : EthActivityService(
-    BlockchainDto.POLYGON,
-    activityItemControllerApi,
-    activityOrderControllerApi,
-    activityAuctionControllerApi,
-    ethActivityConverter
-)
-
-open class MantleActivityService(
-    activityItemControllerApi: NftActivityControllerApi,
-    activityOrderControllerApi: OrderActivityControllerApi,
-    activityAuctionControllerApi: AuctionActivityControllerApi,
-    ethActivityConverter: EthActivityConverter
-) : EthActivityService(
-    BlockchainDto.MANTLE,
-    activityItemControllerApi,
-    activityOrderControllerApi,
-    activityAuctionControllerApi,
-    ethActivityConverter
-)

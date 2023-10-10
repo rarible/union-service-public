@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.service.router
 
+import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
@@ -49,6 +50,10 @@ class OrderProxyService(
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {
         return orderService.getOrdersByIds(orderIds)
+    }
+
+    override suspend fun getAmmOrderTradeInfo(id: String, itemCount: Int): UnionAmmTradeInfo {
+        return orderService.getAmmOrderTradeInfo(id, itemCount)
     }
 
     override suspend fun getBidCurrencies(

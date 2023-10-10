@@ -11,7 +11,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import org.slf4j.LoggerFactory
 
-abstract class EthAuctionEventHandler(
+class EthAuctionEventHandler(
     blockchain: BlockchainDto,
     override val handler: IncomingEventHandler<UnionAuctionEvent>,
     private val ethActionConverter: EthAuctionConverter
@@ -37,8 +37,3 @@ abstract class EthAuctionEventHandler(
         }
     }
 }
-
-open class EthereumAuctionEventHandler(
-    handler: IncomingEventHandler<UnionAuctionEvent>,
-    ethActionConverter: EthAuctionConverter
-) : EthAuctionEventHandler(BlockchainDto.ETHEREUM, handler, ethActionConverter)

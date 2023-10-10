@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.service.dummy
 
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
@@ -41,6 +42,10 @@ class DummyOrderService(
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {
         return emptyList()
+    }
+
+    override suspend fun getAmmOrderTradeInfo(id: String, itemCount: Int): UnionAmmTradeInfo {
+        throw UnionNotFoundException("Order [$id] not found, ${blockchain.name} is not available")
     }
 
     override suspend fun getBidCurrencies(

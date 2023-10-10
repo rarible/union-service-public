@@ -2,10 +2,12 @@ package com.rarible.protocol.union.api.service.select
 
 import com.rarible.protocol.union.api.service.elastic.OrderElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -37,6 +39,13 @@ class OrderSourceSelectService(
      */
     suspend fun getByIds(orderIdsDto: OrderIdsDto): List<UnionOrder> {
         return orderApiService.getByIds(orderIdsDto)
+    }
+
+    suspend fun getAmmOrderTradeInfo(
+        id: OrderIdDto,
+        itemCount: Int
+    ): UnionAmmTradeInfo {
+        return orderApiService.getAmmOrderTradeInfo(id, itemCount)
     }
 
     suspend fun getOrdersAll(

@@ -13,17 +13,28 @@ import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.mockk
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-class EthereumActivityEventHandlerTest {
+@ExtendWith(MockKExtension::class)
+class EthActivityEventHandlerTest {
 
-    private val incomingEventHandler: IncomingEventHandler<UnionActivity> = mockk()
+    private val blockchain = BlockchainDto.ETHEREUM
+
+    @MockK
+    private lateinit var incomingEventHandler: IncomingEventHandler<UnionActivity>
+
     private val ethAuctionConverter = EthAuctionConverter(CurrencyMock.currencyServiceMock)
+
     private val ethActivityConverter = EthActivityConverter(ethAuctionConverter)
-    private val handler = EthereumActivityEventHandler(incomingEventHandler, ethActivityConverter)
+
+    @InjectMockKs
+    private lateinit var handler: EthActivityEventHandler
 
     @BeforeEach
     fun beforeEach() {

@@ -8,7 +8,6 @@ import com.rarible.protocol.solana.dto.TokenEventDto
 import com.rarible.protocol.solana.dto.TokenMetaEventDto
 import com.rarible.protocol.solana.subscriber.SolanaEventsConsumerFactory
 import com.rarible.protocol.union.core.event.ConsumerFactory
-import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionActivity
@@ -99,7 +98,6 @@ class SolanaConsumerConfiguration(
             topic = SolanaEventTopicProvider.getTokenTopic(env),
             handler = handler,
             valueClass = TokenEventDto::class.java,
-            eventType = EventType.ITEM_META,
         )
     }
 
@@ -112,7 +110,6 @@ class SolanaConsumerConfiguration(
             topic = SolanaEventTopicProvider.getTokenMetaTopic(env),
             handler = handler,
             valueClass = TokenMetaEventDto::class.java,
-            eventType = EventType.ITEM_META,
         )
     }
 
@@ -125,7 +122,6 @@ class SolanaConsumerConfiguration(
             topic = SolanaEventTopicProvider.getBalanceTopic(env),
             handler = handler,
             valueClass = BalanceEventDto::class.java,
-            eventType = EventType.OWNERSHIP,
         )
     }
 
@@ -138,7 +134,6 @@ class SolanaConsumerConfiguration(
             topic = SolanaEventTopicProvider.getCollectionTopic(env),
             handler = handler,
             valueClass = com.rarible.protocol.solana.dto.CollectionEventDto::class.java,
-            eventType = EventType.COLLECTION,
         )
     }
 
@@ -151,7 +146,6 @@ class SolanaConsumerConfiguration(
             topic = SolanaEventTopicProvider.getOrderTopic(env),
             handler = handler,
             valueClass = com.rarible.protocol.solana.dto.OrderEventDto::class.java,
-            eventType = EventType.ORDER,
         )
     }
 
@@ -164,7 +158,6 @@ class SolanaConsumerConfiguration(
             topic = SolanaEventTopicProvider.getActivityTopic(env),
             handler = handler,
             valueClass = com.rarible.protocol.solana.dto.ActivityDto::class.java,
-            eventType = EventType.ACTIVITY,
         )
     }
 
@@ -172,7 +165,6 @@ class SolanaConsumerConfiguration(
         topic: String,
         handler: BlockchainEventHandler<B, U>,
         valueClass: Class<B>,
-        eventType: EventType
     ): RaribleKafkaConsumerWorker<B> {
         return consumerFactory.createBlockchainConsumerWorkerGroup(
             hosts = consumer.brokerReplicaSet!!,
@@ -180,7 +172,6 @@ class SolanaConsumerConfiguration(
             handler = handler,
             valueClass = valueClass,
             workers = workers,
-            eventType = eventType,
             batchSize = batchSize
         )
     }

@@ -2,6 +2,7 @@ package com.rarible.protocol.union.integration.immutablex.service
 
 import com.rarible.protocol.union.core.continuation.UnionOrderContinuation
 import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
@@ -73,6 +74,10 @@ class ImxOrderService(
         return orderClient.getByIds(orderIds).map {
             imxOrderConverter.convert(it, blockchain)
         }
+    }
+
+    override suspend fun getAmmOrderTradeInfo(id: String, itemCount: Int): UnionAmmTradeInfo {
+        throw UnionException("Operation is not supported for $blockchain")
     }
 
     override suspend fun getBidCurrencies(

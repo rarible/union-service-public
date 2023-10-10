@@ -46,6 +46,10 @@
         </dependency>
         <dependency>
             <groupId>com.rarible.protocol.ethereum</groupId>
+            <artifactId>protocol-client-erc20-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.rarible.protocol.ethereum</groupId>
             <artifactId>protocol-subscriber-nft</artifactId>
         </dependency>
         <dependency>

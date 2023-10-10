@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
@@ -50,6 +51,10 @@ open class TezosOrderService(
             emptyList()
         }
         return orders
+    }
+
+    override suspend fun getAmmOrderTradeInfo(id: String, itemCount: Int): UnionAmmTradeInfo {
+        throw UnionException("Operation is not supported for $blockchain")
     }
 
     override suspend fun getBidCurrencies(

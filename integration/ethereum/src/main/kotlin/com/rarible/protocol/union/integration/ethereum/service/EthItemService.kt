@@ -21,7 +21,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.http.HttpStatus
 
-open class EthItemService(
+class EthItemService(
     blockchain: BlockchainDto,
     private val itemControllerApi: NftItemControllerApi
 ) : AbstractBlockchainService(blockchain), ItemService {
@@ -124,24 +124,3 @@ open class EthItemService(
         return EthConverter.convert(ethToken)
     }
 }
-
-open class EthereumItemService(
-    itemControllerApi: NftItemControllerApi
-) : EthItemService(
-    BlockchainDto.ETHEREUM,
-    itemControllerApi
-)
-
-open class PolygonItemService(
-    itemControllerApi: NftItemControllerApi
-) : EthItemService(
-    BlockchainDto.POLYGON,
-    itemControllerApi
-)
-
-open class MantleItemService(
-    itemControllerApi: NftItemControllerApi
-) : EthItemService(
-    BlockchainDto.MANTLE,
-    itemControllerApi
-)

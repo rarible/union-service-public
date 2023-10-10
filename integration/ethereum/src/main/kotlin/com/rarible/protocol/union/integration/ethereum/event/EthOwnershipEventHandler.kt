@@ -9,7 +9,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
 import org.slf4j.LoggerFactory
 
-abstract class EthOwnershipEventHandler(
+class EthOwnershipEventHandler(
     blockchain: BlockchainDto,
     override val handler: IncomingEventHandler<UnionOwnershipEvent>
 ) : AbstractBlockchainEventHandler<NftOwnershipEventDto, UnionOwnershipEvent>(
@@ -24,15 +24,3 @@ abstract class EthOwnershipEventHandler(
         return EthOwnershipConverter.convert(event, blockchain)
     }
 }
-
-open class EthereumOwnershipEventHandler(
-    handler: IncomingEventHandler<UnionOwnershipEvent>
-) : EthOwnershipEventHandler(BlockchainDto.ETHEREUM, handler)
-
-open class PolygonOwnershipEventHandler(
-    handler: IncomingEventHandler<UnionOwnershipEvent>
-) : EthOwnershipEventHandler(BlockchainDto.POLYGON, handler)
-
-open class MantleOwnershipEventHandler(
-    handler: IncomingEventHandler<UnionOwnershipEvent>
-) : EthOwnershipEventHandler(BlockchainDto.MANTLE, handler)

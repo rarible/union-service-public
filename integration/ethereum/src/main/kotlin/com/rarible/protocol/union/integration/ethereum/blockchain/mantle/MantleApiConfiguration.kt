@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.blockchain.mantle
 
+import com.rarible.protocol.erc20.api.client.BalanceControllerApi
+import com.rarible.protocol.erc20.api.client.Erc20IndexerApiClientFactory
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftDomainControllerApi
@@ -20,20 +22,13 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConve
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.service.EthActivityService
 import com.rarible.protocol.union.integration.ethereum.service.EthAuctionService
+import com.rarible.protocol.union.integration.ethereum.service.EthBalanceService
 import com.rarible.protocol.union.integration.ethereum.service.EthCollectionService
 import com.rarible.protocol.union.integration.ethereum.service.EthDomainService
 import com.rarible.protocol.union.integration.ethereum.service.EthItemService
 import com.rarible.protocol.union.integration.ethereum.service.EthOrderService
 import com.rarible.protocol.union.integration.ethereum.service.EthOwnershipService
 import com.rarible.protocol.union.integration.ethereum.service.EthSignatureService
-import com.rarible.protocol.union.integration.ethereum.service.MantleActivityService
-import com.rarible.protocol.union.integration.ethereum.service.MantleAuctionService
-import com.rarible.protocol.union.integration.ethereum.service.MantleCollectionService
-import com.rarible.protocol.union.integration.ethereum.service.MantleDomainService
-import com.rarible.protocol.union.integration.ethereum.service.MantleItemService
-import com.rarible.protocol.union.integration.ethereum.service.MantleOrderService
-import com.rarible.protocol.union.integration.ethereum.service.MantleOwnershipService
-import com.rarible.protocol.union.integration.ethereum.service.MantleSignatureService
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -44,91 +39,104 @@ import org.springframework.context.annotation.Import
 @EnableConfigurationProperties(value = [MantleIntegrationProperties::class])
 class MantleApiConfiguration {
 
-    private val mantle = BlockchainDto.MANTLE.name.lowercase()
+    private val blockchain = BlockchainDto.MANTLE
+    private val blockchainName = blockchain.name.lowercase()
 
     @Bean
     fun mantleBlockchain(): BlockchainDto {
-        return BlockchainDto.MANTLE
+        return blockchain
     }
 
     // -------------------- API --------------------//
 
     @Bean
+    @Qualifier("mantle.balance.api")
+    fun mantleBalanceApi(factory: Erc20IndexerApiClientFactory): BalanceControllerApi =
+        factory.createBalanceApiClient(blockchainName)
+
+    @Bean
     @Qualifier("mantle.item.api")
     fun mantleItemApi(factory: NftIndexerApiClientFactory): NftItemControllerApi =
-        factory.createNftItemApiClient(mantle)
+        factory.createNftItemApiClient(blockchainName)
 
     @Bean
     @Qualifier("mantle.ownership.api")
     fun mantleOwnershipApi(factory: NftIndexerApiClientFactory): NftOwnershipControllerApi =
-        factory.createNftOwnershipApiClient(mantle)
+        factory.createNftOwnershipApiClient(blockchainName)
 
     @Bean
     @Qualifier("mantle.collection.api")
     fun mantleCollectionApi(factory: NftIndexerApiClientFactory): NftCollectionControllerApi =
-        factory.createNftCollectionApiClient(mantle)
+        factory.createNftCollectionApiClient(blockchainName)
 
     @Bean
     @Qualifier("mantle.order.api")
     fun mantleOrderApi(factory: OrderIndexerApiClientFactory): OrderControllerApi =
-        factory.createOrderApiClient(mantle)
+        factory.createOrderApiClient(blockchainName)
 
     @Bean
     @Qualifier("mantle.auction.api")
     fun mantleAuctionApi(factory: OrderIndexerApiClientFactory): AuctionControllerApi =
-        factory.createAuctionApiClient(mantle)
+        factory.createAuctionApiClient(blockchainName)
 
     @Bean
     @Qualifier("mantle.signature.api")
     fun mantleSignatureApi(factory: OrderIndexerApiClientFactory): OrderSignatureControllerApi =
-        factory.createOrderSignatureApiClient(mantle)
+        factory.createOrderSignatureApiClient(blockchainName)
 
     @Bean
     @Qualifier("mantle.admin.api.order")
     fun mantleOrderAdminApi(factory: OrderIndexerApiClientFactory): OrderAdminControllerApi =
-        factory.createOrderAdminApiClient(mantle)
+        factory.createOrderAdminApiClient(blockchainName)
 
     @Bean
     @Qualifier("mantle.domain.api")
     fun mantleDomainApi(factory: NftIndexerApiClientFactory): NftDomainControllerApi =
-        factory.createNftDomainApiClient(mantle)
+        factory.createNftDomainApiClient(blockchainName)
 
     @Bean
     @Qualifier("mantle.activity.api.item")
     fun mantleActivityItemApi(factory: NftIndexerApiClientFactory): NftActivityControllerApi =
-        factory.createNftActivityApiClient(mantle)
+        factory.createNftActivityApiClient(blockchainName)
 
     @Bean
     @Qualifier("mantle.activity.api.order")
     fun mantleActivityOrderApi(factory: OrderIndexerApiClientFactory): OrderActivityControllerApi =
-        factory.createOrderActivityApiClient(mantle)
+        factory.createOrderActivityApiClient(blockchainName)
 
     @Bean
     @Qualifier("mantle.activity.api.auction")
     fun mantleActivityAuctionApi(factory: OrderIndexerApiClientFactory): AuctionActivityControllerApi =
-        factory.createAuctionActivityApiClient(mantle)
+        factory.createAuctionActivityApiClient(blockchainName)
 
     // -------------------- Services --------------------//
+
+    @Bean
+    fun mantleBalanceService(
+        @Qualifier("mantle.balance.api") controllerApi: BalanceControllerApi
+    ): EthBalanceService {
+        return EthBalanceService(blockchain, controllerApi)
+    }
 
     @Bean
     fun mantleItemService(
         @Qualifier("mantle.item.api") controllerApi: NftItemControllerApi
     ): EthItemService {
-        return MantleItemService(controllerApi)
+        return EthItemService(blockchain, controllerApi)
     }
 
     @Bean
     fun mantleOwnershipService(
         @Qualifier("mantle.ownership.api") controllerApi: NftOwnershipControllerApi
     ): EthOwnershipService {
-        return MantleOwnershipService(controllerApi)
+        return EthOwnershipService(blockchain, controllerApi)
     }
 
     @Bean
     fun mantleCollectionService(
         @Qualifier("mantle.collection.api") controllerApi: NftCollectionControllerApi
     ): EthCollectionService {
-        return MantleCollectionService(controllerApi)
+        return EthCollectionService(blockchain, controllerApi)
     }
 
     @Bean
@@ -137,7 +145,7 @@ class MantleApiConfiguration {
         @Qualifier("mantle.admin.api.order") adminControllerApi: OrderAdminControllerApi,
         converter: EthOrderConverter
     ): EthOrderService {
-        return MantleOrderService(controllerApi, adminControllerApi, converter)
+        return EthOrderService(blockchain, controllerApi, adminControllerApi, converter)
     }
 
     @Bean
@@ -145,21 +153,21 @@ class MantleApiConfiguration {
         @Qualifier("mantle.auction.api") auctionApi: AuctionControllerApi,
         converter: EthAuctionConverter
     ): EthAuctionService {
-        return MantleAuctionService(auctionApi, converter)
+        return EthAuctionService(blockchain, auctionApi, converter)
     }
 
     @Bean
     fun mantleSignatureService(
         @Qualifier("mantle.signature.api") controllerApi: OrderSignatureControllerApi
     ): EthSignatureService {
-        return MantleSignatureService(controllerApi)
+        return EthSignatureService(blockchain, controllerApi)
     }
 
     @Bean
     fun mantleDomainService(
         @Qualifier("mantle.domain.api") controllerApi: NftDomainControllerApi,
     ): EthDomainService {
-        return MantleDomainService(controllerApi)
+        return EthDomainService(blockchain, controllerApi)
     }
 
     @Bean
@@ -169,6 +177,6 @@ class MantleApiConfiguration {
         @Qualifier("mantle.activity.api.auction") auctionActivityApi: AuctionActivityControllerApi,
         converter: EthActivityConverter
     ): EthActivityService {
-        return MantleActivityService(itemActivityApi, orderActivityApi, auctionActivityApi, converter)
+        return EthActivityService(blockchain, itemActivityApi, orderActivityApi, auctionActivityApi, converter)
     }
 }

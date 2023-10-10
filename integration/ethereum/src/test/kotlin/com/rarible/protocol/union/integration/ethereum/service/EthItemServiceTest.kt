@@ -22,20 +22,29 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.mockk
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 
+@ExtendWith(MockKExtension::class)
 class EthItemServiceTest {
 
-    private val itemControllerApi: NftItemControllerApi = mockk()
-    private val service = EthereumItemService(itemControllerApi)
+    private val blockchain = BlockchainDto.ETHEREUM
+
+    @MockK
+    private lateinit var itemControllerApi: NftItemControllerApi
+
+    @InjectMockKs
+    private lateinit var service: EthItemService
 
     @Test
     fun `ethereum get all items`() = runBlocking<Unit> {

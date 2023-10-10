@@ -3,6 +3,7 @@ package com.rarible.protocol.union.integration.solana.service
 import com.rarible.protocol.solana.api.client.OrderControllerApi
 import com.rarible.protocol.solana.dto.OrderIdsDto
 import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
@@ -60,6 +61,10 @@ open class SolanaOrderService(
     override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {
         val result = orderApi.getOrdersByIds(OrderIdsDto(orderIds)).awaitFirst()
         return result.orders.map { solanaOrderConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getAmmOrderTradeInfo(id: String, itemCount: Int): UnionAmmTradeInfo {
+        throw UnionException("Operation is not supported for $blockchain")
     }
 
     override suspend fun getBidCurrencies(

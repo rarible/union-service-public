@@ -20,21 +20,23 @@ class ConsumerFactory(
         handler: BlockchainEventHandler<T, *>,
         valueClass: Class<T>,
         workers: Map<String, Int>,
-        eventType: EventType,
         batchSize: Int
     ): RaribleKafkaConsumerWorker<T> {
         val settings = RaribleKafkaConsumerSettings(
             hosts = hosts,
             topic = topic,
-            group = consumerGroup(eventType),
-            concurrency = workers.getOrDefault(eventType.value, 9),
+            group = consumerGroup(handler.eventType),
+            concurrency = workers.getOrDefault(handler.eventType.value, 9),
             batchSize = batchSize,
             async = false,
             offsetResetStrategy = OffsetResetStrategy.EARLIEST,
             valueClass = valueClass
         )
-        val eventCounter =
-            eventCountMetrics.eventReceivedGauge(EventCountMetrics.Stage.INDEXER, handler.blockchain, eventType)
+        val eventCounter = eventCountMetrics.eventReceivedGauge(
+            EventCountMetrics.Stage.INDEXER,
+            handler.blockchain,
+            handler.eventType
+        )
         return kafkaConsumerFactory.createWorker(settings, BlockchainEventHandlerWrapper(handler, eventCounter))
     }
 

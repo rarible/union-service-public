@@ -13,7 +13,6 @@ import com.rarible.protocol.dto.FlowOrderEventDto
 import com.rarible.protocol.dto.FlowOrderEventTopicProvider
 import com.rarible.protocol.dto.FlowOwnershipEventDto
 import com.rarible.protocol.union.core.event.ConsumerFactory
-import com.rarible.protocol.union.core.event.EventType
 import com.rarible.protocol.union.core.handler.BlockchainEventHandler
 import com.rarible.protocol.union.core.handler.IncomingEventHandler
 import com.rarible.protocol.union.core.model.UnionActivity
@@ -89,7 +88,6 @@ class FlowConsumerConfiguration(
             topic = FlowNftItemEventTopicProvider.getTopic(env),
             handler = handler,
             valueClass = FlowNftItemEventDto::class.java,
-            eventType = EventType.ITEM,
         )
     }
 
@@ -101,7 +99,6 @@ class FlowConsumerConfiguration(
             topic = FlowNftOwnershipEventTopicProvider.getTopic(env),
             handler = handler,
             valueClass = FlowOwnershipEventDto::class.java,
-            eventType = EventType.OWNERSHIP,
         )
     }
 
@@ -113,7 +110,6 @@ class FlowConsumerConfiguration(
             topic = FlowNftCollectionEventTopicProvider.getTopic(env),
             handler = handler,
             valueClass = FlowCollectionEventDto::class.java,
-            eventType = EventType.COLLECTION,
         )
     }
 
@@ -125,7 +121,6 @@ class FlowConsumerConfiguration(
             topic = FlowOrderEventTopicProvider.getTopic(env),
             handler = handler,
             valueClass = FlowOrderEventDto::class.java,
-            eventType = EventType.ORDER,
         )
     }
 
@@ -137,7 +132,6 @@ class FlowConsumerConfiguration(
             topic = FlowActivityEventTopicProvider.getActivityTopic(env),
             handler = handler,
             valueClass = FlowActivityEventDto::class.java,
-            eventType = EventType.ACTIVITY,
         )
     }
 
@@ -145,7 +139,6 @@ class FlowConsumerConfiguration(
         topic: String,
         handler: BlockchainEventHandler<B, U>,
         valueClass: Class<B>,
-        eventType: EventType
     ): RaribleKafkaConsumerWorker<B> {
         return consumerFactory.createBlockchainConsumerWorkerGroup(
             hosts = consumer.brokerReplicaSet!!,
@@ -153,7 +146,6 @@ class FlowConsumerConfiguration(
             handler = handler,
             valueClass = valueClass,
             workers = workers,
-            eventType = eventType,
             batchSize = batchSize
         )
     }

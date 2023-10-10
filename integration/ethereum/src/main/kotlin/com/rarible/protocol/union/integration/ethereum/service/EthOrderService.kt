@@ -4,6 +4,7 @@ import com.rarible.protocol.dto.OrderIdsDto
 import com.rarible.protocol.dto.OrderStateDto
 import com.rarible.protocol.order.api.client.OrderAdminControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
+import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
@@ -11,6 +12,7 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -19,8 +21,9 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitSingle
 
-open class EthOrderService(
+class EthOrderService(
     override val blockchain: BlockchainDto,
     private val orderControllerApi: OrderControllerApi,
     private val orderAdminControllerApi: OrderAdminControllerApi,
@@ -66,6 +69,12 @@ open class EthOrderService(
         val orderIdsDto = OrderIdsDto(orderIds)
         val orders = orderControllerApi.getByIds(orderIdsDto).awaitFirst().orders
         return orders.map { ethOrderConverter.convert(it, blockchain) }
+    }
+
+    override suspend fun getAmmOrderTradeInfo(id: String, itemCount: Int): UnionAmmTradeInfo {
+        val orderId = OrderIdDto(blockchain, id)
+        val tradeInfo = orderControllerApi.getAmmBuyInfo(id, itemCount).awaitSingle()
+        return ethOrderConverter.convert(orderId, tradeInfo)
     }
 
     override suspend fun getBidCurrencies(
@@ -365,36 +374,3 @@ open class EthOrderService(
         return filtered.ifEmpty { null }
     }
 }
-
-open class EthereumOrderService(
-    orderControllerApi: OrderControllerApi,
-    orderAdminControllerApi: OrderAdminControllerApi,
-    ethOrderConverter: EthOrderConverter
-) : EthOrderService(
-    BlockchainDto.ETHEREUM,
-    orderControllerApi,
-    orderAdminControllerApi,
-    ethOrderConverter
-)
-
-open class PolygonOrderService(
-    orderControllerApi: OrderControllerApi,
-    orderAdminControllerApi: OrderAdminControllerApi,
-    ethOrderConverter: EthOrderConverter
-) : EthOrderService(
-    BlockchainDto.POLYGON,
-    orderControllerApi,
-    orderAdminControllerApi,
-    ethOrderConverter
-)
-
-open class MantleOrderService(
-    orderControllerApi: OrderControllerApi,
-    orderAdminControllerApi: OrderAdminControllerApi,
-    ethOrderConverter: EthOrderConverter
-) : EthOrderService(
-    BlockchainDto.MANTLE,
-    orderControllerApi,
-    orderAdminControllerApi,
-    ethOrderConverter
-)

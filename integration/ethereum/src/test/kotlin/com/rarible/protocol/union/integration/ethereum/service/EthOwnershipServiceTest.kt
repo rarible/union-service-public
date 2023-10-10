@@ -13,16 +13,25 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipId
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
-import io.mockk.mockk
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import reactor.kotlin.core.publisher.toMono
 
+@ExtendWith(MockKExtension::class)
 class EthOwnershipServiceTest {
 
-    private val ownershipControllerApi: NftOwnershipControllerApi = mockk()
-    private val service = EthereumOwnershipService(ownershipControllerApi)
+    private val blockchain = BlockchainDto.ETHEREUM
+
+    @MockK
+    lateinit var ownershipControllerApi: NftOwnershipControllerApi
+
+    @InjectMockKs
+    private lateinit var service: EthOwnershipService
 
     @Test
     fun `ethereum get ownership by id`() = runBlocking<Unit> {
