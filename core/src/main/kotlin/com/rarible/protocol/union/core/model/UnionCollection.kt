@@ -26,7 +26,9 @@ data class UnionCollection(
         BURN,
         MINT_WITH_ADDRESS,
         SECONDARY_SALE_FEES,
-        MINT_AND_TRANSFER
+        MINT_AND_TRANSFER,
+        PAUSABLE,
+        NOT_FOR_SALE
     }
 
     enum class Structure {

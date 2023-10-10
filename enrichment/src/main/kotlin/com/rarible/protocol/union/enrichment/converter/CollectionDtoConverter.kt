@@ -51,6 +51,8 @@ object CollectionDtoConverter {
             UnionCollection.Features.MINT_WITH_ADDRESS -> CollectionDto.Features.MINT_WITH_ADDRESS
             UnionCollection.Features.SECONDARY_SALE_FEES -> CollectionDto.Features.SECONDARY_SALE_FEES
             UnionCollection.Features.MINT_AND_TRANSFER -> CollectionDto.Features.MINT_AND_TRANSFER
+            UnionCollection.Features.PAUSABLE -> CollectionDto.Features.PAUSABLE
+            UnionCollection.Features.NOT_FOR_SALE -> CollectionDto.Features.NOT_FOR_SALE
         }
     }
 
