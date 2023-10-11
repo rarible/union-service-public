@@ -47,7 +47,6 @@ class CollectionController(
         val fullCollectionId = IdParser.parseCollectionId(collection)
         val minterAddress = IdParser.parseAddress(minter)
         val tokenId = router.getService(fullCollectionId.blockchain)
-
             .generateTokenId(fullCollectionId.value, minterAddress.value)
         return ResponseEntity.ok(CollectionDtoConverter.convert(tokenId))
     }
