@@ -26,9 +26,9 @@ import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
-
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.converter.UnionOrderFormConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomAmmPriceInfoDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
@@ -47,6 +47,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import randomEthRaribleV2OrderFormDto
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
 
@@ -69,7 +70,35 @@ class OrderControllerFt : AbstractIntegrationTest() {
     lateinit var ethOrderConverter: EthOrderConverter
 
     @Test
+    fun `upsert order - ethereum`() = runBlocking<Unit> {
+        val order = randomEthSellOrderDto()
+        val form = randomEthRaribleV2OrderFormDto()
+        val nativeForm = UnionOrderFormConverter.convert(form)
+
+        ethereumOrderControllerApiMock.mockUpsertOrder(nativeForm, order)
+
+        val unionOrder = orderControllerClient.upsertOrder(form).awaitFirst()
+
+        assertThat(unionOrder.id.value).isEqualTo(order.hash.prefixed())
+        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+    }
+
+    @Test
     fun `get order by id - ethereum`() = runBlocking<Unit> {
+        val order = randomEthSellOrderDto()
+        val orderId = EthConverter.convert(order.hash)
+        val orderIdFull = OrderIdDto(BlockchainDto.ETHEREUM, order.hash.prefixed()).fullId()
+
+        ethereumOrderControllerApiMock.mockGetById(order)
+
+        val unionOrder = orderControllerClient.getOrderById(orderIdFull).awaitFirst()
+
+        assertThat(unionOrder.id.value).isEqualTo(orderId)
+        assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+    }
+
+    @Test
+    fun `get validated order by id - ethereum`() = runBlocking<Unit> {
         val order = randomEthSellOrderDto()
         val orderId = EthConverter.convert(order.hash)
         val orderIdFull = OrderIdDto(BlockchainDto.ETHEREUM, order.hash.prefixed()).fullId()

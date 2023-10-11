@@ -4,6 +4,7 @@ import com.rarible.protocol.dto.OrderIdsDto
 import com.rarible.protocol.dto.OrderStateDto
 import com.rarible.protocol.order.api.client.OrderAdminControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -11,7 +12,9 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthRaribleOrderFormDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -20,8 +23,9 @@ import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.converter.UnionOrderFormConverter
 import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
 
 class EthOrderService(
     override val blockchain: BlockchainDto,
@@ -29,6 +33,18 @@ class EthOrderService(
     private val orderAdminControllerApi: OrderAdminControllerApi,
     private val ethOrderConverter: EthOrderConverter
 ) : AbstractBlockchainService(blockchain), OrderService {
+
+    override suspend fun upsertOrder(form: OrderFormDto): UnionOrder {
+        if (form !is EthRaribleOrderFormDto) {
+            throw UnionException(
+                "OrderForm ${form.javaClass.simpleName} is not supported by $blockchain," +
+                    " use one of ${EthRaribleOrderFormDto::class.java.simpleName}"
+            )
+        }
+        val nativeForm = UnionOrderFormConverter.convert(form)
+        val result = orderControllerApi.upsertOrder(nativeForm).awaitSingle()
+        return ethOrderConverter.convert(result, blockchain)
+    }
 
     override suspend fun getOrdersAll(
         continuation: String?,
@@ -62,6 +78,11 @@ class EthOrderService(
 
     override suspend fun getOrderById(id: String): UnionOrder {
         val order = orderControllerApi.getOrderByHash(id).awaitFirst()
+        return ethOrderConverter.convert(order, blockchain)
+    }
+
+    override suspend fun getValidatedOrderById(id: String): UnionOrder {
+        val order = orderControllerApi.getValidatedOrderByHash(id).awaitFirst()
         return ethOrderConverter.convert(order, blockchain)
     }
 

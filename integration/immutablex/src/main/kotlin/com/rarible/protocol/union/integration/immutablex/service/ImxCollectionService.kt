@@ -3,9 +3,9 @@ package com.rarible.protocol.union.integration.immutablex.service
 import com.rarible.protocol.union.core.continuation.UnionCollectionContinuation
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
-import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.UnionCollectionTokenId
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -55,7 +55,7 @@ class ImxCollectionService(
         // Not applicable
     }
 
-    override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
+    override suspend fun generateTokenId(collectionId: String, minter: String?): UnionCollectionTokenId {
         throw UnionException("Not supported by $blockchain")
     }
 }

@@ -6,11 +6,12 @@ import com.rarible.protocol.dto.NftCollectionSetBaseUriEventDto
 import com.rarible.protocol.dto.NftCollectionUpdateEventDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.dto.NftTokenIdDto
-import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionEvent
 import com.rarible.protocol.union.core.model.UnionCollectionSetBaseUriEvent
+import com.rarible.protocol.union.core.model.UnionCollectionTokenIdSignature
 import com.rarible.protocol.union.core.model.UnionCollectionUpdateEvent
+import com.rarible.protocol.union.core.model.UnionEthCollectionTokenId
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.continuation.page.Page
@@ -37,6 +38,7 @@ object EthCollectionConverter {
                     eventTimeMarks = EthConverter.convert(source.eventTimeMarks)
                 )
             }
+
             is NftCollectionSetBaseUriEventDto -> {
                 val contract = EthConverter.convert(source.id)
                 UnionCollectionSetBaseUriEvent(
@@ -103,5 +105,12 @@ object EthCollectionConverter {
         }
     }
 
-    fun convert(source: NftTokenIdDto) = TokenId(source.tokenId.toString())
+    fun convert(source: NftTokenIdDto) = UnionEthCollectionTokenId(
+        tokenId = source.tokenId,
+        signature = UnionCollectionTokenIdSignature(
+            v = source.signature.v,
+            r = EthConverter.convert(source.signature.r),
+            s = EthConverter.convert(source.signature.s),
+        )
+    )
 }

@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -17,6 +18,10 @@ class OrderProxyService(
 ) : OrderService {
 
     override val blockchain = orderService.blockchain
+
+    override suspend fun upsertOrder(form: OrderFormDto): UnionOrder {
+        return orderService.upsertOrder(form)
+    }
 
     override suspend fun getOrdersAll(
         continuation: String?,
@@ -46,6 +51,10 @@ class OrderProxyService(
 
     override suspend fun getOrderById(id: String): UnionOrder {
         return orderService.getOrderById(id)
+    }
+
+    override suspend fun getValidatedOrderById(id: String): UnionOrder {
+        return orderService.getValidatedOrderById(id)
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {

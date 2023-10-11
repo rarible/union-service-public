@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -24,9 +25,17 @@ open class SolanaOrderService(
     private val solanaOrderConverter: SolanaOrderConverter
 ) : AbstractBlockchainService(BlockchainDto.SOLANA), OrderService {
 
+    override suspend fun upsertOrder(form: OrderFormDto): UnionOrder {
+        throw UnionException("Off-Chain orders not supported by $blockchain")
+    }
+
     override suspend fun getOrderById(id: String): UnionOrder {
         val order = orderApi.getOrderById(id).awaitFirst()
         return solanaOrderConverter.convert(order, blockchain)
+    }
+
+    override suspend fun getValidatedOrderById(id: String): UnionOrder {
+        return getOrderById(id)
     }
 
     override suspend fun getOrdersAll(

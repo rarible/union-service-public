@@ -1,9 +1,9 @@
 package com.rarible.protocol.union.core.service.dummy
 
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
-import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.UnionCollectionTokenId
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -12,6 +12,13 @@ import com.rarible.protocol.union.dto.continuation.page.Page
 class DummyCollectionService(
     blockchain: BlockchainDto
 ) : AbstractBlockchainService(blockchain), CollectionService {
+
+    override suspend fun generateTokenId(
+        collectionId: String,
+        minter: String?
+    ): UnionCollectionTokenId {
+        throw UnionNotFoundException("Collection [$collectionId] not found, ${blockchain.name} is not available")
+    }
 
     override suspend fun getAllCollections(
         continuation: String?,
@@ -32,10 +39,6 @@ class DummyCollectionService(
 
     override suspend fun getCollectionsByIds(ids: List<String>): List<UnionCollection> {
         return emptyList()
-    }
-
-    override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
-        throw UnionNotFoundException("Collection [$collectionId] not found, ${blockchain.name} is not available")
     }
 
     override suspend fun getCollectionsByOwner(

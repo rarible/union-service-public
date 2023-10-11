@@ -2,9 +2,10 @@ package com.rarible.protocol.union.integration.tezos.service
 
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
-import com.rarible.protocol.union.core.model.TokenId
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.UnionCollectionTokenId
+import com.rarible.protocol.union.core.model.UnionDefaultCollectionTokenId
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -62,7 +63,7 @@ open class TezosCollectionService(
         }
     }
 
-    override suspend fun generateNftTokenId(collectionId: String, minter: String?): TokenId {
+    override suspend fun generateTokenId(collectionId: String, minter: String?): UnionCollectionTokenId {
         val tokenId: BigInteger = try { // Adjust to existed count
             val actualCount = dipdupCollectionService.getTokenLastId(collectionId)
             tezosCollectionRepository.adjustTokenCount(collectionId, actualCount)
@@ -71,7 +72,7 @@ open class TezosCollectionService(
             logger.error("Error generating new tokenId: ${ex.message}", ex)
             throw UnionException("Collection wasn't found")
         }
-        return TokenId(tokenId.toString())
+        return UnionDefaultCollectionTokenId(tokenId)
     }
 
     override suspend fun getCollectionsByOwner(

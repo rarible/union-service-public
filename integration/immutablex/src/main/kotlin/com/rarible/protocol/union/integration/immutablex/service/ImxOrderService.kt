@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -30,6 +31,10 @@ class ImxOrderService(
     // TODO move out to configuration
     private val currencyProbeBatchSize = 64
     private val supportedPlatforms = setOf(PlatformDto.IMMUTABLEX)
+
+    override suspend fun upsertOrder(form: OrderFormDto): UnionOrder {
+        throw UnionException("Off-Chain orders not supported by $blockchain")
+    }
 
     override suspend fun getOrdersAll(
         continuation: String?,
@@ -68,6 +73,10 @@ class ImxOrderService(
     override suspend fun getOrderById(id: String): UnionOrder {
         val order = orderClient.getById(id)
         return imxOrderConverter.convert(order, blockchain)
+    }
+
+    override suspend fun getValidatedOrderById(id: String): UnionOrder {
+        return getOrderById(id)
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {

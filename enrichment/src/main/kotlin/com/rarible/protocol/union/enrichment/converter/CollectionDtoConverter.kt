@@ -2,8 +2,15 @@ package com.rarible.protocol.union.enrichment.converter
 
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.UnionCollectionTokenId
+import com.rarible.protocol.union.core.model.UnionDefaultCollectionTokenId
+import com.rarible.protocol.union.core.model.UnionEthCollectionTokenId
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.CollectionTokenIdDto
+import com.rarible.protocol.union.dto.DefaultCollectionTokenIdDto
+import com.rarible.protocol.union.dto.EthCollectionTokenIdDto
+import com.rarible.protocol.union.dto.EthCollectionTokenIdSignatureDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
@@ -43,6 +50,20 @@ object CollectionDtoConverter {
         )
     }
 
+    fun convert(source: UnionCollectionTokenId): CollectionTokenIdDto {
+        return when (source) {
+            is UnionDefaultCollectionTokenId -> DefaultCollectionTokenIdDto(source.tokenId)
+            is UnionEthCollectionTokenId -> EthCollectionTokenIdDto(
+                tokenId = source.tokenId,
+                signature = EthCollectionTokenIdSignatureDto(
+                    s = source.signature.s,
+                    r = source.signature.r,
+                    v = source.signature.v,
+                )
+            )
+        }
+    }
+
     private fun convert(source: UnionCollection.Features): CollectionDto.Features {
         return when (source) {
             UnionCollection.Features.APPROVE_FOR_ALL -> CollectionDto.Features.APPROVE_FOR_ALL
@@ -73,6 +94,7 @@ object CollectionDtoConverter {
                 BlockchainDto.ETHEREUM,
                 BlockchainDto.POLYGON,
                 BlockchainDto.MANTLE -> CollectionDto.Type.ERC721
+
                 BlockchainDto.IMMUTABLEX -> CollectionDto.Type.IMMUTABLEX
                 BlockchainDto.FLOW -> CollectionDto.Type.FLOW
                 BlockchainDto.TEZOS -> CollectionDto.Type.TEZOS_NFT

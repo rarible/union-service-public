@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.router.BlockchainService
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -12,6 +13,10 @@ import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 
 interface OrderService : BlockchainService {
+
+    suspend fun upsertOrder(
+        form: OrderFormDto
+    ): UnionOrder
 
     suspend fun getOrdersAll(
         continuation: String?,
@@ -27,6 +32,10 @@ interface OrderService : BlockchainService {
     ): Slice<UnionOrder>
 
     suspend fun getOrderById(
+        id: String
+    ): UnionOrder
+
+    suspend fun getValidatedOrderById(
         id: String
     ): UnionOrder
 
