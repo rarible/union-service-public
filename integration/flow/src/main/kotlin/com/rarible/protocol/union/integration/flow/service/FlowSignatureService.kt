@@ -1,10 +1,12 @@
 package com.rarible.protocol.union.integration.flow.service
 
 import com.rarible.protocol.flow.nft.api.client.FlowNftCryptoControllerApi
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.SignatureInputFormDto
 import kotlinx.coroutines.reactive.awaitFirst
 import org.apache.commons.lang3.StringUtils
 
@@ -27,5 +29,9 @@ open class FlowSignatureService(
             signature,
             message
         ).awaitFirst()
+    }
+
+    override suspend fun getInput(form: SignatureInputFormDto): String {
+        throw UnionException("Operation is not supported for ${blockchain.name}")
     }
 }
