@@ -3,6 +3,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
+import com.rarible.core.test.data.randomBinary
 import com.rarible.core.test.data.randomBoolean
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
@@ -30,6 +31,9 @@ import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV2Dto
+import com.rarible.protocol.union.dto.EthOrderFormAssetDto
+import com.rarible.protocol.union.dto.EthRaribleV2OrderFormDto
 import com.rarible.protocol.union.dto.ItemHistoryDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderDataDto
@@ -98,7 +102,7 @@ fun randomOwnership(
 
 fun randomUnionAddress(
     blockchain: BlockchainDto = BlockchainDto.values().random(),
-    value: String = randomString(),
+    value: String = randomAddress().prefixed(),
 ) = UnionAddress(blockchain.group(), value)
 
 fun randomAuctionId(
@@ -163,7 +167,7 @@ fun randomAuction(
 )
 
 fun randomAssetTypeDto(blockchain: BlockchainDto): AssetTypeDto = EthErc721AssetTypeDto(
-    contract = ContractAddress(blockchain, randomString()),
+    contract = ContractAddress(blockchain, randomAddress().prefixed()),
     tokenId = randomBigInt(),
 )
 
@@ -312,3 +316,26 @@ fun convertUnionOwnershipToEsOwnership(source: UnionOwnership): EsOwnership {
         auctionOwnershipId = null,
     )
 }
+
+fun randomEthRaribleV2OrderFormDto(
+    blockchain: BlockchainDto = BlockchainDto.ETHEREUM,
+    maker: UnionAddress = randomUnionAddress(BlockchainDto.ETHEREUM),
+    taker: UnionAddress = randomUnionAddress(BlockchainDto.ETHEREUM),
+    make: EthOrderFormAssetDto = EthOrderFormAssetDto(randomAssetTypeDto(BlockchainDto.ETHEREUM), randomBigInt()),
+    take: EthOrderFormAssetDto = EthOrderFormAssetDto(randomAssetTypeDto(BlockchainDto.ETHEREUM), randomBigInt()),
+    startedAt: Instant? = nowMillis(),
+    endedAt: Instant = nowMillis(),
+    salt: BigInteger = randomBigInt(),
+    signature: String = randomBinary().prefixed(),
+) = EthRaribleV2OrderFormDto(
+    blockchain = blockchain,
+    maker = maker,
+    taker = taker,
+    make = make,
+    take = take,
+    startedAt = startedAt,
+    endedAt = endedAt,
+    salt = salt,
+    signature = signature,
+    data = EthOrderDataRaribleV2DataV2Dto(emptyList(), emptyList(), false),
+)

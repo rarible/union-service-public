@@ -19,6 +19,7 @@ import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
 import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV2Dto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3BuyDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3SellDto
 import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
@@ -85,6 +86,7 @@ object EsOrderConverter {
     fun origins(data: OrderDataDto): List<String> {
         return when (data) {
             is EthOrderDataRaribleV2DataV1Dto -> data.payouts.map { it.account } + data.originFees.map { it.account }
+            is EthOrderDataRaribleV2DataV2Dto -> data.payouts.map { it.account } + data.originFees.map { it.account }
             is EthOrderOpenSeaV1DataV1Dto -> listOf(data.feeRecipient)
             is FlowOrderDataV1Dto -> data.originFees.map { it.account }
             is TezosOrderDataLegacyDto -> data.payouts.map { it.account } + data.originFees.map { it.account }

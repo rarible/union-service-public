@@ -1,17 +1,23 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.core.test.data.randomAddress
+import com.rarible.core.test.data.randomBigInt
+import com.rarible.core.test.data.randomBinary
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.FlowNftCollectionDto
 import com.rarible.protocol.dto.NftCollectionDto
+import com.rarible.protocol.dto.NftSignatureDto
+import com.rarible.protocol.dto.NftTokenIdDto
 import com.rarible.protocol.union.api.client.CollectionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.converter.ContractAddressConverter
 import com.rarible.protocol.union.core.converter.EsCollectionConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthCollectionTokenIdDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
@@ -26,6 +32,7 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionCollectionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionAsset
@@ -89,6 +96,29 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     @BeforeEach
     fun setUp() {
         elasticsearchTestBootstrapper.bootstrap()
+    }
+
+    @Test
+    fun `generate token id - ok, ethereum`() = runBlocking<Unit> {
+        val collectionId = randomAddressString()
+        val minter = randomAddressString()
+        val collectionIdFull = ContractAddressConverter.convert(BlockchainDto.ETHEREUM, collectionId)
+        val minterFull = UnionAddressConverter.convert(BlockchainDto.ETHEREUM, minter)
+        val nativeTokenId = NftTokenIdDto(
+            tokenId = randomBigInt(),
+            signature = NftSignatureDto(v = 1, r = randomBinary(), s = randomBinary())
+        )
+
+        coEvery { testEthereumCollectionApi.generateNftTokenId(collectionId, minter) } returns nativeTokenId.toMono()
+
+        val tokenId = collectionControllerClient.generateTokenId(
+            collectionIdFull.fullId(), minterFull.fullId()
+        ).awaitFirst() as EthCollectionTokenIdDto
+
+        assertThat(tokenId.tokenId).isEqualTo(nativeTokenId.tokenId)
+        assertThat(tokenId.signature.s).isEqualTo(nativeTokenId.signature.s.prefixed())
+        assertThat(tokenId.signature.v).isEqualTo(nativeTokenId.signature.v)
+        assertThat(tokenId.signature.r).isEqualTo(nativeTokenId.signature.r.prefixed())
     }
 
     @Test

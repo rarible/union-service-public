@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -18,6 +19,10 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 class DummyOrderService(
     blockchain: BlockchainDto
 ) : AbstractBlockchainService(blockchain), OrderService {
+
+    override suspend fun upsertOrder(form: OrderFormDto): UnionOrder {
+        throw UnionException("Create/Update Order operation is not supported, ${blockchain.name} is not available")
+    }
 
     override suspend fun getOrdersAll(
         continuation: String?,
@@ -38,6 +43,10 @@ class DummyOrderService(
 
     override suspend fun getOrderById(id: String): UnionOrder {
         throw UnionNotFoundException("Order [$id] not found, ${blockchain.name} is not available")
+    }
+
+    override suspend fun getValidatedOrderById(id: String): UnionOrder {
+        return getOrderById(id)
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {

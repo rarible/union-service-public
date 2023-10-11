@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
@@ -43,9 +44,18 @@ class OrderApiMergeService(
 
     private val onlyActiveOrdersFilter = listOf(OrderStatusDto.ACTIVE)
 
+    suspend fun upsertOrder(form: OrderFormDto): UnionOrder {
+        return router.getService(form.blockchain).upsertOrder(form)
+    }
+
     suspend fun getOrderById(id: String): UnionOrder {
         val orderId = IdParser.parseOrderId(id)
         return router.getService(orderId.blockchain).getOrderById(orderId.value)
+    }
+
+    suspend fun getValidatedOrderById(id: String): UnionOrder {
+        val orderId = IdParser.parseOrderId(id)
+        return router.getService(orderId.blockchain).getValidatedOrderById(orderId.value)
     }
 
     suspend fun getByIds(ids: List<OrderIdDto>): List<UnionOrder> {

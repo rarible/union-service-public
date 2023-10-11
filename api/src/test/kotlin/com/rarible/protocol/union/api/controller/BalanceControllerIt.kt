@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.protocol.dto.Erc20DecimalBalanceDto
 import com.rarible.protocol.union.api.client.BalanceControllerApi
@@ -19,6 +18,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
+import java.math.BigDecimal
 
 @IntegrationTest
 class BalanceControllerIt : AbstractIntegrationTest() {
@@ -33,7 +33,7 @@ class BalanceControllerIt : AbstractIntegrationTest() {
         val ethBalance = Erc20DecimalBalanceDto(
             owner = Address.apply(owner.value),
             balance = randomBigInt(),
-            decimalBalance = randomBigDecimal(),
+            decimalBalance = BigDecimal("12.23"),
             contract = Address.apply(currencyId.value)
         )
 

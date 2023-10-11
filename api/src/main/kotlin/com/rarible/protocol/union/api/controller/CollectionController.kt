@@ -9,10 +9,12 @@ import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
+import com.rarible.protocol.union.dto.CollectionTokenIdDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.CollectionsSearchRequestDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
@@ -37,6 +39,17 @@ class CollectionController(
 ) : CollectionControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    override suspend fun generateTokenId(
+        collection: String,
+        minter: String
+    ): ResponseEntity<CollectionTokenIdDto> {
+        val fullCollectionId = IdParser.parseCollectionId(collection)
+        val minterAddress = IdParser.parseAddress(minter)
+        val tokenId = router.getService(fullCollectionId.blockchain)
+            .generateTokenId(fullCollectionId.value, minterAddress.value)
+        return ResponseEntity.ok(CollectionDtoConverter.convert(tokenId))
+    }
 
     override suspend fun getAllCollections(
         blockchains: List<BlockchainDto>?,
@@ -92,13 +105,14 @@ class CollectionController(
         return ResponseEntity.ok(collectionSourceSelector.searchCollections(collectionsSearchRequestDto))
     }
 
+    // TODO remove later, this is hacky stuff
     @GetMapping(value = ["/v0.1/collections/{collectionId}/generate_token_id"])
     suspend fun generateId(
         @PathVariable("collectionId") collectionId: String,
         @RequestParam(value = "minter", required = false) minter: String,
     ): ResponseEntity<TokenId> {
         val fullCollectionId = IdParser.parseCollectionId(collectionId)
-        val tokenId = router.getService(fullCollectionId.blockchain).generateNftTokenId(fullCollectionId.value, minter)
-        return ResponseEntity.ok(tokenId)
+        val tokenId = router.getService(fullCollectionId.blockchain).generateTokenId(fullCollectionId.value, minter)
+        return ResponseEntity.ok(TokenId(tokenId.tokenId.toString()))
     }
 }

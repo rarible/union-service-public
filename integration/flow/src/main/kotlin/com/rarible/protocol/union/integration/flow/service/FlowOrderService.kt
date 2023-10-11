@@ -12,6 +12,7 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -27,6 +28,10 @@ open class FlowOrderService(
     private val bidControllerApi: FlowBidOrderControllerApi,
     private val flowOrderConverter: FlowOrderConverter
 ) : AbstractBlockchainService(BlockchainDto.FLOW), OrderService {
+
+    override suspend fun upsertOrder(form: OrderFormDto): UnionOrder {
+        throw UnionException("Off-Chain orders not supported by $blockchain")
+    }
 
     override suspend fun getOrdersAll(
         continuation: String?,
@@ -59,6 +64,10 @@ open class FlowOrderService(
     override suspend fun getOrderById(id: String): UnionOrder {
         val order = orderControllerApi.getOrderByOrderId(id).awaitFirst()
         return flowOrderConverter.convert(order, blockchain)
+    }
+
+    override suspend fun getValidatedOrderById(id: String): UnionOrder {
+        return getOrderById(id)
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {

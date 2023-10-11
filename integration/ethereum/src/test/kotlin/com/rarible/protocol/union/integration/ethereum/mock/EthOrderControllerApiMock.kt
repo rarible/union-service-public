@@ -3,6 +3,7 @@ package com.rarible.protocol.union.integration.ethereum.mock
 import com.rarible.protocol.dto.AssetTypeDto
 import com.rarible.protocol.dto.OrderCurrenciesDto
 import com.rarible.protocol.dto.OrderDto
+import com.rarible.protocol.dto.OrderFormDto
 import com.rarible.protocol.dto.OrderIdsDto
 import com.rarible.protocol.dto.OrderStatusDto
 import com.rarible.protocol.dto.OrdersPaginationDto
@@ -22,6 +23,14 @@ class EthOrderControllerApiMock(
         orders.forEach {
             every {
                 orderControllerApi.getOrderByHash(it.hash.prefixed())
+            } returns it.toMono()
+        }
+    }
+
+    fun mockGetValidatedById(vararg orders: OrderDto) {
+        orders.forEach {
+            every {
+                orderControllerApi.getValidatedOrderByHash(it.hash.prefixed())
             } returns it.toMono()
         }
     }
@@ -165,5 +174,9 @@ class EthOrderControllerApiMock(
                 any()
             )
         } returns Mono.just(OrdersPaginationDto(returnOrders.asList(), null))
+    }
+
+    fun mockUpsertOrder(form: OrderFormDto, order: OrderDto) {
+        every { orderControllerApi.upsertOrder(form) } returns order.toMono()
     }
 }

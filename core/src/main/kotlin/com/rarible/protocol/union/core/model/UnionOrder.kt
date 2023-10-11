@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
 import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV2Dto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3BuyDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3SellDto
 import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
@@ -99,6 +100,7 @@ data class UnionOrder(
         return when (data) {
             is EthOrderDataLegacyDto -> emptyList()
             is EthOrderDataRaribleV2DataV1Dto -> data.originFees.map { it.account.value }
+            is EthOrderDataRaribleV2DataV2Dto -> data.originFees.map { it.account.value }
             is EthOrderDataRaribleV2DataV3SellDto -> setOfNotNull(
                 data.originFeeFirst?.account?.value,
                 data.originFeeSecond?.account?.value

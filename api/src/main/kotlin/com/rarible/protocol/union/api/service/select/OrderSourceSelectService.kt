@@ -7,6 +7,7 @@ import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
@@ -27,11 +28,19 @@ class OrderSourceSelectService(
     private val orderElasticService: OrderElasticService,
 ) {
 
+    suspend fun upsertOrder(form: OrderFormDto): UnionOrder {
+        return orderApiService.upsertOrder(form)
+    }
+
     /**
      * Should always route to OrderApiService
      */
     suspend fun getOrderById(id: String): UnionOrder {
         return orderApiService.getOrderById(id)
+    }
+
+    suspend fun getValidatedOrderById(id: String): UnionOrder {
+        return orderApiService.getValidatedOrderById(id)
     }
 
     /**

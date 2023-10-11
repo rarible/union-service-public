@@ -9,6 +9,7 @@ import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -21,6 +22,10 @@ import java.util.regex.Pattern
 open class TezosOrderService(
     private val dipdupOrderService: DipdupOrderService,
 ) : AbstractBlockchainService(BlockchainDto.TEZOS), OrderService {
+
+    override suspend fun upsertOrder(form: OrderFormDto): UnionOrder {
+        throw UnionException("Off-Chain orders not supported by $blockchain")
+    }
 
     override suspend fun getOrdersAll(
         continuation: String?,
@@ -41,6 +46,10 @@ open class TezosOrderService(
 
     override suspend fun getOrderById(id: String): UnionOrder {
         return dipdupOrderService.getOrderById(id)
+    }
+
+    override suspend fun getValidatedOrderById(id: String): UnionOrder {
+        return getOrderById(id)
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {

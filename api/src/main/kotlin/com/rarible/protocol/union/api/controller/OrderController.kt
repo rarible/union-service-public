@@ -6,6 +6,7 @@ import com.rarible.protocol.union.core.util.checkNullIds
 import com.rarible.protocol.union.dto.AmmTradeInfoDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
 import com.rarible.protocol.union.dto.OrderStatusDto
@@ -28,6 +29,11 @@ class OrderController(
     private val orderSourceSelector: OrderSourceSelectService,
     private val enrichmentOrderService: EnrichmentOrderService
 ) : OrderControllerApi {
+
+    override suspend fun upsertOrder(orderFormDto: OrderFormDto): ResponseEntity<OrderDto> {
+        val result = orderSourceSelector.upsertOrder(orderFormDto)
+        return ResponseEntity.ok(enrichmentOrderService.enrich(result))
+    }
 
     override suspend fun getOrdersAll(
         blockchains: List<BlockchainDto>?,
@@ -123,6 +129,11 @@ class OrderController(
 
     override suspend fun getOrderById(id: String): ResponseEntity<OrderDto> {
         val result = orderSourceSelector.getOrderById(id)
+        return ResponseEntity.ok(enrichmentOrderService.enrich(result))
+    }
+
+    override suspend fun getValidatedOrderById(id: String): ResponseEntity<OrderDto> {
+        val result = orderSourceSelector.getValidatedOrderById(id)
         return ResponseEntity.ok(enrichmentOrderService.enrich(result))
     }
 
