@@ -2,6 +2,8 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.core.service.SignatureService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.SignatureInputDto
+import com.rarible.protocol.union.dto.SignatureInputFormDto
 import com.rarible.protocol.union.dto.SignatureValidationFormDto
 import com.rarible.protocol.union.dto.subchains
 import org.springframework.http.ResponseEntity
@@ -21,5 +23,12 @@ class SignatureController(
                 signatureValidationFormDto.message
             )
         return ResponseEntity.ok(result)
+    }
+
+    override suspend fun getInput(signatureInputFormDto: SignatureInputFormDto): ResponseEntity<SignatureInputDto> {
+        val input = router.getService(signatureInputFormDto.blockchain)
+            .getInput(signatureInputFormDto)
+
+        return ResponseEntity.ok(SignatureInputDto(input))
     }
 }
