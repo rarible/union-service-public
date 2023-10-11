@@ -33,7 +33,7 @@ class BalanceControllerIt : AbstractIntegrationTest() {
         val ethBalance = Erc20DecimalBalanceDto(
             owner = Address.apply(owner.value),
             balance = randomBigInt(),
-            decimalBalance = randomBigDecimal(),
+            decimalBalance = randomBigDecimal(2, 2),
             contract = Address.apply(currencyId.value)
         )
 
