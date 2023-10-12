@@ -16,13 +16,13 @@ import org.junit.jupiter.api.Test
 import randomEthRaribleV2OrderFormDto
 import randomUnionAddress
 
-class UnionOrderFormConverterTest {
+class UnionOrderConverterTest {
 
     @Test
     fun `rarible form - ok`() {
         val dto = randomEthRaribleV2OrderFormDto()
 
-        val result = UnionOrderFormConverter.convert(dto)
+        val result = UnionOrderConverter.convert(dto)
 
         assertThat(result.maker.prefixed()).isEqualTo(dto.maker.value)
         assertThat(result.taker?.prefixed()).isEqualTo(dto.taker?.value)
@@ -43,7 +43,7 @@ class UnionOrderFormConverterTest {
             payouts = listOf(payout),
             originFees = listOf(fee)
         )
-        val result = UnionOrderFormConverter.convert(dto) as OrderRaribleV2DataV1Dto
+        val result = UnionOrderConverter.convert(dto) as OrderRaribleV2DataV1Dto
 
         assertThat(result.payouts).hasSize(1)
         assertThat(result.payouts[0].account.prefixed()).isEqualTo(payout.account.value)
@@ -63,7 +63,7 @@ class UnionOrderFormConverterTest {
             originFees = listOf(fee),
             isMakeFill = true
         )
-        val result = UnionOrderFormConverter.convert(dto) as OrderRaribleV2DataV2Dto
+        val result = UnionOrderConverter.convert(dto) as OrderRaribleV2DataV2Dto
 
         assertThat(result.isMakeFill).isEqualTo(true)
         assertThat(result.payouts).hasSize(1)
@@ -87,7 +87,7 @@ class UnionOrderFormConverterTest {
             marketplaceMarker = randomWord()
         )
 
-        val result = UnionOrderFormConverter.convert(dto) as OrderRaribleV2DataV3SellDto
+        val result = UnionOrderConverter.convert(dto) as OrderRaribleV2DataV3SellDto
 
         assertThat(result.maxFeesBasePoint).isEqualTo(dto.maxFeesBasePoint)
         assertThat(result.marketplaceMarker!!.prefixed()).isEqualTo(dto.marketplaceMarker)
@@ -110,7 +110,7 @@ class UnionOrderFormConverterTest {
             marketplaceMarker = randomWord()
         )
 
-        val result = UnionOrderFormConverter.convert(dto) as OrderRaribleV2DataV3BuyDto
+        val result = UnionOrderConverter.convert(dto) as OrderRaribleV2DataV3BuyDto
 
         assertThat(result.marketplaceMarker!!.prefixed()).isEqualTo(dto.marketplaceMarker)
         assertThat(result.payout!!.account.prefixed()).isEqualTo(payout.account.value)

@@ -7,6 +7,7 @@ import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftDomainControllerApi
 import com.rarible.protocol.nft.api.client.NftIndexerApiClientFactory
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.nft.api.client.NftLazyMintControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.AuctionControllerApi
@@ -58,6 +59,11 @@ class PolygonApiConfiguration {
     @Qualifier("polygon.item.api")
     fun polygonItemApi(factory: NftIndexerApiClientFactory): NftItemControllerApi =
         factory.createNftItemApiClient(blockchainName)
+
+    @Bean
+    @Qualifier("polygon.item.lazy.api")
+    fun polygonLazyItemApi(factory: NftIndexerApiClientFactory): NftLazyMintControllerApi =
+        factory.createNftMintApiClient(blockchainName)
 
     @Bean
     @Qualifier("polygon.ownership.api")
@@ -120,9 +126,10 @@ class PolygonApiConfiguration {
 
     @Bean
     fun polygonItemService(
-        @Qualifier("polygon.item.api") controllerApi: NftItemControllerApi
+        @Qualifier("polygon.item.api") controllerApi: NftItemControllerApi,
+        @Qualifier("polygon.item.lazy.api") lazyMintControllerApi: NftLazyMintControllerApi
     ): EthItemService {
-        return EthItemService(blockchain, controllerApi)
+        return EthItemService(blockchain, controllerApi, lazyMintControllerApi)
     }
 
     @Bean

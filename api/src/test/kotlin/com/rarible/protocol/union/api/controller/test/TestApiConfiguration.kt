@@ -25,6 +25,7 @@ import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.nft.api.client.NftLazyMintControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
@@ -201,6 +202,11 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Primary
     @Qualifier("ethereum.item.api")
     fun testEthereumItemApi(): NftItemControllerApi = mockk()
+
+    @Bean
+    @Primary
+    @Qualifier("ethereum.item.lazy.api")
+    fun testEthereumLazyItemApi(): NftLazyMintControllerApi = mockk()
 
     @Bean
     @Primary

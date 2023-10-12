@@ -20,12 +20,16 @@ import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemsDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
+import com.rarible.protocol.union.dto.LazyItemBurnFormDto
+import com.rarible.protocol.union.dto.LazyItemDto
+import com.rarible.protocol.union.dto.LazyItemMintFormDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.RoyaltiesDto
 import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.TraitsDto
 import com.rarible.protocol.union.dto.TraitsRarityRequestDto
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.converter.ItemDtoConverter
 import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
@@ -288,5 +292,26 @@ class ItemController(
                 properties = request.properties.map { it.toInner() }.toSet()
             ).map { it.toApiDto() })
         )
+    }
+
+    override suspend fun getLazyItemById(itemId: String): ResponseEntity<LazyItemDto> {
+        val fullItemId = IdParser.parseItemId(itemId)
+        val item = router.getService(fullItemId.blockchain).getLazyItemById(fullItemId.value)
+        return ResponseEntity.ok(ItemDtoConverter.convert(item))
+    }
+
+    override suspend fun mintLazyItem(lazyItemMintFormDto: LazyItemMintFormDto): ResponseEntity<ItemDto> {
+        val fullItemId = lazyItemMintFormDto.item.id
+        val unionItem = router.getService(fullItemId.blockchain).mintLazyItem(lazyItemMintFormDto)
+        val enrichedUnionItem = enrichmentItemService.enrichItems(listOf(unionItem), ItemMetaPipeline.API)
+            .firstOrNull()
+
+        return ResponseEntity.ok(enrichedUnionItem)
+    }
+
+    override suspend fun burnLazyItem(lazyItemBurnFormDto: LazyItemBurnFormDto): ResponseEntity<Unit> {
+        val fullItemId = lazyItemBurnFormDto.id
+        router.getService(fullItemId.blockchain).burnLazyItem(lazyItemBurnFormDto)
+        return ResponseEntity.noContent().build()
     }
 }

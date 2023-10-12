@@ -17,9 +17,7 @@ import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.dto.OrderRaribleV2DataV2Dto
 import com.rarible.protocol.dto.OrderRaribleV2DataV3BuyDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV3SellDto
-import com.rarible.protocol.dto.PartDto
 import com.rarible.protocol.union.core.exception.UnionException
-import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.EthAmmNftAssetTypeDto
 import com.rarible.protocol.union.dto.EthCollectionAssetTypeDto
 import com.rarible.protocol.union.dto.EthCryptoPunksAssetTypeDto
@@ -38,10 +36,8 @@ import com.rarible.protocol.union.dto.EthOrderFormAssetDto
 import com.rarible.protocol.union.dto.EthRaribleOrderFormDto
 import com.rarible.protocol.union.dto.EthRaribleV2OrderDataDto
 import com.rarible.protocol.union.dto.EthRaribleV2OrderFormDto
-import com.rarible.protocol.union.dto.PayoutDto
-import com.rarible.protocol.union.dto.RoyaltyDto
 
-object UnionOrderFormConverter {
+object UnionOrderConverter {
 
     fun convert(source: EthRaribleOrderFormDto): com.rarible.protocol.dto.OrderFormDto {
         return when (source) {
@@ -63,24 +59,24 @@ object UnionOrderFormConverter {
         return when (source) {
             is EthOrderDataRaribleV2DataV1Dto -> {
                 OrderRaribleV2DataV1Dto(
-                    payouts = source.payouts.map { convert(it) },
-                    originFees = source.originFees.map { convert(it) },
+                    payouts = source.payouts.map { EthConverter.convertToPart(it) },
+                    originFees = source.originFees.map { EthConverter.convertToPart(it) },
                 )
             }
 
             is EthOrderDataRaribleV2DataV2Dto -> {
                 OrderRaribleV2DataV2Dto(
-                    payouts = source.payouts.map { convert(it) },
-                    originFees = source.originFees.map { convert(it) },
+                    payouts = source.payouts.map { EthConverter.convertToPart(it) },
+                    originFees = source.originFees.map { EthConverter.convertToPart(it) },
                     isMakeFill = source.isMakeFill
                 )
             }
 
             is EthOrderDataRaribleV2DataV3SellDto -> {
                 OrderRaribleV2DataV3SellDto(
-                    payout = source.payout?.let { convert(it) },
-                    originFeeFirst = source.originFeeFirst?.let { convert(it) },
-                    originFeeSecond = source.originFeeSecond?.let { convert(it) },
+                    payout = source.payout?.let { EthConverter.convertToPart(it) },
+                    originFeeFirst = source.originFeeFirst?.let { EthConverter.convertToPart(it) },
+                    originFeeSecond = source.originFeeSecond?.let { EthConverter.convertToPart(it) },
                     maxFeesBasePoint = source.maxFeesBasePoint,
                     marketplaceMarker = source.marketplaceMarker?.let { EthConverter.convertToWord(it) }
                 )
@@ -88,9 +84,9 @@ object UnionOrderFormConverter {
 
             is EthOrderDataRaribleV2DataV3BuyDto -> {
                 OrderRaribleV2DataV3BuyDto(
-                    payout = source.payout?.let { convert(it) },
-                    originFeeFirst = source.originFeeFirst?.let { convert(it) },
-                    originFeeSecond = source.originFeeSecond?.let { convert(it) },
+                    payout = source.payout?.let { EthConverter.convertToPart(it) },
+                    originFeeFirst = source.originFeeFirst?.let { EthConverter.convertToPart(it) },
+                    originFeeSecond = source.originFeeSecond?.let { EthConverter.convertToPart(it) },
                     marketplaceMarker = source.marketplaceMarker?.let { EthConverter.convertToWord(it) }
                 )
             }
@@ -125,8 +121,8 @@ object UnionOrderFormConverter {
                 contract = EthConverter.convertToAddress(source.contract.value),
                 tokenId = source.tokenId,
                 uri = source.uri,
-                creators = source.creators.map { convert(it) },
-                royalties = source.royalties.map { convert(it) },
+                creators = source.creators.map { EthConverter.convertToPart(it) },
+                royalties = source.royalties.map { EthConverter.convertToPart(it) },
                 signatures = source.signatures.map { EthConverter.convertToBinary(it) }
             )
 
@@ -135,8 +131,8 @@ object UnionOrderFormConverter {
                 tokenId = source.tokenId,
                 uri = source.uri,
                 supply = source.supply,
-                creators = source.creators.map { convert(it) },
-                royalties = source.royalties.map { convert(it) },
+                creators = source.creators.map { EthConverter.convertToPart(it) },
+                royalties = source.royalties.map { EthConverter.convertToPart(it) },
                 signatures = source.signatures.map { EthConverter.convertToBinary(it) }
             )
 
@@ -159,26 +155,5 @@ object UnionOrderFormConverter {
 
             else -> throw UnionException("Unsupported Eth AssetType: ${source.javaClass.simpleName}")
         }
-    }
-
-    private fun convert(source: CreatorDto): PartDto {
-        return PartDto(
-            account = EthConverter.convertToAddress(source.account.value),
-            value = source.value
-        )
-    }
-
-    private fun convert(source: RoyaltyDto): PartDto {
-        return PartDto(
-            account = EthConverter.convertToAddress(source.account.value),
-            value = source.value
-        )
-    }
-
-    private fun convert(source: PayoutDto): PartDto {
-        return PartDto(
-            account = EthConverter.convertToAddress(source.account.value),
-            value = source.value
-        )
     }
 }

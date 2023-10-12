@@ -1,4 +1,3 @@
-
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
@@ -30,6 +29,8 @@ import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.CreatorDto
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.EthErc721AssetTypeDto
+import com.rarible.protocol.union.dto.EthLazyItemErc1155Dto
+import com.rarible.protocol.union.dto.EthLazyItemErc721Dto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV2Dto
 import com.rarible.protocol.union.dto.EthOrderFormAssetDto
@@ -46,6 +47,7 @@ import com.rarible.protocol.union.dto.PayoutDto
 import com.rarible.protocol.union.dto.PendingOrderDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.RaribleAuctionV1DataV1Dto
+import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.group
 import java.math.BigDecimal
@@ -338,4 +340,34 @@ fun randomEthRaribleV2OrderFormDto(
     salt = salt,
     signature = signature,
     data = EthOrderDataRaribleV2DataV2Dto(emptyList(), emptyList(), false),
+)
+
+fun randomEthLazyItemErc721Dto(
+    itemId: ItemIdDto = randomItemId(),
+    uri: String = randomString(),
+    creators: List<CreatorDto> = emptyList(),
+    royalties: List<RoyaltyDto> = emptyList(),
+    signatures: List<String> = emptyList()
+) = EthLazyItemErc721Dto(
+    id = itemId,
+    uri = uri,
+    creators = creators,
+    royalties = royalties,
+    signatures = signatures
+)
+
+fun randomEthLazyItemErc1155Dto(
+    itemId: ItemIdDto = randomItemId(),
+    uri: String = randomString(),
+    creators: List<CreatorDto> = emptyList(),
+    royalties: List<RoyaltyDto> = emptyList(),
+    signatures: List<String> = emptyList(),
+    supply: BigInteger = randomBigInt()
+) = EthLazyItemErc1155Dto(
+    id = itemId,
+    uri = uri,
+    creators = creators,
+    royalties = royalties,
+    signatures = signatures,
+    supply = supply,
 )

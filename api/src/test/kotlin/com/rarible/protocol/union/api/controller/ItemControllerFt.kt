@@ -5,6 +5,7 @@ import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.dto.BurnLazyNftFormDto
 import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.NftItemRoyaltyListDto
 import com.rarible.protocol.dto.RaribleAuctionV1Dto
@@ -22,6 +23,8 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemsSearchFilterDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
+import com.rarible.protocol.union.dto.LazyItemBurnFormDto
+import com.rarible.protocol.union.dto.LazyItemMintFormDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
@@ -43,6 +46,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
+import com.rarible.protocol.union.integration.ethereum.data.randomEthLazyItem721NativeDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
@@ -54,7 +58,6 @@ import com.rarible.protocol.union.integration.flow.data.randomFlowItemIdFullValu
 import com.rarible.protocol.union.integration.flow.data.randomFlowMetaDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowNftItemDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
-import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemIdFullValue
 import com.rarible.protocol.union.integration.tezos.data.randomTezosTzktItemDto
 import io.mockk.coEvery
@@ -63,6 +66,8 @@ import io.mockk.verify
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
@@ -70,6 +75,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestTemplate
+import randomEthLazyItemErc721Dto
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
@@ -254,13 +260,6 @@ class ItemControllerFt : AbstractIntegrationTest() {
         itemControllerClient.resetItemMeta(itemId.fullId(), false).awaitFirstOrNull()
 
         verify(exactly = 1) { testFlowItemApi.resetItemMeta(itemId.value) }
-    }
-
-    @Test
-    fun `reset item meta by id - tezos`() = runBlocking {
-        val itemId = randomTezosItemId()
-
-        itemControllerClient.resetItemMeta(itemId.fullId(), false).awaitFirstOrNull()
     }
 
     @Test
@@ -674,5 +673,52 @@ class ItemControllerFt : AbstractIntegrationTest() {
             itemControllerClient.searchItems(request).block()
         }.isExactlyInstanceOf(ErrorSearchItems::class.java)
             .hasMessageContaining("501")
+    }
+
+    @Test
+    fun `get lazy item by id - ok`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+        val ethItem = randomEthLazyItem721NativeDto(ethItemId)
+
+        ethereumItemControllerApiMock.mockGetLazyNftItemById(ethItemId, ethItem)
+
+        val result = itemControllerClient.getLazyItemById(ethItemId.fullId()).awaitSingle()
+
+        assertThat(result.id).isEqualTo(ethItemId)
+        assertThat(result.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+    }
+
+    @Test
+    fun `mint lazy item - ok`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+        val ethLazyItem = randomEthLazyItem721NativeDto(ethItemId)
+        val ethLazyItemDto = randomEthLazyItemErc721Dto(itemId = ethItemId, uri = ethLazyItem.uri)
+        val ethItem = randomEthNftItemDto(ethItemId)
+
+        val form = LazyItemMintFormDto(ethLazyItemDto)
+
+        coEvery { testEthereumLazyItemApi.mintNftAsset(ethLazyItem) } returns ethItem.toMono()
+
+        val result = itemControllerClient.mintLazyItem(form).awaitSingle()
+
+        assertThat(result.id).isEqualTo(ethItemId)
+        assertThat(result.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+    }
+
+    @Test
+    fun `burn lazy item - ok`() = runBlocking<Unit> {
+        val ethItemId = randomEthItemId()
+        val form = LazyItemBurnFormDto(
+            id = ethItemId,
+            creators = emptyList(),
+            signatures = emptyList(),
+        )
+
+        val nativeForm = BurnLazyNftFormDto(emptyList(), emptyList())
+        ethereumItemControllerApiMock.mockDeleteLazyMintNftAsset(ethItemId, nativeForm)
+
+        itemControllerClient.burnLazyItem(form).awaitSingleOrNull()
+
+        verify(exactly = 1) { testEthereumItemApi.deleteLazyMintNftAsset(ethItemId.value, nativeForm) }
     }
 }

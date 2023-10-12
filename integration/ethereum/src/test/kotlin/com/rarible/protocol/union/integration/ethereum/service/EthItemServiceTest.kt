@@ -4,21 +4,27 @@ import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.dto.BurnLazyNftFormDto
 import com.rarible.protocol.dto.EthMetaStatusDto
 import com.rarible.protocol.dto.NftItemMetaDto
 import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.NftItemRoyaltyListDto
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.nft.api.client.NftLazyMintControllerApi
 import com.rarible.protocol.union.core.exception.UnionMetaException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthLazyItemErc721Dto
+import com.rarible.protocol.union.dto.LazyItemBurnFormDto
+import com.rarible.protocol.union.dto.LazyItemMintFormDto
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMeta
+import com.rarible.protocol.union.integration.ethereum.data.randomEthLazyItem721NativeDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -42,6 +48,9 @@ class EthItemServiceTest {
 
     @MockK
     private lateinit var itemControllerApi: NftItemControllerApi
+
+    @MockK
+    private lateinit var lazyItemControllerApi: NftLazyMintControllerApi
 
     @InjectMockKs
     private lateinit var service: EthItemService
@@ -267,5 +276,58 @@ class EthItemServiceTest {
         assertThat(result.continuation).isEqualTo("abc")
         assertThat(result.entities).hasSize(1)
         assertThat(result.entities[0]).isEqualTo(expected)
+    }
+
+    @Test
+    fun `get lazy item - ok`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val ethLazyItem = randomEthLazyItem721NativeDto(itemId)
+
+        coEvery { itemControllerApi.getNftLazyItemById(itemId.value) } returns ethLazyItem.toMono()
+
+        val result = service.getLazyItemById(itemId.value)
+
+        assertThat(result.id).isEqualTo(itemId)
+    }
+
+    @Test
+    fun `mint lazy item - ok`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val ethLazyItem = randomEthLazyItem721NativeDto(itemId)
+        val dto = EthLazyItemErc721Dto(
+            id = itemId,
+            uri = ethLazyItem.uri,
+            creators = emptyList(),
+            royalties = emptyList(),
+            signatures = emptyList(),
+        )
+        val ethItem = randomEthNftItemDto(itemId)
+
+        coEvery { lazyItemControllerApi.mintNftAsset(ethLazyItem) } returns ethItem.toMono()
+
+        val result = service.mintLazyItem(LazyItemMintFormDto(dto))
+
+        assertThat(result.id).isEqualTo(itemId)
+    }
+
+    @Test
+    fun `burn lazy item - ok`() = runBlocking<Unit> {
+        val itemId = randomEthItemId()
+        val nativeForm = BurnLazyNftFormDto(
+            creators = emptyList(),
+            signatures = emptyList()
+        )
+
+        val form = LazyItemBurnFormDto(
+            id = itemId,
+            creators = emptyList(),
+            signatures = emptyList()
+        )
+
+        coEvery { itemControllerApi.deleteLazyMintNftAsset(itemId.value, nativeForm) } returns Mono.empty()
+
+        val result = service.burnLazyItem(form)
+
+        coVerify(exactly = 1) { itemControllerApi.deleteLazyMintNftAsset(itemId.value, nativeForm) }
     }
 }

@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.integration.ethereum.mock
 
+import com.rarible.protocol.dto.BurnLazyNftFormDto
+import com.rarible.protocol.dto.LazyNftDto
 import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.dto.NftItemIdsDto
 import com.rarible.protocol.dto.NftItemMetaDto
@@ -29,6 +31,18 @@ class EthItemControllerApiMock(
         every {
             nftItemControllerApi.getNftItemById(itemId.value)
         } throws WebClientExceptionMock.mock(status, error)
+    }
+
+    fun mockGetLazyNftItemById(itemId: ItemIdDto, returnItem: LazyNftDto?) {
+        every {
+            nftItemControllerApi.getNftLazyItemById(itemId.value)
+        } returns (if (returnItem == null) Mono.empty() else Mono.just(returnItem))
+    }
+
+    fun mockDeleteLazyMintNftAsset(itemId: ItemIdDto, form: BurnLazyNftFormDto) {
+        every {
+            nftItemControllerApi.deleteLazyMintNftAsset(itemId.value, form)
+        } returns Mono.empty()
     }
 
     fun mockGetNftItemsByIds(ids: List<String>, returnItems: List<NftItemDto>) {

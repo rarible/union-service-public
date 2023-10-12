@@ -28,7 +28,7 @@ import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
-import com.rarible.protocol.union.integration.ethereum.converter.UnionOrderFormConverter
+import com.rarible.protocol.union.integration.ethereum.converter.UnionOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomAmmPriceInfoDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
@@ -73,7 +73,7 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `upsert order - ethereum`() = runBlocking<Unit> {
         val order = randomEthSellOrderDto()
         val form = randomEthRaribleV2OrderFormDto()
-        val nativeForm = UnionOrderFormConverter.convert(form)
+        val nativeForm = UnionOrderConverter.convert(form)
 
         ethereumOrderControllerApiMock.mockUpsertOrder(nativeForm, order)
 
