@@ -90,6 +90,27 @@ object EthConverter {
         }
     }
 
+    fun convertToPart(source: CreatorDto): PartDto {
+        return PartDto(
+            account = convertToAddress(source.account.value),
+            value = source.value
+        )
+    }
+
+    fun convertToPart(source: RoyaltyDto): PartDto {
+        return PartDto(
+            account = convertToAddress(source.account.value),
+            value = source.value
+        )
+    }
+
+    fun convertToPart(source: PayoutDto): PartDto {
+        return PartDto(
+            account = convertToAddress(source.account.value),
+            value = source.value
+        )
+    }
+
     fun convert(source: Address, blockchain: BlockchainDto): UnionAddress {
         return UnionAddressConverter.convert(blockchain, convert(source))
     }

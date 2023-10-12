@@ -23,7 +23,7 @@ import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
-import com.rarible.protocol.union.integration.ethereum.converter.UnionOrderFormConverter
+import com.rarible.protocol.union.integration.ethereum.converter.UnionOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingle
 
@@ -41,7 +41,7 @@ class EthOrderService(
                     " use one of ${EthRaribleOrderFormDto::class.java.simpleName}"
             )
         }
-        val nativeForm = UnionOrderFormConverter.convert(form)
+        val nativeForm = UnionOrderConverter.convert(form)
         val result = orderControllerApi.upsertOrder(nativeForm).awaitSingle()
         return ethOrderConverter.convert(result, blockchain)
     }

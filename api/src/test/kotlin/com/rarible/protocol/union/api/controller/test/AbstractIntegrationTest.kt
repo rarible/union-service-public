@@ -16,6 +16,7 @@ import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.nft.api.client.NftLazyMintControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
@@ -85,6 +86,10 @@ abstract class AbstractIntegrationTest {
     @Autowired
     @Qualifier("ethereum.item.api")
     lateinit var testEthereumItemApi: NftItemControllerApi
+
+    @Autowired
+    @Qualifier("ethereum.item.lazy.api")
+    lateinit var testEthereumLazyItemApi: NftLazyMintControllerApi
 
     @Autowired
     @Qualifier("ethereum.ownership.api")

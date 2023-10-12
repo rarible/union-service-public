@@ -1,7 +1,10 @@
 package com.rarible.protocol.union.enrichment.converter
 
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
+import com.rarible.protocol.union.core.model.UnionEthLazyItemErc1155
+import com.rarible.protocol.union.core.model.UnionEthLazyItemErc721
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionLazyItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.AmmOrdersDto
@@ -9,8 +12,11 @@ import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionIdDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.EthLazyItemErc1155Dto
+import com.rarible.protocol.union.dto.EthLazyItemErc721Dto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemLastSaleDto
+import com.rarible.protocol.union.dto.LazyItemDto
 import com.rarible.protocol.union.dto.OrderDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.enrichment.model.ItemLastSale
@@ -71,6 +77,27 @@ object ItemDtoConverter {
             result.copy(bestBidOrder = null, bestBidOrdersByCurrency = emptyList())
         } else {
             result
+        }
+    }
+
+    fun convert(source: UnionLazyItem): LazyItemDto {
+        return when (source) {
+            is UnionEthLazyItemErc721 -> EthLazyItemErc721Dto(
+                id = source.id,
+                uri = source.uri,
+                creators = source.creators,
+                royalties = source.royalties,
+                signatures = source.signatures
+            )
+
+            is UnionEthLazyItemErc1155 -> EthLazyItemErc1155Dto(
+                id = source.id,
+                uri = source.uri,
+                creators = source.creators,
+                royalties = source.royalties,
+                signatures = source.signatures,
+                supply = source.supply
+            )
         }
     }
 

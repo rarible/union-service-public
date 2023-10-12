@@ -1,16 +1,23 @@
 package com.rarible.protocol.union.integration.ethereum.converter
 
 import com.rarible.core.common.nowMillis
+import com.rarible.protocol.dto.LazyErc1155Dto
+import com.rarible.protocol.dto.LazyErc721Dto
+import com.rarible.protocol.dto.LazyNftDto
 import com.rarible.protocol.dto.NftItemDeleteEventDto
 import com.rarible.protocol.dto.NftItemDto
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemUpdateEventDto
 import com.rarible.protocol.dto.NftItemsDto
 import com.rarible.protocol.union.core.converter.ContractAddressConverter
+import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.model.UnionEthLazyItemErc1155
+import com.rarible.protocol.union.core.model.UnionEthLazyItemErc721
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionItemEvent
 import com.rarible.protocol.union.core.model.UnionItemUpdateEvent
+import com.rarible.protocol.union.core.model.UnionLazyItem
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -53,6 +60,29 @@ object EthItemConverter {
                     eventTimeMarks = eventTimeMarks
                 )
             }
+        }
+    }
+
+    fun convert(source: LazyNftDto, blockchain: BlockchainDto): UnionLazyItem {
+        return when (source) {
+            is LazyErc721Dto -> UnionEthLazyItemErc721(
+                id = ItemIdDto(blockchain, source.contract.prefixed(), source.tokenId),
+                uri = source.uri,
+                creators = source.creators.map { EthConverter.convertToCreator(it, blockchain) },
+                royalties = source.creators.map { EthConverter.convertToRoyalty(it, blockchain) },
+                signatures = source.signatures.map { EthConverter.convert(it) }
+            )
+
+            is LazyErc1155Dto -> UnionEthLazyItemErc1155(
+                id = ItemIdDto(blockchain, source.contract.prefixed(), source.tokenId),
+                uri = source.uri,
+                creators = source.creators.map { EthConverter.convertToCreator(it, blockchain) },
+                royalties = source.creators.map { EthConverter.convertToRoyalty(it, blockchain) },
+                signatures = source.signatures.map { EthConverter.convert(it) },
+                supply = source.supply
+            )
+
+            else -> throw UnionException("Unsupported Lazy Item type for $blockchain: ${source.javaClass.simpleName}")
         }
     }
 

@@ -1,10 +1,14 @@
 package com.rarible.protocol.union.integration.tezos.service
 
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionLazyItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.LazyItemBurnFormDto
+import com.rarible.protocol.union.dto.LazyItemMintFormDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.tezos.dipdup.DipDupIntegrationProperties
@@ -121,5 +125,17 @@ open class TezosItemService(
     override suspend fun getItemCollectionId(itemId: String): String? {
         // TODO is validation possible here?
         return itemId.substringBefore(":")
+    }
+
+    override suspend fun getLazyItemById(itemId: String): UnionLazyItem {
+        throw UnionException("Not supported by $blockchain")
+    }
+
+    override suspend fun mintLazyItem(form: LazyItemMintFormDto): UnionItem {
+        throw UnionException("Not supported by $blockchain")
+    }
+
+    override suspend fun burnLazyItem(form: LazyItemBurnFormDto) {
+        throw UnionException("Not supported by $blockchain")
     }
 }

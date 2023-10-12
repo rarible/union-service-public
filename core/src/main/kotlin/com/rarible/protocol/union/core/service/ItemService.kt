@@ -1,8 +1,11 @@
 package com.rarible.protocol.union.core.service
 
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionLazyItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.router.BlockchainService
+import com.rarible.protocol.union.dto.LazyItemBurnFormDto
+import com.rarible.protocol.union.dto.LazyItemMintFormDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 
@@ -58,4 +61,16 @@ interface ItemService : BlockchainService {
     suspend fun getItemCollectionId(
         itemId: String
     ): String?
+
+    suspend fun getLazyItemById(
+        itemId: String
+    ): UnionLazyItem
+
+    suspend fun mintLazyItem(
+        form: LazyItemMintFormDto
+    ): UnionItem
+
+    suspend fun burnLazyItem(
+        form: LazyItemBurnFormDto
+    )
 }

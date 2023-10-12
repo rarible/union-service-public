@@ -3,27 +3,34 @@ package com.rarible.protocol.union.integration.ethereum.service
 import com.rarible.protocol.dto.NftItemIdsDto
 import com.rarible.protocol.dto.parser.AddressParser
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.nft.api.client.NftLazyMintControllerApi
 import com.rarible.protocol.union.core.exception.UnionMetaException
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionLazyItem
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.LazyItemBurnFormDto
+import com.rarible.protocol.union.dto.LazyItemMintFormDto
 import com.rarible.protocol.union.dto.RoyaltyDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
 import com.rarible.protocol.union.integration.ethereum.converter.MetaStatusChecker
+import com.rarible.protocol.union.integration.ethereum.converter.UnionItemConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
-import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.http.HttpStatus
 
 class EthItemService(
     blockchain: BlockchainDto,
-    private val itemControllerApi: NftItemControllerApi
+    private val itemControllerApi: NftItemControllerApi,
+    private val lazyItemControllerApi: NftLazyMintControllerApi
 ) : AbstractBlockchainService(blockchain), ItemService {
 
     override suspend fun getAllItems(
@@ -122,5 +129,21 @@ class EthItemService(
         // Conversion used as validation here
         val ethToken = AddressParser.parse(itemId.substringBefore(":"))
         return EthConverter.convert(ethToken)
+    }
+
+    override suspend fun getLazyItemById(itemId: String): UnionLazyItem {
+        val result = itemControllerApi.getNftLazyItemById(itemId).awaitSingle()
+        return EthItemConverter.convert(result, blockchain)
+    }
+
+    override suspend fun mintLazyItem(form: LazyItemMintFormDto): UnionItem {
+        val nativeLazyItem = UnionItemConverter.convert(form)
+        val result = lazyItemControllerApi.mintNftAsset(nativeLazyItem).awaitSingle()
+        return EthItemConverter.convert(result, blockchain)
+    }
+
+    override suspend fun burnLazyItem(form: LazyItemBurnFormDto) {
+        val nativeForm = UnionItemConverter.convert(form)
+        itemControllerApi.deleteLazyMintNftAsset(form.id.value, nativeForm).awaitSingleOrNull()
     }
 }

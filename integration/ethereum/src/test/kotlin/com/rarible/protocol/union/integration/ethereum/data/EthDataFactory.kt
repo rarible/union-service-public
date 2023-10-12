@@ -37,6 +37,7 @@ import com.rarible.protocol.dto.EventTimeMarksDto
 import com.rarible.protocol.dto.ImageContentDto
 import com.rarible.protocol.dto.ItemRoyaltyDto
 import com.rarible.protocol.dto.ItemTransferDto
+import com.rarible.protocol.dto.LazyErc721Dto
 import com.rarible.protocol.dto.LooksRareOrderDto
 import com.rarible.protocol.dto.MetaContentDto
 import com.rarible.protocol.dto.MintDto
@@ -126,6 +127,21 @@ fun randomEthNftItemDto(itemId: ItemIdDto): NftItemDto {
         owners = listOf(),
         pending = listOf(randomEthItemTransferDto()),
         deleted = false
+    )
+}
+
+fun randomEthLazyItem721NativeDto(
+    itemId: ItemIdDto = randomEthItemId(),
+    uri: String = randomString(),
+): LazyErc721Dto {
+    val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
+    return LazyErc721Dto(
+        contract = Address.apply(contract),
+        tokenId = tokenId,
+        uri = uri,
+        creators = emptyList(),
+        royalties = emptyList(),
+        signatures = emptyList()
     )
 }
 
