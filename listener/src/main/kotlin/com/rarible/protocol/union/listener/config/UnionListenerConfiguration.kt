@@ -17,7 +17,7 @@ import com.rarible.protocol.union.core.model.OrderEventDelayMetric
 import com.rarible.protocol.union.core.model.OwnershipEventDelayMetric
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
-import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
@@ -43,7 +43,7 @@ class UnionListenerConfiguration(
     private val listenerProperties: UnionListenerProperties,
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     private val meterRegistry: MeterRegistry,
-    activeBlockchains: List<BlockchainDto>,
+    activeBlockchainProvider: ActiveBlockchainProvider,
     private val ff: FeatureFlagsProperties
 ) {
 
@@ -54,7 +54,7 @@ class UnionListenerConfiguration(
         host = host,
         deserializer = UnionKafkaJsonDeserializer::class.java
     )
-    private val blockchains = activeBlockchains.toSet()
+    private val blockchains = activeBlockchainProvider.blockchains
     private val properties = listenerProperties.consumer
 
     @Bean

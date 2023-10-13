@@ -11,6 +11,7 @@ import com.rarible.protocol.solana.api.client.TokenControllerApi
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.router.ActiveBlockchain
 import com.rarible.protocol.union.core.service.router.OrderProxyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -35,7 +36,9 @@ import org.springframework.context.annotation.Import
 class SolanaApiConfiguration {
 
     @Bean
-    fun solanaBlockchain(): BlockchainDto = BlockchainDto.SOLANA
+    fun solanaBlockchain(): ActiveBlockchain {
+        return ActiveBlockchain(listOf(BlockchainDto.SOLANA))
+    }
 
     // -------------------- API --------------------//
 

@@ -14,7 +14,7 @@ class ConsumerFactory(
     private val eventCountMetrics: EventCountMetrics
 ) {
 
-    fun <T> createBlockchainConsumerWorkerGroup(
+    fun <T> createBlockchainConsumerWorker(
         hosts: String,
         topic: String,
         handler: BlockchainEventHandler<T, *>,

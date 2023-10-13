@@ -50,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import randomEthRaribleV2OrderFormDto
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
+import java.math.BigDecimal
 
 @FlowPreview
 @IntegrationTest
@@ -562,7 +563,10 @@ class OrderControllerFt : AbstractIntegrationTest() {
     fun `get amm trade info - sudo swap`() = runBlocking<Unit> {
         val orderId = randomWord()
         val fullOrderId = OrderIdDto(BlockchainDto.ETHEREUM, orderId)
-        val price = randomAmmPriceInfoDto()
+        val price = randomAmmPriceInfoDto(
+            priceValue = BigDecimal("123.54"),
+            priceUsd = BigDecimal("34534.345"),
+        )
 
         coEvery {
             testEthereumOrderApi.getAmmBuyInfo(orderId, 1)

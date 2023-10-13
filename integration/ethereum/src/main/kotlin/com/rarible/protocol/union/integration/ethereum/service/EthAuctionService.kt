@@ -5,6 +5,7 @@ import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
+import com.rarible.protocol.union.core.util.safeSplit
 import com.rarible.protocol.union.dto.AuctionBidDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionSortDto
@@ -12,6 +13,7 @@ import com.rarible.protocol.union.dto.AuctionStatusDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.integration.ethereum.EthEvmIntegrationProperties
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import io.daonomic.rpc.domain.Word
@@ -20,7 +22,8 @@ import kotlinx.coroutines.reactive.awaitFirst
 class EthAuctionService(
     override val blockchain: BlockchainDto,
     private val auctionControllerApi: AuctionControllerApi,
-    private val ethAuctionConverter: EthAuctionConverter
+    private val ethAuctionConverter: EthAuctionConverter,
+    private val properties: EthEvmIntegrationProperties,
 ) : AbstractBlockchainService(blockchain), AuctionService {
 
     override suspend fun getAuctionsBidsById(
@@ -128,5 +131,9 @@ class EthAuctionService(
             size
         ).awaitFirst()
         return ethAuctionConverter.convert(auctions, blockchain)
+    }
+
+    override fun getAuctionContracts(): List<String> {
+        return safeSplit(properties.auctionContracts)
     }
 }

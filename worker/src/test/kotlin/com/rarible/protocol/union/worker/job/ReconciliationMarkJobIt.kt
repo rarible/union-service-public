@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.worker.job
 
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.ItemDto
@@ -40,7 +41,7 @@ class ReconciliationMarkJobIt : AbstractIntegrationTest() {
         jobHandler = ReconciliationMarkJobHandler(
             itemReconciliationMarkRepository,
             refreshService,
-            listOf(BlockchainDto.ETHEREUM)
+            ActiveBlockchainProvider.of(BlockchainDto.ETHEREUM)
         )
         clearMocks(refreshService)
     }

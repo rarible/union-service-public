@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.core.service
 
-import com.rarible.protocol.union.core.DefaultBlockchainProperties
-import com.rarible.protocol.union.core.util.safeSplit
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -9,14 +8,14 @@ import javax.annotation.PostConstruct
 
 @Component
 class AuctionContractService(
-    blockchainProperties: List<DefaultBlockchainProperties>
+    auctionServiceRouter: BlockchainRouter<AuctionService>
 ) {
 
     private val logger = LoggerFactory.getLogger(AuctionContractService::class.java)
 
-    private val auctionContracts = blockchainProperties.associateBy({ it.blockchain }, {
-        HashSet(safeSplit(it.auctionContracts))
-    })
+    private val auctionContracts = auctionServiceRouter.getEnabledBlockchains().map {
+        it to auctionServiceRouter.getService(it).getAuctionContracts()
+    }.associateBy({ it.first }, { it.second })
 
     @PostConstruct
     fun log() {

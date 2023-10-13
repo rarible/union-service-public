@@ -61,4 +61,6 @@ interface AuctionService : BlockchainService {
         continuation: String? = null,
         size: Int? = null
     ): Slice<AuctionDto>
+
+    fun getAuctionContracts(): List<String> = emptyList()
 }

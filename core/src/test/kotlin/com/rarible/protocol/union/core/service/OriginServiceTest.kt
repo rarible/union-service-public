@@ -1,14 +1,25 @@
 package com.rarible.protocol.union.core.service
 
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.core.DefaultBlockchainProperties
-import com.rarible.protocol.union.core.OriginProperties
+import com.rarible.protocol.union.core.model.Origin
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import io.mockk.every
+import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class OriginServiceTest {
+
+    private val ethOrderService: OrderService = mockk {
+        every { blockchain } returns BlockchainDto.ETHEREUM
+    }
+
+    private val orderServiceRouter = BlockchainRouter(
+        listOf(ethOrderService),
+        listOf(BlockchainDto.ETHEREUM)
+    )
 
     @Test
     fun `get origins`() {
@@ -24,15 +35,14 @@ class OriginServiceTest {
         // Should not be found, not specified in origins
         val collectionIdWithoutOrigin = CollectionIdDto(BlockchainDto.FLOW, collection2)
 
-        val properties = createProperties(
-            mapOf(
-                // Trailing/leading whitespaces and empty values should be filtered
-                "whitelabel" to OriginProperties(whiteLabel, " $collection1 ,$collection2, "),
-                "othermarket" to OriginProperties(otherMarket, null)
-            )
+        val origins = listOf(
+            Origin(whiteLabel, listOf(collection1, collection2)),
+            Origin(otherMarket, emptyList())
         )
 
-        val service = OriginService(listOf(properties))
+        every { ethOrderService.getOrigins() } returns origins
+
+        val service = OriginService(orderServiceRouter)
 
         // Whitelabel + global origins
         assertThat(service.getOrigins(collectionId1)).isEqualTo(listOf(otherMarket, whiteLabel))
@@ -41,16 +51,5 @@ class OriginServiceTest {
         assertThat(service.getOrigins(collectionIdOtherChain)).isEqualTo(listOf(otherMarket))
         assertThat(service.getOrigins(collectionIdWithoutOrigin)).isEqualTo(listOf(otherMarket))
         assertThat(service.getOrigins(null)).isEqualTo(listOf(otherMarket))
-    }
-
-    private fun createProperties(origins: Map<String, OriginProperties>): DefaultBlockchainProperties {
-        return DefaultBlockchainProperties(
-            blockchain = BlockchainDto.ETHEREUM,
-            enabled = true,
-            consumer = null,
-            client = null,
-            auctionContracts = null,
-            origins = origins
-        )
     }
 }
