@@ -5,12 +5,14 @@ import com.rarible.protocol.dto.OrderStateDto
 import com.rarible.protocol.order.api.client.OrderAdminControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.core.exception.UnionException
+import com.rarible.protocol.union.core.model.Origin
 import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
+import com.rarible.protocol.union.core.util.safeSplit
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthRaribleOrderFormDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -21,6 +23,7 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.integration.ethereum.EthEvmIntegrationProperties
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.UnionOrderConverter
@@ -31,7 +34,8 @@ class EthOrderService(
     override val blockchain: BlockchainDto,
     private val orderControllerApi: OrderControllerApi,
     private val orderAdminControllerApi: OrderAdminControllerApi,
-    private val ethOrderConverter: EthOrderConverter
+    private val ethOrderConverter: EthOrderConverter,
+    private val properties: EthEvmIntegrationProperties,
 ) : AbstractBlockchainService(blockchain), OrderService {
 
     override suspend fun upsertOrder(form: OrderFormDto): UnionOrder {
@@ -383,6 +387,15 @@ class EthOrderService(
             com.rarible.protocol.dto.OrderSortDto.LAST_UPDATE_DESC
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
+    }
+
+    override fun getOrigins(): List<Origin> {
+        return properties.origins.values.map {
+            Origin(
+                origin = it.origin,
+                collections = safeSplit(it.collections)
+            )
+        }
     }
 
     /**

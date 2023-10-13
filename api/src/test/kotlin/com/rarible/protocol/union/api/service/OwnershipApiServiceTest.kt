@@ -3,11 +3,12 @@ package com.rarible.protocol.union.api.service
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.protocol.union.api.service.api.OwnershipApiQueryService
-import com.rarible.protocol.union.core.DefaultBlockchainProperties
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.getSellerOwnershipId
 import com.rarible.protocol.union.core.service.AuctionContractService
+import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.OwnershipService
+import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ContractAddress
@@ -29,6 +30,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDt
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.clearMocks
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -37,18 +39,20 @@ import org.junit.jupiter.api.Test
 
 class OwnershipApiServiceTest {
 
-    private val auctionContract = randomAddress()
+    private val auctionContract = randomAddress().prefixed()
 
-    private val properties = DefaultBlockchainProperties(
-        blockchain = BlockchainDto.ETHEREUM,
-        enabled = true,
-        consumer = null,
-        client = null,
-        auctionContracts = auctionContract.prefixed()
+    private val ethAuctionService: AuctionService = mockk() {
+        every { blockchain } returns BlockchainDto.ETHEREUM
+        every { getAuctionContracts() } returns listOf(auctionContract)
+    }
+    private val auctionContractService: AuctionContractService = AuctionContractService(
+        BlockchainRouter(
+            listOf(ethAuctionService),
+            listOf(BlockchainDto.ETHEREUM)
+        )
     )
 
     private val ownershipService: OwnershipService = mockk()
-    private val auctionContractService: AuctionContractService = AuctionContractService(listOf(properties))
     private val enrichmentOwnershipService: EnrichmentOwnershipService = mockk()
     private val enrichmentAuctionService: EnrichmentAuctionService = mockk()
 
@@ -221,7 +225,7 @@ class OwnershipApiServiceTest {
     private suspend fun auction(itemId: ItemIdDto): AuctionDto {
         return ethAuctionConverter
             .convert(randomEthAuctionDto(itemId), BlockchainDto.ETHEREUM)
-            .copy(contract = ContractAddress(BlockchainDto.ETHEREUM, auctionContract.prefixed()))
+            .copy(contract = ContractAddress(BlockchainDto.ETHEREUM, auctionContract))
     }
 
     private fun ownership(itemId: ItemIdDto): UnionOwnership {

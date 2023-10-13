@@ -3,11 +3,16 @@ package com.rarible.protocol.union.worker
 import com.rarible.core.application.ApplicationEnvironmentInfo
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
+import com.rarible.protocol.order.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.NoopReindexSchedulingService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
+import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.integration.ethereum.EthClients
+import com.rarible.protocol.union.integration.ethereum.EthIntegrationProperties
+import com.rarible.protocol.union.integration.ethereum.mock.EthClientsMock
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.mockk
 import io.mockk.spyk
@@ -54,11 +59,19 @@ class TestWorkerConfiguration {
 
     @Bean
     @Primary
+    fun testEthClient(ethIntegrationProperties: EthIntegrationProperties): EthClients {
+        return EthClientsMock.testEthClients(ethIntegrationProperties.active)
+    }
+
+    @Bean
+    @Primary
     @Qualifier("ethereum.item.api")
-    fun testEthereumItemApi(): NftItemControllerApi = mockk()
+    fun testEthereumItemApi(ethClients: EthClients): NftItemControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.nftItemControllerApi
 
     @Bean
     @Primary
     @Qualifier("ethereum.order.api")
-    fun testEthereumOrderApi(): com.rarible.protocol.order.api.client.OrderControllerApi = mockk()
+    fun testEthereumOrderApi(ethClients: EthClients): OrderControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.orderControllerApi
 }

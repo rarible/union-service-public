@@ -140,7 +140,7 @@ class FlowConsumerConfiguration(
         handler: BlockchainEventHandler<B, U>,
         valueClass: Class<B>,
     ): RaribleKafkaConsumerWorker<B> {
-        return consumerFactory.createBlockchainConsumerWorkerGroup(
+        return consumerFactory.createBlockchainConsumerWorker(
             hosts = consumer.brokerReplicaSet!!,
             topic = topic,
             handler = handler,

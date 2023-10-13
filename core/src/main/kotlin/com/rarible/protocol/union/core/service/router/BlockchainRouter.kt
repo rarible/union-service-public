@@ -32,8 +32,8 @@ class BlockchainRouter<T : BlockchainService>(
         return enabledBlockchains.contains(blockchain)
     }
 
-    fun getEnabledBlockchains(blockchains: Collection<BlockchainDto>?) =
-        if (blockchains == null || blockchains.isEmpty()) {
+    fun getEnabledBlockchains(blockchains: Collection<BlockchainDto>? = null) =
+        if (blockchains.isNullOrEmpty()) {
             enabledBlockchains
         } else {
             blockchains.filter(enabledBlockchains::contains)
@@ -78,11 +78,7 @@ class BlockchainRouter<T : BlockchainService>(
         blockchains: Collection<BlockchainDto>?,
         clientCall: suspend (service: T) -> R
     ): List<R> = coroutineScope {
-        val enabledBlockchains = if (blockchains == null || blockchains.isEmpty()) {
-            enabledBlockchains
-        } else {
-            blockchains.filter { enabledBlockchains.contains(it) }
-        }
+        val enabledBlockchains = getEnabledBlockchains(blockchains)
         val selectedServices = enabledBlockchains.map { getService(it) }
 
         if (selectedServices.size == 1) {

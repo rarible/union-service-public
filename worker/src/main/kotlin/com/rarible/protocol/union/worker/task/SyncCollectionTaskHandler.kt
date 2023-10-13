@@ -1,14 +1,12 @@
 package com.rarible.protocol.union.worker.task
 
 import com.rarible.core.task.TaskHandler
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.worker.job.sync.SyncCollectionJob
 import org.springframework.stereotype.Component
 
 @Component
 class SyncCollectionTaskHandler(
-    private val job: SyncCollectionJob,
-    private val activeBlockchains: List<BlockchainDto>
+    private val job: SyncCollectionJob
 ) : TaskHandler<String> {
 
     override val type = "SYNC_COLLECTION_TASK"

@@ -13,6 +13,7 @@ import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.OrderService
+import com.rarible.protocol.union.core.service.router.ActiveBlockchain
 import com.rarible.protocol.union.core.service.router.OrderProxyService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
@@ -34,15 +35,11 @@ import org.springframework.context.annotation.Import
 @Import(CoreConfiguration::class)
 @ComponentScan(basePackageClasses = [FlowOrderConverter::class])
 @EnableConfigurationProperties(value = [FlowIntegrationProperties::class])
-class FlowApiConfiguration(
-    private val properties: FlowIntegrationProperties
-) {
-
-    private val flow = BlockchainDto.FLOW.name.lowercase()
+class FlowApiConfiguration {
 
     @Bean
-    fun flowBlockchain(): BlockchainDto {
-        return BlockchainDto.FLOW
+    fun flowBlockchain(): ActiveBlockchain {
+        return ActiveBlockchain(listOf(BlockchainDto.FLOW))
     }
 
     // -------------------- API --------------------//

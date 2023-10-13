@@ -24,8 +24,19 @@ import com.rarible.protocol.union.core.service.dummy.DummyItemService
 import com.rarible.protocol.union.core.service.dummy.DummyOrderService
 import com.rarible.protocol.union.core.service.dummy.DummyOwnershipService
 import com.rarible.protocol.union.core.service.dummy.DummySignatureService
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.service.router.BlockchainService
+import com.rarible.protocol.union.core.service.router.EvmActivityService
+import com.rarible.protocol.union.core.service.router.EvmAuctionService
+import com.rarible.protocol.union.core.service.router.EvmBalanceService
+import com.rarible.protocol.union.core.service.router.EvmBlockchainService
+import com.rarible.protocol.union.core.service.router.EvmCollectionService
+import com.rarible.protocol.union.core.service.router.EvmDomainService
+import com.rarible.protocol.union.core.service.router.EvmItemService
+import com.rarible.protocol.union.core.service.router.EvmOrderService
+import com.rarible.protocol.union.core.service.router.EvmOwnershipService
+import com.rarible.protocol.union.core.service.router.EvmSignatureService
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonDeserializer
 import org.slf4j.LoggerFactory
@@ -56,7 +67,7 @@ import org.springframework.web.reactive.function.client.WebClient
 )
 class CoreConfiguration(
     val applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-    val enabledBlockchains: List<BlockchainDto>,
+    val activeBlockchainProvider: ActiveBlockchainProvider,
     val featureFlagsProperties: FeatureFlagsProperties,
 ) {
 
@@ -92,105 +103,58 @@ class CoreConfiguration(
     }
 
     @Bean
-    fun balanceServiceRouter(services: List<BalanceService>): BlockchainRouter<BalanceService> {
-        val result = ArrayList(services)
-        val disabled = getDisabledBlockchains(services)
-        disabled.forEach {
-            result.add(DummyBalanceService(it))
-            logger.info("BalanceService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
-        }
-        val blockchains = enabledBlockchains.toMutableList()
-        return BlockchainRouter(result, blockchains)
-    }
+    fun balanceServiceRouter(
+        evmServices: List<EvmBalanceService>,
+        services: List<BalanceService>,
+    ) = createRouter(evmServices, services, BalanceService::class.java) { DummyBalanceService(it) }
 
     @Bean
-    fun itemServiceRouter(services: List<ItemService>): BlockchainRouter<ItemService> {
-        val result = ArrayList(services)
-        val disabled = getDisabledBlockchains(services)
-        disabled.forEach {
-            result.add(DummyItemService(it))
-            logger.info("ItemService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
-        }
-        return BlockchainRouter(result, enabledBlockchains)
-    }
+    fun itemServiceRouter(
+        evmServices: List<EvmItemService>,
+        services: List<ItemService>,
+    ) = createRouter(evmServices, services, ItemService::class.java) { DummyItemService(it) }
 
     @Bean
-    fun ownershipServiceRouter(services: List<OwnershipService>): BlockchainRouter<OwnershipService> {
-        val result = ArrayList(services)
-        val disabled = getDisabledBlockchains(services)
-        disabled.forEach {
-            result.add(DummyOwnershipService(it))
-            logger.info("OwnershipService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
-        }
-        return BlockchainRouter(result, enabledBlockchains)
-    }
+    fun ownershipServiceRouter(
+        evmServices: List<EvmOwnershipService>,
+        services: List<OwnershipService>,
+    ) = createRouter(evmServices, services, OwnershipService::class.java) { DummyOwnershipService(it) }
 
     @Bean
-    fun collectionServiceRouter(services: List<CollectionService>): BlockchainRouter<CollectionService> {
-        val result = ArrayList(services)
-        val disabled = getDisabledBlockchains(services)
-        disabled.forEach {
-            result.add(DummyCollectionService(it))
-            logger.info("CollectionService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
-        }
-        return BlockchainRouter(result, enabledBlockchains)
-    }
+    fun collectionServiceRouter(
+        evmServices: List<EvmCollectionService>,
+        services: List<CollectionService>,
+    ) = createRouter(evmServices, services, CollectionService::class.java) { DummyCollectionService(it) }
 
     @Bean
-    fun orderServiceRouter(services: List<OrderService>): BlockchainRouter<OrderService> {
-        val result = ArrayList(services)
-        val disabled = getDisabledBlockchains(services)
-        disabled.forEach {
-            result.add(DummyOrderService(it))
-            logger.info("OrderService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
-        }
-        return BlockchainRouter(result, enabledBlockchains)
-    }
+    fun orderServiceRouter(
+        evmServices: List<EvmOrderService>,
+        services: List<OrderService>,
+    ) = createRouter(evmServices, services, OrderService::class.java) { DummyOrderService(it) }
 
     @Bean
-    fun auctionServiceRouter(services: List<AuctionService>): BlockchainRouter<AuctionService> {
-        val result = ArrayList(services)
-        val disabled = getDisabledBlockchains(services)
-        disabled.forEach {
-            result.add(DummyAuctionService(it))
-            logger.info("AuctionService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
-        }
-        return BlockchainRouter(result, enabledBlockchains)
-    }
+    fun auctionServiceRouter(
+        evmServices: List<EvmAuctionService>,
+        services: List<AuctionService>,
+    ) = createRouter(evmServices, services, AuctionService::class.java) { DummyAuctionService(it) }
 
     @Bean
-    fun activityServiceRouter(services: List<ActivityService>): BlockchainRouter<ActivityService> {
-        val result = ArrayList(services)
-        val disabled = getDisabledBlockchains(services)
-        disabled.forEach {
-            result.add(DummyActivityService(it))
-            logger.info("ActivityService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
-        }
-        val blockchains = enabledBlockchains.toMutableList()
-        return BlockchainRouter(result, blockchains)
-    }
+    fun activityServiceRouter(
+        evmServices: List<EvmActivityService>,
+        services: List<ActivityService>,
+    ) = createRouter(evmServices, services, ActivityService::class.java) { DummyActivityService(it) }
 
     @Bean
-    fun signatureServiceRouter(services: List<SignatureService>): BlockchainRouter<SignatureService> {
-        val result = ArrayList(services)
-        val disabled = getDisabledBlockchains(services)
-        disabled.forEach {
-            result.add(DummySignatureService(it))
-            logger.info("SignatureService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
-        }
-        return BlockchainRouter(result, enabledBlockchains)
-    }
+    fun signatureServiceRouter(
+        evmServices: List<EvmSignatureService>,
+        services: List<SignatureService>,
+    ) = createRouter(evmServices, services, SignatureService::class.java) { DummySignatureService(it) }
 
     @Bean
-    fun domainServiceRouter(services: List<DomainService>): BlockchainRouter<DomainService> {
-        val result = ArrayList(services)
-        val disabled = getDisabledBlockchains(services)
-        disabled.forEach {
-            result.add(DummyDomainService(it))
-            logger.info("DomainService for blockchain {} disabled or not implemented, replaced by dummy", it.name)
-        }
-        return BlockchainRouter(result, enabledBlockchains)
-    }
+    fun domainServiceRouter(
+        evmServices: List<EvmDomainService>,
+        services: List<DomainService>,
+    ) = createRouter(evmServices, services, DomainService::class.java) { DummyDomainService(it) }
 
     @Bean
     fun currencyApiFactory(
@@ -203,6 +167,24 @@ class CoreConfiguration(
     @Bean
     fun currencyApi(factory: CurrencyApiClientFactory): CurrencyControllerApi {
         return factory.createCurrencyApiClient()
+    }
+
+    private fun <T : BlockchainService> createRouter(
+        evmServices: List<EvmBlockchainService<T>>,
+        services: List<T>,
+        type: Class<T>,
+        default: (blockchain: BlockchainDto) -> T
+    ): BlockchainRouter<T> {
+        val result = ArrayList(evmServices.flatMap { it.services } + services)
+        val disabled = getDisabledBlockchains(result)
+        disabled.forEach {
+            result.add(default(it))
+            logger.info(
+                "${type.simpleName} for blockchain {} disabled or not implemented, replaced by dummy",
+                it.name
+            )
+        }
+        return BlockchainRouter(result, activeBlockchainProvider.blockchains.toList())
     }
 
     private fun <T : BlockchainService> getDisabledBlockchains(services: List<T>): List<BlockchainDto> {

@@ -7,7 +7,7 @@ import com.rarible.core.daemon.job.JobHandler
 import com.rarible.core.daemon.sequential.SequentialDaemonWorker
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
-import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.model.ReconciliationMark
@@ -46,11 +46,11 @@ class ReconciliationMarkJob(
 class ReconciliationMarkJobHandler(
     private val reconciliationMarkRepository: ReconciliationMarkRepository,
     private val refreshService: EnrichmentRefreshService,
-    activeBlockchains: List<BlockchainDto>
+    activeBlockchainProvider: ActiveBlockchainProvider
 ) : JobHandler {
 
     private val batch: Int = 48
-    private val blockchains = activeBlockchains.toSet()
+    private val blockchains = activeBlockchainProvider.blockchains
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

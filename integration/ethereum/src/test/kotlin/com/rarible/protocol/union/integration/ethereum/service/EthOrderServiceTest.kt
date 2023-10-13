@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
+import com.rarible.protocol.union.integration.ethereum.EthEvmIntegrationProperties
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
@@ -43,6 +44,9 @@ class EthOrderServiceTest {
 
     @MockK
     private lateinit var orderAdminControllerApi: OrderAdminControllerApi
+
+    @MockK
+    private lateinit var ethEvmIntegrationProperties: EthEvmIntegrationProperties
 
     private val converter = EthOrderConverter(CurrencyMock.currencyServiceMock)
 

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.core.service
 
+import com.rarible.protocol.union.core.model.Origin
 import com.rarible.protocol.union.core.model.UnionAmmTradeInfo
 import com.rarible.protocol.union.core.model.UnionAssetType
 import com.rarible.protocol.union.core.model.UnionOrder
@@ -171,4 +172,6 @@ interface OrderService : BlockchainService {
     suspend fun cancelOrder(
         id: String,
     ): UnionOrder
+
+    fun getOrigins(): List<Origin> = emptyList()
 }

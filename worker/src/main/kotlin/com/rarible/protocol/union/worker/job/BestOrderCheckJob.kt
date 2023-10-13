@@ -6,7 +6,7 @@ import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.daemon.job.JobHandler
 import com.rarible.core.daemon.sequential.SequentialDaemonWorker
 import com.rarible.protocol.union.core.model.offchainEventMark
-import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
@@ -51,13 +51,13 @@ class BestOrderCheckJobHandler(
     private val enrichmentItemEventService: EnrichmentItemEventService,
     private val enrichmentOwnershipEventService: EnrichmentOwnershipEventService,
     private val enrichmentCollectionEventService: EnrichmentCollectionEventService,
-    blockchains: List<BlockchainDto>,
+    activeBlockchainProvider: ActiveBlockchainProvider,
     properties: WorkerProperties,
 ) : JobHandler {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val updateRate = properties.priceUpdate.rate
-    private val enabledBlockchains = blockchains.toSet()
+    private val enabledBlockchains = activeBlockchainProvider.blockchains
 
     override suspend fun handle() {
         logger.info("BestOrderCheckJob started for blockchains: {}", enabledBlockchains)

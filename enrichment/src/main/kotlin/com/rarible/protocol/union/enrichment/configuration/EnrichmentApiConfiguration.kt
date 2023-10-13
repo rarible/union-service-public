@@ -1,8 +1,6 @@
 package com.rarible.protocol.union.enrichment.configuration
 
-import com.rarible.protocol.union.integration.ethereum.blockchain.ethereum.EthereumApiConfiguration
-import com.rarible.protocol.union.integration.ethereum.blockchain.mantle.MantleApiConfiguration
-import com.rarible.protocol.union.integration.ethereum.blockchain.polygon.PolygonApiConfiguration
+import com.rarible.protocol.union.integration.ethereum.EthApiConfiguration
 import com.rarible.protocol.union.integration.flow.FlowApiConfiguration
 import com.rarible.protocol.union.integration.immutablex.ImxApiConfiguration
 import com.rarible.protocol.union.integration.solana.SolanaApiConfiguration
@@ -15,13 +13,11 @@ import org.springframework.context.annotation.Import
     value = [
         EnrichmentConfiguration::class,
         UnionMetaConfiguration::class,
-        EthereumApiConfiguration::class,
-        PolygonApiConfiguration::class,
+        EthApiConfiguration::class,
         FlowApiConfiguration::class,
         TezosApiConfiguration::class,
         SolanaApiConfiguration::class,
         ImxApiConfiguration::class,
-        MantleApiConfiguration::class,
     ]
 )
 class EnrichmentApiConfiguration

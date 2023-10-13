@@ -24,12 +24,15 @@ import com.rarible.protocol.flow.nft.api.client.FlowNftOwnershipControllerApi
 import com.rarible.protocol.flow.nft.api.client.FlowOrderControllerApi
 import com.rarible.protocol.nft.api.client.NftActivityControllerApi
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
+import com.rarible.protocol.nft.api.client.NftDomainControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftLazyMintControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
 import com.rarible.protocol.order.api.client.AuctionActivityControllerApi
+import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.order.api.client.OrderActivityControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
+import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
@@ -39,6 +42,7 @@ import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig
 import com.rarible.protocol.union.core.test.TestUnionEventHandler
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.FakeSubscriptionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
@@ -48,6 +52,9 @@ import com.rarible.protocol.union.dto.SubscriptionEventDto
 import com.rarible.protocol.union.dto.SubscriptionRequestDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
+import com.rarible.protocol.union.integration.ethereum.EthClients
+import com.rarible.protocol.union.integration.ethereum.EthIntegrationProperties
+import com.rarible.protocol.union.integration.ethereum.mock.EthClientsMock
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.coEvery
@@ -192,112 +199,140 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Primary
     fun testCurrencyApi(): CurrencyControllerApi = CurrencyMock.currencyControllerApiMock
 
+    @Bean
+    @Primary
+    fun testEthClient(ethIntegrationProperties: EthIntegrationProperties): EthClients {
+        return EthClientsMock.testEthClients(ethIntegrationProperties.active)
+    }
+
     // --------------------- ETHEREUM ---------------------//
+
     @Bean
     @Primary
     @Qualifier("ethereum.balance.api")
-    fun testEthereumBalanceApi(): BalanceControllerApi = mockk()
+    fun testEthereumBalanceApi(ethClients: EthClients): BalanceControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.balanceControllerApi
 
     @Bean
     @Primary
     @Qualifier("ethereum.item.api")
-    fun testEthereumItemApi(): NftItemControllerApi = mockk()
+    fun testEthereumItemApi(ethClients: EthClients): NftItemControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.nftItemControllerApi
 
     @Bean
     @Primary
     @Qualifier("ethereum.item.lazy.api")
-    fun testEthereumLazyItemApi(): NftLazyMintControllerApi = mockk()
+    fun testEthereumLazyItemApi(ethClients: EthClients): NftLazyMintControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.nftLazyMintControllerApi
 
     @Bean
     @Primary
     @Qualifier("ethereum.ownership.api")
-    fun testEthereumOwnershipApi(): NftOwnershipControllerApi = mockk()
+    fun testEthereumOwnershipApi(ethClients: EthClients): NftOwnershipControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.nftOwnershipControllerApi
 
     @Bean
     @Primary
     @Qualifier("ethereum.collection.api")
-    fun testEthereumCollectionApi(): NftCollectionControllerApi = mockk()
+    fun testEthereumCollectionApi(ethClients: EthClients): NftCollectionControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.nftCollectionControllerApi
 
     @Bean
     @Primary
     @Qualifier("ethereum.order.api")
-    fun testEthereumOrderApi(): OrderControllerApi = mockk()
+    fun testEthereumOrderApi(ethClients: EthClients): OrderControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.orderControllerApi
 
     @Bean
     @Primary
     @Qualifier("ethereum.auction.api")
-    fun testEthereumAuctionApi(): com.rarible.protocol.order.api.client.AuctionControllerApi = mockk()
+    fun testEthereumAuctionApi(ethClients: EthClients): AuctionControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.auctionControllerApi
 
     @Bean
     @Primary
     @Qualifier("ethereum.signature.api")
-    fun testEthereumSignatureApi(): com.rarible.protocol.order.api.client.OrderSignatureControllerApi = mockk()
+    fun testEthereumSignatureApi(ethClients: EthClients): OrderSignatureControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.orderSignatureControllerApi
 
     @Bean
     @Primary
     @Qualifier("ethereum.domain.api")
-    fun testEthereumDomainApi(): com.rarible.protocol.nft.api.client.NftDomainControllerApi = mockk()
+    fun testEthereumDomainApi(ethClients: EthClients): NftDomainControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.nftDomainControllerApi
 
     @Bean
     @Primary
     @Qualifier("ethereum.activity.api.item")
-    fun testEthereumActivityItemApi(): NftActivityControllerApi = mockk()
+    fun testEthereumActivityItemApi(ethClients: EthClients): NftActivityControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.nftActivityControllerApi
 
     @Bean
     @Primary
     @Qualifier("ethereum.activity.api.order")
-    fun testEthereumActivityOrderApi(): OrderActivityControllerApi = mockk()
+    fun testEthereumActivityOrderApi(ethClients: EthClients): OrderActivityControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.orderActivityControllerApi
 
     @Bean
     @Primary
     @Qualifier("ethereum.activity.api.auction")
-    fun testEthereumActivityAuctionApi(): AuctionActivityControllerApi = mockk()
+    fun testEthereumActivityAuctionApi(ethClients: EthClients): AuctionActivityControllerApi =
+        ethClients.clients[BlockchainDto.ETHEREUM]!!.auctionActivityControllerApi
 
     // --------------------- POLYGON ---------------------//
     @Bean
     @Primary
     @Qualifier("polygon.item.api")
-    fun testPolygonNftItemApi(): NftItemControllerApi = mockk()
+    fun testPolygonNftItemApi(ethClients: EthClients): NftItemControllerApi =
+        ethClients.clients[BlockchainDto.POLYGON]!!.nftItemControllerApi
 
     @Bean
     @Primary
     @Qualifier("polygon.ownership.api")
-    fun testPolygonNftOwnershipApi(): NftOwnershipControllerApi = mockk()
+    fun testPolygonNftOwnershipApi(ethClients: EthClients): NftOwnershipControllerApi =
+        ethClients.clients[BlockchainDto.POLYGON]!!.nftOwnershipControllerApi
 
     @Bean
     @Primary
     @Qualifier("polygon.collection.api")
-    fun testPolygonNftCollectionApi(): NftCollectionControllerApi = mockk()
+    fun testPolygonNftCollectionApi(ethClients: EthClients): NftCollectionControllerApi =
+        ethClients.clients[BlockchainDto.POLYGON]!!.nftCollectionControllerApi
 
     @Bean
     @Primary
     @Qualifier("polygon.order.api")
-    fun testPolygonOrderApi(): com.rarible.protocol.order.api.client.OrderControllerApi = mockk()
+    fun testPolygonOrderApi(ethClients: EthClients): OrderControllerApi =
+        ethClients.clients[BlockchainDto.POLYGON]!!.orderControllerApi
 
     @Bean
     @Primary
     @Qualifier("polygon.auction.api")
-    fun testPolygonAuctionApi(): com.rarible.protocol.order.api.client.AuctionControllerApi = mockk()
+    fun testPolygonAuctionApi(ethClients: EthClients): AuctionControllerApi =
+        ethClients.clients[BlockchainDto.POLYGON]!!.auctionControllerApi
 
     @Bean
     @Primary
     @Qualifier("polygon.signature.api")
-    fun testPolygonSignatureApi(): com.rarible.protocol.order.api.client.OrderSignatureControllerApi = mockk()
+    fun testPolygonSignatureApi(ethClients: EthClients): OrderSignatureControllerApi =
+        ethClients.clients[BlockchainDto.POLYGON]!!.orderSignatureControllerApi
 
     @Bean
     @Primary
     @Qualifier("polygon.activity.api.item")
-    fun testPolygonActivityItemApi(): NftActivityControllerApi = mockk()
+    fun testPolygonActivityItemApi(ethClients: EthClients): NftActivityControllerApi =
+        ethClients.clients[BlockchainDto.POLYGON]!!.nftActivityControllerApi
 
     @Bean
     @Primary
     @Qualifier("polygon.activity.api.order")
-    fun testPolygonActivityOrderApi(): OrderActivityControllerApi = mockk()
+    fun testPolygonActivityOrderApi(ethClients: EthClients): OrderActivityControllerApi =
+        ethClients.clients[BlockchainDto.POLYGON]!!.orderActivityControllerApi
 
     @Bean
     @Primary
     @Qualifier("polygon.activity.api.auction")
-    fun testPolygonActivityAuctionApi(): AuctionActivityControllerApi = mockk()
+    fun testPolygonActivityAuctionApi(ethClients: EthClients): AuctionActivityControllerApi =
+        ethClients.clients[BlockchainDto.POLYGON]!!.auctionActivityControllerApi
 
     // --------------------- SOLANA -------------------//
 
