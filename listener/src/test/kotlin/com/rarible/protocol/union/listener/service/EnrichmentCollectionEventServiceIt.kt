@@ -78,7 +78,7 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
     @Test
     fun `on collection updated - ok, collection inserted`() = runBlocking<Unit> {
         val collectionId = randomEthCollectionId()
-        val ethCollection = randomEthCollectionDto().copy(id = Address.apply(collectionId.value))
+        val ethCollection = randomEthCollectionDto().copy(id = Address.apply(collectionId.value), scam = true)
 
         val unionCollection = EthCollectionConverter.convert(ethCollection, collectionId.blockchain)
         collectionEventService.onCollectionUpdate(UnionCollectionUpdateEvent(unionCollection, stubEventMark()))
@@ -91,12 +91,26 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
             assertThat(messages[0].collectionId).isEqualTo(collectionId)
-            assertThat(messages[0].collection.scam).isEqualTo(ethCollection.scam)
+            assertThat(messages[0].collection.scam).isTrue
             // TODO COLLECTION update meta check after the migration
             assertThat(messages[0].collection.copy(meta = null)).isEqualTo(expected)
         }
         val refreshState = metaAutoRefreshStateRepository.loadToCheckCreated(Instant.now().minusSeconds(60)).toList()
         assertThat(refreshState.map { it.id }).containsExactly(collectionId.fullId())
+
+        collectionEventService.onCollectionUpdate(
+            UnionCollectionUpdateEvent(
+                unionCollection.copy(scam = false),
+                stubEventMark()
+            )
+        )
+
+        waitAssert {
+            val messages = findCollectionUpdates(collectionId.value)
+            assertThat(messages).hasSize(2)
+            assertThat(messages[1].collectionId).isEqualTo(collectionId)
+            assertThat(messages[1].collection.scam).isFalse
+        }
     }
 
     @Test
