@@ -1,24 +1,9 @@
-spring:
-  application:
-    name: union-search-indexer
-  data:
-    elasticsearch:
-      cluster-name: docker-cluster
-      cluster-nodes: ${elasticsearch.cluster-nodes}
-
-      client:
-        reactive:
-          endpoints: ${elasticsearch.api-nodes}
-          max-in-memory-size: 4194304
-
-  elasticsearch:
-    rest:
-      uris: ${elasticsearch.api-nodes}
-
-meta:
-  embedded:
-    publicUrl: "http://localhost:8080/content/embedded"
-  retries: "PT1H,P1D"
+enrichment:
+  meta:
+    common:
+      embedded:
+        publicUrl: "http://localhost:8080/content/embedded"
+      retries: "PT1H,P1D"
 
 integration:
   tezos:
@@ -38,76 +23,24 @@ rarible:
 
 worker:
   reconciliation:
-    orderBatchSize: 50
-    auctionBatchSize: 50
-    threadCount: 2
     notificationEnabled: false
-  price-update:
+  priceUpdate:
     enabled: false
-    rate: PT5M
-    delay: PT60M
-  reconcile-marks:
+  reconcileMarks:
     enabled: false
-    rate: PT1M
-    delay: PT60M
-  meta-item-retry:
+  metaItemRetry:
     enabled: false
-  meta-collection-retry:
+  metaCollectionRetry:
     enabled: false
   metaRefresh:
     enabled: false
-  search-reindex:
+  searchReindex:
     activity:
       enabled: true
-      blockchains:
-        - blockchain: ETHEREUM
-          enabled: true
-        - blockchain: POLYGON
-          enabled: true
-        - blockchain: MANTLE
-          enabled: true
-        - blockchain: FLOW
-          enabled: true
-        - blockchain: TEZOS
-          enabled: true
-        - blockchain: SOLANA
-          enabled: true
-        - blockchain: IMMUTABLEX
-          enabled: false
     order:
       enabled: false
-      blockchains:
     collection:
       enabled: true
-      blockchains:
-        - blockchain: ETHEREUM
-          enabled: true
-        - blockchain: POLYGON
-          enabled: true
-        - blockchain: MANTLE
-          enabled: true
-        - blockchain: FLOW
-          enabled: true
-        - blockchain: TEZOS
-          enabled: true
-        - blockchain: SOLANA
-          enabled: true
-        - blockchain: IMMUTABLEX
-          enabled: false
     ownership:
       enabled: true
-      blockchains:
-        - blockchain: ETHEREUM
-          enabled: true
-        - blockchain: POLYGON
-          enabled: true
-        - blockchain: MANTLE
-          enabled: true
-        - blockchain: FLOW
-          enabled: true
-        - blockchain: TEZOS
-          enabled: true
-        - blockchain: SOLANA
-          enabled: true
-        - blockchain: IMMUTABLEX
-          enabled: false
+

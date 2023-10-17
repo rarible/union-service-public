@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import
 @Import(
     value = [
         EnrichmentConfiguration::class,
-        UnionMetaConfiguration::class,
+        EnrichmentMetaConfiguration::class,
         EthApiConfiguration::class,
         FlowApiConfiguration::class,
         TezosApiConfiguration::class,

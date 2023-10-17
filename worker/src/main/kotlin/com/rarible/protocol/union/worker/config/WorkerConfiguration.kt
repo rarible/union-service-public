@@ -7,9 +7,9 @@ import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.elasticsearch.bootstrap.ElasticsearchBootstrapper
 import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig
+import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepository
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
@@ -42,7 +42,7 @@ import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperatio
     ]
 )
 @EnableRaribleTask
-@EnableConfigurationProperties(WorkerProperties::class, RateLimiterProperties::class)
+@EnableConfigurationProperties(WorkerProperties::class)
 @EnableMongock
 class WorkerConfiguration(
     val properties: WorkerProperties
@@ -75,6 +75,11 @@ class WorkerConfiguration(
     @Bean
     fun mocaXpCustomAttributesProviderProperties(): MocaXpCustomAttributesProviderProperties {
         return properties.itemMetaCustomAttributesJob.providers.mocaXp
+    }
+
+    @Bean
+    fun rateLimiterProperties(): RateLimiterProperties {
+        return properties.ratelimiter
     }
 
     @FlowPreview
@@ -136,7 +141,7 @@ class WorkerConfiguration(
         metaAutoRefreshStateRepository: MetaAutoRefreshStateRepository,
         itemMetaRefreshService: ItemMetaRefreshService,
         esActivityRepository: EsActivityRepository,
-        unionMetaProperties: UnionMetaProperties,
+        commonMetaProperties: CommonMetaProperties,
         properties: WorkerProperties,
         meterRegistry: MeterRegistry,
     ): MetaAutoRefreshJob {
@@ -144,7 +149,7 @@ class WorkerConfiguration(
             metaAutoRefreshStateRepository = metaAutoRefreshStateRepository,
             itemMetaRefreshService = itemMetaRefreshService,
             esActivityRepository = esActivityRepository,
-            simpleHashEnabled = unionMetaProperties.simpleHash.enabled,
+            simpleHashEnabled = commonMetaProperties.simpleHash.enabled,
             properties = properties,
             meterRegistry = meterRegistry,
         )

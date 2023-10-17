@@ -11,7 +11,6 @@ import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepos
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
-import com.rarible.protocol.union.search.indexer.config.IndexerProperties
 import com.rarible.protocol.union.search.indexer.handler.ActivityEventHandler
 import com.rarible.protocol.union.search.indexer.handler.CollectionEventHandler
 import com.rarible.protocol.union.search.indexer.handler.ItemEventHandler
@@ -42,7 +41,7 @@ class TestIndexerConfiguration(
 
     @Bean
     fun indexerMetricFactory(meterRegistry: MeterRegistry): IndexerMetricFactory {
-        return IndexerMetricFactory(meterRegistry, IndexerProperties())
+        return IndexerMetricFactory(meterRegistry)
     }
 
     @Bean

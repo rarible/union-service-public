@@ -3,6 +3,7 @@ package com.rarible.protocol.union.worker.task.search.order
 import com.rarible.core.task.TaskHandler
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.model.elastic.EsOrder
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.core.task.OrderTaskParam
 import com.rarible.protocol.union.worker.config.OrderReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
@@ -18,6 +19,7 @@ class OrderTask(
     private val paramFactory: ParamFactory,
     private val orderReindexService: OrderReindexService,
     private val taskRepository: TaskRepository,
+    private val activeBlockchainProvider: ActiveBlockchainProvider,
 ) : TaskHandler<String> {
 
     override val type: String
@@ -25,7 +27,7 @@ class OrderTask(
 
     override suspend fun isAbleToRun(param: String): Boolean {
         val blockchain = paramFactory.parse<OrderTaskParam>(param).blockchain
-        return properties.isBlockchainActive(blockchain)
+        return properties.enabled && activeBlockchainProvider.isActive(blockchain)
     }
 
     override fun runLongTask(from: String?, param: String): Flow<String> {

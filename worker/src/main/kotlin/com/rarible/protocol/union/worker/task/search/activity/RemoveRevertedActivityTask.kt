@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.worker.task.search.activity
 
 import com.rarible.core.task.TaskHandler
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.core.task.RemoveRevertedActivityTaskParam
 import com.rarible.protocol.union.worker.config.ActivityReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
@@ -14,6 +15,7 @@ class RemoveRevertedActivityTask(
     private val properties: ActivityReindexProperties,
     private val paramFactory: ParamFactory,
     private val activityReindexService: ActivityReindexService,
+    private val activeBlockchainProvider: ActiveBlockchainProvider,
 ) : TaskHandler<String> {
 
     override val type: String
@@ -21,7 +23,7 @@ class RemoveRevertedActivityTask(
 
     override suspend fun isAbleToRun(param: String): Boolean {
         val blockchain = paramFactory.parse<RemoveRevertedActivityTaskParam>(param).blockchain
-        return properties.isBlockchainActive(blockchain)
+        return properties.enabled && activeBlockchainProvider.isActive(blockchain)
     }
 
     /**

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -16,7 +17,6 @@ import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.ItemReindexProperties
 import com.rarible.protocol.union.worker.metrics.SearchTaskMetricFactory
 import com.rarible.protocol.union.worker.task.search.EsRateLimiter
@@ -24,7 +24,6 @@ import com.rarible.protocol.union.worker.task.search.ParamFactory
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import io.mockk.coEvery
 import io.mockk.coVerifyAll
-import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
@@ -65,9 +64,7 @@ internal class ItemTaskTest {
         coEvery { getService(any()) } returns itemService
     }
 
-    private val searchTaskMetricFactory = SearchTaskMetricFactory(SimpleMeterRegistry(), mockk {
-        every { metrics } returns mockk { every { rootPath } returns "protocol.union.worker" }
-    })
+    private val searchTaskMetricFactory = SearchTaskMetricFactory(SimpleMeterRegistry())
 
     private val enrichmentItemService: EnrichmentItemService = mockk()
 
@@ -77,10 +74,7 @@ internal class ItemTaskTest {
         coEvery { waitIfNecessary(any()) } just runs
     }
 
-    private val itemReindexProperties = ItemReindexProperties(
-        enabled = true,
-        blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
-    )
+    private val itemReindexProperties = ItemReindexProperties(enabled = true)
 
     @Test
     fun `should start first task`() = runBlocking<Unit> {
@@ -94,6 +88,7 @@ internal class ItemTaskTest {
             searchTaskMetricFactory,
             taskRepository,
             rateLimiter,
+            ActiveBlockchainProvider.of(BlockchainDto.ETHEREUM)
         )
 
         val param = paramFactory.toString(

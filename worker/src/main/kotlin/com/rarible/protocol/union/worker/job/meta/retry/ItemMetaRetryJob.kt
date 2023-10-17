@@ -8,7 +8,7 @@ import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.dto.CollectionIdDto
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaService
@@ -44,7 +44,7 @@ class ItemMetaRetryJob(
 @Component
 class ItemMetaRetryJobHandler(
     private val repository: ItemRepository,
-    private val metaProperties: UnionMetaProperties,
+    private val metaProperties: CommonMetaProperties,
     private val metaService: ItemMetaService,
     private val router: BlockchainRouter<ItemService>
 ) : JobHandler {

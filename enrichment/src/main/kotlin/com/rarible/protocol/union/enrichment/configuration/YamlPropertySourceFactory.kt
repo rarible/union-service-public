@@ -16,7 +16,7 @@ class YamlPropertySourceFactory : PropertySourceFactory {
         return try {
             val properties: Properties = factory.getObject()!!
             PropertiesPropertySource(encodedResource.resource.filename!!, properties)
-        } catch (e: Exception) {
+        } catch (e: IllegalStateException) {
             // If not found
             return MapPropertySource(name, emptyMap())
         }

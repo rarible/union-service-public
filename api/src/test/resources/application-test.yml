@@ -13,12 +13,6 @@ spring:
     rest:
       uris: ${elasticsearch.api-nodes}
 
-rarible:
-  loader:
-    enableWorkers: true
-    workers: 1
-    enableRetrySchedulerJob: false
-
 integration:
   ethereum:
     origins:
@@ -32,10 +26,6 @@ integration:
       useDipDupTokens: ${consul.tezos.dipdup.useDipDupTokens:false}
   solana:
     enabled: true
-
-meta:
-  embedded:
-    publicUrl: "http://localhost:8080/content/embedded"
 
 common:
   currency:
@@ -58,3 +48,8 @@ logging:
     com.rarible.core.loader: ERROR
     tracer: TRACE
     org.springframework.data.elasticsearch.core.QUERY: DEBUG
+
+api:
+  openapi:
+    baseUrl: "https://test-api.rarible.org"
+    description: "Development (Ropsten, Mumbai, Hangzhou)"

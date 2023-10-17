@@ -45,6 +45,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter
 import org.springframework.http.MediaType
 import org.springframework.http.codec.ClientCodecConfigurer
@@ -56,18 +57,12 @@ import org.springframework.web.reactive.function.client.WebClient
 
 @Configuration
 @EnableScheduling
+@Import(CommonConfiguration::class)
 @ComponentScan(basePackageClasses = [CoreConfiguration::class])
-@EnableConfigurationProperties(
-    value = [
-        FeatureFlagsProperties::class,
-        EsProperties::class,
-        EsOptimizationProperties::class,
-    ]
-)
+@EnableConfigurationProperties(CommonProperties::class)
 class CoreConfiguration(
-    val applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-    val activeBlockchainProvider: ActiveBlockchainProvider,
-    val featureFlagsProperties: FeatureFlagsProperties,
+    private val applicationEnvironmentInfo: ApplicationEnvironmentInfo,
+    private val activeBlockchainProvider: ActiveBlockchainProvider,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)

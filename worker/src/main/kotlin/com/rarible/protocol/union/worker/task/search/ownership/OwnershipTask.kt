@@ -3,6 +3,7 @@ package com.rarible.protocol.union.worker.task.search.ownership
 import com.rarible.core.task.TaskHandler
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import com.rarible.protocol.union.worker.config.OwnershipReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
@@ -19,6 +20,7 @@ class OwnershipTask(
     private val paramFactory: ParamFactory,
     private val reindexService: OwnershipReindexService,
     private val taskRepository: TaskRepository,
+    private val activeBlockchainProvider: ActiveBlockchainProvider,
 ) : TaskHandler<String> {
 
     override val type: String
@@ -26,7 +28,7 @@ class OwnershipTask(
 
     override suspend fun isAbleToRun(param: String): Boolean {
         val blockchain = paramFactory.parse<OwnershipTaskParam>(param).blockchain
-        return properties.isBlockchainActive(blockchain)
+        return properties.enabled && activeBlockchainProvider.isActive(blockchain)
     }
 
     override fun runLongTask(from: String?, param: String): Flow<String> = when (from) {

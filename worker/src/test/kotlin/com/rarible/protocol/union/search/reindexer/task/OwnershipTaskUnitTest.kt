@@ -7,10 +7,10 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.elasticsearch.IndexService
 import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
-import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.OwnershipReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import com.rarible.protocol.union.worker.task.search.ownership.OwnershipReindexService
@@ -68,13 +68,11 @@ class OwnershipTaskUnitTest {
     @Test
     fun `should launch first run of the task`() = runBlocking {
         val task = OwnershipTask(
-            OwnershipReindexProperties(
-                enabled = true,
-                blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
-            ),
+            OwnershipReindexProperties(enabled = true),
             ParamFactory(jacksonObjectMapper().registerKotlinModule()),
             reindexService,
             taskRepository,
+            ActiveBlockchainProvider.of(BlockchainDto.ETHEREUM)
         )
 
         task.runLongTask(
@@ -93,13 +91,11 @@ class OwnershipTaskUnitTest {
     @Test
     fun `should launch next run of the task`(): Unit = runBlocking {
         val task = OwnershipTask(
-            OwnershipReindexProperties(
-                enabled = true,
-                blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
-            ),
+            OwnershipReindexProperties(enabled = true),
             ParamFactory(jacksonObjectMapper().registerKotlinModule()),
             reindexService,
             taskRepository,
+            ActiveBlockchainProvider.of(BlockchainDto.ETHEREUM)
         )
 
         task.runLongTask(

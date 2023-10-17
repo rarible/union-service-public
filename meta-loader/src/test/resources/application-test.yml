@@ -1,15 +1,3 @@
-logging:
-  level.org.springframework.data.mongodb.core.ReactiveMongoTemplate: DEBUG
-
-rarible:
-  loader:
-    workers: 1
-    retry:
-      backoffDelaysMillis: [ ]
-      job:
-        runner:
-        period: 1000000000000000000 # Disable in the tests. Run RetryTasksService manually.
-
 integration:
   ethereum:
     enabled: true
@@ -55,7 +43,3 @@ integration:
         item: 1
         ownership: 1
         order: 1
-
-meta:
-  embedded:
-    publicUrl: "http://localhost:8080/content/embedded"

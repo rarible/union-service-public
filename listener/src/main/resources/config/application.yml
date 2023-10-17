@@ -1,42 +1,6 @@
-application:
-  project: protocol
-
-server:
-  shutdown: graceful
-  port: 8080
-
 spring:
-  application.name: union-listener
-  jackson:
-    mapper:
-      ACCEPT_CASE_INSENSITIVE_ENUMS: true
-    deserialization:
-      FAIL_ON_UNKNOWN_PROPERTIES: false
-    default-property-inclusion: non_null
-  aop:
-    proxy-target-class: false
-  main:
-    banner-mode: log
-    web-application-type: reactive
-  task:
-    scheduling:
-      pool:
-        size: 16
-
-rarible:
-  core:
-    client:
-      name: rarible-protocol
-  ethereum:
-    converter:
-      enabled: true
-  loader:
-    broker-replica-set: ${kafka.hosts}
-    topicsPrefix: protocol.${application.environment}.union.internal.loader
-    enableWorkers: false
-    enableNotifications: true # Enable notifications processor to send item update events when meta gets loaded.
-    loadNotificationsTopicPartitions: 50
-    enableRetrySchedulerJob: true
+  application:
+    name: "union-listener"
 
 integration:
   ethereum:
@@ -144,38 +108,9 @@ integration:
 
 listener:
   consumer:
-    broker-replica-set: ${kafka.hosts}
-  meta-scheduling:
-    item:
-      workers: 3
-      batchSize: 512
-  metrics:
-    root-path: "protocol.union.listener"
+    brokerReplicaSet: "${kafka.hosts}"
   workers:
     polygon:
       coroutineThreadCount: 4
   communityMarketplace:
-    topic: whitelabel.${application.environment}.marketplace
-
-meta:
-  ipfsGateway: "https://ipfs.io,https://nftstorage.link"
-  ipfsPublicGateway: "https://ipfs.io"
-  ipfsLegacyGateway: "https://rarible.mypinata.cloud"
-  mediaFetchTimeout: 10000
-  mediaFetchMaxSize: 131072 # 128 Kb
-  openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
-  http-client:
-    type: KTOR_CIO # KTOR_APACHE, KTOR_CIO
-    thread-count: 1
-    time-out: 10000
-    total-connection: 1000
-  simpleHash:
-    kafka:
-      topics: ${META_SIMPLEHASH_KAFKA_TOPICS:}
-      username: ${META_SIMPLEHASH_KAFKA_USERNAME:}
-      password: ${META_SIMPLEHASH_KAFKA_PASSWORD:}
-
-# Disable verbose logs of Apache HTTP client used to load content media metadata.
-logging:
-  level:
-    org.apache.http: ERROR
+    topic: "whitelabel.${application.environment}.marketplace"

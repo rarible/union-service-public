@@ -1,3 +1,6 @@
+elasticsearch:
+  api-nodes: "staging-es1.rarible.int:9200"
+
 enrichment:
   currencies:
     bestBidByCurrencyWhitelist:

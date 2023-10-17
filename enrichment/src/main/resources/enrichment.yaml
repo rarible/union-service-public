@@ -1,11 +1,69 @@
+application:
+  project: "protocol"
+
+server:
+  shutdown: "graceful"
+  port: 8080
+
+spring:
+  data:
+    mongodb:
+      uri: "mongodb://${mongodb.hosts}"
+      database: "${mongodb.database}"
+  jackson:
+    mapper:
+      ACCEPT_CASE_INSENSITIVE_ENUMS: true
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+    default-property-inclusion: "non_null"
+  aop:
+    proxy-target-class: false
+  main:
+    banner-mode: "log"
+    web-application-type: "reactive"
+
+rarible:
+  core:
+    client:
+      name: "rarible-protocol"
+
 common:
-  producer:
-    brokerReplicaSet: ${kafka.hosts}
   currency:
     refresh:
       cron: "0 0/30 * * * *"
 
-meta:
-  simpleHash:
-    supported:
-      - "ETHEREUM"
+enrichment:
+  producer:
+    brokerReplicaSet: "${kafka.hosts}"
+  meta:
+    common:
+      ipfsGateway: "https://nftstorage.link"
+      ipfsPublicGateway: "https://ipfs.raribleuserdata.com"
+      ipfsLegacyGateway: "https://rarible.mypinata.cloud,https://opensea.mypinata.cloud,https://ipfs.infura.io"
+      mediaFetchTimeout: 10000
+      mediaFetchMaxSize: 131072 # 128 Kb
+      retries: "PT10S,PT30S,PT5M,PT1H,P1D"
+      embedded:
+        publicUrl: "https://${application.environment}-api.rarible.org/content/embedded"
+      httpClient:
+        type: "ASYNC_APACHE"
+        threadCount: 4
+        keepAlive: false
+        timeOut: 30000
+        totalConnection: 8196
+        connectionsPerRoute: 2048
+      simpleHash:
+        enabled: false
+        endpoint: "https://api.simplehash.com/api/v0"
+        kafka:
+          enabled: false
+          broker: "pkc-3w22w.us-central1.gcp.confluent.cloud:9092"
+          topics: "${META_SIMPLEHASH_KAFKA_TOPICS:}"
+          username: "${META_SIMPLEHASH_KAFKA_USERNAME:}"
+          password: "${META_SIMPLEHASH_KAFKA_PASSWORD:}"
+        supported:
+          - "ETHEREUM"
+
+logging:
+  level:
+    org.apache.http: "ERROR"

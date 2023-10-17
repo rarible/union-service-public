@@ -13,6 +13,7 @@ import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsOrder
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.core.task.ActivityTaskParam
 import com.rarible.protocol.union.core.task.CollectionTaskParam
 import com.rarible.protocol.union.core.task.ItemTaskParam
@@ -32,6 +33,7 @@ class ReindexService(
     workerProperties: WorkerProperties,
     private val taskRepository: TaskRepository,
     private val paramFactory: ParamFactory,
+    private val activeBlockchainProvider: ActiveBlockchainProvider
 ) : ReindexSchedulingService {
 
     private val searchReindexProperties = workerProperties.searchReindex
@@ -60,7 +62,7 @@ class ReindexService(
     }
 
     private suspend fun scheduleCollectionReindex(indexName: String, definition: EntityDefinitionExtended) {
-        val blockchains = searchReindexProperties.collection.activeBlockchains()
+        val blockchains = activeBlockchainProvider.blockchains
         val taskParams = blockchains.map {
             paramFactory.toString(
                 CollectionTaskParam(
@@ -87,7 +89,7 @@ class ReindexService(
     }
 
     private suspend fun scheduleActivityReindex(indexName: String, definition: EntityDefinitionExtended) {
-        val blockchains = searchReindexProperties.activity.activeBlockchains()
+        val blockchains = activeBlockchainProvider.blockchains
         val types = SyncTypeDto.values()
         val taskParams = blockchains.flatMap { blockchain ->
             types.map { type ->
@@ -118,7 +120,7 @@ class ReindexService(
     }
 
     private suspend fun scheduleItemReindex(indexName: String, definition: EntityDefinitionExtended) {
-        val blockchains = searchReindexProperties.item.activeBlockchains()
+        val blockchains = activeBlockchainProvider.blockchains
         logger.info("Active blockchains {}", blockchains)
         val taskParams = blockchains.map {
             paramFactory.toString(
@@ -143,7 +145,7 @@ class ReindexService(
     }
 
     private suspend fun scheduleOrderReindex(indexName: String, definition: EntityDefinitionExtended) {
-        val blockchains = searchReindexProperties.order.activeBlockchains()
+        val blockchains = activeBlockchainProvider.blockchains
         val taskParams = blockchains.map {
             paramFactory.toString(
                 OrderTaskParam(
@@ -167,7 +169,7 @@ class ReindexService(
     }
 
     private suspend fun scheduleOwnershipReindex(indexName: String, definition: EntityDefinitionExtended) {
-        val blockchains = searchReindexProperties.ownership.activeBlockchains()
+        val blockchains = activeBlockchainProvider.blockchains
         val taskParams = blockchains.flatMap { blockchain ->
             OwnershipTaskParam.Target.values().map { target ->
                 paramFactory.toString(

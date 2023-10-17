@@ -1,45 +1,23 @@
-application:
-  project: protocol
-
-server:
-  shutdown: graceful
-  port: 8080
-
 spring:
-  application.name: union-search-indexer
-  jackson:
-    mapper:
-      ACCEPT_CASE_INSENSITIVE_ENUMS: true
-    deserialization:
-      FAIL_ON_UNKNOWN_PROPERTIES: false
-    default-property-inclusion: non_null
-  aop:
-    proxy-target-class: false
-  main:
-    banner-mode: log
-    web-application-type: reactive
-
-rarible:
-  core:
-    client:
-      name: rarible-protocol
+  application:
+    name: "union-search-indexer"
 
 handler:
   activity:
-    enabled: ${consul.indexer.activity.enabled:true}
+    enabled: true
   collection:
-    enabled: ${consul.indexer.collection.enabled:true}
+    enabled: true
   item:
-    enabled: ${consul.indexer.item.enabled:false}
-  order:
-    enabled: ${consul.indexer.order.enabled:false}
+    enabled: true
   ownership:
-    enabled: ${consul.indexer.ownership.enabled:false}
+    enabled: true
+  order:
+    enabled: false
 
 indexer:
   consumer:
-    broker-replica-set: ${kafka.hosts}
-    worker-count: 3
+    brokerReplicaSet: ${kafka.hosts}
+    workerCount: 3
 
 integration:
   ethereum:
@@ -119,7 +97,3 @@ integration:
       url: ${consul.immutablex.api.baseUrlV3:}
       byIdsChunkSize: 16
     apiKey: ${consul.immutablex.api.key:}
-
-common:
-  producer:
-    broker-replica-set: ${kafka.hosts}

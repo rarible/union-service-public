@@ -10,10 +10,10 @@ import com.rarible.core.test.ext.KafkaTest
 import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.core.test.wait.BlockingWait.waitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.configuration.SimpleHash
 import com.rarible.protocol.union.enrichment.configuration.SimpleHashKafka
 import com.rarible.protocol.union.enrichment.configuration.SimplehashConsumerConfiguration
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.simplehash.client.subcriber.SimplehashKafkaAvroSerializer
 import com.simplehash.v0.nft
 import io.mockk.every
@@ -35,7 +35,7 @@ class SimpleHashKafkaTest {
         val kafkaBootstrap = System.getProperty("kafka.hosts")
         val topic = "ethereum-${nowMillis().toEpochMilli()}"
 
-        val props: UnionMetaProperties = mockk() {
+        val props: CommonMetaProperties = mockk() {
             every { simpleHash } returns SimpleHash(
                 kafka = SimpleHashKafka(
                     enabled = true,

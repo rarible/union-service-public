@@ -11,9 +11,9 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
+import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
+import com.rarible.protocol.union.enrichment.configuration.EnrichmentMetaConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SimpleHash
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaConfiguration
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverterService
@@ -44,9 +44,9 @@ class SimpleHashServiceTest {
         mapping = mapOf("ethereum" to "ethereum-goerli"),
         supported = setOf(BlockchainDto.ETHEREUM)
     )
-    private val props: UnionMetaProperties
+    private val props: CommonMetaProperties
         get() {
-            val mock = mockk<UnionMetaProperties>()
+            val mock = mockk<CommonMetaProperties>()
             every { mock.simpleHash } returns simpleHashProps
             return mock
         }
@@ -60,7 +60,7 @@ class SimpleHashServiceTest {
     private val router: BlockchainRouter<ItemService> = mockk() {
         every { getService(any()) } returns itemService
     }
-    private val client = UnionMetaConfiguration(props).simpleHashClient(customizer)
+    private val client = EnrichmentMetaConfiguration(props).simpleHashClient(customizer)
     private val metrics = ItemMetaMetrics(SimpleMeterRegistry())
     private val simpleHashConverterService = SimpleHashConverterService()
     private val service = SimpleHashService(props, client, cacheRepository, metrics, router, simpleHashConverterService)

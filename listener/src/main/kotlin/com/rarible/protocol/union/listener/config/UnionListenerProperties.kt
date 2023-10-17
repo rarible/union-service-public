@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.listener.config
 
 import com.rarible.core.daemon.DaemonWorkerProperties
-import com.rarible.core.kafka.Compression
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
@@ -11,14 +10,13 @@ import org.springframework.boot.context.properties.ConstructorBinding
 data class UnionListenerProperties(
     val consumer: InternalConsumerProperties,
     val monitoringWorker: DaemonWorkerProperties = DaemonWorkerProperties(),
-    val metaScheduling: MetaSchedulingProperties,
-    val metrics: MetricsProperties,
+    val metaScheduling: MetaSchedulingProperties = MetaSchedulingProperties(),
+    val metrics: MetricsProperties = MetricsProperties(),
     val communityMarketplace: CommunityMarketplaceProperties = CommunityMarketplaceProperties(),
 )
 
 class InternalConsumerProperties(
     val brokerReplicaSet: String,
-    val compression: Compression = Compression.SNAPPY,
     private val workers: Map<String, BlockchainWorkerProperties> = emptyMap()
 ) {
 
@@ -37,7 +35,7 @@ data class MetaSchedulingProperties(
 )
 
 data class MetaEntrySchedulingProperties(
-    val workers: Int = 3,
+    val workers: Int = 9,
     val batchSize: Int = 500
 )
 

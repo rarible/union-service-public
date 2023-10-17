@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.protocol.union.core.EsProperties
+import com.rarible.protocol.union.api.configuration.EsProperties
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.trait.ExtendedTraitProperty
 import com.rarible.protocol.union.core.model.trait.Trait

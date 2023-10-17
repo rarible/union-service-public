@@ -1,0 +1,17 @@
+meta-loader:
+  downloader:
+    # Since we have 768 connection pool size per API client and 2*pool size batch for mongo pipeline processing,
+    # we should have 768/2 total size of all connection pools, for kafka it should be 768 = sum(worker*batchSize)
+    item:
+      event:
+        poolSize: 128
+      api:
+        poolSize: 64
+      refresh:
+        poolSize: 64
+      retry:
+        poolSize: 32
+      retry_partial:
+        poolSize: 32
+      sync:
+        poolSize: 32

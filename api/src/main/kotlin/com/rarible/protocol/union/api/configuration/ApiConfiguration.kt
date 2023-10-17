@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.configuration
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.rarible.core.autoconfigure.filter.cors.EnableRaribleCorsWebFilter
+import com.rarible.core.task.TaskConfiguration
 import com.rarible.core.telemetry.actuator.WebRequestClientTagContributor
 import com.rarible.protocol.union.dto.UnionModelJacksonModule
 import com.rarible.protocol.union.dto.UnionPrimitivesJacksonModule
@@ -13,6 +14,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
 import org.springframework.http.HttpMethod
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.web.cors.CorsConfiguration
@@ -24,13 +26,31 @@ import java.time.Clock
 @Configuration
 @EnableRaribleCorsWebFilter
 @Import(EnrichmentApiConfiguration::class, SearchConfiguration::class)
-@EnableConfigurationProperties(
-    value = [
-        OpenapiProperties::class,
-        DomainProperties::class,
-    ]
-)
-class ApiConfiguration {
+@EnableConfigurationProperties(ApiProperties::class)
+@EnableReactiveMongoRepositories(basePackageClasses = [TaskConfiguration::class])
+class ApiConfiguration(
+    private val properties: ApiProperties
+) {
+
+    @Bean
+    fun openapiProperties(): OpenapiProperties {
+        return properties.openapi
+    }
+
+    @Bean
+    fun subscribeProperties(): SubscribeProperties {
+        return properties.subscribe
+    }
+
+    @Bean
+    fun elasticsearchProperties(): EsProperties {
+        return properties.elasticsearch
+    }
+
+    @Bean
+    fun elasticsearchOptimizationProperties(): EsOptimizationProperties {
+        return properties.elasticsearch.optimization
+    }
 
     @Bean
     fun jsonCustomizer(): Jackson2ObjectMapperBuilderCustomizer? {

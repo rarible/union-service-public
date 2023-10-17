@@ -9,17 +9,17 @@ import com.rarible.simplehash.client.subcriber.SimplehashKafkaAvroDeserializer
 import com.simplehash.v0.nft
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.slf4j.LoggerFactory
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.ApplicationEventPublisherAware
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.listener.AbstractMessageListenerContainer
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 import java.util.UUID
 
-@ConditionalOnProperty("meta.simplehash.kafka.enabled", havingValue = "true")
+@Configuration
 class SimplehashConsumerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo
 ) {
@@ -30,7 +30,7 @@ class SimplehashConsumerConfiguration(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Bean
-    fun simplehashConsumerFactory(props: UnionMetaProperties): RaribleKafkaListenerContainerFactory<nft> {
+    fun simplehashConsumerFactory(props: CommonMetaProperties): RaribleKafkaListenerContainerFactory<nft> {
         val kafkaProps = props.simpleHash.kafka
         val avroConfig = mapOf(
 
@@ -65,10 +65,14 @@ class SimplehashConsumerConfiguration(
 
     @Bean
     fun simplehashWorker(
-        props: UnionMetaProperties,
+        props: CommonMetaProperties,
         factory: RaribleKafkaListenerContainerFactory<nft>,
         handler: RaribleKafkaBatchEventHandler<nft>
     ): RaribleKafkaConsumerWorker<nft> {
+        if (!props.simpleHash.kafka.enabled) {
+            logger.info("Simplehash Kafka listener disabled")
+            return SimplehashConsumerWorkerWrapper(emptyList<AbstractMessageListenerContainer<String, nft>>())
+        }
         val listener = RaribleKafkaMessageListenerFactory.create(handler, true)
         logger.info("Creating consumers for topics: ${props.simpleHash.kafka.topics}")
         val containers = props.simpleHash.kafka.topics.map {
