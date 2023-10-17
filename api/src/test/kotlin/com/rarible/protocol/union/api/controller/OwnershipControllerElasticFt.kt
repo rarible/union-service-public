@@ -41,11 +41,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.TestPropertySource
 import java.time.Instant
 
 @IntegrationTest
-@TestPropertySource(properties = ["common.feature-flags.enableOwnershipQueriesToElasticSearch=true"])
 class OwnershipControllerElasticFt : AbstractIntegrationTest() {
 
     private val continuation = null

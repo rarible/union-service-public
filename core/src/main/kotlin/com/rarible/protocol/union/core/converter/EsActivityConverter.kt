@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.core.converter
 
 import com.rarible.core.common.mapAsync
-import com.rarible.protocol.union.core.EsActivityEnrichmentProperties
 import com.rarible.protocol.union.core.converter.helper.SellActivityEnricher
 import com.rarible.protocol.union.core.converter.helper.getCurrencyAddressOrNull
 import com.rarible.protocol.union.core.model.elastic.EsActivity
@@ -16,6 +15,7 @@ import com.rarible.protocol.union.dto.AuctionEndActivityDto
 import com.rarible.protocol.union.dto.AuctionFinishActivityDto
 import com.rarible.protocol.union.dto.AuctionOpenActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BurnActivityDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.L2DepositActivityDto
@@ -36,12 +36,13 @@ import org.springframework.stereotype.Component
 class EsActivityConverter(
     private val itemRouter: BlockchainRouter<ItemService>,
     private val sellActivityEnricher: SellActivityEnricher,
-    private val esActivityEnrichmentProperties: EsActivityEnrichmentProperties,
 ) {
+
+    private val blockchainsToQueryItems: Set<BlockchainDto> = setOf(BlockchainDto.SOLANA)
 
     suspend fun batchConvert(source: List<ActivityDto>): List<EsActivity> {
         val items = source.groupBy { it.id.blockchain }
-            .filter { esActivityEnrichmentProperties.blockchainsToQueryItems.contains(it.key) }
+            .filter { blockchainsToQueryItems.contains(it.key) }
             .mapAsync { (blockchain, activities) ->
                 val itemIds = activities.mapNotNull { extractItemId(it)?.value }
                 itemRouter.getService(blockchain).getItemsByIds(itemIds)

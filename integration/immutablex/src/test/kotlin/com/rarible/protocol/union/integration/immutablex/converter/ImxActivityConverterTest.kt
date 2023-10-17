@@ -34,7 +34,7 @@ class ImxActivityConverterTest {
                 toUsd(any(), any<UnionAssetType>(), any(), any())
             } returns BigDecimal.ONE
         },
-        ImxOrderConverter()
+        ImxOrderV3Converter()
     )
 
     @Test

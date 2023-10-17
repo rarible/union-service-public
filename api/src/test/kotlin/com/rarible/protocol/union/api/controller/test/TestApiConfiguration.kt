@@ -10,6 +10,7 @@ import com.rarible.core.kafka.RaribleKafkaConsumerSettings
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
 import com.rarible.core.kafka.RaribleKafkaProducer
 import com.rarible.core.test.ext.KafkaTestExtension
+import com.rarible.dipdup.client.OrderActivityClient
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
 import com.rarible.protocol.dto.NftItemEventDto
 import com.rarible.protocol.dto.NftItemEventTopicProvider
@@ -36,11 +37,7 @@ import com.rarible.protocol.order.api.client.OrderSignatureControllerApi
 import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
-import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
-import com.rarible.protocol.union.core.elasticsearch.EsRepository
-import com.rarible.protocol.union.core.elasticsearch.IndexService
-import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig
+import com.rarible.protocol.union.core.es.ElasticsearchBootstrapperTestConfig
 import com.rarible.protocol.union.core.test.TestUnionEventHandler
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -60,12 +57,10 @@ import com.rarible.protocol.union.test.mock.CurrencyMock
 import io.mockk.coEvery
 import io.mockk.mockk
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
-import org.elasticsearch.action.support.IndicesOptions
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.web.context.WebServerInitializedEvent
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.context.ApplicationListener
@@ -75,13 +70,6 @@ import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
-import org.springframework.data.elasticsearch.client.ClientConfiguration
-import org.springframework.data.elasticsearch.client.reactive.DefaultReactiveElasticsearchClient
-import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
-import org.springframework.data.elasticsearch.core.ReactiveElasticsearchOperations
-import org.springframework.data.elasticsearch.core.ReactiveElasticsearchTemplate
-import org.springframework.data.elasticsearch.core.RefreshPolicy
-import org.springframework.data.elasticsearch.core.convert.ElasticsearchConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.socket.WebSocketMessage
@@ -95,7 +83,7 @@ import com.rarible.protocol.solana.api.client.CollectionControllerApi as SolanaC
 @Lazy
 @Configuration
 @EnableAutoConfiguration
-@Import(WebSocketConfiguration::class)
+@Import(ElasticsearchBootstrapperTestConfig::class, WebSocketConfiguration::class)
 class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -377,6 +365,10 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
 
     @Bean
     @Primary
+    fun testDipDupOrderActivityClient(): OrderActivityClient = mockk()
+
+    @Bean
+    @Primary
     fun testTokenActivityClient(): com.rarible.tzkt.client.TokenActivityClient = mockk()
 
     @Bean
@@ -494,44 +486,6 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Bean
     @Primary
     fun testDipDupTokenClient(): com.rarible.dipdup.client.TokenClient = mockk()
-
-    @Bean(initMethod = "bootstrap")
-    @ConditionalOnMissingBean
-    fun elasticsearchBootstrap(
-        @Qualifier("esOperationsWithTimeout") reactiveElasticSearchOperations: ReactiveElasticsearchOperations,
-        restHighLevelClient: ReactiveElasticsearchClient,
-        esNameResolver: EsNameResolver,
-        indexService: IndexService,
-        repositories: List<EsRepository>,
-    ): ElasticsearchTestBootstrapper {
-
-        return ElasticsearchTestBootstrapper(
-            esNameResolver = esNameResolver,
-            esOperations = reactiveElasticSearchOperations,
-            restHighLevelClient,
-            entityDefinitions = EsEntitiesConfig.createEsEntities(),
-            repositories = repositories
-        )
-    }
-
-    @Primary
-    @Bean("esOperationsWithTimeout")
-    fun elasticSearchOperations(
-        clientConfiguration: ClientConfiguration,
-        converter: ElasticsearchConverter,
-    ): ReactiveElasticsearchOperations {
-        val configWithTimeout = ClientConfiguration.builder()
-            .connectedTo(*clientConfiguration.endpoints.toTypedArray())
-            .withConnectTimeout(15000)
-            .withSocketTimeout(15000)
-            .build()
-        val client = DefaultReactiveElasticsearchClient.create(configWithTimeout)
-
-        val template = ReactiveElasticsearchTemplate(client, converter)
-        template.setIndicesOptions(IndicesOptions.strictExpandOpenAndForbidClosed())
-        template.refreshPolicy = RefreshPolicy.IMMEDIATE
-        return template
-    }
 
     override fun onApplicationEvent(event: WebServerInitializedEvent) {
         val typeRef = object : TypeReference<List<SubscriptionRequestDto>>() {}

@@ -19,13 +19,13 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
-import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderConverter
+import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderV3Converter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
 class ImxOrderService(
     private val orderClient: ImxOrderClient,
-    private val imxOrderConverter: ImxOrderConverter
+    private val imxOrderConverter: ImxOrderV3Converter
 ) : AbstractBlockchainService(BlockchainDto.IMMUTABLEX), OrderService {
 
     // TODO move out to configuration

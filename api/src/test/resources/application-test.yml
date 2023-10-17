@@ -41,11 +41,8 @@ common:
   currency:
     refresh:
       cron: "-"
-  feature-flags:
-    enableRevertedActivityEventSending: false
+  featureFlags:
     enableOwnershipSourceEnrichment: true
-    enableItemLastSaleEnrichment: true
-    enablePoolOrders: true
 
 protocol:
   union:

@@ -1,10 +1,6 @@
 logging:
   level.org.springframework.data.mongodb.core.ReactiveMongoTemplate: DEBUG
 
-common:
-  featureFlags:
-    enableMetaMongoPipeline: false
-
 rarible:
   loader:
     workers: 1

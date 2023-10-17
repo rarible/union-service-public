@@ -34,11 +34,7 @@ class ContentMetaProvider(
     }
 
     private suspend fun getCache(resource: UrlResource): ContentCache? {
-        return if (ff.enableContentMetaCache) {
-            contentCacheService.getCache(resource)
-        } else {
-            null
-        }
+        return contentCacheService.getCache(resource)
     }
 
     private suspend fun getFromCache(

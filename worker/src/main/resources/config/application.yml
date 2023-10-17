@@ -124,11 +124,6 @@ integration:
       url: ${consul.immutablex.api.baseUrlV3:}
       byIdsChunkSize: 16
     apiKey: ${consul.immutablex.api.key:}
-    featureFlags:
-      useOrderV3: ${consul.immutablex.api.useOrderV3:false}
-common:
-  producer:
-    broker-replica-set: ${kafka.hosts}
 
 worker:
   reconciliation:

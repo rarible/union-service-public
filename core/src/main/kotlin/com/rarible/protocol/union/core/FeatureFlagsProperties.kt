@@ -6,42 +6,30 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties("common.feature-flags")
 @ConstructorBinding
 data class FeatureFlagsProperties(
-    val enableNotificationOnCollectionOrders: Boolean = true,
-    val enableRevertedActivityEventSending: Boolean = false,
     val enableOwnershipSourceEnrichment: Boolean = false,
-    val enableItemLastSaleEnrichment: Boolean = true,
-    val enableContentMetaCache: Boolean = true,
-    val enableEmbeddedContentMigrationJob: Boolean = true,
-    val enablePoolOrders: Boolean = false,
-    val enableWebClientConnectionPool: Boolean = false,
+    val enablePoolOrders: Boolean = true,
+    val enableWebClientConnectionPool: Boolean = true,
     // activities
-    var enableActivityQueriesToElasticSearch: Boolean = false,
-    var enableActivityAscQueriesWithApiMerge: Boolean = true,
-    var enableActivitySaveImmediateToElasticSearch: Boolean = false,
+    val enableActivityQueriesToElasticSearch: Boolean = true,
+    val enableActivityAscQueriesWithApiMerge: Boolean = true,
+    val enableActivitySaveImmediateToElasticSearch: Boolean = false,
     // orders
-    var enableOrderQueriesToElasticSearch: Boolean = false,
-    var enableOrderSaveImmediateToElasticSearch: Boolean = false,
+    val enableOrderQueriesToElasticSearch: Boolean = false,
+    val enableOrderSaveImmediateToElasticSearch: Boolean = false,
     // collections
-    val enableCollectionQueriesToElastic: Boolean = false,
-    var enableCollectionSaveImmediateToElasticSearch: Boolean = false,
-    var enableSearchCollections: Boolean = true,
+    val enableSearchCollections: Boolean = true,
+    val enableCollectionSaveImmediateToElasticSearch: Boolean = false,
     // ownerships
-    var enableOwnershipQueriesToElasticSearch: Boolean = false,
-    var enableOwnershipSaveImmediateToElasticSearch: Boolean = false,
+    var enableOwnershipQueriesToElasticSearch: Boolean = true,
+    val enableOwnershipSaveImmediateToElasticSearch: Boolean = false,
     // items
-    var enableItemQueriesToElasticSearch: Boolean = false,
-    var enableSearchItems: Boolean = false,
-    var enableItemSaveImmediateToElasticSearch: Boolean = false,
+    val enableItemQueriesToElasticSearch: Boolean = true,
+    val enableSearchItems: Boolean = true,
+    val enableItemSaveImmediateToElasticSearch: Boolean = false,
     val enableItemBestBidsByCurrency: Boolean = true,
     val enableIncrementalItemStats: Boolean = true,
 
-    val enableCustomCollections: Boolean = false,
-
-    val enableElasticsearchCompatibilityMode: Boolean = false,
-    val enableMongoActivityWrite: Boolean = false,
-    val enableMongoActivityRead: Boolean = false,
-
-    val enableInternalEventChunkAsyncHandling: Boolean = true,
+    val enableElasticsearchCompatibilityMode: Boolean = true,
 
     val enableCollectionAutoReveal: Boolean = true,
     val enableCollectionSetBaseUriEvent: Boolean = true,

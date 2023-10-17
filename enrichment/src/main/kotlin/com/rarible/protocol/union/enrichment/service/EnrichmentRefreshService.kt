@@ -229,9 +229,7 @@ class EnrichmentRefreshService(
         val shortItemId = ShortItemId(itemId)
 
         logger.info("Starting to reconcile Item [{}]", shortItemId)
-        val lastSaleDeferred = async {
-            if (ff.enableItemLastSaleEnrichment) enrichmentActivityService.getItemLastSale(itemId) else null
-        }
+        val lastSaleDeferred = async { enrichmentActivityService.getItemLastSale(itemId) }
         val itemDtoDeferred = async { itemService.fetch(shortItemId) }
         val sellStatsDeferred = async { ownershipService.getItemSellStats(shortItemId) }
         val poolSellOrders = ammOrders.map { ShortPoolOrder(it.sellCurrencyId(), ShortOrderConverter.convert(it)) }

@@ -7,6 +7,7 @@ import com.rarible.core.telemetry.actuator.WebRequestClientTagContributor
 import com.rarible.protocol.union.dto.UnionModelJacksonModule
 import com.rarible.protocol.union.dto.UnionPrimitivesJacksonModule
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
+import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -22,11 +23,13 @@ import java.time.Clock
 
 @Configuration
 @EnableRaribleCorsWebFilter
-@Import(EnrichmentApiConfiguration::class)
-@EnableConfigurationProperties(value = [
-    OpenapiProperties::class,
-    DomainProperties::class,
-])
+@Import(EnrichmentApiConfiguration::class, SearchConfiguration::class)
+@EnableConfigurationProperties(
+    value = [
+        OpenapiProperties::class,
+        DomainProperties::class,
+    ]
+)
 class ApiConfiguration {
 
     @Bean

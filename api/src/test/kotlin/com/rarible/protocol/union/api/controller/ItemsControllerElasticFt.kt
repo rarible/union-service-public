@@ -41,7 +41,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.TestPropertySource
 import randomEsOwnership
 import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
@@ -50,7 +49,6 @@ import java.math.BigInteger
 
 @FlowPreview
 @IntegrationTest
-@TestPropertySource(properties = ["common.feature-flags.enableItemQueriesToElasticSearch=true"])
 class ItemsControllerElasticFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null

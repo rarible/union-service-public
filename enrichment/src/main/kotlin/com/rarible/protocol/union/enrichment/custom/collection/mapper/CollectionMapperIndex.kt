@@ -44,9 +44,6 @@ class CollectionMapperIndex(
     }
 
     private fun indexRule(mapping: CustomCollectionMapping) {
-        if (!ff.enableCustomCollections) {
-            return
-        }
         val provider = customCollectionProviderFactory.create(mapping)
         mapping.getItemIds().forEach {
             getBlockchainIndex(it.blockchain).byItem[it.itemId] = provider

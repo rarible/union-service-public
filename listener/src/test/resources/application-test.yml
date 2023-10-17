@@ -1,6 +1,3 @@
-logging:
-  level.org.springframework.data.mongodb.core.ReactiveMongoTemplate: DEBUG
-
 common:
   currency:
     refresh:
@@ -8,13 +5,8 @@ common:
   client:
     tezos:
       url: "http://localhost:8080"
-  feature-flags:
-    enableRevertedActivityEventSending: false
+  featureFlags:
     enableOwnershipSourceEnrichment: true
-    enableItemLastSaleEnrichment: true
-    enableCustomCollections: true
-    enableMongoActivityWrite: true
-    enableMongoActivityRead: true
     enableItemBestBidsByCurrency: true
     enableCollectionAutoRefreshOnCreation: true
 

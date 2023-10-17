@@ -2,7 +2,6 @@ package com.rarible.protocol.union.enrichment.custom.collection.updater
 
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaProducer
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -13,7 +12,6 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
-import com.rarible.protocol.union.enrichment.converter.ActivityDtoConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityConverter
 import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
@@ -62,45 +60,12 @@ class CustomCollectionActivityUpdaterTest {
     }
 
     @Test
-    fun `update - ok deprecated`() = runBlocking<Unit> {
-        updater = CustomCollectionActivityUpdater(
-            router = router,
-            enrichmentActivityService = enrichmentActivityService,
-            eventProducer = producer,
-            activityRepository = activityRepository,
-            featureFlagsProperties = FeatureFlagsProperties()
-        )
-        val itemId = randomEthItemId()
-        val item = randomUnionItem(itemId)
-        val activity1 = randomUnionActivityMint(itemId)
-        val activity2 = randomUnionActivityMint(itemId).copy(reverted = true)
-        val activity3 = randomUnionActivityMint(itemId)
-
-        mockkGetActivities(itemId, null, "1", activity1, activity2)
-        mockkGetActivities(itemId, "1", "2", activity3)
-        mockkGetActivities(itemId, "2", null)
-
-        val dto1 = ActivityDtoConverter.convert(activity1)
-        val dto3 = ActivityDtoConverter.convert(activity3)
-
-        coEvery { enrichmentActivityService.enrichDeprecated(listOf(activity1)) } returns listOf(dto1)
-        coEvery { enrichmentActivityService.enrichDeprecated(listOf(activity3)) } returns listOf(dto3)
-        coEvery { enrichmentActivityService.enrichDeprecated(emptyList()) } returns emptyList()
-
-        updater.update(item)
-
-        assertEvents(listOf(activity1.id))
-        assertEvents(listOf(activity3.id))
-    }
-
-    @Test
     fun `update - ok`() = runBlocking<Unit> {
         updater = CustomCollectionActivityUpdater(
             router = router,
             enrichmentActivityService = enrichmentActivityService,
             eventProducer = producer,
             activityRepository = activityRepository,
-            featureFlagsProperties = FeatureFlagsProperties(enableMongoActivityWrite = true)
         )
         val itemId = randomEthItemId()
         val item = randomUnionItem(itemId)

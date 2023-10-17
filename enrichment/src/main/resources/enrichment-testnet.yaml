@@ -67,3 +67,7 @@ meta:
     mapping:
       ethereum: ethereum-goerli
       polygon: polygon-mumbai
+
+common:
+  featureFlags:
+    enableOptimizedSearchForItems: true

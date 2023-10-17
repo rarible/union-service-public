@@ -92,7 +92,7 @@ import io.daonomic.rpc.domain.Word
 import scalether.domain.Address
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 fun randomAddressString() = EthConverter.convert(randomAddress())
 
@@ -625,7 +625,7 @@ fun randomEthAuctionDto(itemId: ItemIdDto): AuctionDto {
         seller = randomAddress(),
         sell = randomEthAssetErc721(itemId),
         buy = Erc20AssetTypeDto(randomAddress()),
-        endTime = Instant.MAX,
+        endTime = nowMillis().plus(3650, ChronoUnit.DAYS),
         minimalStep = BigDecimal.ONE,
         minimalPrice = BigDecimal.ONE,
         createdAt = nowMillis(),
@@ -714,7 +714,7 @@ fun randomEthOrderBidActivity(): OrderActivityBidDto {
         hash = Word.apply(randomWord()),
         maker = randomAddress(),
         make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
-        take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
+        take = AssetDto(Erc721AssetTypeDto(randomAddress(), randomBigInt()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
         priceUsd = randomBigDecimal(),
         reverted = false,
@@ -818,7 +818,7 @@ fun randomEthOrderListActivity(): OrderActivityListDto {
         source = OrderActivityDto.Source.OPEN_SEA,
         hash = Word.apply(randomWord()),
         maker = randomAddress(),
-        make = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
+        make = AssetDto(Erc721AssetTypeDto(randomAddress(), randomBigInt()), randomBigInt(), randomBigDecimal()),
         take = AssetDto(Erc20AssetTypeDto(randomAddress()), randomBigInt(), randomBigDecimal()),
         price = randomBigDecimal(),
         priceUsd = randomBigDecimal(),

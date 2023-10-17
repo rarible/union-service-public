@@ -18,6 +18,7 @@ import com.rarible.protocol.union.dto.AuctionCancelActivityDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionBidActivity
@@ -74,7 +75,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         } returns AuctionActivitiesDto(null, list).toMono()
 
         val activities = activityControllerApi.getAllActivities(
-            types, blockchains, null, null, null, size, sort, null,
+            types, blockchains, null, null, null, size, sort, SearchEngineDto.LEGACY,
         ).awaitFirst()
 
         checkActivities(list, activities.activities)
@@ -91,7 +92,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         } returns AuctionActivitiesDto(null, listOf(auctionActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByCollection(
-            types, listOf(ethCollectionId.fullId()), null, null, null, size, sort, null,
+            types, listOf(ethCollectionId.fullId()), null, null, null, size, sort, SearchEngineDto.LEGACY,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -109,7 +110,7 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         } returns AuctionActivitiesDto(null, listOf(auctionActivity)).toMono()
 
         val activities = activityControllerApi.getActivitiesByItem(
-            types, ethItemId.fullId(), null, null, null, size, sort, null,
+            types, ethItemId.fullId(), null, null, null, size, sort, SearchEngineDto.LEGACY,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)
@@ -141,7 +142,17 @@ class ActivityControllerAuctionFt : AbstractIntegrationTest() {
         val now = nowMillis()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
         val activities = activityControllerApi.getActivitiesByUser(
-            types, listOf(userEth.fullId()), null, null, oneWeekAgo, now, null, null, size, sort, null,
+            types,
+            listOf(userEth.fullId()),
+            null,
+            null,
+            oneWeekAgo,
+            now,
+            null,
+            null,
+            size,
+            sort,
+            SearchEngineDto.LEGACY,
         ).awaitFirst()
 
         assertThat(activities.activities).hasSize(1)

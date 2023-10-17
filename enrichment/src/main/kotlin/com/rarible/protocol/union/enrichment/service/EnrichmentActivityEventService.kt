@@ -19,24 +19,22 @@ class EnrichmentActivityEventService(
     suspend fun onActivity(activity: UnionActivity) {
         val marks = activity.eventTimeMarks
 
-        val activityDto = if (ff.enableMongoActivityWrite) {
-            val enrichmentActivity = enrichmentActivityService.update(activity)
-            EnrichmentActivityDtoConverter.convert(source = enrichmentActivity, reverted = activity.reverted ?: false)
-        } else {
-            enrichmentActivityService.enrichDeprecated(activity)
-        }
+        val enrichmentActivity = enrichmentActivityService.update(activity)
+        val activityDto = EnrichmentActivityDtoConverter.convert(
+            source = enrichmentActivity,
+            reverted = activity.reverted ?: false
+        )
+
         val activityEvent = ActivityEvent(
             activity = activityDto,
             eventTimeMarks = marks?.toDto()
         )
 
-        if (ff.enableItemLastSaleEnrichment) {
-            itemEventService.onActivity(
-                activity = activity,
-                item = null,
-                eventTimeMarks = marks
-            )
-        }
+        itemEventService.onActivity(
+            activity = activity,
+            item = null,
+            eventTimeMarks = marks
+        )
 
         if (ff.enableOwnershipSourceEnrichment) {
             ownershipEventService.onActivity(
@@ -46,9 +44,6 @@ class EnrichmentActivityEventService(
             )
         }
 
-        val shouldSend = ff.enableRevertedActivityEventSending || activity.reverted != true
-        if (shouldSend) {
-            activityEventListeners.onEach { it.onEvent(activityEvent) }
-        }
+        activityEventListeners.onEach { it.onEvent(activityEvent) }
     }
 }

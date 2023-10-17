@@ -18,10 +18,6 @@ class CustomCollectionTaskHandler(
 
     override val type = "CUSTOM_COLLECTION_MIGRATION"
 
-    override suspend fun isAbleToRun(param: String): Boolean {
-        return ff.enableCustomCollections
-    }
-
     override fun getAutorunParams(): List<RunTask> {
         return enrichmentCollectionProperties.mappings
             .filter { it.enabled }

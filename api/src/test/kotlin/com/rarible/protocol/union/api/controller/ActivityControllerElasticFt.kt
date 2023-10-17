@@ -1,20 +1,12 @@
 package com.rarible.protocol.union.api.controller
 
-import com.ninjasquad.springmockk.MockkBean
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
-import com.rarible.protocol.dto.ActivitiesByIdRequestDto
 import com.rarible.protocol.dto.AssetDto
-import com.rarible.protocol.dto.AuctionActivitiesDto
 import com.rarible.protocol.dto.Erc721AssetTypeDto
-import com.rarible.protocol.dto.FlowActivitiesDto
-import com.rarible.protocol.dto.NftActivitiesByIdRequestDto
-import com.rarible.protocol.dto.NftActivitiesDto
-import com.rarible.protocol.dto.OrderActivitiesDto
-import com.rarible.protocol.solana.dto.ActivitiesDto
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -30,22 +22,24 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
+import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityConverter
+import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
+import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionStartActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderListActivity
+import com.rarible.protocol.union.integration.flow.converter.FlowActivityConverter
 import com.rarible.protocol.union.integration.flow.data.randomFlowBurnDto
 import com.rarible.protocol.union.integration.flow.data.randomFlowCancelBidActivityDto
+import com.rarible.protocol.union.integration.solana.converter.SolanaActivityConverter
 import com.rarible.protocol.union.integration.solana.data.randomSolanaMintActivity
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemBurnActivity
-import com.rarible.protocol.union.integration.tezos.data.randomTzktItemBurnActivity
-import com.rarible.tzkt.client.TokenActivityClient
-import io.mockk.coEvery
-import kotlinx.coroutines.FlowPreview
+import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -53,23 +47,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.TestPropertySource
-import reactor.kotlin.core.publisher.toMono
 import scalether.domain.AddressFactory
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
-import com.rarible.protocol.solana.dto.ActivitiesByIdRequestDto as SolanaActivitiesByIdRequestDto
 
-@FlowPreview
 @IntegrationTest
-@TestPropertySource(
-    properties = [
-        "common.feature-flags.enableActivityQueriesToElasticSearch=true",
-        "common.feature-flags.enableActivityAscQueriesWithApiMerge=false",
-        "integration.tezos.dipdup.enabled=true",
-    ]
-)
 class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
     private val continuation: String? = null
@@ -79,16 +62,28 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Autowired
+    private lateinit var ethActivityConverter: EthActivityConverter
+
+    @Autowired
+    private lateinit var flowActivityConverter: FlowActivityConverter
+
+    @Autowired
+    private lateinit var solanaActivityConverter: SolanaActivityConverter
+
+    @Autowired
+    private lateinit var dipDupActivityConverter: DipDupActivityConverter
+
+    @Autowired
     private lateinit var activityControllerApi: ActivityControllerApi
 
     @Autowired
-    private lateinit var repository: EsActivityRepository
+    private lateinit var esActivityRepository: EsActivityRepository
+
+    @Autowired
+    private lateinit var activityRepository: ActivityRepository
 
     @Autowired
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
-
-    @MockkBean
-    private lateinit var tokenActivityClient: TokenActivityClient
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
@@ -215,7 +210,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             blockchain = BlockchainDto.TEZOS,
         )
 
-        repository.bulk(
+        esActivityRepository.bulk(
             listOf(
                 elasticEthOrderActivity1, elasticEthOrderActivity2, elasticEthOrderActivity3,
                 elasticEthItemActivity1, elasticEthItemActivity2, elasticEthItemActivity3,
@@ -227,56 +222,43 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             )
         )
 
-        // Since all activity types specified in request, all of existing clients should be requested
-        coEvery {
-            testEthereumActivityOrderApi.getOrderActivitiesById(
-                ActivitiesByIdRequestDto(
-                    listOf(
-                        ethOrderActivity3.id,
-                    )
+        listOf(ethOrderActivity3, ethItemActivity3).map {
+            activityRepository.save(
+                EnrichmentActivityConverter.convert(
+                    ethActivityConverter.convert(it, BlockchainDto.ETHEREUM)
                 )
             )
-        } returns OrderActivitiesDto(null, listOf(ethOrderActivity3)).toMono()
+        }
 
-        coEvery {
-            testEthereumActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(
-                    listOf(
-                        ethItemActivity3.id,
-                    )
-                )
+        activityRepository.save(
+            EnrichmentActivityConverter.convert(
+                ethActivityConverter.convert(ethItemActivity3, BlockchainDto.ETHEREUM)
             )
-        } returns NftActivitiesDto(null, listOf(ethItemActivity3)).toMono()
+        )
 
-        coEvery {
-            testPolygonActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(
-                    listOf(
-                        polygonItemActivity1.id,
-                    )
-                )
+        activityRepository.save(
+            EnrichmentActivityConverter.convert(
+                ethActivityConverter.convert(polygonItemActivity1, BlockchainDto.POLYGON)
             )
-        } returns NftActivitiesDto(null, listOf(polygonItemActivity1)).toMono()
+        )
 
-        coEvery {
-            testFlowActivityApi.getNftOrderActivitiesById(
-                NftActivitiesByIdRequestDto(
-                    listOf(
-                        flowActivity1.id
-                    )
-                )
+        activityRepository.save(
+            EnrichmentActivityConverter.convert(
+                flowActivityConverter.convert(flowActivity1)
             )
-        } returns FlowActivitiesDto(null, listOf(flowActivity1)).toMono()
+        )
 
-        coEvery {
-            testSolanaActivityApi.searchActivitiesByIds(
-                SolanaActivitiesByIdRequestDto(listOf(solanaActivity1.id))
+        activityRepository.save(
+            EnrichmentActivityConverter.convert(
+                solanaActivityConverter.convert(solanaActivity1, BlockchainDto.SOLANA)
             )
-        } returns ActivitiesDto(null, listOf(solanaActivity1)).toMono()
+        )
 
-        coEvery {
-            tokenActivityClient.getActivitiesByIds(any())
-        } returns listOf(randomTzktItemBurnActivity(tezosActivity1.id))
+        activityRepository.save(
+            EnrichmentActivityConverter.convert(
+                dipDupActivityConverter.convert(tezosActivity1, BlockchainDto.TEZOS)
+            )
+        )
 
         val activities = activityControllerApi.getAllActivities(
             types,
@@ -353,13 +335,16 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             currency = AddressFactory.create().toString(),
             date = bidActivity2.date,
         )
-        repository.saveAll(listOf(elasticActivity, elasticBidActivity1, elasticBidActivity2))
 
-        coEvery {
-            testEthereumActivityOrderApi.getOrderActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(orderActivity.id, bidActivity1.id))
+        esActivityRepository.saveAll(listOf(elasticActivity, elasticBidActivity1, elasticBidActivity2))
+
+        listOf(orderActivity, bidActivity1, bidActivity2).map {
+            activityRepository.save(
+                EnrichmentActivityConverter.convert(
+                    ethActivityConverter.convert(it, BlockchainDto.ETHEREUM)
+                )
             )
-        } returns OrderActivitiesDto(null, listOf(orderActivity, bidActivity1)).toMono()
+        }
 
         val activities = activityControllerApi.getActivitiesByCollection(
             types,
@@ -436,7 +421,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             item = "${assetTypeDto.contract}:${assetTypeDto.tokenId}"
         )
 
-        repository.saveAll(
+        esActivityRepository.saveAll(
             listOf(
                 elasticOrderActivity,
                 elasticItemActivity,
@@ -446,23 +431,13 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             )
         )
 
-        coEvery {
-            testEthereumActivityOrderApi.getOrderActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(orderActivity.id, bidActivity.id))
+        listOf(itemActivity, orderActivity, bidActivity, auctionActivity).map {
+            activityRepository.save(
+                EnrichmentActivityConverter.convert(
+                    ethActivityConverter.convert(it, BlockchainDto.ETHEREUM)
+                )
             )
-        } returns OrderActivitiesDto(null, listOf(orderActivity, bidActivity)).toMono()
-
-        coEvery {
-            testEthereumActivityAuctionApi.getAuctionActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(auctionActivity.id))
-            )
-        } returns AuctionActivitiesDto(null, listOf(auctionActivity)).toMono()
-
-        coEvery {
-            testEthereumActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(itemActivity.id))
-            )
-        } returns NftActivitiesDto(null, listOf(itemActivity)).toMono()
+        }
 
         val activities = activityControllerApi.getActivitiesByItem(
             types,
@@ -558,7 +533,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             currency = AddressFactory.create().toString(),
         )
 
-        repository.saveAll(
+        esActivityRepository.saveAll(
             listOf(
                 elasticEthItemActivity,
                 elasticEthItemActivity2,
@@ -569,29 +544,19 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             )
         )
 
-        coEvery {
-            testEthereumActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(ethItemActivity.id))
+        listOf(ethItemActivity, ethItemActivity2, sameTypeDifferentRole, ethBidActivity1, ethBidActivity2).map {
+            activityRepository.save(
+                EnrichmentActivityConverter.convert(
+                    ethActivityConverter.convert(it, BlockchainDto.ETHEREUM)
+                )
             )
-        } returns NftActivitiesDto(null, listOf(ethItemActivity)).toMono()
-
-        coEvery {
-            testEthereumActivityOrderApi.getOrderActivitiesById(any())
-        } answers {
-            val argument = firstArg<ActivitiesByIdRequestDto>()
-            val ids = argument.ids
-            val response =
-                listOf(ethItemActivity2, sameTypeDifferentRole, ethBidActivity1, ethBidActivity2).filter { act ->
-                    ids.contains(act.id)
-                }
-            OrderActivitiesDto(null, response).toMono()
         }
 
-        coEvery {
-            testPolygonActivityItemApi.getNftActivitiesById(
-                ActivitiesByIdRequestDto(ids = listOf(polygonItemActivity.id))
+        activityRepository.save(
+            EnrichmentActivityConverter.convert(
+                ethActivityConverter.convert(polygonItemActivity, BlockchainDto.POLYGON)
             )
-        } returns NftActivitiesDto(null, listOf(polygonItemActivity)).toMono()
+        )
 
         val now = nowMillis()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)

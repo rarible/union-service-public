@@ -11,14 +11,9 @@ class ImxIntegrationProperties(
     val client: ImxClientProperties?,
     val apiKey: String,
     val clientV3: ImxClientProperties?,
-    val featureFlags: ImxFeatureFlags = ImxFeatureFlags()
 )
 
 class ImxClientProperties(
     url: String,
     val byIdsChunkSize: Int = 16
 ) : DefaultClientProperties(url)
-
-data class ImxFeatureFlags(
-    val useOrderV3: Boolean = false
-)

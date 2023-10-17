@@ -191,12 +191,11 @@ class EnrichmentOrderEventService(
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean
     ) {
-        val withNotification = notificationEnabled && ff.enableNotificationOnCollectionOrders
         enrichmentCollectionEventService.onCollectionBestSellOrderUpdate(
             collectionId,
             order,
             eventTimeMarks,
-            withNotification
+            notificationEnabled
         )
     }
 
@@ -206,12 +205,11 @@ class EnrichmentOrderEventService(
         eventTimeMarks: UnionEventTimeMarks?,
         notificationEnabled: Boolean
     ) {
-        val withNotification = notificationEnabled && ff.enableNotificationOnCollectionOrders
         enrichmentCollectionEventService.onCollectionBestBidOrderUpdate(
             collectionId,
             order,
             eventTimeMarks,
-            withNotification
+            notificationEnabled
         )
     }
 

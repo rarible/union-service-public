@@ -79,7 +79,7 @@ fun randomOwnership(
     tokenId: BigInteger? = randomBigInt(),
     owner: UnionAddress = UnionAddress(id.blockchain.group(), randomString()),
     value: BigInteger = randomBigInt(),
-    createdAt: Instant = Instant.ofEpochMilli(randomLong()),
+    createdAt: Instant = randomInstant(),
     creators: List<CreatorDto>? = listOf(CreatorDto(randomUnionAddress(id.blockchain), randomInt())),
     lazyValue: BigInteger = randomBigInt(),
     pending: List<ItemHistoryDto> = listOf(),

@@ -262,13 +262,14 @@ fun randomUnionAuctionDto(ownershipId: OwnershipIdDto) = runBlocking {
 }
 
 fun randomUnionActivityMint(
-    itemId: ItemIdDto = randomEthItemId()
+    itemId: ItemIdDto = randomEthItemId(),
+    owner: UnionAddress = randomUnionAddress()
 ) = runBlocking {
     val mint = mockedEthActivityConverter.convert(
         randomEthItemMintActivity(), itemId.blockchain
     ) as UnionMintActivity
 
-    mint.copy(itemId = itemId)
+    mint.copy(itemId = itemId, owner = owner)
 }
 
 fun randomUnionActivityOrderList(
