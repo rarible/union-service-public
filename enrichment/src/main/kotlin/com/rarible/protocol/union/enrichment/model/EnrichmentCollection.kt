@@ -131,7 +131,8 @@ data class EnrichmentCollection(
             owner = converted.owner,
             parent = converted.parent,
             symbol = converted.symbol,
-            self = converted.self
+            self = converted.self,
+            scam = collection.scam,
         )
     }
 
