@@ -47,7 +47,6 @@ import java.util.concurrent.atomic.AtomicReference
         "spring.cloud.service-registry.auto-registration.enabled = false",
         "spring.cloud.discovery.enabled = false",
         "logging.logstash.tcp-socket.enabled = false",
-        "common.feature-flags.enableCollectionQueriesToElastic = true"
     ]
 )
 class CollectionControllerElasticFt : AbstractIntegrationTest() {

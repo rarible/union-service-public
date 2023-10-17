@@ -7,7 +7,7 @@ import com.rarible.protocol.union.core.model.blockchainAndIndexerMarks
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexOrder
 import com.rarible.protocol.union.integration.immutablex.converter.ImxDataException
-import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderConverter
+import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderV3Converter
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanEntityType
 import com.rarible.protocol.union.integration.immutablex.scanner.ImxScanMetrics
 import org.slf4j.LoggerFactory
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 class ImxOrderEventHandler(
     private val handler: IncomingEventHandler<UnionOrderEvent>,
     private val imxScanMetrics: ImxScanMetrics,
-    private val imxOrderConverter: ImxOrderConverter
+    private val imxOrderConverter: ImxOrderV3Converter
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)

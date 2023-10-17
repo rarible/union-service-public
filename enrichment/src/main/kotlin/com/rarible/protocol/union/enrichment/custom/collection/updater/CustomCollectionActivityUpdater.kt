@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.enrichment.custom.collection.updater
 
 import com.rarible.core.kafka.RaribleKafkaProducer
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.KafkaEventFactory
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ActivityService
@@ -22,7 +21,6 @@ class CustomCollectionActivityUpdater(
     private val enrichmentActivityService: EnrichmentActivityService,
     private val eventProducer: RaribleKafkaProducer<ActivityDto>,
     private val activityRepository: ActivityRepository,
-    private val featureFlagsProperties: FeatureFlagsProperties,
 ) : CustomCollectionUpdater {
 
     private val batchSize = 200
@@ -52,16 +50,11 @@ class CustomCollectionActivityUpdater(
                 sort = ActivitySortDto.EARLIEST_FIRST
             )
 
-            val messages = if (featureFlagsProperties.enableMongoActivityWrite) {
-                enrichmentActivityService.enrich(page.entities.filter { it.reverted != true })
-                    .map {
-                        activityRepository.save(it)
-                        KafkaEventFactory.activityEvent(EnrichmentActivityDtoConverter.convert(it))
-                    }
-            } else {
-                enrichmentActivityService.enrichDeprecated(page.entities.filter { it.reverted != true })
-                    .map { KafkaEventFactory.activityEvent(it) }
-            }
+            val messages = enrichmentActivityService.enrich(page.entities.filter { it.reverted != true })
+                .map {
+                    activityRepository.save(it)
+                    KafkaEventFactory.activityEvent(EnrichmentActivityDtoConverter.convert(it))
+                }
 
             eventProducer.send(messages).collect()
 

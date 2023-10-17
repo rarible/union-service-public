@@ -85,3 +85,8 @@ enrichment:
             - "FLOW:A.d0bcefdf1e67ea85.HWGaragePackV2"
           hwToken:
             - "FLOW:A.d0bcefdf1e67ea85.HWGarageTokenV2"
+
+common:
+  featureFlags:
+    enableActivityAscQueriesWithApiMerge: false
+    enableStrictMetaComparison: true

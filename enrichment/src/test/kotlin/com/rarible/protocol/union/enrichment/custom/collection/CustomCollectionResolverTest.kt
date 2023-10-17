@@ -212,7 +212,7 @@ class CustomCollectionResolverTest {
         val index = CollectionMapperIndex(
             customCollectionItemProvider,
             customCollectionProviderFactory,
-            FeatureFlagsProperties(enableCustomCollections = true),
+            FeatureFlagsProperties(),
             properties
         )
 

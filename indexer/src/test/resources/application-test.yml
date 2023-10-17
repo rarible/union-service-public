@@ -1,8 +1,6 @@
 spring:
   application:
     name: union-search-indexer
-
-
   data:
     elasticsearch:
       cluster-name: docker-cluster
@@ -25,7 +23,7 @@ logging:
 
 common:
   producer:
-    broker-replica-set: ${kafka.hosts}
+    brokerReplicaSet: ${kafka.hosts}
 es:
   optimization:
     earliestActivityByDate: 1970-01-01T00:00:00.000Z

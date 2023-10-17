@@ -4,6 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.api.client.OwnershipControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.UnionAddress
@@ -32,6 +33,8 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -53,6 +56,20 @@ class OwnershipControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var flowOrderConverter: FlowOrderConverter
+
+    @Autowired
+    lateinit var ff: FeatureFlagsProperties
+
+    // TODO add searchEngine flag to the API OR completely remove legacy dearch from the code
+    @BeforeEach
+    fun setLegacy() {
+        ff.enableOwnershipQueriesToElasticSearch = false
+    }
+
+    @AfterEach
+    fun resetLegacy() {
+        ff.enableOwnershipQueriesToElasticSearch = true
+    }
 
     @Test
     fun `get ownership by id - ethereum, not enriched`() = runBlocking<Unit> {

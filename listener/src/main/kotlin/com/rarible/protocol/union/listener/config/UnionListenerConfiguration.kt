@@ -79,17 +79,11 @@ class UnionListenerConfiguration(
                 valueClass = UnionInternalBlockchainEvent::class.java
             )
             val chunkedHandler = UnionInternalChunkedEventHandler(handler, chunker, blockchain)
-            if (ff.enableInternalEventChunkAsyncHandling) {
-                kafkaConsumerFactory.createWorker(
-                    settings,
-                    handlerWrapperFactory.create(chunkedHandler as InternalBatchEventHandler<UnionInternalBlockchainEvent>)
-                )
-            } else {
-                kafkaConsumerFactory.createWorker(
-                    settings,
-                    handlerWrapperFactory.create(chunkedHandler as InternalEventHandler<UnionInternalBlockchainEvent>)
-                )
-            }
+
+            kafkaConsumerFactory.createWorker(
+                settings,
+                handlerWrapperFactory.create(chunkedHandler as InternalBatchEventHandler<UnionInternalBlockchainEvent>)
+            )
         }
         return RaribleKafkaConsumerWorkerGroup(consumers)
     }

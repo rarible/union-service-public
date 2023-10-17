@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.controller.tezos
 import com.rarible.protocol.union.api.client.ItemControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosAddress
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemId
 import com.rarible.protocol.union.integration.tezos.data.randomTzktToken
@@ -29,7 +30,12 @@ class TezosItemControllerFt : AbstractIntegrationTest() {
             tzktTokenClient.tokensByCollection(collectionContract.value, 1, null)
         } returns Page(listOf(randomTzktToken(randomTezosAddress().value)), null)
 
-        val page = itemControllerClient.getItemsByCollection(collectionContract.fullId(), null, 1, null).awaitSingle()
+        val page = itemControllerClient.getItemsByCollection(
+            collectionContract.fullId(),
+            null,
+            1,
+            SearchEngineDto.LEGACY
+        ).awaitSingle()
         assertThat(page.items).hasSize(1)
     }
 
@@ -40,7 +46,13 @@ class TezosItemControllerFt : AbstractIntegrationTest() {
             tzktTokenClient.tokensByOwner(owner.value, 1, null)
         } returns Page(listOf(randomTzktToken(randomTezosAddress().value)), null)
 
-        val page = itemControllerClient.getItemsByOwner(owner.fullId(), emptyList(), null, 1, null).awaitSingle()
+        val page = itemControllerClient.getItemsByOwner(
+            owner.fullId(),
+            emptyList(),
+            null,
+            1,
+            SearchEngineDto.LEGACY
+        ).awaitSingle()
         assertThat(page.items).hasSize(1)
     }
 
@@ -51,7 +63,13 @@ class TezosItemControllerFt : AbstractIntegrationTest() {
             tzktTokenClient.tokensByCreator(creator.value, 1, null)
         } returns Page(listOf(randomTzktToken(randomTezosAddress().value)), null)
 
-        val page = itemControllerClient.getItemsByCreator(creator.fullId(), emptyList(), null, 1, null).awaitSingle()
+        val page = itemControllerClient.getItemsByCreator(
+            creator.fullId(),
+            emptyList(),
+            null,
+            1,
+            SearchEngineDto.LEGACY
+        ).awaitSingle()
         assertThat(page.items).hasSize(1)
     }
 

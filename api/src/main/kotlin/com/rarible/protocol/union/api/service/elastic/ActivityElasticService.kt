@@ -1,11 +1,5 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.core.common.flatMapAsync
-import com.rarible.protocol.union.api.dto.applyCursor
-import com.rarible.protocol.union.api.metrics.ElasticMetricsFactory
-import com.rarible.protocol.union.core.FeatureFlagsProperties
-import com.rarible.protocol.union.core.model.TypedActivityId
-import com.rarible.protocol.union.core.model.UnionActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivityCursor.Companion.fromActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivitySort
@@ -23,12 +17,10 @@ import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.UserActivityTypeDto
-import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityDtoConverter
 import com.rarible.protocol.union.enrichment.model.EnrichmentActivityId
 import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
-import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
 import com.rarible.protocol.union.enrichment.service.query.activity.ActivityQueryService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -39,17 +31,12 @@ import java.util.concurrent.ThreadLocalRandom
 class ActivityElasticService(
     private val filterConverter: ActivityFilterConverter,
     private val esActivityRepository: EsActivityRepository,
-    private val enrichmentActivityService: EnrichmentActivityService,
     private val router: BlockchainRouter<ActivityService>,
     private val activityRepository: ActivityRepository,
-    private val featureFlagsProperties: FeatureFlagsProperties,
     private val esActivityOptimizedSearchService: EsActivityOptimizedSearchService,
-    elasticMetricsFactory: ElasticMetricsFactory,
 ) : ActivityQueryService {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    private val missingIdsMetrics = elasticMetricsFactory.missingActivitiesCounters
 
     override suspend fun getAllActivities(
         type: List<ActivityTypeDto>,
@@ -238,35 +225,13 @@ class ActivityElasticService(
 
     private suspend fun getActivities(esActivities: List<EsActivity>): List<ActivityDto> {
         if (esActivities.isEmpty()) return emptyList()
-        if (featureFlagsProperties.enableMongoActivityRead) {
-            val enrichmentActivities = activityRepository.getAll(esActivities.map {
-                EnrichmentActivityId.of(it.activityId)
-            }).associateBy { it.id }
-            return esActivities.mapNotNull {
-                enrichmentActivities[EnrichmentActivityId.of(it.activityId)]?.let { activity ->
-                    EnrichmentActivityDtoConverter.convert(source = activity, cursor = it.fromActivity().toString())
-                }
+        val enrichmentActivities = activityRepository.getAll(esActivities.map {
+            EnrichmentActivityId.of(it.activityId)
+        }).associateBy { it.id }
+        return esActivities.mapNotNull {
+            enrichmentActivities[EnrichmentActivityId.of(it.activityId)]?.let { activity ->
+                EnrichmentActivityDtoConverter.convert(source = activity, cursor = it.fromActivity().toString())
             }
-        }
-        val mapping = hashMapOf<BlockchainDto, MutableList<TypedActivityId>>()
-
-        esActivities.forEach { activity ->
-            mapping
-                .computeIfAbsent(activity.blockchain) { ArrayList(esActivities.size) }
-                .add(TypedActivityId(IdParser.parseActivityId(activity.activityId).value, activity.type))
-        }
-        val activities = mapping.flatMapAsync { (blockchain, ids) ->
-            val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
-            if (isBlockchainEnabled) {
-                val response = router.getService(blockchain).getActivitiesByIds(ids)
-                checkMissingIds(blockchain, ids, response)
-                response
-            } else emptyList()
-        }.let { enrichmentActivityService.enrichDeprecated(it) }
-
-        val activitiesIdMapping = activities.associateBy { it.id.fullId() }
-        return esActivities.mapNotNull { esActivity ->
-            activitiesIdMapping[esActivity.activityId].applyCursor(esActivity.fromActivity().toString())
         }
     }
 
@@ -276,22 +241,6 @@ class ActivityElasticService(
             ActivitySortDto.EARLIEST_FIRST -> false
         }
         return EsActivitySort(latestFirst)
-    }
-
-    private fun checkMissingIds(
-        blockchain: BlockchainDto,
-        ids: List<TypedActivityId>,
-        response: List<UnionActivity>
-    ) {
-        if (ids.size == response.size) {
-            return
-        }
-
-        val missing = ids.map { it.id }.toHashSet()
-        missing.removeAll(response.map { it.id.value }.toHashSet())
-
-        logger.error("Ids found in ES are missing in $blockchain: $missing")
-        missingIdsMetrics[blockchain]!!.increment(missing.size.toDouble())
     }
 
     private fun latency(start: Long): Long {

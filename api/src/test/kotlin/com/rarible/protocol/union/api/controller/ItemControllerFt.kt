@@ -10,7 +10,6 @@ import com.rarible.protocol.dto.NftItemRoyaltyDto
 import com.rarible.protocol.dto.NftItemRoyaltyListDto
 import com.rarible.protocol.dto.RaribleAuctionV1Dto
 import com.rarible.protocol.union.api.client.ItemControllerApi
-import com.rarible.protocol.union.api.client.ItemControllerApi.ErrorSearchItems
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
@@ -21,12 +20,11 @@ import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdsDto
-import com.rarible.protocol.union.dto.ItemsSearchFilterDto
-import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.LazyItemBurnFormDto
 import com.rarible.protocol.union.dto.LazyItemMintFormDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
+import com.rarible.protocol.union.dto.SearchEngineDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
@@ -70,7 +68,6 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -299,7 +296,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByCollection(
-            ethCollectionId.fullId(), continuation, size, null
+            ethCollectionId.fullId(), continuation, size, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)
@@ -318,7 +315,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         flowItemControllerApiMock.mockGetNftOrderItemsByCollection(flowCollectionId.value, continuation, size, item)
 
         val items = itemControllerClient.getItemsByCollection(
-            flowCollectionId.fullId(), continuation, size, null
+            flowCollectionId.fullId(), continuation, size, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         val result = items.items[0]
@@ -333,7 +330,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         tezosItemControllerApiMock.mockGetNftOrderItemsByCollection(tezosCollectionId.value, continuation, size, item)
 
         val items = itemControllerClient.getItemsByCollection(
-            tezosCollectionId.fullId(), continuation, size, null
+            tezosCollectionId.fullId(), continuation, size, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         val result = items.items[0]
@@ -358,7 +355,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByOwner(
-            ethOwnerId.fullId(), null, continuation, size, null
+            ethOwnerId.fullId(), null, continuation, size, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         assertThat(items.items).hasSize(2)
@@ -384,7 +381,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByOwner(
-            flowOwnerId.fullId(), null, continuation, size, null
+            flowOwnerId.fullId(), null, continuation, size, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         val result = items.items[0]
@@ -401,7 +398,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByOwner(
-            tezosOwnerId.fullId(), null, continuation, size, null
+            tezosOwnerId.fullId(), null, continuation, size, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         val result = items.items[0]
@@ -432,7 +429,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         polygonItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf())
 
         val items = itemControllerClient.getItemsByOwnerWithOwnership(
-            ethOwnerId.fullId(), continuation, size, null
+            ethOwnerId.fullId(), continuation, size, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)
@@ -475,7 +472,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         polygonItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf())
 
         val items = itemControllerClient.getItemsByOwnerWithOwnership(
-            owner.fullId(), continuation, size, null
+            owner.fullId(), continuation, size, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)
@@ -524,7 +521,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         polygonItemControllerApiMock.mockGetNftItemsByIds(listOf(ethItemId.value), listOf())
 
         val items = itemControllerClient.getItemsByOwnerWithOwnership(
-            owner.fullId(), continuation, size, null
+            owner.fullId(), continuation, size, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         assertThat(items.items).hasSize(1)
@@ -544,7 +541,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByCreator(
-            ethCreatorId.fullId(), null, continuation, size, null
+            ethCreatorId.fullId(), null, continuation, size, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         assertThat(items.items).hasSize(0)
@@ -560,7 +557,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByCreator(
-            flowCreatorId.fullId(), null, continuation, size, null
+            flowCreatorId.fullId(), null, continuation, size, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         val result = items.items[0]
@@ -577,7 +574,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getItemsByCreator(
-            tezosCreatorId.fullId(), null, continuation, size, null
+            tezosCreatorId.fullId(), null, continuation, size, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         val result = items.items[0]
@@ -621,7 +618,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getAllItems(
-            blockchains, cursorArg.toString(), size, showDeleted, lastUpdatedFrom, lastUpdatedTo, null
+            blockchains, cursorArg.toString(), size, showDeleted, lastUpdatedFrom, lastUpdatedTo, SearchEngineDto.LEGACY
         ).awaitFirst()
 
         assertThat(items.items).hasSize(3)
@@ -652,27 +649,13 @@ class ItemControllerFt : AbstractIntegrationTest() {
         )
 
         val items = itemControllerClient.getAllItems(
-            blockchains, null, size, false, null, null, null
+            blockchains, null, size, false, null, null, SearchEngineDto.LEGACY
         ).awaitFirst().items.associateBy { it.id }
 
         assertThat(items).hasSize(3)
         assertThat(items[itemIdWithMeta1]!!.meta!!.name).isEqualTo(meta1.name)
         assertThat(items[itemIdWithMeta2]!!.meta!!.name).isEqualTo(meta2.name)
         assertThat(items[itemIdWithoutMeta]!!.meta).isNull()
-    }
-
-    @Test
-    fun `should return 501 on searchItems`() {
-        val request = ItemsSearchRequestDto(
-            filter = ItemsSearchFilterDto(
-                blockchains = listOf(BlockchainDto.FLOW, BlockchainDto.ETHEREUM)
-            )
-        )
-
-        assertThatCode {
-            itemControllerClient.searchItems(request).block()
-        }.isExactlyInstanceOf(ErrorSearchItems::class.java)
-            .hasMessageContaining("501")
     }
 
     @Test

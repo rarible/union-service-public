@@ -4,6 +4,7 @@ import com.rarible.protocol.dto.FlowOrderActivityMatchSideDto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.UnionBurnActivity
 import com.rarible.protocol.union.core.model.UnionFlowAssetTypeFt
+import com.rarible.protocol.union.core.model.UnionFlowAssetTypeNft
 import com.rarible.protocol.union.core.model.UnionMintActivity
 import com.rarible.protocol.union.core.model.UnionOrderActivityMatchSideDto
 import com.rarible.protocol.union.core.model.UnionOrderCancelListActivity
@@ -161,7 +162,7 @@ class FlowActivityConverterTest {
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.hash).isEqualTo(dto.hash)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
-        val makeType = converted.make as UnionFlowAssetTypeFt
+        val makeType = converted.make as UnionFlowAssetTypeNft
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         val takeType = converted.take as UnionFlowAssetTypeFt
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)
@@ -262,7 +263,7 @@ class FlowActivityConverterTest {
         assertThat(converted.date).isEqualTo(dto.date)
         assertThat(converted.hash).isEqualTo(dto.hash)
         assertThat(converted.maker.value).isEqualTo(dto.maker)
-        val makeType = converted.make as UnionFlowAssetTypeFt
+        val makeType = converted.make as UnionFlowAssetTypeNft
         assertThat(makeType.contract.value).isEqualTo(dto.make.contract)
         val takeType = converted.take as UnionFlowAssetTypeFt
         assertThat(takeType.contract.value).isEqualTo(dto.take.contract)

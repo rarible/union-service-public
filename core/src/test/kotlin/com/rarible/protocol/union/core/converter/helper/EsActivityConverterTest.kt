@@ -9,7 +9,6 @@ import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.core.EsActivityEnrichmentProperties
 import com.rarible.protocol.union.core.converter.EsActivityConverter
 import com.rarible.protocol.union.core.model.UnionItem
 import com.rarible.protocol.union.core.service.ItemService
@@ -75,7 +74,6 @@ class EsActivityConverterTest {
     private val converter = EsActivityConverter(
         router,
         enricher,
-        EsActivityEnrichmentProperties(),
     )
 
     @Test

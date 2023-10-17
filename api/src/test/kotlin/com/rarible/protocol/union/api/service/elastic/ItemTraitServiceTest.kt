@@ -4,6 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.core.EsProperties
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsTrait
@@ -21,26 +22,30 @@ import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.TestPropertySource
+import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
 import java.math.BigDecimal
 
 @IntegrationTest
-@TestPropertySource(properties = [
-    "common.elastic-search.itemsTraitsKeysLimit=3",
-    "common.elastic-search.itemsTraitsValuesLimit=15",
-])
 internal class ItemTraitServiceTest {
     @Autowired
     private lateinit var repository: EsItemRepository
 
     @Autowired
-    private lateinit var itemTraitService: ItemTraitService
+    private lateinit var elasticClient: ReactiveElasticsearchClient
 
     @Autowired
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
 
+    private lateinit var itemTraitService: ItemTraitService
+
+    private val properties = EsProperties(
+        itemsTraitsKeysLimit = 3,
+        itemsTraitsValuesLimit = 15
+    )
+
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
+        itemTraitService = ItemTraitService(elasticClient, repository, properties)
         elasticsearchTestBootstrapper.bootstrap()
     }
 

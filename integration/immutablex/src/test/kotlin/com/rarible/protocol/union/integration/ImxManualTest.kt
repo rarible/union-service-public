@@ -7,7 +7,7 @@ import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionCli
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxWebClientFactory
 import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
-import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderConverter
+import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderV3Converter
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionMetaSchemaRepository
 import io.mockk.coEvery
@@ -40,7 +40,7 @@ abstract class ImxManualTest {
                 toUsd(any(), any<UnionAssetType>(), any(), any())
             } returns BigDecimal.ONE
         },
-        ImxOrderConverter()
+        ImxOrderV3Converter()
     )
 
     protected val collectionCreatorRepository: ImxCollectionCreatorRepository = mockk {

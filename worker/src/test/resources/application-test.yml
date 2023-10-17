@@ -1,8 +1,6 @@
 spring:
   application:
     name: union-search-indexer
-
-
   data:
     elasticsearch:
       cluster-name: docker-cluster

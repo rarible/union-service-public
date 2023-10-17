@@ -1,3 +1,10 @@
+common:
+  producer:
+    brokerReplicaSet: ${kafka.hosts}
+  currency:
+    refresh:
+      cron: "0 0/30 * * * *"
+
 meta:
   simpleHash:
     supported:

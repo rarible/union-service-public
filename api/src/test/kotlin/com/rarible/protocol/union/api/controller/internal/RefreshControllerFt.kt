@@ -5,14 +5,12 @@ import com.ninjasquad.springmockk.MockkBean
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomWord
-import com.rarible.protocol.dto.ActivitySortDto
-import com.rarible.protocol.dto.NftActivityFilterByItemDto
-import com.rarible.protocol.dto.OrderActivityFilterByItemDto
-import com.rarible.protocol.dto.OrderActivityMatchDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.model.MetaSource
+import com.rarible.protocol.union.core.model.UnionAsset
+import com.rarible.protocol.union.core.model.UnionEthErc1155AssetType
 import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
 import com.rarible.protocol.union.core.producer.UnionInternalItemEventProducer
 import com.rarible.protocol.union.core.producer.UnionInternalOwnershipEventProducer
@@ -20,12 +18,14 @@ import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipSourceDto
 import com.rarible.protocol.union.dto.ext
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityConverter
 import com.rarible.protocol.union.enrichment.converter.ShortItemConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOwnershipConverter
@@ -33,15 +33,17 @@ import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashNftMetadataUpdate
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
+import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentItemService
 import com.rarible.protocol.union.enrichment.service.EnrichmentOwnershipService
+import com.rarible.protocol.union.enrichment.test.data.randomUnionActivityMint
+import com.rarible.protocol.union.enrichment.test.data.randomUnionActivitySale
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOwnershipConverter
-import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc1155
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAssetErc20
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthBidOrderDto
@@ -49,9 +51,7 @@ import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionA
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOwnershipDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthV2OrderDto
@@ -69,6 +69,7 @@ import org.springframework.http.HttpStatus
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import scalether.domain.Address
+import java.math.BigDecimal
 import java.math.BigInteger
 
 @IntegrationTest
@@ -89,6 +90,9 @@ class RefreshControllerFt : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var rawMetaCacheRepository: RawMetaCacheRepository
+
+    @Autowired
+    lateinit var activityRepository: ActivityRepository
 
     @MockkBean
     lateinit var internalItemProducer: UnionInternalItemEventProducer
@@ -161,8 +165,12 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         val shortOwnership = ShortOwnershipConverter.convert(unionOwnership)
 
         // Last sell activity for item
-        val swapDto = randomEthOrderActivityMatch()
-        val activity = swapDto.copy(left = swapDto.left.copy(asset = randomEthAssetErc1155(itemId)))
+        val (contract, tokenId) = CompositeItemIdParser.split(itemId.value)
+        val contractAddress = ContractAddress(BlockchainDto.ETHEREUM, contract)
+        val activity = randomUnionActivitySale(itemId = itemId).copy(
+            nft = UnionAsset(UnionEthErc1155AssetType(contractAddress, tokenId), BigDecimal.TEN)
+        )
+        activityRepository.save(EnrichmentActivityConverter.convert(activity))
 
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipsByItem(itemId, null, 1000, ethOwnership)
         ethereumOwnershipControllerApiMock.mockGetNftOwnershipById(auctionOwnershipId, auctionOwnership)
@@ -183,23 +191,14 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             ethFreeOwnershipId, sellCurrency, origin, ethOriginBestSell
         )
 
-        val mintActivity = randomEthItemMintActivity().copy(owner = Address.apply(ethFreeOwnershipId.owner.value))
-        ethereumActivityControllerApiMock.mockGetNftActivitiesByItem(
-            itemId,
-            listOf(NftActivityFilterByItemDto.Types.MINT),
-            1,
-            null,
-            ActivitySortDto.LATEST_FIRST,
-            mintActivity
-        )
+        val mintActivity = randomUnionActivityMint(itemId = itemId, owner = ethFreeOwnershipId.owner)
+        activityRepository.save(EnrichmentActivityConverter.convert(mintActivity))
 
         ethereumOrderControllerApiMock.mockGetCurrenciesByBidOrdersOfItem(itemId, active, ethBestBid.make.assetType)
         // Item best bid
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(itemId, bidCurrency, ethBestBid)
         // Item's origin best bid
         ethereumOrderControllerApiMock.mockGetOrderBidsByItemAndByStatus(itemId, bidCurrency, origin, ethOriginBestBid)
-
-        mockLastSellActivity(itemId, activity)
 
         val uri = "$baseUri/v0.1/refresh/item/${itemId.fullId()}/reconcile?full=true"
         val reconciled = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
@@ -275,15 +274,8 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             ethBestSell
         )
 
-        val mintActivity = randomEthItemMintActivity().copy(owner = Address.apply(ethOwnershipId.owner.value))
-        ethereumActivityControllerApiMock.mockGetNftActivitiesByItem(
-            ethItemId,
-            listOf(NftActivityFilterByItemDto.Types.MINT),
-            1,
-            null,
-            ActivitySortDto.LATEST_FIRST,
-            mintActivity
-        )
+        val mintActivity = randomUnionActivityMint(itemId = ethItemId, owner = ethOwnershipId.owner)
+        activityRepository.save(EnrichmentActivityConverter.convert(mintActivity))
 
         ethereumOrderControllerApiMock.mockGetAmmOrdersByItem(ethItemId)
 
@@ -368,7 +360,6 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             unionBestBid.bidCurrencyId(),
             ethBestBid
         )
-        mockLastSellActivity(ethItemId, null)
 
         val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
         val reconciled = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
@@ -493,7 +484,6 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             unionBestBid.bidCurrencyId(),
             ethBestBid
         )
-        mockLastSellActivity(ethItemId, null)
 
         val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
         val reconciled = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
@@ -569,7 +559,6 @@ class RefreshControllerFt : AbstractIntegrationTest() {
             unionBestBid.bidCurrencyId(),
             ethBestBid
         )
-        mockLastSellActivity(ethItemId, null)
 
         val uri = "$baseUri/v0.1/refresh/item/${ethItemId.fullId()}/reconcile"
         val reconciled = testRestTemplate.postForEntity(uri, null, ItemDto::class.java).body!!
@@ -632,16 +621,5 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         coVerify(exactly = 0) {
             testDownloadTaskProducer.send(any<List<KafkaMessage<DownloadTaskEvent>>>())
         }
-    }
-
-    private fun mockLastSellActivity(itemId: ItemIdDto, activity: OrderActivityMatchDto?) {
-        ethereumActivityControllerApiMock.mockGetOrderActivitiesByItem(
-            itemId,
-            listOf(OrderActivityFilterByItemDto.Types.MATCH),
-            1,
-            null,
-            ActivitySortDto.LATEST_FIRST,
-            activity
-        )
     }
 }

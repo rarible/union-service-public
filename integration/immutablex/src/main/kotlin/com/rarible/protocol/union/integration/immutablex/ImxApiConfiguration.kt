@@ -8,7 +8,6 @@ import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionCli
 import com.rarible.protocol.union.integration.immutablex.client.ImxOrderClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxWebClientFactory
 import com.rarible.protocol.union.integration.immutablex.converter.ImxActivityConverter
-import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderConverter
 import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderV3Converter
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionCreatorRepository
 import com.rarible.protocol.union.integration.immutablex.repository.ImxCollectionMetaSchemaRepository
@@ -32,9 +31,6 @@ import org.springframework.web.reactive.function.client.WebClient
 @ComponentScan(basePackageClasses = [ImxActivityConverter::class])
 @EnableConfigurationProperties(ImxIntegrationProperties::class)
 class ImxApiConfiguration {
-
-    @Bean
-    fun imxFeatureFlags(props: ImxIntegrationProperties) = props.featureFlags
 
     @Bean
     fun imxClientProperties(props: ImxIntegrationProperties): ImxClientProperties {
@@ -148,25 +144,14 @@ class ImxApiConfiguration {
 
     @Bean
     fun imxOrderService(
-        featureFlags: ImxFeatureFlags,
-        orderClient: ImxOrderClient,
-        orderClientV3: ImxOrderClient,
-        imxOrderConverter: ImxOrderConverter
+        client: ImxOrderClient,
+        imxOrderConverter: ImxOrderV3Converter
     ): ImxOrderService {
-        val client = when (featureFlags.useOrderV3) {
-            true -> orderClientV3
-            else -> orderClient
-        }
         return ImxOrderService(client, imxOrderConverter)
     }
 
     @Bean
-    fun imxOrderConverter(
-        featureFlags: ImxFeatureFlags,
-    ) = when (featureFlags.useOrderV3) {
-        true -> ImxOrderConverter()
-        else -> ImxOrderV3Converter()
-    }
+    fun imxOrderConverter() = ImxOrderV3Converter()
 
     @Bean
     fun imxActivityService(

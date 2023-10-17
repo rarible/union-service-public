@@ -34,7 +34,7 @@ class UnionInternalOrderEventHandlerTest {
     private val enrichmentItemService: EnrichmentItemService = mockk()
     private val reconciliationEventService: ReconciliationEventService = mockk()
     private val incomingEventHandler: IncomingEventHandler<UnionOrderEvent> = mockk()
-    private val ff: FeatureFlagsProperties = FeatureFlagsProperties().copy(enablePoolOrders = true)
+    private val ff: FeatureFlagsProperties = FeatureFlagsProperties()
 
     private val handler = UnionInternalOrderEventHandler(
         orderEventService,
