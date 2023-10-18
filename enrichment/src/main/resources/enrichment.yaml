@@ -54,6 +54,7 @@ enrichment:
         connectionsPerRoute: 2048
       simpleHash:
         enabled: false
+        apiKey: "${META_SIMPLE_HASH_API_KEY:}"
         endpoint: "https://api.simplehash.com/api/v0"
         kafka:
           enabled: false
