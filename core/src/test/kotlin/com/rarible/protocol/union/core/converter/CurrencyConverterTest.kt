@@ -14,7 +14,7 @@ class CurrencyConverterTest {
         val currency = com.rarible.protocol.currency.dto.CurrencyDto(
             currencyId = "wusd",
             address = randomString(),
-            blockchain = "ETHEREUM",
+            blockchain = BlockchainDto.ETHEREUM.name,
             alias = "usd"
         )
 

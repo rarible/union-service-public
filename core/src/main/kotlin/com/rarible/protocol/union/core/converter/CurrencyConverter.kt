@@ -4,13 +4,6 @@ import com.rarible.protocol.currency.dto.CurrencyDto
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.core.exception.UnionCurrencyException
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.BlockchainDto.ETHEREUM
-import com.rarible.protocol.union.dto.BlockchainDto.FLOW
-import com.rarible.protocol.union.dto.BlockchainDto.IMMUTABLEX
-import com.rarible.protocol.union.dto.BlockchainDto.MANTLE
-import com.rarible.protocol.union.dto.BlockchainDto.POLYGON
-import com.rarible.protocol.union.dto.BlockchainDto.SOLANA
-import com.rarible.protocol.union.dto.BlockchainDto.TEZOS
 import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
 import java.math.BigInteger
@@ -43,15 +36,7 @@ object CurrencyConverter {
     }
 
     fun convert(blockchain: String): BlockchainDto {
-        return when (blockchain) {
-            "ETHEREUM" -> ETHEREUM
-            "FLOW" -> FLOW
-            "POLYGON" -> POLYGON
-            "TEZOS" -> TEZOS
-            "SOLANA" -> SOLANA
-            "IMMUTABLEX" -> IMMUTABLEX
-            "MANTLE" -> MANTLE
-            else -> throw UnionCurrencyException("Unsupported blockchain: $blockchain")
-        }
+        return BlockchainDto.values().find { it.name == blockchain }
+            ?: throw UnionCurrencyException("Unsupported blockchain: $blockchain")
     }
 }
