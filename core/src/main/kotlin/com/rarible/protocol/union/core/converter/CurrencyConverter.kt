@@ -38,29 +38,20 @@ object CurrencyConverter {
         )
     }
 
-    fun convert(blockchain: BlockchainDto): com.rarible.protocol.currency.dto.BlockchainDto {
-        return when (blockchain) {
-            ETHEREUM -> com.rarible.protocol.currency.dto.BlockchainDto.ETHEREUM
-            IMMUTABLEX -> com.rarible.protocol.currency.dto.BlockchainDto.IMMUTABLEX
-            FLOW -> com.rarible.protocol.currency.dto.BlockchainDto.FLOW
-            POLYGON -> com.rarible.protocol.currency.dto.BlockchainDto.POLYGON
-            TEZOS -> com.rarible.protocol.currency.dto.BlockchainDto.TEZOS
-            SOLANA -> com.rarible.protocol.currency.dto.BlockchainDto.SOLANA
-            MANTLE -> com.rarible.protocol.currency.dto.BlockchainDto.MANTLE
-        }
+    fun convert(blockchain: BlockchainDto): String {
+        return blockchain.name
     }
 
-    fun convert(blockchain: com.rarible.protocol.currency.dto.BlockchainDto): BlockchainDto {
+    fun convert(blockchain: String): BlockchainDto {
         return when (blockchain) {
-            com.rarible.protocol.currency.dto.BlockchainDto.ETHEREUM -> ETHEREUM
-            com.rarible.protocol.currency.dto.BlockchainDto.FLOW -> FLOW
-            com.rarible.protocol.currency.dto.BlockchainDto.POLYGON -> POLYGON
-            com.rarible.protocol.currency.dto.BlockchainDto.TEZOS -> TEZOS
-            com.rarible.protocol.currency.dto.BlockchainDto.SOLANA -> SOLANA
-            com.rarible.protocol.currency.dto.BlockchainDto.IMMUTABLEX -> IMMUTABLEX
-            com.rarible.protocol.currency.dto.BlockchainDto.MANTLE -> MANTLE
-            com.rarible.protocol.currency.dto.BlockchainDto.OPTIMISM,
-            com.rarible.protocol.currency.dto.BlockchainDto.APTOS -> throw UnionCurrencyException("Unsupported blockchain: $blockchain")
+            "ETHEREUM" -> ETHEREUM
+            "FLOW" -> FLOW
+            "POLYGON" -> POLYGON
+            "TEZOS" -> TEZOS
+            "SOLANA" -> SOLANA
+            "IMMUTABLEX" -> IMMUTABLEX
+            "MANTLE" -> MANTLE
+            else -> throw UnionCurrencyException("Unsupported blockchain: $blockchain")
         }
     }
 }
