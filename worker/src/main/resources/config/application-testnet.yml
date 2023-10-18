@@ -1,7 +1,5 @@
 worker:
   itemMetaCustomAttributesJob:
-    enabled: true
-    rate: PT24H
     providers:
       mocaXp:
         enabled: true

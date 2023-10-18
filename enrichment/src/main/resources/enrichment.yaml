@@ -68,3 +68,60 @@ enrichment:
 logging:
   level:
     org.apache.http: "ERROR"
+
+integration:
+  eth:
+    ethereum:
+      enabled: true
+      consumer:
+        brokerReplicaSet: "${kafka.hosts}"
+    polygon:
+      enabled: true
+      consumer:
+        brokerReplicaSet: "${kafka.hosts}"
+    mantle:
+      enabled: true
+      consumer:
+        brokerReplicaSet: "${kafka.hosts}"
+  immutablex:
+    enabled: true
+    apiKey: "${IMMUTABLEX_API_KEY:}"
+    client:
+      url: "https://api.sandbox.x.immutable.com/v1"
+    clientV3:
+      url: "https://api.sandbox.x.immutable.com/v3"
+  flow:
+    enabled: true
+    consumer:
+      brokerReplicaSet: "${kafka.hosts}"
+  solana:
+    enabled: false
+    consumer:
+      brokerReplicaSet: "${kafka.hosts}"
+  tezos:
+    enabled: true
+    dipdup:
+      ipfsUrl: "https://ipfs.io/ipfs/"
+      dipdupUrl: ""
+      dipdupToken: ""
+      tzktUrl: ""
+      network: ""
+      chainId: ""
+      nodeAddress: ""
+      sigChecker: ""
+      knownAddresses:
+        hen: ""
+        henRoyalties: ""
+        kalamint: ""
+        fxhashV1: ""
+        fxhashV1Manager: ""
+        fxhashV2: ""
+        versum: ""
+        royaltiesManager: ""
+        bidou8x8: ""
+        bidou24x24: ""
+        dogami: ""
+        dogamiGap: ""
+        dogamiStar: ""
+      consumer:
+        brokerReplicaSet: "${kafka.hosts}"

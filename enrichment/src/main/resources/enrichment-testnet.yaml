@@ -73,3 +73,36 @@ enrichment:
 common:
   featureFlags:
     enableOptimizedSearchForItems: true
+
+integration:
+  eth:
+    ethereum:
+      auctionContracts:
+        - "0x8458d047e66805625e081A8B4466d3d349d9e33a"
+  tezos:
+    dipdup:
+      dipdupUrl: "https://testnet-tezos-indexer.rarible.org/v1/graphql"
+      dipdupToken: "er4oivAtW7U2ToO3TW4nScoc" # TODO
+      tzktUrl: "https://api.ghostnet.tzkt.io/"
+      tzktProperties:
+        collectionBatch: true
+        nftChecking: false
+        ownershipBatch: true
+        tokenBatch: true
+      network: "ghostnet"
+      chainId: "NetXnHfVqm9iesp"
+      nodeAddress: "https://rpc.tzkt.io/ghostnet"
+      sigChecker: "KT1Fbvkq4sMawS4rdNXswoN7ELgkNV1ooLB7"
+      knownAddresses:
+        hen: "KT1P2VyFd61A3ukizJoX37nFF9fqZnihv7Lw"
+        henRoyalties: "KT1L5hpLw7vJ3n9EU4cWrh2zCxkuFbtocNur"
+        royaltiesManager: "KT1AZfqFGFLMUrscNFyawDYAyqXYydz714ya"
+      marketplaces:
+        fxhashV1: true
+        fxhashV2: true
+        objkt: true
+        objktV2: true
+        teia: true
+        versum: true
+      useDipDupTokens: true
+      enrichDipDupCollection: false

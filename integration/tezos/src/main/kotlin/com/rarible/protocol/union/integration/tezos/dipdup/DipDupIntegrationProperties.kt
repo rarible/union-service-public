@@ -16,12 +16,12 @@ data class DipDupIntegrationProperties(
     val tzktProperties: TzktProperties = TzktProperties(),
     val ipfsUrl: String,
     val nodeAddress: String,
+    val network: String,
     val chainId: String,
     val sigChecker: String,
     val knownAddresses: KnownAddresses?,
     val marketplaces: Marketplaces = Marketplaces(),
     val consumer: DefaultConsumerProperties?,
-    val network: String,
     val fungibleContracts: Set<String> = emptySet(),
     val daemon: DaemonWorkerProperties = DaemonWorkerProperties(),
 

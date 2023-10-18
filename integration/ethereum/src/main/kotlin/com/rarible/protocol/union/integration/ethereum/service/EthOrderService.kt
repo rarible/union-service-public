@@ -12,7 +12,6 @@ import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.service.OrderService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
-import com.rarible.protocol.union.core.util.safeSplit
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.EthRaribleOrderFormDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -393,7 +392,7 @@ class EthOrderService(
         return properties.origins.values.map {
             Origin(
                 origin = it.origin,
-                collections = safeSplit(it.collections)
+                collections = it.collections
             )
         }
     }

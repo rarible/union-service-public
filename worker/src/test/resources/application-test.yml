@@ -1,20 +1,7 @@
 enrichment:
   meta:
     common:
-      embedded:
-        publicUrl: "http://localhost:8080/content/embedded"
       retries: "PT1H,P1D"
-
-integration:
-  tezos:
-    client:
-      url: "http://localhost:8080"
-  solana:
-    enabled: true
-
-logging:
-  level:
-    org.springframework.context.annotation: "DEBUG"
 
 rarible:
   core:
@@ -44,3 +31,6 @@ worker:
     ownership:
       enabled: true
 
+logging:
+  level:
+    org.springframework.context.annotation: "DEBUG"

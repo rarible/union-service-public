@@ -1,31 +1,12 @@
-spring:
-  data:
-    elasticsearch:
-      cluster-name: docker-cluster
-      cluster-nodes: ${elasticsearch.cluster-nodes}
+api:
+  openapi:
+    baseUrl: "https://test-api.rarible.org"
+    description: "Development (Ropsten, Mumbai, Hangzhou)"
 
-      client:
-        reactive:
-          endpoints: ${elasticsearch.api-nodes}
-          max-in-memory-size: 4194304
-
-  elasticsearch:
-    rest:
-      uris: ${elasticsearch.api-nodes}
-
-integration:
-  ethereum:
-    origins:
-      testWhitelabel:
-        origin: "0xWhitelabel"
-        collections: "0xf3348949db80297c78ec17d19611c263fc61f988"
-  tezos:
-    client:
-      url: "http://localhost:8080"
-    dipdup:
-      useDipDupTokens: ${consul.tezos.dipdup.useDipDupTokens:false}
-  solana:
-    enabled: true
+protocol:
+  union:
+    subscriber:
+      brokerReplicaSet: "${kafka.hosts}"
 
 common:
   currency:
@@ -34,10 +15,19 @@ common:
   featureFlags:
     enableOwnershipSourceEnrichment: true
 
-protocol:
-  union:
-    subscriber:
-      broker-replica-set: ${kafka.hosts}
+integration:
+  eth:
+    ethereum:
+      origins:
+        testWhitelabel:
+          origin: "0xWhitelabel"
+          collections: "0xf3348949db80297c78ec17d19611c263fc61f988"
+    mantle:
+      enabled: false
+  immutablex:
+    enabled: false
+  solana:
+    enabled: true
 
 logging:
   level:
@@ -48,8 +38,3 @@ logging:
     com.rarible.core.loader: ERROR
     tracer: TRACE
     org.springframework.data.elasticsearch.core.QUERY: DEBUG
-
-api:
-  openapi:
-    baseUrl: "https://test-api.rarible.org"
-    description: "Development (Ropsten, Mumbai, Hangzhou)"
