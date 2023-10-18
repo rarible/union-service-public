@@ -30,6 +30,8 @@ integration:
           origin: "0x6f83681c8f2f7e606b5e86d06034411252a1e2d5"
           collections:
             - "0x922014ee6f4157b4b105781e942ad76424ba5be4"
+    mantle:
+      enabled: false
   tezos:
     enabled: false
     dipdup:
