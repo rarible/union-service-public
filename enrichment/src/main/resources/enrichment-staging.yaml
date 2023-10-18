@@ -15,3 +15,5 @@ integration:
     enabled: false
   tezos:
     enabled: false
+  mantle:
+    enabled: false
