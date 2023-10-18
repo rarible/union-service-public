@@ -420,7 +420,6 @@ class ItemControllerFt : AbstractIntegrationTest() {
             size,
             listOf(ethOwnership)
         )
-        println("MOCKED: " + ethOwnerId.value + " size=" + size)
         polygonOwnershipControllerApiMock.mockGetNftOwnershipsByOwner(ethOwnerId.value, continuation, size, emptyList())
 
         ethereumAuctionControllerApiMock.mockGetAuctionsBySeller(ethOwnerId.value, listOf())
