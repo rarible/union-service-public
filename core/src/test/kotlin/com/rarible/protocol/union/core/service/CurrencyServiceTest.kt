@@ -256,13 +256,13 @@ class CurrencyServiceTest {
         assertThat(actual1).isEqualTo(actual2)
         coVerify(exactly = 1) {
             currencyControllerApi.allCurrencies
-            currencyControllerApi.getCurrencyRate(com.rarible.protocol.currency.dto.BlockchainDto.ETHEREUM, "0x0000000000000000000000000000000000000000", any())
-            currencyControllerApi.getCurrencyRate(com.rarible.protocol.currency.dto.BlockchainDto.FLOW, "A.1654653399040a61.FlowToken", any())
-            currencyControllerApi.getCurrencyRate(com.rarible.protocol.currency.dto.BlockchainDto.POLYGON, "0x0000000000000000000000000000000000000000", any())
-            currencyControllerApi.getCurrencyRate(com.rarible.protocol.currency.dto.BlockchainDto.TEZOS, "tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU", any())
-            currencyControllerApi.getCurrencyRate(com.rarible.protocol.currency.dto.BlockchainDto.SOLANA, "So11111111111111111111111111111111111111112", any())
-            currencyControllerApi.getCurrencyRate(com.rarible.protocol.currency.dto.BlockchainDto.IMMUTABLEX, "0x0000000000000000000000000000000000000000", any())
-            currencyControllerApi.getCurrencyRate(com.rarible.protocol.currency.dto.BlockchainDto.MANTLE, "0x0000000000000000000000000000000000000000", any())
+            currencyControllerApi.getCurrencyRate(BlockchainDto.ETHEREUM.name, "0x0000000000000000000000000000000000000000", any())
+            currencyControllerApi.getCurrencyRate(BlockchainDto.FLOW.name, "A.1654653399040a61.FlowToken", any())
+            currencyControllerApi.getCurrencyRate(BlockchainDto.POLYGON.name, "0x0000000000000000000000000000000000000000", any())
+            currencyControllerApi.getCurrencyRate(BlockchainDto.TEZOS.name, "tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU", any())
+            currencyControllerApi.getCurrencyRate(BlockchainDto.SOLANA.name, "So11111111111111111111111111111111111111112", any())
+            currencyControllerApi.getCurrencyRate(BlockchainDto.IMMUTABLEX.name, "0x0000000000000000000000000000000000000000", any())
+            currencyControllerApi.getCurrencyRate(BlockchainDto.MANTLE.name, "0x0000000000000000000000000000000000000000", any())
         }
         confirmVerified(currencyControllerApi)
     }

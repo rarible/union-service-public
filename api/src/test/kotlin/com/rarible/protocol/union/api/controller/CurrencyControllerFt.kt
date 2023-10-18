@@ -3,13 +3,13 @@ package com.rarible.protocol.union.api.controller
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
-import com.rarible.protocol.currency.dto.BlockchainDto
 import com.rarible.protocol.currency.dto.CurrenciesDto
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.api.client.CurrencyControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.test.nativeTestCurrencies
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import io.mockk.coEvery
@@ -41,7 +41,7 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
         val currencyDto = CurrencyRateDto(address, "usd", randomBigDecimal(), now)
 
         coEvery {
-            testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM, address, now.toEpochMilli())
+            testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM.name, address, now.toEpochMilli())
         } returns currencyDto.toMono()
 
         val result = currencyControllerApi.getCurrencyUsdRate(
@@ -61,7 +61,7 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
         val now = nowMillis()
 
         coEvery {
-            testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM, address, now.toEpochMilli())
+            testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM.name, address, now.toEpochMilli())
         } returns Mono.empty()
 
         val ex = assertThrows<CurrencyControllerApi.ErrorGetCurrencyUsdRate> {
@@ -101,7 +101,7 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
         val currencyDto = CurrencyRateDto(currencyId.contract, "usd", randomBigDecimal(), now)
 
         coEvery {
-            testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM, currencyId.value, now.toEpochMilli())
+            testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM.name, currencyId.value, now.toEpochMilli())
         } returns currencyDto.toMono()
 
         val result = currencyControllerApi.getCurrencyUsdRateByCurrencyId(
@@ -120,7 +120,7 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
         val now = nowMillis()
 
         coEvery {
-            testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM, currencyId.value, now.toEpochMilli())
+            testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM.name, currencyId.value, now.toEpochMilli())
         } returns Mono.empty()
 
         val ex = assertThrows<CurrencyControllerApi.ErrorGetCurrencyUsdRateByCurrencyId> {

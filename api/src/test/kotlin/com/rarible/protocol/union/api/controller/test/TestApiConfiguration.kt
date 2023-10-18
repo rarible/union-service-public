@@ -438,7 +438,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
             clientId = "test.union.ethereum.item",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = NftItemEventDto::class.java,
-            defaultTopic = NftItemEventTopicProvider.getTopic(applicationEnvironmentInfo.name, "ethereum"),
+            defaultTopic = NftItemEventTopicProvider.getTopic(applicationEnvironmentInfo.name, BlockchainDto.ETHEREUM.name.lowercase()),
             bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
             compression = Compression.SNAPPY,
         )
@@ -450,7 +450,7 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
             clientId = "test.union.ethereum.ownership",
             valueSerializerClass = UnionKafkaJsonSerializer::class.java,
             valueClass = NftOwnershipEventDto::class.java,
-            defaultTopic = NftOwnershipEventTopicProvider.getTopic(applicationEnvironmentInfo.name, "ethereum"),
+            defaultTopic = NftOwnershipEventTopicProvider.getTopic(applicationEnvironmentInfo.name, BlockchainDto.ETHEREUM.name.lowercase()),
             bootstrapServers = KafkaTestExtension.kafkaContainer.kafkaBoostrapServers(),
             compression = Compression.SNAPPY,
         )
