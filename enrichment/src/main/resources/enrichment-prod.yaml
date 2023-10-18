@@ -116,7 +116,6 @@ integration:
   tezos:
     dipdup:
       dipdupUrl: "http://hasura.prod-tezos:8080/v1/graphql"
-      dipdupToken: "7fi1vzkapgrbwdhya4d" # TODO
       tzktUrl: "https://api.tzkt.io/"
       tzktProperties:
         collectionBatch: true

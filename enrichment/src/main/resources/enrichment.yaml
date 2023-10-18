@@ -103,7 +103,7 @@ integration:
     dipdup:
       ipfsUrl: "https://ipfs.io/ipfs/"
       dipdupUrl: ""
-      dipdupToken: ""
+      dipdupToken: "${TEZOS_DIPDUP_TOKEN:}"
       tzktUrl: ""
       network: ""
       chainId: ""

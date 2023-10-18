@@ -82,7 +82,6 @@ integration:
   tezos:
     dipdup:
       dipdupUrl: "https://testnet-tezos-indexer.rarible.org/v1/graphql"
-      dipdupToken: "er4oivAtW7U2ToO3TW4nScoc" # TODO
       tzktUrl: "https://api.ghostnet.tzkt.io/"
       tzktProperties:
         collectionBatch: true

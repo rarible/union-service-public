@@ -34,7 +34,6 @@ integration:
     enabled: false
     dipdup:
       dipdupUrl: "https://dev-tezos-indexer.rarible.org/v1/graphql"
-      dipdupToken: "fN1Z2yHtqbtYnNjM9hhBNtNG" # TODO
       tzktUrl: "https://api.ghostnet.tzkt.io/"
       tzktProperties:
         retryAttempts: 2
