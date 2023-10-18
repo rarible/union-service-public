@@ -1,7 +1,5 @@
 package com.rarible.protocol.union.core.util
 
-import com.rarible.protocol.union.core.exception.UnionCurrencyException
-import com.rarible.protocol.union.dto.BlockchainDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

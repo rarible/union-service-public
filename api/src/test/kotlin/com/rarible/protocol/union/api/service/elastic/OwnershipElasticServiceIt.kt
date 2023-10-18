@@ -76,7 +76,7 @@ class OwnershipElasticServiceIt {
             elasticsearchTestBootstrapper.bootstrap()
 
             repeat(10) {
-                val currency = nativeTestCurrencies().find { it.currencyId == "ethereum" }!!
+                val currency = nativeTestCurrencies().find { it.currencyId == BlockchainDto.ETHEREUM.name.lowercase() }!!
                 val oid = randomOwnershipId(
                     blockchain = BlockchainDto.ETHEREUM,
                     itemIdValue = "${randomAddressString()}:${randomLong()}",

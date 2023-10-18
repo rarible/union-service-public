@@ -78,7 +78,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
             elasticsearchTestBootstrapper.bootstrap()
 
             repeat(10) {
-                val currency = nativeTestCurrencies().find { it.currencyId == "ethereum" }!!
+                val currency = nativeTestCurrencies().find { it.currencyId == BlockchainDto.ETHEREUM.name.lowercase() }!!
                 val item = randomItemDto(randomEthItemId())
                     .copy(
                         mintedAt = nowMillis() + Duration.ofHours(it.toLong()),
