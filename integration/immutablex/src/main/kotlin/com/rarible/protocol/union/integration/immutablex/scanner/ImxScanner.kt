@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.integration.immutablex.scanner
 
 import com.rarible.core.common.nowMillis
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.integration.immutablex.client.ImmutablexEvent
 import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.handlers.ImxActivityEventHandler
@@ -11,6 +10,7 @@ import com.rarible.protocol.union.integration.immutablex.handlers.ImxOrderEventH
 import com.rarible.protocol.union.integration.immutablex.model.ImxScanState
 import com.rarible.protocol.union.integration.immutablex.repository.ImxScanStateRepository
 import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import scalether.domain.Address
 import java.util.concurrent.ConcurrentHashMap
@@ -28,7 +28,7 @@ class ImxScanner(
     private val activityDelay: Long
 ) {
 
-    private val logger by Logger()
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Scheduled(
         initialDelayString = "\${integration.immutablex.scanner.job.initialDelay.mints}",

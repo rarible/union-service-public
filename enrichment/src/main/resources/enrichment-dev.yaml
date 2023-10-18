@@ -18,3 +18,37 @@ enrichment:
       - "ETHEREUM:0x55eb2809896ab7414706aacdde63e3bbb26e0bc6"
       - "POLYGON:0xb24740adecb71feb7d66aa4ebd5f5c334e5be922"
       - "POLYGON:0x328823f69a0915c9bec366eb09ccdfb964f91ad5"
+
+integration:
+  eth:
+    ethereum:
+      auctionContracts:
+        - "0x097b9539ba92e6d00087f12f7aa4c956f81030cc"
+        - "0xda98d90e91cf3303493d3d8265f866753d862296"
+      origins:
+        erundulki:
+          origin: "0x6f83681c8f2f7e606b5e86d06034411252a1e2d5"
+          collections:
+            - "0x922014ee6f4157b4b105781e942ad76424ba5be4"
+  tezos:
+    enabled: false
+    dipdup:
+      dipdupUrl: "https://dev-tezos-indexer.rarible.org/v1/graphql"
+      tzktUrl: "https://api.ghostnet.tzkt.io/"
+      tzktProperties:
+        retryAttempts: 2
+        retryDelay: 5000
+      network: "ghostnet"
+      chainId: "NetXnHfVqm9iesp"
+      nodeAddress: "https://rpc.tzkt.io/ghostnet"
+      sigChecker: "KT1Fbvkq4sMawS4rdNXswoN7ELgkNV1ooLB7"
+      knownAddresses:
+        hen: "KT1P2VyFd61A3ukizJoX37nFF9fqZnihv7Lw"
+        henRoyalties: "KT1L5hpLw7vJ3n9EU4cWrh2zCxkuFbtocNur"
+        royaltiesManager: "KT1AZfqFGFLMUrscNFyawDYAyqXYydz714ya"
+      marketplaces:
+        hen: false
+        objkt: true
+        objktV2: true
+      useDipDupTokens: true
+      saveDipDupRoyalty: false

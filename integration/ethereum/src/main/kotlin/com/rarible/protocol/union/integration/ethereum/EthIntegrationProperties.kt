@@ -9,9 +9,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
-@ConfigurationProperties
+@ConfigurationProperties("integration")
 class EthIntegrationProperties(
-    integration: Map<String, EthEvmIntegrationProperties> = emptyMap()
+    eth: Map<String, EthEvmIntegrationProperties> = emptyMap()
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -20,15 +20,14 @@ class EthIntegrationProperties(
     private val exclude = setOf(BlockchainDto.IMMUTABLEX)
     private val evms = BlockchainGroupDto.ETHEREUM.subchains().filter { it !in exclude }
 
-    // TODO we need to re-design integration properties, otherwise it will gather ALL integrations
-    val blockchains = evms.mapNotNull {
-        val properties = integration[it.name.lowercase()] ?: return@mapNotNull null
+    val blockchains = this.evms.mapNotNull {
+        val properties = eth[it.name.lowercase()] ?: return@mapNotNull null
         if (!properties.enabled) return@mapNotNull null
         it to properties
     }.associateBy({ it.first }, { it.second })
 
     // Just to have active blockchains in the same order as they defined in BlockchainGroup
-    val active = evms.filter { blockchains.containsKey(it) }
+    val active = this.evms.filter { blockchains.containsKey(it) }
 
     init {
         logger.info("Found enabled configurations of ETHEREUM EVMs: $active")
@@ -38,11 +37,11 @@ class EthIntegrationProperties(
 data class EthEvmIntegrationProperties(
     val enabled: Boolean,
     val consumer: DefaultConsumerProperties?,
-    val auctionContracts: String? = null,
+    val auctionContracts: List<String> = emptyList(),
     val origins: Map<String, OriginProperties> = emptyMap()
 )
 
 data class OriginProperties(
     val origin: String,
-    val collections: String? // Comma-separated values
+    val collections: List<String> = emptyList()
 )

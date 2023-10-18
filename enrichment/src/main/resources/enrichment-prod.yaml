@@ -99,3 +99,57 @@ common:
   featureFlags:
     enableActivityAscQueriesWithApiMerge: false
     enableStrictMetaComparison: true
+
+integration:
+  eth:
+    ethereum:
+      origins:
+        metaAngels:
+          origin: "0xe3f0dcb8cd846cb63bab7dcaa973445e54f96a9f"
+          collections:
+            - "0xad265ab9b99296364f13ce5b8b3e8d0998778bfb"
+  immutablex:
+    client:
+      url: "https://api.x.immutable.com/v1"
+    clientV3:
+      url: "https://api.x.immutable.com/v3"
+  tezos:
+    dipdup:
+      dipdupUrl: "http://hasura.prod-tezos:8080/v1/graphql"
+      tzktUrl: "https://api.tzkt.io/"
+      tzktProperties:
+        collectionBatch: true
+        ignorePeriod: 9184000000
+        nftChecking: false
+        ownershipBatch: true
+        tokenBatch: true
+      network: "mainnet"
+      chainId: "NetXdQprcVkpaWU"
+      nodeAddress: "https://rpc.tzkt.io/mainnet"
+      sigChecker: "KT1VAmfDTkcYKMZZQhwuxtCGoD1hx7v5bjZ9"
+      knownAddresses:
+        bidou24x24: "KT1TR1ErEQPTdtaJ7hbvKTJSa1tsGnHGZTpf"
+        bidou8x8: "KT1MxDwChiDwd6WBVs24g1NjERUoK622ZEFp"
+        dogami: "KT1NVvPsNDChrLRH5K2cy6Sc9r1uuUwdiZQd"
+        dogamiGap: "KT1CAbPGHUWvkSA9bxMPkqSgabgsjtmRYEda"
+        dogamiStar: "KT1HtNSkJxpbQc2496JfmxHwZk23RnTB81ey"
+        fxhashV1: "KT1KEa8z6vWXDJrVqtMrAeDVzsvxat3kHaCE"
+        fxhashV1Manager: "KT1XCoGnfupWk7Sp8536EfrxcP73LmT68Nyr"
+        fxhashV2: "KT1U6EHmNxJTkvaWJ4ThczG4FSDaHC21ssvi"
+        hen: "KT1RJ6PbjHpwc3M5rw5s2Nbmefwbuwbdxton"
+        henRoyalties: "KT1Hkg5qeNhfwpKW4fXvq7HGZB9z2EnmCCA9"
+        kalamint: "KT1EpGgjQs73QfFJs9z7m1Mxm5MTnpC2tqse"
+        royaltiesManager: "KT1HNNrmCk1fpqveRDz8Fvww2GM4gPzmA7fo"
+        versum: "KT1LjmAdYQCLBjwv4S2oFkEzyHVkomAf5MrW"
+      marketplaces:
+        fxhashV1: true
+        fxhashV2: true
+        hen: true
+        objkt: true
+        objktV2: true
+        teia: true
+        versum: true
+      useDipDupRoyalty: true
+      useDipDupTokens: true
+      saveDipDupRoyalty: false
+      enrichDipDupCollection: false

@@ -5,7 +5,6 @@ import com.rarible.protocol.order.api.client.AuctionControllerApi
 import com.rarible.protocol.union.core.service.AuctionService
 import com.rarible.protocol.union.core.service.router.AbstractBlockchainService
 import com.rarible.protocol.union.core.util.CompositeItemIdParser
-import com.rarible.protocol.union.core.util.safeSplit
 import com.rarible.protocol.union.dto.AuctionBidDto
 import com.rarible.protocol.union.dto.AuctionDto
 import com.rarible.protocol.union.dto.AuctionSortDto
@@ -134,6 +133,6 @@ class EthAuctionService(
     }
 
     override fun getAuctionContracts(): List<String> {
-        return safeSplit(properties.auctionContracts)
+        return properties.auctionContracts
     }
 }
