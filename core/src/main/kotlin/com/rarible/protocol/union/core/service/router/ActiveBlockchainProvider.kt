@@ -16,6 +16,8 @@ class ActiveBlockchainProvider(
 
     val blockchains = build(activeBlockchains)
 
+    fun isActive(blockchain: BlockchainDto) = blockchains.contains(blockchain)
+
     private fun build(activeBlockchains: List<ActiveBlockchain>): Set<BlockchainDto> {
         val all = activeBlockchains.flatMap { it.active }
             .groupBy { it }

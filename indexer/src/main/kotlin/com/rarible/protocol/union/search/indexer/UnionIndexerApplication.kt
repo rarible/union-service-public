@@ -7,7 +7,7 @@ import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 
 @SpringBootApplication
-class UnionSearchIndexerApplication(
+class UnionIndexerApplication(
     private val kafkaConsumers: List<RaribleKafkaConsumerWorker<*>>,
 ) : CommandLineRunner {
 
@@ -17,7 +17,7 @@ class UnionSearchIndexerApplication(
 }
 
 fun main(args: Array<String>) {
-    val app = SpringApplication(UnionSearchIndexerApplication::class.java)
+    val app = SpringApplication(UnionIndexerApplication::class.java)
     app.setRegisterShutdownHook(false)
     val context = app.run(*args)
     Runtime.getRuntime().addShutdownHook(Thread(KafkaShutdownHook(context, context::close)))

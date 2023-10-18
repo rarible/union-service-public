@@ -2,33 +2,23 @@ common:
   currency:
     refresh:
       cron: "-"
-  client:
-    tezos:
-      url: "http://localhost:8080"
   featureFlags:
     enableOwnershipSourceEnrichment: true
     enableItemBestBidsByCurrency: true
     enableCollectionAutoRefreshOnCreation: true
 
 enrichment:
+
   collection:
     mappings:
       - name: "ETHEREUM:0x7777777777777777777777777777777777777777"
         collections:
           - "ETHEREUM:0x8888888888888888888888888888888888888888"
+
   currencies:
     bestBidByCurrencyWhitelist:
-      - ETHEREUM:0xc778417e063141139fce010982780140aa0cd5ab
-      - POLYGON:0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa
-rarible:
-  core:
-    task:
-      enabled: false
-      initialDelay: 600000
-  loader:
-    enableWorkers: true # Enable workers in the tests.
-    workers: 1
-    enableRetrySchedulerJob: false
+      - "ETHEREUM:0xc778417e063141139fce010982780140aa0cd5ab"
+      - "POLYGON:0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa"
 
 integration:
   ethereum:
@@ -79,10 +69,3 @@ integration:
           orders: 6000
           assets: 6000
           collections: 6000
-
-meta:
-  embedded:
-    publicUrl: "http://localhost:8080/content/embedded"
-  simpleHash:
-    kafka:
-      enabled: false

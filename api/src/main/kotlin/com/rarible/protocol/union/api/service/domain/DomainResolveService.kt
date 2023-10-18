@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.service.domain
 
-import com.rarible.protocol.union.api.configuration.DomainProperties
+import com.rarible.protocol.union.api.configuration.ApiProperties
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.core.model.UnionDomainResolveResult
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class DomainResolveService(
     private val router: BlockchainRouter<DomainService>,
-    private val properties: DomainProperties,
+    private val properties: ApiProperties,
 ) {
     suspend fun resolve(domain: String): UnionDomainResolveResult {
         val topDomain = TopLevelDomainExtractor.extract(domain)

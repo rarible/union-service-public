@@ -37,6 +37,15 @@ class EnrichmentConfiguration(
 ) {
 
     @Bean
+    fun enrichmentProducerProperties(): ProducerProperties = properties.producer
+
+    @Bean
+    fun enrichmentCommonMetaProperties(): CommonMetaProperties = properties.meta.common
+
+    @Bean
+    fun enrichmentItemMetaProperties(): EnrichmentItemMetaProperties = properties.meta.item
+
+    @Bean
     fun enrichmentCollectionProperties(): EnrichmentCollectionProperties = properties.collection
 
     @Bean

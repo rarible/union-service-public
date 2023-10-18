@@ -13,7 +13,7 @@ import com.rarible.protocol.union.dto.CollectionTokenIdDto
 import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.CollectionsSearchRequestDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
@@ -34,7 +34,7 @@ class CollectionController(
     private val collectionSourceSelector: CollectionSourceSelectService,
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val itemMetaRefreshService: ItemMetaRefreshService,
-    private val unionMetaProperties: UnionMetaProperties,
+    private val commonMetaProperties: CommonMetaProperties,
     private val ff: FeatureFlagsProperties
 ) : CollectionControllerApi {
 
@@ -85,7 +85,7 @@ class CollectionController(
         itemMetaRefreshService.scheduleUserRefresh(
             collectionId = collectionId,
             full = true,
-            withSimpleHash = unionMetaProperties.simpleHash.enabled
+            withSimpleHash = commonMetaProperties.simpleHash.enabled
         )
         ResponseEntity.noContent().build()
     }

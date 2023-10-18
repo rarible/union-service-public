@@ -1,8 +1,8 @@
 package com.rarible.protocol.union.meta.loader.config
 
 import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaNotifier
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
@@ -34,7 +34,7 @@ import org.springframework.context.annotation.Import
 @Import(value = [EnrichmentApiConfiguration::class])
 @EnableConfigurationProperties(value = [UnionMetaLoaderProperties::class])
 class UnionMetaLoaderConfiguration(
-    private val metaProperties: UnionMetaProperties,
+    private val metaProperties: CommonMetaProperties,
     private val metaLoaderProperties: UnionMetaLoaderProperties,
     private val meterRegistry: MeterRegistry,
     private val downloadTaskService: DownloadTaskService,

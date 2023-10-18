@@ -20,29 +20,23 @@ import com.rarible.protocol.union.core.client.WebClientFactory
 import com.rarible.protocol.union.core.util.safeSplit
 import com.rarible.protocol.union.enrichment.meta.UnionMetaPackage
 import io.micrometer.core.instrument.MeterRegistry
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.web.reactive.function.client.WebClient
 
-@EnableConfigurationProperties(UnionMetaProperties::class)
-@ComponentScan(
-    basePackageClasses = [
-        UnionMetaPackage::class
-    ]
-)
-class UnionMetaConfiguration(
-    private val unionMetaProperties: UnionMetaProperties
+@ComponentScan(basePackageClasses = [UnionMetaPackage::class])
+class EnrichmentMetaConfiguration(
+    private val commonMetaProperties: CommonMetaProperties
 ) {
 
     @Bean
     fun embeddedContentProperties(): EmbeddedContentProperties {
-        return unionMetaProperties.embedded
+        return commonMetaProperties.embedded
     }
 
     @Bean
     fun itemMetaTrimmingProperties(): MetaTrimmingProperties {
-        return unionMetaProperties.trimming
+        return commonMetaProperties.trimming
     }
 
     @Bean
@@ -57,13 +51,13 @@ class UnionMetaConfiguration(
     @Bean
     fun urlResolver(): UrlResolver {
         val publicGatewayProvider = ConstantGatewayProvider(
-            unionMetaProperties.ipfsPublicGateway.trimEnd('/')
+            commonMetaProperties.ipfsPublicGateway.trimEnd('/')
         )
         val internalGatewayProvider = RandomGatewayProvider(
-            safeSplit(unionMetaProperties.ipfsGateway).map { it.trimEnd('/') }
+            safeSplit(commonMetaProperties.ipfsGateway).map { it.trimEnd('/') }
         )
         val legacyGatewayResolver = LegacyIpfsGatewaySubstitutor(
-            safeSplit(unionMetaProperties.ipfsLegacyGateway).map { it.trimEnd('/') }
+            safeSplit(commonMetaProperties.ipfsLegacyGateway).map { it.trimEnd('/') }
         )
 
         val ipfsGatewayResolver = IpfsGatewayResolver(
@@ -77,27 +71,27 @@ class UnionMetaConfiguration(
 
     @Bean
     fun contentReceiver(): ContentReceiver {
-        return when (unionMetaProperties.httpClient.type) {
-            UnionMetaProperties.HttpClient.HttpClientType.KTOR_APACHE ->
+        return when (commonMetaProperties.httpClient.type) {
+            CommonMetaProperties.HttpClient.HttpClientType.KTOR_APACHE ->
                 KtorApacheClientContentReceiver(
-                    timeout = unionMetaProperties.httpClient.timeOut,
-                    threadsCount = unionMetaProperties.httpClient.threadCount,
-                    totalConnection = unionMetaProperties.httpClient.totalConnection,
-                    keepAlive = unionMetaProperties.httpClient.keepAlive
+                    timeout = commonMetaProperties.httpClient.timeOut,
+                    threadsCount = commonMetaProperties.httpClient.threadCount,
+                    totalConnection = commonMetaProperties.httpClient.totalConnection,
+                    keepAlive = commonMetaProperties.httpClient.keepAlive
                 )
 
-            UnionMetaProperties.HttpClient.HttpClientType.KTOR_CIO ->
+            CommonMetaProperties.HttpClient.HttpClientType.KTOR_CIO ->
                 KtorCioClientContentReceiver(
-                    timeout = unionMetaProperties.httpClient.timeOut,
-                    threadsCount = unionMetaProperties.httpClient.threadCount,
-                    totalConnection = unionMetaProperties.httpClient.totalConnection
+                    timeout = commonMetaProperties.httpClient.timeOut,
+                    threadsCount = commonMetaProperties.httpClient.threadCount,
+                    totalConnection = commonMetaProperties.httpClient.totalConnection
                 )
 
-            UnionMetaProperties.HttpClient.HttpClientType.ASYNC_APACHE ->
+            CommonMetaProperties.HttpClient.HttpClientType.ASYNC_APACHE ->
                 ApacheHttpContentReceiver(
-                    timeout = unionMetaProperties.httpClient.timeOut,
-                    connectionsPerRoute = unionMetaProperties.httpClient.connectionsPerRoute,
-                    keepAlive = unionMetaProperties.httpClient.keepAlive
+                    timeout = commonMetaProperties.httpClient.timeOut,
+                    connectionsPerRoute = commonMetaProperties.httpClient.connectionsPerRoute,
+                    keepAlive = commonMetaProperties.httpClient.keepAlive
                 )
         }
     }
@@ -105,13 +99,13 @@ class UnionMetaConfiguration(
     @Bean
     fun contentMetaReceiver(
         contentReceiver: ContentReceiver,
-        unionMetaProperties: UnionMetaProperties,
+        commonMetaProperties: CommonMetaProperties,
         meterRegistry: MeterRegistry,
         contentDetector: ContentDetector
     ): ContentMetaReceiver {
         return ContentMetaReceiver(
             contentReceiver = MeasurableContentReceiver(contentReceiver, meterRegistry),
-            maxBytes = unionMetaProperties.mediaFetchMaxSize.toInt(),
+            maxBytes = commonMetaProperties.mediaFetchMaxSize.toInt(),
             contentReceiverMetrics = ContentReceiverMetrics(meterRegistry),
             contentDetector = contentDetector,
         )
@@ -119,7 +113,7 @@ class UnionMetaConfiguration(
 
     @Bean
     fun simpleHashClient(webClientCustomizer: UnionWebClientCustomizer): WebClient {
-        val props = unionMetaProperties.simpleHash
+        val props = commonMetaProperties.simpleHash
         val webClient = WebClientFactory.createClient(props.endpoint, mapOf("X-API-KEY" to props.apiKey))
         webClientCustomizer.customize(webClient)
         return webClient.build()

@@ -9,7 +9,6 @@ import java.time.Duration
 @ConfigurationProperties(prefix = "worker")
 data class WorkerProperties(
     val searchReindex: SearchReindexProperties = SearchReindexProperties(),
-    val metrics: MetricsProperties = MetricsProperties(),
     val reconciliation: ReconciliationProperties = ReconciliationProperties(),
     val platformBestSellCleanup: PlatformBestSellCleanUpProperties = PlatformBestSellCleanUpProperties(),
     val priceUpdate: PriceUpdateProperties = PriceUpdateProperties(),
@@ -21,6 +20,7 @@ data class WorkerProperties(
     val metaCollectionRetry: MetaRetry = MetaRetry(),
     val itemMetaCustomAttributesJob: ItemMetaCustomAttributesJobProperties = ItemMetaCustomAttributesJobProperties(),
     val communityMarketplace: CommunityMarketplaceProperties = CommunityMarketplaceProperties(),
+    val ratelimiter: RateLimiterProperties = RateLimiterProperties()
 )
 
 data class SearchReindexProperties(
@@ -33,45 +33,26 @@ data class SearchReindexProperties(
 
 sealed class EntityReindexProperties {
     abstract val enabled: Boolean
-    abstract val blockchains: List<BlockchainReindexProperties>
-
-    fun activeBlockchains(): List<BlockchainDto> {
-        if (!this.enabled) return emptyList()
-
-        return blockchains.filter { it.enabled }.map { it.blockchain }
-    }
-
-    fun isBlockchainActive(blockchain: BlockchainDto): Boolean {
-        return this.enabled && this
-            .blockchains
-            .singleOrNull { it.blockchain == blockchain }
-            ?.enabled ?: false
-    }
 }
 
 data class ActivityReindexProperties(
     override val enabled: Boolean = true,
-    override val blockchains: List<BlockchainReindexProperties> = emptyList()
-) : EntityReindexProperties()
-
-data class OrderReindexProperties(
-    override val enabled: Boolean = true,
-    override val blockchains: List<BlockchainReindexProperties> = emptyList()
 ) : EntityReindexProperties()
 
 class CollectionReindexProperties(
     override val enabled: Boolean = true,
-    override val blockchains: List<BlockchainReindexProperties> = emptyList()
 ) : EntityReindexProperties()
 
 class ItemReindexProperties(
     override val enabled: Boolean = true,
-    override val blockchains: List<BlockchainReindexProperties> = emptyList()
 ) : EntityReindexProperties()
 
 data class OwnershipReindexProperties(
     override val enabled: Boolean = true,
-    override val blockchains: List<BlockchainReindexProperties> = emptyList()
+) : EntityReindexProperties()
+
+data class OrderReindexProperties(
+    override val enabled: Boolean = false,
 ) : EntityReindexProperties()
 
 data class BlockchainReindexProperties(
@@ -81,15 +62,11 @@ data class BlockchainReindexProperties(
 
 class ReconciliationProperties(
     val collectionBatchSize: Int = 50,
-    val orderBatchSize: Int = 50,
+    val orderBatchSize: Int = 100,
     val auctionBatchSize: Int = 50,
     val activityBatchSize: Int = 100,
-    val threadCount: Int = 4,
+    val threadCount: Int = 8,
     val notificationEnabled: Boolean = true
-)
-
-data class MetricsProperties(
-    val rootPath: String = "protocol.union.worker"
 )
 
 data class PlatformBestSellCleanUpProperties(
@@ -131,7 +108,7 @@ class ReconcileMarksProperties(
 
 class MetaRetry(
     val enabled: Boolean = true,
-    val rate: Duration = Duration.ofMinutes(1)
+    val rate: Duration = Duration.ofSeconds(1)
 )
 
 class ItemMetaCustomAttributesJobProperties(
@@ -154,4 +131,9 @@ class MocaXpCustomAttributesProviderProperties(
 
 data class CommunityMarketplaceProperties(
     val communityMarketplaceUrl: String = "http://127.0.0.1:8080",
+)
+
+data class RateLimiterProperties(
+    val period: Long = 10000,
+    val maxEntities: Int = 10000,
 )

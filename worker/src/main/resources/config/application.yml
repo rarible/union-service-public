@@ -1,60 +1,10 @@
-application:
-  project: protocol
-
-server:
-  shutdown: graceful
-  port: 8080
-
 spring:
-  application.name: union-search-worker
-  jackson:
-    mapper:
-      ACCEPT_CASE_INSENSITIVE_ENUMS: true
-    deserialization:
-      FAIL_ON_UNKNOWN_PROPERTIES: false
-    default-property-inclusion: non_null
-  aop:
-    proxy-target-class: false
-  main:
-    banner-mode: log
-    web-application-type: reactive
+  application:
+    name: "union-search-worker"
 
 mongock:
   change-logs-scan-package:
-    - com.rarible.protocol.union.enrichment.migration
-
-rarible:
-  core:
-    client:
-      name: rarible-protocol
-
-  loader:
-    broker-replica-set: ${kafka.hosts}
-    topicsPrefix: protocol.${application.environment}.union.internal.loader
-    enableNotifications: false
-    enableWorkers: false
-    enableRetrySchedulerJob: false
-    workers: 4
-    loadTasksBatchSize: 10
-    retry:
-      # Retry after 5m, 24h
-      backoffDelaysMillis: [ 300000, 86400000 ]
-      job:
-        runner:
-          period: 30000 # Schedule retry tasks every 30s
-
-meta:
-  ipfsGateway: "https://ipfs.io,https://nftstorage.link"
-  ipfsPublicGateway: "https://ipfs.io"
-  ipfsLegacyGateway: "https://rarible.mypinata.cloud"
-  mediaFetchMaxSize: 131072 # 128 Kb
-  openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
-  http-client:
-    type: KTOR_CIO # KTOR_APACHE, KTOR_CIO
-    thread-count: 1
-    time-out: 10000
-    total-connection: 1000
-  retries: "PT10S,PT30S,PT5M,PT1H,P1D"
+    - "com.rarible.protocol.union.enrichment.migration"
 
 integration:
   ethereum:
@@ -126,127 +76,10 @@ integration:
     apiKey: ${consul.immutablex.api.key:}
 
 worker:
-  reconciliation:
-    orderBatchSize: 50
-    auctionBatchSize: 50
-    activityBatchSize: 100
-    threadCount: 2
-    notificationEnabled: false
-  platformBestSellCleanup:
-    enabled: true
-    itemBatchSize: 100
-    ownershipBatchSize: 100
-  price-update:
-    enabled: true
-    rate: PT5M
-  reconcile-marks:
-    enabled: true
-    rate: PT15S
-  meta-item-retry:
-    enabled: true
-    rate: PT1S
-  meta-collection-retry:
-    enabled: true
-    rate: PT1S
   itemMetaCustomAttributesJob:
-    enabled: true
-    rate: PT24H
     providers:
       mocaXp:
         enabled: false
-        collection: ""
-        baseUrl: ""
-        uri: ""
         apiKey: ${MOCA_XP_API_KEY}
-  search-reindex:
-    activity:
-      enabled: ${consul.worker.activity.enabled:true}
-      blockchains:
-        - blockchain: ETHEREUM
-          enabled: true
-        - blockchain: POLYGON
-          enabled: true
-        - blockchain: MANTLE
-          enabled: true
-        - blockchain: FLOW
-          enabled: true
-        - blockchain: TEZOS
-          enabled: true
-        - blockchain: SOLANA
-          enabled: true
-        - blockchain: IMMUTABLEX
-          enabled: true
-    collection:
-      enabled: ${consul.worker.collection.enabled:true}
-      blockchains:
-        - blockchain: ETHEREUM
-          enabled: true
-        - blockchain: POLYGON
-          enabled: true
-        - blockchain: MANTLE
-          enabled: true
-        - blockchain: FLOW
-          enabled: true
-        - blockchain: TEZOS
-          enabled: true
-        - blockchain: SOLANA
-          enabled: true
-        - blockchain: IMMUTABLEX
-          enabled: true
-    item:
-      enabled: ${consul.worker.item.enabled:false}
-      blockchains:
-        - blockchain: ETHEREUM
-          enabled: true
-        - blockchain: POLYGON
-          enabled: true
-        - blockchain: MANTLE
-          enabled: true
-        - blockchain: FLOW
-          enabled: true
-        - blockchain: TEZOS
-          enabled: true
-        - blockchain: SOLANA
-          enabled: true
-        - blockchain: IMMUTABLEX
-          enabled: true
-    ownership:
-      enabled: ${consul.worker.ownership.enabled:false}
-      blockchains:
-        - blockchain: ETHEREUM
-          enabled: true
-        - blockchain: POLYGON
-          enabled: true
-        - blockchain: MANTLE
-          enabled: true
-        - blockchain: FLOW
-          enabled: true
-        - blockchain: TEZOS
-          enabled: true
-        - blockchain: SOLANA
-          enabled: true
-        - blockchain: IMMUTABLEX
-          enabled: true
-    order:
-      enabled: ${consul.worker.order.enabled:false}
-      blockchains:
-        - blockchain: ETHEREUM
-          enabled: true
-        - blockchain: POLYGON
-          enabled: true
-        - blockchain: MANTLE
-          enabled: true
-        - blockchain: FLOW
-          enabled: true
-        - blockchain: TEZOS
-          enabled: true
-        - blockchain: SOLANA
-          enabled: true
-        - blockchain: IMMUTABLEX
-          enabled: true
   communityMarketplace:
     communityMarketplaceUrl: http://web.${application.environment}-whitelabel:8080
-
-ratelimiter:
-  period: ${consul.worker.ratelimiter.period:10000}
-  maxEntities: ${consul.worker.ratelimiter.maxEntities:5000}

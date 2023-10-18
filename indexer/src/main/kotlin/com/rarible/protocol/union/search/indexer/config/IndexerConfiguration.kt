@@ -11,6 +11,7 @@ import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
+import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.search.indexer.handler.ActivityEventHandler
 import com.rarible.protocol.union.search.indexer.handler.CollectionEventHandler
 import com.rarible.protocol.union.search.indexer.handler.ItemEventHandler
@@ -19,13 +20,17 @@ import com.rarible.protocol.union.search.indexer.handler.OwnershipEventHandler
 import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEventHandlerFactory
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Import
 
 @Configuration
-class KafkaConsumerConfiguration(
+@EnableConfigurationProperties(value = [IndexerProperties::class])
+@Import(EnrichmentApiConfiguration::class)
+class IndexerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
-    private val kafkaProperties: KafkaProperties,
+    private val properties: IndexerProperties,
     private val metricEventHandlerFactory: MetricConsumerBatchEventHandlerFactory,
     private val kafkaConsumerFactory: RaribleKafkaConsumerFactory
 ) {
@@ -38,6 +43,7 @@ class KafkaConsumerConfiguration(
     }
 
     private val env = applicationEnvironmentInfo.name
+    private val consumer = properties.consumer
 
     @Bean
     @ConditionalOnProperty(prefix = "handler.activity", name = ["enabled"], havingValue = "true")
@@ -109,11 +115,11 @@ class KafkaConsumerConfiguration(
         group: String,
         valueClass: Class<T>,
         handler: RaribleKafkaBatchEventHandler<T>,
-        workers: Int = kafkaProperties.workerCount,
-        batchSize: Int = kafkaProperties.daemon.consumerBatchSize,
+        workers: Int = consumer.workerCount,
+        batchSize: Int = consumer.daemon.consumerBatchSize,
     ): RaribleKafkaConsumerWorker<T> {
         val settings = RaribleKafkaConsumerSettings(
-            hosts = kafkaProperties.brokerReplicaSet,
+            hosts = consumer.brokerReplicaSet,
             topic = topic,
             group = group,
             concurrency = workers,

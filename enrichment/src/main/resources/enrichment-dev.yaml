@@ -1,3 +1,6 @@
+elasticsearch:
+  api-nodes: "dev-es1.rarible.int:9200"
+
 enrichment:
   collection:
     # Specified for test purposes on Dev env

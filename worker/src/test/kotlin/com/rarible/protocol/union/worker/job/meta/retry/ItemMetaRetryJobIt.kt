@@ -2,7 +2,7 @@ package com.rarible.protocol.union.worker.job.meta.retry
 
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
@@ -25,7 +25,7 @@ import java.time.temporal.ChronoUnit
 class ItemMetaRetryJobIt {
 
     @Autowired
-    lateinit var metaProperties: UnionMetaProperties
+    lateinit var metaProperties: CommonMetaProperties
 
     @Autowired
     lateinit var itemRepository: ItemRepository

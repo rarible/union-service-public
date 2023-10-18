@@ -1,3 +1,6 @@
+elasticsearch:
+  api-nodes: "staging-es1.rarible.int.:9200,staging-es2.rarible.int.:9200,staging-es3.rarible.int.:9200"
+
 enrichment:
   collection:
     mappings:
@@ -19,7 +22,22 @@ enrichment:
       - name: "FLOW:A.6f6702697b205c18.HWGarageCardV2"
         collections:
           - "FLOW:A.6f6702697b205c18.HWGarageCard"
+
+  currencies:
+    bestBidByCurrencyWhitelist:
+      - "ETHEREUM:0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6" # weth
+      - "ETHEREUM:0xcfaf03b6254363bca1a9d8e529270b5660bf3109" # usdc
+      - "ETHEREUM:0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea" # dai
+      - "POLYGON:0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa" # weth
+      - "POLYGON:0xd6e804e7edb5b2aecb31d9ccc9d9f3940a7b4ce2" # usdc
+      - "POLYGON:0x9c3c9283d3e44854697cd22d3faa240cfb032889" # wmatic
+
   meta:
+    common:
+      simpleHash:
+        mapping:
+          ethereum: "ethereum-goerli"
+          polygon: "polygon-mumbai"
     item:
       customizers:
         mattel:
@@ -52,22 +70,6 @@ enrichment:
             - "FLOW:A.80102bce1de42dc4.HWGaragePackV2"
           hwToken:
             - "FLOW:A.6f6702697b205c18.HWGarageTokenV2"
-
-  currencies:
-    bestBidByCurrencyWhitelist:
-      - ETHEREUM:0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6 # weth
-      - ETHEREUM:0xcfaf03b6254363bca1a9d8e529270b5660bf3109 # usdc
-      - ETHEREUM:0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea # dai
-      - POLYGON:0xa6fa4fb5f76172d178d61b04b0ecd319c5d1c0aa # weth
-      - POLYGON:0xd6e804e7edb5b2aecb31d9ccc9d9f3940a7b4ce2 # usdc
-      - POLYGON:0x9c3c9283d3e44854697cd22d3faa240cfb032889 # wmatic
-
-meta:
-  simpleHash:
-    mapping:
-      ethereum: ethereum-goerli
-      polygon: polygon-mumbai
-
 common:
   featureFlags:
     enableOptimizedSearchForItems: true

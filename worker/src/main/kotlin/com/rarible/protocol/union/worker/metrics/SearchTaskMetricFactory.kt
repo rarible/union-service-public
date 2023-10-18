@@ -6,7 +6,6 @@ import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncTypeDto
-import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tag
 import org.springframework.stereotype.Component
@@ -14,8 +13,10 @@ import org.springframework.stereotype.Component
 @Component
 class SearchTaskMetricFactory(
     private val meterRegistry: MeterRegistry,
-    private val properties: WorkerProperties
 ) {
+
+    private val root = "protocol.union.worker"
+
     fun createReindexActivityCounter(
         blockchain: BlockchainDto,
         type: SyncTypeDto
@@ -66,6 +67,6 @@ class SearchTaskMetricFactory(
     }
 
     private fun getReindexEntityMetricName(entity: EsEntity): String {
-        return "${properties.metrics.rootPath}.reindex.${entity.name.lowercase()}"
+        return "$root.reindex.${entity.name.lowercase()}"
     }
 }

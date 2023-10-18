@@ -5,7 +5,7 @@ import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.core.daemon.job.JobHandler
 import com.rarible.core.daemon.sequential.SequentialDaemonWorker
 import com.rarible.protocol.union.core.util.LogUtils
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
@@ -39,7 +39,7 @@ class CollectionMetaRetryJob(
 @Component
 class CollectionMetaRetryJobHandler(
     private val repository: CollectionRepository,
-    private val metaProperties: UnionMetaProperties,
+    private val metaProperties: CommonMetaProperties,
     private val metaService: CollectionMetaService
 ) : JobHandler {
 

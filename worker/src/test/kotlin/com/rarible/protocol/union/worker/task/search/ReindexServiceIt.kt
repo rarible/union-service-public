@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.elasticsearch.EsNameResolver
 import com.rarible.protocol.union.core.model.elastic.EntityDefinition
 import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
 import com.rarible.protocol.union.core.model.elastic.EsActivity
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
@@ -48,6 +49,9 @@ internal class ReindexServiceIt {
     @Autowired
     private lateinit var esNameResolver: EsNameResolver
 
+    @Autowired
+    private lateinit var activeBlockchainProvider: ActiveBlockchainProvider
+
     private val newVersionData = EsActivity.VERSION + 1
 
     private lateinit var newEntityDefinitionExtendedByNewVersion: EntityDefinitionExtended
@@ -78,8 +82,10 @@ internal class ReindexServiceIt {
         taskRepository.deleteAll().awaitSingleOrNull()
         reindexService.scheduleReindex("test_activity_index", esActivityRepository.entityDefinition)
 
+        // all blockchains * all activities + index switch (minus immutablex)
+        val expected = blockchainCount() * 3 + 1
         val tasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        assertThat(tasks).hasSize(19) // all blockchains * all activities + index switch (minus immutablex)
+        assertThat(tasks).hasSize(expected)
     }
 
     @Test
@@ -87,8 +93,10 @@ internal class ReindexServiceIt {
         taskRepository.deleteAll().awaitSingleOrNull()
         reindexService.scheduleReindex("test_collection_index", esCollectionRepository.entityDefinition)
 
+        // all blockchains + index switch (minus immutablex)
+        val expected = blockchainCount() + 1
         val tasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        assertThat(tasks).hasSize(7) // all blockchains + index switch (minus immutablex)
+        assertThat(tasks).hasSize(expected)
     }
 
     @Test
@@ -96,8 +104,10 @@ internal class ReindexServiceIt {
         taskRepository.deleteAll().awaitSingleOrNull()
         reindexService.scheduleReindex("test_ownership_index", esOwnershipRepository.entityDefinition)
 
+        // all enabled blockchains(5) * target.types(2) + index switch(1)
+        val expected = blockchainCount() * 2 + 1
         val tasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        assertThat(tasks).hasSize(13) // all enabled blockchains(5) * target.types(2) + index switch(1)
+        assertThat(tasks).hasSize(expected)
     }
 
     @Test
@@ -106,14 +116,16 @@ internal class ReindexServiceIt {
         reindexService.scheduleReindex("test_collection_index", esCollectionRepository.entityDefinition)
         reindexService.scheduleReindex("test_ownership_index", esOwnershipRepository.entityDefinition)
         val runningTasks = taskRepository.findAll().collectList().awaitFirstOrDefault(emptyList())
-        // collection - all blockchains + index switch (minus immutablex) = 6
+        // collection - all blockchains + index switch (minus immutablex)
+        val expectedCollectionTasks = blockchainCount() + 1
         assertThat(runningTasks
             .filter { it.type == "COLLECTION_REINDEX" || it.type == "CHANGE_ES_COLLECTION_ALIAS_TASK" })
-            .hasSize(7)
-        // ownerships - all enabled blockchains(5) * target.types(2) + index switch(1) = 11
+            .hasSize(expectedCollectionTasks)
+        // ownerships - all enabled blockchains(5) * target.types(2) + index switch(1)
+        val expectedOwnershipTasks = blockchainCount() * 2 + 1
         assertThat(runningTasks
             .filter { it.type == "OWNERSHIP_REINDEX" || it.type == "CHANGE_ES_OWNERSHIP_ALIAS_TASK" })
-            .hasSize(13)
+            .hasSize(expectedOwnershipTasks)
 
         reindexService.stopTasksIfExists(esCollectionRepository.entityDefinition)
 
@@ -163,4 +175,6 @@ internal class ReindexServiceIt {
         val progressByNewSettings = reindexService.checkReindexInProgress(newEntityDefinitionExtendedBySettings)
         assertFalse(progressByNewSettings)
     }
+
+    private fun blockchainCount() = activeBlockchainProvider.blockchains.size
 }

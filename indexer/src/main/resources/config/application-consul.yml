@@ -1,18 +1,8 @@
 spring:
-  data:
-    elasticsearch:
-      cluster-name: docker-cluster
-      cluster-nodes: ${elasticsearch.cluster-nodes}
+  config:
+    use-legacy-processing: true
+    import: "consul:"
+  cloud:
+    bootstrap:
+      enabled: true
 
-      client:
-        reactive:
-          endpoints:  ${elasticsearch.api-nodes}
-          max-in-memory-size: 4194304
-          socket-timeout: ${elasticsearch.socket-timeout:120000}
-          connection-timeout: ${elasticsearch.connection-timeout:120000}
-
-  elasticsearch:
-    rest:
-      uris: ${elasticsearch.api-nodes}
-    socket-timeout: ${elasticsearch.socket-timeout:120000}
-    connection-timeout: ${elasticsearch.connection-timeout:120000}

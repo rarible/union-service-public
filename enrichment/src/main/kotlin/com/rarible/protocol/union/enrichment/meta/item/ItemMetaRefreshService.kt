@@ -6,7 +6,7 @@ import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.configuration.EnrichmentProperties
+import com.rarible.protocol.union.enrichment.configuration.EnrichmentItemMetaProperties
 import com.rarible.protocol.union.enrichment.download.PartialDownloadException
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
@@ -32,7 +32,7 @@ class ItemMetaRefreshService(
     private val enrichmentItemService: EnrichmentItemService,
     private val defaultItemMetaComparator: DefaultItemMetaComparator,
     private val strictItemMetaComparator: StrictItemMetaComparator,
-    private val enrichmentProperties: EnrichmentProperties,
+    private val enrichmentItemMetaProperties: EnrichmentItemMetaProperties,
     private val collectionRepository: CollectionRepository,
     private val ff: FeatureFlagsProperties,
 ) {
@@ -225,7 +225,7 @@ class ItemMetaRefreshService(
         val result = coroutineScope {
             esItemRepository.getRandomItemsFromCollection(
                 collectionId = collectionFullId,
-                size = enrichmentProperties.meta.item.numberOfItemsToCheckForMetaChanges
+                size = enrichmentItemMetaProperties.numberOfItemsToCheckForMetaChanges
             )
                 .map { esItem ->
                     asyncWithTraceId {

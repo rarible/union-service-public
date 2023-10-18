@@ -9,7 +9,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverterService
@@ -24,7 +24,7 @@ import javax.annotation.PostConstruct
 
 @Service
 class SimpleHashService(
-    private val props: UnionMetaProperties,
+    private val props: CommonMetaProperties,
     private val simpleHashClient: WebClient,
     private val metaCacheRepository: RawMetaCacheRepository,
     private val metrics: ItemMetaMetrics,

@@ -3,6 +3,7 @@ package com.rarible.protocol.union.worker.task.search.activity
 import com.rarible.core.task.TaskHandler
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.model.elastic.EsActivity
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.core.task.ActivityTaskParam
 import com.rarible.protocol.union.worker.config.ActivityReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
@@ -19,6 +20,7 @@ class ActivityTask(
     private val paramFactory: ParamFactory,
     private val activityReindexService: ActivityReindexService,
     private val taskRepository: TaskRepository,
+    private val activeBlockchainProvider: ActiveBlockchainProvider,
 ) : TaskHandler<String> {
 
     override val type: String
@@ -26,7 +28,7 @@ class ActivityTask(
 
     override suspend fun isAbleToRun(param: String): Boolean {
         val blockchain = paramFactory.parse<ActivityTaskParam>(param).blockchain
-        return properties.isBlockchainActive(blockchain)
+        return properties.enabled && activeBlockchainProvider.isActive(blockchain)
     }
 
     /**

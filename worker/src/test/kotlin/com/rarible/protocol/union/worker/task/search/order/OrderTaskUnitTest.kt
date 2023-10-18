@@ -3,9 +3,9 @@ package com.rarible.protocol.union.worker.task.search.order
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.rarible.core.task.Task
 import com.rarible.core.task.TaskRepository
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.core.task.OrderTaskParam
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.worker.config.BlockchainReindexProperties
 import com.rarible.protocol.union.worker.config.OrderReindexProperties
 import com.rarible.protocol.union.worker.task.search.ParamFactory
 import io.mockk.coEvery
@@ -40,13 +40,11 @@ class OrderTaskUnitTest {
     @Test
     internal fun `should start first task`() = runBlocking {
         val task = OrderTask(
-            OrderReindexProperties(
-                enabled = true,
-                blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
-            ),
+            OrderReindexProperties(enabled = true),
             paramFactory,
             service,
             taskRepository,
+            ActiveBlockchainProvider.of(BlockchainDto.ETHEREUM)
         )
         task.runLongTask(
             null, paramFactory.toString(
@@ -66,13 +64,11 @@ class OrderTaskUnitTest {
     @Test
     fun `should launch next run of the task`(): Unit = runBlocking {
         val task = OrderTask(
-            OrderReindexProperties(
-                enabled = true,
-                blockchains = listOf(BlockchainReindexProperties(enabled = true, BlockchainDto.ETHEREUM))
-            ),
+            OrderReindexProperties(enabled = true),
             paramFactory,
             service,
             taskRepository,
+            ActiveBlockchainProvider.of(BlockchainDto.ETHEREUM)
         )
 
         task.runLongTask(

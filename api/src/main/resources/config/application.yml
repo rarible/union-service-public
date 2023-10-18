@@ -1,43 +1,15 @@
-application:
-  project: protocol
-
-server:
-  shutdown: graceful
-  port: 8080
-
 spring:
-  application.name: union-api
-  jackson:
-    mapper:
-      ACCEPT_CASE_INSENSITIVE_ENUMS: true
-    deserialization:
-      FAIL_ON_UNKNOWN_PROPERTIES: false
-    default-property-inclusion: non_null
-  main:
-    banner-mode: log
-    web-application-type: reactive
+  application:
+    name: "union-api"
 
-rarible:
-  core:
-    client:
-      name: rarible-protocol
-  ethereum:
-    converter:
-      enabled: true
-  loader:
-    broker-replica-set: ${kafka.hosts}
-    topicsPrefix: protocol.${application.environment}.union.internal.loader
-    enableWorkers: false
-    enableNotifications: false
-    enableRetrySchedulerJob: false
 protocol:
   union:
     subscriber:
       broker-replica-set: ${kafka.hosts}
+
 api:
   openapi:
-    baseUrl: "https://dev-api.rarible.org"
-    description: "Development (Ropsten, Mumbai, Hangzhou)"
+    baseUrl: "https://${application.environment}-api.rarible.org"
   domains:
     ethereum: eth
 
@@ -110,21 +82,7 @@ integration:
       url: ${consul.immutablex.api.baseUrlV3:}
       byIdsChunkSize: 16
     apiKey: ${consul.immutablex.api.key:}
-meta:
-  ipfsGateway: "https://ipfs.io,https://nftstorage.link"
-  ipfsPublicGateway: "https://ipfs.io"
-  ipfsLegacyGateway: "https://rarible.mypinata.cloud"
-  mediaFetchTimeout: 10000
-  mediaFetchMaxSize: 131072 # 128 Kb
-  openSeaProxyUrl: ${consul.meta.openSeaProxyUrl}
-  http-client:
-    type: KTOR_CIO
-    thread-count: 1
-    time-out: 10000
-    total-connection: 1000
 
-# Disable verbose logs of Apache HTTP client used to load content media metadata.
 logging:
   level:
-    org.apache.http: ERROR
     org.springframework.data.elasticsearch.core.QUERY: DEBUG

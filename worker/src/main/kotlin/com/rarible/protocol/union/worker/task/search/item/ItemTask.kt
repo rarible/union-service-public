@@ -5,6 +5,7 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.converter.EsItemConverter.toEsItem
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.service.ItemService
+import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.core.util.PageSize
@@ -36,6 +37,7 @@ class ItemTask(
     private val searchTaskMetricFactory: SearchTaskMetricFactory,
     private val taskRepository: TaskRepository,
     private val rateLimiter: EsRateLimiter,
+    private val activeBlockchainProvider: ActiveBlockchainProvider,
 ) : TaskHandler<String> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -45,7 +47,7 @@ class ItemTask(
 
     override suspend fun isAbleToRun(param: String): Boolean {
         val blockchain = paramFactory.parse<ItemTaskParam>(param).blockchain
-        return properties.isBlockchainActive(blockchain)
+        return properties.enabled && activeBlockchainProvider.isActive(blockchain)
     }
 
     override fun runLongTask(from: String?, param: String): Flow<String> {

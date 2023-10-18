@@ -14,7 +14,6 @@ import com.rarible.protocol.union.worker.config.WorkerProperties
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
@@ -25,18 +24,16 @@ import org.junit.jupiter.api.Test
 
 class ReconciliationOrderJobTest {
 
-    private val testPageSize = 50
-
+    private val properties = ReconciliationProperties()
     private val orderService: OrderService = mockk()
     private val orderServiceRouter: BlockchainRouter<OrderService> = mockk()
     private val orderEventService: EnrichmentOrderEventService = mockk()
+    private val testPageSize = properties.orderBatchSize
 
     private val orderReconciliationService = ReconciliationOrderJob(
         orderServiceRouter,
         orderEventService,
-        mockk<WorkerProperties>() {
-            every { reconciliation } returns ReconciliationProperties()
-        }
+        WorkerProperties(reconciliation = properties)
     )
 
     @BeforeEach

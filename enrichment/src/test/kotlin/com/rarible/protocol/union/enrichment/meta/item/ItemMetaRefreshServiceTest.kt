@@ -5,7 +5,7 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.configuration.EnrichmentProperties
+import com.rarible.protocol.union.enrichment.configuration.EnrichmentItemMetaProperties
 import com.rarible.protocol.union.enrichment.download.PartialDownloadException
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
@@ -69,7 +69,7 @@ internal class ItemMetaRefreshServiceTest {
     private lateinit var collectionRepository: CollectionRepository
 
     @SpyK
-    private var enrichmentProperties: EnrichmentProperties = EnrichmentProperties()
+    private var enrichmentProperties: EnrichmentItemMetaProperties = EnrichmentItemMetaProperties()
 
     @BeforeEach
     fun beforeEach() {

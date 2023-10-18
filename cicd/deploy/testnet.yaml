@@ -8,7 +8,6 @@ protocol-union-api:
 
 protocol-union-listener:
   environments:
-    META_SIMPLEHASH_KAFKA_ENABLED: false
     META_SIMPLEHASH_KAFKA_TOPICS: ethereum-goerli.nft.v2-value
 
 protocol-union-meta-loader:

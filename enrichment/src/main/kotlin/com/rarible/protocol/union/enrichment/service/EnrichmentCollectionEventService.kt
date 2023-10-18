@@ -12,7 +12,7 @@ import com.rarible.protocol.union.core.service.OriginService
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CollectionUpdateEventDto
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
@@ -31,7 +31,7 @@ class EnrichmentCollectionEventService(
     private val bestOrderService: BestOrderService,
     private val originService: OriginService,
     private val itemMetaRefreshService: ItemMetaRefreshService,
-    private val unionMetaProperties: UnionMetaProperties,
+    private val commonMetaProperties: CommonMetaProperties,
     private val ff: FeatureFlagsProperties
 ) {
 
@@ -63,7 +63,7 @@ class EnrichmentCollectionEventService(
         }
         itemMetaRefreshService.scheduleAutoRefreshOnBaseUriChanged(
             collectionId = event.collectionId,
-            withSimpleHash = unionMetaProperties.simpleHash.enabled,
+            withSimpleHash = commonMetaProperties.simpleHash.enabled,
         )
     }
 

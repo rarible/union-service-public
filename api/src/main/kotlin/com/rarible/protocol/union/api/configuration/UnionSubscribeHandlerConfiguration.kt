@@ -15,13 +15,11 @@ import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.subscriber.autoconfigure.UnionEventsSubscriberProperties
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.util.UUID
 
 @Configuration
-@EnableConfigurationProperties(value = [SubscribeProperties::class])
 class UnionSubscribeHandlerConfiguration(
     private val kafkaConsumerFactory: RaribleKafkaConsumerFactory,
     private val properties: SubscribeProperties,

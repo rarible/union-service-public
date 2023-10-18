@@ -6,7 +6,7 @@ import com.rarible.core.logging.withTraceId
 import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
-import com.rarible.protocol.union.enrichment.configuration.UnionMetaProperties
+import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
@@ -23,7 +23,7 @@ import java.time.Instant
 @RestController
 class MetaRefreshController(
     private val itemMetaRefreshService: ItemMetaRefreshService,
-    private val unionMetaProperties: UnionMetaProperties,
+    private val commonMetaProperties: CommonMetaProperties,
     private val taskRepository: TaskRepository,
     private val objectMapper: ObjectMapper
 ) {
@@ -42,7 +42,7 @@ class MetaRefreshController(
             collections = parseCollectionsFromBody(body),
             full = "full" == mode,
             scheduledAt = scheduledAt ?: nowMillis(),
-            withSimpleHash = withSimpleHash && unionMetaProperties.simpleHash.enabled
+            withSimpleHash = withSimpleHash && commonMetaProperties.simpleHash.enabled
         )
     }
 
