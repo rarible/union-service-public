@@ -32,7 +32,7 @@ class CurrencyConverterTest {
         val currency = com.rarible.protocol.currency.dto.CurrencyDto(
             currencyId = "tzx",
             address = "$address:$tokenId",
-            blockchain = "TEZOS",
+            blockchain = BlockchainDto.TEZOS.name,
             alias = null
         )
 

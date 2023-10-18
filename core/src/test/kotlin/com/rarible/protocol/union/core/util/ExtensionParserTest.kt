@@ -36,12 +36,4 @@ class ExtensionParserTest {
     private fun assertMimeType(mimeType: String, expected: String) {
         assertThat(ExtensionParser.getFileExtension(mimeType)).isEqualTo(expected)
     }
-
-    @Test
-    fun test1() {
-        val blockchain = "TEZOS"
-//        val d = BlockchainDto.values().associateBy { it.name }[blockchain] ?: UnionCurrencyException("Unsupported blockchain: $blockchain")
-        val d = BlockchainDto.values().find { it.name == blockchain } ?: UnionCurrencyException("Unsupported blockchain: $blockchain")
-        println(d)
-    }
 }
