@@ -67,7 +67,13 @@ class CurrencyService(
         }
 
         logger.info("Currency {}:[{}] updated, but doesn't support USD conversion", blockchain.name, address)
-        val stub = CurrencyUsdRateDto(address, "", BigDecimal(-1), nowMillis())
+        val stub = CurrencyUsdRateDto(
+            currencyId = address,
+            symbol = "",
+            rate = BigDecimal(-1),
+            date = nowMillis(),
+            abbreviation = null
+        )
         blockchainCache[address] = stub
         return stub
     }
@@ -250,15 +256,13 @@ class CurrencyService(
             }
         }
 
-        private suspend fun refreshCurrencyRates() {
+        private fun refreshCurrencyRates() {
             currencyRates = currencies.mapNotNull { currency ->
-                val usdRate = getCurrentRate(currency.currencyId.blockchain, currency.currencyId.value)
-                    ?: return@mapNotNull null
-
+                val rate = currency.rate ?: return@mapNotNull null
                 CurrencyRate(
                     blockchain = currency.currencyId.blockchain,
                     currencyId = currency.currencyId.fullId(),
-                    rate = usdRate.rate
+                    rate = rate
                 )
             }
         }
