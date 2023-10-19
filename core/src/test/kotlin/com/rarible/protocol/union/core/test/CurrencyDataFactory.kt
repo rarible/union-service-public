@@ -1,12 +1,14 @@
 package com.rarible.protocol.union.core.test
 
 import com.rarible.protocol.union.dto.BlockchainDto
+import java.math.BigDecimal
 
 fun nativeTestCurrencies() = listOf(
     com.rarible.protocol.currency.dto.CurrencyDto(
         currencyId = "ethereum",
         address = "0x0000000000000000000000000000000000000000",
         blockchain = BlockchainDto.ETHEREUM.name,
+        rate = BigDecimal(4)
     ),
     com.rarible.protocol.currency.dto.CurrencyDto(
         currencyId = "matic-network",
@@ -22,6 +24,7 @@ fun nativeTestCurrencies() = listOf(
         currencyId = "flow",
         address = "A.1654653399040a61.FlowToken",
         blockchain = BlockchainDto.FLOW.name,
+        rate = BigDecimal(6)
     ),
     com.rarible.protocol.currency.dto.CurrencyDto(
         currencyId = "tezos",

@@ -256,15 +256,13 @@ class CurrencyService(
             }
         }
 
-        private suspend fun refreshCurrencyRates() {
+        private fun refreshCurrencyRates() {
             currencyRates = currencies.mapNotNull { currency ->
-                val usdRate = getCurrentRate(currency.currencyId.blockchain, currency.currencyId.value)
-                    ?: return@mapNotNull null
-
+                val rate = currency.rate ?: return@mapNotNull null
                 CurrencyRate(
                     blockchain = currency.currencyId.blockchain,
                     currencyId = currency.currencyId.fullId(),
-                    rate = usdRate.rate
+                    rate = rate
                 )
             }
         }
