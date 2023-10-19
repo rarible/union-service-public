@@ -67,7 +67,13 @@ class CurrencyService(
         }
 
         logger.info("Currency {}:[{}] updated, but doesn't support USD conversion", blockchain.name, address)
-        val stub = CurrencyUsdRateDto(address, "", BigDecimal(-1), nowMillis())
+        val stub = CurrencyUsdRateDto(
+            currencyId = address,
+            symbol = "",
+            rate = BigDecimal(-1),
+            date = nowMillis(),
+            abbreviation = null
+        )
         blockchainCache[address] = stub
         return stub
     }
