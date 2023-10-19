@@ -30,6 +30,7 @@ object CurrencyConverter {
             symbol = source.currencyId,
             alias = source.alias,
             abbreviation = source.abbreviation,
+            rate = source.rate
         )
     }
 
