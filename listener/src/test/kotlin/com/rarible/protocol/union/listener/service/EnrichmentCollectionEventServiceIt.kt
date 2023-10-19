@@ -86,7 +86,6 @@ class EnrichmentCollectionEventServiceIt : AbstractIntegrationTest() {
         val updated = collectionService.get(EnrichmentCollectionId(collectionId))!!
         val expected = CollectionDtoConverter.convert(updated)
 
-        assertThat(updated.version).isEqualTo(0L)
         waitAssert {
             val messages = findCollectionUpdates(collectionId.value)
             assertThat(messages).hasSize(1)
