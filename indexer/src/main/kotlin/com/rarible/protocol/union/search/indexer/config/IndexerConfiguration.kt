@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
+import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.search.indexer.handler.ActivityEventHandler
 import com.rarible.protocol.union.search.indexer.handler.CollectionEventHandler
 import com.rarible.protocol.union.search.indexer.handler.ItemEventHandler
@@ -27,7 +28,7 @@ import org.springframework.context.annotation.Import
 
 @Configuration
 @EnableConfigurationProperties(value = [IndexerProperties::class])
-@Import(EnrichmentApiConfiguration::class)
+@Import(EnrichmentApiConfiguration::class, SearchConfiguration::class)
 class IndexerConfiguration(
     applicationEnvironmentInfo: ApplicationEnvironmentInfo,
     private val properties: IndexerProperties,
