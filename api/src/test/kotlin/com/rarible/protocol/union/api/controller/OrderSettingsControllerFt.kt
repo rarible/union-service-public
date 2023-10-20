@@ -17,11 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired
 class OrderSettingsControllerFt : AbstractIntegrationTest() {
 
     @Autowired
-    lateinit var orderSettingsControllerClient: OrderSettingsControllerApi
+    lateinit var orderControllerClient: OrderControllerApi
 
     @Test
     fun `order fees - ethereum`() = runBlocking<Unit> {
-        val response = orderSettingsControllerClient.getOrderFees(BlockchainDto.ETHEREUM).body
+        val response = orderControllerClient.getOrderFees(BlockchainDto.ETHEREUM).body
 
         assertThat(response.fees).hasSize(10)
         assertThat(response.fees["RARIBLE_V2"]).isEqualTo(10)
@@ -30,14 +30,14 @@ class OrderSettingsControllerFt : AbstractIntegrationTest() {
     @Test
     fun `order fees - missed blockchain`() = runBlocking<Unit> {
         assertThrows<UnionValidationException> {
-            orderSettingsControllerClient.getOrderFees(null)
+            orderControllerClient.getOrderFees(null)
         }
     }
 
     @Test
     fun `order fees - non-supported blockchain`() = runBlocking<Unit> {
         assertThrows<UnionNotFoundException> {
-            orderSettingsControllerClient.getOrderFees(BlockchainDto.TEZOS)
+            orderControllerClient.getOrderFees(BlockchainDto.TEZOS)
         }
     }
 }

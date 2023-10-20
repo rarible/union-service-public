@@ -1,11 +1,15 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.configuration.ApiProperties
 import com.rarible.protocol.union.api.service.select.OrderSourceSelectService
+import com.rarible.protocol.union.core.exception.UnionNotFoundException
+import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.util.checkNullIds
 import com.rarible.protocol.union.dto.AmmTradeInfoDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderFeesDto
 import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
@@ -27,7 +31,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class OrderController(
     private val orderSourceSelector: OrderSourceSelectService,
-    private val enrichmentOrderService: EnrichmentOrderService
+    private val enrichmentOrderService: EnrichmentOrderService,
+    private val apiProperties: ApiProperties
 ) : OrderControllerApi {
 
     override suspend fun upsertOrder(orderFormDto: OrderFormDto): ResponseEntity<OrderDto> {
@@ -130,6 +135,15 @@ class OrderController(
     override suspend fun getOrderById(id: String): ResponseEntity<OrderDto> {
         val result = orderSourceSelector.getOrderById(id)
         return ResponseEntity.ok(enrichmentOrderService.enrich(result))
+    }
+
+    override suspend fun getOrderFees(blockchain: BlockchainDto?): ResponseEntity<OrderFeesDto> {
+        if (blockchain == null) {
+            throw UnionValidationException("Param 'blockchain' is required")
+        } else {
+            val fees = apiProperties.orderSettings.fees[blockchain] ?: throw UnionNotFoundException("Settings are not found")
+            return ResponseEntity.ok(OrderFeesDto(fees))
+        }
     }
 
     override suspend fun getValidatedOrderById(id: String): ResponseEntity<OrderDto> {
