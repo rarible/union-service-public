@@ -10,14 +10,21 @@ import com.rarible.protocol.dto.Erc721AssetTypeDto
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
+import com.rarible.protocol.union.api.service.UserActivityTypeConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.core.util.truncatedToSeconds
+import com.rarible.protocol.union.dto.ActivityCurrencyFilterDto
+import com.rarible.protocol.union.dto.ActivitySearchFilterDto
+import com.rarible.protocol.union.dto.ActivitySearchRequestDto
+import com.rarible.protocol.union.dto.ActivitySearchSortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
+import com.rarible.protocol.union.dto.ActivityUserFilterDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
@@ -41,6 +48,7 @@ import com.rarible.protocol.union.integration.solana.data.randomSolanaMintActivi
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemBurnActivity
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -84,6 +92,9 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
+    @Autowired
+    private lateinit var userActivityTypeConverter: UserActivityTypeConverter
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
@@ -260,7 +271,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             )
         )
 
-        val activities = activityControllerApi.getAllActivities(
+        val activitiesByEndpoint = activityControllerApi.getAllActivities(
             types,
             blockchains,
             null,
@@ -269,7 +280,21 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             size,
             com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST,
             null,
-        ).awaitFirst()
+        ).awaitSingle()
+
+        val activities = activityControllerApi.searchActivities(
+            ActivitySearchRequestDto(
+                filter = ActivitySearchFilterDto(
+                    blockchains = blockchains,
+                    types = types
+                ),
+                size = size,
+                sort = ActivitySearchSortDto.EARLIEST
+            )
+        ).awaitSingle()
+
+        // TODO replace later with search only
+        assertThat(activitiesByEndpoint).isEqualTo(activities)
 
         assertThat(activities.activities).hasSize(5)
 
@@ -290,16 +315,36 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
         assertThat(activities.cursor).isNotNull
 
-        val activities2 = activityControllerApi.getAllActivities(
+        val currencyId = CurrencyIdDto(BlockchainDto.ETHEREUM, elasticEthOrderActivity3.currency!!, null)
+
+        val activitiesByEndpoint2 = activityControllerApi.getAllActivities(
             listOf(ActivityTypeDto.BID),
             blockchains,
-            listOf("${BlockchainDto.ETHEREUM}:${elasticEthOrderActivity3.currency}"),
+            listOf(currencyId.fullId()),
             null,
             null,
             size,
             com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST,
             null,
         ).awaitFirst()
+
+        val activities2 = activityControllerApi.searchActivities(
+            ActivitySearchRequestDto(
+                filter = ActivitySearchFilterDto(
+                    blockchains = blockchains,
+                    types = listOf(ActivityTypeDto.BID),
+                    currencies = ActivityCurrencyFilterDto(
+                        bid = listOf(currencyId)
+                    )
+                ),
+                size = size,
+                sort = ActivitySearchSortDto.EARLIEST
+            )
+        ).awaitSingle()
+
+        // TODO replace later with search only
+        assertThat(activitiesByEndpoint2).isEqualTo(activities2)
+
         assertThat(activities2.activities.map { it.id.value }).containsExactlyInAnyOrder(ethOrderActivity3.id)
     }
 
@@ -346,16 +391,34 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             )
         }
 
-        val activities = activityControllerApi.getActivitiesByCollection(
+        val currencyId = CurrencyIdDto(BlockchainDto.ETHEREUM, elasticBidActivity1.currency!!, null)
+
+        val activitiesByEndpoint = activityControllerApi.getActivitiesByCollection(
             types,
             listOf(ethCollectionId.fullId()),
-            listOf("${BlockchainDto.ETHEREUM}:${elasticBidActivity1.currency}"),
+            listOf(currencyId.fullId()),
             continuation,
             null,
             defaultSize,
             sort,
             null,
         ).awaitFirst()
+
+        val activities = activityControllerApi.searchActivities(
+            ActivitySearchRequestDto(
+                filter = ActivitySearchFilterDto(
+                    types = types,
+                    collections = listOf(ethCollectionId),
+                    currencies = ActivityCurrencyFilterDto(
+                        bid = listOf(currencyId)
+                    )
+                ),
+                size = defaultSize,
+            )
+        ).awaitSingle()
+
+        // TODO replace later with search only
+        assertThat(activitiesByEndpoint).isEqualTo(activities)
 
         assertThat(activities.activities.map { it.id.value }).containsExactly(orderActivity.id, bidActivity1.id)
     }
@@ -439,16 +502,34 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             )
         }
 
-        val activities = activityControllerApi.getActivitiesByItem(
+        val currencyId = CurrencyIdDto(BlockchainDto.ETHEREUM, elasticBidActivity1.currency!!, null)
+
+        val activitiesByEndpoint = activityControllerApi.getActivitiesByItem(
             types,
             ethItemId.fullId(),
-            listOf("${BlockchainDto.ETHEREUM}:${elasticBidActivity1.currency}"),
+            listOf(currencyId.fullId()),
             continuation,
             null,
             100,
             sort,
             null,
         ).awaitFirst()
+
+        val activities = activityControllerApi.searchActivities(
+            ActivitySearchRequestDto(
+                filter = ActivitySearchFilterDto(
+                    types = types,
+                    items = listOf(ethItemId),
+                    currencies = ActivityCurrencyFilterDto(
+                        bid = listOf(currencyId)
+                    )
+                ),
+                size = defaultSize,
+            )
+        ).awaitSingle()
+
+        // TODO replace later with search only
+        assertThat(activitiesByEndpoint).isEqualTo(activities)
 
         assertThat(activities.activities).hasSize(4)
         assertThat(activities.activities[0]).isInstanceOf(OrderBidActivityDto::class.java)
@@ -560,11 +641,13 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
         val now = nowMillis()
         val oneWeekAgo = now.minus(7, ChronoUnit.DAYS)
-        val activities = activityControllerApi.getActivitiesByUser(
+        val currencyId = CurrencyIdDto(BlockchainDto.ETHEREUM, elasticEthBidActivity1.currency!!, null)
+
+        val activitiesByEndpoint = activityControllerApi.getActivitiesByUser(
             types,
             listOf(userEth.fullId()),
             null,
-            listOf("${BlockchainDto.ETHEREUM}:${elasticEthBidActivity1.currency}"),
+            listOf(currencyId.fullId()),
             oneWeekAgo,
             now,
             null,
@@ -574,6 +657,26 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
+        val activities = activityControllerApi.searchActivities(
+            ActivitySearchRequestDto(
+                filter = ActivitySearchFilterDto(
+                    types = types.map { userActivityTypeConverter.convert(it).activityTypeDto }.distinct(),
+                    users = ActivityUserFilterDto(
+                        any = listOf(userEth),
+                    ),
+                    from = oneWeekAgo,
+                    to = now,
+                    currencies = ActivityCurrencyFilterDto(
+                        bid = listOf(currencyId)
+                    )
+                ),
+                size = size,
+            )
+        ).awaitSingle()
+
+        // TODO replace later with search only
+        assertThat(activitiesByEndpoint).isEqualTo(activities)
+
         assertThat(activities.activities.map { it.id.value }).containsExactly(
             ethItemActivity.id,
             ethItemActivity2.id,
@@ -581,11 +684,11 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         )
         assertThat(activities.cursor).isNotNull
 
-        val activities2 = activityControllerApi.getActivitiesByUser(
+        val activitiesByEndpoint2 = activityControllerApi.getActivitiesByUser(
             types,
             listOf(userEth.fullId()),
             null,
-            listOf("${BlockchainDto.ETHEREUM}:${elasticEthBidActivity1.currency}"),
+            listOf(currencyId.fullId()),
             oneWeekAgo,
             now,
             null,
@@ -595,6 +698,26 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
+        val activities2 = activityControllerApi.searchActivities(
+            ActivitySearchRequestDto(
+                filter = ActivitySearchFilterDto(
+                    types = types.map { userActivityTypeConverter.convert(it).activityTypeDto }.distinct(),
+                    users = ActivityUserFilterDto(
+                        any = listOf(userEth),
+                    ),
+                    from = oneWeekAgo,
+                    to = now,
+                    currencies = ActivityCurrencyFilterDto(
+                        bid = listOf(currencyId)
+                    )
+                ),
+                size = 100,
+            )
+        ).awaitSingle()
+
+        // TODO replace later with search only
+        assertThat(activitiesByEndpoint2).isEqualTo(activities2)
+
         assertThat(activities2.activities.map { it.id.value }).containsExactly(
             ethItemActivity.id,
             ethItemActivity2.id,
@@ -603,7 +726,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             ethBidActivity1.id,
         )
 
-        val fromActivities = activityControllerApi.getActivitiesByUser(
+        val fromActivitiesByEndpoint = activityControllerApi.getActivitiesByUser(
             listOf(UserActivityTypeDto.SELL),
             listOf(userEth.fullId()),
             null,
@@ -616,9 +739,27 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             sort,
             null,
         ).awaitFirst()
+
+        val fromActivities = activityControllerApi.searchActivities(
+            ActivitySearchRequestDto(
+                filter = ActivitySearchFilterDto(
+                    types = listOf(ActivityTypeDto.SELL),
+                    users = ActivityUserFilterDto(
+                        from = listOf(userEth),
+                    ),
+                    from = oneWeekAgo,
+                    to = now,
+                ),
+                size = size,
+            )
+        ).awaitSingle()
+
+        // TODO replace later with search only
+        assertThat(fromActivitiesByEndpoint).isEqualTo(fromActivities)
+
         assertThat(fromActivities.activities).hasSize(1)
 
-        val toActivities = activityControllerApi.getActivitiesByUser(
+        val toActivitiesByEndpoint = activityControllerApi.getActivitiesByUser(
             listOf(UserActivityTypeDto.TRANSFER_TO),
             listOf(userEth2.fullId()),
             null,
@@ -631,6 +772,24 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             sort,
             null,
         ).awaitFirst()
+
+        val toActivities = activityControllerApi.searchActivities(
+            ActivitySearchRequestDto(
+                filter = ActivitySearchFilterDto(
+                    types = listOf(ActivityTypeDto.TRANSFER),
+                    users = ActivityUserFilterDto(
+                        to = listOf(userEth2),
+                    ),
+                    from = oneWeekAgo,
+                    to = now,
+                ),
+                size = size,
+            )
+        ).awaitSingle()
+
+        // TODO replace later with search only
+        assertThat(toActivitiesByEndpoint).isEqualTo(toActivities)
+
         assertThat(toActivities.activities).hasSize(1)
     }
 }

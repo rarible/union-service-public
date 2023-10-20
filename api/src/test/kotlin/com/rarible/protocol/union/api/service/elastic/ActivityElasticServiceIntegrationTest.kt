@@ -320,7 +320,6 @@ internal class ActivityElasticServiceIntegrationTest {
         fun before() {
             service = ActivityElasticService(
                 filterConverter,
-                repository,
                 router,
                 activityRepository,
                 esActivityOptimizedSearchService,
@@ -359,7 +358,6 @@ internal class ActivityElasticServiceIntegrationTest {
         fun before() {
             service = ActivityElasticService(
                 filterConverter,
-                repository,
                 router,
                 activityRepository,
                 esActivityOptimizedSearchService,
@@ -393,7 +391,6 @@ internal class ActivityElasticServiceIntegrationTest {
         fun before() {
             service = ActivityElasticService(
                 filterConverter,
-                repository,
                 router,
                 activityRepository,
                 esActivityOptimizedSearchService,
@@ -428,7 +425,6 @@ internal class ActivityElasticServiceIntegrationTest {
         fun before() {
             service = ActivityElasticService(
                 filterConverter,
-                repository,
                 router,
                 activityRepository,
                 esActivityOptimizedSearchService,

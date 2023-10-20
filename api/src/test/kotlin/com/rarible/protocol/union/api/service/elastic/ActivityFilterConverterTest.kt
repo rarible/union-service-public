@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.SpyK
@@ -134,10 +135,10 @@ class ActivityFilterConverterTest {
 
             // then
             assertThat(actual).usingRecursiveComparison()
-                .ignoringFields("activityTypes", "item", "blockchains", "cursor", "bidCurrencies")
+                .ignoringFields("activityTypes", "items", "blockchains", "cursor", "bidCurrencies")
                 .isEqualTo(emptyGenericFilter)
             assertThat(actual.activityTypes).containsExactlyInAnyOrder(*types.toTypedArray())
-            assertThat(actual.item).isEqualTo("0x00000012345:1")
+            assertThat(actual.items).isEqualTo(setOf(ItemIdDto(BlockchainDto.TEZOS, "0x00000012345:1")))
             assertThat(actual.blockchains).containsExactly(BlockchainDto.TEZOS)
             assertThat(actual.cursor).isEqualTo(cursor)
             assertThat(actual.bidCurrencies).isEqualTo(bidCurrencies.toSet())

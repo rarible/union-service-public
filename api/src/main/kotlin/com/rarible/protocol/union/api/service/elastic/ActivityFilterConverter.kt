@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.api.service.UserActivityTypeConverter
 import com.rarible.protocol.union.core.model.elastic.ElasticActivityFilter
+import com.rarible.protocol.union.dto.ActivitySearchFilterDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
@@ -54,7 +55,7 @@ class ActivityFilterConverter(
         return ElasticActivityFilter(
             blockchains = setOf(fullItemId.blockchain),
             activityTypes = type.toSet(),
-            item = fullItemId.value,
+            items = setOf(fullItemId),
             bidCurrencies = bidCurrencies?.toSet().orEmpty(),
             cursor = cursor,
         )
@@ -83,6 +84,24 @@ class ActivityFilterConverter(
             from = from,
             to = to,
             cursor = cursor,
+        )
+    }
+
+    fun convertDtoFilter(
+        filter: ActivitySearchFilterDto,
+        activeBlockchains: Set<BlockchainDto>
+    ): ElasticActivityFilter {
+        return ElasticActivityFilter(
+            blockchains = activeBlockchains,
+            activityTypes = filter.types?.toSet() ?: emptySet(),
+            anyUsers = (filter.users?.any ?: emptyList()).map { it.value }.toSet(),
+            usersFrom = (filter.users?.from ?: emptyList()).map { it.value }.toSet(),
+            usersTo = (filter.users?.to ?: emptyList()).map { it.value }.toSet(),
+            collections = filter.collections?.toSet() ?: emptySet(),
+            bidCurrencies = filter.currencies?.bid?.toSet() ?: emptySet(),
+            items = filter.items?.toSet() ?: emptySet(),
+            from = filter.from,
+            to = filter.to
         )
     }
 
