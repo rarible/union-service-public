@@ -4,6 +4,7 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import java.time.Instant
 
 data class ElasticActivityFilter(
@@ -14,7 +15,7 @@ data class ElasticActivityFilter(
     val usersTo: Set<String> = emptySet(),
     val collections: Set<CollectionIdDto> = emptySet(),
     val bidCurrencies: Set<CurrencyIdDto> = emptySet(),
-    val item: String? = null,
+    val items: Set<ItemIdDto> = emptySet(),
     override val from: Instant? = null,
     override val to: Instant? = null,
     val cursor: String? = null,

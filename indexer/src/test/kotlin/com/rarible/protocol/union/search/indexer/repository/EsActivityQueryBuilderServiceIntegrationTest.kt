@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
@@ -167,11 +168,12 @@ internal class EsActivityQueryBuilderServiceIntegrationTest {
     @Test
     fun `should query by any item`() = runBlocking<Unit> {
         // given
-        val filter = ElasticActivityFilter(item = "0x01:111")
-        val toFind1 = randomEsActivity().copy(item = "0x01:111")
-        val toFind2 = randomEsActivity().copy(item = "0x01:111")
-        val toSkip1 = randomEsActivity().copy(item = "0x05:555")
-        val toSkip2 = randomEsActivity().copy(item = "0x06:666")
+        val toFind1 = randomEsActivity().copy(blockchain = BlockchainDto.ETHEREUM, item = "0x01:111")
+        val toFind2 = randomEsActivity().copy(blockchain = BlockchainDto.ETHEREUM, item = "0x01:111")
+        val toFind3 = randomEsActivity().copy(blockchain = BlockchainDto.POLYGON, item = "0x01:111")
+        val toSkip1 = randomEsActivity().copy(blockchain = BlockchainDto.ETHEREUM, item = "0x05:555")
+        val toSkip2 = randomEsActivity().copy(blockchain = BlockchainDto.POLYGON, item = "0x06:666")
+        val filter = ElasticActivityFilter(items = setOf(ItemIdDto(BlockchainDto.ETHEREUM, "0x01:111")))
 
         repository.saveAll(listOf(toFind1, toFind2, toSkip1, toSkip2))
 
