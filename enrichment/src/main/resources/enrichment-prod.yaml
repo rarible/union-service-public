@@ -68,6 +68,9 @@ enrichment:
           - "ETHEREUM:0x942bc2d3e7a589fe5bd4a5c6ef9727dfd82f5c8a"
           - "ETHEREUM:0xea698596b6009a622c3ed00dd5a8b5d1cae4fc36"
           - "ETHEREUM:0x8cdbd7010bd197848e95c1fd7f6e870aac9b0d3c"
+      - name: "FLOW:A.d0bcefdf1e67ea85.HWGarageCardV2"
+        collections:
+          - "FLOW:A.d0bcefdf1e67ea85.HWGarageCard"
 
   meta:
     common:
