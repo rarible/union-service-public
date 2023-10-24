@@ -78,7 +78,8 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
             elasticsearchTestBootstrapper.bootstrap()
 
             repeat(10) {
-                val currency = nativeTestCurrencies().find { it.currencyId == BlockchainDto.ETHEREUM.name.lowercase() }!!
+                val currency =
+                    nativeTestCurrencies().find { it.currencyId == BlockchainDto.ETHEREUM.name.lowercase() }!!
                 val item = randomItemDto(randomEthItemId())
                     .copy(
                         mintedAt = nowMillis() + Duration.ofHours(it.toLong()),
@@ -239,15 +240,6 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
             expected = takeRandomItems()
             checkResult(
                 filter = ItemsSearchFilterDto(
-                    names = expected.mapNotNull { it.name },
-                ),
-                expected = expected,
-                failMessage = "Search by names failed!"
-            )
-
-            expected = takeRandomItems()
-            checkResult(
-                filter = ItemsSearchFilterDto(
                     descriptions = expected.mapNotNull { it.description }
                 ),
                 expected = expected,
@@ -363,10 +355,12 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                 "ETHEREUM:0x0000000000000000000000000000000000000000" -> {
                     expected.first().bestSellAmount!!
                 }
+
                 "FLOW:A.1654653399040a61.FlowToken" -> {
                     expected.first().bestSellAmount!! * ratesPerCurrency["FLOW:A.1654653399040a61.FlowToken"]!! /
-                            ratesPerCurrency["ETHEREUM:0x0000000000000000000000000000000000000000"]!!
+                        ratesPerCurrency["ETHEREUM:0x0000000000000000000000000000000000000000"]!!
                 }
+
                 else -> throw RuntimeException("Test must be amended")
             }
 
@@ -375,10 +369,12 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                 "ETHEREUM:0x0000000000000000000000000000000000000000" -> {
                     expected.last().bestSellAmount!!
                 }
+
                 "FLOW:A.1654653399040a61.FlowToken" -> {
                     expected.last().bestSellAmount!! * ratesPerCurrency["FLOW:A.1654653399040a61.FlowToken"]!! /
-                            ratesPerCurrency["ETHEREUM:0x0000000000000000000000000000000000000000"]!!
+                        ratesPerCurrency["ETHEREUM:0x0000000000000000000000000000000000000000"]!!
                 }
+
                 else -> throw RuntimeException("Test must be amended")
             }
 
@@ -409,10 +405,12 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                 "ETHEREUM:0x0000000000000000000000000000000000000000" -> {
                     expected.first().bestBidAmount!!
                 }
+
                 "FLOW:A.1654653399040a61.FlowToken" -> {
                     expected.first().bestBidAmount!! * ratesPerCurrency["FLOW:A.1654653399040a61.FlowToken"]!! /
-                            ratesPerCurrency["ETHEREUM:0x0000000000000000000000000000000000000000"]!!
+                        ratesPerCurrency["ETHEREUM:0x0000000000000000000000000000000000000000"]!!
                 }
+
                 else -> throw RuntimeException("Test must be amended")
             }
 
@@ -421,10 +419,12 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                 "ETHEREUM:0x0000000000000000000000000000000000000000" -> {
                     expected.last().bestBidAmount!!
                 }
+
                 "FLOW:A.1654653399040a61.FlowToken" -> {
                     expected.last().bestBidAmount!! * ratesPerCurrency["FLOW:A.1654653399040a61.FlowToken"]!! /
-                            ratesPerCurrency["ETHEREUM:0x0000000000000000000000000000000000000000"]!!
+                        ratesPerCurrency["ETHEREUM:0x0000000000000000000000000000000000000000"]!!
                 }
+
                 else -> throw RuntimeException("Test must be amended")
             }
 
@@ -506,7 +506,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                 sellPriceFrom = priceFrom * 0.999,
                 sellPriceTo = priceTo * 1.001,
                 sellCurrency = null,
-                ),
+            ),
             sort = ItemsSearchSortDto.LOWEST_SELL
         )
         // when
@@ -520,6 +520,69 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
         // then
         assertThat(actual.map { it.id.fullId().lowercase() })
             .isEqualTo(expected.map { it.itemId.lowercase() })
+    }
+
+    @Test
+    fun `search items by names`() = runBlocking<Unit> {
+        val expected = takeRandomItems()
+        val items = itemElasticService.searchItems(
+            ItemsSearchRequestDto(
+                filter = ItemsSearchFilterDto(
+                    names = expected.mapNotNull { it.name },
+                )
+            )
+        )
+        assertThat(items.items.map { it.id.fullId().lowercase() })
+            .containsExactlyInAnyOrderElementsOf(expected.map { it.itemId.lowercase() })
+    }
+
+    @Test
+    fun `search items by special character name`() = runBlocking<Unit> {
+        val namePart1 = "~" + randomString(3)
+        val namePart2 = randomString(3) + "!"
+        val item = randomItemDto(randomEthItemId())
+            .copy(
+                meta = MetaDto(
+                    name = "$namePart1 $namePart2",
+                    attributes = listOf(
+                        MetaAttributeDto(
+                            key = randomString(),
+                            value = randomString()
+                        ),
+                        MetaAttributeDto(
+                            key = randomString(),
+                            value = randomString()
+                        )
+                    ),
+                    content = emptyList()
+                )
+            ).toEsItem()
+        repository.save(item)
+        val items1 = itemElasticService.searchItems(
+            ItemsSearchRequestDto(
+                filter = ItemsSearchFilterDto(
+                    names = listOf(namePart1),
+                )
+            )
+        )
+        val items2 = itemElasticService.searchItems(
+            ItemsSearchRequestDto(
+                filter = ItemsSearchFilterDto(
+                    names = listOf(namePart2),
+                )
+            )
+        )
+        val items3 = itemElasticService.searchItems(
+            ItemsSearchRequestDto(
+                filter = ItemsSearchFilterDto(
+                    names = listOf(item.name!!),
+                )
+            )
+        )
+        assertThat(items1.items.map { it.id.fullId().lowercase() })
+            .containsExactlyElementsOf(items2.items.map { it.id.fullId().lowercase() })
+            .containsExactlyElementsOf(items3.items.map { it.id.fullId().lowercase() })
+            .containsExactly(item.itemId.lowercase())
     }
 
     private fun takeRandomItems(): List<EsItem> {

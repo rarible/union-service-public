@@ -13,6 +13,7 @@ data class EsItemGenericFilter(
     val creators: Set<String> = emptySet(),
     val owners: Set<String>? = null,
     val collections: Set<String>? = null,
+    val names: Set<String>? = null,
     val mintedFrom: Instant? = null,
     val mintedTo: Instant? = null,
     val updatedFrom: Instant? = null,
