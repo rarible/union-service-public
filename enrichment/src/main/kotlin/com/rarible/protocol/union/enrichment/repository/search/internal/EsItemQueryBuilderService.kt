@@ -98,6 +98,7 @@ class EsItemQueryBuilderService(
                     .fuzzyTranspositions(false)
                     .fuzzyMaxExpansions(0)
                     .fields(mapOf(EsItem::name.name to 1.0f))
+                    .analyzeWildcard(true)
             )
         }
         minimumShouldMatch(1)
