@@ -116,7 +116,13 @@ fun randomUnionItem(id: ItemIdDto = randomEthItemId()): UnionItem {
         BlockchainDto.ETHEREUM,
         BlockchainDto.POLYGON,
         BlockchainDto.IMMUTABLEX,
-        BlockchainDto.MANTLE -> EthItemConverter.convert(
+        BlockchainDto.MANTLE,
+        BlockchainDto.ARBITRUM,
+        BlockchainDto.CHILIZ,
+        BlockchainDto.ZKSYNC,
+        BlockchainDto.ZKEVM,
+        BlockchainDto.ASTAR,
+        BlockchainDto.BASE -> EthItemConverter.convert(
             randomEthNftItemDto(id),
             id.blockchain
         )

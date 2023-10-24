@@ -47,3 +47,69 @@ api:
         AMM: 0
         X2Y2: 0
         AUCTION: 0
+      arbitrum:
+        RARIBLE_V1: 0
+        RARIBLE_V2: 0
+        OPEN_SEA_V1: 0
+        SEAPORT_V1: 0
+        LOOKSRARE: 0
+        LOOKSRARE_V2: 0
+        CRYPTO_PUNK: 0
+        AMM: 0
+        X2Y2: 0
+        AUCTION: 0
+      chiliz:
+        RARIBLE_V1: 0
+        RARIBLE_V2: 0
+        OPEN_SEA_V1: 0
+        SEAPORT_V1: 0
+        LOOKSRARE: 0
+        LOOKSRARE_V2: 0
+        CRYPTO_PUNK: 0
+        AMM: 0
+        X2Y2: 0
+        AUCTION: 0
+      zksync:
+        RARIBLE_V1: 0
+        RARIBLE_V2: 0
+        OPEN_SEA_V1: 0
+        SEAPORT_V1: 0
+        LOOKSRARE: 0
+        LOOKSRARE_V2: 0
+        CRYPTO_PUNK: 0
+        AMM: 0
+        X2Y2: 0
+        AUCTION: 0
+      zkevm:
+        RARIBLE_V1: 0
+        RARIBLE_V2: 0
+        OPEN_SEA_V1: 0
+        SEAPORT_V1: 0
+        LOOKSRARE: 0
+        LOOKSRARE_V2: 0
+        CRYPTO_PUNK: 0
+        AMM: 0
+        X2Y2: 0
+        AUCTION: 0
+      astar:
+        RARIBLE_V1: 0
+        RARIBLE_V2: 0
+        OPEN_SEA_V1: 0
+        SEAPORT_V1: 0
+        LOOKSRARE: 0
+        LOOKSRARE_V2: 0
+        CRYPTO_PUNK: 0
+        AMM: 0
+        X2Y2: 0
+        AUCTION: 0
+      base:
+        RARIBLE_V1: 0
+        RARIBLE_V2: 0
+        OPEN_SEA_V1: 0
+        SEAPORT_V1: 0
+        LOOKSRARE: 0
+        LOOKSRARE_V2: 0
+        CRYPTO_PUNK: 0
+        AMM: 0
+        X2Y2: 0
+        AUCTION: 0

@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class CurrencyService(
-    private val currencyClient: CurrencyClient
+    private val currencyClient: CurrencyClient,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -231,11 +231,9 @@ class CurrencyService(
             currencies = currencyClient.getAllCurrencies()
                 .filter { it.blockchain != "OPTIMISM" }
                 .map { CurrencyConverter.convert(it) }
-            nativeCurrencies = BlockchainDto.values().associateWith { blockchain ->
-                val symbol = getSymbol(blockchain)
-                currencies.find { it.symbol == symbol && it.currencyId.blockchain == blockchain }
-                    ?: throw UnionCurrencyException("Currency with symbol $symbol not found in ${blockchain.name}")
-            }
+            val symbols = BlockchainDto.values().associateBy { getSymbol(it) }
+            nativeCurrencies = currencies.filter { symbols.keys.contains(it.symbol) }
+                .associateBy { symbols[it.symbol]!! }
             refreshCurrencyRates()
         }
 
@@ -253,6 +251,12 @@ class CurrencyService(
                 BlockchainDto.SOLANA -> "solana"
                 BlockchainDto.IMMUTABLEX -> "immutable-x"
                 BlockchainDto.MANTLE -> "mantle"
+                BlockchainDto.ARBITRUM -> "arbitrum"
+                BlockchainDto.CHILIZ -> "chiliz"
+                BlockchainDto.ZKSYNC -> "zksync"
+                BlockchainDto.ASTAR -> "astar"
+                BlockchainDto.ZKEVM -> "zkevm"
+                BlockchainDto.BASE -> "base"
             }
         }
 
