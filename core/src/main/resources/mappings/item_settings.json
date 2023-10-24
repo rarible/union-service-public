@@ -144,13 +144,6 @@
         "filter": [
           "lowercase"
         ]
-      },
-      "whitespace_analyzer": {
-        "type": "custom",
-        "tokenizer": "whitespace",
-        "filter": [
-          "lowercase"
-        ]
       }
     }
   }

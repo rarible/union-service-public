@@ -18,9 +18,9 @@
     },
     "name": {
       "type": "text",
-      "analyzer": "whitespace_analyzer",
-      "search_analyzer": "whitespace_analyzer",
-      "search_quote_analyzer": "whitespace_analyzer",
+      "analyzer": "stemmer_analyzer",
+      "search_analyzer": "stemmer_stop_analyzer",
+      "search_quote_analyzer": "stemmer_analyzer",
       "index_prefixes": {
         "min_chars" : 1,
         "max_chars" : 10
