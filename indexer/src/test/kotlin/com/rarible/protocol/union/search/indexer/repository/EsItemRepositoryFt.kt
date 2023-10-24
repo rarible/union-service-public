@@ -26,6 +26,7 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.elasticsearch.index.query.BoolQueryBuilder
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -278,6 +279,7 @@ internal class EsItemRepositoryFt {
     }
 
     @Test
+    @Disabled("Text search temporary disabled. Will be fixed in PT-4066")
     fun `should search by name`(): Unit = runBlocking {
 
         val esItems = (1..50).map { randomEsItem() }
@@ -322,6 +324,7 @@ internal class EsItemRepositoryFt {
     }
 
     @Test
+    @Disabled("Text search temporary disabled. Will be fixed in PT-4066")
     fun `should search by trait string`(): Unit = runBlocking {
 
         val esItems = (1..50).map { randomEsItem() }
@@ -336,6 +339,7 @@ internal class EsItemRepositoryFt {
     }
 
     @Test
+    @Disabled("Text search temporary disabled. Will be fixed in PT-4066")
     fun `should search by trait long`(): Unit = runBlocking {
 
         val esItems = (1..50).map { randomEsItem() }
