@@ -1,12 +1,15 @@
 package com.rarible.protocol.union.core.service.router
 
 import com.rarible.protocol.union.dto.BlockchainDto
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class ActiveBlockchainProvider(
     activeBlockchains: List<ActiveBlockchain>
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     companion object {
         // Convenient constructor for tests
@@ -26,6 +29,7 @@ class ActiveBlockchainProvider(
             throw IllegalStateException("Blockchain ${it.first()} specified as active ${it.size} times")
         }
 
+        logger.info("Active Blockchains: {}", all.keys)
         return HashSet(all.keys)
     }
 }

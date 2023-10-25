@@ -10,7 +10,6 @@ import com.rarible.protocol.union.core.model.elastic.TraitRangeFilter
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.index.query.BoolQueryBuilder
-import org.elasticsearch.index.query.MultiMatchQueryBuilder
 import org.elasticsearch.index.query.Operator
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
@@ -76,22 +75,17 @@ class EsItemQueryBuilderService(
         mustMatchTerms(filter.bidPlatforms, EsItem::bestBidMarketplace.name)
         mustMatchRange(filter.mintedFrom, filter.mintedTo, EsItem::mintedAt.name)
         mustMatchRange(filter.updatedFrom, filter.updatedTo, EsItem::lastUpdatedAt.name)
-        applyTextFilter(filter.text)
+        applyNamesTextFilter(filter.names)
         applyTraitsFilter(filter.traits)
         applyTraitRangesFilter(filter.traitRanges)
     }
 
-    private fun BoolQueryBuilder.applyTextFilter(text: String?) {
-        if (!text.isNullOrBlank()) {
-            should(
-                QueryBuilders.nestedQuery(
-                    "traits",
-                    QueryBuilders.boolQuery().must(QueryBuilders.termQuery("traits.value.raw", text)),
-                    ScoreMode.None
-                )
-            )
-
-            val trimmedText = text.trim()
+    private fun BoolQueryBuilder.applyNamesTextFilter(names: Set<String>?) {
+        if (names.isNullOrEmpty()) {
+            return
+        }
+        for (name in names) {
+            val trimmedText = name.trim()
             val lastTerm = trimmedText.split(" ").last()
             val textForSearch = if (lastTerm == trimmedText) {
                 "($lastTerm | $lastTerm*)"
@@ -104,19 +98,10 @@ class EsItemQueryBuilderService(
                     .fuzzyTranspositions(false)
                     .fuzzyMaxExpansions(0)
                     .fields(mapOf(EsItem::name.name to 1.0f))
+                    .analyzeWildcard(true)
             )
-                // phrase. boost = 100
-                .should(
-                    QueryBuilders.multiMatchQuery(text)
-                        .fields(mapOf(EsItem::name.name to 1.0f))
-                        .boost(100f)
-                        .fuzzyTranspositions(false)
-                        .operator(Operator.AND)
-                        .type(MultiMatchQueryBuilder.Type.PHRASE)
-                )
-
-            minimumShouldMatch(1)
         }
+        minimumShouldMatch(1)
     }
 
     private fun BoolQueryBuilder.applyTraitsFilter(traits: List<TraitFilter>?) {

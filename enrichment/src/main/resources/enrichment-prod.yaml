@@ -71,6 +71,9 @@ enrichment:
       - name: "FLOW:A.d0bcefdf1e67ea85.HWGarageCardV2"
         collections:
           - "FLOW:A.d0bcefdf1e67ea85.HWGarageCard"
+      - name: "FLOW:A.d0bcefdf1e67ea85.HWGarageTokenV2"
+        collections:
+          - "FLOW:A.d0bcefdf1e67ea85.HWGaragePack"
 
   meta:
     common:

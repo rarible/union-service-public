@@ -2,6 +2,8 @@ package com.rarible.protocol.union.integration.immutablex
 
 import com.rarible.protocol.union.core.CoreConfiguration
 import com.rarible.protocol.union.core.UnionWebClientCustomizer
+import com.rarible.protocol.union.core.service.router.ActiveBlockchain
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.integration.immutablex.client.ImxActivityClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxAssetClient
 import com.rarible.protocol.union.integration.immutablex.client.ImxCollectionClient
@@ -31,6 +33,11 @@ import org.springframework.web.reactive.function.client.WebClient
 @ComponentScan(basePackageClasses = [ImxActivityConverter::class])
 @EnableConfigurationProperties(ImxIntegrationProperties::class)
 class ImxApiConfiguration {
+
+    @Bean
+    fun imxBlockchains(): ActiveBlockchain {
+        return ActiveBlockchain(listOf(BlockchainDto.IMMUTABLEX))
+    }
 
     @Bean
     fun imxClientProperties(props: ImxIntegrationProperties): ImxClientProperties {
