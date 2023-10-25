@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class CurrencyService(
-    private val currencyClient: CurrencyClient
+    private val currencyClient: CurrencyClient,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -67,7 +67,13 @@ class CurrencyService(
         }
 
         logger.info("Currency {}:[{}] updated, but doesn't support USD conversion", blockchain.name, address)
-        val stub = CurrencyUsdRateDto(address, "", BigDecimal(-1), nowMillis())
+        val stub = CurrencyUsdRateDto(
+            currencyId = address,
+            symbol = "",
+            rate = BigDecimal(-1),
+            date = nowMillis(),
+            abbreviation = null
+        )
         blockchainCache[address] = stub
         return stub
     }
@@ -225,11 +231,9 @@ class CurrencyService(
             currencies = currencyClient.getAllCurrencies()
                 .filter { it.blockchain != "OPTIMISM" }
                 .map { CurrencyConverter.convert(it) }
-            nativeCurrencies = BlockchainDto.values().associateWith { blockchain ->
-                val symbol = getSymbol(blockchain)
-                currencies.find { it.symbol == symbol && it.currencyId.blockchain == blockchain }
-                    ?: throw UnionCurrencyException("Currency with symbol $symbol not found in ${blockchain.name}")
-            }
+            val symbols = BlockchainDto.values().associateBy { getSymbol(it) }
+            nativeCurrencies = currencies.filter { symbols.keys.contains(it.symbol) }
+                .associateBy { symbols[it.symbol]!! }
             refreshCurrencyRates()
         }
 
@@ -247,18 +251,22 @@ class CurrencyService(
                 BlockchainDto.SOLANA -> "solana"
                 BlockchainDto.IMMUTABLEX -> "immutable-x"
                 BlockchainDto.MANTLE -> "mantle"
+                BlockchainDto.ARBITRUM -> "arbitrum"
+                BlockchainDto.CHILIZ -> "chiliz"
+                BlockchainDto.ZKSYNC -> "zksync"
+                BlockchainDto.ASTAR -> "astar"
+                BlockchainDto.ZKEVM -> "zkevm"
+                BlockchainDto.BASE -> "base"
             }
         }
 
-        private suspend fun refreshCurrencyRates() {
+        private fun refreshCurrencyRates() {
             currencyRates = currencies.mapNotNull { currency ->
-                val usdRate = getCurrentRate(currency.currencyId.blockchain, currency.currencyId.value)
-                    ?: return@mapNotNull null
-
+                val rate = currency.rate ?: return@mapNotNull null
                 CurrencyRate(
                     blockchain = currency.currencyId.blockchain,
                     currencyId = currency.currencyId.fullId(),
-                    rate = usdRate.rate
+                    rate = rate
                 )
             }
         }

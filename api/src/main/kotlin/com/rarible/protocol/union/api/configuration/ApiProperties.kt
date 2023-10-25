@@ -14,6 +14,7 @@ data class ApiProperties(
     val openapi: OpenapiProperties = OpenapiProperties(),
     val subscribe: SubscribeProperties = SubscribeProperties(),
     val elasticsearch: EsProperties = EsProperties(),
+    val orderSettings: OrderSettingsProperties = OrderSettingsProperties()
 ) {
 
     fun findBlockchain(topDomain: String): BlockchainDto? {
@@ -47,4 +48,8 @@ data class EsOptimizationProperties(
     val activityDateSearchPeriod: Duration = Duration.ofDays(7),
     val earliestOwnershipDate: Instant = Instant.parse("2016-04-26T20:30:48.000Z"),
     val ownershipDateSearchPeriod: Duration = Duration.ofDays(7),
+)
+
+data class OrderSettingsProperties(
+    val fees: Map<BlockchainDto, Map<String, Int>> = emptyMap()
 )

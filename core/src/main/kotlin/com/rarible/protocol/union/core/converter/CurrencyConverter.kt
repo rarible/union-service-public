@@ -15,7 +15,8 @@ object CurrencyConverter {
             currencyId = source.fromCurrencyId,
             symbol = source.fromCurrencyId,
             rate = source.rate,
-            date = source.date
+            date = source.date,
+            abbreviation = source.abbreviation,
         )
     }
 
@@ -27,7 +28,9 @@ object CurrencyConverter {
         return com.rarible.protocol.union.dto.CurrencyDto(
             currencyId = CurrencyIdDto(convert(source.blockchain), address, tokenId),
             symbol = source.currencyId,
-            alias = source.alias
+            alias = source.alias,
+            abbreviation = source.abbreviation,
+            rate = source.rate
         )
     }
 

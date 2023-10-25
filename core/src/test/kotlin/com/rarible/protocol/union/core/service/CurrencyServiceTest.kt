@@ -240,13 +240,6 @@ class CurrencyServiceTest {
             currencyControllerApi.allCurrencies
         } returns allCurrencies.toMono()
         every { allCurrencies.currencies } returns nativeTestCurrencies()
-        mockCurrency(BlockchainDto.ETHEREUM, "0x0000000000000000000000000000000000000000", BigDecimal(2))
-        mockCurrency(BlockchainDto.FLOW, "A.1654653399040a61.FlowToken", BigDecimal(3))
-        mockCurrency(BlockchainDto.POLYGON, "0x0000000000000000000000000000000000000000", BigDecimal(4))
-        mockCurrency(BlockchainDto.TEZOS, "tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU", BigDecimal(5))
-        mockCurrency(BlockchainDto.SOLANA, "So11111111111111111111111111111111111111112", BigDecimal(6))
-        mockCurrency(BlockchainDto.IMMUTABLEX, "0x0000000000000000000000000000000000000000", BigDecimal(7))
-        mockCurrency(BlockchainDto.MANTLE, "0x0000000000000000000000000000000000000000", BigDecimal(8))
 
         // when
         val actual1 = currencyService.getAllCurrencyRates()
@@ -256,13 +249,6 @@ class CurrencyServiceTest {
         assertThat(actual1).isEqualTo(actual2)
         coVerify(exactly = 1) {
             currencyControllerApi.allCurrencies
-            currencyControllerApi.getCurrencyRate(BlockchainDto.ETHEREUM.name, "0x0000000000000000000000000000000000000000", any())
-            currencyControllerApi.getCurrencyRate(BlockchainDto.FLOW.name, "A.1654653399040a61.FlowToken", any())
-            currencyControllerApi.getCurrencyRate(BlockchainDto.POLYGON.name, "0x0000000000000000000000000000000000000000", any())
-            currencyControllerApi.getCurrencyRate(BlockchainDto.TEZOS.name, "tz1Ke2h7sDdakHJQh8WX4Z372du1KChsksyU", any())
-            currencyControllerApi.getCurrencyRate(BlockchainDto.SOLANA.name, "So11111111111111111111111111111111111111112", any())
-            currencyControllerApi.getCurrencyRate(BlockchainDto.IMMUTABLEX.name, "0x0000000000000000000000000000000000000000", any())
-            currencyControllerApi.getCurrencyRate(BlockchainDto.MANTLE.name, "0x0000000000000000000000000000000000000000", any())
         }
         confirmVerified(currencyControllerApi)
     }
