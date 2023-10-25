@@ -3,6 +3,7 @@ package com.rarible.protocol.union.api.service.select
 import com.rarible.protocol.union.api.service.elastic.ActivityElasticService
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.ActivitiesDto
+import com.rarible.protocol.union.dto.ActivitySearchFilterDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -108,6 +109,20 @@ class ActivitySourceSelectService(
     ): ActivitiesDto {
         return getQuerySource(searchEngine, sort).getActivitiesByUser(
             type, user, blockchains, bidCurrencies, from, to, continuation, cursor, size, sort
+        )
+    }
+
+    suspend fun search(
+        filter: ActivitySearchFilterDto,
+        cursor: String?,
+        size: Int?,
+        sort: ActivitySortDto?,
+    ): ActivitiesDto {
+        return activityElasticService.searchActivities(
+            filter = filter,
+            size = size,
+            sort = sort,
+            cursor = cursor
         )
     }
 

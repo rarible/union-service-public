@@ -2,6 +2,10 @@ api:
   openapi:
     baseUrl: "https://test-api.rarible.org"
     description: "Development (Ropsten, Mumbai, Hangzhou)"
+  order-settings:
+    fees:
+      ethereum:
+        RARIBLE_V2: 10
 
 protocol:
   union:

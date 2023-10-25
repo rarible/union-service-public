@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.model.elastic.EsActivityQueryResult
 import com.rarible.protocol.union.core.model.elastic.EsActivitySort
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
@@ -235,7 +236,7 @@ internal class EsActivityOptimizedSearchServiceTest {
                 )
             ),
             ElasticActivityFilter(
-                item = "item"
+                items = setOf(ItemIdDto(BlockchainDto.TEZOS, "item"))
             ),
         )
     }

@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.service.elastic
 
+import com.rarible.protocol.union.core.model.elastic.ElasticActivityFilter
 import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivityCursor.Companion.fromActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivitySort
@@ -7,6 +8,7 @@ import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.ActivitiesDto
 import com.rarible.protocol.union.dto.ActivityDto
+import com.rarible.protocol.union.dto.ActivitySearchFilterDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -20,7 +22,6 @@ import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityDtoConverter
 import com.rarible.protocol.union.enrichment.model.EnrichmentActivityId
 import com.rarible.protocol.union.enrichment.repository.ActivityRepository
-import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
 import com.rarible.protocol.union.enrichment.service.query.activity.ActivityQueryService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -30,7 +31,6 @@ import java.util.concurrent.ThreadLocalRandom
 @Service
 class ActivityElasticService(
     private val filterConverter: ActivityFilterConverter,
-    private val esActivityRepository: EsActivityRepository,
     private val router: BlockchainRouter<ActivityService>,
     private val activityRepository: ActivityRepository,
     private val esActivityOptimizedSearchService: EsActivityOptimizedSearchService,
@@ -56,17 +56,9 @@ class ActivityElasticService(
             logger.info("Unable to find enabled blockchains for getAllActivities(), blockchains={}", blockchains)
             return ActivitiesDto()
         }
-        val filter = filterConverter.convertGetAllActivities(type, enabledBlockchains, bidCurrencies, effectiveCursor)
-        logger.info("[$requestId] Built filter: $filter")
-        val queryResult = esActivityOptimizedSearchService.search(filter, convertSort(sort), size)
-        logger.info("[$requestId] Get query result: ${queryResult.entities.size}, ${latency(start)}")
 
-        val activities = getActivities(queryResult.entities)
-        val result = ActivitiesDto(
-            continuation = null,
-            cursor = queryResult.continuation,
-            activities = activities
-        )
+        val filter = filterConverter.convertGetAllActivities(type, enabledBlockchains, bidCurrencies, effectiveCursor)
+        val result = executeSearch(filter, size, sort)
 
         logger.info(
             "[{}] Response for ES getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
@@ -126,15 +118,8 @@ class ActivityElasticService(
             bidCurrencies,
             effectiveCursor
         )
-        val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
 
-        val activities = getActivities(queryResult.activities)
-
-        val result = ActivitiesDto(
-            continuation = null,
-            cursor = queryResult.cursor,
-            activities = activities
-        )
+        val result = executeSearch(filter, size, sort)
 
         logger.info(
             "Response for ES getActivitiesByCollection(type={}, collection={}, cursor={}, size={}, sort={}): " +
@@ -160,14 +145,8 @@ class ActivityElasticService(
         }
         val effectiveCursor = cursor ?: continuation
         val filter = filterConverter.convertGetActivitiesByItem(type, itemId.fullId(), bidCurrencies, effectiveCursor)
-        val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
-        val activities = getActivities(queryResult.activities)
 
-        val result = ActivitiesDto(
-            continuation = null,
-            cursor = queryResult.cursor,
-            activities = activities
-        )
+        val result = executeSearch(filter, size, sort)
 
         logger.info(
             "Response for ES getActivitiesByItem(type={}, itemId={} cursor={}, size={}, sort={}): " +
@@ -205,14 +184,8 @@ class ActivityElasticService(
             to,
             effectiveCursor
         )
-        val queryResult = esActivityRepository.search(filter, convertSort(sort), size)
-        val activities = getActivities(queryResult.activities)
 
-        val result = ActivitiesDto(
-            continuation = null,
-            cursor = queryResult.cursor,
-            activities = activities
-        )
+        val result = executeSearch(filter, size, sort)
 
         logger.info(
             "Response for ES getActivitiesByUser(type={}, users={}, cursor={}, size={}, sort={}):" +
@@ -221,6 +194,43 @@ class ActivityElasticService(
         )
 
         return result
+    }
+
+    suspend fun searchActivities(
+        filter: ActivitySearchFilterDto,
+        size: Int?,
+        sort: ActivitySortDto?,
+        cursor: String?,
+    ): ActivitiesDto {
+        val start = System.currentTimeMillis()
+        val esFilter = filterConverter.convertDtoFilter(
+            filter = filter,
+            activeBlockchains = router.getEnabledBlockchains(filter.blockchains).toSet()
+        )
+
+        val result = executeSearch(esFilter, size, sort)
+
+        logger.info(
+            "Response for ES searchActivities(filter={}, cursor={}, size={}, sort={}):" +
+                " Slice(size={}, cursor={}) ({}ms)",
+            filter, cursor, size, sort, result.activities.size, result.cursor, latency(start)
+        )
+        return result
+    }
+
+    private suspend fun executeSearch(
+        filter: ElasticActivityFilter,
+        size: Int?,
+        sort: ActivitySortDto?
+    ): ActivitiesDto {
+        val queryResult = esActivityOptimizedSearchService.search(filter, convertSort(sort), size)
+        val activities = getActivities(queryResult.entities)
+
+        return ActivitiesDto(
+            continuation = null,
+            cursor = queryResult.continuation,
+            activities = activities
+        )
     }
 
     private suspend fun getActivities(esActivities: List<EsActivity>): List<ActivityDto> {

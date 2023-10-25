@@ -2,6 +2,8 @@ package com.rarible.protocol.union.test.mock
 
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.currency.api.client.CurrencyControllerApi
+import com.rarible.protocol.currency.dto.CurrenciesDto
+import com.rarible.protocol.currency.dto.CurrencyDto
 import com.rarible.protocol.currency.dto.CurrencyRateDto
 import com.rarible.protocol.union.core.client.CurrencyClient
 import com.rarible.protocol.union.core.service.CurrencyService
@@ -26,17 +28,20 @@ object CurrencyMock {
     fun mockCurrencies(): Map<String, Double> {
         val ratesPerCurrency = mutableMapOf<String, Double>()
 
-        nativeTestCurrencies().forEachIndexed { index, currency ->
+        val native = nativeTestCurrencies().mapIndexed { index, currency ->
             val rate = 1.0 + 2.0.pow(index.toDouble())
             ratesPerCurrency["${currency.blockchain}:${currency.address}"] = rate
-            every { currencyControllerApiMock.getCurrencyRate(currency.blockchain, currency.address, any()) } returns
-                CurrencyRateDto(
-                    fromCurrencyId = currency.currencyId,
-                    toCurrencyId = "",
-                    rate = rate.toBigDecimal(),
-                    date = nowMillis(),
-                ).toMono()
+            CurrencyDto(
+                currencyId = currency.currencyId,
+                address = currency.address,
+                blockchain = currency.blockchain,
+                alias = currency.alias,
+                abbreviation = currency.abbreviation,
+                rate = rate.toBigDecimal()
+            )
         }
+
+        every { currencyControllerApiMock.allCurrencies } returns CurrenciesDto(native).toMono()
 
         return ratesPerCurrency
     }

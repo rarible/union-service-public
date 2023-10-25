@@ -4,6 +4,8 @@ import com.rarible.protocol.union.api.service.select.ActivitySourceSelectService
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.ActivitiesByUsersRequestDto
 import com.rarible.protocol.union.dto.ActivitiesDto
+import com.rarible.protocol.union.dto.ActivitySearchRequestDto
+import com.rarible.protocol.union.dto.ActivitySearchSortDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -38,7 +40,10 @@ class ActivityController(
         sort: ActivitySortDto?,
         searchEngine: SearchEngineDto?
     ): ResponseEntity<ActivitiesDto> {
-        logger.info("Got request to get all activities, parameters: $type, $blockchains, $continuation, $cursor, $size, $sort, $searchEngine")
+        logger.info(
+            "Got request to get all activities, parameters: " +
+                "$type, $blockchains, $continuation, $cursor, $size, $sort, $searchEngine"
+        )
         val result = activitySourceSelector.getAllActivities(
             type,
             blockchains,
@@ -142,7 +147,9 @@ class ActivityController(
         return ResponseEntity.ok(result)
     }
 
-    override suspend fun getActivitiesByUsers(activitiesByUsersRequestDto: ActivitiesByUsersRequestDto): ResponseEntity<ActivitiesDto> {
+    override suspend fun getActivitiesByUsers(
+        activitiesByUsersRequestDto: ActivitiesByUsersRequestDto
+    ): ResponseEntity<ActivitiesDto> {
         val result = activitySourceSelector.getActivitiesByUser(
             activitiesByUsersRequestDto.types,
             activitiesByUsersRequestDto.users.take(MAX_USERS_COUNT),
@@ -155,6 +162,23 @@ class ActivityController(
             activitiesByUsersRequestDto.size,
             activitiesByUsersRequestDto.sort,
             activitiesByUsersRequestDto.searchEngine
+        )
+        return ResponseEntity.ok(result)
+    }
+
+    override suspend fun searchActivities(
+        activitySearchRequestDto: ActivitySearchRequestDto
+    ): ResponseEntity<ActivitiesDto> {
+        val sort = when (activitySearchRequestDto.sort) {
+            ActivitySearchSortDto.EARLIEST -> ActivitySortDto.EARLIEST_FIRST
+            ActivitySearchSortDto.LATEST -> ActivitySortDto.LATEST_FIRST
+            else -> null
+        }
+        val result = activitySourceSelector.search(
+            filter = activitySearchRequestDto.filter,
+            cursor = activitySearchRequestDto.cursor,
+            size = activitySearchRequestDto.size,
+            sort = sort
         )
         return ResponseEntity.ok(result)
     }

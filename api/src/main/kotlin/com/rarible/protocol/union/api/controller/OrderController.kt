@@ -1,11 +1,14 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.protocol.union.api.configuration.ApiProperties
 import com.rarible.protocol.union.api.service.select.OrderSourceSelectService
+import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.util.checkNullIds
 import com.rarible.protocol.union.dto.AmmTradeInfoDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.OrderDto
+import com.rarible.protocol.union.dto.OrderFeesDto
 import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderIdsDto
 import com.rarible.protocol.union.dto.OrderSortDto
@@ -27,7 +30,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class OrderController(
     private val orderSourceSelector: OrderSourceSelectService,
-    private val enrichmentOrderService: EnrichmentOrderService
+    private val enrichmentOrderService: EnrichmentOrderService,
+    private val apiProperties: ApiProperties
 ) : OrderControllerApi {
 
     override suspend fun upsertOrder(orderFormDto: OrderFormDto): ResponseEntity<OrderDto> {
@@ -132,6 +136,16 @@ class OrderController(
         return ResponseEntity.ok(enrichmentOrderService.enrich(result))
     }
 
+    override suspend fun getOrderFees(blockchain: BlockchainDto?): ResponseEntity<OrderFeesDto> {
+        if (blockchain == null) {
+            throw UnionValidationException("Param 'blockchain' is required")
+        } else {
+            val blockchainFees = apiProperties.orderSettings.fees[blockchain] ?: emptyMap()
+            val fees = FEE_TYPE.associateWith { blockchainFees[it] ?: 0 }
+            return ResponseEntity.ok(OrderFeesDto(fees))
+        }
+    }
+
     override suspend fun getValidatedOrderById(id: String): ResponseEntity<OrderDto> {
         val result = orderSourceSelector.getValidatedOrderById(id)
         return ResponseEntity.ok(enrichmentOrderService.enrich(result))
@@ -196,5 +210,20 @@ class OrderController(
     private suspend fun toDto(slice: Slice<UnionOrder>): OrdersDto {
         val orders = enrichmentOrderService.enrich(slice.entities)
         return OrdersDto(slice.continuation, orders)
+    }
+
+    companion object {
+        private val FEE_TYPE = listOf(
+            "RARIBLE_V1",
+            "RARIBLE_V2",
+            "OPEN_SEA_V1",
+            "SEAPORT_V1",
+            "LOOKSRARE",
+            "LOOKSRARE_V2",
+            "CRYPTO_PUNK",
+            "AMM",
+            "X2Y2",
+            "AUCTION"
+        )
     }
 }

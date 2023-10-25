@@ -46,5 +46,5 @@ class EsActivityOptimizedSearchService(
             filter.usersFrom.isEmpty() &&
             filter.usersTo.isEmpty() &&
             filter.collections.isEmpty() &&
-            filter.item == null
+            filter.items.isEmpty()
 }

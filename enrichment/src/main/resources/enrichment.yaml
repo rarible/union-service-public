@@ -83,6 +83,30 @@ integration:
       enabled: true
       consumer:
         brokerReplicaSet: "${kafka.hosts}"
+    arbitrum:
+      enabled: false
+      consumer:
+        brokerReplicaSet: "${kafka.hosts}"
+    chiliz:
+      enabled: false
+      consumer:
+        brokerReplicaSet: "${kafka.hosts}"
+    zksync:
+      enabled: false
+      consumer:
+        brokerReplicaSet: "${kafka.hosts}"
+    zkevm:
+      enabled: false
+      consumer:
+        brokerReplicaSet: "${kafka.hosts}"
+    astar:
+      enabled: false
+      consumer:
+        brokerReplicaSet: "${kafka.hosts}"
+    base:
+      enabled: false
+      consumer:
+        brokerReplicaSet: "${kafka.hosts}"
   immutablex:
     enabled: true
     apiKey: "${IMMUTABLEX_API_KEY:}"

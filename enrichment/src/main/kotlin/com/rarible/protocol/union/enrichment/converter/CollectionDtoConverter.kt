@@ -93,7 +93,13 @@ object CollectionDtoConverter {
             when (collectionId.blockchain) {
                 BlockchainDto.ETHEREUM,
                 BlockchainDto.POLYGON,
-                BlockchainDto.MANTLE -> CollectionDto.Type.ERC721
+                BlockchainDto.MANTLE,
+                BlockchainDto.ARBITRUM,
+                BlockchainDto.CHILIZ,
+                BlockchainDto.ZKSYNC,
+                BlockchainDto.ZKEVM,
+                BlockchainDto.ASTAR,
+                BlockchainDto.BASE -> CollectionDto.Type.ERC721
 
                 BlockchainDto.IMMUTABLEX -> CollectionDto.Type.IMMUTABLEX
                 BlockchainDto.FLOW -> CollectionDto.Type.FLOW
