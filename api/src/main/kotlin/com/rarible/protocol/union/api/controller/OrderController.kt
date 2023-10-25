@@ -2,7 +2,6 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.configuration.ApiProperties
 import com.rarible.protocol.union.api.service.select.OrderSourceSelectService
-import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.core.model.UnionOrder
 import com.rarible.protocol.union.core.util.checkNullIds
@@ -141,7 +140,8 @@ class OrderController(
         if (blockchain == null) {
             throw UnionValidationException("Param 'blockchain' is required")
         } else {
-            val fees = apiProperties.orderSettings.fees[blockchain] ?: throw UnionNotFoundException("Settings are not found")
+            val blockchainFees = apiProperties.orderSettings.fees[blockchain] ?: emptyMap()
+            val fees = FEE_TYPE.associateWith { blockchainFees[it] ?: 0 }
             return ResponseEntity.ok(OrderFeesDto(fees))
         }
     }
@@ -210,5 +210,20 @@ class OrderController(
     private suspend fun toDto(slice: Slice<UnionOrder>): OrdersDto {
         val orders = enrichmentOrderService.enrich(slice.entities)
         return OrdersDto(slice.continuation, orders)
+    }
+
+    companion object {
+        private val FEE_TYPE = listOf(
+            "RARIBLE_V1",
+            "RARIBLE_V2",
+            "OPEN_SEA_V1",
+            "SEAPORT_V1",
+            "LOOKSRARE",
+            "LOOKSRARE_V2",
+            "CRYPTO_PUNK",
+            "AMM",
+            "X2Y2",
+            "AUCTION"
+        )
     }
 }

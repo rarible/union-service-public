@@ -41,4 +41,34 @@ fun nativeTestCurrencies() = listOf(
         address = "0x0000000000000000000000000000000000000000",
         blockchain = BlockchainDto.IMMUTABLEX.name,
     ),
+    com.rarible.protocol.currency.dto.CurrencyDto(
+        currencyId = "arbitrum",
+        address = "0x0000000000000000000000000000000000000000",
+        blockchain = BlockchainDto.ARBITRUM.name,
+    ),
+    com.rarible.protocol.currency.dto.CurrencyDto(
+        currencyId = "chiliz",
+        address = "0x0000000000000000000000000000000000000000",
+        blockchain = BlockchainDto.CHILIZ.name,
+    ),
+    com.rarible.protocol.currency.dto.CurrencyDto(
+        currencyId = "zksync",
+        address = "0x0000000000000000000000000000000000000000",
+        blockchain = BlockchainDto.ZKSYNC.name,
+    ),
+    com.rarible.protocol.currency.dto.CurrencyDto(
+        currencyId = "zkevm",
+        address = "0x0000000000000000000000000000000000000000",
+        blockchain = BlockchainDto.ZKEVM.name,
+    ),
+    com.rarible.protocol.currency.dto.CurrencyDto(
+        currencyId = "astar",
+        address = "0x0000000000000000000000000000000000000000",
+        blockchain = BlockchainDto.ASTAR.name,
+    ),
+    com.rarible.protocol.currency.dto.CurrencyDto(
+        currencyId = "base",
+        address = "0x0000000000000000000000000000000000000000",
+        blockchain = BlockchainDto.BASE.name,
+    ),
 )

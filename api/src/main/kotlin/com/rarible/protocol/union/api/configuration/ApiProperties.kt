@@ -51,5 +51,5 @@ data class EsOptimizationProperties(
 )
 
 data class OrderSettingsProperties(
-    val fees: Map<BlockchainDto, Map<String, Int>> = mapOf()
+    val fees: Map<BlockchainDto, Map<String, Int>> = emptyMap()
 )

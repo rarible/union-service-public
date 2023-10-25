@@ -2,7 +2,6 @@ package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.core.exception.UnionNotFoundException
 import com.rarible.protocol.union.core.exception.UnionValidationException
 import com.rarible.protocol.union.dto.BlockchainDto
 import kotlinx.coroutines.FlowPreview
@@ -31,13 +30,6 @@ class OrderSettingsControllerFt : AbstractIntegrationTest() {
     fun `order fees - missed blockchain`() = runBlocking<Unit> {
         assertThrows<UnionValidationException> {
             orderControllerClient.getOrderFees(null)
-        }
-    }
-
-    @Test
-    fun `order fees - non-supported blockchain`() = runBlocking<Unit> {
-        assertThrows<UnionNotFoundException> {
-            orderControllerClient.getOrderFees(BlockchainDto.TEZOS)
         }
     }
 }
