@@ -257,6 +257,7 @@ class CurrencyService(
                 BlockchainDto.ASTAR -> "astar"
                 BlockchainDto.ZKEVM -> "zkevm"
                 BlockchainDto.BASE -> "base"
+                BlockchainDto.LIGHTLINK -> "lightlink"
             }
         }
 
