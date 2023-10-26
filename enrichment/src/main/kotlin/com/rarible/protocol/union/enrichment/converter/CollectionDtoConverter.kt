@@ -100,7 +100,7 @@ object CollectionDtoConverter {
                 BlockchainDto.ZKEVM,
                 BlockchainDto.ASTAR,
                 BlockchainDto.BASE,
-                BlockchainDto.LIGHTLINK-> CollectionDto.Type.ERC721
+                BlockchainDto.LIGHTLINK -> CollectionDto.Type.ERC721
 
                 BlockchainDto.IMMUTABLEX -> CollectionDto.Type.IMMUTABLEX
                 BlockchainDto.FLOW -> CollectionDto.Type.FLOW
