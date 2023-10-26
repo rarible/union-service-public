@@ -1,9 +1,7 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.core.service.CurrencyService
-import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrenciesDto
-import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.CurrencyUsdRateDto
 import com.rarible.protocol.union.dto.parser.CurrencyIdParser
 import org.springframework.http.ResponseEntity
@@ -15,7 +13,7 @@ class CurrencyController(
     private val currencyService: CurrencyService
 ) : CurrencyControllerApi {
 
-    override suspend fun getCurrencyUsdRateByCurrencyId(
+    override suspend fun getUsdRate(
         currencyId: String,
         at: Instant
     ): ResponseEntity<CurrencyUsdRateDto> {
@@ -27,14 +25,5 @@ class CurrencyController(
     override suspend fun getAllCurrencies(): ResponseEntity<CurrenciesDto> {
         val currencies = currencyService.getAllCurrencies()
         return ResponseEntity.ok(CurrenciesDto(currencies))
-    }
-
-    override suspend fun getCurrencyUsdRate(
-        blockchain: BlockchainDto,
-        address: String,
-        at: Instant
-    ): ResponseEntity<CurrencyUsdRateDto> {
-        val currencyId = CurrencyIdDto(blockchain, address, null)
-        return getCurrencyUsdRateByCurrencyId(currencyId.fullId(), at)
     }
 }
