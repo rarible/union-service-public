@@ -10,7 +10,7 @@ abstract class MetaContentEnrichmentService<K, T : ContentOwner<T>>(
     private val customizers: List<MetaCustomizer<K, T>>,
 ) {
 
-    suspend fun enrcih(key: K, meta: T): T {
+    suspend fun enrich(key: K, meta: T): T {
         val sanitized = sanitizeContent(meta.content)
         val (_, blockchain) = extractBlockchain(key)
         val content = contentMetaLoader.enrichContent(key.toString(), blockchain, sanitized)

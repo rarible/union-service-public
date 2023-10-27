@@ -32,11 +32,10 @@ class ItemMetaRepository(
         if (isUpdateRequired(item.metaEntry)) {
             val updated = LogUtils.addToMdc(itemId.toDto(), blockchainRouter) {
                 val result = updateEntry(item.metaEntry)
-                logger.info("Updating Item [{}] with meta entry having status {}", entryId, result.status)
                 if (result.data?.toComparable() != item.metaEntry?.data?.toComparable()) {
-                    logger.info("Metadata has changed after refresh for item $itemId")
+                    logger.info("Metadata has changed after refresh for item $itemId (status=${result.status})")
                 } else {
-                    logger.info("Metadata has not changed after refresh for item $itemId")
+                    logger.info("Metadata has not changed after refresh for item $itemId (status=${result.status})")
                 }
                 result
             }

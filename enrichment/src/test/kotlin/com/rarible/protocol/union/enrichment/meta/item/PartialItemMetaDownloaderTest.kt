@@ -65,7 +65,7 @@ internal class PartialItemMetaDownloaderTest {
         coEvery { provider.getSource() } returns MetaSource.SIMPLE_HASH
 
         val enrichedMeta = randomUnionMeta()
-        coEvery { itemMetaContentEnrichmentService.enrcih(itemId, updatedMeta) } returns enrichedMeta
+        coEvery { itemMetaContentEnrichmentService.enrich(itemId, updatedMeta) } returns enrichedMeta
 
         val result = partialItemMetaDownloader.download(itemId.fullId())
 
