@@ -1,33 +1,14 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.client.AuctionControllerApi
+// import com.rarible.protocol.union.api.client.AuctionControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
-import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.core.converter.UnionAddressConverter
-import com.rarible.protocol.union.core.util.PageSize
-import com.rarible.protocol.union.dto.AuctionBidDto
-import com.rarible.protocol.union.dto.AuctionIdDto
-import com.rarible.protocol.union.dto.AuctionSortDto
-import com.rarible.protocol.union.dto.AuctionStatusDto
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.PlatformDto
-import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
-import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
-import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
-import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionBidsDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionDto
-import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.reactive.awaitFirst
-import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 
-@FlowPreview
-@IntegrationTest
+// TODO AUCTIONS DISABLED
+// @FlowPreview
+// @IntegrationTest
 class AuctionControllerFt : AbstractIntegrationTest() {
 
+    /*
     private val continuation: String? = null
     private val size = PageSize.AUCTION.default
     private val platform: PlatformDto? = null
@@ -164,4 +145,5 @@ class AuctionControllerFt : AbstractIntegrationTest() {
         assertThat(unionAuctions.auctions.size).isEqualTo(1)
         assertThat(unionAuctions.auctions.first().id).isEqualTo(unionAuction.id)
     }
+     */
 }

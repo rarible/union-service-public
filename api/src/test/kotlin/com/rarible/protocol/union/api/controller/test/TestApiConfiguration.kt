@@ -160,8 +160,11 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Bean
     fun testOrderControllerApi(factory: UnionApiClientFactory) = factory.createOrderApiClient()
 
+    // TODO AUCTIONS DISABLED
+    /*
     @Bean
     fun testAuctionControllerApi(factory: UnionApiClientFactory) = factory.createAuctionApiClient()
+    */
 
     @Bean
     fun testSignatureControllerApi(factory: UnionApiClientFactory) = factory.createSignatureApiClient()
