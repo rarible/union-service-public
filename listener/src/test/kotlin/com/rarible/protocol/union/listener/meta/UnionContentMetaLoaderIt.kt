@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.listener.meta
 
+import com.rarible.core.content.meta.loader.ContentMetaResult
 import com.rarible.core.meta.resource.model.ContentMeta
 import com.rarible.core.meta.resource.model.MimeType
 import com.rarible.core.test.data.randomInt
@@ -54,7 +55,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val content = randomUnionContent(UnionImageProperties())
         val contentMeta = randomContentMeta(MimeType.PNG_IMAGE.value)
 
-        coEvery { testContentMetaReceiver.receive(URL(content.url)) } returns contentMeta
+        coEvery { testContentMetaReceiver.receive(URL(content.url)) } returns stubResult(contentMeta)
 
         val result = unionMetaConLoader.enrichContent(itemId.fullId(), itemId.blockchain, listOf(content))[0]
         val enriched = result.properties!! as UnionImageProperties
@@ -71,7 +72,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val content = randomUnionContent(UnionVideoProperties())
         val contentMeta = randomContentMeta(MimeType.PNG_IMAGE.value)
 
-        coEvery { testContentMetaReceiver.receive(URL(content.url)) } returns contentMeta
+        coEvery { testContentMetaReceiver.receive(URL(content.url)) } returns stubResult(contentMeta)
 
         val result = unionMetaConLoader.enrichContent(itemId.fullId(), itemId.blockchain, listOf(content))[0]
         val enriched = result.properties!! as UnionImageProperties
@@ -88,7 +89,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val content = randomUnionContent(input)
 
         // failed with exception
-        coEvery { testContentMetaReceiver.receive(content.url) } throws IOException()
+        coEvery { testContentMetaReceiver.receive(URL(content.url)) } throws IOException()
 
         val result = unionMetaConLoader.enrichContent(itemId.fullId(), itemId.blockchain, listOf(content))[0]
         val enriched = result.properties as UnionImageProperties
@@ -101,7 +102,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val input = UnionImageProperties(MimeType.PNG_IMAGE.value, randomLong(), true, randomInt(), randomInt())
         val content = randomUnionContent(input)
 
-        coEvery { testContentMetaReceiver.receive(content.url) } returns null
+        coEvery { testContentMetaReceiver.receive(URL(content.url)) } returns stubResult(null)
 
         val result = unionMetaConLoader.enrichContent(itemId.fullId(), itemId.blockchain, listOf(content))[0]
         val enriched = result.properties as UnionImageProperties
@@ -114,7 +115,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val content = randomUnionContent()
 
         // null returned without exception
-        coEvery { testContentMetaReceiver.receive(content.url) } returns null
+        coEvery { testContentMetaReceiver.receive(URL(content.url)) } returns stubResult(null)
 
         val result = unionMetaConLoader.enrichContent(itemId.fullId(), itemId.blockchain, listOf(content))[0]
         val enriched = result.properties
@@ -131,7 +132,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val content = randomUnionContent(UnionImageProperties()).copy(url = cid)
         val contentMeta = randomContentMeta(MimeType.PNG_IMAGE.value)
 
-        coEvery { testContentMetaReceiver.receive(content.url) } returns contentMeta
+        coEvery { testContentMetaReceiver.receive(URL("https://ipfs.io/ipfs/$cid")) } returns stubResult(contentMeta)
 
         val result = unionMetaConLoader.enrichContent(itemId.fullId(), itemId.blockchain, listOf(content))[0]
 
@@ -145,7 +146,7 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
         val content = randomUnionContent(UnionImageProperties()).copy(url = url)
         val contentMeta = randomContentMeta(MimeType.PNG_IMAGE.value)
 
-        coEvery { testContentMetaReceiver.receive(content.url) } returns contentMeta
+        coEvery { testContentMetaReceiver.receive(URL(content.url)) } returns stubResult(contentMeta)
 
         val result = unionMetaConLoader.enrichContent(itemId.fullId(), itemId.blockchain, listOf(content))[0]
 
@@ -199,6 +200,15 @@ class UnionContentMetaLoaderIt : AbstractIntegrationTest() {
             width = randomInt(1000),
             height = randomInt(1000),
             size = randomLong()
+        )
+    }
+
+    private fun stubResult(contentMeta: ContentMeta?): ContentMetaResult {
+        return ContentMetaResult(
+            meta = contentMeta,
+            approach = "stub",
+            bytesRead = 0,
+            exception = null
         )
     }
 }

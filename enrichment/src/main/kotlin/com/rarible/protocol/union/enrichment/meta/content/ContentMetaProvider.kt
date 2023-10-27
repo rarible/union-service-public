@@ -1,16 +1,17 @@
 package com.rarible.protocol.union.enrichment.meta.content
 
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
-import com.rarible.core.meta.resource.model.ContentMeta
+import com.rarible.core.content.meta.loader.ContentMetaResult
 import com.rarible.core.meta.resource.model.UrlResource
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionMetaContentProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.meta.content.cache.ContentCache
 import com.rarible.protocol.union.enrichment.meta.content.cache.ContentCacheService
+import com.rarible.protocol.union.enrichment.util.metaSpent
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.net.URL
+import java.time.Instant
 
 @Component
 class ContentMetaProvider(
@@ -18,16 +19,20 @@ class ContentMetaProvider(
     private val contentCacheService: ContentCacheService,
     private val contentMetaReceiver: ContentMetaReceiver,
     private val metrics: ContentMetaMetrics,
-    private val ff: FeatureFlagsProperties
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    suspend fun getContent(blockchain: BlockchainDto, resource: UrlResource): UnionMetaContentProperties? {
+    suspend fun getContent(
+        id: String,
+        blockchain: BlockchainDto,
+        start: Instant,
+        resource: UrlResource
+    ): UnionMetaContentProperties? {
         val cache = getCache(resource)
         getFromCache(cache, blockchain, resource)?.let { return it }
 
-        val fetched = fetch(blockchain, resource)
+        val fetched = fetch(id, blockchain, start, resource)
         updateCache(cache, blockchain, resource, fetched)
 
         return fetched
@@ -79,48 +84,99 @@ class ContentMetaProvider(
         }
     }
 
-    private suspend fun fetch(blockchain: BlockchainDto, resource: UrlResource): UnionMetaContentProperties? {
+    private suspend fun fetch(
+        id: String,
+        blockchain: BlockchainDto,
+        start: Instant,
+        resource: UrlResource
+    ): UnionMetaContentProperties? {
         val internalUrl = contentMetaService.resolveInternalHttpUrl(resource)
-        if (internalUrl == resource.original) {
-            logger.info("Fetching content meta by URL $internalUrl")
-        } else {
-            logger.info("Fetching content meta by URL $internalUrl (original URL is ${resource.original})")
-        }
 
         val parsedUrl = try {
             URL(internalUrl)
         } catch (e: Throwable) {
-            logger.warn("Wrong URL: $internalUrl", e)
-            metrics.onContentResolutionFailed(blockchain, "remote", "malformed_url")
+            logger.warn("Wrong URL for $id: $internalUrl: ${e.message}")
+            metrics.onContentResolutionFailed(
+                blockchain = blockchain,
+                start = start,
+                source = SOURCE,
+                approach = "unknown",
+                reason = "malformed_url",
+            )
             return null
         }
 
         return try {
-            val contentMeta = contentMetaReceiver.receive(parsedUrl)
-            val properties = contentMeta?.let { contentMetaService.convertToProperties(contentMeta) }
-            mark(blockchain, contentMeta, properties)
+            val result = contentMetaReceiver.receive(parsedUrl)
+            val properties = result.meta?.let { contentMetaService.convertToProperties(it) }
+            mark(start, blockchain, result, properties)
+
+            val spent = System.currentTimeMillis() - start.toEpochMilli()
+            if (result.exception == null) {
+                logger.info(
+                    "Fetched content meta for $id via URL $internalUrl (original URL: ${resource.original})," +
+                        " resolved with approach: ${result.approach}, bytes read: ${result.bytesRead}," +
+                        " content=${result.meta} (${metaSpent(start)})"
+                )
+            } else {
+                logger.warn(
+                    "Failed to fetch content meta for $id via URL $internalUrl (original URL: ${resource.original})," +
+                        " resolved with approach: ${result.approach}, bytes read: ${result.bytesRead}," +
+                        " error=${result.exception?.message} (${metaSpent(start)})"
+                )
+            }
+
             properties
         } catch (e: Exception) {
-            logger.warn("Failed to receive content meta via URL {}", internalUrl, e)
-            metrics.onContentResolutionFailed(blockchain, "remote", "error")
+            logger.warn("Failed to receive content meta for $id via URL $internalUrl", e)
+            metrics.onContentResolutionFailed(
+                blockchain = blockchain,
+                start = start,
+                source = SOURCE,
+                approach = "unknown",
+                reason = "error",
+            )
             null
         }
     }
 
     private fun mark(
+        start: Instant,
         blockchain: BlockchainDto,
-        contentMeta: ContentMeta?,
+        result: ContentMetaResult,
         properties: UnionMetaContentProperties?
     ) {
-        if (contentMeta == null) {
-            metrics.onContentResolutionFailed(blockchain, "remote", "unresolvable")
+        if (result.meta == null) {
+            metrics.onContentResolutionFailed(
+                blockchain = blockchain,
+                start = start,
+                source = SOURCE,
+                approach = result.approach,
+                reason = "unresolvable",
+            )
             return
         }
         if (properties == null) {
             // if we got ContentMeta but after conversion it is null, it means we don't know such mime type
-            metrics.onContentResolutionFailed(blockchain, "remote", "unknown_mime_type")
+            metrics.onContentResolutionFailed(
+                blockchain = blockchain,
+                start = start,
+                source = SOURCE,
+                approach = result.approach,
+                reason = "unknown_mime_type",
+            )
             return
         }
-        metrics.onContentFetched(blockchain, "remote", properties)
+        metrics.onContentFetched(
+            blockchain = blockchain,
+            start = start,
+            source = SOURCE,
+            approach = result.approach,
+            properties = properties,
+        )
+    }
+
+    companion object {
+        const val SOURCE = "remote"
     }
 }

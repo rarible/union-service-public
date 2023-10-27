@@ -3,10 +3,8 @@ package com.rarible.protocol.union.enrichment.configuration
 import com.rarible.core.content.meta.loader.ApacheHttpContentReceiver
 import com.rarible.core.content.meta.loader.ContentMetaReceiver
 import com.rarible.core.content.meta.loader.ContentReceiver
-import com.rarible.core.content.meta.loader.ContentReceiverMetrics
 import com.rarible.core.content.meta.loader.KtorApacheClientContentReceiver
 import com.rarible.core.content.meta.loader.KtorCioClientContentReceiver
-import com.rarible.core.content.meta.loader.MeasurableContentReceiver
 import com.rarible.core.meta.resource.detector.ContentDetector
 import com.rarible.core.meta.resource.detector.embedded.EmbeddedContentDetector
 import com.rarible.core.meta.resource.parser.UrlParser
@@ -19,7 +17,6 @@ import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.client.WebClientFactory
 import com.rarible.protocol.union.core.util.safeSplit
 import com.rarible.protocol.union.enrichment.meta.UnionMetaPackage
-import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.web.reactive.function.client.WebClient
@@ -100,13 +97,11 @@ class EnrichmentMetaConfiguration(
     fun contentMetaReceiver(
         contentReceiver: ContentReceiver,
         commonMetaProperties: CommonMetaProperties,
-        meterRegistry: MeterRegistry,
         contentDetector: ContentDetector
     ): ContentMetaReceiver {
         return ContentMetaReceiver(
-            contentReceiver = MeasurableContentReceiver(contentReceiver, meterRegistry),
+            contentReceiver = contentReceiver,
             maxBytes = commonMetaProperties.mediaFetchMaxSize.toInt(),
-            contentReceiverMetrics = ContentReceiverMetrics(meterRegistry),
             contentDetector = contentDetector,
         )
     }

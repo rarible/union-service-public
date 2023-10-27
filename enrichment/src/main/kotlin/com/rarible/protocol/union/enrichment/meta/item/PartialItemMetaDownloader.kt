@@ -61,7 +61,7 @@ class PartialItemMetaDownloader(
             throw DownloadException("Failed to download meta from providers: $failedProviders")
         }
 
-        val result = itemMetaContentEnrichmentService.enrcih(key = itemId, meta = meta)
+        val result = itemMetaContentEnrichmentService.enrich(key = itemId, meta = meta)
         return if (failedProviders.isEmpty()) {
             result
         } else {

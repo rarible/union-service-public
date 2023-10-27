@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.enrichment.meta.content
 
+import com.rarible.core.common.nowMillis
+import com.rarible.protocol.union.core.UnionMetrics
 import com.rarible.protocol.union.core.model.UnionAudioProperties
 import com.rarible.protocol.union.core.model.UnionHtmlProperties
 import com.rarible.protocol.union.core.model.UnionImageProperties
@@ -8,9 +10,10 @@ import com.rarible.protocol.union.core.model.UnionModel3dProperties
 import com.rarible.protocol.union.core.model.UnionUnknownProperties
 import com.rarible.protocol.union.core.model.UnionVideoProperties
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.core.UnionMetrics
 import io.micrometer.core.instrument.MeterRegistry
 import org.springframework.stereotype.Component
+import java.time.Duration
+import java.time.Instant
 
 @Component
 class ContentMetaMetrics(
@@ -20,7 +23,13 @@ class ContentMetaMetrics(
     // --------------- Content meta resolution ---------------//
     // Content resolution statistics (for embedded and remote meta content)
 
-    fun onContentFetched(blockchain: BlockchainDto, source: String, properties: UnionMetaContentProperties) {
+    fun onContentFetched(
+        blockchain: BlockchainDto,
+        start: Instant,
+        source: String,
+        approach: String,
+        properties: UnionMetaContentProperties
+    ) {
         val fullness = when {
             properties.isFull() -> "full"
             properties.isEmpty() -> "empty"
@@ -42,16 +51,28 @@ class ContentMetaMetrics(
             status("ok"),
             tag("source", source),
             type(type),
-            tag("fullness", fullness)
+            tag("approach", approach),
+            tag("fullness", fullness),
+            tag("reason", "ok")
         )
     }
 
-    fun onContentResolutionFailed(blockchain: BlockchainDto, source: String, reason: String) {
-        increment(
+    fun onContentResolutionFailed(
+        blockchain: BlockchainDto,
+        start: Instant,
+        source: String,
+        approach: String,
+        reason: String
+    ) {
+        record(
             CONTENT_META_RESOLUTION,
+            Duration.between(start, nowMillis()),
             tag(blockchain),
             status("fail"),
             tag("source", source),
+            type("unknown"),
+            tag("approach", approach),
+            tag("fullness", "empty"),
             reason(reason)
         )
     }
