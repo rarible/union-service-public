@@ -33,67 +33,6 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
     @Autowired
     lateinit var currencyControllerApi: CurrencyControllerApi
 
-    @Test
-    fun `get currency usd rate using deprecated method`() = runBlocking<Unit> {
-        val address = randomAddressString()
-        val now = nowMillis()
-
-        val currencyDto = CurrencyRateDto(address, "usd", randomBigDecimal(), now)
-
-        coEvery {
-            testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM.name, address, now.toEpochMilli())
-        } returns currencyDto.toMono()
-
-        val result = currencyControllerApi.getCurrencyUsdRate(
-            com.rarible.protocol.union.dto.BlockchainDto.ETHEREUM,
-            address,
-            now
-        ).awaitFirst()
-
-        assertThat(result.currencyId).isEqualTo(address)
-        assertThat(result.date).isEqualTo(now)
-        assertThat(result.rate).isEqualTo(currencyDto.rate.stripTrailingZeros())
-    }
-
-    @Test
-    fun `get currency usd rate - currency not found using deprecated method`() = runBlocking<Unit> {
-        val address = randomAddressString()
-        val now = nowMillis()
-
-        coEvery {
-            testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM.name, address, now.toEpochMilli())
-        } returns Mono.empty()
-
-        val ex = assertThrows<CurrencyControllerApi.ErrorGetCurrencyUsdRate> {
-            runBlocking {
-                currencyControllerApi.getCurrencyUsdRate(
-                    com.rarible.protocol.union.dto.BlockchainDto.ETHEREUM,
-                    address,
-                    now
-                ).awaitFirst()
-            }
-        }
-
-        assertThat(ex.on400).isNotNull
-    }
-
-    companion object {
-
-        @JvmStatic
-        fun currencyId() = Stream.of(
-            CurrencyIdDto(
-                com.rarible.protocol.union.dto.BlockchainDto.ETHEREUM,
-                randomAddressString(),
-                randomBigInt()
-            ),
-            CurrencyIdDto(
-                com.rarible.protocol.union.dto.BlockchainDto.ETHEREUM,
-                randomAddressString(),
-                null
-            )
-        )
-    }
-
     @ParameterizedTest
     @MethodSource("currencyId")
     fun `get currency usd rate`(currencyId: CurrencyIdDto) = runBlocking<Unit> {
@@ -104,7 +43,7 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
             testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM.name, currencyId.value, now.toEpochMilli())
         } returns currencyDto.toMono()
 
-        val result = currencyControllerApi.getCurrencyUsdRateByCurrencyId(
+        val result = currencyControllerApi.getUsdRate(
             currencyId.fullId(),
             now
         ).awaitFirst()
@@ -123,9 +62,9 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
             testCurrencyApi.getCurrencyRate(BlockchainDto.ETHEREUM.name, currencyId.value, now.toEpochMilli())
         } returns Mono.empty()
 
-        val ex = assertThrows<CurrencyControllerApi.ErrorGetCurrencyUsdRateByCurrencyId> {
+        val ex = assertThrows<CurrencyControllerApi.ErrorGetUsdRate> {
             runBlocking {
-                currencyControllerApi.getCurrencyUsdRateByCurrencyId(currencyId.fullId(), now).awaitFirst()
+                currencyControllerApi.getUsdRate(currencyId.fullId(), now).awaitFirst()
             }
         }
         assertThat(ex.on400).isNotNull
@@ -139,5 +78,22 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
 
         assertThat(currencies).hasSize(14)
         assertThat(currencies).doesNotHaveDuplicates()
+    }
+
+    companion object {
+
+        @JvmStatic
+        fun currencyId() = Stream.of(
+            CurrencyIdDto(
+                BlockchainDto.ETHEREUM,
+                randomAddressString(),
+                randomBigInt()
+            ),
+            CurrencyIdDto(
+                BlockchainDto.ETHEREUM,
+                randomAddressString(),
+                null
+            )
+        )
     }
 }
