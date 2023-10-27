@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.meta
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.ContentOwner
 import com.rarible.protocol.union.core.model.MetaSource
 import com.rarible.protocol.union.enrichment.download.PartialDownloadException
@@ -7,7 +8,10 @@ import com.rarible.protocol.union.enrichment.download.ProviderDownloadException
 import com.rarible.protocol.union.enrichment.meta.content.MetaContentEnrichmentService
 import com.rarible.protocol.union.enrichment.meta.provider.MetaCustomProvider
 import com.rarible.protocol.union.enrichment.meta.provider.MetaProvider
+import com.rarible.protocol.union.enrichment.util.metaSpent
 import org.slf4j.LoggerFactory
+import java.time.Duration
+import java.time.Instant
 import java.util.concurrent.ArrayBlockingQueue
 
 abstract class MetaDownloader<K, T : ContentOwner<T>>(
@@ -21,6 +25,7 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     protected suspend fun load(key: K): T? {
+        val start = nowMillis()
         val (id, blockchain) = metaContentEnrichmentService.extractBlockchain(key)
 
         // Check custom providers first - if any of them can be used for meta resolution,
@@ -29,7 +34,10 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
         customProviders.forEach { provider ->
             val result = provider.fetch(blockchain, id)
             if (result.supported) {
-                return result.data?.let { metaContentEnrichmentService.enrcih(key = key, meta = it) }
+                val enrichmentStart = nowMillis()
+                val enriched = result.data?.let { metaContentEnrichmentService.enrich(key = key, meta = it) }
+                logDownload(start, enrichmentStart, key, enriched)
+                return enriched
             }
         }
 
@@ -42,13 +50,40 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
                 current
             }
         }
-        meta ?: return null
 
-        val result = metaContentEnrichmentService.enrcih(key = key, meta = meta)
+        if (meta == null) {
+            logDownload(start, nowMillis(), key, null)
+            return null
+        }
+
+        val enrichmentStart = nowMillis()
+        val result = metaContentEnrichmentService.enrich(key = key, meta = meta)
+        logDownload(start, enrichmentStart, key, result)
+
         return when {
             failedProviders.isEmpty() -> result
             (failedProviders.size == providers.size) -> null
             else -> throw PartialDownloadException(failedProviders = failedProviders.toList(), data = result)
+        }
+    }
+
+    private fun logDownload(
+        start: Instant,
+        enrichmentStart: Instant,
+        key: K,
+        meta: T?
+    ) {
+        val jsonDuration = Duration.between(enrichmentStart, start)
+        if (meta != null) {
+            logger.info(
+                "Downloaded $type meta for $key" +
+                    " (${metaSpent(jsonDuration)} json, ${metaSpent(enrichmentStart)}) enrichment"
+            )
+        } else {
+            logger.info(
+                "Failed to download $type meta for $key" +
+                    " (${metaSpent(jsonDuration)} json, ${metaSpent(enrichmentStart)}) enrichment"
+            )
         }
     }
 }
