@@ -10,7 +10,6 @@ import com.rarible.protocol.union.core.model.UnionUnknownProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.meta.embedded.EmbeddedContentService
 import com.rarible.protocol.union.enrichment.meta.embedded.UnionEmbeddedContent
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.slf4j.LoggerFactory
@@ -33,7 +32,7 @@ class ContentMetaDownloader(
         metaContent: List<UnionMetaContent>
     ): List<UnionMetaContent> = coroutineScope {
         metaContent.map { content ->
-            asyncWithTraceId(context = NonCancellable) {
+            asyncWithTraceId {
                 // Checking if there is embedded content first
                 val start = nowMillis()
                 val embedded = contentMetaService.detectEmbeddedContent(content.url)
