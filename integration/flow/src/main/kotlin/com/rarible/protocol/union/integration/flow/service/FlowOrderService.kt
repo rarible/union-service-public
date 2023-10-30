@@ -71,8 +71,7 @@ open class FlowOrderService(
     }
 
     override suspend fun getOrdersByIds(orderIds: List<String>): List<UnionOrder> {
-        val ids = orderIds.map { it.toLong() }
-        val orders = orderControllerApi.getOrdersByIds(FlowOrderIdsDto(ids)).collectList().awaitFirst()
+        val orders = orderControllerApi.getOrdersByIds(FlowOrderIdsDto(orderIds)).collectList().awaitFirst()
         return orders.map { flowOrderConverter.convert(it, blockchain) }
     }
 
