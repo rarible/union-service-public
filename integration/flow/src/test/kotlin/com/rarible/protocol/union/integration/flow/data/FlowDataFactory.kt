@@ -133,7 +133,7 @@ fun randomFlowCollectionDto(id: String): FlowNftCollectionDto {
 fun randomFlowV1OrderDto() = randomFlowV1OrderDto(randomFlowItemId())
 fun randomFlowV1OrderDto(itemId: ItemIdDto): FlowOrderDto {
     return FlowOrderDto(
-        id = randomLong(),
+        id = randomString(),
         itemId = itemId.value,
         maker = randomFlowAddress().value,
         taker = randomFlowAddress().value,
