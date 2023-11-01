@@ -6,6 +6,7 @@ import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.currency.dto.CurrenciesDto
+import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.core.converter.CurrencyConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
@@ -27,9 +28,6 @@ import com.rarible.protocol.union.enrichment.test.data.randomUnionOwnership
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.flow.data.randomFlowCollectionDto
-import com.rarible.protocol.union.test.mock.CurrencyMock
-import com.rarible.protocol.union.test.mock.CurrencyMock.mockCurrencies
-import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -45,7 +43,7 @@ import java.time.Duration
 import kotlin.random.Random
 
 @IntegrationTest
-class OwnershipElasticServiceIt {
+class OwnershipElasticServiceIt : AbstractIntegrationTest() {
 
     @MockkBean
     private lateinit var router: BlockchainRouter<OwnershipService>
@@ -70,13 +68,19 @@ class OwnershipElasticServiceIt {
     @Autowired
     private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
 
+    private val ratesPerCurrency = nativeTestCurrencies().filter { it.rate != null }.associateBy(
+        { "${it.blockchain}:${it.address}" }, { it.rate!!.toDouble() }
+    )
+
     @BeforeEach
     internal fun setUp() {
+        every { testCurrencyApi.allCurrencies } returns CurrenciesDto(nativeTestCurrencies()).toMono()
         runBlocking {
             elasticsearchTestBootstrapper.bootstrap()
 
             repeat(10) {
-                val currency = nativeTestCurrencies().find { it.currencyId == BlockchainDto.ETHEREUM.name.lowercase() }!!
+                val currency =
+                    nativeTestCurrencies().find { it.currencyId == BlockchainDto.ETHEREUM.name.lowercase() }!!
                 val oid = randomOwnershipId(
                     blockchain = BlockchainDto.ETHEREUM,
                     itemIdValue = "${randomAddressString()}:${randomLong()}",
@@ -182,9 +186,6 @@ class OwnershipElasticServiceIt {
                 enrichmentAuctionService.fetchAuctionsIfAbsent(any(), any())
             } returns emptyMap()
         }
-
-        clearMocks(CurrencyMock.currencyControllerApiMock)
-        every { CurrencyMock.currencyControllerApiMock.allCurrencies } returns CurrenciesDto(nativeTestCurrencies()).toMono()
     }
 
     @Test
@@ -301,8 +302,6 @@ class OwnershipElasticServiceIt {
     @Test
     @Disabled("Unstable test PT-2682")
     fun `should find by sell price`() = runBlocking<Unit> {
-        // given
-        val ratesPerCurrency = mockCurrencies()
         val expected: List<EsOwnership> =
             ownerships.sortedBy { it.bestSellAmount?.times(ratesPerCurrency[it.bestSellCurrency]!!) }
                 .drop(ownerships.size / 4)
@@ -351,8 +350,6 @@ class OwnershipElasticServiceIt {
     @Test
     @Disabled("Unstable test PT-2682")
     fun `should find by usd sell price`() = runBlocking<Unit> {
-        // given
-        val ratesPerCurrency = mockCurrencies()
         val expected: List<EsOwnership> =
             ownerships.sortedBy { it.bestSellAmount?.times(ratesPerCurrency[it.bestSellCurrency]!!) }
                 .drop(ownerships.size / 4)

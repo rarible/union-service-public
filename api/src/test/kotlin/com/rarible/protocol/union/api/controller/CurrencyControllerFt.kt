@@ -13,6 +13,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import io.mockk.coEvery
+import io.mockk.every
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
@@ -72,9 +73,9 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
 
     @Test
     fun `get all currencies`() = runBlocking<Unit> {
-        coEvery { testCurrencyApi.getAllCurrencies() } returns Mono.just(CurrenciesDto(nativeTestCurrencies()))
+        every { testCurrencyApi.allCurrencies } returns Mono.just(CurrenciesDto(nativeTestCurrencies()))
 
-        val currencies = currencyControllerApi.getAllCurrencies().awaitFirst().currencies
+        val currencies = currencyControllerApi.allCurrencies.awaitFirst().currencies
 
         assertThat(currencies).hasSize(14)
         assertThat(currencies).doesNotHaveDuplicates()

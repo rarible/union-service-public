@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.controller.internal
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.ninjasquad.springmockk.MockkBean
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomWord
@@ -62,7 +61,6 @@ import io.mockk.every
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -94,26 +92,18 @@ class RefreshControllerFt : AbstractIntegrationTest() {
     @Autowired
     lateinit var activityRepository: ActivityRepository
 
-    @MockkBean
+    @Autowired
     lateinit var internalItemProducer: UnionInternalItemEventProducer
 
-    @MockkBean
+    @Autowired
     lateinit var internalCollectionProducer: UnionInternalCollectionEventProducer
 
-    @MockkBean
+    @Autowired
     lateinit var internalOwnershipProducer: UnionInternalOwnershipEventProducer
 
     private val origin = "0xWhitelabel"
     private val ethOriginCollection = "0xf3348949db80297c78ec17d19611c263fc61f988" // from application.yaml
     private val active = listOf(com.rarible.protocol.dto.OrderStatusDto.ACTIVE)
-
-    @BeforeEach
-    fun setUp() {
-        coEvery { internalItemProducer.sendDeleteEvent(any()) } returns Unit
-        coEvery { internalItemProducer.sendChangeEvent(any()) } returns Unit
-        coEvery { internalCollectionProducer.sendChangeEvent(any()) } returns Unit
-        coEvery { internalOwnershipProducer.sendChangeEvent(any()) } returns Unit
-    }
 
     @Test
     fun `reconcile item - full`() = runBlocking<Unit> {

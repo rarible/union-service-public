@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
 import com.rarible.protocol.union.core.service.CurrencyService
@@ -13,9 +12,6 @@ class EsItemQueryPriceFilterService(
     private val currencyService: CurrencyService,
     private val esEntityQueryPriceFilterService: EsEntityQueryPriceFilterService,
 ) {
-    companion object {
-        val logger by Logger()
-    }
 
     suspend fun applyPriceFilter(
         query: BoolQueryBuilder,

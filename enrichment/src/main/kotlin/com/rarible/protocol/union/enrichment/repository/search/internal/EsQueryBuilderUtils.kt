@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.repository.search.internal
 
 import org.elasticsearch.index.query.BoolQueryBuilder
+import org.elasticsearch.index.query.ExistsQueryBuilder
 import org.elasticsearch.index.query.RangeQueryBuilder
 import org.elasticsearch.index.query.TermQueryBuilder
 import org.elasticsearch.index.query.TermsQueryBuilder
@@ -19,6 +20,14 @@ fun BoolQueryBuilder.mustMatchTerms(terms: Set<*>?, field: String) {
 fun BoolQueryBuilder.mustMatchTerm(term: String?, field: String) {
     if (!term.isNullOrEmpty()) {
         must(TermQueryBuilder(field, term))
+    }
+}
+
+fun BoolQueryBuilder.mustExists(term: Boolean?, field: String) {
+    when (term) {
+        null -> return
+        true -> must(ExistsQueryBuilder(field))
+        false -> mustNot(ExistsQueryBuilder(field))
     }
 }
 
