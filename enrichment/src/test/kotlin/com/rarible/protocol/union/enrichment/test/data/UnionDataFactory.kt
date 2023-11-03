@@ -366,6 +366,8 @@ fun randomEsItem(): EsItem {
     return EsItem(
         id = itemId.value,
         itemId = itemId.fullId(),
+        token = itemId.value.split(":")[0],
+        tokenId = itemId.value.split(":")[1],
         blockchain = itemId.blockchain,
         collection = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed()).fullId(),
         name = randomString(),

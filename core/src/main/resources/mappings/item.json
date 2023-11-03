@@ -16,6 +16,12 @@
     "collection": {
       "type": "keyword"
     },
+    "token": {
+      "type": "keyword"
+    },
+    "tokenId": {
+      "type": "keyword"
+    },
     "name": {
       "type": "text",
       "analyzer": "stemmer_analyzer",

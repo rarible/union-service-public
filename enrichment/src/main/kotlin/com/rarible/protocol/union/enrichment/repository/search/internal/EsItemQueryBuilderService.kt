@@ -96,7 +96,8 @@ class EsItemQueryBuilderService(
     }
 
     private fun fieldsWithBoost(fields: List<TextField>): Map<String, Float> =
-        fields.map { it.esField }.associateWith { searchProperties.item[it] ?: 1.0f }
+        (fields.map { it.esField } + listOf("token", "tokenId"))
+            .associateWith { searchProperties.item[it] ?: 1.0f }
 
     private fun BoolQueryBuilder.applyFullTextSearch(text: String, fields: Map<String, Float>) {
         val trimmedText = text.trim()

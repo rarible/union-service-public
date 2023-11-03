@@ -35,6 +35,7 @@ class EsItemOptimizedSearchService(
         }
         val max = PageSize.ITEM.limit(limit)
         return when (sort.type) {
+            EsItemSortType.MOST_RELEVANT,
             EsItemSortType.LATEST_FIRST,
             EsItemSortType.EARLIEST_FIRST -> {
                 if (filter is EsItemGenericFilter) {

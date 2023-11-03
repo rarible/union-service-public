@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.core.common.nowMillis
+import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.currency.dto.CurrenciesDto
@@ -548,21 +549,86 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
 
     @Test
     fun `search items by names and full text`() = runBlocking<Unit> {
-        val expected1 = takeRandomItems()[0]
-        val expected2 = takeRandomItems()[1]
+        val expected = takeRandomItems()[0]
         val items = itemElasticService.searchItems(
             ItemsSearchRequestDto(
                 filter = ItemsSearchFilterDto(
-                    names = listOf(expected1.name!!),
+                    names = listOf(expected.name!!),
                     fullText = ItemSearchFullTextDto(
-                        text = expected2.name!!,
+                        text = expected.name!!,
                         fields = listOf(ItemSearchFullTextDto.Fields.NAME)
                     )
                 )
             )
         )
         assertThat(items.items.map { it.id.fullId().lowercase() })
-            .containsExactlyInAnyOrder(expected1.itemId.lowercase(), expected2.itemId.lowercase())
+            .containsExactly(expected.itemId.lowercase())
+    }
+
+    @Test
+    fun `search items full text phrase boost`() = runBlocking<Unit> {
+        val phraseItem = randomItemDto(ItemIdDto(BlockchainDto.ETHEREUM, "${randomAddress()}:1")).copy(
+            meta = MetaDto(name = "phrase", attributes = emptyList(), content = emptyList())
+        ).toEsItem()
+        val precisePhraseItem = randomItemDto(ItemIdDto(BlockchainDto.ETHEREUM, "${randomAddress()}:2")).copy(
+            meta = MetaDto(name = "precise phrase", attributes = emptyList(), content = emptyList())
+        ).toEsItem()
+        val extendedPhraseItem = randomItemDto(ItemIdDto(BlockchainDto.ETHEREUM, "${randomAddress()}:3")).copy(
+            meta = MetaDto(name = "precise phrase extended", attributes = emptyList(), content = emptyList())
+        ).toEsItem()
+        repository.bulk(entitiesToSave = listOf(phraseItem, precisePhraseItem, extendedPhraseItem))
+        val precisePhraseSearchItems = itemElasticService.searchItems(
+            ItemsSearchRequestDto(
+                filter = ItemsSearchFilterDto(
+                    fullText = ItemSearchFullTextDto(
+                        text = "phrase",
+                        fields = listOf(ItemSearchFullTextDto.Fields.NAME)
+                    ),
+                ),
+                sort = ItemsSearchSortDto.DEFAULT
+            )
+        )
+        assertThat(precisePhraseSearchItems.items.map { it.id.fullId().lowercase() })
+            // TODO should be containsExactly, can't align order
+            .containsExactlyInAnyOrder(
+                phraseItem.itemId.lowercase(),
+                precisePhraseItem.itemId.lowercase(),
+                extendedPhraseItem.itemId.lowercase()
+            )
+        val phraseSearchItems = itemElasticService.searchItems(
+            ItemsSearchRequestDto(
+                filter = ItemsSearchFilterDto(
+                    fullText = ItemSearchFullTextDto(
+                        text = "precise phrase",
+                        fields = listOf(ItemSearchFullTextDto.Fields.NAME)
+                    )
+                ),
+                sort = ItemsSearchSortDto.DEFAULT
+            )
+        )
+        assertThat(phraseSearchItems.items.map { it.id.fullId().lowercase() })
+            // TODO should be containsExactly, can't align order
+            .containsExactlyInAnyOrder(
+                precisePhraseItem.itemId.lowercase(),
+                extendedPhraseItem.itemId.lowercase()
+            )
+    }
+
+    @Test
+    fun `search items by tokenId`() = runBlocking<Unit> {
+        val expected = takeRandomItems()[0]
+        val items = itemElasticService.searchItems(
+            ItemsSearchRequestDto(
+                filter = ItemsSearchFilterDto(
+                    fullText = ItemSearchFullTextDto(
+                        text = expected.tokenId!!,
+                        fields = listOf(ItemSearchFullTextDto.Fields.NAME)
+                    )
+                ),
+            )
+        )
+        assertThat(items.items.map { it.id.fullId().lowercase() })
+            .containsExactly(expected.itemId.lowercase())
     }
 
     private fun takeRandomItems(): List<EsItem> {

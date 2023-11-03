@@ -281,6 +281,8 @@ internal class ItemTraitServiceTest {
             itemId = itemId.fullId(),
             blockchain = blockchain,
             collection = collection,
+            token = itemId.value.split(":")[0],
+            tokenId = itemId.value.split(":")[1],
             name = randomString(),
             description = randomString(),
             traits = traits,

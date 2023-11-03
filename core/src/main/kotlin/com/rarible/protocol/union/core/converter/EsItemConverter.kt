@@ -18,6 +18,8 @@ object EsItemConverter {
             itemId = id.fullId(),
             blockchain = blockchain,
             collection = collection?.fullId(),
+            token = collection?.value,
+            tokenId = tokenId(id),
             name = meta?.name,
             description = meta?.description,
             creators = creators.map { it.account.fullId() },

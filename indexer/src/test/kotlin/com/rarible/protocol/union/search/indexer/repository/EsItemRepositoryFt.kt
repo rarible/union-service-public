@@ -64,6 +64,8 @@ internal class EsItemRepositoryFt {
         val esItem = EsItem(
             id = "0xFF",
             itemId = "0x03",
+            token = "0x02",
+            tokenId = "0x03",
             blockchain = BlockchainDto.ETHEREUM,
             collection = "0x02",
             name = "TestItem",
@@ -436,6 +438,8 @@ internal class EsItemRepositoryFt {
             itemId = itemId.fullId(),
             blockchain = blockchain,
             collection = collectionId,
+            token = collectionId,
+            tokenId = itemId.value.split(":")[1],
             name = randomString(),
             description = randomString(),
             traits = listOf(
