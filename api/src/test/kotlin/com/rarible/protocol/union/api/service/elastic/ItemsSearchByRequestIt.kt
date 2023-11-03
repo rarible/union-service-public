@@ -20,6 +20,7 @@ import com.rarible.protocol.union.dto.ContractAddress
 import com.rarible.protocol.union.dto.EthErc20AssetTypeDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ItemSearchFullTextDto
 import com.rarible.protocol.union.dto.ItemsSearchFilterDto
 import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsSearchSortDto
@@ -543,6 +544,25 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
 
         assertThat(onSale).containsExactlyInAnyOrderElementsOf(esItems.map { it.itemId })
         assertThat(notOnSale).isEqualTo(listOf(item.itemId))
+    }
+
+    @Test
+    fun `search items by names and full text`() = runBlocking<Unit> {
+        val expected1 = takeRandomItems()[0]
+        val expected2 = takeRandomItems()[1]
+        val items = itemElasticService.searchItems(
+            ItemsSearchRequestDto(
+                filter = ItemsSearchFilterDto(
+                    names = listOf(expected1.name!!),
+                    fullText = ItemSearchFullTextDto(
+                        text = expected2.name!!,
+                        fields = listOf(ItemSearchFullTextDto.Fields.NAME)
+                    )
+                )
+            )
+        )
+        assertThat(items.items.map { it.id.fullId().lowercase() })
+            .containsExactlyInAnyOrder(expected1.itemId.lowercase(), expected2.itemId.lowercase())
     }
 
     private fun takeRandomItems(): List<EsItem> {

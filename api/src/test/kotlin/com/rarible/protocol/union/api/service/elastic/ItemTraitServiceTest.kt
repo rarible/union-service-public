@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
+import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.api.configuration.EsProperties
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -12,6 +13,7 @@ import com.rarible.protocol.union.core.model.trait.Trait
 import com.rarible.protocol.union.core.model.trait.TraitEntry
 import com.rarible.protocol.union.core.model.trait.TraitProperty
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.TraitEntryDto
 import com.rarible.protocol.union.dto.TraitsDto
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
@@ -233,8 +235,8 @@ internal class ItemTraitServiceTest {
         ).map { repository.save(it) }
 
         val collectionIds = listOf("1", "2", "4")
-         val keysLimit = 3
-         val valuesLimit = 15
+        val keysLimit = 3
+        val valuesLimit = 15
 
         var result: TraitsDto = itemTraitService.queryTraits(collectionIds, emptyList())
 
@@ -271,18 +273,22 @@ internal class ItemTraitServiceTest {
         validateTraitEntry(traitEntry = result.traits[0].values[0], value = "value222", count = 1)
     }
 
-    fun randomEsItem(collection: String? = randomAddress().toString(), traits: List<EsTrait>) = EsItem(
-        id = randomString(),
-        itemId = randomAddress().toString(),
-        blockchain = BlockchainDto.values().random(),
-        collection = collection,
-        name = randomString(),
-        description = randomString(),
-        traits = traits,
-        creators = listOf(randomAddress().toString()),
-        mintedAt = nowMillis(),
-        lastUpdatedAt = nowMillis()
-    )
+    fun randomEsItem(collection: String? = randomAddress().toString(), traits: List<EsTrait>): EsItem {
+        val blockchain = BlockchainDto.values().random()
+        val itemId = ItemIdDto(blockchain, randomAddress().prefixed(), randomBigInt())
+        return EsItem(
+            id = randomString(),
+            itemId = itemId.fullId(),
+            blockchain = blockchain,
+            collection = collection,
+            name = randomString(),
+            description = randomString(),
+            traits = traits,
+            creators = listOf(randomAddress().toString()),
+            mintedAt = nowMillis(),
+            lastUpdatedAt = nowMillis()
+        )
+    }
 
     private fun validateTraitEntry(traitEntry: TraitEntryDto, value: String, count: Long) {
         assertThat(traitEntry.value).isEqualTo(value)

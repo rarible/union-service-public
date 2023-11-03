@@ -20,6 +20,7 @@ data class EsItemGenericFilter(
     val updatedTo: Instant? = null,
     val deleted: Boolean? = null,
     val text: String? = null,
+    val fullText: FullTextSearch? = null,
     val traits: List<TraitFilter>? = null,
     val traitRanges: List<TraitRangeFilter>? = null,
     val descriptions: Set<String>? = null,

@@ -3,6 +3,7 @@ package com.rarible.protocol.union.search.indexer.repository
 import com.ninjasquad.springmockk.MockkBean
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
+import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
@@ -18,6 +19,7 @@ import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.search.indexer.test.IntegrationTest
@@ -426,22 +428,24 @@ internal class EsItemRepositoryFt {
         assertThat(result).containsExactlyInAnyOrder(esItem2OnSaleCurrency1, esItemOnSaleCurrency2)
     }
 
-    fun randomEsItem(
-        collectionId: String = randomAddress().toString(),
-    ) = EsItem(
-        id = randomString(),
-        itemId = randomAddress().toString(),
-        blockchain = BlockchainDto.values().random(),
-        collection = collectionId,
-        name = randomString(),
-        description = randomString(),
-        traits = listOf(
-            EsTrait("long", randomLong().toString()),
-            EsTrait("testString", randomString()),
-            EsTrait("testDate", "2022-05-" + (1..30).random())
-        ),
-        creators = listOf(randomAddress().toString()),
-        mintedAt = nowMillis(),
-        lastUpdatedAt = nowMillis()
-    )
+    fun randomEsItem(collectionId: String = randomAddress().toString()): EsItem {
+        val blockchain = BlockchainDto.values().random()
+        val itemId = ItemIdDto(blockchain, collectionId, randomBigInt())
+        return EsItem(
+            id = randomString(),
+            itemId = itemId.fullId(),
+            blockchain = blockchain,
+            collection = collectionId,
+            name = randomString(),
+            description = randomString(),
+            traits = listOf(
+                EsTrait("long", randomLong().toString()),
+                EsTrait("testString", randomString()),
+                EsTrait("testDate", "2022-05-" + (1..30).random())
+            ),
+            creators = listOf(randomAddress().toString()),
+            mintedAt = nowMillis(),
+            lastUpdatedAt = nowMillis()
+        )
+    }
 }

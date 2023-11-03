@@ -2,7 +2,9 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.core.model.elastic.EsItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
+import com.rarible.protocol.union.core.model.elastic.FullTextSearch
 import com.rarible.protocol.union.core.model.elastic.Range
+import com.rarible.protocol.union.core.model.elastic.TextField
 import com.rarible.protocol.union.core.model.elastic.TraitFilter
 import com.rarible.protocol.union.core.model.elastic.TraitRangeFilter
 import com.rarible.protocol.union.dto.ItemsSearchFilterDto
@@ -54,17 +56,24 @@ class ItemFilterConverter() {
     }
 
     fun searchItems(filter: ItemsSearchFilterDto, cursor: String?): EsItemFilter {
+        filter.fullText
         return EsItemGenericFilter(
             cursor = cursor,
             blockchains = filter.blockchains?.map { it.name }?.toSet(),
             collections = filter.collections?.map { it.fullId() }?.toSet(),
-            names = filter.names?.toSet(),
             creators = filter.creators?.map { it.fullId() }?.toSet().orEmpty(),
             mintedFrom = filter.mintedAtFrom,
             mintedTo = filter.mintedAtTo,
             updatedFrom = filter.lastUpdatedAtFrom,
             updatedTo = filter.lastUpdatedAtTo,
             deleted = filter.deleted,
+            fullText = filter.fullText?.let {
+                FullTextSearch(
+                    it.text,
+                    it.fields?.map { tf -> TextField.valueOf(tf.name.uppercase()) } ?: listOf(TextField.NAME)
+                )
+            },
+            names = filter.names?.toSet(),
             descriptions = filter.descriptions?.toSet(),
             traits = filter.traits?.map { TraitFilter(it.key, it.value) },
             traitRanges = filter.traitRanges?.map {
