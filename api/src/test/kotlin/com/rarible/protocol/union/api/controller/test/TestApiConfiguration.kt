@@ -38,6 +38,9 @@ import com.rarible.protocol.union.api.client.FixedUnionApiServiceUriProvider
 import com.rarible.protocol.union.api.client.UnionApiClientFactory
 import com.rarible.protocol.union.api.configuration.WebSocketConfiguration
 import com.rarible.protocol.union.core.es.ElasticsearchBootstrapperTestConfig
+import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
+import com.rarible.protocol.union.core.producer.UnionInternalItemEventProducer
+import com.rarible.protocol.union.core.producer.UnionInternalOwnershipEventProducer
 import com.rarible.protocol.union.core.test.TestUnionEventHandler
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionEventDto
@@ -391,6 +394,30 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     fun testSignatureClient(): com.rarible.tzkt.client.SignatureClient = mockk()
 
     // ---------------------- KAFKA ---------------------//
+
+    @Bean
+    @Primary
+    fun testInternalItemProducer(): UnionInternalItemEventProducer = mockk {
+        coEvery { sendDeleteEvent(any()) } returns Unit
+        coEvery { sendDeleteEvents(any()) } returns Unit
+        coEvery { sendChangeEvent(any()) } returns Unit
+        coEvery { sendChangeEvents(any()) } returns Unit
+    }
+
+    @Bean
+    @Primary
+    fun internalCollectionProducer(): UnionInternalCollectionEventProducer = mockk {
+        coEvery { sendChangeEvent(any()) } returns Unit
+        coEvery { sendChangeEvents(any()) } returns Unit
+    }
+
+    @Bean
+    @Primary
+    fun internalOwnershipProducer(): UnionInternalOwnershipEventProducer = mockk {
+        coEvery { sendChangeEvent(any()) } returns Unit
+        coEvery { sendChangeEvents(any()) } returns Unit
+    }
+
     @Bean
     fun testItemHandler() = TestUnionEventHandler<ItemEventDto>()
 

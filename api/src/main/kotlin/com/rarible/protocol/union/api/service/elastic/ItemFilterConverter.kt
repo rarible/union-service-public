@@ -36,15 +36,6 @@ class ItemFilterConverter() {
         )
     }
 
-    fun getItemsByOwner(owner: String, blockchains: Set<String>?, cursor: String?): EsItemFilter {
-
-        return EsItemGenericFilter(
-            cursor = cursor,
-            owners = setOf(owner),
-            blockchains = blockchains
-        )
-    }
-
     fun getItemsByCreator(creator: String, blockchains: Set<String>?, cursor: String?): EsItemFilter {
 
         return EsItemGenericFilter(
@@ -87,6 +78,7 @@ class ItemFilterConverter() {
             bidPriceCurrency = filter.bidCurrency,
             bidPriceFrom = filter.bidPriceFrom,
             bidPriceTo = filter.bidPriceTo,
+            onSale = filter.onSale
         )
     }
 }

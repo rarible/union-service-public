@@ -75,6 +75,7 @@ class EsItemQueryBuilderService(
         mustMatchTerms(filter.bidPlatforms, EsItem::bestBidMarketplace.name)
         mustMatchRange(filter.mintedFrom, filter.mintedTo, EsItem::mintedAt.name)
         mustMatchRange(filter.updatedFrom, filter.updatedTo, EsItem::lastUpdatedAt.name)
+        mustExists(filter.onSale, EsItem::bestSellAmount.name)
         applyNamesTextFilter(filter.names)
         applyTraitsFilter(filter.traits)
         applyTraitRangesFilter(filter.traitRanges)
