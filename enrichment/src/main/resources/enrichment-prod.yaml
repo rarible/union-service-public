@@ -80,8 +80,8 @@ enrichment:
       ipfsGateway: "http://ipfs-gw1.ext.rarible.com:8080,http://ipfs-gw2.ext.rarible.com:8080,http://ipfs-gw3.ext.rarible.com:8080"
       embedded:
         publicUrl: "https://api.rarible.org/content/embedded"
-    simpleHash:
-      enabled: true
+      simpleHash:
+        enabled: true
     item:
       customizers:
         mattel:
