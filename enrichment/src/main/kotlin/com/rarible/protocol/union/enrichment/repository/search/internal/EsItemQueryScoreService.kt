@@ -19,7 +19,7 @@ class EsItemQueryScoreService(
         blockchains: Set<BlockchainDto>
     ): FunctionScoreQueryBuilder {
         return when (sort.type) {
-            EsItemSortType.MOST_RELEVANT,
+            EsItemSortType.RELEVANCE,
             EsItemSortType.TRAIT,
             EsItemSortType.LATEST_FIRST,
             EsItemSortType.EARLIEST_FIRST -> throw UnsupportedOperationException("ScoreService can't be used with $sort")

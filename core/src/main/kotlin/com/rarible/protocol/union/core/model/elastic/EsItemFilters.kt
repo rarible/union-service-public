@@ -23,7 +23,6 @@ data class EsItemGenericFilter(
     val fullText: FullTextSearch? = null,
     val traits: List<TraitFilter>? = null,
     val traitRanges: List<TraitRangeFilter>? = null,
-    val descriptions: Set<String>? = null,
     val sellPlatforms: Set<String>? = null,
     val bidPlatforms: Set<String>? = null,
     val sellPriceCurrency: String? = null,

@@ -240,15 +240,6 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
         expected = takeRandomItems()
         checkResult(
             filter = ItemsSearchFilterDto(
-                descriptions = expected.mapNotNull { it.description }
-            ),
-            expected = expected,
-            failMessage = "Search by descriptions failed!"
-        )
-
-        expected = takeRandomItems()
-        checkResult(
-            filter = ItemsSearchFilterDto(
                 creators = expected.flatMap { it.creators }.map { IdParser.parseAddress(it) }
             ),
             expected = expected,
@@ -585,7 +576,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                         fields = listOf(ItemSearchFullTextDto.Fields.NAME)
                     ),
                 ),
-                sort = ItemsSearchSortDto.DEFAULT
+                sort = ItemsSearchSortDto.RELEVANCE
             )
         )
         assertThat(precisePhraseSearchItems.items.map { it.id.fullId().lowercase() })
@@ -603,7 +594,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                         fields = listOf(ItemSearchFullTextDto.Fields.NAME)
                     )
                 ),
-                sort = ItemsSearchSortDto.DEFAULT
+                sort = ItemsSearchSortDto.RELEVANCE
             )
         )
         assertThat(phraseSearchItems.items.map { it.id.fullId().lowercase() })
