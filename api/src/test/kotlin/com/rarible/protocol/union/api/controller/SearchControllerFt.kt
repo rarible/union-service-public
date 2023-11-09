@@ -11,7 +11,7 @@ import com.rarible.protocol.dto.Erc721AssetTypeDto
 import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.union.api.client.ActivityControllerApi
 import com.rarible.protocol.union.api.client.CollectionControllerApi
-import com.rarible.protocol.union.api.client.SearchApiApi
+import com.rarible.protocol.union.api.client.SearchControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.api.service.UserActivityTypeConverter
@@ -99,7 +99,7 @@ internal class SearchControllerFt : AbstractIntegrationTest() {
     private lateinit var activityControllerApi: ActivityControllerApi
 
     @Autowired
-    private lateinit var searchApiApi: SearchApiApi
+    private lateinit var searchControllerApi: SearchControllerApi
 
     @Autowired
     private lateinit var esActivityRepository: EsActivityRepository
@@ -308,7 +308,7 @@ internal class SearchControllerFt : AbstractIntegrationTest() {
             null,
         ).awaitSingle()
 
-        val activities = searchApiApi.searchActivities(
+        val activities = searchControllerApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     blockchains = blockchains,
@@ -354,7 +354,7 @@ internal class SearchControllerFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val activities2 = searchApiApi.searchActivities(
+        val activities2 = searchControllerApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     blockchains = blockchains,
@@ -430,7 +430,7 @@ internal class SearchControllerFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val activities = searchApiApi.searchActivities(
+        val activities = searchControllerApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     types = types,
@@ -541,7 +541,7 @@ internal class SearchControllerFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val activities = searchApiApi.searchActivities(
+        val activities = searchControllerApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     types = types,
@@ -683,7 +683,7 @@ internal class SearchControllerFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val activities = searchApiApi.searchActivities(
+        val activities = searchControllerApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     types = types.map { userActivityTypeConverter.convert(it).activityTypeDto }.distinct(),
@@ -724,7 +724,7 @@ internal class SearchControllerFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val activities2 = searchApiApi.searchActivities(
+        val activities2 = searchControllerApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     types = types.map { userActivityTypeConverter.convert(it).activityTypeDto }.distinct(),
@@ -766,7 +766,7 @@ internal class SearchControllerFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val fromActivities = searchApiApi.searchActivities(
+        val fromActivities = searchControllerApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     types = listOf(ActivityTypeDto.SELL),
@@ -799,7 +799,7 @@ internal class SearchControllerFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val toActivities = searchApiApi.searchActivities(
+        val toActivities = searchControllerApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     types = listOf(ActivityTypeDto.TRANSFER),
@@ -872,7 +872,7 @@ internal class SearchControllerFt : AbstractIntegrationTest() {
             size = 10,
             filter = CollectionsSearchFilterDto(text = "apes", blockchains = listOf(BlockchainDto.ETHEREUM))
         )
-        val unionCollections = searchApiApi.searchCollection(request).awaitFirst()
+        val unionCollections = searchControllerApi.searchCollection(request).awaitFirst()
 
         assertThat(unionCollections.collections.map { it.id })
             .containsExactlyInAnyOrderElementsOf(matchUnionEth.map { it.id })
@@ -927,7 +927,7 @@ internal class SearchControllerFt : AbstractIntegrationTest() {
             size = 10,
             filter = CollectionsSearchFilterDto(text = "apes", blockchains = listOf(BlockchainDto.ETHEREUM))
         )
-        val unionCollections = searchApiApi.searchCollection(request).awaitFirst()
+        val unionCollections = searchControllerApi.searchCollection(request).awaitFirst()
 
         assertThat(unionCollections.collections.map { it.id })
             .containsExactlyInAnyOrderElementsOf(matchUnionEth.map { it.id })
@@ -982,7 +982,7 @@ internal class SearchControllerFt : AbstractIntegrationTest() {
                 size = 2,
                 filter = CollectionsSearchFilterDto(text = "need found", blockchains = listOf(BlockchainDto.ETHEREUM))
             )
-            val result = searchApiApi.searchCollection(request).awaitFirst()
+            val result = searchControllerApi.searchCollection(request).awaitFirst()
             foundCollections.addAll(result.collections)
             continuation.set(result.continuation)
         } while (result.collections.isNotEmpty())

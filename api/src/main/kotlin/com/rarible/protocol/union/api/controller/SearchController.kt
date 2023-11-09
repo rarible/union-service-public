@@ -28,7 +28,7 @@ class SearchController(
     private val itemSourceSelectService: ItemSourceSelectService,
     private val itemTraitService: ItemTraitService,
     private val ownershipSourceSelectService: OwnershipSourceSelectService,
-) : SearchAPIApi {
+) : SearchControllerApi {
     override suspend fun searchActivities(
         activitySearchRequestDto: ActivitySearchRequestDto
     ): ResponseEntity<ActivitiesDto> {
