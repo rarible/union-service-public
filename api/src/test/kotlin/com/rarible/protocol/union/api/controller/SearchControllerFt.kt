@@ -6,36 +6,51 @@ import com.rarible.core.test.data.randomBigDecimal
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomInt
 import com.rarible.protocol.dto.AssetDto
+import com.rarible.protocol.dto.CollectionsByIdRequestDto
 import com.rarible.protocol.dto.Erc721AssetTypeDto
+import com.rarible.protocol.dto.NftCollectionsDto
 import com.rarible.protocol.union.api.client.ActivityControllerApi
+import com.rarible.protocol.union.api.client.CollectionControllerApi
+import com.rarible.protocol.union.api.client.SearchApiApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.api.service.UserActivityTypeConverter
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
+import com.rarible.protocol.union.core.model.elastic.EsCollection
 import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.core.util.truncatedToSeconds
 import com.rarible.protocol.union.dto.ActivityCurrencyFilterDto
 import com.rarible.protocol.union.dto.ActivitySearchFilterDto
 import com.rarible.protocol.union.dto.ActivitySearchRequestDto
 import com.rarible.protocol.union.dto.ActivitySearchSortDto
+import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.ActivityUserFilterDto
 import com.rarible.protocol.union.dto.AuctionStartActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.dto.CollectionsSearchFilterDto
+import com.rarible.protocol.union.dto.CollectionsSearchRequestDto
 import com.rarible.protocol.union.dto.CurrencyIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MintActivityDto
 import com.rarible.protocol.union.dto.OrderBidActivityDto
 import com.rarible.protocol.union.dto.UserActivityTypeDto
 import com.rarible.protocol.union.enrichment.converter.EnrichmentActivityConverter
+import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.repository.ActivityRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsActivityRepository
+import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
+import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.test.data.randomEsActivity
+import com.rarible.protocol.union.enrichment.test.data.randomEsCollection
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
+import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAddress
 import com.rarible.protocol.union.integration.ethereum.data.randomEthAuctionStartActivity
+import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemMintActivity
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderActivityMatch
 import com.rarible.protocol.union.integration.ethereum.data.randomEthOrderBidActivity
@@ -47,27 +62,26 @@ import com.rarible.protocol.union.integration.solana.converter.SolanaActivityCon
 import com.rarible.protocol.union.integration.solana.data.randomSolanaMintActivity
 import com.rarible.protocol.union.integration.tezos.data.randomTezosItemBurnActivity
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupActivityConverter
+import io.mockk.coEvery
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import reactor.kotlin.core.publisher.toMono
 import scalether.domain.AddressFactory
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.atomic.AtomicReference
 
 @IntegrationTest
-class ActivityControllerElasticFt : AbstractIntegrationTest() {
-
+internal class SearchControllerFt : AbstractIntegrationTest() {
     private val continuation: String? = null
     private val defaultSize = PageSize.ACTIVITY.default
-    private val sort: com.rarible.protocol.union.dto.ActivitySortDto? = null
-
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val sort: ActivitySortDto? = null
 
     @Autowired
     private lateinit var ethActivityConverter: EthActivityConverter
@@ -85,6 +99,9 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
     private lateinit var activityControllerApi: ActivityControllerApi
 
     @Autowired
+    private lateinit var searchApiApi: SearchApiApi
+
+    @Autowired
     private lateinit var esActivityRepository: EsActivityRepository
 
     @Autowired
@@ -95,6 +112,15 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
 
     @Autowired
     private lateinit var userActivityTypeConverter: UserActivityTypeConverter
+
+    @Autowired
+    private lateinit var collectionControllerApi: CollectionControllerApi
+
+    @Autowired
+    private lateinit var esCollectionRepository: EsCollectionRepository
+
+    @Autowired
+    private lateinit var enrichmentCollectionService: EnrichmentCollectionService
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
@@ -278,11 +304,11 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             null,
             null,
             size,
-            com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST,
+            ActivitySortDto.EARLIEST_FIRST,
             null,
         ).awaitSingle()
 
-        val activities = activityControllerApi.searchActivities(
+        val activities = searchApiApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     blockchains = blockchains,
@@ -324,11 +350,11 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             null,
             null,
             size,
-            com.rarible.protocol.union.dto.ActivitySortDto.EARLIEST_FIRST,
+            ActivitySortDto.EARLIEST_FIRST,
             null,
         ).awaitFirst()
 
-        val activities2 = activityControllerApi.searchActivities(
+        val activities2 = searchApiApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     blockchains = blockchains,
@@ -404,7 +430,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val activities = activityControllerApi.searchActivities(
+        val activities = searchApiApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     types = types,
@@ -515,7 +541,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val activities = activityControllerApi.searchActivities(
+        val activities = searchApiApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     types = types,
@@ -657,7 +683,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val activities = activityControllerApi.searchActivities(
+        val activities = searchApiApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     types = types.map { userActivityTypeConverter.convert(it).activityTypeDto }.distinct(),
@@ -698,7 +724,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val activities2 = activityControllerApi.searchActivities(
+        val activities2 = searchApiApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     types = types.map { userActivityTypeConverter.convert(it).activityTypeDto }.distinct(),
@@ -740,7 +766,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val fromActivities = activityControllerApi.searchActivities(
+        val fromActivities = searchApiApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     types = listOf(ActivityTypeDto.SELL),
@@ -773,7 +799,7 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
             null,
         ).awaitFirst()
 
-        val toActivities = activityControllerApi.searchActivities(
+        val toActivities = searchApiApi.searchActivities(
             ActivitySearchRequestDto(
                 filter = ActivitySearchFilterDto(
                     types = listOf(ActivityTypeDto.TRANSFER),
@@ -791,5 +817,177 @@ class ActivityControllerElasticFt : AbstractIntegrationTest() {
         assertThat(toActivitiesByEndpoint).isEqualTo(toActivities)
 
         assertThat(toActivities.activities).hasSize(1)
+    }
+
+    @Test
+    fun `get collections by name`() = runBlocking<Unit> {
+        val matches = listOf(
+            randomEthCollectionDto().copy(name = "apes"),
+            randomEthCollectionDto().copy(name = "my apes")
+        )
+        val notMatches = listOf(
+            randomEthCollectionDto().copy(name = "my"),
+            randomEthCollectionDto().copy(name = "test")
+        )
+        val polygonDto = randomEthCollectionDto().copy(name = "apes")
+
+        val esEth = (matches + notMatches).map {
+            randomEsCollection().copy(
+                collectionId = "${BlockchainDto.ETHEREUM}:${it.id}",
+                blockchain = BlockchainDto.ETHEREUM,
+                name = it.name
+            )
+        }
+        val esPolygon = randomEsCollection().copy(
+            collectionId = "${BlockchainDto.POLYGON}:${polygonDto.id}",
+            blockchain = BlockchainDto.POLYGON,
+            name = polygonDto.name
+        )
+        esCollectionRepository.saveAll(esEth + esPolygon)
+
+        val matchUnionEth = matches.map {
+            EthCollectionConverter.convert(it, BlockchainDto.ETHEREUM)
+        }
+        val notMatchUnionEth = notMatches.map {
+            EthCollectionConverter.convert(it, BlockchainDto.ETHEREUM)
+        }
+        val unionPolygon = EthCollectionConverter.convert(polygonDto, BlockchainDto.POLYGON)
+
+        (matchUnionEth + notMatchUnionEth + unionPolygon).forEach {
+            enrichmentCollectionService.save(EnrichmentCollectionConverter.convert(it))
+        }
+        coEvery {
+            testEthereumCollectionApi.getNftCollectionsByIds(any())
+        } answers {
+            val requests = invocation.args.first() as CollectionsByIdRequestDto
+            val collections = requests.ids.map { id ->
+                (matches + notMatches).single { it.id.prefixed() == id }
+            }
+            NftCollectionsDto(
+                total = 2, continuation = null, collections = collections
+            ).toMono()
+        }
+        val request = CollectionsSearchRequestDto(
+            continuation = null,
+            size = 10,
+            filter = CollectionsSearchFilterDto(text = "apes", blockchains = listOf(BlockchainDto.ETHEREUM))
+        )
+        val unionCollections = searchApiApi.searchCollection(request).awaitFirst()
+
+        assertThat(unionCollections.collections.map { it.id })
+            .containsExactlyInAnyOrderElementsOf(matchUnionEth.map { it.id })
+
+        assertThat(unionCollections.total).isEqualTo(2)
+    }
+
+    @Test
+    fun `get collections by meta name`() = runBlocking<Unit> {
+        val matches = listOf(
+            randomEthCollectionDto().copy(name = "apes"),
+            randomEthCollectionDto().copy(name = "my apes")
+        )
+        val notMatches = listOf(
+            randomEthCollectionDto().copy(name = "my"),
+            randomEthCollectionDto().copy(name = "test")
+        )
+        val esEth = (matches + notMatches).map {
+            randomEsCollection().copy(
+                collectionId = "${BlockchainDto.ETHEREUM}:${it.id}",
+                blockchain = BlockchainDto.ETHEREUM,
+                name = "",
+                meta = EsCollection.CollectionMeta(
+                    name = it.name
+                ),
+            )
+        }
+        esCollectionRepository.saveAll(esEth)
+
+        val matchUnionEth = matches.map {
+            EthCollectionConverter.convert(it, BlockchainDto.ETHEREUM)
+        }
+        val notMatchUnionEth = notMatches.map {
+            EthCollectionConverter.convert(it, BlockchainDto.ETHEREUM)
+        }
+        (matchUnionEth + notMatchUnionEth).forEach {
+            enrichmentCollectionService.save(EnrichmentCollectionConverter.convert(it))
+        }
+        coEvery {
+            testEthereumCollectionApi.getNftCollectionsByIds(any())
+        } answers {
+            val requests = invocation.args.first() as CollectionsByIdRequestDto
+            val collections = requests.ids.map { id ->
+                (matches + notMatches).single { it.id.prefixed() == id }
+            }
+            NftCollectionsDto(
+                total = 2, continuation = null, collections = collections
+            ).toMono()
+        }
+        val request = CollectionsSearchRequestDto(
+            continuation = null,
+            size = 10,
+            filter = CollectionsSearchFilterDto(text = "apes", blockchains = listOf(BlockchainDto.ETHEREUM))
+        )
+        val unionCollections = searchApiApi.searchCollection(request).awaitFirst()
+
+        assertThat(unionCollections.collections.map { it.id })
+            .containsExactlyInAnyOrderElementsOf(matchUnionEth.map { it.id })
+
+        assertThat(unionCollections.total).isEqualTo(2)
+    }
+
+    @Test
+    fun `get collections by name with continuation`() = runBlocking<Unit> {
+        val matches = (1..10).map {
+            randomEthCollectionDto().copy(name = "needfound$it")
+        }
+        val notMatches = (1..10).map {
+            randomEthCollectionDto().copy(name = "my")
+        }
+        val esEth = (matches + notMatches).map {
+            randomEsCollection().copy(
+                collectionId = "${BlockchainDto.ETHEREUM}:${it.id}",
+                blockchain = BlockchainDto.ETHEREUM,
+                name = it.name,
+            )
+        }
+        esCollectionRepository.saveAll(esEth)
+        esCollectionRepository.refresh()
+
+        val matchUnionEth = matches.map {
+            EthCollectionConverter.convert(it, BlockchainDto.ETHEREUM)
+        }
+        val notMatchUnionEth = notMatches.map {
+            EthCollectionConverter.convert(it, BlockchainDto.ETHEREUM)
+        }
+        (matchUnionEth + notMatchUnionEth).forEach {
+            enrichmentCollectionService.save(EnrichmentCollectionConverter.convert(it))
+        }
+        coEvery {
+            testEthereumCollectionApi.getNftCollectionsByIds(any())
+        } answers {
+            val requests = invocation.args.first() as CollectionsByIdRequestDto
+            val collections = requests.ids.map { id ->
+                (matches + notMatches).single { it.id.prefixed() == id }
+            }
+            NftCollectionsDto(
+                total = 2, continuation = null, collections = collections
+            ).toMono()
+        }
+
+        val foundCollections = mutableListOf<CollectionDto>()
+        val continuation: AtomicReference<String?> = AtomicReference(null)
+        do {
+            val request = CollectionsSearchRequestDto(
+                continuation = continuation.get(),
+                size = 2,
+                filter = CollectionsSearchFilterDto(text = "need found", blockchains = listOf(BlockchainDto.ETHEREUM))
+            )
+            val result = searchApiApi.searchCollection(request).awaitFirst()
+            foundCollections.addAll(result.collections)
+            continuation.set(result.continuation)
+        } while (result.collections.isNotEmpty())
+
+        assertThat(foundCollections.map { it.id })
+            .containsExactlyInAnyOrderElementsOf(matchUnionEth.map { it.id })
     }
 }

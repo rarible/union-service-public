@@ -11,7 +11,6 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionDto
 import com.rarible.protocol.union.dto.CollectionTokenIdDto
 import com.rarible.protocol.union.dto.CollectionsDto
-import com.rarible.protocol.union.dto.CollectionsSearchRequestDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
@@ -99,10 +98,6 @@ class CollectionController(
         val ownerAddress = IdParser.parseAddress(owner)
         val result = collectionSourceSelector.getCollectionsByOwner(ownerAddress, blockchains, continuation, size)
         return ResponseEntity.ok(result)
-    }
-
-    override suspend fun searchCollection(collectionsSearchRequestDto: CollectionsSearchRequestDto): ResponseEntity<CollectionsDto> {
-        return ResponseEntity.ok(collectionSourceSelector.searchCollections(collectionsSearchRequestDto))
     }
 
     // TODO remove later, this is hacky stuff

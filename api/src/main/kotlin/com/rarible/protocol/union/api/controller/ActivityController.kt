@@ -4,8 +4,6 @@ import com.rarible.protocol.union.api.service.select.ActivitySourceSelectService
 import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.ActivitiesByUsersRequestDto
 import com.rarible.protocol.union.dto.ActivitiesDto
-import com.rarible.protocol.union.dto.ActivitySearchRequestDto
-import com.rarible.protocol.union.dto.ActivitySearchSortDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -162,23 +160,6 @@ class ActivityController(
             activitiesByUsersRequestDto.size,
             activitiesByUsersRequestDto.sort,
             activitiesByUsersRequestDto.searchEngine
-        )
-        return ResponseEntity.ok(result)
-    }
-
-    override suspend fun searchActivities(
-        activitySearchRequestDto: ActivitySearchRequestDto
-    ): ResponseEntity<ActivitiesDto> {
-        val sort = when (activitySearchRequestDto.sort) {
-            ActivitySearchSortDto.EARLIEST -> ActivitySortDto.EARLIEST_FIRST
-            ActivitySearchSortDto.LATEST -> ActivitySortDto.LATEST_FIRST
-            else -> null
-        }
-        val result = activitySourceSelector.search(
-            filter = activitySearchRequestDto.filter,
-            cursor = activitySearchRequestDto.cursor,
-            size = activitySearchRequestDto.size,
-            sort = sort
         )
         return ResponseEntity.ok(result)
     }

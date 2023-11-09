@@ -6,7 +6,6 @@ import com.rarible.protocol.union.core.util.PageSize
 import com.rarible.protocol.union.core.util.checkNullIds
 import com.rarible.protocol.union.dto.OwnershipDto
 import com.rarible.protocol.union.dto.OwnershipIdsDto
-import com.rarible.protocol.union.dto.OwnershipSearchRequestDto
 import com.rarible.protocol.union.dto.OwnershipsDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
@@ -80,11 +79,5 @@ class OwnershipController(
         )
 
         return ResponseEntity.ok(result)
-    }
-
-    override suspend fun searchOwnerships(
-        ownershipSearchRequestDto: OwnershipSearchRequestDto,
-    ): ResponseEntity<OwnershipsDto> {
-        return ResponseEntity.ok(ownershipSourceSelectService.search(ownershipSearchRequestDto))
     }
 }
