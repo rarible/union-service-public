@@ -5,17 +5,22 @@ import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomString
 import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.AmmTradeInfoDto
+import com.rarible.protocol.dto.EthereumOrderUpdateApiErrorDto
 import com.rarible.protocol.dto.HoldNftItemIdsDto
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.order.api.client.OrderAdminControllerApi
 import com.rarible.protocol.order.api.client.OrderControllerApi
+import com.rarible.protocol.order.api.client.OrderControllerApi.ErrorUpsertOrder
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.OrderFormDto
 import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.integration.ethereum.EthEvmIntegrationProperties
 import com.rarible.protocol.union.integration.ethereum.converter.EthConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConverter
+import com.rarible.protocol.union.integration.ethereum.converter.UnionOrderConverter
 import com.rarible.protocol.union.integration.ethereum.data.randomAddressString
 import com.rarible.protocol.union.integration.ethereum.data.randomAmmPriceInfoDto
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -28,10 +33,14 @@ import io.mockk.confirmVerified
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import randomEthRaribleV2OrderFormDto
 import reactor.kotlin.core.publisher.toMono
 
 @ExtendWith(MockKExtension::class)
@@ -185,5 +194,45 @@ class EthOrderServiceTest {
         val result = service.getAmmOrderTradeInfo(orderId, 1)
 
         assertThat(result.orderId).isEqualTo(OrderIdDto(blockchain, orderId))
+    }
+
+    @Test
+    fun `upsert order - ok`() = runBlocking<Unit> {
+        val form = randomEthRaribleV2OrderFormDto()
+        val nativeOrder = randomEthV2OrderDto()
+        val expected = converter.convert(nativeOrder, BlockchainDto.ETHEREUM)
+
+        coEvery { orderControllerApi.upsertOrder(UnionOrderConverter.convert(form)) } returns nativeOrder.toMono()
+
+        val result = service.upsertOrder(form)
+
+        assertThat(result).isEqualTo(expected)
+    }
+
+    @Test
+    fun `upsert order - unsupported form`() = runBlocking<Unit> {
+        assertThrows<UnionException> { service.upsertOrder(mockk<OrderFormDto>()) }
+    }
+
+    @Test
+    fun `upsert order - failed, 400`() = runBlocking<Unit> {
+        val form = randomEthRaribleV2OrderFormDto()
+        val error = ErrorUpsertOrder(WebClientResponseException(400, "", null, null, null))
+        error.on400 = EthereumOrderUpdateApiErrorDto(EthereumOrderUpdateApiErrorDto.Code.INCORRECT_SIGNATURE, "Ooops")
+
+        coEvery { orderControllerApi.upsertOrder(UnionOrderConverter.convert(form)) } throws error
+
+        val ex = assertThrows<UnionException> { service.upsertOrder(form) }
+        assertThat(ex.message).isEqualTo("Failed to insert/update order, error code: INCORRECT_SIGNATURE. Ooops")
+    }
+
+    @Test
+    fun `upsert order - failed, 500`() = runBlocking<Unit> {
+        val form = randomEthRaribleV2OrderFormDto()
+        val error = ErrorUpsertOrder(WebClientResponseException(500, "", null, null, null))
+
+        coEvery { orderControllerApi.upsertOrder(UnionOrderConverter.convert(form)) } throws error
+
+        assertThrows<ErrorUpsertOrder> { service.upsertOrder(form) }
     }
 }
