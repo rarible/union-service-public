@@ -39,7 +39,7 @@ enrichment:
     common:
       ipfsGateway: "https://nftstorage.link"
       ipfsPublicGateway: "https://ipfs.raribleuserdata.com"
-      ipfsLegacyGateway: "https://rarible.mypinata.cloud,https://opensea.mypinata.cloud,https://ipfs.infura.io"
+      ipfsLegacyGateway: "https://rarible.mypinata.cloud,https://opensea.mypinata.cloud,https://ipfs.infura.io,https://ipfs.daonomic.com"
       mediaFetchTimeout: 10000
       mediaFetchMaxSize: 131072 # 128 Kb
       retries: "PT10S,PT30S,PT5M,PT1H,P1D"
