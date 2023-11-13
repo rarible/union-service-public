@@ -107,7 +107,7 @@ integration:
       enabled: false
       consumer:
         brokerReplicaSet: "${kafka.hosts}"
-    ligthlink:
+    lightlink:
       enabled: false
       consumer:
         brokerReplicaSet: "${kafka.hosts}"
