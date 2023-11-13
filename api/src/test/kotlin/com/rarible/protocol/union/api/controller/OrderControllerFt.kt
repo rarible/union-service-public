@@ -6,9 +6,11 @@ import com.rarible.core.test.data.randomString
 import com.rarible.core.test.data.randomWord
 import com.rarible.protocol.dto.AmmTradeInfoDto
 import com.rarible.protocol.dto.Erc20AssetTypeDto
+import com.rarible.protocol.dto.EthereumOrderUpdateApiErrorDto
 import com.rarible.protocol.dto.FlowOrdersPaginationDto
 import com.rarible.protocol.dto.OrderCurrenciesDto
 import com.rarible.protocol.dto.OrdersPaginationDto
+import com.rarible.protocol.order.api.client.OrderControllerApi.ErrorUpsertOrder
 import com.rarible.protocol.union.api.client.OrderControllerApi
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
 import com.rarible.protocol.union.api.controller.test.IntegrationTest
@@ -21,6 +23,7 @@ import com.rarible.protocol.union.dto.OrderIdDto
 import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SudoSwapTradeInfoDto
+import com.rarible.protocol.union.dto.UnionApiErrorBadRequestDto
 import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.dto.continuation.page.ArgSlice
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
@@ -39,18 +42,25 @@ import com.rarible.protocol.union.integration.flow.data.randomFlowAddress
 import com.rarible.protocol.union.integration.flow.data.randomFlowV1OrderDto
 import com.rarible.protocol.union.integration.tezos.data.randomTezosOrderDto
 import io.mockk.coEvery
+import io.mockk.every
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.InstanceOfAssertFactories
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import randomEthRaribleV2OrderFormDto
+import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
+import reactor.kotlin.test.*
+import reactor.test.StepVerifier
 import scalether.domain.Address
 import java.math.BigDecimal
+import java.util.function.Consumer
 
 @FlowPreview
 @IntegrationTest
@@ -82,6 +92,27 @@ class OrderControllerFt : AbstractIntegrationTest() {
 
         assertThat(unionOrder.id.value).isEqualTo(order.hash.prefixed())
         assertThat(unionOrder.id.blockchain).isEqualTo(BlockchainDto.ETHEREUM)
+    }
+
+    @Test
+    fun `upsert order error - ethereum`() = runBlocking<Unit> {
+        val form = randomEthRaribleV2OrderFormDto()
+        val nativeForm = UnionOrderConverter.convert(form)
+
+        val error = ErrorUpsertOrder(WebClientResponseException(400, "", null, null, null))
+        error.on400 = EthereumOrderUpdateApiErrorDto(EthereumOrderUpdateApiErrorDto.Code.INCORRECT_SIGNATURE, "Ooops")
+        error.data = error.on400
+
+        every { testEthereumOrderApi.upsertOrder(nativeForm) } returns Mono.error(error) // ethereum error
+
+        StepVerifier.create(orderControllerClient.upsertOrder(form))
+            .expectErrorSatisfies { e ->
+                assertThat(e).isInstanceOf(OrderControllerApi.ErrorUpsertOrder::class.java) // union error
+                assertThat((e as OrderControllerApi.ErrorUpsertOrder).on500).isNull()
+                assertThat(e.on400.code).isEqualTo(UnionApiErrorBadRequestDto.Code.BAD_REQUEST)
+                assertThat(e.on400.message).isEqualTo("Ooops")
+            }
+            .verify()
     }
 
     @Test

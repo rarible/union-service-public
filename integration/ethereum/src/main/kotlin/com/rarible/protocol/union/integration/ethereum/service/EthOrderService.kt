@@ -45,14 +45,7 @@ class EthOrderService(
             )
         }
         val nativeForm = UnionOrderConverter.convert(form)
-        val result = try {
-            orderControllerApi.upsertOrder(nativeForm).awaitSingle()
-        } catch (e: OrderControllerApi.ErrorUpsertOrder) {
-            if (e.on400 != null) {
-                throw UnionException("Failed to insert/update order, error code: ${e.on400.code}. ${e.on400.message}")
-            }
-            throw e
-        }
+        val result = orderControllerApi.upsertOrder(nativeForm).awaitSingle()
         return ethOrderConverter.convert(result, blockchain)
     }
 
