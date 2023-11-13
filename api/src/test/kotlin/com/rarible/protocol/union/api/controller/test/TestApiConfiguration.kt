@@ -182,6 +182,9 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     fun testActivityControllerApi(factory: UnionApiClientFactory) = factory.createActivityApiClient()
 
     @Bean
+    fun testSearchApiApi(factory: UnionApiClientFactory) = factory.createSearchApiClient()
+
+    @Bean
     fun testCurrencyControllerApi(factory: UnionApiClientFactory) = factory.createCurrencyApiClient()
 
     @Bean
