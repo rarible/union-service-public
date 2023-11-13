@@ -14,7 +14,7 @@ data class EsItemSort(
         }
 
     companion object {
-        val DEFAULT = EsItemSort(type = EsItemSortType.DEFAULT)
+        val DEFAULT = EsItemSort(type = EsItemSortType.LATEST_FIRST)
     }
 }
 
@@ -25,6 +25,7 @@ data class TraitSort(
 )
 
 enum class EsItemSortType(override val sortOrder: SortOrder) : OrderedSort {
+    RELEVANCE(SortOrder.DESC),
     LATEST_FIRST(SortOrder.DESC),
     EARLIEST_FIRST(SortOrder.ASC),
     HIGHEST_SELL_PRICE_FIRST(SortOrder.DESC),
@@ -32,8 +33,4 @@ enum class EsItemSortType(override val sortOrder: SortOrder) : OrderedSort {
     HIGHEST_BID_PRICE_FIRST(SortOrder.DESC),
     LOWEST_BID_PRICE_FIRST(SortOrder.ASC),
     TRAIT(SortOrder.ASC);
-
-    companion object {
-        val DEFAULT = LATEST_FIRST
-    }
 }

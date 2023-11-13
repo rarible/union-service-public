@@ -65,6 +65,15 @@ enrichment:
         supported:
           - "ETHEREUM"
 
+search:
+  boost:
+    item:
+      "name": 1000
+      "description": 10
+      "traits.value.raw": 1
+      "token": 2
+      "tokenId": 1
+
 logging:
   level:
     org.apache.http: "ERROR"

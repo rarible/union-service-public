@@ -3,6 +3,7 @@ package com.rarible.protocol.union.meta.loader.config
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
+import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaDownloader
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaNotifier
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
@@ -31,7 +32,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
 
 @Configuration
-@Import(value = [EnrichmentApiConfiguration::class])
+@Import(value = [EnrichmentApiConfiguration::class, SearchConfiguration::class])
 @EnableConfigurationProperties(value = [UnionMetaLoaderProperties::class])
 class UnionMetaLoaderConfiguration(
     private val metaProperties: CommonMetaProperties,
