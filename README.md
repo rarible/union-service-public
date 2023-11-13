@@ -16,7 +16,8 @@ Use these base URLs to access our API on different networks:
 | [dev-api.rarible.org/v0.1/doc](https://dev-api.rarible.org/v0.1/doc)         | https://dev-api.rarible.org/v0.1     | Development (Ropsten, Mumbai, Ithaca) |
 
 Also see additional information and usage examples on the [API Reference](https://docs.rarible.org/api-reference/) and [Search Capabilities](https://docs.rarible.org/reference/search-capabilities/) pages.
-Rarible Protocol SDK
+
+## Rarible Protocol SDK
 
 Protocol SDK is available on GitHub: [https://github.com/rarible/sdk](https://github.com/rarible/sdk)
 
