@@ -376,6 +376,7 @@ class ItemElasticService(
     private fun convertSort(request: ItemsSearchRequestDto): EsItemSort {
         val sort = request.sort ?: return EsItemSort.DEFAULT
         return when (sort) {
+            ItemsSearchSortDto.RELEVANCE -> EsItemSort(type = EsItemSortType.RELEVANCE)
             ItemsSearchSortDto.LATEST -> EsItemSort(type = EsItemSortType.LATEST_FIRST)
             ItemsSearchSortDto.EARLIEST -> EsItemSort(type = EsItemSortType.EARLIEST_FIRST)
             ItemsSearchSortDto.HIGHEST_SELL -> EsItemSort(type = EsItemSortType.HIGHEST_SELL_PRICE_FIRST)

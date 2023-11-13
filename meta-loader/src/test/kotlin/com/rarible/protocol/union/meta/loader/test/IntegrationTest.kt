@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.meta.loader.test
 
+import com.rarible.core.test.ext.ElasticsearchTest
 import com.rarible.core.test.ext.KafkaTest
 import com.rarible.core.test.ext.MongoCleanup
 import com.rarible.core.test.ext.MongoTest
@@ -11,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles
 @KafkaTest
 @MongoTest
 @MongoCleanup
+@ElasticsearchTest
 @EnableAutoConfiguration
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.MOCK,

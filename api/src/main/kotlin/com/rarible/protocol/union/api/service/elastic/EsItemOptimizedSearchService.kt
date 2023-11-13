@@ -43,6 +43,7 @@ class EsItemOptimizedSearchService(
                     esItemRepository.search(filter, sort, limit)
                 }
             }
+            EsItemSortType.RELEVANCE,
             EsItemSortType.TRAIT,
             EsItemSortType.HIGHEST_SELL_PRICE_FIRST,
             EsItemSortType.LOWEST_SELL_PRICE_FIRST,
