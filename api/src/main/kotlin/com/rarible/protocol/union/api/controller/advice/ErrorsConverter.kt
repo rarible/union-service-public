@@ -4,6 +4,8 @@ import com.rarible.dipdup.client.exception.DipDupNotFound
 import com.rarible.protocol.dto.EthereumApiErrorBadRequestDto
 import com.rarible.protocol.dto.EthereumApiErrorEntityNotFoundDto
 import com.rarible.protocol.dto.EthereumApiErrorServerErrorDto
+import com.rarible.protocol.dto.EthereumOrderDataApiErrorDto
+import com.rarible.protocol.dto.EthereumOrderUpdateApiErrorDto
 import com.rarible.protocol.union.dto.UnionApiErrorBadRequestDto
 import com.rarible.protocol.union.dto.UnionApiErrorEntityNotFoundDto
 import com.rarible.protocol.union.dto.UnionApiErrorServerErrorDto
@@ -24,6 +26,8 @@ object ErrorsConverter {
         return when (data) {
             // ETHEREUM
             is EthereumApiErrorBadRequestDto -> UnionApiErrorBadRequestDto(convert(data.code), data.message)
+            is EthereumOrderUpdateApiErrorDto -> UnionApiErrorBadRequestDto(convert(data.code), data.message)
+            is EthereumOrderDataApiErrorDto -> UnionApiErrorBadRequestDto(convert(data.code), data.message)
             is EthereumApiErrorServerErrorDto -> UnionApiErrorServerErrorDto(message = data.message)
             is EthereumApiErrorEntityNotFoundDto -> UnionApiErrorEntityNotFoundDto(message = data.message)
             // FLOW
@@ -38,6 +42,26 @@ object ErrorsConverter {
         return when (code) {
             EthereumApiErrorBadRequestDto.Code.VALIDATION -> UnionApiErrorBadRequestDto.Code.VALIDATION
             EthereumApiErrorBadRequestDto.Code.BAD_REQUEST -> UnionApiErrorBadRequestDto.Code.BAD_REQUEST
+        }
+    }
+
+    private fun convert(code: EthereumOrderUpdateApiErrorDto.Code): UnionApiErrorBadRequestDto.Code {
+        return when (code) {
+            EthereumOrderUpdateApiErrorDto.Code.INCORRECT_SIGNATURE,
+            EthereumOrderUpdateApiErrorDto.Code.INCORRECT_ORDER_DATA,
+            EthereumOrderUpdateApiErrorDto.Code.INCORRECT_PRICE,
+            EthereumOrderUpdateApiErrorDto.Code.INCORRECT_LAZY_ASSET,
+            EthereumOrderUpdateApiErrorDto.Code.ORDER_CANCELED,
+            EthereumOrderUpdateApiErrorDto.Code.ORDER_INVALID_UPDATE -> UnionApiErrorBadRequestDto.Code.BAD_REQUEST
+        }
+    }
+
+    private fun convert(code: EthereumOrderDataApiErrorDto.Code): UnionApiErrorBadRequestDto.Code {
+        return when (code) {
+            EthereumOrderDataApiErrorDto.Code.BAD_REQUEST,
+            EthereumOrderDataApiErrorDto.Code.INCORRECT_ORDER_DATA -> UnionApiErrorBadRequestDto.Code.BAD_REQUEST
+
+            EthereumOrderDataApiErrorDto.Code.VALIDATION -> UnionApiErrorBadRequestDto.Code.VALIDATION
         }
     }
 }
