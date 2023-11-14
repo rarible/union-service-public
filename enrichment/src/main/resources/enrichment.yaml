@@ -84,7 +84,7 @@ integration:
       consumer:
         brokerReplicaSet: "${kafka.hosts}"
     arbitrum:
-      enabled: false
+      enabled: true
       consumer:
         brokerReplicaSet: "${kafka.hosts}"
     chiliz:
