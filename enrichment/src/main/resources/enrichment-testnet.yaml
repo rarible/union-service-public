@@ -22,6 +22,26 @@ enrichment:
       - name: "FLOW:A.6f6702697b205c18.HWGarageCardV2"
         collections:
           - "FLOW:A.6f6702697b205c18.HWGarageCard"
+      - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Genesis"
+        collections:
+          - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Genesis"
+      - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Gadgets"
+        collections:
+          - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Gadgets"
       - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Moments"
         collections:
           - "FLOW:A.371ebe4bc55f8925.Gamisodes"
@@ -32,6 +52,36 @@ enrichment:
             - name: "collection"
               values:
                 - "Moments"
+      - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Missions"
+        collections:
+          - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Missions"
+      - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Gamisodes"
+        collections:
+          - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Gamisodes"
+      - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Brain"
+        collections:
+          - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Brain Train Tickets"
 
   currencies:
     bestBidByCurrencyWhitelist:
