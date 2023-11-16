@@ -74,6 +74,66 @@ enrichment:
       - name: "FLOW:A.d0bcefdf1e67ea85.HWGarageTokenV2"
         collections:
           - "FLOW:A.d0bcefdf1e67ea85.HWGaragePack"
+      - name: "FLOW:A.A.09e04bdbcccde6ca.Gamisodes_Genesis"
+        collections:
+          - "FLOW:A.A.09e04bdbcccde6ca.Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.A.09e04bdbcccde6ca.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Genesis"
+      - name: "FLOW:A.A.09e04bdbcccde6ca.Gamisodes_Gadgets"
+        collections:
+          - "FLOW:A.A.09e04bdbcccde6ca.Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.A.09e04bdbcccde6ca.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Gadgets"
+      - name: "FLOW:A.A.09e04bdbcccde6ca.Gamisodes_Moments"
+        collections:
+          - "FLOW:A.A.09e04bdbcccde6ca.Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.A.09e04bdbcccde6ca.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Moments"
+      - name: "FLOW:A.A.09e04bdbcccde6ca.Gamisodes_Missions"
+        collections:
+          - "FLOW:A.A.09e04bdbcccde6ca.Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.A.09e04bdbcccde6ca.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Missions"
+      - name: "FLOW:A.A.09e04bdbcccde6ca.Gamisodes_Gamisodes"
+        collections:
+          - "FLOW:A.A.09e04bdbcccde6ca.Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.A.09e04bdbcccde6ca.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Gamisodes"
+      - name: "FLOW:A.A.09e04bdbcccde6ca.Gamisodes_Brain"
+        collections:
+          - "FLOW:A.A.09e04bdbcccde6ca.Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.A.09e04bdbcccde6ca.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Brain Train Tickets"
 
   meta:
     common:
