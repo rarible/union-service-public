@@ -23,6 +23,8 @@ enrichment:
         collections:
           - "FLOW:A.6f6702697b205c18.HWGarageCard"
       - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Moments"
+        collections:
+          - "FLOW:A.371ebe4bc55f8925.Gamisodes"
         meta:
           collections:
             - "FLOW:A.371ebe4bc55f8925.Gamisodes"
