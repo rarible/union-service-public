@@ -13,7 +13,7 @@ class CollectionMapperContext(
 
     private val itemHint = ConcurrentHashMap(itemHint)
     private val itemMetaHint = ConcurrentHashMap(
-        itemHint.values.filter { it.metaEntry!!.data != null }
+        itemHint.values.filter { it.metaEntry?.data != null }
             .associateBy({ it.id.toDto() }, { it.metaEntry!!.data!! })
     )
 
