@@ -18,7 +18,8 @@ open class FlowSignatureService(
         signer: String,
         publicKey: String?,
         signature: String,
-        message: String
+        message: String,
+        algorithm: String?,
     ): Boolean {
         if (StringUtils.isBlank(publicKey)) {
             throw UnionValidationException("Parameter publicKey is not specified: $publicKey")
@@ -27,7 +28,8 @@ open class FlowSignatureService(
             publicKey,
             signer,
             signature,
-            message
+            message,
+            algorithm,
         ).awaitFirst()
     }
 
