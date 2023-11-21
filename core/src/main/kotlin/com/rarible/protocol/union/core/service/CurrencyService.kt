@@ -231,9 +231,15 @@ class CurrencyService(
             currencies = currencyClient.getAllCurrencies()
                 .filter { it.blockchain != "OPTIMISM" }
                 .map { CurrencyConverter.convert(it) }
-            val symbols = BlockchainDto.values().associateBy { getSymbol(it) }
-            nativeCurrencies = currencies.filter { symbols.keys.contains(it.symbol) }
-                .associateBy { symbols[it.symbol]!! }
+
+            val symbols = BlockchainDto.values().associateWith { getSymbol(it) }
+            nativeCurrencies = symbols.mapNotNull { (blockchain, symbol) ->
+                val currency = currencies.find {
+                    it.currencyId.blockchain == blockchain && it.symbol == symbol
+                }
+                if (currency != null) blockchain to currency else null
+            }.toMap()
+
             refreshCurrencyRates()
         }
 
