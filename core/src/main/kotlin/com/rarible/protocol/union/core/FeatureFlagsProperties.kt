@@ -36,4 +36,7 @@ data class FeatureFlagsProperties(
 
     val enableStrictMetaComparison: Boolean = false,
     val enableMetaDownloadLimit: Boolean = true,
+
+    // migrator
+    val skipOrderMigration: Boolean = false,
 )

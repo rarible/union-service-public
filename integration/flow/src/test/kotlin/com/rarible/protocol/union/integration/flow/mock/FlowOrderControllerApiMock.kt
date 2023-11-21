@@ -22,7 +22,7 @@ class FlowOrderControllerApiMock(
     fun mockGetByIds(vararg orders: FlowOrderDto) {
         every {
             orderControllerApi.getOrdersByIds(
-                FlowOrderIdsDto(orders.map { it.id })
+                FlowOrderIdsDto(orders.map { it.id.toString() })
             )
         } returns orders.toFlux()
     }

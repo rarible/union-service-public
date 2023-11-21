@@ -74,6 +74,54 @@ enrichment:
       - name: "FLOW:A.d0bcefdf1e67ea85.HWGarageTokenV2"
         collections:
           - "FLOW:A.d0bcefdf1e67ea85.HWGaragePack"
+      - name: "FLOW:A.09e04bdbcccde6ca.Gamisodes_Genesis"
+        meta:
+          collections:
+            - "FLOW:A.09e04bdbcccde6ca.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Genesis"
+      - name: "FLOW:A.09e04bdbcccde6ca.Gamisodes_Gadgets"
+        meta:
+          collections:
+            - "FLOW:A.09e04bdbcccde6ca.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Gadgets"
+      - name: "FLOW:A.09e04bdbcccde6ca.Gamisodes_Moments"
+        meta:
+          collections:
+            - "FLOW:A.09e04bdbcccde6ca.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Moments"
+      - name: "FLOW:A.09e04bdbcccde6ca.Gamisodes_Missions"
+        meta:
+          collections:
+            - "FLOW:A.09e04bdbcccde6ca.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Missions"
+      - name: "FLOW:A.09e04bdbcccde6ca.Gamisodes_Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.09e04bdbcccde6ca.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Gamisodes"
+      - name: "FLOW:A.09e04bdbcccde6ca.Gamisodes_Brain"
+        meta:
+          collections:
+            - "FLOW:A.09e04bdbcccde6ca.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Brain Train Tickets"
 
   meta:
     common:

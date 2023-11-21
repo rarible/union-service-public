@@ -17,10 +17,11 @@ class SignatureController(
     override suspend fun validate(signatureValidationFormDto: SignatureValidationFormDto): ResponseEntity<Boolean> {
         val result = router.getService(signatureValidationFormDto.signer.blockchainGroup.subchains()[0])
             .validate(
-                signatureValidationFormDto.signer.value,
-                signatureValidationFormDto.publicKey,
-                signatureValidationFormDto.signature,
-                signatureValidationFormDto.message
+                signer = signatureValidationFormDto.signer.value,
+                publicKey = signatureValidationFormDto.publicKey,
+                signature = signatureValidationFormDto.signature,
+                message = signatureValidationFormDto.message,
+                algorithm = signatureValidationFormDto.algorithm
             )
         return ResponseEntity.ok(result)
     }
