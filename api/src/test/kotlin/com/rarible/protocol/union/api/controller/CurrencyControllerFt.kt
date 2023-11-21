@@ -77,7 +77,7 @@ class CurrencyControllerFt : AbstractIntegrationTest() {
 
         val currencies = currencyControllerApi.allCurrencies.awaitFirst().currencies
 
-        assertThat(currencies).hasSize(14)
+        assertThat(currencies).hasSize(13)
         assertThat(currencies).doesNotHaveDuplicates()
     }
 

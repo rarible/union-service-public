@@ -263,7 +263,9 @@ class CurrencyServiceTest {
         every { allCurrencies.currencies } returns nativeTestCurrencies()
 
         // when
-        val results = BlockchainDto.values().map { currencyService.getNativeCurrency(it) }
+        val results = BlockchainDto.values().map {
+            currencyService.getNativeCurrency(it)
+        }
 
         // then
         assertThat(results).isNotEmpty
