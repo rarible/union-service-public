@@ -5,17 +5,17 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.enrichment.custom.collection.mapper.CollectionMapperContext
 import com.rarible.protocol.union.enrichment.custom.collection.mapper.CollectionMapperIndex
 import com.rarible.protocol.union.enrichment.custom.collection.provider.CustomCollectionProvider
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import org.springframework.stereotype.Component
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
 
 @Component
 class CustomCollectionResolver(
     private val itemServiceRouter: BlockchainRouter<ItemService>,
-    private val collectionMapperIndex: CollectionMapperIndex
+    private val collectionMapperIndex: CollectionMapperIndex,
+    private val provider: CustomCollectionItemProvider
 ) {
 
     suspend fun <T> resolve(
@@ -38,7 +38,7 @@ class CustomCollectionResolver(
         }
 
         // Resolving other item's collections
-        val resolved = resolve(remain.map { it.itemId!! }, ConcurrentHashMap(hint))
+        val resolved = resolve(remain.map { it.itemId!! }, CollectionMapperContext(hint, provider))
 
         remain.forEach { entity ->
             resolved[entity.itemId!!]?.let { result[entity.entityId] = it }
@@ -49,7 +49,7 @@ class CustomCollectionResolver(
 
     private suspend fun resolve(
         itemIds: Collection<ItemIdDto>,
-        hint: ConcurrentMap<ItemIdDto, ShortItem>
+        context: CollectionMapperContext
     ): Map<ItemIdDto, CollectionIdDto> {
         val gropedByCollection = itemIds.mapNotNull { itemId ->
             if (itemId.blockchain == BlockchainDto.SOLANA) {
@@ -64,11 +64,11 @@ class CustomCollectionResolver(
 
         gropedByCollection.forEach { (collectionId, collectionItemIds) ->
             collectionMapperIndex.getCollectionMapper(collectionId)
-                ?.getCustomCollectionProviders(collectionItemIds, hint)
+                ?.getCustomCollectionProviders(collectionItemIds, context)
                 ?.let { result.putAll(it) }
         }
 
-        return result.mapValues { it.value.getCustomCollection(it.key, hint[it.key]) }
+        return result.mapValues { it.value.getCustomCollection(it.key, context.getItemHint()[it.key]) }
     }
 
     private suspend fun resolve(collectionId: CollectionIdDto): CollectionIdDto? {

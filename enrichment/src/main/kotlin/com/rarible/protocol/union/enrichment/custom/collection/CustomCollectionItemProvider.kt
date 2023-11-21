@@ -2,12 +2,11 @@ package com.rarible.protocol.union.enrichment.custom.collection
 
 import com.rarible.core.common.asyncWithTraceId
 import com.rarible.protocol.union.core.model.UnionItem
+import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
-import com.rarible.protocol.union.enrichment.download.DownloadEntry
-import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -54,11 +53,12 @@ class CustomCollectionItemProvider(
             ?.let { CollectionIdDto(itemId.blockchain, it) }
     }
 
-    suspend fun getOrFetchMeta(itemIds: Collection<ItemIdDto>): Map<ItemIdDto, ShortItem> {
+    suspend fun getOrFetchMeta(itemIds: Collection<ItemIdDto>): Map<ItemIdDto, UnionMeta> {
         val fromDb = getItemsWithMeta(itemIds)
+            .mapValues { it.value.metaEntry!!.data!! }
 
         val missingFromDb = itemIds.filter { fromDb.containsKey(it) }
-        val fromBlockchain = fetchItemsWithMeta(missingFromDb)
+        val fromBlockchain = fetchMeta(missingFromDb)
         return fromDb + fromBlockchain
     }
 
@@ -68,7 +68,7 @@ class CustomCollectionItemProvider(
             .associateBy { it.id.toDto() }
     }
 
-    suspend fun fetchItemsWithMeta(itemIds: Collection<ItemIdDto>): Map<ItemIdDto, ShortItem> {
+    suspend fun fetchMeta(itemIds: Collection<ItemIdDto>): Map<ItemIdDto, UnionMeta> {
         if (itemIds.isEmpty()) {
             return emptyMap()
         }
@@ -79,15 +79,7 @@ class CustomCollectionItemProvider(
                 chunk.map {
                     asyncWithTraceId(context = NonCancellable) {
                         try {
-                            val meta = router.getService(it.blockchain).getItemMetaById(it.value)
-                            val item = ShortItem.empty(ShortItemId(it)).withMeta(
-                                DownloadEntry(
-                                    id = it.toString(),
-                                    status = DownloadStatus.SUCCESS,
-                                    data = meta
-                                )
-                            )
-                            it to item
+                            it to router.getService(it.blockchain).getItemMetaById(it.value)
                         } catch (e: Exception) {
                             logger.warn(
                                 "Failed to fetch meta to determine custom collection of Item: {}",

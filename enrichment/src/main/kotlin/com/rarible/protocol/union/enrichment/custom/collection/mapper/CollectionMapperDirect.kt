@@ -3,8 +3,6 @@ package com.rarible.protocol.union.enrichment.custom.collection.mapper
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.custom.collection.provider.CustomCollectionProvider
-import com.rarible.protocol.union.enrichment.model.ShortItem
-import java.util.concurrent.ConcurrentMap
 
 class CollectionMapperDirect(
     private val provider: CustomCollectionProvider
@@ -12,7 +10,7 @@ class CollectionMapperDirect(
 
     override suspend fun getCustomCollectionProviders(
         itemIds: Collection<ItemIdDto>,
-        hint: ConcurrentMap<ItemIdDto, ShortItem>
+        context: CollectionMapperContext
     ): Map<ItemIdDto, CustomCollectionProvider> {
         return itemIds.associateWith { provider }
     }

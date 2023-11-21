@@ -1,26 +1,20 @@
 package com.rarible.protocol.union.enrichment.custom.collection.mapper
 
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMapping
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentCollectionProperties
-import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemProvider
 import com.rarible.protocol.union.enrichment.custom.collection.provider.CustomCollectionProvider
 import com.rarible.protocol.union.enrichment.custom.collection.provider.CustomCollectionProviderFactory
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
-import com.rarible.protocol.union.enrichment.model.ShortItem
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.EnumMap
-import java.util.concurrent.ConcurrentMap
 
 @Component
 class CollectionMapperIndex(
-    private val customCollectionItemProvider: CustomCollectionItemProvider,
     private val customCollectionProviderFactory: CustomCollectionProviderFactory,
-    private val ff: FeatureFlagsProperties,
     collectionProperties: EnrichmentCollectionProperties,
 ) {
 
@@ -64,7 +58,7 @@ class CollectionMapperIndex(
         mapping.meta.getCollectionIds().forEach {
             getBlockchainIndex(it.blockchain).addCollectionMapper(
                 it,
-                CollectionMapperByMeta(provider, mapping.meta.getAttributes(), customCollectionItemProvider)
+                CollectionMapperByMeta(provider, mapping.meta.getAttributes())
             )
         }
     }
@@ -92,12 +86,12 @@ class CollectionMapperIndex(
 
         override suspend fun getCustomCollectionProviders(
             itemIds: Collection<ItemIdDto>,
-            hint: ConcurrentMap<ItemIdDto, ShortItem>
+            context: CollectionMapperContext
         ): Map<ItemIdDto, CustomCollectionProvider> {
             val result = HashMap<ItemIdDto, CustomCollectionProvider>()
             val temp = HashSet(itemIds)
             mappers.forEach {
-                val mapped = it.getCustomCollectionProviders(temp, hint)
+                val mapped = it.getCustomCollectionProviders(temp, context)
                 result.putAll(mapped)
                 temp.removeAll(mapped.keys)
             }

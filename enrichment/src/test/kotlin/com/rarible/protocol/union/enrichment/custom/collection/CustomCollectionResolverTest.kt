@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.enrichment.custom.collection
 
 import com.rarible.core.test.data.randomString
-import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -14,8 +13,6 @@ import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMetaM
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentCollectionProperties
 import com.rarible.protocol.union.enrichment.custom.collection.mapper.CollectionMapperIndex
 import com.rarible.protocol.union.enrichment.custom.collection.provider.CustomCollectionProviderFactory
-import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
-import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
@@ -158,12 +155,8 @@ class CustomCollectionResolverTest {
         val collectionId = randomEthCollectionId()
         val itemId = ItemIdDto(collectionId.blockchain, "${collectionId.value}:1")
 
-        val item = randomShortItem().copy(
-            metaEntry = randomItemMetaDownloadEntry(
-                data = randomUnionMeta().copy(attributes = listOf(UnionMetaAttribute("a", "b")))
-            )
-        )
-        coEvery { customCollectionItemProvider.getOrFetchMeta(listOf(itemId)) } returns mapOf(itemId to item)
+        val meta = randomUnionMeta().copy(attributes = listOf(UnionMetaAttribute("a", "b")))
+        coEvery { customCollectionItemProvider.getOrFetchMeta(listOf(itemId)) } returns mapOf(itemId to meta)
 
         val customMetaMapping = CustomCollectionMetaMapping(
             listOf(collectionId.fullId()),
@@ -181,13 +174,8 @@ class CustomCollectionResolverTest {
         val collectionId = randomEthCollectionId()
         val itemId = ItemIdDto(collectionId.blockchain, "${collectionId.value}:1")
 
-        val item = randomShortItem().copy(
-            metaEntry = randomItemMetaDownloadEntry(
-                data = randomUnionMeta().copy(attributes = listOf(UnionMetaAttribute("key1", "b")))
-            )
-        )
-
-        coEvery { customCollectionItemProvider.getOrFetchMeta(listOf(itemId)) } returns mapOf(itemId to item)
+        val meta = randomUnionMeta().copy(attributes = listOf(UnionMetaAttribute("key1", "b")))
+        coEvery { customCollectionItemProvider.getOrFetchMeta(listOf(itemId)) } returns mapOf(itemId to meta)
 
         val customMetaMapping = CustomCollectionMetaMapping(
             listOf(collectionId.fullId()),
@@ -218,15 +206,14 @@ class CustomCollectionResolverTest {
         )
         val properties = EnrichmentCollectionProperties(listOf(mapping))
         val index = CollectionMapperIndex(
-            customCollectionItemProvider,
             customCollectionProviderFactory,
-            FeatureFlagsProperties(),
             properties
         )
 
         return CustomCollectionResolver(
             router,
-            index
+            index,
+            customCollectionItemProvider,
         )
     }
 
