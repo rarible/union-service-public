@@ -251,13 +251,12 @@ class CurrencyService(
                 BlockchainDto.SOLANA -> "solana"
                 BlockchainDto.IMMUTABLEX -> "immutable-x"
                 BlockchainDto.MANTLE -> "mantle"
-                BlockchainDto.ARBITRUM -> "arbitrum"
                 BlockchainDto.CHILIZ -> "chiliz"
-                BlockchainDto.ZKSYNC -> "zksync"
-                BlockchainDto.ASTAR -> "astar"
-                BlockchainDto.ZKEVM -> "zkevm"
-                BlockchainDto.BASE -> "base"
-                BlockchainDto.LIGHTLINK -> "lightlink"
+                BlockchainDto.ARBITRUM -> "ethereum"
+                BlockchainDto.ZKSYNC -> "ethereum"
+                BlockchainDto.ASTARZKEVM -> "ethereum"
+                BlockchainDto.BASE -> "ethereum"
+                BlockchainDto.LIGHTLINK -> "ethereum"
             }
         }
 
