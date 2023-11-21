@@ -77,7 +77,7 @@ class ItemsControllerElasticFt : AbstractIntegrationTest() {
         elasticsearchTestBootstrapper.bootstrap()
         CurrencyMock.clearCurrencyMock()
         every {
-            CurrencyMock.currencyControllerApiMock.allCurrencies
+            testCurrencyApi.allCurrencies
         } returns CurrenciesDto(nativeTestCurrencies()).toMono()
     }
 

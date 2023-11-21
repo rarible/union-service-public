@@ -19,7 +19,6 @@ data class FeatureFlagsProperties(
     val enableOwnershipSaveImmediateToElasticSearch: Boolean = false,
     // items
     val enableItemQueriesToElasticSearch: Boolean = true,
-    val enableSearchItems: Boolean = true,
     val enableItemSaveImmediateToElasticSearch: Boolean = false,
     val enableItemBestBidsByCurrency: Boolean = true,
     val enableIncrementalItemStats: Boolean = true,

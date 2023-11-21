@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.core.common.mapAsync
+import com.rarible.core.common.asyncWithTraceId
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.api.service.api.ItemEnrichService
 import com.rarible.protocol.union.api.service.api.ItemQueryService
@@ -34,15 +34,16 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.dto.subchains
-
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import org.elasticsearch.search.sort.SortOrder
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import kotlin.random.Random
 
 @Service
 class ItemElasticService(
@@ -64,22 +65,21 @@ class ItemElasticService(
         lastUpdatedFrom: Long?,
         lastUpdatedTo: Long?
     ): ItemsDto {
-        val requestId = Random.nextLong()
-        log("Called getAllItems($blockchains, $continuation, $size)", requestId)
+        logger.info("Called getAllItems($blockchains, $continuation, $size)")
 
         val safeSize = PageSize.ITEM.limit(size)
         val slice = getAllItemsInner(
-            blockchains, showDeleted, lastUpdatedFrom, lastUpdatedTo, continuation, safeSize, requestId
+            blockchains, showDeleted, lastUpdatedFrom, lastUpdatedTo, continuation, safeSize
         )
 
-        log(
+        logger.info(
             "Response for getAllItemsInner(): " +
-                "slice size=${slice.entities.size}, continuation=${slice.continuation}", requestId
+                "slice size=${slice.entities.size}, continuation=${slice.continuation}"
         )
 
         val before = nowMillis().toEpochMilli()
         val enriched = itemEnrichService.enrich(slice.entities)
-        log("Enrichment took ${nowMillis().minusMillis(before).toEpochMilli()} ms", requestId)
+        logger.info("Enrichment took ${nowMillis().minusMillis(before).toEpochMilli()} ms")
 
         return ItemsDto(
             items = enriched,
@@ -103,7 +103,7 @@ class ItemElasticService(
         val filter = itemFilterConverter.getItemsByCollection(collection.fullId(), continuation)
         logger.info("Built filter: $filter")
         val queryResult = search(filter, EsItemSort.DEFAULT, safeSize)
-        val items = getItems(queryResult.entities, null)
+        val items = getItems(queryResult.entities)
         val cursor = queryResult.continuation
 
         val searchTime = System.currentTimeMillis()
@@ -171,7 +171,7 @@ class ItemElasticService(
         val cursor = queryResult.continuation
 
         if (queryResult.entities.isEmpty()) return ItemsDto()
-        val items = getItems(queryResult.entities, null)
+        val items = getItems(queryResult.entities)
         val enriched = itemEnrichService.enrich(items)
 
         logger.info(
@@ -245,7 +245,7 @@ class ItemElasticService(
         )
         val resultOwnerships = ownerships.map { ItemOwnershipConverter.convert(it) }
 
-        val items: List<UnionItem> = getItemsByIdsInner(resultOwnerships.map { it.id.getItemId().fullId() }, null)
+        val items: List<UnionItem> = getItemsByIdsInner(resultOwnerships.map { it.id.getItemId().fullId() })
         val enriched = itemEnrichService.enrich(items)
 
         val result = resultOwnerships.mapNotNull { ownership ->
@@ -279,7 +279,7 @@ class ItemElasticService(
         val sort = convertSort(request)
         val result = search(filter, sort, request.size)
         if (result.entities.isEmpty()) return ItemsDto()
-        val items = getItems(result.entities, null)
+        val items = getItems(result.entities)
         val enriched = itemEnrichService.enrich(items)
         return ItemsDto(
             continuation = result.continuation,
@@ -287,16 +287,13 @@ class ItemElasticService(
         )
     }
 
-    private suspend fun getItems(esItems: List<EsItemLite>, requestId: Long?): List<UnionItem> {
-        val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
+    private suspend fun getItems(esItems: List<EsItemLite>): List<UnionItem> {
+        val mapping = esItems.groupBy(
+            { it.blockchain },
+            { IdParser.parseItemId(it.itemId).value }
+        )
 
-        esItems.forEach { item ->
-            mapping
-                .computeIfAbsent(item.blockchain) { ArrayList(esItems.size) }
-                .add(IdParser.parseItemId(item.itemId).value)
-        }
-
-        val items = getItemsFromBlockchains(mapping, requestId)
+        val items = getItemsFromBlockchains(mapping)
         val itemsIdMapping = items.associateBy { it.id.fullId() }
 
         return esItems.mapNotNull { esItem ->
@@ -305,21 +302,16 @@ class ItemElasticService(
     }
 
     private suspend fun getItemsByOwnerships(ownerships: List<EsOwnership>): List<UnionItem> {
-        return getItemsByIdsInner(ownerships.mapNotNull { it.itemId }, null)
+        return getItemsByIdsInner(ownerships.mapNotNull { it.itemId })
     }
 
-    private suspend fun getItemsByIdsInner(itemIds: List<String>, requestId: Long?): List<UnionItem> {
-        val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
+    private suspend fun getItemsByIdsInner(itemIds: List<String>): List<UnionItem> {
+        val mapping = itemIds.map(IdParser::parseItemId).groupBy(
+            { it.blockchain },
+            { it.value }
+        )
 
-        itemIds
-            .forEach { itemId ->
-                val itemIdDto = IdParser.parseItemId(itemId)
-                mapping
-                    .computeIfAbsent(itemIdDto.blockchain) { ArrayList(itemIds.size) }
-                    .add(itemIdDto.value)
-            }
-
-        val items = getItemsFromBlockchains(mapping, requestId)
+        val items = getItemsFromBlockchains(mapping)
         val itemsIdMapping = items.associateBy { it.id.fullId() }
 
         return itemIds.mapNotNull {
@@ -334,7 +326,6 @@ class ItemElasticService(
         lastUpdatedTo: Long?,
         continuation: String?,
         size: Int?,
-        requestId: Long,
     ): Slice<UnionItem> {
         val evaluatedBlockchains = router.getEnabledBlockchains(blockchains).map { it.name }.toSet()
         if (evaluatedBlockchains.isEmpty()) {
@@ -344,11 +335,11 @@ class ItemElasticService(
         val filter = itemFilterConverter.convertGetAllItems(
             evaluatedBlockchains, showDeleted, lastUpdatedFrom, lastUpdatedTo, continuation
         )
-        log("Built filter: $filter", requestId)
+        logger.info("Built filter: $filter")
         val queryResult = search(filter, EsItemSort.DEFAULT, size)
-        log("Got ${queryResult.entities.size} ES entities", requestId)
-        val items = getItems(queryResult.entities, requestId)
-        log("Got ${items.size} items", requestId)
+        logger.info("Got ${queryResult.entities.size} ES entities")
+        val items = getItems(queryResult.entities)
+        logger.info("Got ${items.size} items")
         return Slice(
             entities = items,
             continuation = queryResult.continuation
@@ -356,19 +347,23 @@ class ItemElasticService(
     }
 
     private suspend fun getItemsFromBlockchains(
-        itemsPerBlockchain: Map<BlockchainDto, MutableList<String>>,
-        requestId: Long?
+        itemsPerBlockchain: Map<BlockchainDto, List<String>>,
     ): List<UnionItem> {
         logger.debug("Getting ${itemsPerBlockchain.size} items from blockchains")
-        val items = itemsPerBlockchain.mapAsync { element ->
-            val blockchain = element.key
-            val ids = element.value
-            val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
-            if (isBlockchainEnabled) {
-                log("Requested ${ids.size} items from $blockchain", requestId)
-                router.getService(blockchain).getItemsByIds(ids)
-                    .also { log("Returned ${it.size} of ${ids.size} items from $blockchain", requestId) }
-            } else emptyList()
+
+        val items = coroutineScope {
+            itemsPerBlockchain.map { element ->
+                asyncWithTraceId(context = NonCancellable) {
+                    val blockchain = element.key
+                    val ids = element.value
+                    val isBlockchainEnabled = router.isBlockchainEnabled(blockchain)
+                    if (isBlockchainEnabled) {
+                        logger.info("Requested ${ids.size} items from $blockchain")
+                        router.getService(blockchain).getItemsByIds(ids)
+                            .also { logger.info("Returned ${it.size} of ${ids.size} items from $blockchain") }
+                    } else emptyList()
+                }
+            }.awaitAll()
         }.flatten()
 
         return items
@@ -381,6 +376,7 @@ class ItemElasticService(
     private fun convertSort(request: ItemsSearchRequestDto): EsItemSort {
         val sort = request.sort ?: return EsItemSort.DEFAULT
         return when (sort) {
+            ItemsSearchSortDto.RELEVANCE -> EsItemSort(type = EsItemSortType.RELEVANCE)
             ItemsSearchSortDto.LATEST -> EsItemSort(type = EsItemSortType.LATEST_FIRST)
             ItemsSearchSortDto.EARLIEST -> EsItemSort(type = EsItemSortType.EARLIEST_FIRST)
             ItemsSearchSortDto.HIGHEST_SELL -> EsItemSort(type = EsItemSortType.HIGHEST_SELL_PRICE_FIRST)
@@ -413,13 +409,5 @@ class ItemElasticService(
     private fun SortOrderDto.toSortOrder(): SortOrder = when (this) {
         SortOrderDto.ASC -> SortOrder.ASC
         SortOrderDto.DESC -> SortOrder.DESC
-    }
-
-    private fun log(message: String, requestId: Long?) {
-        if (requestId != null) {
-            logger.info("[requestId=$requestId] $message")
-        } else {
-            logger.info(message)
-        }
     }
 }

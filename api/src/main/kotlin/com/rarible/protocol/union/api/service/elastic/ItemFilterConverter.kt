@@ -1,10 +1,14 @@
 package com.rarible.protocol.union.api.service.elastic
 
+import com.rarible.protocol.union.core.exception.UnionException
 import com.rarible.protocol.union.core.model.elastic.EsItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
+import com.rarible.protocol.union.core.model.elastic.FullTextSearch
 import com.rarible.protocol.union.core.model.elastic.Range
+import com.rarible.protocol.union.core.model.elastic.TextField
 import com.rarible.protocol.union.core.model.elastic.TraitFilter
 import com.rarible.protocol.union.core.model.elastic.TraitRangeFilter
+import com.rarible.protocol.union.dto.ItemSearchFullTextDto
 import com.rarible.protocol.union.dto.ItemsSearchFilterDto
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -36,15 +40,6 @@ class ItemFilterConverter() {
         )
     }
 
-    fun getItemsByOwner(owner: String, blockchains: Set<String>?, cursor: String?): EsItemFilter {
-
-        return EsItemGenericFilter(
-            cursor = cursor,
-            owners = setOf(owner),
-            blockchains = blockchains
-        )
-    }
-
     fun getItemsByCreator(creator: String, blockchains: Set<String>?, cursor: String?): EsItemFilter {
 
         return EsItemGenericFilter(
@@ -62,19 +57,19 @@ class ItemFilterConverter() {
         )
     }
 
-    fun searchItems(filter: ItemsSearchFilterDto, cursor: String?): EsItemFilter {
-        return EsItemGenericFilter(
+    fun searchItems(filter: ItemsSearchFilterDto, cursor: String?): EsItemFilter =
+        EsItemGenericFilter(
             cursor = cursor,
             blockchains = filter.blockchains?.map { it.name }?.toSet(),
             collections = filter.collections?.map { it.fullId() }?.toSet(),
-            names = filter.names?.toSet(),
             creators = filter.creators?.map { it.fullId() }?.toSet().orEmpty(),
             mintedFrom = filter.mintedAtFrom,
             mintedTo = filter.mintedAtTo,
             updatedFrom = filter.lastUpdatedAtFrom,
             updatedTo = filter.lastUpdatedAtTo,
             deleted = filter.deleted,
-            descriptions = filter.descriptions?.toSet(),
+            fullText = filter.fullText?.let { FullTextSearch(it.text, textFields(it)) },
+            names = filter.names?.toSet(),
             traits = filter.traits?.map { TraitFilter(it.key, it.value) },
             traitRanges = filter.traitRanges?.map {
                 TraitRangeFilter(key = it.key, valueRange = Range(from = it.valueRange.from, to = it.valueRange.to))
@@ -87,6 +82,18 @@ class ItemFilterConverter() {
             bidPriceCurrency = filter.bidCurrency,
             bidPriceFrom = filter.bidPriceFrom,
             bidPriceTo = filter.bidPriceTo,
+            onSale = filter.onSale
         )
-    }
+
+    private fun textFields(textDto: ItemSearchFullTextDto) =
+        textDto.fields?.map { textField ->
+            when (textField.name.uppercase()) {
+                TextField.NAME.name -> TextField.NAME
+                TextField.DESCRIPTION.name -> TextField.DESCRIPTION
+                TextField.TRAIT_VALUE.name -> TextField.TRAIT_VALUE
+                else -> throw UnionException("Unknown full text search field ${textField.name}, " +
+                    "allowed values: ${TextField.values().map { it.toString() }}"
+                )
+            }
+        } ?: listOf(TextField.NAME)
 }

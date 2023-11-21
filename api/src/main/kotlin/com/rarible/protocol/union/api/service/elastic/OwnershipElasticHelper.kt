@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.core.common.mapAsync
-import com.rarible.core.logging.Logger
 import com.rarible.protocol.union.core.model.UnionOwnership
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
 import com.rarible.protocol.union.core.model.elastic.EsOwnershipByCollectionFilter
@@ -20,6 +19,7 @@ import com.rarible.protocol.union.dto.UnionAddress
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.dto.parser.OwnershipIdParser
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -28,6 +28,8 @@ class OwnershipElasticHelper(
     private val esOwnershipOptimizedSearchService: EsOwnershipOptimizedSearchService,
     private val router: BlockchainRouter<OwnershipService>,
 ) {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     suspend fun getRawOwnershipsByOwner(
         owner: UnionAddress,
@@ -83,7 +85,7 @@ class OwnershipElasticHelper(
 
     private suspend fun getOwnerships(esOwnerships: List<EsOwnership>): List<UnionOwnership> {
         if (esOwnerships.isEmpty()) return emptyList()
-        log.debug("Enrich elastic ownerships with blockchains api (count=${esOwnerships.size})")
+        logger.debug("Enrich elastic ownerships with blockchains api (count=${esOwnerships.size})")
         val mapping = hashMapOf<BlockchainDto, MutableList<String>>()
         esOwnerships.forEach { ownership ->
             mapping
@@ -98,10 +100,5 @@ class OwnershipElasticHelper(
 
         val ownershipsIdMapping = ownerships.associateBy { it.id.fullId().lowercase() }
         return esOwnerships.mapNotNull { esOwnership -> ownershipsIdMapping[esOwnership.id.lowercase()] }
-    }
-
-    companion object {
-
-        private val log by Logger()
     }
 }

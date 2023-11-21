@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.service.select
 
-import com.rarible.protocol.union.api.exception.FeatureUnderConstructionException
 import com.rarible.protocol.union.api.service.api.ItemApiMergeService
 import com.rarible.protocol.union.api.service.api.ItemQueryService
 import com.rarible.protocol.union.api.service.elastic.ItemElasticService
@@ -108,21 +107,13 @@ class ItemSourceSelectService(
     }
 
     suspend fun searchItems(itemsSearchRequestDto: ItemsSearchRequestDto): ItemsDto {
-        return if (featureFlagsProperties.enableSearchItems) {
-            itemElasticService.searchItems(itemsSearchRequestDto)
-        } else throw FeatureUnderConstructionException("searchItems() feature is under construction")
+        return itemElasticService.searchItems(itemsSearchRequestDto)
     }
 
     private fun getQuerySource(searchEngine: SearchEngineDto?): ItemQueryService {
-        if (searchEngine != null) {
-            return when (searchEngine) {
-                SearchEngineDto.LEGACY -> itemApiService
-                SearchEngineDto.V1 -> itemElasticService
-            }
-        }
-        return when (featureFlagsProperties.enableItemQueriesToElasticSearch) {
-            true -> itemElasticService
-            else -> itemApiService
+        return when (searchEngine) {
+            SearchEngineDto.LEGACY -> itemApiService
+            else -> itemElasticService
         }
     }
 }

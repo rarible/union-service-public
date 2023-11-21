@@ -5,11 +5,15 @@ import com.rarible.protocol.union.core.model.elastic.EsItemFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
 import com.rarible.protocol.union.core.model.elastic.EsItemSortType
+import com.rarible.protocol.union.core.model.elastic.FullTextSearch
+import com.rarible.protocol.union.core.model.elastic.TextField
 import com.rarible.protocol.union.core.model.elastic.TraitFilter
 import com.rarible.protocol.union.core.model.elastic.TraitRangeFilter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.configuration.SearchProperties
 import org.apache.lucene.search.join.ScoreMode
 import org.elasticsearch.index.query.BoolQueryBuilder
+import org.elasticsearch.index.query.MultiMatchQueryBuilder
 import org.elasticsearch.index.query.Operator
 import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
@@ -24,6 +28,7 @@ class EsItemQueryBuilderService(
     private val scoreService: EsItemQueryScoreService,
     private val sortService: EsItemQuerySortService,
     private val priceFilterService: EsItemQueryPriceFilterService,
+    private val searchProperties: SearchProperties,
 ) {
     companion object {
         private val SCORE_SORT_TYPES: Set<EsItemSortType> = setOf(
@@ -75,9 +80,48 @@ class EsItemQueryBuilderService(
         mustMatchTerms(filter.bidPlatforms, EsItem::bestBidMarketplace.name)
         mustMatchRange(filter.mintedFrom, filter.mintedTo, EsItem::mintedAt.name)
         mustMatchRange(filter.updatedFrom, filter.updatedTo, EsItem::lastUpdatedAt.name)
+        mustExists(filter.onSale, EsItem::bestSellAmount.name)
+        applyFullTextSearch(filter.fullText)
         applyNamesTextFilter(filter.names)
         applyTraitsFilter(filter.traits)
         applyTraitRangesFilter(filter.traitRanges)
+    }
+
+    private fun BoolQueryBuilder.applyFullTextSearch(text: FullTextSearch?) {
+        if (text == null || text.text.isBlank()) {
+            return
+        }
+        val targetFields = fieldsWithBoost(text.fields)
+        applyFullTextSearch(text.text, targetFields)
+    }
+
+    private fun fieldsWithBoost(fields: List<TextField>): Map<String, Float> =
+        (fields.map { it.esField } + listOf("token", "tokenId"))
+            .associateWith { searchProperties.item[it] ?: 1.0f }
+
+    private fun BoolQueryBuilder.applyFullTextSearch(text: String, fields: Map<String, Float>) {
+        val trimmedText = text.trim()
+        val lastTerm = trimmedText.split(" ").last()
+        val textForSearch = if (lastTerm == trimmedText) {
+            "($lastTerm | $lastTerm*)"
+        } else {
+            trimmedText.replaceAfterLast(" ", "($lastTerm | $lastTerm*)")
+        }
+        should(
+            QueryBuilders.simpleQueryStringQuery(textForSearch)
+                .defaultOperator(Operator.AND)
+                .fuzzyTranspositions(false)
+                .fuzzyMaxExpansions(0)
+                .fields(fields)
+        ).should( // phrase. boost = 100
+            QueryBuilders.multiMatchQuery(text)
+                .fields(fields)
+                .boost(100f)
+                .fuzzyTranspositions(false)
+                .operator(Operator.AND)
+                .type(MultiMatchQueryBuilder.Type.PHRASE)
+        )
+        minimumShouldMatch(1)
     }
 
     private fun BoolQueryBuilder.applyNamesTextFilter(names: Set<String>?) {
@@ -106,7 +150,6 @@ class EsItemQueryBuilderService(
 
     private fun BoolQueryBuilder.applyTraitsFilter(traits: List<TraitFilter>?) {
         traits?.forEach {
-
             must(
                 QueryBuilders.nestedQuery(
                     "traits",

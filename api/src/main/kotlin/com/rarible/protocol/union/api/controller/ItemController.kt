@@ -18,7 +18,6 @@ import com.rarible.protocol.union.dto.ExtendedTraitPropertiesDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdsDto
 import com.rarible.protocol.union.dto.ItemsDto
-import com.rarible.protocol.union.dto.ItemsSearchRequestDto
 import com.rarible.protocol.union.dto.ItemsWithOwnershipDto
 import com.rarible.protocol.union.dto.LazyItemBurnFormDto
 import com.rarible.protocol.union.dto.LazyItemDto
@@ -46,7 +45,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 import java.time.Duration
@@ -185,11 +183,6 @@ class ItemController(
         return ResponseEntity.ok().build()
     }
 
-    override suspend fun searchItems(itemsSearchRequestDto: ItemsSearchRequestDto): ResponseEntity<ItemsDto> {
-        logger.info("Got request to search items: $itemsSearchRequestDto")
-        return ResponseEntity.ok(itemSourceSelectService.searchItems(itemsSearchRequestDto))
-    }
-
     override suspend fun getItemsByCollection(
         collection: String,
         continuation: String?,
@@ -265,18 +258,6 @@ class ItemController(
             itemTraitService.queryTraits(
                 collectionIds = collectionIds,
                 keys = keys
-            )
-        )
-    }
-
-    override suspend fun searchTraits(
-        @RequestParam filter: String,
-        @RequestParam collectionIds: List<String>
-    ): ResponseEntity<TraitsDto> {
-        return ResponseEntity.ok(
-            itemTraitService.searchTraits(
-                filter = filter,
-                collectionIds = collectionIds
             )
         )
     }

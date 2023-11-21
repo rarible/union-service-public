@@ -14,6 +14,8 @@ data class EsItem(
     val itemId: String,
     val blockchain: BlockchainDto,
     val collection: String?,
+    val token: String?,
+    val tokenId: String?,
     val deleted: Boolean = false,
 
     val name: String?,

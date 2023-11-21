@@ -26,7 +26,6 @@ import com.rarible.protocol.union.enrichment.service.query.activity.ActivityQuer
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
-import java.util.concurrent.ThreadLocalRandom
 
 @Service
 class ActivityElasticService(
@@ -47,7 +46,6 @@ class ActivityElasticService(
         size: Int?,
         sort: ActivitySortDto?
     ): ActivitiesDto {
-        val requestId = ThreadLocalRandom.current().nextLong()
         val start = System.currentTimeMillis()
 
         val effectiveCursor = cursor ?: continuation
@@ -61,9 +59,8 @@ class ActivityElasticService(
         val result = executeSearch(filter, size, sort)
 
         logger.info(
-            "[{}] Response for ES getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
+            "Response for ES getAllActivities(type={}, blockchains={}, continuation={}, size={}, sort={}):" +
                 " Slice(size={}, continuation={}, cursor={}) ({}ms)",
-            requestId,
             type,
             blockchains,
             continuation,

@@ -222,8 +222,8 @@ class EthOrderServiceTest {
 
         coEvery { orderControllerApi.upsertOrder(UnionOrderConverter.convert(form)) } throws error
 
-        val ex = assertThrows<UnionException> { service.upsertOrder(form) }
-        assertThat(ex.message).isEqualTo("Failed to insert/update order, error code: INCORRECT_SIGNATURE. Ooops")
+        val ex = assertThrows<ErrorUpsertOrder> { service.upsertOrder(form) }
+        assertThat(ex.on400).isEqualTo(error.on400)
     }
 
     @Test

@@ -20,9 +20,9 @@ data class EsItemGenericFilter(
     val updatedTo: Instant? = null,
     val deleted: Boolean? = null,
     val text: String? = null,
+    val fullText: FullTextSearch? = null,
     val traits: List<TraitFilter>? = null,
     val traitRanges: List<TraitRangeFilter>? = null,
-    val descriptions: Set<String>? = null,
     val sellPlatforms: Set<String>? = null,
     val bidPlatforms: Set<String>? = null,
     val sellPriceCurrency: String? = null,
@@ -31,13 +31,12 @@ data class EsItemGenericFilter(
     val bidPriceCurrency: String? = null,
     val bidPriceFrom: Double? = null,
     val bidPriceTo: Double? = null,
+    val onSale: Boolean? = null,
     override val cursor: String? = null,
 ) : EsItemFilter(), DateRangeFilter<EsItemGenericFilter> {
-    override val from: Instant?
-        get() = updatedFrom
 
-    override val to: Instant?
-        get() = updatedTo
+    override val from = updatedFrom
+    override val to = updatedTo
 
     override fun applyDateRange(range: DateRange): EsItemGenericFilter =
         copy(updatedFrom = range.from, updatedTo = range.to)

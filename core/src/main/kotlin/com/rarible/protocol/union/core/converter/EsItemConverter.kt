@@ -3,7 +3,9 @@ package com.rarible.protocol.union.core.converter
 import com.rarible.protocol.union.core.converter.helper.getCurrencyIdOrNull
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsTrait
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
+import com.rarible.protocol.union.dto.ItemIdDto
 import org.apache.commons.codec.digest.DigestUtils
 
 object EsItemConverter {
@@ -16,13 +18,16 @@ object EsItemConverter {
             itemId = id.fullId(),
             blockchain = blockchain,
             collection = collection?.fullId(),
+            token = collection?.value,
+            tokenId = tokenId(id),
             name = meta?.name,
             description = meta?.description,
             creators = creators.map { it.account.fullId() },
             mintedAt = mintedAt,
             lastUpdatedAt = lastUpdatedAt,
             deleted = deleted,
-            traits = meta?.attributes?.map { EsTrait(it.key.take(MAX_TRAIT_LENGTH), it.value?.take(MAX_TRAIT_LENGTH)) } ?: emptyList(),
+            traits = meta?.attributes?.map { EsTrait(it.key.take(MAX_TRAIT_LENGTH), it.value?.take(MAX_TRAIT_LENGTH)) }
+                ?: emptyList(),
             self = self,
             bestSellAmount = this.bestSellOrder?.take?.value?.toDouble(),
             bestSellCurrency = getCurrencyIdOrNull(blockchain, this.bestSellOrder?.take),
@@ -31,6 +36,14 @@ object EsItemConverter {
             bestBidCurrency = getCurrencyIdOrNull(blockchain, this.bestBidOrder?.make),
             bestBidMarketplace = this.bestBidOrder?.platform?.name, // getting marketplace may be more complicated
         )
+    }
+
+    private fun tokenId(itemId: ItemIdDto): String? {
+        if (itemId.blockchain == BlockchainDto.SOLANA) {
+            return itemId.value
+        }
+        val parts = itemId.value.split(":")
+        return if (parts.size == 2) parts[1] else itemId.value
     }
 
     private fun prepareId(itemId: String): String {

@@ -11,6 +11,7 @@ import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.client.RestHighLevelClientBuilder
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
@@ -30,6 +31,7 @@ import java.time.Duration
 
 @Configuration
 @Import(EsNameResolver::class, IndexService::class, EsMetadataRepository::class)
+@EnableConfigurationProperties(SearchProperties::class)
 class SearchConfiguration(private val ff: FeatureFlagsProperties) {
     @Bean
     fun elasticsearchCustomConversions(): ElasticsearchCustomConversions {

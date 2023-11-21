@@ -31,7 +31,7 @@ class CurrencyClient(
     }
 
     suspend fun getAllCurrencies(): List<CurrencyDto> {
-        return currencyControllerApi.getAllCurrencies()
+        return currencyControllerApi.allCurrencies
             .awaitFirstOrNull()?.currencies ?: emptyList()
     }
 
