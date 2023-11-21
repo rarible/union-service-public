@@ -6,6 +6,8 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemProvider
+import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
+import com.rarible.protocol.union.enrichment.test.data.randomShortItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionMeta
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -76,10 +78,14 @@ class ArtBlocksCustomCollectionProviderTest {
     fun `get sub-collection - ok, created`() = runBlocking<Unit> {
         val itemId = createItemId(123111111)
         val subCollection = CollectionIdDto(BlockchainDto.ETHEREUM, "0x814ec5e9a5e91837887cd7b78c39fa9038c7a239")
-        val meta = randomUnionMeta(attributes = listOf(UnionMetaAttribute("collection_name", "123")))
+        val item = randomShortItem().copy(
+            metaEntry = randomItemMetaDownloadEntry(
+                data = randomUnionMeta(attributes = listOf(UnionMetaAttribute("collection_name", "123")))
+            )
+        )
 
         coEvery { artificialCollectionService.exists(subCollection) } returns false
-        coEvery { customCollectionItemProvider.getMeta(listOf(itemId)) } returns mapOf(itemId to meta)
+        coEvery { customCollectionItemProvider.getItemsWithMeta(listOf(itemId)) } returns mapOf(itemId to item)
 
         val result = provider.getCustomCollection(itemId, null)
 
@@ -99,10 +105,13 @@ class ArtBlocksCustomCollectionProviderTest {
     fun `get sub-collection - ok, created, meta attribute not found`() = runBlocking<Unit> {
         val itemId = createItemId(987987111111)
         val subCollection = CollectionIdDto(BlockchainDto.ETHEREUM, "0x4755745f20b8b7944f85abfffb62549dc8f6d4dd")
-        val meta = randomUnionMeta()
+
+        val item = randomShortItem().copy(
+            metaEntry = randomItemMetaDownloadEntry()
+        )
 
         coEvery { artificialCollectionService.exists(subCollection) } returns false
-        coEvery { customCollectionItemProvider.getMeta(listOf(itemId)) } returns mapOf(itemId to meta)
+        coEvery { customCollectionItemProvider.getItemsWithMeta(listOf(itemId)) } returns mapOf(itemId to item)
 
         val result = provider.getCustomCollection(itemId, null)
 

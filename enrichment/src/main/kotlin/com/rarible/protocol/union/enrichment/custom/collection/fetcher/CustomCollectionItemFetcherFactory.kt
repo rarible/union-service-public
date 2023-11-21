@@ -27,7 +27,10 @@ class CustomCollectionItemFetcherFactory(
             result.add(CustomCollectionItemFetcherByList(customCollectionItemProvider, itemIds))
         }
 
-        val collectionIds = mapping.getCollectionIds().map { it.toDto() }
+        val collectionIds = (mapping.getCollectionIds() + mapping.meta.getCollectionIds())
+            .map { it.toDto() }
+            .distinct()
+
         if (collectionIds.isNotEmpty()) {
             result.add(CustomCollectionItemFetcherByCollection(customCollectionItemProvider, collectionIds))
         }
