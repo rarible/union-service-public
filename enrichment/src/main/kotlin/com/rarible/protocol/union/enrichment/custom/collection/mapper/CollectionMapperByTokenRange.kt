@@ -4,7 +4,6 @@ import com.rarible.protocol.union.core.util.CompositeItemIdParser
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.custom.collection.provider.CustomCollectionProvider
-import com.rarible.protocol.union.enrichment.model.ShortItem
 import java.math.BigInteger
 
 class CollectionMapperByTokenRange(
@@ -14,7 +13,7 @@ class CollectionMapperByTokenRange(
 
     override suspend fun getCustomCollectionProviders(
         itemIds: Collection<ItemIdDto>,
-        hint: Map<ItemIdDto, ShortItem>
+        context: CollectionMapperContext
     ): Map<ItemIdDto, CustomCollectionProvider> {
         // Doesn't work for solana
         return itemIds.filter { it.blockchain != BlockchainDto.SOLANA }

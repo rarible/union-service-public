@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.custom.collection.fetcher
 
 import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMapping
+import com.rarible.protocol.union.enrichment.configuration.CustomCollectionMetaMapping
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentCollectionProperties
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemProvider
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
@@ -61,6 +62,30 @@ class CustomCollectionItemFetcherFactoryTest {
             name = customCollection.fullId(),
             items = listOf(itemId.fullId()),
             collections = listOf(collectionId.fullId())
+        )
+
+        val properties = EnrichmentCollectionProperties(listOf(mapping))
+
+        val provider = CustomCollectionItemFetcherFactory(customCollectionItemProvider, properties)
+        val fetchers = provider.get(customCollection.fullId())
+
+        assertThat(fetchers).hasSize(2)
+        assertThat(fetchers[0]).isInstanceOf(CustomCollectionItemFetcherByList::class.java)
+        assertThat(fetchers[1]).isInstanceOf(CustomCollectionItemFetcherByCollection::class.java)
+    }
+
+    @Test
+    fun `get - ok, with meta mapping`() {
+        val customCollection = randomEthCollectionId()
+        val itemId = randomEthItemId()
+        val collectionId = randomEthCollectionId()
+
+        val mapping = CustomCollectionMapping(
+            name = customCollection.fullId(),
+            items = listOf(itemId.fullId()),
+            meta = CustomCollectionMetaMapping(
+                collections = listOf(collectionId.fullId())
+            )
         )
 
         val properties = EnrichmentCollectionProperties(listOf(mapping))

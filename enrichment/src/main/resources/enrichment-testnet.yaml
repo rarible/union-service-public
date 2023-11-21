@@ -23,8 +23,6 @@ enrichment:
         collections:
           - "FLOW:A.6f6702697b205c18.HWGarageCard"
       - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Genesis"
-        collections:
-          - "FLOW:A.371ebe4bc55f8925.Gamisodes"
         meta:
           collections:
             - "FLOW:A.371ebe4bc55f8925.Gamisodes"
@@ -33,8 +31,6 @@ enrichment:
               values:
                 - "Genesis"
       - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Gadgets"
-        collections:
-          - "FLOW:A.371ebe4bc55f8925.Gamisodes"
         meta:
           collections:
             - "FLOW:A.371ebe4bc55f8925.Gamisodes"
@@ -43,8 +39,6 @@ enrichment:
               values:
                 - "Gadgets"
       - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Moments"
-        collections:
-          - "FLOW:A.371ebe4bc55f8925.Gamisodes"
         meta:
           collections:
             - "FLOW:A.371ebe4bc55f8925.Gamisodes"
@@ -53,8 +47,6 @@ enrichment:
               values:
                 - "Moments"
       - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Missions"
-        collections:
-          - "FLOW:A.371ebe4bc55f8925.Gamisodes"
         meta:
           collections:
             - "FLOW:A.371ebe4bc55f8925.Gamisodes"
@@ -63,8 +55,6 @@ enrichment:
               values:
                 - "Missions"
       - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Gamisodes"
-        collections:
-          - "FLOW:A.371ebe4bc55f8925.Gamisodes"
         meta:
           collections:
             - "FLOW:A.371ebe4bc55f8925.Gamisodes"
@@ -73,8 +63,6 @@ enrichment:
               values:
                 - "Gamisodes"
       - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Brain"
-        collections:
-          - "FLOW:A.371ebe4bc55f8925.Gamisodes"
         meta:
           collections:
             - "FLOW:A.371ebe4bc55f8925.Gamisodes"

@@ -36,8 +36,8 @@ class ArtBlocksCustomCollectionProvider(
         val subCollectionId = collectionId.copy(value = surrogateCollectionId)
 
         if (!artificialCollectionService.exists(subCollectionId)) {
-            val name = customCollectionItemProvider.getMeta(listOf(itemId))[itemId]
-                ?.attributes?.find { it.key == "collection_name" }?.value
+            val name = customCollectionItemProvider.getItemsWithMeta(listOf(itemId))[itemId]
+                ?.metaEntry?.data?.attributes?.find { it.key == "collection_name" }?.value
 
             artificialCollectionService.createArtificialCollection(
                 originalId = collectionId,
