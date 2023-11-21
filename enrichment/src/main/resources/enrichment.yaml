@@ -104,11 +104,7 @@ integration:
       enabled: false
       consumer:
         brokerReplicaSet: "${kafka.hosts}"
-    zkevm:
-      enabled: false
-      consumer:
-        brokerReplicaSet: "${kafka.hosts}"
-    astar:
+    astarzkevm:
       enabled: false
       consumer:
         brokerReplicaSet: "${kafka.hosts}"
