@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.collect
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicReference
 
 @Component
 class CustomCollectionOrderUpdater(
@@ -46,12 +47,12 @@ class CustomCollectionOrderUpdater(
 
     private suspend fun updateSell(itemId: ItemIdDto, currencyId: String) {
         val service = router.getService(itemId.blockchain)
-        var continuation: String? = null
+        val continuation = AtomicReference<String>()
         do {
             val page = service.getSellOrdersByItem(
                 platform = null,
                 itemId = itemId.value,
-                continuation = continuation,
+                continuation = continuation.get(),
                 maker = null,
                 origin = null,
                 status = emptyList(),
@@ -61,18 +62,18 @@ class CustomCollectionOrderUpdater(
 
             send(page.entities, itemId, currencyId, "SELL")
 
-            continuation = page.continuation
-        } while (continuation != null)
+            continuation.set(page.continuation)
+        } while (continuation.get() != null)
     }
 
     private suspend fun updateBid(itemId: ItemIdDto, currencyId: String) {
         val service = router.getService(itemId.blockchain)
-        var continuation: String? = null
+        val continuation = AtomicReference<String>()
         do {
             val page = service.getOrderBidsByItem(
                 platform = null,
                 itemId = itemId.value,
-                continuation = continuation,
+                continuation = continuation.get(),
                 origin = null,
                 status = emptyList(),
                 makers = null,
@@ -84,8 +85,8 @@ class CustomCollectionOrderUpdater(
 
             send(page.entities, itemId, currencyId, "BID")
 
-            continuation = page.continuation
-        } while (continuation != null)
+            continuation.set(page.continuation)
+        } while (continuation.get() != null)
     }
 
     private suspend fun send(

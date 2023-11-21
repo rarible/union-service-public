@@ -16,7 +16,8 @@ open class TezosSignatureService(
         signer: String,
         publicKey: String?,
         signature: String,
-        message: String
+        message: String,
+        algorithm: String?,
     ): Boolean {
         if (publicKey.isNullOrBlank()) {
             throw UnionValidationException("Public key is not specified")

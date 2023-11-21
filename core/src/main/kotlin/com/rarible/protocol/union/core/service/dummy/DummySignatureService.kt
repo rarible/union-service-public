@@ -14,7 +14,8 @@ class DummySignatureService(
         signer: String,
         publicKey: String?,
         signature: String,
-        message: String
+        message: String,
+        algorithm: String?,
     ): Boolean {
         return false
     }

@@ -22,6 +22,54 @@ enrichment:
       - name: "FLOW:A.6f6702697b205c18.HWGarageCardV2"
         collections:
           - "FLOW:A.6f6702697b205c18.HWGarageCard"
+      - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Genesis"
+        meta:
+          collections:
+            - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Genesis"
+      - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Gadgets"
+        meta:
+          collections:
+            - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Gadgets"
+      - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Moments"
+        meta:
+          collections:
+            - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Moments"
+      - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Missions"
+        meta:
+          collections:
+            - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Missions"
+      - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Gamisodes"
+        meta:
+          collections:
+            - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Gamisodes"
+      - name: "FLOW:A.371ebe4bc55f8925.Gamisodes_Brain"
+        meta:
+          collections:
+            - "FLOW:A.371ebe4bc55f8925.Gamisodes"
+          attributes:
+            - name: "collection"
+              values:
+                - "Brain Train Tickets"
 
   currencies:
     bestBidByCurrencyWhitelist:

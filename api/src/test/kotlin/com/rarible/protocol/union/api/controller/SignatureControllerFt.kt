@@ -69,7 +69,8 @@ class SignatureControllerFt : AbstractIntegrationTest() {
             signer = UnionAddressConverter.convert(BlockchainDto.FLOW, randomString()),
             publicKey = randomString(),
             message = randomString(),
-            signature = randomString()
+            signature = randomString(),
+            algorithm = randomString()
         )
 
         coEvery {
@@ -77,7 +78,8 @@ class SignatureControllerFt : AbstractIntegrationTest() {
                 unionForm.publicKey,
                 unionForm.signer.value,
                 unionForm.signature,
-                unionForm.message
+                unionForm.message,
+                unionForm.algorithm
             )
         } returns true.toMono()
         val result = signatureControllerApi.validate(unionForm).awaitFirst()
