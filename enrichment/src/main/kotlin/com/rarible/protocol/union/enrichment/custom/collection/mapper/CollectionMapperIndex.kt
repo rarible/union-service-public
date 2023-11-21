@@ -14,6 +14,7 @@ import com.rarible.protocol.union.enrichment.model.ShortItem
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.EnumMap
+import java.util.concurrent.ConcurrentMap
 
 @Component
 class CollectionMapperIndex(
@@ -91,7 +92,7 @@ class CollectionMapperIndex(
 
         override suspend fun getCustomCollectionProviders(
             itemIds: Collection<ItemIdDto>,
-            hint: Map<ItemIdDto, ShortItem>
+            hint: ConcurrentMap<ItemIdDto, ShortItem>
         ): Map<ItemIdDto, CustomCollectionProvider> {
             val result = HashMap<ItemIdDto, CustomCollectionProvider>()
             val temp = HashSet(itemIds)

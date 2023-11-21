@@ -104,7 +104,8 @@ class CustomCollectionItemProviderTest {
         coEvery { ethService.getItemMetaById(item2.value) } throws IllegalArgumentException()
         coEvery { polyService.getItemMetaById(item3.value) } returns meta3
 
-        val result = provider.fetchMeta(listOf(item1, item2, item3))
+        val result = provider.fetchItemsWithMeta(listOf(item1, item2, item3))
+            .mapValues { it.value.metaEntry!!.data!! }
 
         assertThat(result).isEqualTo(mapOf(item1 to meta1, item3 to meta3))
     }

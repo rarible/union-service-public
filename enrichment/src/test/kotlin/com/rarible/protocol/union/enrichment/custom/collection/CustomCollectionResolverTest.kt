@@ -158,8 +158,12 @@ class CustomCollectionResolverTest {
         val collectionId = randomEthCollectionId()
         val itemId = ItemIdDto(collectionId.blockchain, "${collectionId.value}:1")
 
-        val meta = randomUnionMeta().copy(attributes = listOf(UnionMetaAttribute("a", "b")))
-        coEvery { customCollectionItemProvider.getOrFetchMeta(listOf(itemId)) } returns mapOf(itemId to meta)
+        val item = randomShortItem().copy(
+            metaEntry = randomItemMetaDownloadEntry(
+                data = randomUnionMeta().copy(attributes = listOf(UnionMetaAttribute("a", "b")))
+            )
+        )
+        coEvery { customCollectionItemProvider.getOrFetchMeta(listOf(itemId)) } returns mapOf(itemId to item)
 
         val customMetaMapping = CustomCollectionMetaMapping(
             listOf(collectionId.fullId()),
@@ -177,9 +181,13 @@ class CustomCollectionResolverTest {
         val collectionId = randomEthCollectionId()
         val itemId = ItemIdDto(collectionId.blockchain, "${collectionId.value}:1")
 
-        val meta = randomUnionMeta().copy(attributes = listOf(UnionMetaAttribute("key1", "b")))
-        val item = randomShortItem(itemId).copy(metaEntry = randomItemMetaDownloadEntry().copy(data = meta))
-        coEvery { customCollectionItemProvider.getOrFetchMeta(listOf(itemId)) } returns mapOf(itemId to meta)
+        val item = randomShortItem().copy(
+            metaEntry = randomItemMetaDownloadEntry(
+                data = randomUnionMeta().copy(attributes = listOf(UnionMetaAttribute("key1", "b")))
+            )
+        )
+
+        coEvery { customCollectionItemProvider.getOrFetchMeta(listOf(itemId)) } returns mapOf(itemId to item)
 
         val customMetaMapping = CustomCollectionMetaMapping(
             listOf(collectionId.fullId()),

@@ -9,6 +9,8 @@ import com.rarible.protocol.union.enrichment.custom.collection.mapper.Collection
 import com.rarible.protocol.union.enrichment.custom.collection.provider.CustomCollectionProvider
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import org.springframework.stereotype.Component
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
 @Component
 class CustomCollectionResolver(
@@ -36,7 +38,7 @@ class CustomCollectionResolver(
         }
 
         // Resolving other item's collections
-        val resolved = resolve(remain.map { it.itemId!! }, hint)
+        val resolved = resolve(remain.map { it.itemId!! }, ConcurrentHashMap(hint))
 
         remain.forEach { entity ->
             resolved[entity.itemId!!]?.let { result[entity.entityId] = it }
@@ -47,7 +49,7 @@ class CustomCollectionResolver(
 
     private suspend fun resolve(
         itemIds: Collection<ItemIdDto>,
-        hint: Map<ItemIdDto, ShortItem>
+        hint: ConcurrentMap<ItemIdDto, ShortItem>
     ): Map<ItemIdDto, CollectionIdDto> {
         val gropedByCollection = itemIds.mapNotNull { itemId ->
             if (itemId.blockchain == BlockchainDto.SOLANA) {

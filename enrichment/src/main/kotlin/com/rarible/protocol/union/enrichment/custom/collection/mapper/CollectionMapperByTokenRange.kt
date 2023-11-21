@@ -6,6 +6,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.custom.collection.provider.CustomCollectionProvider
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import java.math.BigInteger
+import java.util.concurrent.ConcurrentMap
 
 class CollectionMapperByTokenRange(
     private val provider: CustomCollectionProvider,
@@ -14,7 +15,7 @@ class CollectionMapperByTokenRange(
 
     override suspend fun getCustomCollectionProviders(
         itemIds: Collection<ItemIdDto>,
-        hint: Map<ItemIdDto, ShortItem>
+        hint: ConcurrentMap<ItemIdDto, ShortItem>
     ): Map<ItemIdDto, CustomCollectionProvider> {
         // Doesn't work for solana
         return itemIds.filter { it.blockchain != BlockchainDto.SOLANA }

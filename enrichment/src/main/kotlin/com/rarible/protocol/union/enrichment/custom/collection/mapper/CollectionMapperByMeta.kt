@@ -5,6 +5,7 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.custom.collection.CustomCollectionItemProvider
 import com.rarible.protocol.union.enrichment.custom.collection.provider.CustomCollectionProvider
 import com.rarible.protocol.union.enrichment.model.ShortItem
+import java.util.concurrent.ConcurrentMap
 
 class CollectionMapperByMeta(
     private val provider: CustomCollectionProvider,
@@ -15,16 +16,19 @@ class CollectionMapperByMeta(
 
     override suspend fun getCustomCollectionProviders(
         itemIds: Collection<ItemIdDto>,
-        hint: Map<ItemIdDto, ShortItem>
+        hint: ConcurrentMap<ItemIdDto, ShortItem>
     ): Map<ItemIdDto, CustomCollectionProvider> {
         val missing = itemIds.filter { !hint.containsKey(it) }
 
         val fetched = customCollectionItemProvider.getOrFetchMeta(missing)
 
         val fromHint = hint.filter { it.value.metaEntry?.data != null }
-            .mapValues { it.value.metaEntry!!.data!! }
+
+        hint.putAll(fetched) // minor optimisation to avoid unnecessary calls to DB for same items
 
         return (fetched + fromHint)
+            .filter { it.value.metaEntry?.data != null }
+            .mapValues { it.value.metaEntry!!.data!! }
             .filter { matches(it.value) }
             .mapValues { provider }
     }
