@@ -16,6 +16,7 @@ class DummySignatureService(
         signature: String,
         message: String,
         algorithm: String?,
+        weight: Int?,
     ): Boolean {
         return false
     }

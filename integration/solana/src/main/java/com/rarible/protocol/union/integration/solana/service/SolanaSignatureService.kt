@@ -19,6 +19,7 @@ open class SolanaSignatureService(
         signature: String,
         message: String,
         algorithm: String?,
+        weight: Int?,
     ): Boolean {
         return signatureControllerApi.validate(
             SolanaSignatureValidationFormDto(

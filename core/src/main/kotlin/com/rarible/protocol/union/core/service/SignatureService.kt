@@ -10,7 +10,8 @@ interface SignatureService : BlockchainService {
         publicKey: String?,
         signature: String,
         message: String,
-        algorithm: String?
+        algorithm: String?,
+        weight: Int?
     ): Boolean
 
     // TODO Ideally there should be intermediate object SignatureInputForm with 'native' values only

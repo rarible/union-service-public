@@ -21,7 +21,8 @@ class SignatureController(
                 publicKey = signatureValidationFormDto.publicKey,
                 signature = signatureValidationFormDto.signature,
                 message = signatureValidationFormDto.message,
-                algorithm = signatureValidationFormDto.algorithm
+                algorithm = signatureValidationFormDto.algorithm,
+                weight = signatureValidationFormDto.weight
             )
         return ResponseEntity.ok(result)
     }
