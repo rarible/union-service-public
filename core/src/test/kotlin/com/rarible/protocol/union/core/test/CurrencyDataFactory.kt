@@ -42,7 +42,7 @@ fun nativeTestCurrencies() = listOf(
         blockchain = BlockchainDto.IMMUTABLEX.name,
     ),
     com.rarible.protocol.currency.dto.CurrencyDto(
-        currencyId = "arbitrum",
+        currencyId = "ethereum",
         address = "0x0000000000000000000000000000000000000000",
         blockchain = BlockchainDto.ARBITRUM.name,
     ),
@@ -52,27 +52,22 @@ fun nativeTestCurrencies() = listOf(
         blockchain = BlockchainDto.CHILIZ.name,
     ),
     com.rarible.protocol.currency.dto.CurrencyDto(
-        currencyId = "zksync",
+        currencyId = "ethereum",
         address = "0x0000000000000000000000000000000000000000",
         blockchain = BlockchainDto.ZKSYNC.name,
     ),
     com.rarible.protocol.currency.dto.CurrencyDto(
-        currencyId = "zkevm",
+        currencyId = "ethereum",
         address = "0x0000000000000000000000000000000000000000",
-        blockchain = BlockchainDto.ZKEVM.name,
+        blockchain = BlockchainDto.ASTARZKEVM.name,
     ),
     com.rarible.protocol.currency.dto.CurrencyDto(
-        currencyId = "astar",
-        address = "0x0000000000000000000000000000000000000000",
-        blockchain = BlockchainDto.ASTAR.name,
-    ),
-    com.rarible.protocol.currency.dto.CurrencyDto(
-        currencyId = "base",
+        currencyId = "ethereum",
         address = "0x0000000000000000000000000000000000000000",
         blockchain = BlockchainDto.BASE.name,
     ),
     com.rarible.protocol.currency.dto.CurrencyDto(
-        currencyId = "lightlink",
+        currencyId = "ethereum",
         address = "0x0000000000000000000000000000000000000000",
         blockchain = BlockchainDto.LIGHTLINK.name,
     ),

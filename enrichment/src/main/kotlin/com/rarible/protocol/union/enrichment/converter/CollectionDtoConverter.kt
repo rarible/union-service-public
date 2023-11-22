@@ -97,8 +97,7 @@ object CollectionDtoConverter {
                 BlockchainDto.ARBITRUM,
                 BlockchainDto.CHILIZ,
                 BlockchainDto.ZKSYNC,
-                BlockchainDto.ZKEVM,
-                BlockchainDto.ASTAR,
+                BlockchainDto.ASTARZKEVM,
                 BlockchainDto.BASE,
                 BlockchainDto.LIGHTLINK -> CollectionDto.Type.ERC721
 
