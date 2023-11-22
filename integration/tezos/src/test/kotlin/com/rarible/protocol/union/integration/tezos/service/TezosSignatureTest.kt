@@ -28,7 +28,7 @@ class TezosSignatureTest {
 
         coEvery { signatureClient.validate(publicKey, signature, message) } returns true
 
-        assertTrue(service.validate(randomString(), publicKey, signature, message, null))
+        assertTrue(service.validate(randomString(), publicKey, signature, message, null, null))
     }
 
     @Test
@@ -41,7 +41,7 @@ class TezosSignatureTest {
         coEvery { signatureClient.validate(publicKey, signature, message) } throws SignatureValidationException("blablabla")
 
         assertThrows<UnionValidationException> {
-            service.validate(randomString(), publicKey, signature, message, null)
+            service.validate(randomString(), publicKey, signature, message, null, null)
         }
     }
 }

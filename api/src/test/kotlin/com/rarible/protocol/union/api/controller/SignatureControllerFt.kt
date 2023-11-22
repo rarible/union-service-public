@@ -79,7 +79,8 @@ class SignatureControllerFt : AbstractIntegrationTest() {
                 unionForm.signer.value,
                 unionForm.signature,
                 unionForm.message,
-                unionForm.algorithm
+                unionForm.algorithm,
+                unionForm.weight
             )
         } returns true.toMono()
         val result = signatureControllerApi.validate(unionForm).awaitFirst()
