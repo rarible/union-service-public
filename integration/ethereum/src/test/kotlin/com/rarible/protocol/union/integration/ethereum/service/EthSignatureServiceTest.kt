@@ -54,7 +54,8 @@ class EthSignatureServiceTest {
             publicKey = null,
             signature = EthConverter.convert(expected.signature),
             message = expected.message,
-            algorithm = null
+            algorithm = null,
+            weight = null,
         )
 
         assertThat(result).isEqualTo(true)

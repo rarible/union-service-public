@@ -28,6 +28,7 @@ class EthSignatureService(
         signature: String,
         message: String,
         algorithm: String?,
+        weight: Int?,
     ): Boolean {
         val ethereumForm = EthereumSignatureValidationFormDto(
             signer = EthConverter.convertToAddress(signer),
