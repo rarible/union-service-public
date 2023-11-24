@@ -172,6 +172,10 @@ class OrderSourceSelectService(
         )
     }
 
+    suspend fun reportOrder(id: String) {
+        orderApiService.reportOrder(id)
+    }
+
     private fun getQuerySource(searchEngine: SearchEngineDto?): OrderQueryService {
         if (searchEngine != null) {
             return when (searchEngine) {

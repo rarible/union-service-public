@@ -173,5 +173,7 @@ interface OrderService : BlockchainService {
         id: String,
     ): UnionOrder
 
+    suspend fun reportOrder(id: String)
+
     fun getOrigins(): List<Origin> = emptyList()
 }

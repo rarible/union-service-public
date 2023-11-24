@@ -22,6 +22,7 @@ import com.rarible.protocol.union.integration.immutablex.client.TokenIdDecoder
 import com.rarible.protocol.union.integration.immutablex.converter.ImxOrderV3Converter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import org.slf4j.LoggerFactory
 
 class ImxOrderService(
     private val orderClient: ImxOrderClient,
@@ -327,10 +328,18 @@ class ImxOrderService(
         return Slice.empty()
     }
 
+    override suspend fun reportOrder(id: String) {
+        logger.info("Report imx order: $id")
+    }
+
     private fun isPlatformSupported(platform: PlatformDto?): Boolean {
         if (platform == null) {
             return true
         }
         return supportedPlatforms.contains(platform)
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(ImxOrderService::class.java)
     }
 }

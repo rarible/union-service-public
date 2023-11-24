@@ -19,6 +19,7 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.solana.converter.SolanaConverter
 import com.rarible.protocol.union.integration.solana.converter.SolanaOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import org.slf4j.LoggerFactory
 
 open class SolanaOrderService(
     private val orderApi: OrderControllerApi,
@@ -270,11 +271,19 @@ open class SolanaOrderService(
         throw UnionException("Operation is not supported for this blockchain")
     }
 
+    override suspend fun reportOrder(id: String) {
+        logger.info("Reported solana order: $id")
+    }
+
     override suspend fun getAmmOrdersAll(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
         return Slice.empty()
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(SolanaOrderService::class.java)
     }
 }

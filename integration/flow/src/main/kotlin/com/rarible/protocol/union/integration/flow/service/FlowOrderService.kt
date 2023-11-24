@@ -21,6 +21,7 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.flow.converter.FlowConverter
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import org.slf4j.LoggerFactory
 import java.time.Instant
 
 open class FlowOrderService(
@@ -283,11 +284,19 @@ open class FlowOrderService(
         throw UnionException("Operation is not supported for $blockchain")
     }
 
+    override suspend fun reportOrder(id: String) {
+        logger.info("Reported flow order: $id")
+    }
+
     override suspend fun getAmmOrdersAll(
         status: List<OrderStatusDto>?,
         continuation: String?,
         size: Int
     ): Slice<UnionOrder> {
         return Slice.empty()
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(FlowOrderService::class.java)
     }
 }

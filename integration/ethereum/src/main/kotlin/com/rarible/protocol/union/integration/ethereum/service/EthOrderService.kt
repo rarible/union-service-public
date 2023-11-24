@@ -28,6 +28,7 @@ import com.rarible.protocol.union.integration.ethereum.converter.EthOrderConvert
 import com.rarible.protocol.union.integration.ethereum.converter.UnionOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 
 class EthOrderService(
     override val blockchain: BlockchainDto,
@@ -386,6 +387,10 @@ class EthOrderService(
             com.rarible.protocol.dto.OrderSortDto.LAST_UPDATE_DESC
         ).awaitFirst()
         return ethOrderConverter.convert(orders, blockchain)
+    }
+
+    override suspend fun reportOrder(id: String) {
+        orderControllerApi.reportOrder(id).awaitSingleOrNull()
     }
 
     override fun getOrigins(): List<Origin> {
