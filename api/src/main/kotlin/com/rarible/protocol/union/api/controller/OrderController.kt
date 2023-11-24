@@ -207,6 +207,11 @@ class OrderController(
         return ResponseEntity.ok(toDto(result))
     }
 
+    override suspend fun reportOrderById(id: String): ResponseEntity<Unit> {
+        orderSourceSelector.reportOrder(id)
+        return ResponseEntity.ok().build()
+    }
+
     private suspend fun toDto(slice: Slice<UnionOrder>): OrdersDto {
         val orders = enrichmentOrderService.enrich(slice.entities)
         return OrdersDto(slice.continuation, orders)

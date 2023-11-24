@@ -45,7 +45,9 @@ import io.mockk.coEvery
 import io.mockk.every
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
@@ -610,5 +612,15 @@ class OrderControllerFt : AbstractIntegrationTest() {
         assertThat(convertedPrice.price).isEqualTo(price.price)
         assertThat(convertedPrice.priceUsd).isEqualTo(price.priceUsd)
         assertThat(convertedPrice.priceValue).isEqualTo(price.priceValue)
+    }
+
+    @Test
+    fun `report order`() = runBlocking<Unit> {
+        val orderId = randomWord()
+        val fullOrderId = OrderIdDto(BlockchainDto.ETHEREUM, orderId)
+
+        coEvery { testEthereumOrderApi.reportOrder(orderId) } returns Mono.empty()
+
+        orderControllerClient.reportOrderById(fullOrderId.fullId()).awaitSingleOrNull()
     }
 }

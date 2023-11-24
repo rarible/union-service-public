@@ -293,6 +293,10 @@ class OrderProxyService(
         return orderService.cancelOrder(id)
     }
 
+    override suspend fun reportOrder(id: String) {
+        orderService.reportOrder(id)
+    }
+
     private fun isPlatformSupported(platform: PlatformDto?): Boolean {
         if (platform == null) {
             return true

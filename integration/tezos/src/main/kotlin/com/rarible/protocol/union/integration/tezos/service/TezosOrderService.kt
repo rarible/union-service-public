@@ -17,6 +17,7 @@ import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.DipDupConverter
 import com.rarible.protocol.union.integration.tezos.dipdup.service.DipdupOrderService
+import org.slf4j.LoggerFactory
 import java.util.regex.Pattern
 
 open class TezosOrderService(
@@ -277,6 +278,7 @@ open class TezosOrderService(
     }
 
     companion object {
+        private val logger = LoggerFactory.getLogger(TezosOrderService::class.java)
         private val UUID_REGEX_PATTERN: Pattern =
             Pattern.compile("^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$")
     }

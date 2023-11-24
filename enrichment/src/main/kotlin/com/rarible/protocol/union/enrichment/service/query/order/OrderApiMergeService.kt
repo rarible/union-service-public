@@ -53,6 +53,11 @@ class OrderApiMergeService(
         return router.getService(orderId.blockchain).getOrderById(orderId.value)
     }
 
+    suspend fun reportOrder(id: String) {
+        val orderId = IdParser.parseOrderId(id)
+        router.getService(orderId.blockchain).reportOrder(orderId.value)
+    }
+
     suspend fun getValidatedOrderById(id: String): UnionOrder {
         val orderId = IdParser.parseOrderId(id)
         return router.getService(orderId.blockchain).getValidatedOrderById(orderId.value)

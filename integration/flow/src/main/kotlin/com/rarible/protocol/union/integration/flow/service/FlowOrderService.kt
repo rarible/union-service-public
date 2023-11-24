@@ -21,6 +21,7 @@ import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.integration.flow.converter.FlowConverter
 import com.rarible.protocol.union.integration.flow.converter.FlowOrderConverter
 import kotlinx.coroutines.reactive.awaitFirst
+import org.slf4j.LoggerFactory
 import java.time.Instant
 
 open class FlowOrderService(
@@ -289,5 +290,9 @@ open class FlowOrderService(
         size: Int
     ): Slice<UnionOrder> {
         return Slice.empty()
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(FlowOrderService::class.java)
     }
 }
