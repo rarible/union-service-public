@@ -12,6 +12,7 @@ import com.rarible.protocol.union.dto.OrderStatusDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.dto.SyncSortDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import org.slf4j.LoggerFactory
 
 interface OrderService : BlockchainService {
 
@@ -173,7 +174,13 @@ interface OrderService : BlockchainService {
         id: String,
     ): UnionOrder
 
-    suspend fun reportOrder(id: String)
+    suspend fun reportOrder(id: String) {
+        logger.info("Reported $blockchain order: $id")
+    }
 
     fun getOrigins(): List<Origin> = emptyList()
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(OrderService::class.java)
+    }
 }

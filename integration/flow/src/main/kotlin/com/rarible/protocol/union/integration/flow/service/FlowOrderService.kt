@@ -284,10 +284,6 @@ open class FlowOrderService(
         throw UnionException("Operation is not supported for $blockchain")
     }
 
-    override suspend fun reportOrder(id: String) {
-        logger.info("Reported flow order: $id")
-    }
-
     override suspend fun getAmmOrdersAll(
         status: List<OrderStatusDto>?,
         continuation: String?,

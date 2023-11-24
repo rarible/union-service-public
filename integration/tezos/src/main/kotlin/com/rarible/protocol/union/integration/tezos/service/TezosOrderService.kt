@@ -271,10 +271,6 @@ open class TezosOrderService(
         return Slice.empty()
     }
 
-    override suspend fun reportOrder(id: String) {
-        logger.info("Reported tezos order: $id")
-    }
-
     private fun isValidUUID(str: String?): Boolean {
         return if (str == null) {
             false

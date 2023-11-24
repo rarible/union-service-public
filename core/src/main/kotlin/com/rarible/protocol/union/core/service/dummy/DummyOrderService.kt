@@ -210,7 +210,4 @@ class DummyOrderService(
     override suspend fun cancelOrder(id: String): UnionOrder {
         throw UnionException("Can't cancel order $id, ${blockchain.name} is not available")
     }
-
-    override suspend fun reportOrder(id: String) {
-    }
 }

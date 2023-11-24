@@ -328,10 +328,6 @@ class ImxOrderService(
         return Slice.empty()
     }
 
-    override suspend fun reportOrder(id: String) {
-        logger.info("Report imx order: $id")
-    }
-
     private fun isPlatformSupported(platform: PlatformDto?): Boolean {
         if (platform == null) {
             return true
