@@ -52,6 +52,7 @@ import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
 import com.rarible.protocol.union.dto.EthOrderCryptoPunksDataDto
 import com.rarible.protocol.union.dto.EthOrderDataLegacyDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV1Dto
+import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV2Dto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3BuyDto
 import com.rarible.protocol.union.dto.EthOrderDataRaribleV2DataV3SellDto
 import com.rarible.protocol.union.dto.EthOrderOpenSeaV1DataV1Dto
@@ -512,9 +513,10 @@ class EthOrderConverter(
     fun convert(source: com.rarible.protocol.dto.OrderRaribleV2DataDto, blockchain: BlockchainDto): OrderDataDto {
         return when (source) {
             is OrderRaribleV2DataV2Dto -> {
-                EthOrderDataRaribleV2DataV1Dto(
+                EthOrderDataRaribleV2DataV2Dto(
                     payouts = source.payouts.map { EthConverter.convertToPayout(it, blockchain) },
-                    originFees = source.originFees.map { EthConverter.convertToPayout(it, blockchain) }
+                    originFees = source.originFees.map { EthConverter.convertToPayout(it, blockchain) },
+                    isMakeFill = source.isMakeFill
                 )
             }
 
