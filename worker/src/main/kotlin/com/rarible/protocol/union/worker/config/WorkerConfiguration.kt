@@ -106,7 +106,7 @@ class WorkerConfiguration(
     }
 
     @Bean
-    @ConditionalOnProperty(name = ["worker.price-update.enabled"], havingValue = "true")
+    @ConditionalOnProperty(name = ["worker.priceUpdate.enabled"], havingValue = "true")
     fun bestOrderCheckJob(
         handler: BestOrderCheckJobHandler,
         properties: WorkerProperties,
@@ -116,7 +116,7 @@ class WorkerConfiguration(
     }
 
     @Bean
-    @ConditionalOnProperty(name = ["worker.reconcile-marks.enabled"], havingValue = "true")
+    @ConditionalOnProperty(name = ["worker.reconcileMarks.enabled"], havingValue = "true")
     fun reconciliationMarkJob(
         handler: ReconciliationMarkJobHandler,
         properties: WorkerProperties,

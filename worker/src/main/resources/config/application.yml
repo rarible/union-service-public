@@ -7,6 +7,16 @@ mongock:
     - "com.rarible.protocol.union.enrichment.migration"
 
 worker:
+  priceUpdate:
+    enabled: true
+  reconcileMarks:
+    enabled: true
+  metaRefresh:
+    enabled: false
+  metaRefreshRequestCleanup:
+    enabled: false
+  metaAutoRefresh:
+    enabled: false
   itemMetaCustomAttributesJob:
     enabled: true
     rate: "PT24H"

@@ -162,6 +162,12 @@ integration:
           origin: "0xe3f0dcb8cd846cb63bab7dcaa973445e54f96a9f"
           collections:
             - "0xad265ab9b99296364f13ce5b8b3e8d0998778bfb"
+    chiliz:
+      enabled: true
+    zksync:
+      enabled: true
+    lightlink:
+      enabled: true
   immutablex:
     client:
       url: "https://api.x.immutable.com/v1"
