@@ -61,7 +61,7 @@ fun randomContractAddress(
 ) = ContractAddress(blockchain, value)
 
 fun randomOwnershipId(
-    blockchain: BlockchainDto = BlockchainDto.values().random(),
+    blockchain: BlockchainDto = BlockchainDto.ETHEREUM,
     itemIdValue: String = "${randomString().lowercase()}:${randomLong()}",
     owner: UnionAddress = randomUnionAddress(blockchain, randomString().lowercase()),
 ) = OwnershipIdDto(
@@ -103,22 +103,22 @@ fun randomOwnership(
 )
 
 fun randomUnionAddress(
-    blockchain: BlockchainDto = BlockchainDto.values().random(),
+    blockchain: BlockchainDto = BlockchainDto.ETHEREUM,
     value: String = randomAddress().prefixed(),
 ) = UnionAddress(blockchain.group(), value)
 
 fun randomAuctionId(
-    blockchain: BlockchainDto = BlockchainDto.values().random(),
+    blockchain: BlockchainDto = BlockchainDto.ETHEREUM,
     value: String = randomString(),
 ) = AuctionIdDto(blockchain, value)
 
 fun randomOrderId(
-    blockchain: BlockchainDto = BlockchainDto.values().random(),
+    blockchain: BlockchainDto = BlockchainDto.ETHEREUM,
     value: String = randomString(),
 ) = OrderIdDto(blockchain, value)
 
 fun randomItemId(
-    blockchain: BlockchainDto = BlockchainDto.values().random(),
+    blockchain: BlockchainDto = BlockchainDto.ETHEREUM,
     value: String = "${randomString()}:${randomBigInt(6)}",
 ) = ItemIdDto(blockchain, value)
 

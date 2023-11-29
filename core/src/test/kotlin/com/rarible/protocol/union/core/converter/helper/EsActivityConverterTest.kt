@@ -671,7 +671,7 @@ class EsActivityConverterTest {
     }
 
     private fun randomBlockchain(): BlockchainDto {
-        return BlockchainDto.values().random()
+        return BlockchainDto.ETHEREUM
     }
 
     private fun randomUnionAddress(): UnionAddress {

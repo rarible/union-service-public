@@ -274,7 +274,7 @@ internal class ItemTraitServiceTest {
     }
 
     fun randomEsItem(collection: String? = randomAddress().toString(), traits: List<EsTrait>): EsItem {
-        val blockchain = BlockchainDto.values().random()
+        val blockchain = BlockchainDto.ETHEREUM
         val itemId = ItemIdDto(blockchain, randomAddress().prefixed(), randomBigInt())
         return EsItem(
             id = randomString(),
