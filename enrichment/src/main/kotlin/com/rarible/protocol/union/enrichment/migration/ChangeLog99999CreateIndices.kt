@@ -11,6 +11,7 @@ import com.rarible.protocol.union.enrichment.repository.MetaAutoRefreshStateRepo
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.OwnershipRepository
 import com.rarible.protocol.union.enrichment.repository.ReconciliationMarkRepository
+import com.rarible.protocol.union.enrichment.repository.TraitRepository
 import io.changock.migration.api.annotations.NonLockGuarded
 import kotlinx.coroutines.runBlocking
 
@@ -26,6 +27,7 @@ class ChangeLog99999CreateIndices {
     fun createIndicesForAllCollections(
         @NonLockGuarded ownershipRepository: OwnershipRepository,
         @NonLockGuarded itemRepository: ItemRepository,
+        @NonLockGuarded traitRepository: TraitRepository,
         @NonLockGuarded itemReconciliationMarkRepository: ReconciliationMarkRepository,
         @NonLockGuarded collectionRepository: CollectionRepository,
         @NonLockGuarded itemMetaRepository: ItemMetaRepository,
@@ -36,6 +38,7 @@ class ChangeLog99999CreateIndices {
     ) = runBlocking {
         ownershipRepository.createIndices()
         itemRepository.createIndices()
+        traitRepository.createIndices()
         itemReconciliationMarkRepository.createIndices()
         collectionRepository.createIndices()
         activityRepository.createIndices()
