@@ -89,7 +89,8 @@ class ActivityFilterConverter(
 
     fun convertDtoFilter(
         filter: ActivitySearchFilterDto,
-        activeBlockchains: Set<BlockchainDto>
+        activeBlockchains: Set<BlockchainDto>,
+        cursor: String?,
     ): ElasticActivityFilter {
         return ElasticActivityFilter(
             blockchains = activeBlockchains,
@@ -101,7 +102,8 @@ class ActivityFilterConverter(
             bidCurrencies = filter.currencies?.bid?.toSet() ?: emptySet(),
             items = filter.items?.toSet() ?: emptySet(),
             from = filter.from,
-            to = filter.to
+            to = filter.to,
+            cursor = cursor,
         )
     }
 

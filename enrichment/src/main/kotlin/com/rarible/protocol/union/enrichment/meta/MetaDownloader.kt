@@ -73,7 +73,7 @@ abstract class MetaDownloader<K, T : ContentOwner<T>>(
         key: K,
         meta: T?
     ) {
-        val jsonDuration = Duration.between(enrichmentStart, start)
+        val jsonDuration = Duration.between(start, enrichmentStart)
         if (meta != null) {
             logger.info(
                 "Downloaded $type meta for $key" +

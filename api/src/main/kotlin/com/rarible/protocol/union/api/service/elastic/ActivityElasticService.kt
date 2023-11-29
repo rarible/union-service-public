@@ -202,7 +202,8 @@ class ActivityElasticService(
         val start = System.currentTimeMillis()
         val esFilter = filterConverter.convertDtoFilter(
             filter = filter,
-            activeBlockchains = router.getEnabledBlockchains(filter.blockchains).toSet()
+            activeBlockchains = router.getEnabledBlockchains(filter.blockchains).toSet(),
+            cursor = cursor,
         )
 
         val result = executeSearch(esFilter, size, sort)
