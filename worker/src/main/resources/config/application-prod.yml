@@ -1,4 +1,8 @@
 worker:
+  metaRefresh:
+    enabled: true
+  metaRefreshRequestCleanup:
+    enabled: true
   itemMetaCustomAttributesJob:
     providers:
       mocaXp:
