@@ -127,6 +127,12 @@ integration:
     ethereum:
       auctionContracts:
         - "0x8458d047e66805625e081A8B4466d3d349d9e33a"
+    chiliz:
+      enabled: true
+    zksync:
+      enabled: true
+    lightlink:
+      enabled: true
   tezos:
     dipdup:
       dipdupUrl: "https://testnet-tezos-indexer.rarible.org/v1/graphql"
