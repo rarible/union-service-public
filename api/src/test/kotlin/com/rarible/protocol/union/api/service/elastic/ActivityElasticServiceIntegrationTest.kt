@@ -16,6 +16,7 @@ import com.rarible.protocol.union.core.model.elastic.EsActivity
 import com.rarible.protocol.union.core.model.elastic.EsActivityCursor
 import com.rarible.protocol.union.core.service.ActivityService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.dto.ActivitySearchFilterDto
 import com.rarible.protocol.union.dto.ActivitySortDto
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.AssetDto
@@ -311,6 +312,57 @@ internal class ActivityElasticServiceIntegrationTest {
             userTo = "0x223344",
         )
         repository.saveAll(listOf(one, two, three, four, five, six, seven).shuffled())
+    }
+
+    @Nested
+    inner class SearchTest {
+        @BeforeEach
+        fun before() {
+            service = ActivityElasticService(
+                filterConverter,
+                router,
+                activityRepository,
+                esActivityOptimizedSearchService,
+            )
+        }
+
+        @Test
+        fun `search with cursor`() = runBlocking<Unit> {
+            val cursor1 = buildCursor(one)
+            val cursor2 = buildCursor(two)
+            val cursor7 = buildCursor(seven)
+
+            val result = service.searchActivities(
+                filter = ActivitySearchFilterDto(
+                    blockchains = listOf(BlockchainDto.ETHEREUM),
+                    from = Instant.ofEpochMilli(0),
+                    to = Instant.ofEpochMilli(5000),
+                ),
+                size = 2,
+                sort = null,
+                cursor = null,
+            )
+
+            assertThat(result.activities).containsExactly(
+                EnrichmentActivityDtoConverter.convert(activity1, cursor1),
+                EnrichmentActivityDtoConverter.convert(activity2, cursor2)
+            )
+
+            val result2 = service.searchActivities(
+                filter = ActivitySearchFilterDto(
+                    blockchains = listOf(BlockchainDto.ETHEREUM),
+                    from = Instant.ofEpochMilli(0),
+                    to = Instant.ofEpochMilli(5000),
+                ),
+                size = 2,
+                sort = null,
+                cursor = result.cursor,
+            )
+
+            assertThat(result2.activities).containsExactly(
+                EnrichmentActivityDtoConverter.convert(activity7, cursor7)
+            )
+        }
     }
 
     @Nested
