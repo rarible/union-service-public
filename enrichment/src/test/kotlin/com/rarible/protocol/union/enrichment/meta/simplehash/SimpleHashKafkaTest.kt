@@ -6,6 +6,7 @@ import com.rarible.core.kafka.Compression
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
 import com.rarible.core.kafka.RaribleKafkaProducer
+import com.rarible.core.test.ext.KafkaCleanup
 import com.rarible.core.test.ext.KafkaTest
 import com.rarible.core.test.ext.KafkaTestExtension
 import com.rarible.core.test.wait.BlockingWait.waitAssert
@@ -27,6 +28,7 @@ import java.util.concurrent.ConcurrentLinkedDeque
 
 @Disabled("Works locally, but fails in jenkins")
 @KafkaTest
+@KafkaCleanup
 class SimpleHashKafkaTest {
 
     @Test
