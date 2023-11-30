@@ -120,7 +120,6 @@ internal class ElasticsearchBootstrapperTest {
         }
     }
 
-
     @Test
     fun `should create first index`() = runBlocking<Unit> {
         bootstrapper.bootstrap()
