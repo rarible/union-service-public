@@ -133,6 +133,8 @@ integration:
       enabled: true
     lightlink:
       enabled: true
+    astarzkevm:
+      enabled: true
   tezos:
     dipdup:
       dipdupUrl: "https://testnet-tezos-indexer.rarible.org/v1/graphql"
