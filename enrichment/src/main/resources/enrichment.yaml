@@ -132,7 +132,7 @@ integration:
     consumer:
       brokerReplicaSet: "${kafka.hosts}"
   tezos:
-    enabled: true
+    enabled: false
     dipdup:
       ipfsUrl: "https://ipfs.io/ipfs/"
       dipdupUrl: ""
