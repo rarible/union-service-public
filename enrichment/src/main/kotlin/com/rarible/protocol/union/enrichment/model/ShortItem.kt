@@ -100,6 +100,10 @@ data class ShortItem(
         )
     }
 
+    fun isListed(): Boolean {
+        return bestSellOrder != null
+    }
+
     companion object {
 
         const val COLLECTION = "enrichment_item"

@@ -7,8 +7,10 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
+import com.rarible.protocol.union.enrichment.meta.item.ItemChangeListener
 import com.rarible.protocol.union.enrichment.meta.item.MetaTrimmer
 import com.rarible.protocol.union.enrichment.model.ShortItem
+import com.rarible.protocol.union.enrichment.model.ShortItemChange
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -17,7 +19,8 @@ import org.springframework.stereotype.Component
 class ItemMetaRepository(
     private val itemMetaTrimmer: MetaTrimmer,
     private val itemRepository: ItemRepository,
-    private val blockchainRouter: BlockchainRouter<ItemService>
+    private val blockchainRouter: BlockchainRouter<ItemService>,
+    private val itemChangeListeners: List<ItemChangeListener>,
 ) : DownloadEntryRepository<UnionMeta> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -43,7 +46,8 @@ class ItemMetaRepository(
             if (trimmedMeta != updated.data) {
                 logger.info("Item with large meta was trimmed: $itemId")
             }
-            itemRepository.save(item.withMeta(updated.withData(trimmedMeta)))
+            val updatedItem = itemRepository.save(item.withMeta(updated.withData(trimmedMeta)))
+            onItemChange(item, updatedItem)
             updated
         } else {
             null
@@ -57,5 +61,10 @@ class ItemMetaRepository(
 
     override suspend fun getAll(ids: Collection<String>): List<DownloadEntry<UnionMeta>> {
         return itemRepository.getAll(ids.map { ShortItemId.of(it) }).mapNotNull { it.metaEntry }
+    }
+
+    private suspend fun onItemChange(current: ShortItem?, updated: ShortItem) {
+        val change = ShortItemChange(current, updated)
+        itemChangeListeners.forEach { it.onItemChange(change) }
     }
 }
