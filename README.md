@@ -26,9 +26,9 @@ Protocol SDK is available on GitHub: [https://github.com/rarible/sdk](https://gi
 1. Activate enabled flag, for example: `integration.eth.arbitrum.enabled: true`
 2. Restart union services: indexer, worker, api, listener
 3. Create tasks for enabled blockchain:
-    - `SYNC_COLLECTION_TASK` with param `{"blockchain" : "ARBITRUM", "scope" : "EVENT"}`
-    - `ITEM_REINDEX` with param `{"versionData":1,"settingsHash":"19e94d6d897e42206c57b2d451f51cbc","blockchain":"ARBITRUM","index":"protocol_union_testnet_item_1"}`
-    - `SYNC_OWNERSHIP_TASK` with param `{"blockchain" : "ARBITRUM", "scope" : "EVENT"}`
+   - `SYNC_COLLECTION_TASK` with param `{"blockchain" : "ARBITRUM", "scope" : "EVENT"}`
+   - `ITEM_REINDEX` using endpoint `/maintenance/es/reindex/item` with esIndex=`protocol_union_testnet_item_1`
+   - `SYNC_OWNERSHIP_TASK` with param `{"blockchain" : "ARBITRUM", "scope" : "EVENT"}`
     - `SYNC_ACTIVITY_TASK` with param `{"blockchain" : "ARBITRUM", "scope" : "EVENT", "type" : "NFT"}`
 
 
