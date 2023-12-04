@@ -44,6 +44,8 @@ integration:
     enabled: false
   solana:
     enabled: true
+  tezos:
+    enabled: true
 
 logging:
   level:
