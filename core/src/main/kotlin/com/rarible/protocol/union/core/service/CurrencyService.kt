@@ -263,6 +263,7 @@ class CurrencyService(
                 BlockchainDto.ASTARZKEVM -> "ethereum"
                 BlockchainDto.BASE -> "ethereum"
                 BlockchainDto.LIGHTLINK -> "ethereum"
+                BlockchainDto.RARI -> "ethereum"
             }
         }
 
