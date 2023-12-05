@@ -1,6 +1,5 @@
 api:
   openapi:
-    baseUrl: "https://dev-api.rarible.org"
     description: "Development (Ropsten, Mumbai, Hangzhou)"
     examples:
       collectionId: "ETHEREUM:0x6972347e66a32f40ef3c012615c13cb88bf681cc"
