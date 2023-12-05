@@ -34,12 +34,21 @@ openapi: "3.0.1"
 info:
   title: "title"
 servers:
-  - url: "http://localhost"
+  - url: "http://{environment}.localhost.org"
     description: "test desc"
+    variables:
+      environment:
+        enum: ["api", "test-api"]
+        default: "api"
 paths:
 components:"""
 
-        val withHost = OpenapiSubstitutor.substituteHost(yaml, "http://localhost", "test desc")
+        val withHost = OpenapiSubstitutor.substituteHost(
+            yaml = yaml,
+            baseUrl = "http://{environment}.localhost.org",
+            description = "test desc",
+            envs = listOf("prod", "test")
+        )
 
         assertThat(withHost).isEqualTo(expectedYaml)
     }
