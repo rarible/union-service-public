@@ -1,7 +1,8 @@
 api:
   openapi:
-    baseUrl: "https://test-api.rarible.org"
     description: "Development (Ropsten, Mumbai, Hangzhou)"
+    envs:
+      - "test"
   order-settings:
     fees:
       ethereum:

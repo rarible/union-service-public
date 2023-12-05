@@ -28,7 +28,8 @@ class OpenapiService(
         return OpenapiSubstitutor.substituteHost(
             this,
             openapiProperties.baseUrl,
-            openapiProperties.description
+            openapiProperties.description,
+            openapiProperties.envs
         )
     }
 
