@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.common.nowMillis
 import com.rarible.core.logging.withTraceId
 import com.rarible.core.task.TaskRepository
+import com.rarible.protocol.union.api.service.task.TaskSchedulingService
+import com.rarible.protocol.union.core.task.RefreshCollectionMetaTaskParam
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
@@ -25,7 +28,8 @@ class MetaRefreshController(
     private val itemMetaRefreshService: ItemMetaRefreshService,
     private val commonMetaProperties: CommonMetaProperties,
     private val taskRepository: TaskRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val taskSchedulingService: TaskSchedulingService,
 ) {
 
     @PostMapping(
@@ -43,6 +47,25 @@ class MetaRefreshController(
             full = "full" == mode,
             scheduledAt = scheduledAt ?: nowMillis(),
             withSimpleHash = withSimpleHash && commonMetaProperties.simpleHash.enabled
+        )
+    }
+
+    @PostMapping(
+        value = ["/maintenance/collections/meta/refresh/{mode}"],
+        produces = ["application/json"]
+    )
+    suspend fun refreshCollectionMeta(
+        @PathVariable mode: String,
+        @RequestParam(value = "blockchain", required = false) blockchain: BlockchainDto? = null
+    ): Unit = withTraceId {
+        taskSchedulingService.schedule(
+            type = RefreshCollectionMetaTaskParam.COLLECTION_META_REFRESH_TASK,
+            param = objectMapper.writeValueAsString(
+                RefreshCollectionMetaTaskParam(
+                    blockchain = blockchain,
+                    full = mode == "full",
+                )
+            )
         )
     }
 

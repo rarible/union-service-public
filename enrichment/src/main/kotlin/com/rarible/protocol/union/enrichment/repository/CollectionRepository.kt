@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.repository
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.mongo.util.div
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
@@ -103,10 +104,14 @@ class CollectionRepository(
         return template.find(query, EnrichmentCollection::class.java).asFlow()
     }
 
-    fun findAll(fromIdExcluded: EnrichmentCollectionId? = null): Flow<EnrichmentCollection> = template.find(
+    fun findAll(
+        fromIdExcluded: EnrichmentCollectionId? = null,
+        blockchain: BlockchainDto? = null
+    ): Flow<EnrichmentCollection> = template.find(
         Query(
             Criteria().apply {
                 fromIdExcluded?.let { and(EnrichmentCollection::id).gt(fromIdExcluded) }
+                blockchain?.let { and(EnrichmentCollection::blockchain).isEqualTo(blockchain) }
             }
         ).with(Sort.by(EnrichmentCollection::id.name)),
         EnrichmentCollection::class.java

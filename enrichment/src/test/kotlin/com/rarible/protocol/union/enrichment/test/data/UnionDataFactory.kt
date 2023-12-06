@@ -53,6 +53,7 @@ import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.download.DownloadStatus
 import com.rarible.protocol.union.enrichment.download.DownloadTask
 import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashCollection
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
 import com.rarible.protocol.union.integration.ethereum.converter.EthActivityConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
@@ -501,7 +502,7 @@ fun randomSimpleHashItem(
     previews: SimpleHashItem.Preview? = randomSimpleHashItemPreview(),
     imageProperties: SimpleHashItem.ImageProperties? = randomSimpleHashImageProperties(),
     extraMetadata: SimpleHashItem.ExtraMetadata? = randomSimpleHashImageExtraMetadata(),
-    collection: SimpleHashItem.Collection? = randomSimpleHashItemCollection(),
+    collection: SimpleHashCollection? = randomSimpleHashItemCollection(),
     createdDate: LocalDateTime? = LocalDateTime.now(),
     externalUrl: String? = "http://localhost:8080/sh/external/${randomString()}"
 ): SimpleHashItem {
@@ -570,8 +571,8 @@ fun randomSimpleHashItemCollection(
     description: String? = "SH description ${randomString()}",
     imageUrl: String? = "http://localhost:8080/sh/collection/original/${randomString()}",
     bannerImageUrl: String? = "http://localhost:8080/sh/collection/banner/${randomString()}",
-): SimpleHashItem.Collection {
-    return SimpleHashItem.Collection(
+): SimpleHashCollection {
+    return SimpleHashCollection(
         name = name,
         description = description,
         imageUrl = imageUrl,

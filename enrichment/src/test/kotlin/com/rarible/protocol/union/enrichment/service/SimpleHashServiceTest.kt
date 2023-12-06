@@ -1,7 +1,9 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.model.MetaSource
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
@@ -9,6 +11,7 @@ import com.rarible.protocol.union.core.model.UnionMetaContent
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
@@ -17,7 +20,10 @@ import com.rarible.protocol.union.enrichment.configuration.SimpleHash
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverterService
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.RawMetaCache
+import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
@@ -42,7 +48,8 @@ class SimpleHashServiceTest {
         enabled = true,
         endpoint = "http://localhost:${mockServer.port}",
         mapping = mapOf("ethereum" to "ethereum-goerli"),
-        supported = setOf(BlockchainDto.ETHEREUM)
+        supported = setOf(BlockchainDto.ETHEREUM),
+        supportedCollection = setOf(BlockchainDto.ETHEREUM),
     )
     private val props: CommonMetaProperties
         get() {
@@ -63,7 +70,16 @@ class SimpleHashServiceTest {
     private val client = EnrichmentMetaConfiguration(props).simpleHashClient(customizer)
     private val metrics = ItemMetaMetrics(SimpleMeterRegistry())
     private val simpleHashConverterService = SimpleHashConverterService()
-    private val service = SimpleHashService(props, client, cacheRepository, metrics, router, simpleHashConverterService)
+    private val collectionRepository: CollectionRepository = mockk()
+    private val service = SimpleHashService(
+        props = props,
+        simpleHashClient = client,
+        metaCacheRepository = cacheRepository,
+        metrics = metrics,
+        itemServiceRouter = router,
+        simpleHashConverterService = simpleHashConverterService,
+        collectionRepository = collectionRepository,
+    )
 
     @Test
     fun `get and convert item meta for item - ok`() = runBlocking<Unit> {
@@ -194,6 +210,83 @@ class SimpleHashServiceTest {
         val request = mockServer.takeRequest()
         assertThat(request.path).isEqualTo("/nfts/refresh/ethereum-goerli/${collectionId.value}")
         assertThat(request.method).isEqualTo("POST")
+    }
+
+    @Test
+    fun `fetch collection meta - ok`() = runBlocking<Unit> {
+        mockServer.enqueue(
+            MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody(this::class.java.getResource("/simplehash/collection.json").readText())
+        )
+        coEvery {
+            collectionRepository.get(
+                EnrichmentCollectionId(
+                    BlockchainDto.ETHEREUM,
+                    "0x8d9710f0e193d3f95c0723eaaf1a81030dc9116d"
+                )
+            )
+        } returns EnrichmentCollection(
+            blockchain = BlockchainDto.ETHEREUM,
+            collectionId = "0x8d9710f0e193d3f95c0723eaaf1a81030dc9116d",
+            name = null,
+            bestSellOrders = emptyMap(),
+            bestBidOrders = emptyMap(),
+            lastUpdatedAt = nowMillis(),
+        )
+
+        val result =
+            service.fetch(CollectionIdDto(BlockchainDto.ETHEREUM, "0x8d9710f0e193d3f95c0723eaaf1a81030dc9116d"))
+
+        assertThat(result).isEqualTo(
+            UnionCollectionMeta(
+                name = "HYTOPIA Worlds",
+                description = "HYTOPIA is a game and creator platform developed by Minecraft modding experts, aiming to overcome Minecraft's limitations and become \"the next Minecraft.\" The platform promotes innovation and collaboration among players, creators, and contributors, fostering an interconnected ecosystem with a new game engine and resources. HYTOPIA's mission is to create the largest UGC (user-generated content) games platform in the world.\n" +
+                    "\n" +
+                    "HYTOPIA is comprised of 10,000 worlds - a world is required to create, launch and monetize a massively multiplayer game within the HYTOPIA ecosystem.\n" +
+                    "\n" +
+                    "Learn more about HYTOPIA at: https://hytopia.com",
+                content = listOf(
+                    UnionMetaContent(
+                        url = "https://lh3.googleusercontent.com/rwPEL9SuOYdEpeY2dwIIcRpDZt9Day4MO75zzRQCGjZHnJOm2wJ4DZ2U_rbMDPRzLm3y-93xFny7BuyC1mneVnhDEZSR1_gWfVM",
+                        representation = MetaContentDto.Representation.ORIGINAL,
+                    )
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `fetch collection meta custom - fail`() = runBlocking<Unit> {
+        coEvery {
+            collectionRepository.get(
+                EnrichmentCollectionId(
+                    BlockchainDto.ETHEREUM,
+                    "0x8d9710f0e193d3f95c0723eaaf1a81030dc9116d"
+                )
+            )
+        } returns EnrichmentCollection(
+            blockchain = BlockchainDto.ETHEREUM,
+            collectionId = "0x8d9710f0e193d3f95c0723eaaf1a81030dc9116d",
+            name = null,
+            bestSellOrders = emptyMap(),
+            bestBidOrders = emptyMap(),
+            lastUpdatedAt = nowMillis(),
+            parent = EnrichmentCollectionId(BlockchainDto.ETHEREUM, "0x8d9710f0e193d3f95c0723eaaf1a81030dc9116a")
+        )
+
+        val result =
+            service.fetch(CollectionIdDto(BlockchainDto.ETHEREUM, "0x8d9710f0e193d3f95c0723eaaf1a81030dc9116d"))
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `fetch collection meta not supported - fail`() = runBlocking<Unit> {
+        val result =
+            service.fetch(CollectionIdDto(BlockchainDto.POLYGON, "0x8d9710f0e193d3f95c0723eaaf1a81030dc9116d"))
+
+        assertThat(result).isNull()
     }
 
     // Converted UnionMeta from test resource file '/simplehash/nft.json'

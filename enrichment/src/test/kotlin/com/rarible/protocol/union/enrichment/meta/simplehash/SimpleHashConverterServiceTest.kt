@@ -1,10 +1,14 @@
 package com.rarible.protocol.union.enrichment.meta.simplehash
 
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
+import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.enrichment.meta.simplehash.resolver.SimpleHashResolver
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -47,5 +51,32 @@ class SimpleHashConverterServiceTest {
         assertThrows<RuntimeException> {
             simpleHashConverterService.convert(source)
         }
+    }
+
+    @Test
+    fun `should convert collection - ok`() {
+        val service = SimpleHashConverterService()
+
+        val result = service.convert(
+            SimpleHashCollection(
+                name = "test name",
+                description = "test description",
+                imageUrl = "imageUrl",
+                bannerImageUrl = "bannerImageUrl"
+            )
+        )
+
+        assertThat(result).isEqualTo(
+            UnionCollectionMeta(
+                name = "test name",
+                description = "test description",
+                content = listOf(
+                    UnionMetaContent(
+                        url = "imageUrl",
+                        representation = MetaContentDto.Representation.ORIGINAL
+                    )
+                )
+            )
+        )
     }
 }
