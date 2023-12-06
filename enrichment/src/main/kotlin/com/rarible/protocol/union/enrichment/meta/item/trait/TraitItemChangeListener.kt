@@ -7,7 +7,8 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemChangeListener
 import com.rarible.protocol.union.enrichment.model.ItemAttributeCountChange
 import com.rarible.protocol.union.enrichment.model.ItemAttributeShort
 import com.rarible.protocol.union.enrichment.model.ShortItem
-import com.rarible.protocol.union.enrichment.model.ShortItemChange
+import com.rarible.protocol.union.enrichment.model.ItemChangeEvent
+import com.rarible.protocol.union.enrichment.model.ItemState
 import com.rarible.protocol.union.enrichment.util.toItemAttributeShort
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,19 +17,18 @@ import org.springframework.stereotype.Component
 @Component
 class TraitItemChangeListener : ItemChangeListener {
 
-    override suspend fun onItemChange(change: ShortItemChange) {
+    override suspend fun onItemChange(change: ItemChangeEvent) {
         triggerTraits(current = change.current, updated = change.updated)
     }
 
     private suspend fun triggerTraits(
-        current: ShortItem?,
-        updated: ShortItem,
-        eventTimeMarks: EventTimeMarks,
+        current: ItemState?,
+        updated: ItemState,
     ) {
         val (oldCollection, oldAttributes) = calcProperties(current)
         val (newCollection, newAttributes) = calcProperties(updated)
-        val newListed = updated.isListed()
-        val oldListed = current?.isListed() ?: false
+        val newListed = updated.isListed
+        val oldListed = current?.isListed ?: false
 
         if (oldCollection == newCollection) {
             if (oldAttributes != newAttributes) {

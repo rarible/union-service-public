@@ -10,7 +10,7 @@ import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryReposi
 import com.rarible.protocol.union.enrichment.meta.item.ItemChangeListener
 import com.rarible.protocol.union.enrichment.meta.item.MetaTrimmer
 import com.rarible.protocol.union.enrichment.model.ShortItem
-import com.rarible.protocol.union.enrichment.model.ShortItemChange
+import com.rarible.protocol.union.enrichment.model.ItemChangeEvent
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -64,7 +64,7 @@ class ItemMetaRepository(
     }
 
     private suspend fun onItemChange(current: ShortItem?, updated: ShortItem) {
-        val change = ShortItemChange(current, updated)
+        val change = ItemChangeEvent(current, updated)
         itemChangeListeners.forEach { it.onItemChange(change) }
     }
 }

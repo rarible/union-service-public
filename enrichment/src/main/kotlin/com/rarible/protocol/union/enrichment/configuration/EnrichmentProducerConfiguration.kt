@@ -24,6 +24,7 @@ import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
+import com.rarible.protocol.union.enrichment.model.ItemChangeEvent
 import com.rarible.protocol.union.subscriber.UnionKafkaJsonSerializer
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
@@ -101,6 +102,12 @@ class EnrichmentProducerConfiguration(
             producers[it] = producer
         }
         return UnionInternalBlockchainEventProducer(producers)
+    }
+
+    @Bean
+    fun itemChangeEventProducer(): RaribleKafkaProducer<ItemChangeEvent> {
+        val topic = UnionInternalTopicProvider.getItemChangeTopic(env)
+        return createUnionProducer("change.item.publisher", topic, ItemChangeEvent::class.java)
     }
 
     @Bean
