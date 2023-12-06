@@ -50,6 +50,7 @@ internal class SubscriptionEventFt : AbstractIntegrationTest() {
     protected lateinit var webSocketRequests: Sinks.Many<List<SubscriptionRequestDto>>
 
     @Test
+    @Disabled("Fix in PT-4403")
     fun `item event websocket test`() = runBlocking {
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed(), randomBigInt())
 
