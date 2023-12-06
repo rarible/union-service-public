@@ -56,6 +56,8 @@ data class EnrichmentCollection(
 
     val metaRefreshPriority: Int? = null,
 
+    val hasTraits: Boolean = false,
+
     @Version
     val version: Long? = null
 ) : BestSellOrderOwner<EnrichmentCollection>,

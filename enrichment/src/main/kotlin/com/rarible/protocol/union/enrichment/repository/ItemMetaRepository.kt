@@ -7,7 +7,7 @@ import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.meta.downloader.DownloadEntryRepository
-import com.rarible.protocol.union.enrichment.meta.item.ItemChangeListener
+import com.rarible.protocol.union.enrichment.meta.item.ItemChangeService
 import com.rarible.protocol.union.enrichment.meta.item.MetaTrimmer
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ItemChangeEvent
@@ -20,7 +20,7 @@ class ItemMetaRepository(
     private val itemMetaTrimmer: MetaTrimmer,
     private val itemRepository: ItemRepository,
     private val blockchainRouter: BlockchainRouter<ItemService>,
-    private val itemChangeListeners: List<ItemChangeListener>,
+    private val itemChangeService: ItemChangeService,
 ) : DownloadEntryRepository<UnionMeta> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -64,7 +64,7 @@ class ItemMetaRepository(
     }
 
     private suspend fun onItemChange(current: ShortItem?, updated: ShortItem) {
-        val change = ItemChangeEvent(current, updated)
-        itemChangeListeners.forEach { it.onItemChange(change) }
+        val event = ItemChangeEvent(current, updated)
+        itemChangeService.onItemChange(event)
     }
 }
