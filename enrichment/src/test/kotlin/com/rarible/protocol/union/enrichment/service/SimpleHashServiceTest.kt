@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.service
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.model.MetaSource
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionImageProperties
 import com.rarible.protocol.union.core.model.UnionMeta
@@ -272,7 +273,8 @@ class SimpleHashServiceTest {
             bestSellOrders = emptyMap(),
             bestBidOrders = emptyMap(),
             lastUpdatedAt = nowMillis(),
-            parent = EnrichmentCollectionId(BlockchainDto.ETHEREUM, "0x8d9710f0e193d3f95c0723eaaf1a81030dc9116a")
+            parent = EnrichmentCollectionId(BlockchainDto.ETHEREUM, "0x8d9710f0e193d3f95c0723eaaf1a81030dc9116a"),
+            structure = UnionCollection.Structure.COMPOSITE,
         )
 
         val result =

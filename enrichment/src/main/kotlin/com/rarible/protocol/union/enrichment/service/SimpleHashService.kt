@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.service
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.core.model.MetaSource
+import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
@@ -129,7 +130,7 @@ class SimpleHashService(
             return null
         }
         val collection = collectionRepository.get(EnrichmentCollectionId(key))
-        if (collection?.parent != null) {
+        if (collection?.structure != UnionCollection.Structure.REGULAR) {
             return null
         }
 
