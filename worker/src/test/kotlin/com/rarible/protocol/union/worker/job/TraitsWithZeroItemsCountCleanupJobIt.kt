@@ -54,7 +54,7 @@ class TraitsWithZeroItemsCountCleanupJobIt {
     }
 
     @Test
-    fun `cleanup openSea best sells`() = runBlocking<Unit> {
+    fun `clean up`() = runBlocking<Unit> {
         val withZero = traitRepository.findWithZeroItemsCount().count()
         assertThat(withZero).isEqualTo(1)
 
