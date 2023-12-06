@@ -3,6 +3,8 @@ package com.rarible.protocol.union.enrichment.service
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.rarible.protocol.union.api.ApiClient
 import com.rarible.protocol.union.core.model.MetaSource
+import com.rarible.protocol.union.core.model.UnionCollection
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
 import com.rarible.protocol.union.core.service.ItemService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
@@ -11,9 +13,13 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashCollection
+import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashCollectionsResponse
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverter
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashConverterService
 import com.rarible.protocol.union.enrichment.meta.simplehash.SimpleHashItem
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.RawMetaCacheRepository
 import kotlinx.coroutines.reactor.awaitSingle
 import org.slf4j.LoggerFactory
@@ -30,6 +36,7 @@ class SimpleHashService(
     private val metrics: ItemMetaMetrics,
     private val itemServiceRouter: BlockchainRouter<ItemService>,
     private val simpleHashConverterService: SimpleHashConverterService,
+    private val collectionRepository: CollectionRepository,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -47,6 +54,10 @@ class SimpleHashService(
 
     fun isSupported(blockchain: BlockchainDto): Boolean {
         return blockchain in props.simpleHash.supported && enabled
+    }
+
+    fun isSupportedCollection(blockchain: BlockchainDto): Boolean {
+        return blockchain in props.simpleHash.supportedCollection && enabled
     }
 
     suspend fun fetch(key: ItemIdDto): UnionMeta? {
@@ -94,8 +105,45 @@ class SimpleHashService(
         }
     }
 
-    suspend fun fetch(key: CollectionIdDto): UnionMeta? {
-        // TODO: request from simplehash
+    private fun parse(key: CollectionIdDto, json: String): SimpleHashCollection? {
+        return try {
+            val result = objectMapper.readValue(json, SimpleHashCollectionsResponse::class.java)
+            if (result.collections.isEmpty()) {
+                metrics.onMetaFetchNotFound(key.blockchain, MetaSource.SIMPLE_HASH)
+                return null
+            }
+            metrics.onMetaFetched(key.blockchain, MetaSource.SIMPLE_HASH)
+            result.collections.first()
+        } catch (e: Exception) {
+            logger.error("Failed to parse meta from simplehash {}: {}", key, json)
+            metrics.onMetaCorruptedDataError(key.blockchain, MetaSource.SIMPLE_HASH)
+            null
+        }
+    }
+
+    suspend fun fetch(key: CollectionIdDto): UnionCollectionMeta? {
+        return fetchRaw(key)?.let { simpleHashConverterService.convert(it) }
+    }
+
+    private suspend fun fetchRaw(key: CollectionIdDto): SimpleHashCollection? {
+        if (!isSupportedCollection(key.blockchain)) {
+            return null
+        }
+        val collection = collectionRepository.get(EnrichmentCollectionId(key))
+        if (collection?.structure != UnionCollection.Structure.REGULAR) {
+            return null
+        }
+
+        try {
+            val json = simpleHashClient.get()
+                .uri("/nfts/collections/${network(key.blockchain)}/${key.value}?limit=1")
+                .retrieve().bodyToMono(String::class.java).awaitSingle()
+
+            return parse(key, json)
+        } catch (e: Exception) {
+            metrics.onMetaError(key.blockchain, MetaSource.SIMPLE_HASH)
+            logger.error("Failed to fetch from simplehash $key", e)
+        }
         return null
     }
 

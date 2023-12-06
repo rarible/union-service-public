@@ -92,6 +92,7 @@ data class SimpleHash(
     val endpoint: String = "",
     val apiKey: String = "",
     val supported: Set<BlockchainDto> = emptySet(),
+    val supportedCollection: Set<BlockchainDto> = emptySet(),
 
     // this is needed to mapping for test networks
     val mapping: Map<String, String> = emptyMap(),
