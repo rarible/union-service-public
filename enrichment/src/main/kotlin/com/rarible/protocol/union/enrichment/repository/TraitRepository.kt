@@ -62,7 +62,6 @@ class TraitRepository(
 
         private val COLLECTION_ITEMS_COUNT_DEFINITION = Index()
             .on(Trait::itemsCount.name, Sort.Direction.ASC)
-            .partial(PartialIndexFilter.of(Trait::itemsCount isEqualTo 0L))
             .background()
 
         private val ALL_INDEXES = listOf(
