@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.enrichment.repository
 
 import com.rarible.protocol.union.enrichment.model.Trait
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
@@ -42,6 +44,12 @@ class TraitRepository(
         return template.find<Trait>(Query(criteria)).collectList().awaitFirst()
     }
 
+    suspend fun deleteWithZeroItemsCount(): Flow<Trait> =
+        template.findAllAndRemove(
+            Query(Criteria(Trait::itemsCount.name).lte(0L)),
+            Trait::class.java
+        ).asFlow()
+
     private val logger = LoggerFactory.getLogger(ItemRepository::class.java)
 
     companion object {
@@ -51,8 +59,13 @@ class TraitRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
+        private val COLLECTION_ITEMS_COUNT_DEFINITION = Index()
+            .on(Trait::itemsCount.name, Sort.Direction.ASC)
+            .background()
+
         private val ALL_INDEXES = listOf(
             COLLECTION_KEY_DEFINITION,
+            COLLECTION_ITEMS_COUNT_DEFINITION,
         )
     }
 }
