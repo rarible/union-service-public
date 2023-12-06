@@ -9,6 +9,8 @@ protocol:
 
 api:
   openapi:
-    baseUrl: "https://${application.environment}-api.rarible.org"
+    baseUrl: "https://{environment}.rarible.org"
+    envs:
+      - "${application.environment}"
   domains:
     ethereum: eth
