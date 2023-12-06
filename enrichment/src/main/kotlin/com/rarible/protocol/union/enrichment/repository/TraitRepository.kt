@@ -11,9 +11,11 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.findById
 import org.springframework.data.mongodb.core.index.Index
+import org.springframework.data.mongodb.core.index.PartialIndexFilter
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.inValues
+import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.stereotype.Component
 
 @Component
@@ -45,7 +47,7 @@ class TraitRepository(
 
     suspend fun deleteWithZeroItemsCount() =
         template.findAllAndRemove(
-            Query(Criteria().and(Trait::itemsCount.name).lte(0L)),
+            Query(Criteria(Trait::itemsCount.name).lte(0L)),
             Trait::class.java
         ).asFlow()
 
@@ -60,6 +62,7 @@ class TraitRepository(
 
         private val COLLECTION_ITEMS_COUNT_DEFINITION = Index()
             .on(Trait::itemsCount.name, Sort.Direction.ASC)
+            .partial(PartialIndexFilter.of(Trait::itemsCount isEqualTo 0L))
             .background()
 
         private val ALL_INDEXES = listOf(
