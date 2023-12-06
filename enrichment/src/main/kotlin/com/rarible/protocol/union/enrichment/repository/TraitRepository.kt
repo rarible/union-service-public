@@ -1,12 +1,10 @@
 package com.rarible.protocol.union.enrichment.repository
 
 import com.rarible.protocol.union.enrichment.model.Trait
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -45,15 +43,11 @@ class TraitRepository(
         return template.find<Trait>(Query(criteria)).collectList().awaitFirst()
     }
 
-    suspend fun findWithZeroItemsCount(): Flow<Trait> =
-        template.find(
+    suspend fun deleteWithZeroItemsCount() =
+        template.findAllAndRemove(
             Query(Criteria().and(Trait::itemsCount.name).lte(0L)),
             Trait::class.java
         ).asFlow()
-
-    suspend fun delete(trait: Trait) {
-        template.remove(trait).awaitSingleOrNull()
-    }
 
     private val logger = LoggerFactory.getLogger(ItemRepository::class.java)
 
@@ -64,8 +58,13 @@ class TraitRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
+        private val COLLECTION_ITEMS_COUNT_DEFINITION = Index()
+            .on(Trait::itemsCount.name, Sort.Direction.ASC)
+            .background()
+
         private val ALL_INDEXES = listOf(
             COLLECTION_KEY_DEFINITION,
+            COLLECTION_ITEMS_COUNT_DEFINITION,
         )
     }
 }
