@@ -103,14 +103,17 @@ class CollectionRepository(
         return template.find(query, EnrichmentCollection::class.java).asFlow()
     }
 
-    fun findAll(fromIdExcluded: EnrichmentCollectionId? = null): Flow<EnrichmentCollection> = template.find(
-        Query(
-            Criteria().apply {
-                fromIdExcluded?.let { and(EnrichmentCollection::id).gt(fromIdExcluded) }
-            }
-        ).with(Sort.by(EnrichmentCollection::id.name)),
-        EnrichmentCollection::class.java
-    ).asFlow()
+    fun findAll(fromIdExcluded: EnrichmentCollectionId? = null, limit: Int? = null): Flow<EnrichmentCollection> =
+        template.find(
+            Query(
+                Criteria().apply {
+                    fromIdExcluded?.let { and(EnrichmentCollection::id).gt(fromIdExcluded) }
+                }
+            ).with(Sort.by(EnrichmentCollection::id.name)).apply {
+                limit?.let { limit(it) }
+            },
+            EnrichmentCollection::class.java
+        ).asFlow()
 
     suspend fun updatePriority(collectionIds: Set<EnrichmentCollectionId>, priority: Int?) {
         template.updateMulti(

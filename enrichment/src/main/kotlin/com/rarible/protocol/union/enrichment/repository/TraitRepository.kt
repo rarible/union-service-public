@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.enrichment.repository
 
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.Trait
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -13,6 +14,7 @@ import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.inValues
+import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
 
 @Component
@@ -28,8 +30,12 @@ class TraitRepository(
         }
     }
 
-    suspend fun save(item: Trait): Trait {
-        return template.save(item).awaitFirst()
+    suspend fun save(trait: Trait): Trait {
+        return template.save(trait).awaitFirst()
+    }
+
+    suspend fun insertAll(traits: List<Trait>) {
+        template.insertAll(traits).awaitFirst()
     }
 
     suspend fun get(id: String): Trait? {
@@ -40,6 +46,11 @@ class TraitRepository(
         if (ids.isEmpty()) return emptyList()
         val criteria = Criteria("_id").inValues(ids)
         return template.find<Trait>(Query(criteria)).collectList().awaitFirst()
+    }
+
+    suspend fun deleteAllByCollection(collectionId: EnrichmentCollectionId) {
+        val query = Query(where(Trait::collectionId).`is`(collectionId.toString()))
+        template.remove(query, Trait::class.java).awaitSingle()
     }
 
     private val logger = LoggerFactory.getLogger(ItemRepository::class.java)

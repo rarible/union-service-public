@@ -1,14 +1,20 @@
 package com.rarible.protocol.union.enrichment.repository
 
 import com.rarible.core.mongo.util.div
+import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.PlatformDto
 import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.download.DownloadStatus
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.ShortDateIdItem
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
+import com.rarible.protocol.union.enrichment.model.Trait
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
@@ -30,9 +36,11 @@ import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.lt
 import org.springframework.data.mongodb.core.query.lte
+import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.Instant
+import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class ItemRepository(
@@ -189,6 +197,42 @@ class ItemRepository(
         ).with(Sort.by(ShortItem::id.name)),
         ShortItem::class.java
     ).asFlow()
+
+    suspend fun getTraitsByCollection(collectionId: EnrichmentCollectionId): List<Trait> {
+        val traitsCount = ConcurrentHashMap<UnionMetaAttribute, Int>()
+        val listedTraitsCount = ConcurrentHashMap<UnionMetaAttribute, Int>()
+        val query = Query(where(ShortItem::collectionId).`is`(collectionId.toString()))
+            .noCursorTimeout()
+            .cursorBatchSize(20)
+        template.find(query, ShortItem::class.java)
+            .asFlow()
+            .filter {
+                it.metaEntry != null && it.metaEntry.isDownloaded() && it.metaEntry.data != null
+            }
+            .flatMapMerge { item ->
+                item.metaEntry!!.data!!.attributes.map { attr ->
+                    Pair(
+                        attr,
+                        item.bestSellOrder != null
+                    )
+                }.asFlow()
+            }
+            .collect { (attr, listed) ->
+                traitsCount[attr] = (traitsCount[attr] ?: 0) + 1
+                if (listed) {
+                    listedTraitsCount[attr] = (listedTraitsCount[attr] ?: 0) + 1
+                }
+            }
+        return traitsCount.map { (attribute, count) ->
+            Trait(
+                collectionId = collectionId,
+                key = attribute.key,
+                value = attribute.value,
+                itemsCount = count.toLong(),
+                listedItemsCount = listedTraitsCount[attribute]?.toLong() ?: 0L
+            )
+        }
+    }
 
     companion object {
 
