@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.enrichment.repository
 
 import com.rarible.protocol.union.enrichment.model.Trait
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -43,7 +44,7 @@ class TraitRepository(
         return template.find<Trait>(Query(criteria)).collectList().awaitFirst()
     }
 
-    suspend fun deleteWithZeroItemsCount() =
+    suspend fun deleteWithZeroItemsCount(): Flow<Trait> =
         template.findAllAndRemove(
             Query(Criteria(Trait::itemsCount.name).lte(0L)),
             Trait::class.java
