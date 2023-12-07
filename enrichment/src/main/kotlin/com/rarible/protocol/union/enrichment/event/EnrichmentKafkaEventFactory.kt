@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
 import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
+import com.rarible.protocol.union.enrichment.model.ItemChangeEvent
 import java.util.UUID
 
 object EnrichmentKafkaEventFactory {
@@ -40,6 +41,14 @@ object EnrichmentKafkaEventFactory {
             id = UUID.randomUUID().toString(),
             key = task.id,
             value = task
+        )
+    }
+
+    fun itemChangeEvent(event: ItemChangeEvent): KafkaMessage<ItemChangeEvent> {
+        return KafkaMessage(
+            id = UUID.randomUUID().toString(),
+            key = event.id.toDto().fullId(),
+            value = event
         )
     }
 }

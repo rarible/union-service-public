@@ -5,6 +5,7 @@ import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.event.OutgoingItemEventListener
 import com.rarible.protocol.union.core.model.stubEventMark
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
+import com.rarible.protocol.union.enrichment.meta.item.ItemChangeService
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.service.BestOrderService
 import com.rarible.protocol.union.enrichment.service.EnrichmentActivityService
@@ -32,6 +33,7 @@ class EnrichmentItemEventServiceTest {
     private val activityService: EnrichmentActivityService = mockk()
     private val eventListener: OutgoingItemEventListener = mockk()
     private val enrichmentItemSellStatsService: EnrichmentItemSellStatsService = mockk()
+    private val itemChangeService: ItemChangeService = mockk()
 
     private val bestOrderService: BestOrderService = mockk()
     private val reconciliationEventService: ReconciliationEventService = mockk()
@@ -44,6 +46,7 @@ class EnrichmentItemEventServiceTest {
         bestOrderService,
         reconciliationEventService,
         enrichmentItemSellStatsService,
+        itemChangeService,
         FeatureFlagsProperties(),
     )
 

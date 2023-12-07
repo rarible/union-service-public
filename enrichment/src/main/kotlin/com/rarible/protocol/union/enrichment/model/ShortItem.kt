@@ -46,6 +46,8 @@ data class ShortItem(
 
     val metaEntry: DownloadEntry<UnionMeta>? = null,
 
+    val deleted: Boolean = false,
+
     @Version
     val version: Long? = null
 ) : BestSellOrderOwner<ShortItem>, BestBidOrderOwner<ShortItem>, OriginOrdersOwner, BlockchainAware {
@@ -98,6 +100,10 @@ data class ShortItem(
             metaEntry = entry,
             lastUpdatedAt = if (metaChanged) nowMillis() else lastUpdatedAt
         )
+    }
+
+    fun isListed(): Boolean {
+        return bestSellOrder != null
     }
 
     companion object {
