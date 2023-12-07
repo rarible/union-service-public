@@ -36,6 +36,7 @@ data class EnrichmentCollection(
     val symbol: String? = null,
     val self: Boolean? = null,
     val scam: Boolean = false,
+    val hasTraits: Boolean = true,
 
     override val bestSellOrder: ShortOrder? = null,
     override val bestSellOrders: Map<String, ShortOrder>,

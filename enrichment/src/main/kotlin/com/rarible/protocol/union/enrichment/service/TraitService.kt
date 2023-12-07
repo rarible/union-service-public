@@ -35,5 +35,12 @@ class TraitService(
         logger.info("Deleted traits with zero items count: ${deleted.get()} time: ${time}ms")
     }
 
-    private val logger = LoggerFactory.getLogger(TraitService::class.java)
+    suspend fun deleteAll(collectionId: EnrichmentCollectionId) {
+        traitRepository.deleteAllByCollection(collectionId)
+        // TODO remove from index PT-4121
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(TraitService::class.java)
+    }
 }

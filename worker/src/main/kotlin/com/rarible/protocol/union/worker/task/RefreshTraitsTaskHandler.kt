@@ -2,6 +2,7 @@ package com.rarible.protocol.union.worker.task
 
 import com.rarible.core.logging.withTraceId
 import com.rarible.core.task.TaskHandler
+import com.rarible.protocol.union.core.task.Tasks
 import com.rarible.protocol.union.dto.BlockchainIdFormatException
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
@@ -19,7 +20,7 @@ class RefreshTraitsTaskHandler(
     private val traitService: TraitService,
     private val collectionRepository: CollectionRepository,
 ) : TaskHandler<String> {
-    override val type = "REFRESH_TRAITS_TASK"
+    override val type = Tasks.REFRESH_TRAITS_TASK
 
     override fun runLongTask(from: String?, param: String): Flow<String> = flow {
         try {
