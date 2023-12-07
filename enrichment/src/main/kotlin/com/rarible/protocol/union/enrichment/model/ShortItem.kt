@@ -46,6 +46,8 @@ data class ShortItem(
 
     val metaEntry: DownloadEntry<UnionMeta>? = null,
 
+    val deleted: Boolean = false,
+
     @Version
     val version: Long? = null
 ) : BestSellOrderOwner<ShortItem>, BestBidOrderOwner<ShortItem>, OriginOrdersOwner, BlockchainAware {

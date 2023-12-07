@@ -20,7 +20,11 @@ class TraitService(
                 incTotal = it.totalChange,
                 incListed = it.listedChange
             )
-            // TODO: Index trait
+            indexTrait(traitId)
         }
+    }
+
+    private suspend fun indexTrait(traitId: String) {
+        // TODO: Index trait
     }
 }

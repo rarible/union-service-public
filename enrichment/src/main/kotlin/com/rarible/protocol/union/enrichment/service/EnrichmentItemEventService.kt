@@ -287,6 +287,10 @@ class EnrichmentItemEventService(
         updateAuction(auction, notificationEnabled) { it.copy(auctions = it.auctions - auction.id) }
     }
 
+    private suspend fun onItemChange(current: ShortItem?, updated: ShortItem) {
+        itemChangeService.onItemChange(ItemChangeEvent(current, updated))
+    }
+
     private suspend fun updateOrder(
         itemId: ShortItemId,
         order: UnionOrder,
@@ -302,7 +306,7 @@ class EnrichmentItemEventService(
                 order = order,
                 eventTimeMarks = eventTimeMarks
             )
-            itemChangeService.onItemChange(ItemChangeEvent(short, updated))
+            onItemChange(short, updated)
             logger.info("Saved Item [{}] after Order event [{}]", itemId, order.id)
         } else {
             logger.info("Item [{}] not changed after Order event [{}], event won't be published", itemId, order.id)
