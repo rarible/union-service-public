@@ -34,97 +34,161 @@ class TraitItemChangeListener(
         val oldListed = current?.isListed ?: false
 
         if (oldCollection == newCollection) {
-            if (oldAttributes != newAttributes) {
-                when {
-                    newAttributes == null -> changeItemsCount(
-                        collectionId = newCollection!!,
-                        attributes = oldAttributes!!.map {
-                            ItemAttributeCountChange(
-                                attribute = it,
-                                totalChange = -1,
-                                listedChange = if (oldListed) -1 else 0
-                            )
-                        }.toSet()
-                    )
-
-                    oldAttributes == null -> changeItemsCount(
-                        collectionId = newCollection!!,
-                        attributes = newAttributes.map {
-                            ItemAttributeCountChange(
-                                attribute = it,
-                                totalChange = 1,
-                                listedChange = if (newListed) 1 else 0
-                            )
-                        }.toSet())
-
-                    else -> {
-                        val removedAttributes = oldAttributes - newAttributes
-                        val addedAttributes = newAttributes - oldAttributes
-                        val allAttributes = newAttributes + oldAttributes
-                        val changes = allAttributes.map {
-                            ItemAttributeCountChange(
-                                attribute = it,
-                                totalChange = if (addedAttributes.contains(it)) {
-                                    1L
-                                } else if (removedAttributes.contains(it)) {
-                                    -1L
-                                } else {
-                                    0L
-                                },
-                                listedChange = if (newListed && (!oldListed && !removedAttributes.contains(it) ||
-                                        addedAttributes.contains(it))
-                                ) {
-                                    1
-                                } else if (oldListed && (!newListed && !addedAttributes.contains(it) ||
-                                        removedAttributes.contains(it))
-                                ) {
-                                    -1
-                                } else {
-                                    0
-                                }
-                            )
-                        }.filter { it.listedChange != 0L || it.totalChange != 0L }.toSet()
-
-                        changeItemsCount(newCollection!!, changes)
-                    }
-                }
-            } else if (newListed != oldListed && newAttributes != null) {
-                changeItemsCount(
-                    collectionId = newCollection!!,
-                    attributes = newAttributes.map {
-                        ItemAttributeCountChange(
-                            attribute = it,
-                            totalChange = 0,
-                            listedChange = if (newListed) 1 else -1
-                        )
-                    }.toSet())
-            }
+            handleItemChange(
+                collection = newCollection!!,
+                oldAttributes = oldAttributes,
+                newAttributes = newAttributes,
+                oldListed = oldListed,
+                newListed = newListed
+            )
         } else {
-            if (newCollection != null && newAttributes != null) {
-                changeItemsCount(
-                    collectionId = newCollection,
-                    attributes = newAttributes.map {
-                        ItemAttributeCountChange(
-                            attribute = it,
-                            totalChange = 1,
-                            listedChange = if (newListed) 1 else 0
-                        )
-                    }.toSet()
-                )
-            }
-            if (oldCollection != null && oldAttributes != null) {
-                changeItemsCount(
-                    collectionId = oldCollection,
-                    oldAttributes.map {
-                        ItemAttributeCountChange(
-                            attribute = it,
-                            totalChange = -1,
-                            listedChange = if (oldListed) -1 else 0
-                        )
-                    }.toSet()
-                )
+            handleCollectionChange(
+                newCollection = newCollection,
+                oldCollection = oldCollection,
+                oldAttributes = oldAttributes,
+                newAttributes = newAttributes,
+                oldListed = oldListed,
+                newListed = newListed
+            )
+        }
+    }
+
+    private suspend fun handleItemChange(
+        collection: CollectionIdDto,
+        oldAttributes: Set<ItemAttributeShort>?,
+        newAttributes: Set<ItemAttributeShort>?,
+        oldListed: Boolean,
+        newListed: Boolean
+    ) {
+        if (oldAttributes != newAttributes) {
+            onAttributesChange(
+                collection = collection,
+                oldAttributes = oldAttributes,
+                newAttributes = newAttributes,
+                oldListed = oldListed,
+                newListed = newListed
+            )
+        } else if (newListed != oldListed && newAttributes != null) {
+            onListedChange(
+                collection = collection,
+                attributes = newAttributes,
+                listed = newListed
+            )
+        }
+    }
+
+    private suspend fun handleCollectionChange(
+        newCollection: CollectionIdDto?,
+        oldCollection: CollectionIdDto?,
+        oldAttributes: Set<ItemAttributeShort>?,
+        newAttributes: Set<ItemAttributeShort>?,
+        oldListed: Boolean,
+        newListed: Boolean
+    ) {
+        if (newCollection != null && newAttributes != null) {
+            changeItemsCount(
+                collectionId = newCollection,
+                attributes = newAttributes.map {
+                    ItemAttributeCountChange(
+                        attribute = it,
+                        totalChange = 1,
+                        listedChange = if (newListed) 1 else 0
+                    )
+                }.toSet()
+            )
+        }
+        if (oldCollection != null && oldAttributes != null) {
+            changeItemsCount(
+                collectionId = oldCollection,
+                oldAttributes.map {
+                    ItemAttributeCountChange(
+                        attribute = it,
+                        totalChange = -1,
+                        listedChange = if (oldListed) -1 else 0
+                    )
+                }.toSet()
+            )
+        }
+    }
+
+    private suspend fun onAttributesChange(
+        collection: CollectionIdDto,
+        oldAttributes: Set<ItemAttributeShort>?,
+        newAttributes: Set<ItemAttributeShort>?,
+        oldListed: Boolean,
+        newListed: Boolean
+    ) {
+        when {
+            newAttributes == null -> changeItemsCount(
+                collectionId = collection,
+                attributes = oldAttributes!!.map {
+                    ItemAttributeCountChange(
+                        attribute = it,
+                        totalChange = -1,
+                        listedChange = if (oldListed) -1 else 0
+                    )
+                }.toSet()
+            )
+
+            oldAttributes == null -> changeItemsCount(
+                collectionId = collection,
+                attributes = newAttributes.map {
+                    ItemAttributeCountChange(
+                        attribute = it,
+                        totalChange = 1,
+                        listedChange = if (newListed) 1 else 0
+                    )
+                }.toSet()
+            )
+
+            else -> {
+                val removedAttributes = oldAttributes - newAttributes
+                val addedAttributes = newAttributes - oldAttributes
+                val allAttributes = newAttributes + oldAttributes
+                val changes = allAttributes.map {
+                    ItemAttributeCountChange(
+                        attribute = it,
+                        totalChange = if (addedAttributes.contains(it)) {
+                            1L
+                        } else if (removedAttributes.contains(it)) {
+                            -1L
+                        } else {
+                            0L
+                        },
+                        listedChange = if (newListed && (!oldListed && !removedAttributes.contains(it) ||
+                                    addedAttributes.contains(it))
+                        ) {
+                            1
+                        } else if (oldListed && (!newListed && !addedAttributes.contains(it) ||
+                                    removedAttributes.contains(it))
+                        ) {
+                            -1
+                        } else {
+                            0
+                        }
+                    )
+                }.filter { it.listedChange != 0L || it.totalChange != 0L }.toSet()
+
+                changeItemsCount(collection, changes)
             }
         }
+    }
+
+    private suspend fun onListedChange(
+        collection: CollectionIdDto,
+        attributes: Set<ItemAttributeShort>,
+        listed: Boolean
+    ) {
+        changeItemsCount(
+            collectionId = collection,
+            attributes = attributes.map {
+                ItemAttributeCountChange(
+                    attribute = it,
+                    totalChange = 0,
+                    listedChange = if (listed) 1 else -1
+                )
+            }.toSet()
+        )
     }
 
     private fun calcProperties(item: ItemState?): ItemPropertiesForTraitStatistics =
