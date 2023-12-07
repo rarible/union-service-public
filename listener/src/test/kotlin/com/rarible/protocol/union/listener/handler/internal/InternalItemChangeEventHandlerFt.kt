@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.listener.handler.internal
 
 import com.rarible.core.test.data.randomString
+import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
@@ -16,6 +17,7 @@ import com.rarible.protocol.union.enrichment.util.TraitUtils
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthNftItemDto
+import com.rarible.protocol.union.integration.ethereum.data.randomEthSellOrderDto
 import com.rarible.protocol.union.listener.test.AbstractIntegrationTest
 import com.rarible.protocol.union.listener.test.IntegrationTest
 import io.mockk.every
@@ -91,6 +93,11 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
         every {
             testEthereumItemApi.getNftItemById(any())
         } returns randomEthNftItemDto().toMono()
+        every {
+            testEthereumOrderApi.getByIds(any())
+        } returns OrdersPaginationDto(
+            orders = listOf(randomEthSellOrderDto(itemId)),
+        ).toMono()
 
         enrichmentItemEventService.onItemBestSellOrderUpdated(
             itemId = item.id,
