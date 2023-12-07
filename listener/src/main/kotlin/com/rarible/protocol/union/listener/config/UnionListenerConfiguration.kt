@@ -113,7 +113,7 @@ class UnionListenerConfiguration(
         val settings = RaribleKafkaConsumerSettings(
             hosts = properties.brokerReplicaSet,
             topic = UnionInternalTopicProvider.getItemChangeTopic(env),
-            group = consumerGroup("change.item"),
+            group = consumerGroup("item.change"),
             concurrency = listenerProperties.itemChange.workers,
             batchSize = listenerProperties.itemChange.batchSize,
             async = false,
