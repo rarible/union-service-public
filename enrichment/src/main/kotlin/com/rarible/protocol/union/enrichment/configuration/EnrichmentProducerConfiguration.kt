@@ -107,7 +107,7 @@ class EnrichmentProducerConfiguration(
     @Bean
     fun itemChangeEventProducer(): RaribleKafkaProducer<ItemChangeEvent> {
         val topic = UnionInternalTopicProvider.getItemChangeTopic(env)
-        return createUnionProducer("change.item.publisher", topic, ItemChangeEvent::class.java)
+        return createUnionProducer("item.change", topic, ItemChangeEvent::class.java)
     }
 
     @Bean
