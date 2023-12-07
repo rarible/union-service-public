@@ -97,7 +97,21 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
             order = randomUnionSellOrder(itemId),
             eventTimeMarks = null,
         )
+        waitAssert {
+            val trait1 = traitRepository.get(traitId1)
+            assertThat(trait1?.itemsCount).isEqualTo(1)
+            assertThat(trait1?.listedItemsCount).isEqualTo(1)
 
+            val trait2 = traitRepository.get(traitId2)
+            assertThat(trait2?.itemsCount).isEqualTo(1)
+            assertThat(trait2?.listedItemsCount).isEqualTo(1)
+        }
+
+        enrichmentItemEventService.onItemBestSellOrderUpdated(
+            itemId = item.id,
+            order = randomUnionSellOrder(itemId),
+            eventTimeMarks = null,
+        )
         waitAssert {
             val trait1 = traitRepository.get(traitId1)
             assertThat(trait1?.itemsCount).isEqualTo(1)

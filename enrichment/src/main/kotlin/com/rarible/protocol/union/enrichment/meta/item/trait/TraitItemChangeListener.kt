@@ -8,6 +8,7 @@ import com.rarible.protocol.union.enrichment.model.ItemAttributeShort
 import com.rarible.protocol.union.enrichment.model.ItemChangeEvent
 import com.rarible.protocol.union.enrichment.model.ItemState
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
+import com.rarible.protocol.union.enrichment.service.TraitService
 import com.rarible.protocol.union.enrichment.util.toItemAttributeShort
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

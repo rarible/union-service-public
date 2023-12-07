@@ -9,6 +9,7 @@ import com.rarible.protocol.union.enrichment.model.ItemChangeEvent
 import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortOrder
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
+import com.rarible.protocol.union.enrichment.service.TraitService
 import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollection
 import com.rarible.protocol.union.enrichment.test.data.randomItemMetaDownloadEntry
 import com.rarible.protocol.union.enrichment.test.data.randomShortItem
