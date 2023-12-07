@@ -195,10 +195,10 @@ class TraitItemChangeListener(
         item?.takeIfNotDeleted()
             ?.let {
                 ItemPropertiesForTraitStatistics(
-                    collection = it.meta?.collectionId?.let { collectionId ->
+                    collection = it.collectionId?.let { collectionId ->
                         CollectionIdDto(it.blockchain, collectionId)
                     },
-                    attributes = it.meta?.attributes
+                    attributes = it.attributes
                         ?.mapNotNull { attribute -> attribute.toItemAttributeShort() }
                         ?.toSet()
                 )

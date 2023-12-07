@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.enrichment.model
 
-import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaAttribute
 import com.rarible.protocol.union.dto.BlockchainDto
 
 data class ItemChangeEvent(
@@ -13,18 +13,18 @@ data class ItemChangeEvent(
 
 data class ItemState(
     val blockchain: BlockchainDto,
-    val bestSellOrder: ShortOrder?,
-    val meta: UnionMeta?,
+    val isListed: Boolean,
+    val collectionId: String?,
+    val attributes: List<UnionMetaAttribute>?,
     val deleted: Boolean,
 ) {
-    val isListed: Boolean = bestSellOrder != null
-
     companion object {
         fun from(value: ShortItem): ItemState {
             return ItemState(
                 blockchain = value.blockchain,
-                bestSellOrder = value.bestSellOrder,
-                meta = value.metaEntry?.data,
+                isListed = value.bestSellOrder != null,
+                collectionId = value.metaEntry?.data?.collectionId,
+                attributes = value.metaEntry?.data?.attributes,
                 deleted = value.deleted
             )
         }
