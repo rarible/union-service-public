@@ -18,10 +18,13 @@ import com.rarible.protocol.union.worker.IntegrationTest
 import io.mockk.clearMocks
 import io.mockk.coVerify
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.client.indices.GetIndexRequest
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -103,6 +106,18 @@ internal class ElasticsearchBootstrapperTest {
         )
 
         elasticsearchTestBootstrapper.deleteAllIndexes()
+    }
+
+    @AfterEach
+    fun removeIndexes() = runBlocking {
+        val response =
+            reactiveElasticSearchOperations.executeWithIndicesClient { it.getIndex(GetIndexRequest("*")) }
+                .awaitSingle()
+        // full cleanup is needed because tests creates multiple indexes and broken state
+        response.indices.forEach { name ->
+            reactiveElasticSearchOperations.executeWithIndicesClient { it.deleteIndex(DeleteIndexRequest(name)) }
+                .awaitSingle()
+        }
     }
 
     @Test

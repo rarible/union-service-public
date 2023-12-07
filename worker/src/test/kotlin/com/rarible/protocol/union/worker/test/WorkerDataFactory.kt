@@ -3,6 +3,7 @@ package com.rarible.protocol.union.worker.test
 import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
 import com.rarible.protocol.union.enrichment.model.ReconciliationMark
+import com.rarible.protocol.union.enrichment.model.Trait
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import com.rarible.protocol.union.integration.ethereum.data.randomEthItemId
 
@@ -21,3 +22,10 @@ fun randomCollectionMark(): ReconciliationMark {
         lastUpdatedAt = nowMillis()
     )
 }
+
+fun randomTrait() = Trait(
+    collectionId = randomEthCollectionId(),
+    key = "1",
+    value = "",
+    itemsCount = 1
+)

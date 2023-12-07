@@ -431,7 +431,7 @@ internal class EsItemRepositoryFt {
     }
 
     fun randomEsItem(collectionId: String = randomAddress().toString()): EsItem {
-        val blockchain = BlockchainDto.values().random()
+        val blockchain = BlockchainDto.ETHEREUM
         val itemId = ItemIdDto(blockchain, collectionId, randomBigInt())
         return EsItem(
             id = randomString(),

@@ -71,4 +71,9 @@ fun nativeTestCurrencies() = listOf(
         address = "0x0000000000000000000000000000000000000000",
         blockchain = BlockchainDto.LIGHTLINK.name,
     ),
+    com.rarible.protocol.currency.dto.CurrencyDto(
+        currencyId = "ethereum",
+        address = "0x0000000000000000000000000000000000000000",
+        blockchain = BlockchainDto.RARI.name,
+    ),
 )

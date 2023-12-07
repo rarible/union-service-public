@@ -31,6 +31,31 @@ worker:
     ownership:
       enabled: true
 
+integration:
+  eth:
+    mantle:
+      enabled: false
+    arbitrum:
+      enabled: false
+    chiliz:
+      enabled: false
+    zksync:
+      enabled: false
+    astarzkevm:
+      enabled: false
+    base:
+      enabled: false
+    lightlink:
+      enabled: false
+  tezos:
+    enabled: false
+  immutablex:
+    enabled: false
+  flow:
+    enabled: false
+  solana:
+    enabled: false
+
 logging:
   level:
     org.springframework.context.annotation: "DEBUG"

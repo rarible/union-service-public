@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.model.UnionMeta
+import com.rarible.protocol.union.core.model.UnionMetaContent
+import com.rarible.protocol.union.dto.MetaContentDto
 import com.rarible.protocol.union.enrichment.meta.simplehash.resolver.SimpleHashArtBlocksResolver
 import com.rarible.protocol.union.enrichment.meta.simplehash.resolver.SimpleHashResolver
 import org.slf4j.LoggerFactory
@@ -42,6 +45,21 @@ class SimpleHashConverterService {
         }
 
         throw RuntimeException("All resolvers failed")
+    }
+
+    fun convert(source: SimpleHashCollection): UnionCollectionMeta {
+        return UnionCollectionMeta(
+            name = source.name ?: "",
+            description = source.description,
+            content = source.imageUrl?.let {
+                listOf(
+                    UnionMetaContent(
+                        url = it,
+                        representation = MetaContentDto.Representation.ORIGINAL,
+                    )
+                )
+            } ?: emptyList()
+        )
     }
 
     fun convertRawToUnionMeta(json: String): UnionMeta {

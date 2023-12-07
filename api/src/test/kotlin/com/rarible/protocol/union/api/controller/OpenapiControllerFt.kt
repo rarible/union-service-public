@@ -23,7 +23,8 @@ internal class OpenapiControllerFt : AbstractIntegrationTest() {
         assertTrue(yaml.contains("Item:"))
         assertTrue(yaml.contains("components:"))
         assertTrue(yaml.contains("servers:"))
-        assertTrue(yaml.contains("  - url: \"https://test-api.rarible.org\""))
+        assertTrue(yaml.contains("  - url: \"https://{environment}.rarible.org\""))
+        assertTrue(yaml.contains("        enum: [\"test-api\"]"))
         assertTrue(yaml.contains("    description: \"Development (Ropsten, Mumbai, Hangzhou)\""))
     }
 

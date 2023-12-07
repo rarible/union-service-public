@@ -1,0 +1,85 @@
+{
+  "next_cursor": null,
+  "next": null,
+  "previous": null,
+  "collections": [
+    {
+      "collection_id": "e7ea1fff22a0e0be7f7024ff4cc36cc2",
+      "name": "HYTOPIA Worlds",
+      "description": "HYTOPIA is a game and creator platform developed by Minecraft modding experts, aiming to overcome Minecraft's limitations and become \"the next Minecraft.\" The platform promotes innovation and collaboration among players, creators, and contributors, fostering an interconnected ecosystem with a new game engine and resources. HYTOPIA's mission is to create the largest UGC (user-generated content) games platform in the world.\n\nHYTOPIA is comprised of 10,000 worlds - a world is required to create, launch and monetize a massively multiplayer game within the HYTOPIA ecosystem.\n\nLearn more about HYTOPIA at: https://hytopia.com",
+      "image_url": "https://lh3.googleusercontent.com/rwPEL9SuOYdEpeY2dwIIcRpDZt9Day4MO75zzRQCGjZHnJOm2wJ4DZ2U_rbMDPRzLm3y-93xFny7BuyC1mneVnhDEZSR1_gWfVM",
+      "banner_image_url": "https://lh3.googleusercontent.com/Akk2SpfAPMGVRldITiUBzpX4HEgkXI9stBtcWiXGIUpVu0dqCgWncrXHcsdGJDlJ2rG0QMi5BaFG_WXdAUT02zQtDXyJ9W6Qnzg=w2500",
+      "category": "gaming",
+      "is_nsfw": false,
+      "external_url": "https://topia.gg",
+      "twitter_username": null,
+      "discord_url": "https://discord.gg/topiagg",
+      "instagram_username": null,
+      "medium_username": null,
+      "telegram_url": null,
+      "marketplace_pages": [
+        {
+          "marketplace_id": "opensea",
+          "marketplace_name": "OpenSea",
+          "marketplace_collection_id": "topia-worlds",
+          "collection_url": "https://opensea.io/collection/topia-worlds",
+          "verified": true
+        }
+      ],
+      "metaplex_mint": null,
+      "metaplex_first_verified_creator": null,
+      "floor_prices": [
+        {
+          "marketplace_id": "opensea",
+          "marketplace_name": "OpenSea",
+          "value": 3350000000000000000,
+          "payment_token": {
+            "payment_token_id": "ethereum.native",
+            "name": "Ether",
+            "symbol": "ETH",
+            "address": null,
+            "decimals": 18
+          },
+          "value_usd_cents": 759177
+        },
+        {
+          "marketplace_id": "looksrare",
+          "marketplace_name": "LooksRare",
+          "value": 3950000000000000000,
+          "payment_token": {
+            "payment_token_id": "ethereum.native",
+            "name": "Ether",
+            "symbol": "ETH",
+            "address": null,
+            "decimals": 18
+          },
+          "value_usd_cents": 895149
+        }
+      ],
+      "top_bids": [
+        {
+          "marketplace_id": "blur",
+          "marketplace_name": "Blur",
+          "value": 2860000000000000000,
+          "payment_token": {
+            "payment_token_id": "ethereum.native",
+            "name": "Ether",
+            "symbol": "ETH",
+            "address": null,
+            "decimals": 18
+          },
+          "value_usd_cents": 648133
+        }
+      ],
+      "distinct_owner_count": 1491,
+      "distinct_nft_count": 9999,
+      "total_quantity": 9999,
+      "chains": [
+        "ethereum"
+      ],
+      "top_contracts": [
+        "ethereum.0x8d9710f0e193d3f95c0723eaaf1a81030dc9116d"
+      ]
+    }
+  ]
+}

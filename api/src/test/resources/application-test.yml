@@ -1,7 +1,8 @@
 api:
   openapi:
-    baseUrl: "https://test-api.rarible.org"
     description: "Development (Ropsten, Mumbai, Hangzhou)"
+    envs:
+      - "test"
   order-settings:
     fees:
       ethereum:
@@ -34,9 +35,7 @@ integration:
       enabled: false
     zksync:
       enabled: false
-    zkevm:
-      enabled: false
-    astar:
+    astarzkevm:
       enabled: false
     base:
       enabled: false
@@ -45,6 +44,8 @@ integration:
   immutablex:
     enabled: false
   solana:
+    enabled: true
+  tezos:
     enabled: true
 
 logging:

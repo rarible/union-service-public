@@ -1,7 +1,9 @@
 api:
   openapi:
-    baseUrl: "https://api.rarible.org"
     description: "Production (Mainnet)"
+    envs:
+      - "prod"
+      - "testnet"
     examples:
       blockchain: "ETHEREUM"
       collectionId: "ETHEREUM:0xb66a603f4cfe17e3d27b87a8bfcad319856518b8"

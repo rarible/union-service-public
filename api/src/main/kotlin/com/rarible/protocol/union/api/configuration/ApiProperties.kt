@@ -25,6 +25,7 @@ data class ApiProperties(
 data class OpenapiProperties(
     val baseUrl: String = "",
     val description: String = "",
+    val envs: List<String> = emptyList(),
     // Map of examples for openapi, like "itemId" -> "ETHEREUM:0x123"
     // In openapi examples should be declared as ${itemId}
     val examples: Map<String, String> = mapOf()

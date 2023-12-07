@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.search.indexer.test
 
 import com.rarible.core.test.ext.ElasticsearchTest
+import com.rarible.core.test.ext.KafkaCleanup
 import com.rarible.core.test.ext.KafkaTest
 import com.rarible.core.test.ext.MongoCleanup
 import com.rarible.core.test.ext.MongoTest
@@ -16,6 +17,7 @@ import org.springframework.test.context.ContextConfiguration
 @KafkaTest
 @MongoTest
 @MongoCleanup
+@KafkaCleanup
 @ElasticsearchTest
 @EnableAutoConfiguration
 @SpringBootTest(
