@@ -14,7 +14,8 @@ data class ItemChangeEvent(
 data class ItemState(
     val blockchain: BlockchainDto,
     val bestSellOrder: ShortOrder?,
-    val meta: UnionMeta?
+    val meta: UnionMeta?,
+    val deleted: Boolean,
 ) {
     val isListed: Boolean = bestSellOrder != null
 
@@ -23,7 +24,8 @@ data class ItemState(
             return ItemState(
                 blockchain = value.blockchain,
                 bestSellOrder = value.bestSellOrder,
-                meta = value.metaEntry?.data
+                meta = value.metaEntry?.data,
+                deleted = value.deleted
             )
         }
     }

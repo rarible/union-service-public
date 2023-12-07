@@ -128,7 +128,7 @@ class TraitItemChangeListener(
     }
 
     private fun calcProperties(item: ItemState?): ItemPropertiesForTraitStatistics =
-        item
+        item?.takeIfNotDeleted()
             ?.let {
                 ItemPropertiesForTraitStatistics(
                     collection = it.meta?.collectionId?.let { collectionId ->
@@ -158,6 +158,9 @@ class TraitItemChangeListener(
             require(attributes == null || collection != null)
         }
     }
+
+    private fun ItemState.takeIfNotDeleted(): ItemState? =
+        if (this.deleted) null else this
 
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(TraitItemChangeListener::class.java)

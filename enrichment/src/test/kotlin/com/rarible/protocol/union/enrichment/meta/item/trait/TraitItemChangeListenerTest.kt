@@ -18,26 +18,27 @@ import com.rarible.protocol.union.enrichment.util.toItemAttributeShort
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
-import org.mockito.InjectMocks
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
+import java.util.concurrent.atomic.AtomicInteger
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class TraitItemChangeListenerTest {
 
-    @InjectMocks
+    @InjectMockKs
     private lateinit var traitItemChangeListener: TraitItemChangeListener
 
-    @Mock
+    @MockK
     private lateinit var traitService: TraitService
 
-    @Mock(lenient = true)
+    @MockK
     private lateinit var collectionRepository: CollectionRepository
 
     @BeforeEach
@@ -51,9 +52,15 @@ class TraitItemChangeListenerTest {
     @MethodSource("traitItemsCountChangesCases")
     fun traitItemsCountChanges(case: TestCase) = runBlocking<Unit> {
         with(case) {
+            coEvery {
+                traitService.changeItemsCount(any(), any())
+            } returns Unit
+
             traitItemChangeListener.onItemChange(ItemChangeEvent(oldItem, newItem))
+
             val oldCollection = oldItem?.let { CollectionIdDto(it.blockchain, it.metaEntry?.data?.collectionId!!) }
             val newCollection = newItem.let { CollectionIdDto(it.blockchain, it.metaEntry?.data?.collectionId!!) }
+            val interaction = AtomicInteger(0)
             if (expDecOld) {
                 coVerify {
                     traitService.changeItemsCount(oldCollection!!, OLD_ATTRIBUTES_SHORT.map {
@@ -64,6 +71,7 @@ class TraitItemChangeListenerTest {
                         )
                     }.toSet())
                 }
+                interaction.incrementAndGet()
             }
             if (expIncNew) {
                 coVerify {
@@ -75,8 +83,9 @@ class TraitItemChangeListenerTest {
                         )
                     }.toSet())
                 }
+                interaction.incrementAndGet()
             }
-            coVerify {
+            coVerify(exactly = interaction.get()) {
                 traitService.changeItemsCount(any(), any())
             }
         }
@@ -85,6 +94,9 @@ class TraitItemChangeListenerTest {
     @Test
     fun `traitItemsCountChanges for changed attributes for the same collection`() = runBlocking<Unit> {
         val collection = randomEthCollectionId()
+        coEvery {
+            traitService.changeItemsCount(any(), any())
+        } returns Unit
 
         traitItemChangeListener.onItemChange(
             ItemChangeEvent(
@@ -125,7 +137,6 @@ class TraitItemChangeListenerTest {
             collectionRepository.get(EnrichmentCollectionId(collection))
         } returns randomEnrichmentCollection(collection).copy(hasTraits = false)
 
-
         traitItemChangeListener.onItemChange(
             ItemChangeEvent(
                 current = null,
@@ -146,6 +157,9 @@ class TraitItemChangeListenerTest {
         coEvery {
             collectionRepository.get(EnrichmentCollectionId(collection))
         } returns randomEnrichmentCollection(collection).copy(hasTraits = true)
+        coEvery {
+            traitService.changeItemsCount(any(), any())
+        } returns Unit
 
         traitItemChangeListener.onItemChange(
             ItemChangeEvent(
@@ -187,6 +201,9 @@ class TraitItemChangeListenerTest {
         coEvery {
             collectionRepository.get(EnrichmentCollectionId(collection))
         } returns randomEnrichmentCollection(collection).copy(hasTraits = true)
+        coEvery {
+            traitService.changeItemsCount(any(), any())
+        } returns Unit
 
         traitItemChangeListener.onItemChange(
             ItemChangeEvent(
@@ -228,6 +245,9 @@ class TraitItemChangeListenerTest {
         coEvery {
             collectionRepository.get(EnrichmentCollectionId(collection))
         } returns randomEnrichmentCollection(collection).copy(hasTraits = true)
+        coEvery {
+            traitService.changeItemsCount(any(), any())
+        } returns Unit
 
         traitItemChangeListener.onItemChange(
             ItemChangeEvent(
@@ -268,6 +288,9 @@ class TraitItemChangeListenerTest {
         coEvery {
             collectionRepository.get(EnrichmentCollectionId(collection))
         } returns randomEnrichmentCollection(collection).copy(hasTraits = true)
+        coEvery {
+            traitService.changeItemsCount(any(), any())
+        } returns Unit
 
         traitItemChangeListener.onItemChange(
             ItemChangeEvent(
@@ -281,11 +304,11 @@ class TraitItemChangeListenerTest {
                 setOf(
                     ItemAttributeCountChange(
                         attribute = ItemAttributeShort(
-                            "hands",
-                            "gold"
+                            "hat",
+                            "big"
                         ),
                         totalChange = 1,
-                        listedChange = 1
+                        listedChange = 1,
                     ),
                     ItemAttributeCountChange(
                         attribute = ItemAttributeShort(
@@ -311,6 +334,9 @@ class TraitItemChangeListenerTest {
         coEvery {
             collectionRepository.get(EnrichmentCollectionId(collection2))
         } returns randomEnrichmentCollection(collection2).copy(hasTraits = true)
+        coEvery {
+            traitService.changeItemsCount(any(), any())
+        } returns Unit
 
         traitItemChangeListener.onItemChange(
             ItemChangeEvent(
@@ -352,12 +378,12 @@ class TraitItemChangeListenerTest {
                             "gold"
                         ),
                         totalChange = 1,
-                        listedChange = 1
+                        listedChange = 1,
                     ),
                     ItemAttributeCountChange(
                         attribute = ItemAttributeShort(
-                            "hands",
-                            "long"
+                            "hat",
+                            "big"
                         ),
                         totalChange = 1,
                         listedChange = 1,
