@@ -18,7 +18,7 @@ data class SimpleHashItem(
     val previews: Preview?,
     val imageProperties: ImageProperties?,
     val extraMetadata: ExtraMetadata?,
-    val collection: Collection?,
+    val collection: SimpleHashCollection?,
     val createdDate: LocalDateTime?,
     val externalUrl: String?,
 ) {
@@ -40,14 +40,6 @@ data class SimpleHashItem(
         val projectId: String? = null,
         val collectionName: String? = null,
         val metadataOriginalUrl: String? = null,
-    )
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    data class Collection(
-        val name: String?,
-        val description: String?,
-        val imageUrl: String?,
-        val bannerImageUrl: String?,
     )
 
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)

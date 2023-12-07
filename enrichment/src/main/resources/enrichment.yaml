@@ -64,6 +64,9 @@ enrichment:
           password: "${META_SIMPLEHASH_KAFKA_PASSWORD:}"
         supported:
           - "ETHEREUM"
+        supportedCollection:
+          - "ETHEREUM"
+          - "POLYGON"
 
 search:
   boost:
