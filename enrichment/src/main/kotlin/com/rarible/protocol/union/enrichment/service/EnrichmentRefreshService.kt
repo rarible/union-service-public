@@ -38,6 +38,7 @@ import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.ItemChangeEvent
 import com.rarible.protocol.union.enrichment.model.OriginOrders
+import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -269,8 +270,8 @@ class EnrichmentRefreshService(
                 poolSellOrders = poolSellOrders
             )
             logger.info("Saving refreshed Item [{}] with gathered enrichment data [{}]", itemId, currentItem)
-            itemService.save(currentItem)
-            itemChangeService.onItemChange(ItemChangeEvent(currentItem, updatedItem))
+            itemService.save(updatedItem)
+            onItemChange(currentItem, updatedItem)
             updatedItem
         }
 
@@ -488,6 +489,10 @@ class EnrichmentRefreshService(
         val best = allOrders.map { ShortOrderConverter.convert(it) }
             .reduceOrNull(BestSellOrderComparator::compare)
         return best?.let { mappedAllOrders[best.id] }
+    }
+
+    private suspend fun onItemChange(currentItem: ShortItem?, updatedItem: ShortItem) {
+        itemChangeService.onItemChange(ItemChangeEvent(currentItem, updatedItem))
     }
 
     data class OriginBestOrders(
