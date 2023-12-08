@@ -38,7 +38,7 @@ class RefreshTraitsTaskHandler(
                             logger.info("Processing collection ${collection.id}")
                             traitService.recalculateTraits(collection.id)
                         } catch (ex: Exception) {
-                            logger.warn("Error processing collection for updating traits", ex)
+                            logger.warn("Error processing collection ${collection.id} for updating traits", ex)
                         }
                         if (counter.incrementAndGet() % BATCH_SIZE == 0L) {
                             emit(collection.id.toString())

@@ -12,14 +12,14 @@ import kotlin.system.measureTimeMillis
 @Component
 class TraitService(
     private val itemRepository: ItemRepository,
-    private val traitRepository: TraitRepository
+    private val traitRepository: TraitRepository,
 ) {
     suspend fun recalculateTraits(collectionId: EnrichmentCollectionId) {
         traitRepository.deleteAllByCollection(collectionId)
         logger.info("Recalculate traits for collection: $collectionId")
         val traits = itemRepository.getTraitsByCollection(collectionId = collectionId)
         traits.chunked(1000).forEach { chunk ->
-            traitRepository.insertAll(chunk)
+            traitRepository.saveAll(chunk)
         }
         // TODO reindex ES PT-4121
         logger.info("Recalculated traits for collection: $collectionId")

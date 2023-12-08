@@ -39,7 +39,8 @@ class RefreshTraitsTaskHandlerIt {
         itemRepository.save(
             randomShortItem()
                 .copy(
-                    collectionId = collection.id.toString(),
+                    blockchain = collection.id.blockchain,
+                    collectionId = collection.id.collectionId,
                     metaEntry = randomItemMetaDownloadEntry()
                         .copy(
                             data = randomUnionMeta(
@@ -54,7 +55,8 @@ class RefreshTraitsTaskHandlerIt {
         itemRepository.save(
             randomShortItem()
                 .copy(
-                    collectionId = collection.id.toString(),
+                    blockchain = collection.id.blockchain,
+                    collectionId = collection.id.collectionId,
                     metaEntry = randomItemMetaDownloadEntry()
                         .copy(
                             data = randomUnionMeta(
@@ -70,7 +72,8 @@ class RefreshTraitsTaskHandlerIt {
         itemRepository.save(
             randomShortItem()
                 .copy(
-                    collectionId = collection.id.toString(),
+                    blockchain = collection.id.blockchain,
+                    collectionId = collection.id.collectionId,
                     bestSellOrder = randomShortSellOrder(),
                     metaEntry = randomItemMetaDownloadEntry()
                         .copy(

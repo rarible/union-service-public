@@ -1,5 +1,7 @@
 package com.rarible.protocol.union.enrichment.repository
 
+import com.mongodb.client.model.UpdateOneModel
+import com.mongodb.client.model.UpdateOptions
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.Trait
 import kotlinx.coroutines.flow.Flow
@@ -7,6 +9,7 @@ import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
+import org.bson.Document
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -16,6 +19,7 @@ import org.springframework.data.mongodb.core.index.Index
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.inValues
+import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
 
@@ -36,8 +40,15 @@ class TraitRepository(
         return template.save(trait).awaitFirst()
     }
 
-    suspend fun insertAll(traits: List<Trait>) {
-        template.insertAll(traits).awaitFirst()
+    suspend fun saveAll(traits: List<Trait>) {
+        val collection = template.getCollection(Trait.COLLECTION).awaitSingle()
+        val updates = traits.map {
+            val doc = Document()
+            template.converter.write(it, doc)
+            val filter = Document("_id", it.id)
+            UpdateOneModel<Document>(filter, Document("\$set", doc), UpdateOptions().upsert(true))
+        }
+        collection.bulkWrite(updates).awaitFirstOrNull()
     }
 
     suspend fun get(id: String): Trait? {
@@ -51,7 +62,7 @@ class TraitRepository(
     }
 
     suspend fun deleteAllByCollection(collectionId: EnrichmentCollectionId) {
-        val query = Query(where(Trait::collectionId).`is`(collectionId.toString()))
+        val query = Query(where(Trait::collectionId).isEqualTo(collectionId))
         template.remove(query, Trait::class.java).awaitSingle()
     }
 

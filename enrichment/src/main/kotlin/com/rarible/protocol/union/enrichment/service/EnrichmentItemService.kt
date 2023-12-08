@@ -144,11 +144,7 @@ class EnrichmentItemService(
         }
 
         val resolvedItem = fetchedItem.await()
-        val itemHint = shortItem?.let { mapOf(itemId to it) } ?: emptyMap()
-        val customCollection = customCollectionResolver.resolve(
-            listOf(CustomCollectionResolutionRequest(itemId, itemId, null)),
-            itemHint
-        )[itemId]
+        val customCollection = resolveCustomCollection(shortItem, itemId)
 
         ItemDtoConverter.convert(
             item = resolvedItem,
@@ -159,6 +155,21 @@ class EnrichmentItemService(
             auctions = auctionsData.await(),
             customCollection = customCollection
         )
+    }
+
+    suspend fun resolveCustomCollection(shortItem: ShortItem): CollectionIdDto? {
+        return resolveCustomCollection(shortItem, shortItem.id.toDto())
+    }
+
+    private suspend fun resolveCustomCollection(
+        shortItem: ShortItem?,
+        itemId: ItemIdDto
+    ): CollectionIdDto? {
+        val itemHint = shortItem?.let { mapOf(itemId to it) } ?: emptyMap()
+        return customCollectionResolver.resolve(
+            listOf(CustomCollectionResolutionRequest(itemId, itemId, null)),
+            itemHint
+        )[itemId]
     }
 
     suspend fun enrichItems(
