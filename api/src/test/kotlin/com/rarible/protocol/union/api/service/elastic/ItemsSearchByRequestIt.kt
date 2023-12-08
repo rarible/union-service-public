@@ -2,7 +2,6 @@ package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
-import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.currency.dto.CurrenciesDto
 import com.rarible.protocol.union.api.controller.test.AbstractIntegrationTest
@@ -137,7 +136,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                                 value = currency.address,
                             )
                         ),
-                        randomDouble(1.0, 10.0).toBigDecimal(),
+                        (it + 1).toBigDecimal(),
                     )
                 ),
                 bestBidOrder = randomOrderDto(
@@ -148,7 +147,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                                 value = currency.address,
                             )
                         ),
-                        randomDouble(1.0, 10.0).toBigDecimal(),
+                        (it + 1).toBigDecimal(),
                     )
                 ),
             )
@@ -181,7 +180,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                                 value = currency.address,
                             )
                         ),
-                        randomDouble(1.0, 10.0).toBigDecimal(),
+                        (it + 1).toBigDecimal(),
                     )
                 ),
                 bestBidOrder = randomOrderDto(
@@ -192,7 +191,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                                 value = currency.address,
                             )
                         ),
-                        randomDouble(1.0, 10.0).toBigDecimal(),
+                        (it + 1).toBigDecimal(),
                     )
                 ),
             )
