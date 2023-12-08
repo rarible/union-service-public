@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.apollographql.apollo3.mpp.platform
 import com.rarible.core.common.nowMillis
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomString
