@@ -59,8 +59,8 @@ class TraitItemChangeListenerTest {
 
             traitItemChangeListener.onItemChange(ItemChangeEvent(oldItem, newItem))
 
-            val oldCollection = oldItem?.let { CollectionIdDto(it.blockchain, it.metaEntry?.data?.collectionId!!) }
-            val newCollection = newItem.let { CollectionIdDto(it.blockchain, it.metaEntry?.data?.collectionId!!) }
+            val oldCollection = oldItem?.let { CollectionIdDto(it.blockchain, it.collectionId!!) }
+            val newCollection = newItem.let { CollectionIdDto(it.blockchain, it.collectionId!!) }
             val interaction = AtomicInteger(0)
             if (expDecOld) {
                 coVerify {
@@ -441,10 +441,10 @@ class TraitItemChangeListenerTest {
         ): ShortItem {
             return randomShortItem().copy(
                 blockchain = collection.blockchain,
+                collectionId = collection.value,
                 bestSellOrder = sellOrder,
                 metaEntry = randomItemMetaDownloadEntry(
                     data = randomUnionMeta().copy(
-                        collectionId = collection.value,
                         attributes = attributes
                     )
                 ),
