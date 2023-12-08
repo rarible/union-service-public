@@ -74,7 +74,7 @@ class EnrichmentItemEventService(
         val itemId = itemDeleteEvent.itemId
         val existing = enrichmentItemService.getOrEmpty(ShortItemId(itemId))
         val updated = existing.withDeleted(true)
-        enrichmentItemService.save(existing)
+        enrichmentItemService.save(updated)
         onItemChange(existing, updated)
         val event = ItemDeleteEventDto(
             itemId = itemId,

@@ -167,6 +167,9 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
         )
 
         waitAssert {
+            val savedItem = itemRepository.get(item.id)
+            assertThat(savedItem?.deleted).isFalse()
+
             val trait1 = traitRepository.get(traitId1)
             assertThat(trait1?.itemsCount).isEqualTo(1)
             assertThat(trait1?.listedItemsCount).isEqualTo(0)
@@ -192,6 +195,9 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
             )
         )
         waitAssert {
+            val savedItem = itemRepository.get(item.id)
+            assertThat(savedItem?.deleted).isTrue()
+
             val trait1 = traitRepository.get(traitId1)
             assertThat(trait1?.itemsCount).isEqualTo(0)
             assertThat(trait1?.listedItemsCount).isEqualTo(0)
