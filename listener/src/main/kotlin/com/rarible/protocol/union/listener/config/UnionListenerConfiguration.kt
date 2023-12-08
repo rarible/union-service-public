@@ -21,6 +21,7 @@ import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentConsumerConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
 import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
+import com.rarible.protocol.union.enrichment.model.ItemChangeEvent
 import com.rarible.protocol.union.listener.handler.MetricsInternalEventHandlerFactory
 import com.rarible.protocol.union.listener.handler.internal.CollectionMetaTaskSchedulerHandler
 import com.rarible.protocol.union.listener.handler.internal.ItemMetaTaskSchedulerHandler
@@ -101,6 +102,23 @@ class UnionListenerConfiguration(
             async = false,
             offsetResetStrategy = OffsetResetStrategy.EARLIEST,
             valueClass = ReconciliationMarkEvent::class.java
+        )
+        return kafkaConsumerFactory.createWorker(settings, handler)
+    }
+
+    @Bean
+    fun unionItemChangeWorker(
+        handler: InternalEventHandler<ItemChangeEvent>
+    ): RaribleKafkaConsumerWorker<ItemChangeEvent> {
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = properties.brokerReplicaSet,
+            topic = UnionInternalTopicProvider.getItemChangeTopic(env),
+            group = consumerGroup("item.change"),
+            concurrency = listenerProperties.itemChange.workers,
+            batchSize = listenerProperties.itemChange.batchSize,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = ItemChangeEvent::class.java
         )
         return kafkaConsumerFactory.createWorker(settings, handler)
     }

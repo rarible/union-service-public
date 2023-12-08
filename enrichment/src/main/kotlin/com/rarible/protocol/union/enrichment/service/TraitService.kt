@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.enrichment.service
 
+import com.rarible.core.common.asyncBatchHandle
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.model.ItemAttributeCountChange
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.TraitRepository
 import kotlinx.coroutines.flow.count
@@ -35,5 +37,29 @@ class TraitService(
         logger.info("Deleted traits with zero items count: ${deleted.get()} time: ${time}ms")
     }
 
-    private val logger = LoggerFactory.getLogger(TraitService::class.java)
+    suspend fun changeItemsCount(
+        collectionId: EnrichmentCollectionId,
+        changes: Set<ItemAttributeCountChange>,
+    ) {
+        changes.asyncBatchHandle(TRAIT_HANDLE_BATCH) {
+            val traitId = traitRepository.incrementItemsCount(
+                collectionId,
+                it.attribute,
+                incTotal = it.totalChange,
+                incListed = it.listedChange
+            )
+            indexTrait(traitId)
+        }
+    }
+
+    private suspend fun indexTrait(traitId: String) {
+        // TODO: Index trait
+    }
+
+    private companion object {
+        private val logger = LoggerFactory.getLogger(TraitService::class.java)
+
+        // We don't expect that there will be more than 500 traits in one collection
+        const val TRAIT_HANDLE_BATCH = 500
+    }
 }

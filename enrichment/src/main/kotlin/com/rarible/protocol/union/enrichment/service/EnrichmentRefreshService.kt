@@ -33,9 +33,12 @@ import com.rarible.protocol.union.enrichment.evaluator.ItemBestSellOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestBidOrderProvider
 import com.rarible.protocol.union.enrichment.evaluator.OwnershipBestSellOrderProvider
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.item.ItemChangeService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.model.ItemChangeEvent
 import com.rarible.protocol.union.enrichment.model.OriginOrders
+import com.rarible.protocol.union.enrichment.model.ShortItem
 import com.rarible.protocol.union.enrichment.model.ShortItemId
 import com.rarible.protocol.union.enrichment.model.ShortOwnership
 import com.rarible.protocol.union.enrichment.model.ShortOwnershipId
@@ -63,6 +66,7 @@ class EnrichmentRefreshService(
     private val internalOwnershipProducer: UnionInternalOwnershipEventProducer,
     private val auctionContractService: AuctionContractService,
     private val originService: OriginService,
+    private val itemChangeService: ItemChangeService,
     private val ff: FeatureFlagsProperties
 ) {
 
@@ -252,7 +256,8 @@ class EnrichmentRefreshService(
         val itemDto = itemDtoDeferred.await()
 
         val updatedItem = optimisticLock {
-            val currentItem = itemService.getOrEmpty(shortItemId).copy(
+            val currentItem = itemService.getOrEmpty(shortItemId)
+            val updatedItem = currentItem.copy(
                 bestSellOrders = bestOrders.global.bestSellOrders,
                 bestSellOrder = bestOrders.global.bestSellOrder,
                 bestBidOrders = bestOrders.global.bestBidOrders,
@@ -264,11 +269,10 @@ class EnrichmentRefreshService(
                 lastSale = lastSaleDeferred.await(),
                 poolSellOrders = poolSellOrders
             )
-
             logger.info("Saving refreshed Item [{}] with gathered enrichment data [{}]", itemId, currentItem)
-            itemService.save(currentItem)
-
-            currentItem
+            itemService.save(updatedItem)
+            onItemChange(currentItem, updatedItem)
+            updatedItem
         }
 
         if (itemDto.deleted) {
@@ -485,6 +489,10 @@ class EnrichmentRefreshService(
         val best = allOrders.map { ShortOrderConverter.convert(it) }
             .reduceOrNull(BestSellOrderComparator::compare)
         return best?.let { mappedAllOrders[best.id] }
+    }
+
+    private suspend fun onItemChange(currentItem: ShortItem?, updatedItem: ShortItem) {
+        itemChangeService.onItemChange(ItemChangeEvent(currentItem, updatedItem))
     }
 
     data class OriginBestOrders(
