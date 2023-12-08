@@ -136,7 +136,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                                 value = currency.address,
                             )
                         ),
-                        it.toBigDecimal(),
+                        (it + 1).toBigDecimal(),
                     )
                 ),
                 bestBidOrder = randomOrderDto(
@@ -147,7 +147,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                                 value = currency.address,
                             )
                         ),
-                        it.toBigDecimal(),
+                        (it + 1).toBigDecimal(),
                     )
                 ),
             )
@@ -180,7 +180,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                                 value = currency.address,
                             )
                         ),
-                        it.toBigDecimal(),
+                        (it + 1).toBigDecimal(),
                     )
                 ),
                 bestBidOrder = randomOrderDto(
@@ -191,7 +191,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                                 value = currency.address,
                             )
                         ),
-                        it.toBigDecimal(),
+                        (it + 1).toBigDecimal(),
                     )
                 ),
             )
