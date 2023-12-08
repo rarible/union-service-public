@@ -35,11 +35,14 @@ class RefreshTraitsTaskHandlerIt {
     @Test
     fun `refresh traits`() = runBlocking<Unit> {
         val collection = randomEnrichmentCollection()
+        val collectionWithoutTraits = randomEnrichmentCollection().copy(hasTraits = false)
         collectionRepository.save(collection)
+        collectionRepository.save(collectionWithoutTraits)
         itemRepository.save(
             randomShortItem()
                 .copy(
-                    collectionId = collection.id.toString(),
+                    blockchain = collection.id.blockchain,
+                    collectionId = collection.id.collectionId,
                     metaEntry = randomItemMetaDownloadEntry()
                         .copy(
                             data = randomUnionMeta(
@@ -54,7 +57,8 @@ class RefreshTraitsTaskHandlerIt {
         itemRepository.save(
             randomShortItem()
                 .copy(
-                    collectionId = collection.id.toString(),
+                    blockchain = collection.id.blockchain,
+                    collectionId = collection.id.collectionId,
                     metaEntry = randomItemMetaDownloadEntry()
                         .copy(
                             data = randomUnionMeta(
@@ -70,7 +74,27 @@ class RefreshTraitsTaskHandlerIt {
         itemRepository.save(
             randomShortItem()
                 .copy(
-                    collectionId = collection.id.toString(),
+                    blockchain = collection.id.blockchain,
+                    collectionId = collection.id.collectionId,
+                    bestSellOrder = randomShortSellOrder(),
+                    metaEntry = randomItemMetaDownloadEntry()
+                        .copy(
+                            data = randomUnionMeta(
+                                attributes = listOf(
+                                    UnionMetaAttribute("key1", "value1"),
+                                    UnionMetaAttribute("key2"),
+                                    UnionMetaAttribute("key3", "value3"),
+                                    UnionMetaAttribute("key4", "value4")
+                                )
+                            )
+                        )
+                )
+        )
+        itemRepository.save(
+            randomShortItem()
+                .copy(
+                    blockchain = collectionWithoutTraits.id.blockchain,
+                    collectionId = collectionWithoutTraits.id.collectionId,
                     bestSellOrder = randomShortSellOrder(),
                     metaEntry = randomItemMetaDownloadEntry()
                         .copy(

@@ -201,7 +201,10 @@ class ItemRepository(
     suspend fun getTraitsByCollection(collectionId: EnrichmentCollectionId): List<Trait> {
         val traitsCount = ConcurrentHashMap<UnionMetaAttribute, Int>()
         val listedTraitsCount = ConcurrentHashMap<UnionMetaAttribute, Int>()
-        val query = Query(where(ShortItem::collectionId).`is`(collectionId.toString()))
+        val query = Query(
+            where(ShortItem::blockchain).isEqualTo(collectionId.blockchain).and(ShortItem::collectionId)
+                .isEqualTo(collectionId.collectionId)
+        )
             .noCursorTimeout()
             .cursorBatchSize(20)
         template.find(query, ShortItem::class.java)
@@ -277,6 +280,12 @@ class ItemRepository(
             .on("_id", Sort.Direction.ASC)
             .background()
 
+        private val BLOCKCHAIN_COLLECTION_ID: Index = Index()
+            .on(ShortItem::blockchain.name, Sort.Direction.ASC)
+            .on(ShortItem::collectionId.name, Sort.Direction.ASC)
+            .on("_id", Sort.Direction.ASC)
+            .background()
+
         private val ALL_INDEXES = listOf(
             STATUS_RETRIES_FAILED_AT_DEFINITION,
             BLOCKCHAIN_DEFINITION,
@@ -284,6 +293,7 @@ class ItemRepository(
             BY_BEST_SELL_PLATFORM_DEFINITION,
             POOL_ORDER_DEFINITION,
             LAST_UPDATED_AT_ID,
+            BLOCKCHAIN_COLLECTION_ID,
         )
     }
 }

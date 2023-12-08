@@ -13,6 +13,7 @@ data class UnionListenerProperties(
     val metaScheduling: MetaSchedulingProperties = MetaSchedulingProperties(),
     val metrics: MetricsProperties = MetricsProperties(),
     val communityMarketplace: CommunityMarketplaceProperties = CommunityMarketplaceProperties(),
+    val itemChange: ItemChangeProperties = ItemChangeProperties(),
 )
 
 class InternalConsumerProperties(
@@ -47,4 +48,9 @@ data class BlockchainWorkerProperties(
 
 data class CommunityMarketplaceProperties(
     val topic: String = "",
+)
+
+data class ItemChangeProperties(
+    val workers: Int = 9,
+    val batchSize: Int = 500
 )

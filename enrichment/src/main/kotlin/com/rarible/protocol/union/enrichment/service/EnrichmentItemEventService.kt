@@ -21,7 +21,9 @@ import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.ItemUpdateEventDto
 import com.rarible.protocol.union.enrichment.converter.ItemLastSaleConverter
 import com.rarible.protocol.union.enrichment.evaluator.OrderPoolEvaluator
+import com.rarible.protocol.union.enrichment.meta.item.ItemChangeService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
+import com.rarible.protocol.union.enrichment.model.ItemChangeEvent
 import com.rarible.protocol.union.enrichment.model.ItemLastSale
 import com.rarible.protocol.union.enrichment.model.ItemSellStats
 import com.rarible.protocol.union.enrichment.model.ShortItem
@@ -41,6 +43,7 @@ class EnrichmentItemEventService(
     private val bestOrderService: BestOrderService,
     private val reconciliationEventService: ReconciliationEventService,
     private val enrichmentItemSellStatsService: EnrichmentItemSellStatsService,
+    private val itemChangeService: ItemChangeService,
     private val featureFlagsProperties: FeatureFlagsProperties,
 ) {
 
@@ -53,6 +56,7 @@ class EnrichmentItemEventService(
             short = existing,
             eventTimeMarks = event.eventTimeMarks
         )
+        updateItem(existing, updateEvent)
         sendUpdate(updateEvent)
     }
 
@@ -64,7 +68,21 @@ class EnrichmentItemEventService(
             item = item,
             eventTimeMarks = event.eventTimeMarks
         )
+        updateItem(existing, updateEvent)
         sendUpdate(updateEvent)
+    }
+
+    private suspend fun updateItem(
+        existing: ShortItem,
+        updateEvent: ItemUpdateEventDto
+    ) {
+        if (existing.collectionId != updateEvent.item.collection?.value) {
+            enrichmentItemService.save(
+                existing.copy(
+                    collectionId = updateEvent.item.collection?.value
+                )
+            )
+        }
     }
 
     suspend fun onItemDeleted(itemDeleteEvent: UnionItemDeleteEvent) = optimisticLock {
@@ -284,6 +302,10 @@ class EnrichmentItemEventService(
         updateAuction(auction, notificationEnabled) { it.copy(auctions = it.auctions - auction.id) }
     }
 
+    private suspend fun onItemChange(current: ShortItem?, updated: ShortItem) {
+        itemChangeService.onItemChange(ItemChangeEvent(current, updated))
+    }
+
     private suspend fun updateOrder(
         itemId: ShortItemId,
         order: UnionOrder,
@@ -299,6 +321,7 @@ class EnrichmentItemEventService(
                 order = order,
                 eventTimeMarks = eventTimeMarks
             )
+            onItemChange(short, updated)
             logger.info("Saved Item [{}] after Order event [{}]", itemId, order.id)
         } else {
             logger.info("Item [{}] not changed after Order event [{}], event won't be published", itemId, order.id)

@@ -29,4 +29,8 @@ object UnionInternalTopicProvider {
     fun getCollectionMetaDownloadTaskExecutorTopic(environment: String, pipeline: String): String {
         return "protocol.$environment.union.internal.download.meta.collection.$pipeline"
     }
+
+    fun getItemChangeTopic(environment: String): String {
+        return "protocol.$environment.union.internal.change.item"
+    }
 }
