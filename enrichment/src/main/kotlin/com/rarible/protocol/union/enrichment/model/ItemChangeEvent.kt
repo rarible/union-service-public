@@ -23,7 +23,7 @@ data class ItemState(
             return ItemState(
                 blockchain = value.blockchain,
                 isListed = value.bestSellOrder != null,
-                collectionId = value.metaEntry?.data?.collectionId,
+                collectionId = value.collectionId,
                 attributes = value.metaEntry?.data?.attributes,
                 deleted = value.deleted
             )
