@@ -140,6 +140,7 @@ class ItemsSearchByRequestIt : AbstractIntegrationTest() {
                     )
                 ),
                 bestBidOrder = randomOrderDto(
+                    platform = PlatformDto.RARIBLE,
                     make = AssetDto(
                         EthErc20AssetTypeDto(
                             contract = ContractAddress(
