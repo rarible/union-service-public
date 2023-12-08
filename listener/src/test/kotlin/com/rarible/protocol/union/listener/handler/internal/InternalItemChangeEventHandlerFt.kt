@@ -59,6 +59,7 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
 
         val itemId = randomEthItemId()
         val item = randomShortItem(itemId).copy(
+            collectionId = collectionId.value,
             bestSellOrder = null,
             blockchain = collectionId.blockchain,
             metaEntry = randomItemMetaDownloadEntry(data = null)
@@ -71,7 +72,6 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
             updateEntry = {
                 randomItemMetaDownloadEntry(
                     data = randomUnionMeta().copy(
-                        collectionId = collectionId.value,
                         attributes = listOf(
                             attribute1,
                             attribute2
