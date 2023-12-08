@@ -27,7 +27,6 @@ import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrder
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
-
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
@@ -47,7 +46,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import scalether.domain.Address
-import scalether.domain.AddressFactory
 import java.time.Instant
 
 @IntegrationTest
@@ -117,7 +115,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         val shortItem = ShortItemConverter.convert(unionItem).copy(
-            collectionId = AddressFactory.create().toString(),
+            collectionId = randomAddress().toString(),
             bestSellOrder = ShortOrderConverter.convert(unionBestSell),
             bestBidOrder = ShortOrderConverter.convert(unionBestBid),
             bestBidOrders = listOf(
