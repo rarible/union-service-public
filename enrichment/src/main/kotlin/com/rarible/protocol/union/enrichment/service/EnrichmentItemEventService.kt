@@ -56,6 +56,7 @@ class EnrichmentItemEventService(
             short = existing,
             eventTimeMarks = event.eventTimeMarks
         )
+        updateItem(existing, updateEvent)
         sendUpdate(updateEvent)
     }
 
@@ -67,7 +68,21 @@ class EnrichmentItemEventService(
             item = item,
             eventTimeMarks = event.eventTimeMarks
         )
+        updateItem(existing, updateEvent)
         sendUpdate(updateEvent)
+    }
+
+    private suspend fun updateItem(
+        existing: ShortItem,
+        updateEvent: ItemUpdateEventDto
+    ) {
+        if (existing.collectionId != updateEvent.item.collection?.value) {
+            enrichmentItemService.save(
+                existing.copy(
+                    collectionId = updateEvent.item.collection?.value
+                )
+            )
+        }
     }
 
     suspend fun onItemDeleted(itemDeleteEvent: UnionItemDeleteEvent) = optimisticLock {

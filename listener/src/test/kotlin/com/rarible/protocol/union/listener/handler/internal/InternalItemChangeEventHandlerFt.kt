@@ -53,8 +53,8 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
 
         val attribute1 = UnionMetaAttribute(randomString(), randomString())
         val attribute2 = UnionMetaAttribute(randomString(), randomString())
-        val traitId1: String = TraitUtils.getId(collectionId, attribute1.key, attribute1.value!!)
-        val traitId2: String = TraitUtils.getId(collectionId, attribute2.key, attribute2.value!!)
+        val traitId1: String = TraitUtils.getId(collection.id, attribute1.key, attribute1.value!!)
+        val traitId2: String = TraitUtils.getId(collection.id, attribute2.key, attribute2.value!!)
 
         val itemId = randomEthItemId()
         val item = randomShortItem(itemId).copy(

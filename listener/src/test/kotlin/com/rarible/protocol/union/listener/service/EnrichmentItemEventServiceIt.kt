@@ -27,7 +27,6 @@ import com.rarible.protocol.union.enrichment.test.data.randomShortOwnership
 import com.rarible.protocol.union.enrichment.test.data.randomUnionBidOrder
 import com.rarible.protocol.union.enrichment.test.data.randomUnionItem
 import com.rarible.protocol.union.enrichment.test.data.randomUnionSellOrder
-
 import com.rarible.protocol.union.integration.ethereum.converter.EthAuctionConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthItemConverter
 import com.rarible.protocol.union.integration.ethereum.converter.EthMetaConverter
@@ -84,7 +83,8 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
             ShortItem.empty(created.id).copy(
                 lastUpdatedAt = created.lastUpdatedAt,
                 version = created.version,
-                metaEntry = created.metaEntry
+                metaEntry = created.metaEntry,
+                collectionId = unionItem.collection?.value,
             )
         )
         assertThat(created.lastUpdatedAt).isAfter(Instant.now().minusSeconds(5))
@@ -115,6 +115,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
 
         val unionItem = EthItemConverter.convert(ethItem, itemId.blockchain)
         val shortItem = ShortItemConverter.convert(unionItem).copy(
+            collectionId = randomAddress().toString(),
             bestSellOrder = ShortOrderConverter.convert(unionBestSell),
             bestBidOrder = ShortOrderConverter.convert(unionBestBid),
             bestBidOrders = listOf(
@@ -141,6 +142,7 @@ class EnrichmentItemEventServiceIt : AbstractIntegrationTest() {
         val saved = itemService.get(shortItem.id)!!
         assertThat(saved.bestSellOrder).isEqualTo(shortItem.bestSellOrder)
         assertThat(saved.bestBidOrder).isEqualTo(shortItem.bestBidOrder)
+        assertThat(saved.collectionId).isEqualTo(unionItem.collection?.value)
 
         waitAssert {
             val messages = findItemUpdates(itemId.value)

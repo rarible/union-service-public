@@ -1,6 +1,7 @@
 package com.rarible.protocol.union.api.service.elastic
 
 import com.rarible.protocol.union.api.configuration.EsProperties
+import com.rarible.protocol.union.api.service.api.CollectionApiService
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.trait.ExtendedTraitProperty
 import com.rarible.protocol.union.core.model.trait.Trait
@@ -9,6 +10,8 @@ import com.rarible.protocol.union.core.model.trait.TraitProperty
 import com.rarible.protocol.union.dto.TraitDto
 import com.rarible.protocol.union.dto.TraitEntryDto
 import com.rarible.protocol.union.dto.TraitsDto
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import org.apache.lucene.search.join.ScoreMode
@@ -38,26 +41,17 @@ import java.math.RoundingMode
 
 @Service
 class ItemTraitService(
-    val elasticClient: ReactiveElasticsearchClient,
-    val esItemRepository: EsItemRepository,
-    val esProperties: EsProperties
+    private val elasticClient: ReactiveElasticsearchClient,
+    private val esItemRepository: EsItemRepository,
+    private val esProperties: EsProperties,
+    private val collectionApiService: CollectionApiService,
+    private val collectionRepository: CollectionRepository,
 ) {
-
-    companion object {
-        private const val KEYS_BUCKET_NAME = "trait_keys"
-        private const val VALUES_BUCKET_NAME = "trait_values"
-        const val TRAIT_NESTED_FIELD = "traits"
-        const val TRAIT_KEY_KEYWORD_FIELD = "traits.key.raw"
-        const val TRAIT_VALUE_KEYWORD_FIELD = "traits.value.raw"
-        val TRAITS_FIELDS = mapOf("traits.key" to 1f, "traits.value" to 1f)
-        val TRAITS_NESTED_FIELDS = mapOf(
-            TRAIT_NESTED_FIELD to mapOf(
-                "traits.key" to 1f, "traits.value" to 1f
-            )
-        )
-    }
-
     suspend fun searchTraits(filter: String, collectionIds: List<String>): TraitsDto {
+        val withTraitsCollectionIds = collectionApiService.filterHasTraits(collectionIds)
+        if (withTraitsCollectionIds.isEmpty()) {
+            return TraitsDto()
+        }
         val aggregationBuilder = getFilterAggregationBuilder(filter)
 
         val searchSourceBuilder = SearchSourceBuilder().aggregation(aggregationBuilder)
@@ -65,12 +59,10 @@ class ItemTraitService(
             .apply {
                 val boolQuery = QueryBuilders.boolQuery()
 
-                if (collectionIds.isNotEmpty()) {
-                    boolQuery.must(
-                        QueryBuilders.boolQuery()
-                            .must(QueryBuilders.termsQuery(EsItem::collection.name, collectionIds))
-                    )
-                }
+                boolQuery.must(
+                    QueryBuilders.boolQuery()
+                        .must(QueryBuilders.termsQuery(EsItem::collection.name, withTraitsCollectionIds))
+                )
 
                 boolQuery.must(
                     QueryBuilders.boolQuery()
@@ -93,6 +85,8 @@ class ItemTraitService(
         collectionId: String,
         properties: Set<TraitProperty>
     ): List<ExtendedTraitProperty> {
+        val collection = collectionRepository.get(EnrichmentCollectionId.of(collectionId)) ?: return emptyList()
+        if (!collection.hasTraits) return emptyList()
         val itemsCount = esItemRepository.countItemsInCollection(collectionId)
         if (itemsCount == 0L) return properties.map { it.toExtended() }
 
@@ -113,6 +107,8 @@ class ItemTraitService(
         )
 
     suspend fun getTraitsDistinct(collectionId: String, properties: Set<TraitProperty>): List<Trait> {
+        val collection = collectionRepository.get(EnrichmentCollectionId.of(collectionId)) ?: return emptyList()
+        if (!collection.hasTraits) return emptyList()
         val collectionQueryBuilder = QueryBuilders.boolQuery()
             .must(QueryBuilders.termsQuery(EsItem::collection.name, collectionId))
         val query = QueryBuilders.boolQuery().filter(collectionQueryBuilder)
@@ -286,6 +282,10 @@ class ItemTraitService(
         )
 
     suspend fun queryTraits(collectionIds: List<String>, keys: List<String>?): TraitsDto {
+        val withTraitsCollectionIds = collectionApiService.filterHasTraits(collectionIds)
+        if (withTraitsCollectionIds.isEmpty()) {
+            return TraitsDto()
+        }
         val traitTermsAggregationBuilder =
             getTermsAggregationBuilder().apply {
                 if (keys?.isNotEmpty() == true) {
@@ -296,11 +296,9 @@ class ItemTraitService(
             .subAggregation(traitTermsAggregationBuilder)
         val searchSourceBuilder = SearchSourceBuilder().aggregation(aggregationBuilder).size(0)
             .apply {
-                if (collectionIds.isNotEmpty()) {
-                    val queryBuilder = QueryBuilders.boolQuery()
-                        .must(QueryBuilders.termsQuery(EsItem::collection.name, collectionIds))
-                    query(QueryBuilders.boolQuery().filter(queryBuilder))
-                }
+                val queryBuilder = QueryBuilders.boolQuery()
+                    .must(QueryBuilders.termsQuery(EsItem::collection.name, withTraitsCollectionIds))
+                query(QueryBuilders.boolQuery().filter(queryBuilder))
             }
         val searchRequest = SearchRequest().indices(esItemRepository.entityDefinition.aliasName)
             .source(searchSourceBuilder)
@@ -308,5 +306,19 @@ class ItemTraitService(
         val aggregation: Aggregation = elasticClient.aggregate(searchRequest).awaitFirstOrNull() ?: return TraitsDto()
 
         return (aggregation as ParsedNested).aggregations.toTraitList()
+    }
+
+    companion object {
+        private const val KEYS_BUCKET_NAME = "trait_keys"
+        private const val VALUES_BUCKET_NAME = "trait_values"
+        const val TRAIT_NESTED_FIELD = "traits"
+        const val TRAIT_KEY_KEYWORD_FIELD = "traits.key.raw"
+        const val TRAIT_VALUE_KEYWORD_FIELD = "traits.value.raw"
+        val TRAITS_FIELDS = mapOf("traits.key" to 1f, "traits.value" to 1f)
+        val TRAITS_NESTED_FIELDS = mapOf(
+            TRAIT_NESTED_FIELD to mapOf(
+                "traits.key" to 1f, "traits.value" to 1f
+            )
+        )
     }
 }

@@ -1,6 +1,5 @@
 package com.rarible.protocol.union.enrichment.meta.item.trait
 
-import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.enrichment.meta.item.ItemChangeListener
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.ItemAttributeCountChange
@@ -55,7 +54,7 @@ class TraitItemChangeListener(
     }
 
     private suspend fun handleItemChange(
-        collection: CollectionIdDto,
+        collection: EnrichmentCollectionId,
         oldAttributes: Set<ItemAttributeShort>?,
         newAttributes: Set<ItemAttributeShort>?,
         oldListed: Boolean,
@@ -79,8 +78,8 @@ class TraitItemChangeListener(
     }
 
     private suspend fun handleCollectionChange(
-        newCollection: CollectionIdDto?,
-        oldCollection: CollectionIdDto?,
+        newCollection: EnrichmentCollectionId?,
+        oldCollection: EnrichmentCollectionId?,
         oldAttributes: Set<ItemAttributeShort>?,
         newAttributes: Set<ItemAttributeShort>?,
         oldListed: Boolean,
@@ -113,7 +112,7 @@ class TraitItemChangeListener(
     }
 
     private suspend fun onAttributesChange(
-        collection: CollectionIdDto,
+        collection: EnrichmentCollectionId,
         oldAttributes: Set<ItemAttributeShort>?,
         newAttributes: Set<ItemAttributeShort>?,
         oldListed: Boolean,
@@ -176,7 +175,7 @@ class TraitItemChangeListener(
     }
 
     private suspend fun onListedChange(
-        collection: CollectionIdDto,
+        collection: EnrichmentCollectionId,
         attributes: Set<ItemAttributeShort>,
         listed: Boolean
     ) {
@@ -197,7 +196,7 @@ class TraitItemChangeListener(
             ?.let {
                 ItemPropertiesForTraitStatistics(
                     collection = it.collectionId?.let { collectionId ->
-                        CollectionIdDto(it.blockchain, collectionId)
+                        EnrichmentCollectionId(it.blockchain, collectionId)
                     },
                     attributes = it.attributes
                         ?.mapNotNull { attribute -> attribute.toItemAttributeShort() }
@@ -206,17 +205,17 @@ class TraitItemChangeListener(
             } ?: ItemPropertiesForTraitStatistics(collection = null, attributes = null)
 
     private suspend fun changeItemsCount(
-        collectionId: CollectionIdDto,
+        collectionId: EnrichmentCollectionId,
         attributes: Set<ItemAttributeCountChange>,
     ) {
-        val collection = collectionRepository.get(EnrichmentCollectionId(collectionId)) ?: return
+        val collection = collectionRepository.get(collectionId) ?: return
         if (!collection.hasTraits || attributes.isEmpty()) return
         logger.info("Changes itemsCount in traits for collection: $collectionId and attributes: $attributes")
         traitService.changeItemsCount(collectionId, attributes)
     }
 
     private data class ItemPropertiesForTraitStatistics(
-        val collection: CollectionIdDto?,
+        val collection: EnrichmentCollectionId?,
         val attributes: Set<ItemAttributeShort>?,
     ) {
         init {

@@ -106,14 +106,17 @@ class CollectionRepository(
 
     fun findAll(
         fromIdExcluded: EnrichmentCollectionId? = null,
-        blockchain: BlockchainDto? = null
+        blockchain: BlockchainDto? = null,
+        limit: Int? = null
     ): Flow<EnrichmentCollection> = template.find(
         Query(
             Criteria().apply {
                 fromIdExcluded?.let { and(EnrichmentCollection::id).gt(fromIdExcluded) }
                 blockchain?.let { and(EnrichmentCollection::blockchain).isEqualTo(blockchain) }
             }
-        ).with(Sort.by(EnrichmentCollection::id.name)),
+        ).with(Sort.by(EnrichmentCollection::id.name)).apply {
+            limit?.let { limit(it) }
+        },
         EnrichmentCollection::class.java
     ).asFlow()
 

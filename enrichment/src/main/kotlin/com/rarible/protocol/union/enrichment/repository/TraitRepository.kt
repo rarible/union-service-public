@@ -1,6 +1,8 @@
 package com.rarible.protocol.union.enrichment.repository
 
-import com.rarible.protocol.union.dto.CollectionIdDto
+import com.mongodb.client.model.UpdateOneModel
+import com.mongodb.client.model.UpdateOptions
+import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.ItemAttributeShort
 import com.rarible.protocol.union.enrichment.model.Trait
 import com.rarible.protocol.union.enrichment.util.TraitUtils
@@ -9,6 +11,7 @@ import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactive.awaitSingle
+import org.bson.Document
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
@@ -36,8 +39,19 @@ class TraitRepository(
         }
     }
 
-    suspend fun save(item: Trait): Trait {
-        return template.save(item).awaitFirst()
+    suspend fun save(trait: Trait): Trait {
+        return template.save(trait).awaitFirst()
+    }
+
+    suspend fun saveAll(traits: List<Trait>) {
+        val collection = template.getCollection(Trait.COLLECTION).awaitSingle()
+        val updates = traits.map {
+            val doc = Document()
+            template.converter.write(it, doc)
+            val filter = Document("_id", it.id)
+            UpdateOneModel<Document>(filter, Document("\$set", doc), UpdateOptions().upsert(true))
+        }
+        collection.bulkWrite(updates).awaitFirstOrNull()
     }
 
     suspend fun get(id: String): Trait? {
@@ -50,8 +64,13 @@ class TraitRepository(
         return template.find<Trait>(Query(criteria)).collectList().awaitFirst()
     }
 
+    suspend fun deleteAllByCollection(collectionId: EnrichmentCollectionId) {
+        val query = Query(where(Trait::collectionId).isEqualTo(collectionId))
+        template.remove(query, Trait::class.java).awaitSingle()
+    }
+
     suspend fun incrementItemsCount(
-        collectionId: CollectionIdDto,
+        collectionId: EnrichmentCollectionId,
         attribute: ItemAttributeShort,
         incTotal: Long = 1,
         incListed: Long = 1
@@ -82,9 +101,9 @@ class TraitRepository(
             Trait::class.java
         ).asFlow()
 
-    private val logger = LoggerFactory.getLogger(ItemRepository::class.java)
-
     companion object {
+        private val logger = LoggerFactory.getLogger(ItemRepository::class.java)
+
         private val COLLECTION_KEY_DEFINITION = Index()
             .on(Trait::collectionId.name, Sort.Direction.ASC)
             .on(Trait::key.name, Sort.Direction.ASC)

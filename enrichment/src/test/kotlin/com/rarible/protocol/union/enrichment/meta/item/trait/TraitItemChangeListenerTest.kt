@@ -64,7 +64,7 @@ class TraitItemChangeListenerTest {
             val interaction = AtomicInteger(0)
             if (expDecOld) {
                 coVerify {
-                    traitService.changeItemsCount(oldCollection!!, OLD_ATTRIBUTES_SHORT.map {
+                    traitService.changeItemsCount(EnrichmentCollectionId(oldCollection!!), OLD_ATTRIBUTES_SHORT.map {
                         ItemAttributeCountChange(
                             attribute = it,
                             totalChange = -1,
@@ -76,7 +76,7 @@ class TraitItemChangeListenerTest {
             }
             if (expIncNew) {
                 coVerify {
-                    traitService.changeItemsCount(newCollection, NEW_ATTRIBUTES_SHORT.map {
+                    traitService.changeItemsCount(EnrichmentCollectionId(newCollection), NEW_ATTRIBUTES_SHORT.map {
                         ItemAttributeCountChange(
                             attribute = it,
                             totalChange = 1,
@@ -107,7 +107,7 @@ class TraitItemChangeListenerTest {
         )
         coVerify {
             traitService.changeItemsCount(
-                collection,
+                EnrichmentCollectionId(collection),
                 setOf(
                     ItemAttributeCountChange(
                         attribute = ItemAttributeShort(
@@ -170,7 +170,7 @@ class TraitItemChangeListenerTest {
         )
         coVerify {
             traitService.changeItemsCount(
-                collection,
+                EnrichmentCollectionId(collection),
                 setOf(
                     ItemAttributeCountChange(
                         attribute = ItemAttributeShort(
@@ -214,7 +214,7 @@ class TraitItemChangeListenerTest {
         )
         coEvery {
             traitService.changeItemsCount(
-                collection,
+                EnrichmentCollectionId(collection),
                 setOf(
                     ItemAttributeCountChange(
                         attribute = ItemAttributeShort(
@@ -258,7 +258,7 @@ class TraitItemChangeListenerTest {
         )
         coVerify {
             traitService.changeItemsCount(
-                collection,
+                EnrichmentCollectionId(collection),
                 setOf(
                     ItemAttributeCountChange(
                         attribute = ItemAttributeShort(
@@ -301,7 +301,7 @@ class TraitItemChangeListenerTest {
         )
         coVerify {
             traitService.changeItemsCount(
-                collection,
+                EnrichmentCollectionId(collection),
                 setOf(
                     ItemAttributeCountChange(
                         attribute = ItemAttributeShort(
@@ -348,7 +348,7 @@ class TraitItemChangeListenerTest {
 
         coVerify {
             traitService.changeItemsCount(
-                collection1,
+                EnrichmentCollectionId(collection1),
                 setOf(
                     ItemAttributeCountChange(
                         attribute = ItemAttributeShort(
@@ -371,7 +371,7 @@ class TraitItemChangeListenerTest {
         }
         coVerify {
             traitService.changeItemsCount(
-                collection2,
+                EnrichmentCollectionId(collection2),
                 setOf(
                     ItemAttributeCountChange(
                         attribute = ItemAttributeShort(
