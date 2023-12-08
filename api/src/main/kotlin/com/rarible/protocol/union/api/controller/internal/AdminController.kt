@@ -57,7 +57,7 @@ class AdminController(
     suspend fun updateHasTraits(
         @PathVariable collectionId: String,
         @RequestParam hasTraits: Boolean
-    ): ResponseEntity<OrderDto> {
+    ): ResponseEntity<Unit> {
         val enrichmentCollectionId = EnrichmentCollectionId.of(collectionId)
         if (!collectionApiService.updateHasTraits(id = enrichmentCollectionId, hasTraits = hasTraits)) {
             return ResponseEntity.ok().build()

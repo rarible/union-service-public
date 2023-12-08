@@ -21,7 +21,7 @@ class CollectionApiService(
                 collectionRepository.save(collection.copy(hasTraits = hasTraits))
                 unionInternalCollectionEventProducer.sendChangeEvent(id.toDto())
             }
-            return@optimisticLock collection.hasTraits != hasTraits
+            collection.hasTraits != hasTraits
         }
     }
 
