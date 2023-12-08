@@ -102,8 +102,8 @@ data class ShortItem(
         )
     }
 
-    fun isListed(): Boolean {
-        return bestSellOrder != null
+    fun withDeleted(deleted: Boolean): ShortItem {
+        return this.copy(deleted = deleted)
     }
 
     companion object {
