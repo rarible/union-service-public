@@ -2,6 +2,7 @@ package com.rarible.protocol.union.api.configuration
 
 import com.rarible.core.daemon.DaemonWorkerProperties
 import com.rarible.protocol.union.dto.BlockchainDto
+import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 import java.time.Duration
@@ -33,7 +34,8 @@ data class OpenapiProperties(
 
 data class SubscribeProperties(
     val daemon: DaemonWorkerProperties = DaemonWorkerProperties(),
-    val workers: Map<String, Int> = mapOf()
+    val workers: Map<String, Int> = mapOf(),
+    val offsetResetStrategy: OffsetResetStrategy = OffsetResetStrategy.LATEST,
 )
 
 data class EsProperties(
