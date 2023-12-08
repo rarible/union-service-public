@@ -7,6 +7,8 @@ api:
     fees:
       ethereum:
         RARIBLE_V2: 10
+  subscribe:
+    offsetResetStrategy: EARLIEST
 
 protocol:
   union:

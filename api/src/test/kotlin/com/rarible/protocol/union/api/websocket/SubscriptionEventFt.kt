@@ -29,7 +29,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.core.publisher.Sinks
@@ -50,7 +49,6 @@ internal class SubscriptionEventFt : AbstractIntegrationTest() {
     protected lateinit var webSocketRequests: Sinks.Many<List<SubscriptionRequestDto>>
 
     @Test
-    @Disabled("Fix in PT-4403")
     fun `item event websocket test`() = runBlocking {
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed(), randomBigInt())
 
@@ -94,13 +92,10 @@ internal class SubscriptionEventFt : AbstractIntegrationTest() {
     }
 
     @Test
-    @Disabled("Fix in PT-4403")
     fun `order event websocket test by itemId`() = runBlocking {
         val order = ethOrderConverter.convert(randomEthV2OrderDto(), BlockchainDto.ETHEREUM)
         val type = (order.make.type as UnionEthErc721AssetType)
         val itemId = ItemIdDto(BlockchainDto.ETHEREUM, type.contract.value, type.tokenId)
-        println("order is $order")
-        println("itemId is $itemId")
         val dto = OrderDtoConverter.convert(order)
 
         val orderEventDto = OrderUpdateEventDto(order.id, "eventId", stubEventMark().toDto(), dto)
