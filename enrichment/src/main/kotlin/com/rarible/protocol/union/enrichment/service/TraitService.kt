@@ -37,6 +37,11 @@ class TraitService(
         logger.info("Deleted traits with zero items count: ${deleted.get()} time: ${time}ms")
     }
 
+    suspend fun deleteAll(collectionId: EnrichmentCollectionId) {
+        traitRepository.deleteAllByCollection(collectionId)
+        // TODO remove from index PT-4121
+    }
+
     suspend fun changeItemsCount(
         collectionId: EnrichmentCollectionId,
         changes: Set<ItemAttributeCountChange>,
