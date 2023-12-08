@@ -73,7 +73,9 @@ class EnrichmentItemEventService(
     suspend fun onItemDeleted(itemDeleteEvent: UnionItemDeleteEvent) = optimisticLock {
         val itemId = itemDeleteEvent.itemId
         val existing = enrichmentItemService.getOrEmpty(ShortItemId(itemId))
+        val updated = existing.withDeleted(true)
         enrichmentItemService.save(existing)
+        onItemChange(existing, updated)
         val event = ItemDeleteEventDto(
             itemId = itemId,
             eventId = UUID.randomUUID().toString(),
