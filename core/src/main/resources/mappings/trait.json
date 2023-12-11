@@ -1,0 +1,39 @@
+{
+  "dynamic": "false",
+  "properties": {
+    "id": {
+      "type": "keyword"
+    },
+    "collectionId": {
+      "type": "keyword"
+    },
+    "key": {
+      "type": "text",
+      "fields": {
+        "raw": {
+          "type": "keyword"
+        }
+      },
+      "analyzer": "stemmer_analyzer",
+      "search_analyzer": "stemmer_stop_analyzer",
+      "search_quote_analyzer": "stemmer_analyzer"
+    },
+    "value": {
+      "type": "text",
+      "fields": {
+        "raw": {
+          "type": "keyword"
+        }
+      },
+      "analyzer": "stemmer_analyzer",
+      "search_analyzer": "stemmer_stop_analyzer",
+      "search_quote_analyzer": "stemmer_analyzer"
+    },
+    "itemsCount": {
+      "type": "long"
+    },
+    "listedItemsCount": {
+      "type": "long"
+    }
+  }
+}

@@ -31,7 +31,7 @@ import com.rarible.protocol.union.core.model.elastic.EsCollection
 import com.rarible.protocol.union.core.model.elastic.EsCollectionLite
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsItemLite
-import com.rarible.protocol.union.core.model.elastic.EsTrait
+import com.rarible.protocol.union.core.model.elastic.EsItemTrait
 import com.rarible.protocol.union.dto.ActivityTypeDto
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.BlockchainGroupDto
@@ -373,7 +373,7 @@ fun randomEsItem(): EsItem {
         collection = CollectionIdDto(BlockchainDto.ETHEREUM, randomAddress().prefixed()).fullId(),
         name = randomString(),
         description = randomString(),
-        traits = listOf(EsTrait(randomString(), randomInt().toString()), EsTrait(randomString(), randomString())),
+        traits = listOf(EsItemTrait(randomString(), randomInt().toString()), EsItemTrait(randomString(), randomString())),
         creators = listOf(randomString()),
         mintedAt = nowMillis(),
         lastUpdatedAt = nowMillis(),

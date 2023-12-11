@@ -10,7 +10,7 @@ import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
-import com.rarible.protocol.union.core.model.elastic.EsTrait
+import com.rarible.protocol.union.core.model.elastic.EsItemTrait
 import com.rarible.protocol.union.core.model.elastic.Range
 import com.rarible.protocol.union.core.model.elastic.TraitFilter
 import com.rarible.protocol.union.core.model.elastic.TraitRangeFilter
@@ -70,7 +70,7 @@ internal class EsItemRepositoryFt {
             collection = "0x02",
             name = "TestItem",
             description = "description",
-            traits = listOf(EsTrait("long", "10"), EsTrait("test", "eye")),
+            traits = listOf(EsItemTrait("long", "10"), EsItemTrait("test", "eye")),
             creators = listOf("0x01"),
             mintedAt = now,
             lastUpdatedAt = now
@@ -167,23 +167,23 @@ internal class EsItemRepositoryFt {
         val value2 = randomString()
         val esItem1 = randomEsItem().copy(
             traits = listOf(
-                EsTrait(key, value),
-                EsTrait(key2, value2),
-                EsTrait(randomString(), randomString()),
+                EsItemTrait(key, value),
+                EsItemTrait(key2, value2),
+                EsItemTrait(randomString(), randomString()),
             ),
         )
         val esItem2 = randomEsItem().copy(
             traits = listOf(
-                EsTrait(key, randomString()),
-                EsTrait(key2, value2),
-                EsTrait(randomString(), randomString()),
+                EsItemTrait(key, randomString()),
+                EsItemTrait(key2, value2),
+                EsItemTrait(randomString(), randomString()),
             ),
         )
         val esItem3 = randomEsItem().copy(
             traits = listOf(
-                EsTrait(key, value),
-                EsTrait(randomString(), value2),
-                EsTrait(randomString(), randomString()),
+                EsItemTrait(key, value),
+                EsItemTrait(randomString(), value2),
+                EsItemTrait(randomString(), randomString()),
             ),
         )
         repository.saveAll(listOf(esItem1, esItem2, esItem3))
@@ -204,20 +204,20 @@ internal class EsItemRepositoryFt {
         val key2 = randomString()
         val esItem1 = randomEsItem().copy(
             traits = listOf(
-                EsTrait(key, "1"),
-                EsTrait(key2, "2"),
+                EsItemTrait(key, "1"),
+                EsItemTrait(key2, "2"),
             ),
         )
         val esItem2 = randomEsItem().copy(
             traits = listOf(
-                EsTrait(key, "2"),
-                EsTrait(key2, "3"),
+                EsItemTrait(key, "2"),
+                EsItemTrait(key2, "3"),
             ),
         )
         val esItem3 = randomEsItem().copy(
             traits = listOf(
-                EsTrait(key, "3"),
-                EsTrait(key2, "4"),
+                EsItemTrait(key, "3"),
+                EsItemTrait(key2, "4"),
             ),
         )
         repository.saveAll(listOf(esItem1, esItem2, esItem3))
@@ -443,9 +443,9 @@ internal class EsItemRepositoryFt {
             name = randomString(),
             description = randomString(),
             traits = listOf(
-                EsTrait("long", randomLong().toString()),
-                EsTrait("testString", randomString()),
-                EsTrait("testDate", "2022-05-" + (1..30).random())
+                EsItemTrait("long", randomLong().toString()),
+                EsItemTrait("testString", randomString()),
+                EsItemTrait("testDate", "2022-05-" + (1..30).random())
             ),
             creators = listOf(randomAddress().toString()),
             mintedAt = nowMillis(),

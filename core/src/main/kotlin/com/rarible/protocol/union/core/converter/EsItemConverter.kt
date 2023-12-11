@@ -2,7 +2,7 @@ package com.rarible.protocol.union.core.converter
 
 import com.rarible.protocol.union.core.converter.helper.getCurrencyIdOrNull
 import com.rarible.protocol.union.core.model.elastic.EsItem
-import com.rarible.protocol.union.core.model.elastic.EsTrait
+import com.rarible.protocol.union.core.model.elastic.EsItemTrait
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.ItemDto
 import com.rarible.protocol.union.dto.ItemIdDto
@@ -26,7 +26,7 @@ object EsItemConverter {
             mintedAt = mintedAt,
             lastUpdatedAt = lastUpdatedAt,
             deleted = deleted,
-            traits = meta?.attributes?.map { EsTrait(it.key.take(MAX_TRAIT_LENGTH), it.value?.take(MAX_TRAIT_LENGTH)) }
+            traits = meta?.attributes?.map { EsItemTrait(it.key.take(MAX_TRAIT_LENGTH), it.value?.take(MAX_TRAIT_LENGTH)) }
                 ?: emptyList(),
             self = self,
             bestSellAmount = this.bestSellOrder?.take?.value?.toDouble(),

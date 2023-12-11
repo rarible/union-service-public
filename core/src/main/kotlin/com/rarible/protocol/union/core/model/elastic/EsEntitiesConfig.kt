@@ -12,7 +12,8 @@ object EsEntitiesConfig {
         EsCollection.ENTITY_DEFINITION,
         EsOrder.ENTITY_DEFINITION,
         EsOwnership.ENTITY_DEFINITION,
-        EsItem.ENTITY_DEFINITION
+        EsItem.ENTITY_DEFINITION,
+        EsTrait.ENTITY_DEFINITION,
     )
 
     fun prodEsEntities(): List<EntityDefinition> = listOf(
@@ -21,6 +22,7 @@ object EsEntitiesConfig {
         EsOwnership.ENTITY_DEFINITION,
         EsItem.ENTITY_DEFINITION,
         EsOrder.ENTITY_DEFINITION,
+        EsTrait.ENTITY_DEFINITION,
     )
 
     fun loadMapping(entity: EsEntity): String {

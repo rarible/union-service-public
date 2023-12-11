@@ -20,7 +20,7 @@ data class EsItem(
 
     val name: String?,
     val description: String?,
-    val traits: List<EsTrait>,
+    val traits: List<EsItemTrait>,
 
     val creators: List<String>,
 
@@ -52,4 +52,4 @@ data class EsItem(
     }
 }
 
-data class EsTrait(val key: String, val value: String?)
+data class EsItemTrait(val key: String, val value: String?)
