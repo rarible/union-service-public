@@ -135,6 +135,8 @@ integration:
       enabled: true
     astarzkevm:
       enabled: true
+    rari:
+      enabled: true
   tezos:
     dipdup:
       dipdupUrl: "https://testnet-tezos-indexer.rarible.org/v1/graphql"
