@@ -33,4 +33,8 @@ object UnionInternalTopicProvider {
     fun getItemChangeTopic(environment: String): String {
         return "protocol.$environment.union.internal.change.item"
     }
+
+    fun getTraitTopic(environment: String): String {
+        return "protocol.$environment.union.internal.trait"
+    }
 }

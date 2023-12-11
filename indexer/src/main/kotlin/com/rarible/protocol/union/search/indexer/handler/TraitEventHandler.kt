@@ -4,10 +4,10 @@ import com.rarible.core.common.nowMillis
 import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
 import com.rarible.protocol.union.core.FeatureFlagsProperties
 import com.rarible.protocol.union.core.converter.EsTraitConverter.toEsTrait
+import com.rarible.protocol.union.core.model.UnionTraitEvent
 import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.SearchableTraitEventDto
 import com.rarible.protocol.union.enrichment.repository.search.EsTraitRepository
 import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
 import org.elasticsearch.action.support.WriteRequest
@@ -19,7 +19,7 @@ class TraitEventHandler(
     private val featureFlagsProperties: FeatureFlagsProperties,
     private val repository: EsTraitRepository,
     metricFactory: IndexerMetricFactory,
-) : RaribleKafkaBatchEventHandler<SearchableTraitEventDto> {
+) : RaribleKafkaBatchEventHandler<UnionTraitEvent> {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -27,8 +27,8 @@ class TraitEventHandler(
         metricFactory.createEntitySaveCountMetric(EsEntity.TRAIT, it)
     }
 
-    override suspend fun handle(event: List<SearchableTraitEventDto>) {
-        logger.info("Handling ${event.size} SearchableTraitEventDto events")
+    override suspend fun handle(event: List<UnionTraitEvent>) {
+        logger.info("Handling ${event.size} UnionTraitEvent events")
         val startTime = nowMillis()
 
         val convertedEvents = event
@@ -36,7 +36,7 @@ class TraitEventHandler(
             .map {
                 it.toEsTrait()
             }
-        logger.debug("Saving ${convertedEvents.size} SearchableTraitEventDto events to ElasticSearch")
+        logger.debug("Saving ${convertedEvents.size} UnionTraitEvent events to ElasticSearch")
         val refreshPolicy =
             if (featureFlagsProperties.enableTraitSaveImmediateToElasticSearch) {
                 WriteRequest.RefreshPolicy.IMMEDIATE
@@ -54,7 +54,7 @@ class TraitEventHandler(
         countSaves(convertedEvents)
 
         val elapsedTime = nowMillis().minusMillis(startTime.toEpochMilli()).toEpochMilli()
-        logger.info("Handling of ${event.size} SearchableTraitEventDto events completed in $elapsedTime ms" +
+        logger.info("Handling of ${event.size} UnionTraitEvent events completed in $elapsedTime ms" +
                 " (saved: ${convertedEvents.size}, deleted: ${deletedIds.size})")
     }
 

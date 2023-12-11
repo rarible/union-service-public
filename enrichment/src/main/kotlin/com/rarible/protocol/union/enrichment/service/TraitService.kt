@@ -58,7 +58,7 @@ class TraitService(
     }
 
     private suspend fun indexTrait(traitId: String) {
-        // TODO: Index trait
+        //
     }
 
     private companion object {

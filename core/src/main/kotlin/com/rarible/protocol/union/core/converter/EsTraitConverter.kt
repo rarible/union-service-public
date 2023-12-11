@@ -1,11 +1,11 @@
 package com.rarible.protocol.union.core.converter
 
+import com.rarible.protocol.union.core.model.UnionTraitEvent
 import com.rarible.protocol.union.core.model.elastic.EsTrait
-import com.rarible.protocol.union.dto.SearchableTraitEventDto
 
 object EsTraitConverter {
 
-    fun SearchableTraitEventDto.toEsTrait(): EsTrait {
+    fun UnionTraitEvent.toEsTrait(): EsTrait {
         return EsTrait(
             id = id,
             blockchain = collectionId.blockchain,

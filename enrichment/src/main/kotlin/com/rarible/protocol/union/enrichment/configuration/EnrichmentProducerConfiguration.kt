@@ -110,6 +110,12 @@ class EnrichmentProducerConfiguration(
         return createUnionProducer("item.change", topic, ItemChangeEvent::class.java)
     }
 
+//    @Bean
+//    fun traitEventProducer(): RaribleKafkaProducer<SearchableTraitEventDto> {
+//        val topic = UnionInternalTopicProvider.getTraitTopic(env)
+//        return createUnionProducer("item.change", topic, ItemChangeEvent::class.java)
+//    }
+
     @Bean
     fun outgoingActivityEventListener(
         eventsProducer: RaribleKafkaProducer<ActivityDto>

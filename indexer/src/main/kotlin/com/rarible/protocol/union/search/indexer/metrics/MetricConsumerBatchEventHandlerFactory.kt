@@ -3,13 +3,13 @@ package com.rarible.protocol.union.search.indexer.metrics
 import com.rarible.core.common.nowMillis
 import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
 import com.rarible.protocol.union.core.event.EventCountMetrics
+import com.rarible.protocol.union.core.model.UnionTraitEvent
 import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
-import com.rarible.protocol.union.dto.SearchableTraitEventDto
 import org.springframework.stereotype.Component
 
 @Component
@@ -61,7 +61,7 @@ class MetricConsumerBatchEventHandlerFactory(
         )
     }
 
-    fun wrapTrait(handler: RaribleKafkaBatchEventHandler<SearchableTraitEventDto>): RaribleKafkaBatchEventHandler<SearchableTraitEventDto> {
+    fun wrapTrait(handler: RaribleKafkaBatchEventHandler<UnionTraitEvent>): RaribleKafkaBatchEventHandler<UnionTraitEvent> {
         return MetricsConsumerBatchEventHandlerWrapper(
             metricFactory = metricFactory,
             eventCountMetrics = eventCountMetrics,

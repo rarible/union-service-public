@@ -5,12 +5,13 @@ import com.rarible.core.kafka.RaribleKafkaBatchEventHandler
 import com.rarible.core.kafka.RaribleKafkaConsumerFactory
 import com.rarible.core.kafka.RaribleKafkaConsumerSettings
 import com.rarible.core.kafka.RaribleKafkaConsumerWorker
+import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
+import com.rarible.protocol.union.core.model.UnionTraitEvent
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
-import com.rarible.protocol.union.dto.SearchableTraitEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -105,11 +106,11 @@ class IndexerConfiguration(
     @ConditionalOnProperty(prefix = "handler.trait", name = ["enabled"], havingValue = "true")
     fun traitWorker(
         handler: TraitEventHandler
-    ): RaribleKafkaConsumerWorker<SearchableTraitEventDto> {
+    ): RaribleKafkaConsumerWorker<UnionTraitEvent> {
         return entityWorker(
-            topic = UnionEventTopicProvider.getTraitTopic(env),
+            topic = UnionInternalTopicProvider.getTraitTopic(env),
             group = consumerGroup(TRAIT),
-            valueClass = SearchableTraitEventDto::class.java,
+            valueClass = UnionTraitEvent::class.java,
             handler = metricEventHandlerFactory.wrapTrait(handler)
         )
     }
