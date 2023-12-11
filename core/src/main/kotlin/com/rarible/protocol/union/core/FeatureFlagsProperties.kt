@@ -22,6 +22,8 @@ data class FeatureFlagsProperties(
     val enableItemSaveImmediateToElasticSearch: Boolean = false,
     val enableItemBestBidsByCurrency: Boolean = true,
     val enableIncrementalItemStats: Boolean = true,
+    // traits
+    val enableTraitSaveImmediateToElasticSearch: Boolean = false,
 
     val enableElasticsearchCompatibilityMode: Boolean = true,
 

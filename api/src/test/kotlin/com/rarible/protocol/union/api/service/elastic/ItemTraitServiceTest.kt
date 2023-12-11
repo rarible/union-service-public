@@ -9,7 +9,7 @@ import com.rarible.protocol.union.api.controller.test.IntegrationTest
 import com.rarible.protocol.union.api.service.api.CollectionApiService
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elastic.EsItem
-import com.rarible.protocol.union.core.model.elastic.EsTrait
+import com.rarible.protocol.union.core.model.elastic.EsItemTrait
 import com.rarible.protocol.union.core.model.trait.Trait
 import com.rarible.protocol.union.core.model.trait.TraitEntry
 import com.rarible.protocol.union.core.model.trait.TraitProperty
@@ -77,43 +77,43 @@ internal class ItemTraitServiceTest {
             randomEsItem(
                 collection = collection1.id.toString(),
                 traits = listOf(
-                    EsTrait("key1", "value11"),
-                    EsTrait("key3", "value222"),
-                    EsTrait("key4", "value22"),
-                    EsTrait("key5", "value22"),
-                    EsTrait("eyes", "googly")
+                    EsItemTrait("key1", "value11"),
+                    EsItemTrait("key3", "value222"),
+                    EsItemTrait("key4", "value22"),
+                    EsItemTrait("key5", "value22"),
+                    EsItemTrait("eyes", "googly")
                 )
             ),
             randomEsItem(
                 collection = collection2.id.toString(),
                 traits = listOf(
-                    EsTrait("key1", "value22"),
-                    EsTrait("key2", "value222"),
-                    EsTrait("key6", "value61")
+                    EsItemTrait("key1", "value22"),
+                    EsItemTrait("key2", "value222"),
+                    EsItemTrait("key6", "value61")
                 )
             ),
             randomEsItem(
                 collection = collection3.id.toString(),
                 traits = listOf(
-                    EsTrait("key1", "value13"),
-                    EsTrait("key2", "value222")
+                    EsItemTrait("key1", "value13"),
+                    EsItemTrait("key2", "value222")
                 )
             ),
             randomEsItem(
                 collection = collection4.id.toString(),
                 traits = listOf(
-                    EsTrait("key1", "value11")
+                    EsItemTrait("key1", "value11")
                 )
             ),
             randomEsItem(
                 collection = collection5.id.toString(),
                 traits = listOf(
-                    EsTrait("key1", "value11"),
-                    EsTrait("key3", "value222"),
-                    EsTrait("key4", "value22"),
-                    EsTrait("key5", "value22"),
-                    EsTrait("key6", "value61"),
-                    EsTrait("eyes", "googly")
+                    EsItemTrait("key1", "value11"),
+                    EsItemTrait("key3", "value222"),
+                    EsItemTrait("key4", "value22"),
+                    EsItemTrait("key5", "value22"),
+                    EsItemTrait("key6", "value61"),
+                    EsItemTrait("eyes", "googly")
                 )
             ),
         ).map { repository.save(it) }
@@ -148,38 +148,38 @@ internal class ItemTraitServiceTest {
             randomEsItem(
                 collection = collection1.id.toString(),
                 traits = listOf(
-                    EsTrait("eyes", "green"),
-                    EsTrait("eyes", "green"),
-                    EsTrait("eyes", "green"),
-                    EsTrait("background", "yellow"),
+                    EsItemTrait("eyes", "green"),
+                    EsItemTrait("eyes", "green"),
+                    EsItemTrait("eyes", "green"),
+                    EsItemTrait("background", "yellow"),
                 )
             ),
             randomEsItem(
                 collection = collection1.id.toString(),
                 traits = listOf(
-                    EsTrait("eyes", "blue"),
-                    EsTrait("background", "white"),
+                    EsItemTrait("eyes", "blue"),
+                    EsItemTrait("background", "white"),
                 )
             ),
             randomEsItem(
                 collection = collection1.id.toString(),
                 traits = listOf(
-                    EsTrait("eyes", "blue"),
-                    EsTrait("eyes", "gray"),
-                    EsTrait("background", "black"),
+                    EsItemTrait("eyes", "blue"),
+                    EsItemTrait("eyes", "gray"),
+                    EsItemTrait("background", "black"),
                 )
             ),
             randomEsItem(
                 collection = collection1.id.toString(),
                 traits = listOf(
-                    EsTrait("eyes", "red-gray")
+                    EsItemTrait("eyes", "red-gray")
                 )
             ),
             randomEsItem(
                 collection = collection2.id.toString(),
                 traits = listOf(
-                    EsTrait("eyes", "black"),
-                    EsTrait("background", "purple"),
+                    EsItemTrait("eyes", "black"),
+                    EsItemTrait("background", "purple"),
                 )
             )
         ).map { repository.save(it) }
@@ -246,40 +246,40 @@ internal class ItemTraitServiceTest {
             randomEsItem(
                 collection = collection1.id.toString(),
                 traits = listOf(
-                    EsTrait("key1", "value11"),
-                    EsTrait("key3", "value222"),
-                    EsTrait("key4", "value22"),
-                    EsTrait("key5", "value22")
+                    EsItemTrait("key1", "value11"),
+                    EsItemTrait("key3", "value222"),
+                    EsItemTrait("key4", "value22"),
+                    EsItemTrait("key5", "value22")
                 )
             ),
             randomEsItem(
                 collection = collection2.id.toString(),
                 traits = listOf(
-                    EsTrait("key1", "value22"),
-                    EsTrait("key2", "value222"),
-                    EsTrait("key6", "value61")
+                    EsItemTrait("key1", "value22"),
+                    EsItemTrait("key2", "value222"),
+                    EsItemTrait("key6", "value61")
                 )
             ),
             randomEsItem(
                 collection = collection3.id.toString(),
                 traits = listOf(
-                    EsTrait("key1", "value13"),
-                    EsTrait("key2", "value222")
+                    EsItemTrait("key1", "value13"),
+                    EsItemTrait("key2", "value222")
                 )
             ),
             randomEsItem(
                 collection = collection4.id.toString(),
                 traits = listOf(
-                    EsTrait("key1", "value11")
+                    EsItemTrait("key1", "value11")
                 )
             ),
             randomEsItem(
                 collection = collection5.id.toString(),
                 traits = listOf(
-                    EsTrait("key1", "value11"),
-                    EsTrait("key3", "value222"),
-                    EsTrait("key4", "value22"),
-                    EsTrait("key5", "value22")
+                    EsItemTrait("key1", "value11"),
+                    EsItemTrait("key3", "value222"),
+                    EsItemTrait("key4", "value22"),
+                    EsItemTrait("key5", "value22")
                 )
             ),
         ).map { repository.save(it) }
@@ -328,7 +328,7 @@ internal class ItemTraitServiceTest {
         validateTraitEntry(traitEntry = result.traits[0].values[0], value = "value222", count = 1)
     }
 
-    fun randomEsItem(collection: String? = randomAddress().toString(), traits: List<EsTrait>): EsItem {
+    fun randomEsItem(collection: String? = randomAddress().toString(), traits: List<EsItemTrait>): EsItem {
         val blockchain = BlockchainDto.ETHEREUM
         val itemId = ItemIdDto(blockchain, randomAddress().prefixed(), randomBigInt())
         return EsItem(

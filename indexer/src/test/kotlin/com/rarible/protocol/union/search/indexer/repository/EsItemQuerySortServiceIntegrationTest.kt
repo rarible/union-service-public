@@ -4,7 +4,7 @@ import com.rarible.core.common.nowMillis
 import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
 import com.rarible.protocol.union.core.model.elastic.EsItemSortType
-import com.rarible.protocol.union.core.model.elastic.EsTrait
+import com.rarible.protocol.union.core.model.elastic.EsItemTrait
 import com.rarible.protocol.union.core.model.elastic.SortType
 import com.rarible.protocol.union.core.model.elastic.TraitSort
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -84,36 +84,36 @@ class EsItemQuerySortServiceIntegrationTest {
 
         val first = randomEsItem().copy(
             traits = listOf(
-                EsTrait(key = "trait1", value = "1"),
-                EsTrait(key = "trait2", value = "10")
+                EsItemTrait(key = "trait1", value = "1"),
+                EsItemTrait(key = "trait2", value = "10")
             ),
             itemId = "A"
         )
         val second = randomEsItem().copy(
             traits = listOf(
-                EsTrait(key = "trait1", value = "10"),
-                EsTrait(key = "trait2", value = "1")
+                EsItemTrait(key = "trait1", value = "10"),
+                EsItemTrait(key = "trait2", value = "1")
             ),
             itemId = "B"
         )
         val third = randomEsItem().copy(
             traits = listOf(
-                EsTrait(key = "trait1", value = "5"),
-                EsTrait(key = "trait2", value = "5")
+                EsItemTrait(key = "trait1", value = "5"),
+                EsItemTrait(key = "trait2", value = "5")
             ),
             itemId = "C"
         )
         val fourth = randomEsItem().copy(
             traits = listOf(
-                EsTrait(key = "trait1", value = "5"),
-                EsTrait(key = "trait2", value = "5")
+                EsItemTrait(key = "trait1", value = "5"),
+                EsItemTrait(key = "trait2", value = "5")
             ),
             itemId = "D"
         )
         val fifth = randomEsItem().copy(
             traits = listOf(
-                EsTrait(key = "trait1", value = "6"),
-                EsTrait(key = "trait2", value = "3")
+                EsItemTrait(key = "trait1", value = "6"),
+                EsItemTrait(key = "trait2", value = "3")
             ),
             itemId = "E"
         )

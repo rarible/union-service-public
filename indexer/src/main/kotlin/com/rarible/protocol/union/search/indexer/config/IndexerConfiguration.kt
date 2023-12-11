@@ -10,6 +10,7 @@ import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.SearchableTraitEventDto
 import com.rarible.protocol.union.dto.UnionEventTopicProvider
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentApiConfiguration
 import com.rarible.protocol.union.enrichment.configuration.SearchConfiguration
@@ -18,6 +19,7 @@ import com.rarible.protocol.union.search.indexer.handler.CollectionEventHandler
 import com.rarible.protocol.union.search.indexer.handler.ItemEventHandler
 import com.rarible.protocol.union.search.indexer.handler.OrderEventHandler
 import com.rarible.protocol.union.search.indexer.handler.OwnershipEventHandler
+import com.rarible.protocol.union.search.indexer.handler.TraitEventHandler
 import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEventHandlerFactory
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -40,6 +42,7 @@ class IndexerConfiguration(
         const val ORDER = "order"
         const val COLLECTION = "collection"
         const val ITEM = "item"
+        const val TRAIT = "trait"
         const val OWNERSHIP = "ownership"
     }
 
@@ -95,6 +98,19 @@ class IndexerConfiguration(
             group = consumerGroup(ITEM),
             valueClass = ItemEventDto::class.java,
             handler = metricEventHandlerFactory.wrapItem(handler)
+        )
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = "handler.trait", name = ["enabled"], havingValue = "true")
+    fun traitWorker(
+        handler: TraitEventHandler
+    ): RaribleKafkaConsumerWorker<SearchableTraitEventDto> {
+        return entityWorker(
+            topic = UnionEventTopicProvider.getTraitTopic(env),
+            group = consumerGroup(TRAIT),
+            valueClass = SearchableTraitEventDto::class.java,
+            handler = metricEventHandlerFactory.wrapTrait(handler)
         )
     }
 

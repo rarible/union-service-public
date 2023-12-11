@@ -5,7 +5,7 @@ import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig.loadSettin
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
 
-data class EsTraitStat(
+data class EsTrait(
     @Id
     val id: String,
     val blockchain: BlockchainDto,

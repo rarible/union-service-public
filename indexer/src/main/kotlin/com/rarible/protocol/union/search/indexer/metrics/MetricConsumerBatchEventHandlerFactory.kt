@@ -9,6 +9,7 @@ import com.rarible.protocol.union.dto.CollectionEventDto
 import com.rarible.protocol.union.dto.ItemEventDto
 import com.rarible.protocol.union.dto.OrderEventDto
 import com.rarible.protocol.union.dto.OwnershipEventDto
+import com.rarible.protocol.union.dto.SearchableTraitEventDto
 import org.springframework.stereotype.Component
 
 @Component
@@ -57,6 +58,17 @@ class MetricConsumerBatchEventHandlerFactory(
             esEntity = EsEntity.ITEM,
             eventTimestamp = { nowMillis() },
             eventBlockchain = { event -> event.itemId.blockchain }
+        )
+    }
+
+    fun wrapTrait(handler: RaribleKafkaBatchEventHandler<SearchableTraitEventDto>): RaribleKafkaBatchEventHandler<SearchableTraitEventDto> {
+        return MetricsConsumerBatchEventHandlerWrapper(
+            metricFactory = metricFactory,
+            eventCountMetrics = eventCountMetrics,
+            delegate = handler,
+            esEntity = EsEntity.TRAIT,
+            eventTimestamp = { nowMillis() },
+            eventBlockchain = { event -> event.collectionId.blockchain }
         )
     }
 
