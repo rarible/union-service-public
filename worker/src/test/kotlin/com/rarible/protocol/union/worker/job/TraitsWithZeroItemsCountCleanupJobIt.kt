@@ -57,7 +57,7 @@ class TraitsWithZeroItemsCountCleanupJobIt {
             traitService = traitService
         )
         val kafkaResult: KafkaSendResult.Success = mockk()
-        coEvery {  producer.send(any<KafkaMessage<UnionTraitEvent>>()) } returns kafkaResult
+        coEvery { producer.send(any<KafkaMessage<UnionTraitEvent>>()) } returns kafkaResult
         coEvery { kafkaResult.ensureSuccess() } returns kafkaResult
     }
 

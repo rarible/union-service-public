@@ -16,5 +16,4 @@ object TraitConverter {
             version = trait.version
         )
     }
-
 }
