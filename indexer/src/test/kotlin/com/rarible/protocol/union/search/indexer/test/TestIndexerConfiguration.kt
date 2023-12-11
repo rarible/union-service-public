@@ -11,11 +11,13 @@ import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepos
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsOrderRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsOwnershipRepository
+import com.rarible.protocol.union.enrichment.repository.search.EsTraitRepository
 import com.rarible.protocol.union.search.indexer.handler.ActivityEventHandler
 import com.rarible.protocol.union.search.indexer.handler.CollectionEventHandler
 import com.rarible.protocol.union.search.indexer.handler.ItemEventHandler
 import com.rarible.protocol.union.search.indexer.handler.OrderEventHandler
 import com.rarible.protocol.union.search.indexer.handler.OwnershipEventHandler
+import com.rarible.protocol.union.search.indexer.handler.TraitEventHandler
 import com.rarible.protocol.union.search.indexer.metrics.IndexerMetricFactory
 import com.rarible.protocol.union.search.indexer.metrics.MetricConsumerBatchEventHandlerFactory
 import io.micrometer.core.instrument.MeterRegistry
@@ -90,6 +92,11 @@ class TestIndexerConfiguration(
     @Bean
     fun itemHandler(repository: EsItemRepository, metricFactory: IndexerMetricFactory): ItemEventHandler {
         return ItemEventHandler(FeatureFlagsProperties(), repository, metricFactory)
+    }
+
+    @Bean
+    fun traitHandler(repository: EsTraitRepository, metricFactory: IndexerMetricFactory): TraitEventHandler {
+        return TraitEventHandler(FeatureFlagsProperties(), repository, metricFactory)
     }
 
     // --- APIs ---
