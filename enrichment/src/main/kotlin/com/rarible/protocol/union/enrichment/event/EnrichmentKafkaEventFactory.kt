@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.event
 import com.rarible.core.kafka.KafkaMessage
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.ReconciliationMarkType
+import com.rarible.protocol.union.core.model.UnionTraitEvent
 import com.rarible.protocol.union.dto.CollectionIdDto
 import com.rarible.protocol.union.dto.ItemIdDto
 import com.rarible.protocol.union.dto.OwnershipIdDto
@@ -48,6 +49,14 @@ object EnrichmentKafkaEventFactory {
         return KafkaMessage(
             id = UUID.randomUUID().toString(),
             key = event.id.toDto().fullId(),
+            value = event
+        )
+    }
+
+    fun itemChangeEvent(event: UnionTraitEvent): KafkaMessage<UnionTraitEvent> {
+        return KafkaMessage(
+            id = UUID.randomUUID().toString(),
+            key = event.id,
             value = event
         )
     }

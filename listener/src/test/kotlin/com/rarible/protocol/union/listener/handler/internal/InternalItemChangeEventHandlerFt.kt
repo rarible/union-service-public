@@ -178,6 +178,9 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
             val trait2 = traitRepository.get(traitId2)
             assertThat(trait2?.itemsCount).isEqualTo(1)
             assertThat(trait2?.listedItemsCount).isEqualTo(0)
+
+            val events = findTraits(traitId1)
+            assertThat(events.first().itemsCount).isEqualTo(1)
         }
 
         every {
@@ -206,6 +209,9 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
             val trait2 = traitRepository.get(traitId2)
             assertThat(trait2?.itemsCount).isEqualTo(0)
             assertThat(trait2?.listedItemsCount).isEqualTo(0)
+
+            val events = findTraits(traitId2)
+            assertThat(events.last().itemsCount).isEqualTo(0)
         }
     }
 }

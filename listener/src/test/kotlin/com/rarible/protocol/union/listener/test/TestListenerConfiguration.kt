@@ -45,6 +45,7 @@ import com.rarible.protocol.solana.api.client.TokenControllerApi
 import com.rarible.protocol.solana.dto.SolanaEventTopicProvider
 import com.rarible.protocol.solana.dto.TokenMetaEventDto
 import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
+import com.rarible.protocol.union.core.model.UnionTraitEvent
 import com.rarible.protocol.union.core.test.TestUnionEventHandler
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -122,6 +123,27 @@ class TestListenerConfiguration(
             async = false,
             offsetResetStrategy = OffsetResetStrategy.EARLIEST,
             valueClass = ItemEventDto::class.java
+        )
+        return kafkaConsumerFactory.createWorker(settings, handler)
+    }
+
+    @Bean
+    fun testTraitEventHandler() = TestUnionEventHandler<UnionTraitEvent>()
+
+    @Bean
+    fun testTraitConsumer(
+        handler: TestUnionEventHandler<UnionTraitEvent>
+    ): RaribleKafkaConsumerWorker<UnionTraitEvent> {
+        val topic = UnionInternalTopicProvider.getTraitTopic(env)
+        val settings = RaribleKafkaConsumerSettings(
+            hosts = kafkaContainer.kafkaBoostrapServers(),
+            topic = topic,
+            group = "test-union-trait-group",
+            concurrency = 1,
+            batchSize = 10,
+            async = false,
+            offsetResetStrategy = OffsetResetStrategy.EARLIEST,
+            valueClass = UnionTraitEvent::class.java
         )
         return kafkaConsumerFactory.createWorker(settings, handler)
     }

@@ -6,6 +6,7 @@ import com.rarible.protocol.dto.EthActivityEventDto
 import com.rarible.protocol.nft.api.client.NftCollectionControllerApi
 import com.rarible.protocol.nft.api.client.NftItemControllerApi
 import com.rarible.protocol.nft.api.client.NftOwnershipControllerApi
+import com.rarible.protocol.union.core.model.UnionTraitEvent
 import com.rarible.protocol.union.core.test.TestUnionEventHandler
 import com.rarible.protocol.union.core.test.WaitAssert
 import com.rarible.protocol.union.dto.ActivityDto
@@ -94,6 +95,9 @@ abstract class AbstractIntegrationTest {
     @Autowired
     lateinit var testActivityEventHandler: TestUnionEventHandler<ActivityDto>
 
+    @Autowired
+    lateinit var testTraitEventHandler: TestUnionEventHandler<UnionTraitEvent>
+
     @BeforeEach
     fun beforeEachTest() {
         clearMocks(
@@ -123,6 +127,10 @@ abstract class AbstractIntegrationTest {
     fun findItemDeletions(itemId: String): List<ItemDeleteEventDto> {
         return testItemEventHandler.events.filterIsInstance(ItemDeleteEventDto::class.java)
             .filter { it.itemId.value == itemId }
+    }
+
+    fun findTraits(id: String): List<UnionTraitEvent> {
+        return testTraitEventHandler.events.filter { it.id == id }
     }
 
     fun findOwnershipUpdates(ownershipId: String): List<OwnershipUpdateEventDto> {

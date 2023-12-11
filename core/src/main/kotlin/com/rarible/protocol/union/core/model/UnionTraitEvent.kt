@@ -6,7 +6,7 @@ data class UnionTraitEvent(
     val id: String,
     val collectionId: CollectionIdDto,
     val key: String,
-    val value: String,
+    val value: String?,
     val itemsCount: Long,
     val listedItemsCount: Long,
     val version: Long,

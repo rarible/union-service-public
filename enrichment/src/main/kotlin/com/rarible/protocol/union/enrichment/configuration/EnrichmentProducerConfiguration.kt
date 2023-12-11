@@ -15,6 +15,7 @@ import com.rarible.protocol.union.core.event.UnionInternalTopicProvider
 import com.rarible.protocol.union.core.model.ActivityEvent
 import com.rarible.protocol.union.core.model.ReconciliationMarkEvent
 import com.rarible.protocol.union.core.model.UnionInternalBlockchainEvent
+import com.rarible.protocol.union.core.model.UnionTraitEvent
 import com.rarible.protocol.union.core.producer.UnionInternalBlockchainEventProducer
 import com.rarible.protocol.union.dto.ActivityDto
 import com.rarible.protocol.union.dto.BlockchainDto
@@ -110,11 +111,11 @@ class EnrichmentProducerConfiguration(
         return createUnionProducer("item.change", topic, ItemChangeEvent::class.java)
     }
 
-//    @Bean
-//    fun traitEventProducer(): RaribleKafkaProducer<SearchableTraitEventDto> {
-//        val topic = UnionInternalTopicProvider.getTraitTopic(env)
-//        return createUnionProducer("item.change", topic, ItemChangeEvent::class.java)
-//    }
+    @Bean
+    fun traitEventProducer(): RaribleKafkaProducer<UnionTraitEvent> {
+        val topic = UnionInternalTopicProvider.getTraitTopic(env)
+        return createUnionProducer("item.change", topic, UnionTraitEvent::class.java)
+    }
 
     @Bean
     fun outgoingActivityEventListener(
