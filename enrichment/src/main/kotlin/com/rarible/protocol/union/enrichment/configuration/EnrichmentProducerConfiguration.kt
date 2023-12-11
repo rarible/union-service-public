@@ -114,7 +114,7 @@ class EnrichmentProducerConfiguration(
     @Bean
     fun traitEventProducer(): RaribleKafkaProducer<UnionTraitEvent> {
         val topic = UnionInternalTopicProvider.getTraitTopic(env)
-        return createUnionProducer("item.change", topic, UnionTraitEvent::class.java)
+        return createUnionProducer("item.trait", topic, UnionTraitEvent::class.java)
     }
 
     @Bean

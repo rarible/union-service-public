@@ -19,11 +19,11 @@ class EsTraitRepository(
 ) : ElasticSearchRepository<EsTrait>(
     objectMapper,
     esOperations,
-    esNameResolver.createEntityDefinitionExtended(EsItem.ENTITY_DEFINITION),
+    esNameResolver.createEntityDefinitionExtended(EsTrait.ENTITY_DEFINITION),
     elasticsearchConverter,
     elasticClient,
     EsTrait::class.java,
-    EsItem::itemId.name,
+    EsTrait::id.name,
 ) {
 
     override fun entityId(entity: EsTrait): String {
