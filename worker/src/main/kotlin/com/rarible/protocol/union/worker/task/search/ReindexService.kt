@@ -13,6 +13,7 @@ import com.rarible.protocol.union.core.model.elastic.EsEntity
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsOrder
 import com.rarible.protocol.union.core.model.elastic.EsOwnership
+import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.core.service.router.ActiveBlockchainProvider
 import com.rarible.protocol.union.core.task.ActivityTaskParam
 import com.rarible.protocol.union.core.task.CollectionTaskParam
@@ -20,6 +21,8 @@ import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.core.task.OrderTaskParam
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import com.rarible.protocol.union.core.task.RawTaskParam
+import com.rarible.protocol.union.core.task.TraitTaskParam
+import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import com.rarible.protocol.union.worker.task.search.ChangeEsAliasTask.Companion.getChangeAliasTaskName
@@ -46,17 +49,25 @@ class ReindexService(
             EsEntity.ACTIVITY -> {
                 scheduleActivityReindex(newIndexName, entityDefinition)
             }
+
             EsEntity.ITEM -> {
                 scheduleItemReindex(newIndexName, entityDefinition)
             }
+
             EsEntity.COLLECTION -> {
                 scheduleCollectionReindex(newIndexName, entityDefinition)
             }
+
             EsEntity.ORDER -> {
                 scheduleOrderReindex(newIndexName, entityDefinition)
             }
+
             EsEntity.OWNERSHIP -> {
                 scheduleOwnershipReindex(newIndexName, entityDefinition)
+            }
+
+            EsEntity.TRAIT -> {
+                scheduleTraitReindex(newIndexName, entityDefinition)
             }
         }
     }
@@ -190,6 +201,30 @@ class ReindexService(
         val indexSwitch = indexSwitchTask(
             entityName = EsEntity.OWNERSHIP.entityName,
             changeAliasTaskParam = changeEsOwnershipAliasTaskParam,
+            definition
+        )
+        taskRepository.saveAll(tasks + indexSwitch).collectList().awaitFirst()
+    }
+
+    private suspend fun scheduleTraitReindex(indexName: String, definition: EntityDefinitionExtended) {
+        val blockchains = activeBlockchainProvider.blockchains
+        val taskParams = blockchains.map {
+            paramFactory.toString(
+                TraitTaskParam(
+                    versionData = definition.versionData,
+                    settingsHash = definition.settingsHash,
+                    blockchain = BlockchainDto.ETHEREUM, // task not use it, reindex all blockchains
+                    index = indexName
+                )
+            )
+        }
+        val tasks = tasks(EsTrait.ENTITY_DEFINITION.reindexTask, taskParams)
+        val changeEsTraitAliasTaskParam = ChangeAliasTaskParam(
+            indexName, taskParams
+        )
+        val indexSwitch = indexSwitchTask(
+            entityName = EsEntity.TRAIT.entityName,
+            changeAliasTaskParam = changeEsTraitAliasTaskParam,
             definition
         )
         taskRepository.saveAll(tasks + indexSwitch).collectList().awaitFirst()

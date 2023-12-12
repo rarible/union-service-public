@@ -25,6 +25,8 @@ import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 @Component
 class TraitRepository(

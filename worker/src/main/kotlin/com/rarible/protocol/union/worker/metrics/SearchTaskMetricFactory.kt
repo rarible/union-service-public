@@ -66,6 +66,12 @@ class SearchTaskMetricFactory(
         ) {}.bind(meterRegistry)
     }
 
+    fun createReindexTraitCounter(): RegisteredCounter {
+        return object : CountingMetric(
+            name = getReindexEntityMetricName(EsEntity.TRAIT)
+        ) {}.bind(meterRegistry)
+    }
+
     private fun getReindexEntityMetricName(entity: EsEntity): String {
         return "$root.reindex.${entity.name.lowercase()}"
     }

@@ -30,6 +30,7 @@ data class SearchReindexProperties(
     val collection: CollectionReindexProperties = CollectionReindexProperties(),
     val ownership: OwnershipReindexProperties = OwnershipReindexProperties(),
     val item: ItemReindexProperties = ItemReindexProperties(),
+    val trait: TraitReindexProperties = TraitReindexProperties(),
 )
 
 sealed class EntityReindexProperties {
@@ -60,6 +61,10 @@ data class BlockchainReindexProperties(
     val enabled: Boolean,
     val blockchain: BlockchainDto
 )
+
+class TraitReindexProperties(
+    override val enabled: Boolean = true,
+) : EntityReindexProperties()
 
 class ReconciliationProperties(
     val collectionBatchSize: Int = 50,

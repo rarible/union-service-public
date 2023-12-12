@@ -66,6 +66,16 @@ data class ItemTaskParam(
     override val tags: List<String>? = null,
 ) : TaskParam()
 
+data class TraitTaskParam(
+    override val versionData: Int?,
+    override val settingsHash: String?,
+    override val blockchain: BlockchainDto,
+    override val index: String,
+    override val from: Long? = null,
+    override val to: Long? = null,
+    override val tags: List<String>? = null,
+) : TaskParam()
+
 data class CollectionTaskParam(
     override val versionData: Int?,
     override val settingsHash: String?,
