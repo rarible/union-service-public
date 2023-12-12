@@ -16,6 +16,7 @@ import com.rarible.core.meta.resource.resolver.UrlResolver
 import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.client.WebClientFactory
 import com.rarible.protocol.union.core.util.safeSplit
+import com.rarible.protocol.union.enrichment.ipfs.AlwaysSubstituteIpfsGatewayResolver
 import com.rarible.protocol.union.enrichment.meta.UnionMetaPackage
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
@@ -53,14 +54,18 @@ class EnrichmentMetaConfiguration(
         val internalGatewayProvider = RandomGatewayProvider(
             safeSplit(commonMetaProperties.ipfsGateway).map { it.trimEnd('/') }
         )
-        val legacyGatewayResolver = LegacyIpfsGatewaySubstitutor(
-            safeSplit(commonMetaProperties.ipfsLegacyGateway).map { it.trimEnd('/') }
-        )
+        val customGatewaysResolver = if (commonMetaProperties.alwaysSubstituteIpfsGateway) {
+            AlwaysSubstituteIpfsGatewayResolver()
+        } else {
+            LegacyIpfsGatewaySubstitutor(
+                safeSplit(commonMetaProperties.ipfsLegacyGateway).map { it.trimEnd('/') }
+            )
+        }
 
         val ipfsGatewayResolver = IpfsGatewayResolver(
             publicGatewayProvider = publicGatewayProvider,
             internalGatewayProvider = internalGatewayProvider,
-            customGatewaysResolver = legacyGatewayResolver
+            customGatewaysResolver = customGatewaysResolver
         )
 
         return UrlResolver(ipfsGatewayResolver)

@@ -39,6 +39,7 @@ data class CommonMetaProperties(
     val ipfsGateway: String,
     val ipfsPublicGateway: String,
     val ipfsLegacyGateway: String?,
+    val alwaysSubstituteIpfsGateway: Boolean = true,
     val mediaFetchMaxSize: Long,
     val embedded: EmbeddedContentProperties,
     val trimming: MetaTrimmingProperties = MetaTrimmingProperties(),

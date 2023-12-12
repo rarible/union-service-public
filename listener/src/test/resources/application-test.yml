@@ -8,6 +8,9 @@ common:
     enableCollectionAutoRefreshOnCreation: true
 
 enrichment:
+  meta:
+    common:
+      alwaysSubstituteIpfsGateway: false
   collection:
     mappings:
       - name: "ETHEREUM:0x7777777777777777777777777777777777777777"
