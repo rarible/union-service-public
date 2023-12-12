@@ -4,6 +4,7 @@ import com.rarible.core.test.data.randomString
 import com.rarible.protocol.dto.OrdersPaginationDto
 import com.rarible.protocol.union.core.model.UnionItemDeleteEvent
 import com.rarible.protocol.union.core.model.UnionMetaAttribute
+import com.rarible.protocol.union.core.test.WaitAssert.wait
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.ItemMetaRepository
 import com.rarible.protocol.union.enrichment.repository.ItemRepository
@@ -27,6 +28,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import reactor.kotlin.core.publisher.toMono
+import java.time.Duration
 
 @IntegrationTest
 class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
@@ -167,7 +169,7 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
             }
         )
 
-        waitAssert {
+        wait(Duration.ofSeconds(10)) {
             val savedItem = itemRepository.get(item.id)
             assertThat(savedItem?.deleted).isFalse()
 
@@ -180,6 +182,7 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
             assertThat(trait2?.listedItemsCount).isEqualTo(0)
 
             val events = findTraits(traitId1)
+            assertThat(events.size).isGreaterThan(0)
             assertThat(events.first().itemsCount).isEqualTo(1)
         }
 
@@ -198,7 +201,7 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
                 null
             )
         )
-        waitAssert {
+        wait(Duration.ofSeconds(10)) {
             val savedItem = itemRepository.get(item.id)
             assertThat(savedItem?.deleted).isTrue()
 
@@ -211,6 +214,7 @@ class InternalItemChangeEventHandlerFt : AbstractIntegrationTest() {
             assertThat(trait2?.listedItemsCount).isEqualTo(0)
 
             val events = findTraits(traitId2)
+            assertThat(events.size).isGreaterThan(0)
             assertThat(events.last().itemsCount).isEqualTo(0)
         }
     }
