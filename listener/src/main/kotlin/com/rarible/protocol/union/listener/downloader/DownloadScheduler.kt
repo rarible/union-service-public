@@ -26,11 +26,11 @@ abstract class DownloadScheduler<T>(
     abstract val type: String
     abstract fun getBlockchain(task: DownloadTaskEvent): BlockchainDto
 
-    suspend fun schedule(task: DownloadTaskEvent) {
+    open suspend fun schedule(task: DownloadTaskEvent) {
         schedule(listOf(task))
     }
 
-    suspend fun schedule(tasks: Collection<DownloadTaskEvent>) {
+    open suspend fun schedule(tasks: Collection<DownloadTaskEvent>) {
 
         val created = createInitialEntries(tasks)
 
