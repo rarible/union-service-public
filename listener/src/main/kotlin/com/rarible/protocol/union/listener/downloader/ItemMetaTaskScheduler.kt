@@ -32,6 +32,9 @@ class ItemMetaTaskScheduler(
         if (getBlockchain(task) != BlockchainDto.BASE) {
             return task
         }
+        if (task.pipeline != ItemMetaPipeline.EVENT.pipeline) {
+            return task
+        }
         return task.copy(pipeline = ItemMetaPipeline.SYNC.pipeline)
     }
 }
