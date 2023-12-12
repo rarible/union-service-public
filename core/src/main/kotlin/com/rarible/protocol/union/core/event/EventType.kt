@@ -8,6 +8,7 @@ enum class EventType(
     AUCTION("auction"),
     ACTIVITY("activity"),
     ITEM("item"),
+    TRAIT("trait"),
     ITEM_META("itemMeta"),
     COLLECTION("collection"),
     OWNERSHIP("ownership")
