@@ -9,6 +9,8 @@ handler:
     enabled: true
   item:
     enabled: true
+  trait:
+    enabled: true
   ownership:
     enabled: true
   order:
