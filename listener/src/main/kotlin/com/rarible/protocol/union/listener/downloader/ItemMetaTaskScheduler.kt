@@ -19,12 +19,19 @@ class ItemMetaTaskScheduler(
     override val type = "item"
     override fun getBlockchain(task: DownloadTaskEvent) = IdParser.parseItemId(task.id).blockchain
 
-    // TODO make it in right way
     override suspend fun schedule(task: DownloadTaskEvent) {
+        super.schedule(changePipeline(task))
+    }
+
+    override suspend fun schedule(tasks: Collection<DownloadTaskEvent>) {
+        super.schedule(tasks.map { changePipeline(it) })
+    }
+
+    // TODO make it in right way
+    private fun changePipeline(task: DownloadTaskEvent): DownloadTaskEvent {
         if (getBlockchain(task) != BlockchainDto.BASE) {
-            super.schedule(task)
-        } else {
-            super.schedule(task.copy(pipeline = ItemMetaPipeline.SYNC.pipeline))
+            return task
         }
+        return task.copy(pipeline = ItemMetaPipeline.SYNC.pipeline)
     }
 }

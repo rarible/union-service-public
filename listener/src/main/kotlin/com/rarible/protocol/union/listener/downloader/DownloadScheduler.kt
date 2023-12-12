@@ -30,7 +30,7 @@ abstract class DownloadScheduler<T>(
         schedule(listOf(task))
     }
 
-    suspend fun schedule(tasks: Collection<DownloadTaskEvent>) {
+    open suspend fun schedule(tasks: Collection<DownloadTaskEvent>) {
 
         val created = createInitialEntries(tasks)
 
