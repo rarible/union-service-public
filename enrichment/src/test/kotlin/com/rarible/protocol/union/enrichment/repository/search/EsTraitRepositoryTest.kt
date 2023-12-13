@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.enrichment.repository.search
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elastic.EsSortOrder
 import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.core.model.elastic.EsTraitFilter
@@ -12,25 +12,32 @@ import com.rarible.protocol.union.enrichment.test.IntegrationTest
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.util.*
+import java.util.UUID
 
 @IntegrationTest
 @Suppress("SpringJavaInjectionPointsAutowiringInspection")
 class EsTraitRepositoryTest {
-    @Autowired
-    protected lateinit var objectMapper: ObjectMapper
 
     @Autowired
     private lateinit var esTraitRepository: EsTraitRepository
+
+    @Autowired
+    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+
+    @BeforeEach
+    fun setUp() = runBlocking<Unit> {
+        elasticsearchTestBootstrapper.bootstrap()
+    }
 
     @Test
     fun crud() = runBlocking<Unit> {
         val trait = EsTrait(
             id = UUID.randomUUID().toString(),
             blockchain = BlockchainDto.ETHEREUM,
-            collection = randomEthCollectionId().fullId(),
+            collectionId = randomEthCollectionId().fullId(),
             key = "key",
             value = "value",
             itemsCount = 0,
@@ -64,7 +71,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId,
+                collectionId = collectionId,
                 key = "key1",
                 value = "value1",
                 itemsCount = 2,
@@ -76,7 +83,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId,
+                collectionId = collectionId,
                 key = "key1",
                 value = "value2",
                 itemsCount = 1,
@@ -88,7 +95,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId,
+                collectionId = collectionId,
                 key = "key1",
                 value = "value3",
                 itemsCount = 3,
@@ -100,7 +107,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId,
+                collectionId = collectionId,
                 key = "key1",
                 value = "value4",
                 itemsCount = 10,
@@ -112,7 +119,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId,
+                collectionId = collectionId,
                 key = "key2",
                 value = "value1",
                 itemsCount = 11,
@@ -124,7 +131,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId,
+                collectionId = collectionId,
                 key = "key3",
                 value = "value1",
                 itemsCount = 12,
@@ -136,7 +143,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId,
+                collectionId = collectionId,
                 key = "key4",
                 value = "value1",
                 itemsCount = 13,
@@ -148,7 +155,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId2,
+                collectionId = collectionId2,
                 key = "key5",
                 value = "value2",
                 itemsCount = 14,
@@ -160,7 +167,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId3,
+                collectionId = collectionId3,
                 key = "key1",
                 value = "value1",
                 itemsCount = 1,
@@ -175,8 +182,8 @@ class EsTraitRepositoryTest {
                 listed = false,
                 collectionIds = setOf(collectionId, collectionId2),
                 valueFrequencySortOrder = EsSortOrder.ASC,
-                keysLimit = 100,
-                valuesLimit = 100
+                keysLimit = 3,
+                valuesLimit = 3
             )
         )
         assertThat(result).containsExactly(
@@ -208,8 +215,8 @@ class EsTraitRepositoryTest {
                 listed = false,
                 collectionIds = setOf(collectionId, collectionId2),
                 valueFrequencySortOrder = EsSortOrder.DESC,
-                keysLimit = 100,
-                valuesLimit = 100
+                keysLimit = 3,
+                valuesLimit = 3
             ),
         )
         assertThat(resultDesc).containsExactly(
@@ -241,8 +248,8 @@ class EsTraitRepositoryTest {
                 listed = false,
                 collectionIds = setOf(collectionId, collectionId2),
                 valueFrequencySortOrder = EsSortOrder.ASC,
-                keysLimit = 100,
-                valuesLimit = 100
+                keysLimit = 3,
+                valuesLimit = 3
             )
         )
         assertThat(keysFiltered).containsExactly(
@@ -262,8 +269,8 @@ class EsTraitRepositoryTest {
                 listed = false,
                 collectionIds = setOf(collectionId2),
                 valueFrequencySortOrder = EsSortOrder.ASC,
-                keysLimit = 100,
-                valuesLimit = 100
+                keysLimit = 3,
+                valuesLimit = 3
             )
         )
         assertThat(collectionFiltered).containsExactly(
@@ -302,8 +309,8 @@ class EsTraitRepositoryTest {
                 listed = true,
                 collectionIds = setOf(collectionId, collectionId2),
                 valueFrequencySortOrder = EsSortOrder.ASC,
-                keysLimit = 100,
-                valuesLimit = 100
+                keysLimit = 3,
+                valuesLimit = 3
             )
         )
         assertThat(listed).containsExactly(
@@ -339,7 +346,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId,
+                collectionId = collectionId,
                 key = "key1",
                 value = "value1",
                 itemsCount = 2,
@@ -351,7 +358,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId,
+                collectionId = collectionId,
                 key = "key1",
                 value = "value2",
                 itemsCount = 3,
@@ -363,7 +370,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId,
+                collectionId = collectionId,
                 key = "key2",
                 value = "value1",
                 itemsCount = 4,
@@ -375,7 +382,7 @@ class EsTraitRepositoryTest {
             EsTrait(
                 id = UUID.randomUUID().toString(),
                 blockchain = BlockchainDto.ETHEREUM,
-                collection = collectionId2,
+                collectionId = collectionId2,
                 key = "key1",
                 value = "value1",
                 itemsCount = 5,
@@ -385,7 +392,7 @@ class EsTraitRepositoryTest {
         )
 
         val result = esTraitRepository.getTraits(
-            collectionId = "collectionId",
+            collectionId = collectionId,
             properties = setOf(
                 TraitProperty(key = "key1", value = "value1"),
                 TraitProperty(key = "key1", value = "value2"),

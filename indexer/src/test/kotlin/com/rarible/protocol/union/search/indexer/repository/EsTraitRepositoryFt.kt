@@ -43,7 +43,7 @@ internal class EsTraitRepositoryFt {
         return EsTrait(
             id = "0xFF",
             blockchain = BlockchainDto.ETHEREUM,
-            collection = "0x02",
+            collectionId = "0x02",
             key = "test",
             value = "value",
             itemsCount = 2,

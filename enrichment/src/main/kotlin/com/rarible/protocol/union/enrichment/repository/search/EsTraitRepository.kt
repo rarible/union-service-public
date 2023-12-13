@@ -47,7 +47,7 @@ class EsTraitRepository(
         properties: Set<TraitProperty>
     ): List<Trait> {
         val queryBuilder = QueryBuilders.boolQuery()
-            .must(QueryBuilders.termQuery(EsTrait::collection.name, collectionId))
+            .must(QueryBuilders.termQuery(EsTrait::collectionId.name, collectionId))
             .minimumShouldMatch(1)
         properties.forEach {
             queryBuilder.should(
@@ -114,7 +114,7 @@ class EsTraitRepository(
         val field = if (filter.listed) EsTrait::listedItemsCount.name else EsTrait::itemsCount.name
         queryBuilder.must(QueryBuilders.rangeQuery(field).gt(0))
         if (filter.collectionIds.isNotEmpty()) {
-            queryBuilder.must(QueryBuilders.termsQuery(EsTrait::collection.name, filter.collectionIds))
+            queryBuilder.must(QueryBuilders.termsQuery(EsTrait::collectionId.name, filter.collectionIds))
         }
         if (filter.keys.isNotEmpty()) {
             queryBuilder.must(QueryBuilders.termsQuery("${EsTrait::key.name}.raw", filter.keys))
