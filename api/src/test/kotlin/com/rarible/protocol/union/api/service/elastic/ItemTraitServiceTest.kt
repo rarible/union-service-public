@@ -48,7 +48,7 @@ class ItemTraitServiceTest {
     private lateinit var itemTraitService: ItemTraitService
 
     @Test
-    fun `getTraitsWithRarity - optimised` () = runBlocking<Unit> {
+    fun `getTraitsWithRarity - optimised`() = runBlocking<Unit> {
         val collectionId = randomString()
         val properties1 = TraitProperty(key = randomString(), randomString())
         val properties2 = TraitProperty(key = randomString(), randomString())
@@ -123,7 +123,7 @@ class ItemTraitServiceTest {
     }
 
     @Test
-    fun `searchTraits - optimised` () = runBlocking<Unit> {
+    fun `searchTraits - optimised`() = runBlocking<Unit> {
         val collectionId1 = randomString()
         val collectionId2 = randomString()
         val filter = "test"
