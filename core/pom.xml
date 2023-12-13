@@ -94,6 +94,12 @@
             <artifactId>protocol-union-client</artifactId>
         </dependency>
 
+        <!-- ============ Marketplace-API ============= -->
+        <dependency>
+            <groupId>com.rarible.marketplace</groupId>
+            <artifactId>marketplace-backend-client</artifactId>
+        </dependency>
+
         <!-- ================== Spring =================== -->
         <dependency>
             <groupId>org.springframework</groupId>
