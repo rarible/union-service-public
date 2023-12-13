@@ -46,6 +46,7 @@ import com.rarible.protocol.union.core.service.CurrencyService
 import com.rarible.protocol.union.core.util.evalMakePrice
 import com.rarible.protocol.union.core.util.evalTakePrice
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.dto.EthLooksRareMerkleProofDto
 import com.rarible.protocol.union.dto.EthLooksRareOrderDataV1Dto
 import com.rarible.protocol.union.dto.EthLooksRareOrderDataV2Dto
 import com.rarible.protocol.union.dto.EthOrderBasicSeaportDataV1Dto
@@ -453,7 +454,16 @@ class EthOrderConverter(
                         orderNonce = order.data.orderNonce,
                         subsetNonce = order.data.subsetNonce,
                         additionalParameters = EthConverter.convert(order.data.additionalParameters),
-                        strategyId = order.data.strategyId
+                        strategyId = order.data.strategyId,
+                        merkleRoot = order.data.merkleRoot?.let { EthConverter.convert(it) },
+                        merkleProof = order.data.merkleProof?.let { proofs ->
+                            proofs.map {
+                                EthLooksRareMerkleProofDto(
+                                    position = it.position,
+                                    value = EthConverter.convert(it.value)
+                                )
+                            }
+                        }
                     ),
                     optionalRoyalties = optionalRoyalties,
                 )
