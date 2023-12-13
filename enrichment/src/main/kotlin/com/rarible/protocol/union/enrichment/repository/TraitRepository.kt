@@ -25,8 +25,6 @@ import org.springframework.data.mongodb.core.query.inValues
 import org.springframework.data.mongodb.core.query.isEqualTo
 import org.springframework.data.mongodb.core.query.where
 import org.springframework.stereotype.Component
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
 
 @Component
 class TraitRepository(
@@ -69,6 +67,11 @@ class TraitRepository(
     suspend fun traitsByCollection(collectionId: EnrichmentCollectionId): Flow<Trait> {
         val query = Query(where(Trait::collectionId).isEqualTo(collectionId))
         return template.find<Trait>(query).asFlow()
+    }
+
+    suspend fun deleteAll(traitIds: List<String>) {
+        val query = Query(where(Trait::id).`in`(traitIds))
+        template.remove(query, Trait::class.java).awaitSingle()
     }
 
     suspend fun deleteAllByCollection(collectionId: EnrichmentCollectionId) {

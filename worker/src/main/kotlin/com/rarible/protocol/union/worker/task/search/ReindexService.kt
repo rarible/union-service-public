@@ -21,8 +21,8 @@ import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.core.task.OrderTaskParam
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
 import com.rarible.protocol.union.core.task.RawTaskParam
-import com.rarible.protocol.union.core.task.TraitTaskParam
-import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.core.task.SyncScope
+import com.rarible.protocol.union.core.task.SyncTraitJobParam
 import com.rarible.protocol.union.dto.SyncTypeDto
 import com.rarible.protocol.union.worker.config.WorkerProperties
 import com.rarible.protocol.union.worker.task.search.ChangeEsAliasTask.Companion.getChangeAliasTaskName
@@ -208,13 +208,12 @@ class ReindexService(
 
     private suspend fun scheduleTraitReindex(indexName: String, definition: EntityDefinitionExtended) {
         val blockchains = activeBlockchainProvider.blockchains
-        val taskParams = blockchains.map {
+        val taskParams = blockchains.map { blockchain ->
             paramFactory.toString(
-                TraitTaskParam(
-                    versionData = definition.versionData,
-                    settingsHash = definition.settingsHash,
-                    blockchain = BlockchainDto.ETHEREUM, // task not use it, reindex all blockchains
-                    index = indexName
+                SyncTraitJobParam(
+                    blockchain = blockchain,
+                    scope = SyncScope.ES,
+                    esIndex = indexName,
                 )
             )
         }

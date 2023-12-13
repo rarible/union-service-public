@@ -8,7 +8,6 @@ import com.rarible.protocol.union.enrichment.event.EnrichmentKafkaEventFactory
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.model.ItemAttributeCountChange
 import com.rarible.protocol.union.enrichment.model.Trait
-import com.rarible.protocol.union.enrichment.repository.ItemRepository
 import com.rarible.protocol.union.enrichment.repository.TraitRepository
 import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.map
@@ -20,21 +19,9 @@ import kotlin.system.measureTimeMillis
 
 @Component
 class TraitService(
-    private val itemRepository: ItemRepository,
     private val traitRepository: TraitRepository,
     private val producer: RaribleKafkaProducer<UnionTraitEvent>
 ) {
-    suspend fun recalculateTraits(collectionId: EnrichmentCollectionId) {
-        traitRepository.deleteAllByCollection(collectionId)
-        logger.info("Recalculate traits for collection: $collectionId")
-        val traits = itemRepository.getTraitsByCollection(collectionId = collectionId)
-        traits.chunked(1000).forEach { chunk ->
-            traitRepository.saveAll(chunk)
-            sendChanged(chunk)
-        }
-        logger.info("Recalculated traits for collection: $collectionId")
-    }
-
     suspend fun deleteWithZeroItemsCount() {
         logger.info("Deleting traits with zero items count")
         val deleted = AtomicInteger(0)

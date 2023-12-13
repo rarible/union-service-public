@@ -66,16 +66,6 @@ data class ItemTaskParam(
     override val tags: List<String>? = null,
 ) : TaskParam()
 
-data class TraitTaskParam(
-    override val versionData: Int?,
-    override val settingsHash: String?,
-    override val blockchain: BlockchainDto,
-    override val index: String,
-    override val from: Long? = null,
-    override val to: Long? = null,
-    override val tags: List<String>? = null,
-) : TaskParam()
-
 data class CollectionTaskParam(
     override val versionData: Int?,
     override val settingsHash: String?,
@@ -105,5 +95,19 @@ data class OwnershipTaskParam(
     enum class Target {
         OWNERSHIP,
         AUCTIONED_OWNERSHIP,
+    }
+}
+
+data class SyncTraitJobParam(
+    override val blockchain: BlockchainDto,
+    override val scope: SyncScope,
+    val collectionId: String? = null,
+    override val esIndex: String? = null,
+    override val batchSize: Int = DEFAULT_BATCH,
+    override val chunkSize: Int = DEFAULT_CHUNK,
+) : AbstractSyncJobParam() {
+
+    companion object {
+        val TYPE = "SYNC_TRAIT_TASK"
     }
 }
