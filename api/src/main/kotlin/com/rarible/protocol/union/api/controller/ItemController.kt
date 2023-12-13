@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.elastic.ItemTraitService
+import com.rarible.protocol.union.api.service.elastic.LegacyItemTraitService
 import com.rarible.protocol.union.api.service.elastic.toApiDto
 import com.rarible.protocol.union.api.service.elastic.toInner
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
@@ -56,7 +56,7 @@ class ItemController(
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
     private val itemMetaService: ItemMetaService,
-    private val itemTraitService: ItemTraitService,
+    private val itemTraitService: LegacyItemTraitService,
 ) : ItemControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)

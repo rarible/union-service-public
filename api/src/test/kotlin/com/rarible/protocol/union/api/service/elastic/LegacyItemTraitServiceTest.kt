@@ -31,7 +31,7 @@ import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsea
 import java.math.BigDecimal
 
 @IntegrationTest
-internal class ItemTraitServiceTest {
+internal class LegacyItemTraitServiceTest {
     @Autowired
     private lateinit var repository: EsItemRepository
 
@@ -47,7 +47,7 @@ internal class ItemTraitServiceTest {
     @Autowired
     private lateinit var collectionRepository: CollectionRepository
 
-    private lateinit var itemTraitService: ItemTraitService
+    private lateinit var itemTraitService: LegacyItemTraitService
 
     private val properties = EsProperties(
         itemsTraitsKeysLimit = 3,
@@ -56,7 +56,7 @@ internal class ItemTraitServiceTest {
 
     @BeforeEach
     fun setUp() = runBlocking<Unit> {
-        itemTraitService = ItemTraitService(
+        itemTraitService = LegacyItemTraitService(
             elasticClient = elasticClient,
             esItemRepository = repository,
             esProperties = properties,

@@ -1,6 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.elastic.ItemTraitService
+import com.rarible.protocol.union.api.service.elastic.LegacyItemTraitService
 import com.rarible.protocol.union.api.service.select.ActivitySourceSelectService
 import com.rarible.protocol.union.api.service.select.CollectionSourceSelectService
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
@@ -26,7 +26,7 @@ class SearchController(
     private val activitySourceSelector: ActivitySourceSelectService,
     private val collectionSourceSelector: CollectionSourceSelectService,
     private val itemSourceSelectService: ItemSourceSelectService,
-    private val itemTraitService: ItemTraitService,
+    private val itemTraitService: LegacyItemTraitService,
     private val ownershipSourceSelectService: OwnershipSourceSelectService,
 ) : SearchControllerApi {
     override suspend fun searchActivities(
