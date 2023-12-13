@@ -170,6 +170,8 @@ integration:
       enabled: true
     lightlink:
       enabled: true
+    base:
+      enabled: true
   immutablex:
     client:
       url: "https://api.x.immutable.com/v1"

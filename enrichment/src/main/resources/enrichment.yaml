@@ -125,6 +125,10 @@ integration:
       enabled: false
       consumer:
         brokerReplicaSet: "${kafka.hosts}"
+    rari:
+      enabled: false
+      consumer:
+        brokerReplicaSet: "${kafka.hosts}"
   immutablex:
     enabled: true
     apiKey: "${IMMUTABLEX_API_KEY:}"
