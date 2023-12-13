@@ -40,6 +40,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 @Service
+@Deprecated("Use ItemTraitService")
 class LegacyItemTraitService(
     private val elasticClient: ReactiveElasticsearchClient,
     private val esItemRepository: EsItemRepository,

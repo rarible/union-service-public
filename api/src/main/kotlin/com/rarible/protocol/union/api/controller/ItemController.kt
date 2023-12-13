@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
-import com.rarible.protocol.union.api.service.elastic.LegacyItemTraitService
-import com.rarible.protocol.union.api.service.elastic.toApiDto
+import com.rarible.protocol.union.api.service.elastic.ItemTraitService
 import com.rarible.protocol.union.api.service.elastic.toInner
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
@@ -56,7 +55,7 @@ class ItemController(
     private val router: BlockchainRouter<ItemService>,
     private val enrichmentItemService: EnrichmentItemService,
     private val itemMetaService: ItemMetaService,
-    private val itemTraitService: LegacyItemTraitService,
+    private val itemTraitService: ItemTraitService,
 ) : ItemControllerApi {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -271,7 +270,7 @@ class ItemController(
             ExtendedTraitPropertiesDto(traits = itemTraitService.getTraitsWithRarity(
                 collectionId = request.collectionId,
                 properties = request.properties.map { it.toInner() }.toSet()
-            ).map { it.toApiDto() })
+            ))
         )
     }
 

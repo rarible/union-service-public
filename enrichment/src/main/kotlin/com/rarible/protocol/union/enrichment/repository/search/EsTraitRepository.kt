@@ -6,7 +6,9 @@ import com.rarible.protocol.union.core.model.elastic.EsTrait
 import com.rarible.protocol.union.core.model.elastic.EsTraitFilter
 import com.rarible.protocol.union.core.model.trait.Trait
 import com.rarible.protocol.union.core.model.trait.TraitEntry
+import com.rarible.protocol.union.core.model.trait.TraitProperty
 import kotlinx.coroutines.reactive.awaitFirstOrNull
+import kotlinx.coroutines.reactor.awaitSingle
 import org.elasticsearch.action.search.SearchRequest
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.aggregations.Aggregation
@@ -40,13 +42,77 @@ class EsTraitRepository(
         return entity.id
     }
 
+    suspend fun getTraits(
+        collectionId: String,
+        properties: Set<TraitProperty>
+    ): List<Trait> {
+        val queryBuilder = QueryBuilders.boolQuery()
+            .must(QueryBuilders.termQuery(EsTrait::collection.name, collectionId))
+            .minimumShouldMatch(1)
+        properties.forEach {
+            queryBuilder.should(
+                QueryBuilders.boolQuery()
+                    .must(QueryBuilders.termQuery("${EsTrait::key.name}.raw", it.key))
+                    .must(QueryBuilders.termQuery("${EsTrait::value.name}.raw", it.value))
+            )
+        }
+        val searchSourceBuilder = SearchSourceBuilder().query(QueryBuilders.boolQuery().filter(queryBuilder))
+            .size(properties.size)
+
+        val searchRequest = SearchRequest().indices(entityDefinition.aliasName).source(searchSourceBuilder)
+        val hits = elasticClient.search(searchRequest).collectList().awaitSingle()
+        val result = hits.map {
+            objectMapper.readValue(it.sourceAsString, EsTrait::class.java)
+        }
+            .groupBy { it.key }
+            .map { entry ->
+                val allValues = properties.filter { it.key == entry.key }.map { it.value }
+                val foundValues = entry.value.mapNotNull { it.value }.toSet()
+                val notFoundValues = allValues - foundValues
+                Trait(
+                    key = TraitEntry(
+                        value = entry.key,
+                        count = entry.value.sumOf { value -> value.itemsCount }
+                    ),
+                    values = entry.value.mapNotNull {
+                        val value = it.value ?: return@mapNotNull null
+                        TraitEntry(
+                            value = value,
+                            count = it.itemsCount
+                        )
+                    } + notFoundValues.map {
+                        TraitEntry(
+                            value = it,
+                            count = 0
+                        )
+                    }
+                )
+            }
+        val resultKeys = result.map { it.key.value }.toSet()
+        val allKeys = properties.map { it.key }.toSet()
+        val notFoundKeys = allKeys - resultKeys
+        val notFoundResults = notFoundKeys.map { key ->
+            val allValues = properties.filter { it.key == key }.map { it.value }
+            Trait(
+                key = TraitEntry(
+                    value = key,
+                    count = 0,
+                ),
+                values = allValues.map { value ->
+                    TraitEntry(
+                        value = value,
+                        count = 0
+                    )
+                }
+            )
+        }
+        return result + notFoundResults
+    }
+
     suspend fun searchTraits(filter: EsTraitFilter): List<Trait> {
         val queryBuilder = QueryBuilders.boolQuery()
         val field = if (filter.listed) EsTrait::listedItemsCount.name else EsTrait::itemsCount.name
         queryBuilder.must(QueryBuilders.rangeQuery(field).gt(0))
-        if (filter.blockchains.isNotEmpty()) {
-            queryBuilder.must(QueryBuilders.termsQuery(EsTrait::blockchain.name, filter.blockchains))
-        }
         if (filter.collectionIds.isNotEmpty()) {
             queryBuilder.must(QueryBuilders.termsQuery(EsTrait::collection.name, filter.collectionIds))
         }
