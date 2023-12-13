@@ -32,6 +32,7 @@ object EsItemConverter {
             bestSellAmount = this.bestSellOrder?.take?.value?.toDouble(),
             bestSellCurrency = getCurrencyIdOrNull(blockchain, this.bestSellOrder?.take),
             bestSellMarketplace = this.bestSellOrder?.platform?.name, // getting marketplace may be more complicated
+            bestSellCreatedAt = this.bestSellOrder?.createdAt,
             bestBidAmount = this.bestBidOrder?.make?.value?.toDouble(),
             bestBidCurrency = getCurrencyIdOrNull(blockchain, this.bestBidOrder?.make),
             bestBidMarketplace = this.bestBidOrder?.platform?.name, // getting marketplace may be more complicated

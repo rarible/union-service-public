@@ -10,6 +10,7 @@ import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
 import com.rarible.protocol.union.core.model.elastic.EsItem
 import com.rarible.protocol.union.core.model.elastic.EsItemGenericFilter
 import com.rarible.protocol.union.core.model.elastic.EsItemSort
+import com.rarible.protocol.union.core.model.elastic.EsItemSortType
 import com.rarible.protocol.union.core.model.elastic.EsItemTrait
 import com.rarible.protocol.union.core.model.elastic.Range
 import com.rarible.protocol.union.core.model.elastic.TraitFilter
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery
 import org.springframework.test.context.ContextConfiguration
+import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 @IntegrationTest
@@ -280,6 +282,19 @@ internal class EsItemRepositoryFt {
         ).entities
 
         assertThat(result2.size).isEqualTo(30)
+    }
+
+    @Test
+    fun `sort by recently listed`() = runBlocking<Unit> {
+        val newListedItem = randomEsItem().copy(bestSellCreatedAt = Instant.ofEpochMilli(5000))
+        val oldListedItem = randomEsItem().copy(bestSellCreatedAt = Instant.ofEpochMilli(1000))
+        val notListedItem = randomEsItem().copy(bestSellCreatedAt = null)
+
+        repository.bulk(entitiesToSave = listOf(newListedItem, oldListedItem, notListedItem), idsToDelete = emptyList())
+
+        val result = repository.search(EsItemGenericFilter(), EsItemSort(type = EsItemSortType.RECENTLY_LISTED), 200)
+
+        assertThat(result.entities.map { it.id }).containsExactly(newListedItem.id, oldListedItem.id, notListedItem.id)
     }
 
     @Test

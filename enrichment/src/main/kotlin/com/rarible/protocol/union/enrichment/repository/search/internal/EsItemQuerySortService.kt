@@ -8,6 +8,7 @@ import com.rarible.protocol.union.core.model.elastic.EsItemSortType.HIGHEST_SELL
 import com.rarible.protocol.union.core.model.elastic.EsItemSortType.LATEST_FIRST
 import com.rarible.protocol.union.core.model.elastic.EsItemSortType.LOWEST_BID_PRICE_FIRST
 import com.rarible.protocol.union.core.model.elastic.EsItemSortType.LOWEST_SELL_PRICE_FIRST
+import com.rarible.protocol.union.core.model.elastic.EsItemSortType.RECENTLY_LISTED
 import com.rarible.protocol.union.core.model.elastic.EsItemSortType.TRAIT
 import com.rarible.protocol.union.core.model.elastic.SortType
 import org.elasticsearch.index.query.QueryBuilders
@@ -29,6 +30,7 @@ class EsItemQuerySortService {
             HIGHEST_BID_PRICE_FIRST,
             LOWEST_BID_PRICE_FIRST -> sortByPrice(builder, sort.sortOrder)
             TRAIT -> sortByTrait(builder, sort)
+            RECENTLY_LISTED -> sortByRecentlyListed(builder)
         }
     }
 
@@ -60,5 +62,15 @@ class EsItemQuerySortService {
     private fun sortByPrice(builder: NativeSearchQueryBuilder, sortOrder: SortOrder) {
         builder.sortByField("_score", sortOrder)
         builder.sortByField(EsItem::itemId, sortOrder)
+    }
+
+    private fun sortByRecentlyListed(builder: NativeSearchQueryBuilder) {
+        builder.withSorts(
+            SortBuilders
+                .fieldSort(EsItem::bestSellCreatedAt.name)
+                .order(SortOrder.DESC)
+                .missing("_last")
+        )
+        builder.sortByField(EsItem::itemId, SortOrder.DESC)
     }
 }

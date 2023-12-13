@@ -138,6 +138,7 @@ class EsItemConverterTest {
                     assertThat(esItem.bestSellAmount).isEqualTo(10.0)
                     assertThat(esItem.bestSellCurrency).isEqualTo(unionItem.blockchain.name + ":" + it.take.type.ext.currencyAddress())
                     assertThat(esItem.bestSellMarketplace).isEqualTo(it.platform.name)
+                    assertThat(esItem.bestSellCreatedAt).isEqualTo(it.createdAt)
                 }
 
                 unionItem.bestBidOrder?.let {

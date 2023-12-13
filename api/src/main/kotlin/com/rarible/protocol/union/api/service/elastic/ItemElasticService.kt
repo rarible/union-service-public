@@ -379,6 +379,7 @@ class ItemElasticService(
             ItemsSearchSortDto.RELEVANCE -> EsItemSort(type = EsItemSortType.RELEVANCE)
             ItemsSearchSortDto.LATEST -> EsItemSort(type = EsItemSortType.LATEST_FIRST)
             ItemsSearchSortDto.EARLIEST -> EsItemSort(type = EsItemSortType.EARLIEST_FIRST)
+            ItemsSearchSortDto.RECENTLY_LISTED -> EsItemSort(type = EsItemSortType.RECENTLY_LISTED)
             ItemsSearchSortDto.HIGHEST_SELL -> EsItemSort(type = EsItemSortType.HIGHEST_SELL_PRICE_FIRST)
             ItemsSearchSortDto.LOWEST_SELL -> EsItemSort(type = EsItemSortType.LOWEST_SELL_PRICE_FIRST)
             ItemsSearchSortDto.HIGHEST_BID -> EsItemSort(type = EsItemSortType.HIGHEST_BID_PRICE_FIRST)
