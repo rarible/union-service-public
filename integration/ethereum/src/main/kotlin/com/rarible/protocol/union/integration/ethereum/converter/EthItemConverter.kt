@@ -69,7 +69,7 @@ object EthItemConverter {
                 id = ItemIdDto(blockchain, source.contract.prefixed(), source.tokenId),
                 uri = source.uri,
                 creators = source.creators.map { EthConverter.convertToCreator(it, blockchain) },
-                royalties = source.creators.map { EthConverter.convertToRoyalty(it, blockchain) },
+                royalties = source.royalties.map { EthConverter.convertToRoyalty(it, blockchain) },
                 signatures = source.signatures.map { EthConverter.convert(it) }
             )
 
@@ -77,7 +77,7 @@ object EthItemConverter {
                 id = ItemIdDto(blockchain, source.contract.prefixed(), source.tokenId),
                 uri = source.uri,
                 creators = source.creators.map { EthConverter.convertToCreator(it, blockchain) },
-                royalties = source.creators.map { EthConverter.convertToRoyalty(it, blockchain) },
+                royalties = source.royalties.map { EthConverter.convertToRoyalty(it, blockchain) },
                 signatures = source.signatures.map { EthConverter.convert(it) },
                 supply = source.supply
             )
