@@ -132,7 +132,6 @@ enrichment:
         enabled: true
       marketplace:
         enabled: false
-        endpoint: "https://rarible.com"
     item:
       customizers:
         mattel:
