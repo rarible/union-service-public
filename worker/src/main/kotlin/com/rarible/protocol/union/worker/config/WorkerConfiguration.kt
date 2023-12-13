@@ -73,6 +73,11 @@ class WorkerConfiguration(
     }
 
     @Bean
+    fun traitReindexProperties(): TraitReindexProperties {
+        return properties.searchReindex.trait
+    }
+
+    @Bean
     fun mocaXpCustomAttributesProviderProperties(): MocaXpCustomAttributesProviderProperties {
         return properties.itemMetaCustomAttributesJob.providers.mocaXp
     }

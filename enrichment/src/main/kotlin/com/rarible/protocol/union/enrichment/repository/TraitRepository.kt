@@ -69,6 +69,11 @@ class TraitRepository(
         return template.find<Trait>(query).asFlow()
     }
 
+    suspend fun deleteAll(traitIds: List<String>) {
+        val query = Query(where(Trait::id).`in`(traitIds))
+        template.remove(query, Trait::class.java).awaitSingle()
+    }
+
     suspend fun deleteAllByCollection(collectionId: EnrichmentCollectionId) {
         val query = Query(where(Trait::collectionId).isEqualTo(collectionId))
         template.remove(query, Trait::class.java).awaitSingle()

@@ -6,6 +6,8 @@ import com.rarible.core.task.TaskRepository
 import com.rarible.protocol.union.core.task.ActivityTaskParam
 import com.rarible.protocol.union.core.task.ItemTaskParam
 import com.rarible.protocol.union.core.task.OwnershipTaskParam
+import com.rarible.protocol.union.core.task.SyncScope
+import com.rarible.protocol.union.core.task.SyncTraitJobParam
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.SyncTypeDto
 import kotlinx.coroutines.reactive.awaitFirst
@@ -153,6 +155,41 @@ class ElasticMaintenanceService(
         }
 
         logger.info("Scheduling ${tasks.size} maintenance tasks for reindexing items")
+        taskRepository.saveAll(tasks).collectList().awaitFirst()
+    }
+
+    suspend fun scheduleReindexTraitsTasks(
+        blockchains: List<BlockchainDto> = emptyList(),
+        collectionId: String? = null,
+        esIndex: String,
+        deletePreviousTasks: Boolean = true,
+    ) {
+        if (deletePreviousTasks) {
+            deletePreviousTasks(SyncTraitJobParam.TYPE)
+        }
+
+        val tasks = mutableListOf<Task>()
+
+        val actualBlockchains = blockchains.ifEmpty {
+            BlockchainDto.values().toList()
+        }
+
+        actualBlockchains.forEach { blockchain ->
+            val param = SyncTraitJobParam(
+                blockchain = blockchain,
+                collectionId = collectionId,
+                esIndex = esIndex,
+                scope = SyncScope.ES
+            )
+            val task = Task(
+                type = SyncTraitJobParam.TYPE,
+                param = objectMapper.writeValueAsString(param),
+                running = false,
+            )
+            tasks.add(task)
+        }
+
+        logger.info("Scheduling ${tasks.size} maintenance tasks for reindexing traits")
         taskRepository.saveAll(tasks).collectList().awaitFirst()
     }
 

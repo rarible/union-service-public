@@ -3,6 +3,8 @@ package com.rarible.protocol.union.worker.job.sync
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.rarible.protocol.union.core.task.AbstractSyncJobParam
+import com.rarible.protocol.union.core.task.SyncScope
 import com.rarible.protocol.union.dto.continuation.page.Slice
 import com.rarible.protocol.union.worker.job.AbstractBatchJob
 import com.rarible.protocol.union.worker.task.search.EsRateLimiter

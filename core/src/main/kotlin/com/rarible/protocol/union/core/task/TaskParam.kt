@@ -97,3 +97,17 @@ data class OwnershipTaskParam(
         AUCTIONED_OWNERSHIP,
     }
 }
+
+data class SyncTraitJobParam(
+    override val blockchain: BlockchainDto,
+    override val scope: SyncScope,
+    val collectionId: String? = null,
+    override val esIndex: String? = null,
+    override val batchSize: Int = DEFAULT_BATCH,
+    override val chunkSize: Int = DEFAULT_CHUNK,
+) : AbstractSyncJobParam() {
+
+    companion object {
+        val TYPE = "SYNC_TRAIT_TASK"
+    }
+}

@@ -2,6 +2,7 @@ package com.rarible.protocol.union.core.model.elastic
 
 import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig.loadMapping
 import com.rarible.protocol.union.core.model.elastic.EsEntitiesConfig.loadSettings
+import com.rarible.protocol.union.core.task.SyncTraitJobParam
 import com.rarible.protocol.union.dto.BlockchainDto
 import org.springframework.data.annotation.Id
 
@@ -24,7 +25,8 @@ data class EsTrait(
                 entity = it,
                 mapping = loadMapping(it),
                 versionData = VERSION,
-                settings = loadSettings(it)
+                settings = loadSettings(it),
+                reindexTask = SyncTraitJobParam.TYPE
             )
         }
     }

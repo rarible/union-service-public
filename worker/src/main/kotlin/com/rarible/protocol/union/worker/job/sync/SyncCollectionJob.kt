@@ -6,6 +6,8 @@ import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
+import com.rarible.protocol.union.core.task.AbstractSyncJobParam
+import com.rarible.protocol.union.core.task.SyncScope
 import com.rarible.protocol.union.core.util.toSlice
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
