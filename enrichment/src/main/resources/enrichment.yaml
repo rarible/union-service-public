@@ -72,7 +72,7 @@ enrichment:
         supported:
           - "ETHEREUM"
           - "POLYGON"
-        endpoint: "http://rarible-api.${env}-marketplace:8080"
+        endpoint: "http://rarible-api.${application.environment}-marketplace:8080"
 
 search:
   boost:
