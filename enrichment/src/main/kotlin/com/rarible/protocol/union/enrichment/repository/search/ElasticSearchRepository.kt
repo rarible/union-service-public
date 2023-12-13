@@ -4,17 +4,23 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.protocol.union.core.elasticsearch.EsHelper
 import com.rarible.protocol.union.core.elasticsearch.EsRepository
 import com.rarible.protocol.union.core.model.elastic.EntityDefinitionExtended
+import com.rarible.protocol.union.core.model.elastic.EsSortOrder
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.enrichment.repository.search.internal.mustMatchTerm
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.runBlocking
+import org.apache.lucene.queryparser.flexible.standard.QueryParserUtil
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest
 import org.elasticsearch.action.bulk.BulkRequest
 import org.elasticsearch.action.support.WriteRequest
 import org.elasticsearch.client.Requests
 import org.elasticsearch.index.query.BoolQueryBuilder
+import org.elasticsearch.index.query.MultiMatchQueryBuilder
+import org.elasticsearch.index.query.Operator
+import org.elasticsearch.index.query.QueryBuilders
+import org.elasticsearch.search.sort.SortOrder
 import org.elasticsearch.xcontent.XContentType
 import org.slf4j.LoggerFactory
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
@@ -32,7 +38,7 @@ abstract class ElasticSearchRepository<T>(
     val esOperations: ReactiveElasticsearchOperations,
     val entityDefinition: EntityDefinitionExtended,
     private val elasticsearchConverter: ElasticsearchConverter,
-    private val elasticClient: ReactiveElasticsearchClient,
+    protected val elasticClient: ReactiveElasticsearchClient,
     private val entityType: Class<T>,
     private val idFieldName: String = "_id"
 ) : EsRepository {
@@ -193,6 +199,44 @@ abstract class ElasticSearchRepository<T>(
         return esOperations.delete(nativeQuery, entityType, entityDefinition.searchIndexCoordinates).awaitSingle()
     }
 
+    protected fun fullTextClauses(
+        boolQuery: BoolQueryBuilder,
+        text: String,
+        fields: Map<String, Float>
+    ) {
+        if (text.isBlank()) return
+        val trimmedText = text.trim()
+        val lastTerm = trimmedText.split(" ").last()
+        val textForSearch = if (lastTerm == trimmedText) {
+            "($lastTerm | $lastTerm*)"
+        } else {
+            trimmedText.replaceAfterLast(" ", "($lastTerm | $lastTerm*)")
+        }
+        val joinedText = trimmedText.replace("\\s*".toRegex(), "")
+        val joinedTextForSearch = "(${QueryParserUtil.escape(joinedText)} | ${QueryParserUtil.escape(joinedText)}*)"
+        boolQuery.should(
+            QueryBuilders.simpleQueryStringQuery(textForSearch)
+                .defaultOperator(Operator.AND)
+                .fuzzyTranspositions(false)
+                .fuzzyMaxExpansions(0)
+                .fields(fields)
+        )
+        boolQuery.should(
+            QueryBuilders.simpleQueryStringQuery(joinedTextForSearch)
+                .defaultOperator(Operator.AND)
+                .fuzzyTranspositions(false)
+                .fuzzyMaxExpansions(0)
+                .fields(fields)
+        )
+        boolQuery.should(
+            QueryBuilders.multiMatchQuery(text)
+                .fields(fields)
+                .fuzzyTranspositions(false)
+                .operator(Operator.AND)
+                .type(MultiMatchQueryBuilder.Type.PHRASE)
+        )
+    }
+
     protected suspend fun <T> logIfSlow(vararg params: Any?, query: suspend () -> T): T {
         val start = System.currentTimeMillis()
         val result = query()
@@ -201,6 +245,11 @@ abstract class ElasticSearchRepository<T>(
             logger.warn("Slow search: {} ms, params: {}", latency, params.filterNotNull().joinToString())
         }
         return result
+    }
+
+    protected fun EsSortOrder.toElasticsearchSortOrder(): SortOrder = when (this) {
+        EsSortOrder.ASC -> SortOrder.ASC
+        EsSortOrder.DESC -> SortOrder.DESC
     }
 
     private fun index(indexName: String?) = indexName

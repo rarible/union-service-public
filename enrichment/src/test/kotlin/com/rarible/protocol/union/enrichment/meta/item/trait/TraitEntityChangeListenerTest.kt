@@ -31,7 +31,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.util.concurrent.atomic.AtomicInteger
 
 @ExtendWith(MockKExtension::class)
-class TraitItemChangeListenerTest {
+class TraitEntityChangeListenerTest {
 
     @InjectMockKs
     private lateinit var traitItemChangeListener: TraitItemChangeListener
