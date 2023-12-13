@@ -8,6 +8,11 @@ import com.rarible.core.test.data.randomDouble
 import com.rarible.core.test.data.randomInt
 import com.rarible.core.test.data.randomLong
 import com.rarible.core.test.data.randomString
+import com.rarible.marketplace.generated.marketplacebackend.dto.BadgeTypeDto
+import com.rarible.marketplace.generated.marketplacebackend.dto.MediaDto
+import com.rarible.marketplace.generated.marketplacebackend.dto.TagDto
+import com.rarible.marketplace.generated.marketplacebackend.dto.TokenDto
+import com.rarible.marketplace.generated.marketplacebackend.dto.TokenFeatureDto
 import com.rarible.protocol.dto.OrderRaribleV2DataV1Dto
 import com.rarible.protocol.union.core.converter.UnionAddressConverter
 import com.rarible.protocol.union.core.model.MetaSource
@@ -577,6 +582,48 @@ fun randomSimpleHashItemCollection(
         description = description,
         imageUrl = imageUrl,
         bannerImageUrl = bannerImageUrl
+    )
+}
+
+fun randomMarketplaceTokenDto(
+    id: String = randomAddressString(),
+    name: String = randomString(),
+    blockchain: com.rarible.marketplace.generated.marketplacebackend.dto.BlockchainDto = com.rarible.marketplace.generated.marketplacebackend.dto.BlockchainDto.ETHEREUM,
+    editors: List<String> = emptyList(),
+    features: List<TokenFeatureDto> = emptyList(),
+    itemsWithRarity: Boolean = false,
+    shared: Boolean = false,
+    standard: TokenDto.Standard = TokenDto.Standard.ERC721,
+    tags: List<TagDto> = emptyList(),
+    links: Map<String, String> = emptyMap(),
+    badges: List<BadgeTypeDto> = emptyList(),
+    coverMedia: List<MediaDto> = emptyList(),
+    imageMedia: List<MediaDto> = emptyList(),
+    size: Long = 0,
+    onSaleSize: Long = 0,
+    hasTraits: Boolean = true,
+    blacklisted: Boolean = false,
+    pic: String = randomString(),
+): TokenDto {
+    return TokenDto(
+        id = id,
+        name = name,
+        blockchain = blockchain,
+        editors = editors,
+        features = features,
+        itemsWithRarity = itemsWithRarity,
+        shared = shared,
+        standard = standard,
+        tags = tags,
+        links = links,
+        badges = badges,
+        coverMedia = coverMedia,
+        imageMedia = imageMedia,
+        size = size,
+        onSaleSize = onSaleSize,
+        hasTraits = hasTraits,
+        blacklisted = blacklisted,
+        pic = pic
     )
 }
 

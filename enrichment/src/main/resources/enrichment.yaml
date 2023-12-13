@@ -67,6 +67,12 @@ enrichment:
         supportedCollection:
           - "ETHEREUM"
           - "POLYGON"
+      marketplace:
+        enabled: true
+        supported:
+          - "ETHEREUM"
+          - "POLYGON"
+        endpoint: "https://${application.environment}.rarible.com"
 
 search:
   boost:

@@ -13,6 +13,8 @@ import com.rarible.core.meta.resource.resolver.IpfsGatewayResolver
 import com.rarible.core.meta.resource.resolver.LegacyIpfsGatewaySubstitutor
 import com.rarible.core.meta.resource.resolver.RandomGatewayProvider
 import com.rarible.core.meta.resource.resolver.UrlResolver
+import com.rarible.marketplace.generated.marketplacebackend.api.ApiClient
+import com.rarible.marketplace.generated.marketplacebackend.api.client.CollectionControllerApi
 import com.rarible.protocol.union.core.UnionWebClientCustomizer
 import com.rarible.protocol.union.core.client.WebClientFactory
 import com.rarible.protocol.union.core.util.safeSplit
@@ -117,5 +119,12 @@ class EnrichmentMetaConfiguration(
         val webClient = WebClientFactory.createClient(props.endpoint, mapOf("X-API-KEY" to props.apiKey))
         webClientCustomizer.customize(webClient)
         return webClient.build()
+    }
+
+    @Bean
+    fun marketplaceCollectionClient(webClientCustomizer: UnionWebClientCustomizer): CollectionControllerApi {
+        val url = commonMetaProperties.marketplace.endpoint
+        val client = ApiClient(webClientCustomizer).setBasePath(url)
+        return CollectionControllerApi(client)
     }
 }

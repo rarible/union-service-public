@@ -4,7 +4,7 @@ import com.rarible.protocol.union.core.model.UnionCollectionMeta
 import com.rarible.protocol.union.core.service.CollectionService
 import com.rarible.protocol.union.core.service.router.BlockchainRouter
 import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.enrichment.meta.item.ItemMetaMetrics
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.provider.DefaultMetaProvider
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class DefaultCollectionMetaProvider(
     private val router: BlockchainRouter<CollectionService>,
-    metrics: ItemMetaMetrics
+    metrics: CollectionMetaMetrics
 ) : CollectionMetaProvider, DefaultMetaProvider<UnionCollectionMeta>(
     metrics,
     type = "collection"

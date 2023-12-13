@@ -45,6 +45,7 @@ data class CommonMetaProperties(
     val trimming: MetaTrimmingProperties = MetaTrimmingProperties(),
     val httpClient: HttpClient = HttpClient(),
     val simpleHash: SimpleHash = SimpleHash(),
+    val marketplace: Marketplace = Marketplace(),
     private val retries: String = "" //  TODO not sure it should be here
 ) {
 
@@ -113,6 +114,12 @@ data class SimpleHashKafka(
 
     val username: String? = null,
     val password: String? = null,
+)
+
+data class Marketplace(
+    val enabled: Boolean = false,
+    val supported: Set<BlockchainDto> = emptySet(),
+    val endpoint: String = ""
 )
 
 // ---------------------- Item Meta -------------------------//
