@@ -11,6 +11,7 @@ import com.rarible.protocol.union.core.task.SyncScope
 import com.rarible.protocol.union.core.util.toSlice
 import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Slice
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
@@ -58,6 +59,7 @@ class SyncCollectionJob(
                         collectionId = collection.id,
                         pipeline = CollectionMetaPipeline.SYNC,
                         force = false,
+                        source = DownloadTaskSource.INTERNAL,
                         priority = MetaDownloadPriority.NOBODY_CARES
                     )
                 }

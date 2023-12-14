@@ -2,7 +2,9 @@ package com.rarible.protocol.union.worker.task.meta
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.rarible.protocol.union.core.task.RefreshCollectionMetaTaskParam
 import com.rarible.protocol.union.dto.BlockchainDto
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
@@ -10,7 +12,6 @@ import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.test.data.randomCollectionMetaDownloadEntry
 import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollection
 import com.rarible.protocol.union.integration.ethereum.data.randomEthCollectionId
-import com.rarible.protocol.union.core.task.RefreshCollectionMetaTaskParam
 import io.mockk.coEvery
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
@@ -58,6 +59,7 @@ internal class RefreshCollectionMetaTaskTest {
                 collectionId = collectionWithMeta.id.toDto(),
                 pipeline = CollectionMetaPipeline.REFRESH,
                 force = true,
+                source = DownloadTaskSource.INTERNAL,
                 priority = 0
             )
         } returns Unit
@@ -67,6 +69,7 @@ internal class RefreshCollectionMetaTaskTest {
                 collectionId = collectionWithoutMeta.id.toDto(),
                 pipeline = CollectionMetaPipeline.REFRESH,
                 force = true,
+                source = DownloadTaskSource.INTERNAL,
                 priority = 0
             )
         } returns Unit
@@ -106,6 +109,7 @@ internal class RefreshCollectionMetaTaskTest {
                 collectionId = collectionWithoutMeta.id.toDto(),
                 pipeline = CollectionMetaPipeline.REFRESH,
                 force = true,
+                source = DownloadTaskSource.INTERNAL,
                 priority = 1
             )
         } returns Unit

@@ -3,6 +3,7 @@ package com.rarible.protocol.union.worker.task
 import com.rarible.core.task.TaskHandler
 import com.rarible.protocol.union.enrichment.configuration.EnrichmentCollectionProperties
 import com.rarible.protocol.union.enrichment.custom.collection.provider.ArtBlocksCustomCollectionProvider
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollection
@@ -80,6 +81,7 @@ class ArtBlocksCollectionProjectJob(
             collectionId = collection.id.toDto(),
             pipeline = CollectionMetaPipeline.REFRESH,
             force = true,
+            source = DownloadTaskSource.INTERNAL,
             priority = MetaDownloadPriority.RIGHT_NOW
         )
         logger.info(

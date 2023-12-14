@@ -234,7 +234,7 @@ class ItemControllerFt : AbstractIntegrationTest() {
 
         verify(exactly = 1) { testEthereumItemApi.resetNftItemMetaById(itemId.value) }
         coVerify {
-            testDownloadTaskProducer.send(match<Collection<KafkaMessage<DownloadTaskEvent>>> { events ->
+            testItemDownloadTaskProducer.send(match<Collection<KafkaMessage<DownloadTaskEvent>>> { events ->
                 assertThat(events).hasSize(1)
                 val task = events.first().value
                 assertThat(task.id).isEqualTo(itemId.fullId())

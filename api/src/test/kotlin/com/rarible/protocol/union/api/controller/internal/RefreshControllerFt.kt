@@ -588,7 +588,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(code).isEqualTo(HttpStatus.NO_CONTENT)
 
         coVerify(exactly = 1) {
-            testDownloadTaskProducer.send(withArg<List<KafkaMessage<DownloadTaskEvent>>> {
+            testItemDownloadTaskProducer.send(withArg<List<KafkaMessage<DownloadTaskEvent>>> {
                 assertThat(it).hasSize(1)
                 assertThat(it[0].value).isInstanceOf(DownloadTaskEvent::class.java)
                 val task = it[0].value
@@ -609,7 +609,7 @@ class RefreshControllerFt : AbstractIntegrationTest() {
         assertThat(code).isEqualTo(HttpStatus.NO_CONTENT)
 
         coVerify(exactly = 0) {
-            testDownloadTaskProducer.send(any<List<KafkaMessage<DownloadTaskEvent>>>())
+            testItemDownloadTaskProducer.send(any<List<KafkaMessage<DownloadTaskEvent>>>())
         }
     }
 }

@@ -3,12 +3,13 @@ package com.rarible.protocol.union.worker.task.meta
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.rarible.core.logging.withTraceId
 import com.rarible.core.task.TaskHandler
+import com.rarible.protocol.union.core.task.RefreshCollectionMetaTaskParam
 import com.rarible.protocol.union.dto.parser.IdParser
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
 import com.rarible.protocol.union.enrichment.repository.CollectionRepository
-import com.rarible.protocol.union.core.task.RefreshCollectionMetaTaskParam
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.slf4j.LoggerFactory
@@ -33,6 +34,7 @@ class RefreshCollectionMetaTask(
                         collectionId = collection.id.toDto(),
                         pipeline = CollectionMetaPipeline.REFRESH,
                         force = true,
+                        source = DownloadTaskSource.INTERNAL,
                         priority = parsedParam.priority,
                     )
                 }
