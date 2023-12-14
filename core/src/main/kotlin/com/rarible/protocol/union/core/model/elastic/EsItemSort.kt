@@ -28,6 +28,7 @@ enum class EsItemSortType(override val sortOrder: SortOrder) : OrderedSort {
     RELEVANCE(SortOrder.DESC),
     LATEST_FIRST(SortOrder.DESC),
     EARLIEST_FIRST(SortOrder.ASC),
+    RECENTLY_LISTED(SortOrder.DESC),
     HIGHEST_SELL_PRICE_FIRST(SortOrder.DESC),
     LOWEST_SELL_PRICE_FIRST(SortOrder.ASC),
     HIGHEST_BID_PRICE_FIRST(SortOrder.DESC),
