@@ -30,13 +30,15 @@ class CollectionMetaService(
     suspend fun download(
         collectionId: CollectionIdDto,
         pipeline: CollectionMetaPipeline,
-        force: Boolean
-    ) = download(collectionId, pipeline.pipeline, force, DownloadTaskSource.INTERNAL)
+        source: DownloadTaskSource,
+        force: Boolean,
+    ) = download(collectionId, pipeline.pipeline, force, source)
 
     suspend fun schedule(
         collectionId: CollectionIdDto,
         pipeline: CollectionMetaPipeline,
         force: Boolean,
-        priority: Int
-    ) = schedule(collectionId, pipeline.pipeline, force, DownloadTaskSource.INTERNAL, priority)
+        source: DownloadTaskSource,
+        priority: Int,
+    ) = schedule(collectionId, pipeline.pipeline, force, source, priority)
 }

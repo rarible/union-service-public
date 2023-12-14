@@ -6,6 +6,7 @@ import com.rarible.core.daemon.job.JobHandler
 import com.rarible.core.daemon.sequential.SequentialDaemonWorker
 import com.rarible.protocol.union.core.util.LogUtils
 import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
@@ -71,6 +72,7 @@ class CollectionMetaRetryJobHandler(
                     collectionId = collectionId,
                     pipeline = CollectionMetaPipeline.RETRY,
                     force = true,
+                    DownloadTaskSource.INTERNAL,
                     priority = priority
                 )
                 repository.save(collection.withNextRetry())

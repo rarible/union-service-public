@@ -71,7 +71,11 @@ abstract class AbstractIntegrationTest {
 
     @Autowired
     @Qualifier("download.scheduler.task.producer.item-meta")
-    protected lateinit var testDownloadTaskProducer: RaribleKafkaProducer<DownloadTaskEvent>
+    protected lateinit var testItemDownloadTaskProducer: RaribleKafkaProducer<DownloadTaskEvent>
+
+    @Autowired
+    @Qualifier("download.scheduler.task.producer.collection-meta")
+    protected lateinit var testCollectionDownloadTaskProducer: RaribleKafkaProducer<DownloadTaskEvent>
 
     // --------------------- CURRENCY ---------------------//
 
@@ -256,7 +260,7 @@ abstract class AbstractIntegrationTest {
 
             testItemEventProducer,
             testOwnershipEventProducer,
-            testDownloadTaskProducer,
+            testItemDownloadTaskProducer,
         )
         ethereumItemControllerApiMock = EthItemControllerApiMock(testEthereumItemApi)
         ethereumOwnershipControllerApiMock = EthOwnershipControllerApiMock(testEthereumOwnershipApi)
@@ -292,7 +296,15 @@ abstract class AbstractIntegrationTest {
         } returns KafkaSendResult.Success("")
 
         coEvery {
-            testDownloadTaskProducer.send(any() as List<KafkaMessage<DownloadTaskEvent>>)
+            testItemDownloadTaskProducer.send(any() as List<KafkaMessage<DownloadTaskEvent>>)
+        } answers {
+            @Suppress("UNCHECKED_CAST")
+            val tasks = it.invocation.args[0] as List<KafkaMessage<DownloadTaskEvent>>
+            tasks.map { KafkaSendResult.Success("") }.asFlow()
+        }
+
+        coEvery {
+            testCollectionDownloadTaskProducer.send(any() as List<KafkaMessage<DownloadTaskEvent>>)
         } answers {
             @Suppress("UNCHECKED_CAST")
             val tasks = it.invocation.args[0] as List<KafkaMessage<DownloadTaskEvent>>

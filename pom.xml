@@ -70,7 +70,7 @@
         <rarible.protocol.simplehash.version>1.0.0</rarible.protocol.simplehash.version>
         <rarible.marketplace.version>4.329.106</rarible.marketplace.version>
 
-        <rarible.protocol.union.version>1.73.0</rarible.protocol.union.version>
+        <rarible.protocol.union.version>1.73.101</rarible.protocol.union.version>
 
         <dev-jna.version>5.7.0</dev-jna.version>
 

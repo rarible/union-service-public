@@ -15,6 +15,7 @@ import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.download.DownloadEntry
 import com.rarible.protocol.union.enrichment.download.DownloadStatus
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaMetrics
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
@@ -160,6 +161,7 @@ class EnrichmentCollectionService(
                     collectionId = collectionId,
                     pipeline = metaPipeline,
                     force = false,
+                    source = DownloadTaskSource.INTERNAL,
                     // TODO potentially we can customize priority for specific collections here
                     priority = MetaDownloadPriority.RIGHT_NOW
                 )

@@ -3,6 +3,7 @@ package com.rarible.protocol.union.enrichment.custom.collection.provider
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
 import com.rarible.protocol.union.dto.CollectionIdDto
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
@@ -70,6 +71,7 @@ class ArtificialCollectionService(
                 collectionId = surrogateId,
                 pipeline = CollectionMetaPipeline.REFRESH,
                 force = true,
+                source = DownloadTaskSource.INTERNAL,
                 priority = MetaDownloadPriority.HIGH
             )
         } catch (e: DuplicateKeyException) {

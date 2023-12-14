@@ -14,9 +14,12 @@ import com.rarible.protocol.union.dto.CollectionsDto
 import com.rarible.protocol.union.dto.parser.IdParser
 import com.rarible.protocol.union.enrichment.configuration.CommonMetaProperties
 import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
+import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.meta.item.ItemMetaRefreshService
 import com.rarible.protocol.union.enrichment.model.EnrichmentCollectionId
+import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.slf4j.LoggerFactory
@@ -34,6 +37,7 @@ class CollectionController(
     private val enrichmentCollectionService: EnrichmentCollectionService,
     private val itemMetaRefreshService: ItemMetaRefreshService,
     private val commonMetaProperties: CommonMetaProperties,
+    private val collectionMetaService: CollectionMetaService,
     private val ff: FeatureFlagsProperties
 ) : CollectionControllerApi {
 
@@ -75,12 +79,33 @@ class CollectionController(
         return ResponseEntity.ok(enrichedCollection)
     }
 
-    override suspend fun refreshCollectionMeta(collection: String): ResponseEntity<Unit> = withTraceId {
+    override suspend fun resetCollectionMeta(collection: String): ResponseEntity<Unit> = withTraceId {
+        val collectionId = IdParser.parseCollectionId(collection)
+
+        enrichmentCollectionService.get(EnrichmentCollectionId(collectionId))
+            ?: throw UnionNotFoundException("Collection $collection not found")
+
+        collectionMetaService.schedule(
+            collectionId = collectionId,
+            pipeline = CollectionMetaPipeline.REFRESH,
+            force = true,
+            source = DownloadTaskSource.EXTERNAL,
+            priority = MetaDownloadPriority.ASAP,
+        )
+
+        ResponseEntity.noContent().build()
+    }
+
+    override suspend fun refreshCollectionItemsMeta(collection: String): ResponseEntity<Unit> = withTraceId {
         if (!ff.enableCollectionItemMetaRefreshApi) {
             return@withTraceId ResponseEntity.noContent().build()
         }
         logger.info("Received request to refresh meta for collection: $collection")
         val collectionId = IdParser.parseCollectionId(collection)
+
+        enrichmentCollectionService.get(EnrichmentCollectionId(collectionId))
+            ?: throw UnionNotFoundException("Collection $collection not found")
+
         itemMetaRefreshService.scheduleUserRefresh(
             collectionId = collectionId,
             full = true,

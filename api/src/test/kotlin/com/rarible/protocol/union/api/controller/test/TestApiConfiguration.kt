@@ -143,7 +143,13 @@ class TestApiConfiguration : ApplicationListener<WebServerInitializedEvent> {
     @Bean
     @Primary
     @Qualifier("download.scheduler.task.producer.item-meta")
-    fun testDownloadTaskProducer(): RaribleKafkaProducer<DownloadTaskEvent> =
+    fun testItemDownloadTaskProducer(): RaribleKafkaProducer<DownloadTaskEvent> =
+        mockk { coEvery { close() } returns Unit }
+
+    @Bean
+    @Primary
+    @Qualifier("download.scheduler.task.producer.collection-meta")
+    fun testCollectionDownloadTaskProducer(): RaribleKafkaProducer<DownloadTaskEvent> =
         mockk { coEvery { close() } returns Unit }
 
     @Bean

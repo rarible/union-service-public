@@ -7,6 +7,7 @@ import com.rarible.protocol.union.dto.BlockchainDto
 import com.rarible.protocol.union.dto.continuation.page.Page
 import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
@@ -90,6 +91,7 @@ class SyncCollectionJobTest {
                 collection1.id,
                 CollectionMetaPipeline.SYNC,
                 false,
+                DownloadTaskSource.INTERNAL,
                 MetaDownloadPriority.NOBODY_CARES
             )
         } returns Unit
@@ -102,7 +104,7 @@ class SyncCollectionJobTest {
         coVerify(exactly = 1) { enrichmentCollectionService.update(collection1, false) }
         coVerify(exactly = 1) { enrichmentCollectionService.update(collection2, false) }
         // Only collection without meta should be triggered
-        coVerify(exactly = 1) { collectionMetaService.schedule(any(), any(), any(), any()) }
+        coVerify(exactly = 1) { collectionMetaService.schedule(any(), any(), any(), any(), any()) }
 
         coVerify(exactly = 1) {
             esCollectionRepository.bulk(match { batch ->
@@ -137,7 +139,7 @@ class SyncCollectionJobTest {
 
         coVerify(exactly = 1) { enrichmentCollectionService.update(collection1, false) }
         coVerify(exactly = 1) { enrichmentCollectionService.update(collection2, false) }
-        coVerify(exactly = 0) { collectionMetaService.schedule(any(), any(), any(), any()) }
+        coVerify(exactly = 0) { collectionMetaService.schedule(any(), any(), any(), any(), any()) }
 
         coVerify(exactly = 1) { producer.sendChangeEvents(listOf(collection1.id, collection2.id)) }
     }

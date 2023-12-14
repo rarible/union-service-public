@@ -2,6 +2,7 @@ package com.rarible.protocol.union.enrichment.custom.collection.provider
 
 import com.rarible.protocol.union.core.model.UnionCollection
 import com.rarible.protocol.union.core.producer.UnionInternalCollectionEventProducer
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaPipeline
 import com.rarible.protocol.union.enrichment.meta.collection.CollectionMetaService
 import com.rarible.protocol.union.enrichment.model.MetaDownloadPriority
@@ -77,6 +78,7 @@ class ArtificialCollectionServiceTest {
                 subId,
                 CollectionMetaPipeline.REFRESH,
                 true,
+                DownloadTaskSource.INTERNAL,
                 MetaDownloadPriority.HIGH
             )
         } returns Unit
@@ -95,6 +97,7 @@ class ArtificialCollectionServiceTest {
                 subId,
                 CollectionMetaPipeline.REFRESH,
                 true,
+                DownloadTaskSource.INTERNAL,
                 MetaDownloadPriority.HIGH
             )
         }

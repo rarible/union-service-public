@@ -1,5 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
+import com.rarible.core.kafka.KafkaMessage
 import com.rarible.core.test.data.randomAddress
 import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomBinary
@@ -23,10 +24,14 @@ import com.rarible.protocol.union.dto.continuation.CombinedContinuation
 import com.rarible.protocol.union.enrichment.converter.CollectionDtoConverter
 import com.rarible.protocol.union.enrichment.converter.EnrichmentCollectionConverter
 import com.rarible.protocol.union.enrichment.converter.ShortOrderConverter
+import com.rarible.protocol.union.enrichment.download.DownloadTaskEvent
+import com.rarible.protocol.union.enrichment.download.DownloadTaskSource
+import com.rarible.protocol.union.enrichment.meta.item.ItemMetaPipeline
 import com.rarible.protocol.union.enrichment.repository.MetaRefreshRequestRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsCollectionRepository
 import com.rarible.protocol.union.enrichment.service.EnrichmentCollectionService
 import com.rarible.protocol.union.enrichment.test.data.randomCollectionMetaDownloadEntry
+import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollection
 import com.rarible.protocol.union.enrichment.test.data.randomUnionAddress
 import com.rarible.protocol.union.enrichment.test.data.randomUnionCollectionMeta
 import com.rarible.protocol.union.integration.ethereum.converter.EthCollectionConverter
@@ -46,8 +51,10 @@ import com.rarible.protocol.union.integration.tezos.data.randomTezosCollectionDt
 import com.rarible.protocol.union.integration.tezos.dipdup.converter.TzktCollectionConverter
 import com.rarible.tzkt.model.Contract
 import io.mockk.coEvery
+import io.mockk.coVerify
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.reactive.awaitFirst
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -323,11 +330,29 @@ class CollectionControllerFt : AbstractIntegrationTest() {
     }
 
     @Test
-    fun refreshCollectionMeta() = runBlocking<Unit> {
+    fun `reset collection meta by id - ok`() = runBlocking<Unit> {
+        val collection = enrichmentCollectionService.save(randomEnrichmentCollection())
+        collectionControllerClient.resetCollectionMeta(collection.id.toString()).awaitFirstOrNull()
+
+        coVerify {
+            testCollectionDownloadTaskProducer.send(match<Collection<KafkaMessage<DownloadTaskEvent>>> { events ->
+                assertThat(events).hasSize(1)
+                val task = events.first().value
+                assertThat(task.id).isEqualTo(collection.id.toString())
+                assertThat(task.force).isTrue()
+                assertThat(task.pipeline).isEqualTo(ItemMetaPipeline.REFRESH.pipeline)
+                assertThat(task.source).isEqualTo(DownloadTaskSource.EXTERNAL)
+                true
+            })
+        }
+    }
+
+    @Test
+    fun `reset collection's items - ok`() = runBlocking<Unit> {
         val unionCollection = EthCollectionConverter.convert(randomEthCollectionDto(), BlockchainDto.ETHEREUM)
         enrichmentCollectionService.save(EnrichmentCollectionConverter.convert(unionCollection))
 
-        collectionControllerClient.refreshCollectionMeta(unionCollection.id.fullId()).awaitSingleOrNull()
+        collectionControllerClient.refreshCollectionItemsMeta(unionCollection.id.fullId()).awaitSingleOrNull()
 
         val requests = metaRefreshRequestRepository.countForCollectionId(unionCollection.id.fullId())
         assertThat(requests).isEqualTo(1)
