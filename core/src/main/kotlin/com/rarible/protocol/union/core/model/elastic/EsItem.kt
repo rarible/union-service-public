@@ -34,6 +34,7 @@ data class EsItem(
     val bestSellAmount: Double? = null,
     val bestSellCurrency: String? = null, // blockchain:currencyAddress
     val bestSellMarketplace: String? = null,
+    val bestSellCreatedAt: Instant? = null,
     val bestBidAmount: Double? = null,
     val bestBidCurrency: String? = null, // blockchain:currencyAddress
     val bestBidMarketplace: String? = null,

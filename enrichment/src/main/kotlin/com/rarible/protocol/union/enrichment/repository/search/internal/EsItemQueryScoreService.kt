@@ -22,7 +22,8 @@ class EsItemQueryScoreService(
             EsItemSortType.RELEVANCE,
             EsItemSortType.TRAIT,
             EsItemSortType.LATEST_FIRST,
-            EsItemSortType.EARLIEST_FIRST -> throw UnsupportedOperationException("ScoreService can't be used with $sort")
+            EsItemSortType.EARLIEST_FIRST,
+            EsItemSortType.RECENTLY_LISTED -> throw UnsupportedOperationException("ScoreService can't be used with $sort")
             EsItemSortType.HIGHEST_SELL_PRICE_FIRST,
             EsItemSortType.LOWEST_SELL_PRICE_FIRST -> esEntityQueryScoreService.buildQuery(
                 boolQuery,
