@@ -130,8 +130,6 @@ enrichment:
         publicUrl: "https://api.rarible.org/content/embedded"
       simpleHash:
         enabled: true
-      marketplace:
-        enabled: false
     item:
       customizers:
         mattel:
