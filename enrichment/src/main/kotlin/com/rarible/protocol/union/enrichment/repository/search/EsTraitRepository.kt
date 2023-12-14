@@ -148,8 +148,6 @@ class EsTraitRepository(
             .map { keysBucket ->
                 val key = TraitEntry(value = keysBucket.keyAsString, count = keysBucket.docCount)
                 val valuesBucket = keysBucket.aggregations.get<ParsedTopHits>("hits").hits
-                key to valuesBucket
-            }.map { (key, valuesBucket) ->
                 val values = valuesBucket.map { value ->
                     val source = value.sourceAsMap
                     TraitEntry(
