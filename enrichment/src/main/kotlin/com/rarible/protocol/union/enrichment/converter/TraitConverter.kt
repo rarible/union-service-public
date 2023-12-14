@@ -48,9 +48,11 @@ object TraitConverter {
                 ExtendedTraitPropertyDto(
                     key = trait.key.value,
                     value = value.value,
-                    rarity = value.count.toBigDecimal().multiply(100.toBigDecimal()).divide(itemCount.toBigDecimal(), 7, RoundingMode.HALF_UP)
+                    rarity = value.count.toBigDecimal().multiply(ONE_HUNDRED_PERCENT).divide(itemCount.toBigDecimal(), 7, RoundingMode.HALF_UP)
                 )
             }
         }.flatten()
     }
+
+    private val ONE_HUNDRED_PERCENT = 100.toBigDecimal()
 }

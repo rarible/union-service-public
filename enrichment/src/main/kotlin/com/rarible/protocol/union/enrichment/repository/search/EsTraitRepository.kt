@@ -119,7 +119,7 @@ class EsTraitRepository(
         if (filter.keys.isNotEmpty()) {
             queryBuilder.must(QueryBuilders.termsQuery("${EsTrait::key.name}.raw", filter.keys))
         }
-        if (filter.text?.isNotBlank() == true) {
+        if (filter.text.isNullOrBlank().not()) {
             fullTextClauses(queryBuilder, filter.text!!, mapOf(EsTrait::key.name to 1.0f, EsTrait::value.name to 1.0f))
             queryBuilder.minimumShouldMatch(1)
         }
