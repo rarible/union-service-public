@@ -1,7 +1,6 @@
 package com.rarible.protocol.union.api.controller
 
 import com.rarible.protocol.union.api.service.elastic.ItemTraitService
-import com.rarible.protocol.union.api.service.elastic.toApiDto
 import com.rarible.protocol.union.api.service.elastic.toInner
 import com.rarible.protocol.union.api.service.select.ItemSourceSelectService
 import com.rarible.protocol.union.core.exception.UnionNotFoundException
@@ -271,7 +270,7 @@ class ItemController(
             ExtendedTraitPropertiesDto(traits = itemTraitService.getTraitsWithRarity(
                 collectionId = request.collectionId,
                 properties = request.properties.map { it.toInner() }.toSet()
-            ).map { it.toApiDto() })
+            ))
         )
     }
 

@@ -9,7 +9,7 @@ object EsTraitConverter {
         return EsTrait(
             id = id,
             blockchain = collectionId.blockchain,
-            collection = collectionId.fullId(),
+            collectionId = collectionId.fullId(),
             key = key,
             value = value,
             itemsCount = itemsCount,

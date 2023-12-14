@@ -10,9 +10,9 @@ data class EsTrait(
     @Id
     val id: String,
     val blockchain: BlockchainDto,
-    val collection: String?,
+    val collectionId: String,
     val key: String,
-    val value: String?,
+    val value: String?, // TODO: Should it be nullable?
     val itemsCount: Long,
     val listedItemsCount: Long,
     val version: Long,

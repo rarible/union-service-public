@@ -1,354 +1,218 @@
 package com.rarible.protocol.union.api.service.elastic
 
-import com.rarible.core.common.nowMillis
-import com.rarible.core.test.data.randomAddress
-import com.rarible.core.test.data.randomBigInt
 import com.rarible.core.test.data.randomString
 import com.rarible.protocol.union.api.configuration.EsProperties
-import com.rarible.protocol.union.api.controller.test.IntegrationTest
-import com.rarible.protocol.union.api.service.api.CollectionApiService
-import com.rarible.protocol.union.core.es.ElasticsearchTestBootstrapper
-import com.rarible.protocol.union.core.model.elastic.EsItem
-import com.rarible.protocol.union.core.model.elastic.EsItemTrait
+import com.rarible.protocol.union.core.FeatureFlagsProperties
+import com.rarible.protocol.union.core.model.elastic.EsTraitFilter
 import com.rarible.protocol.union.core.model.trait.Trait
 import com.rarible.protocol.union.core.model.trait.TraitEntry
 import com.rarible.protocol.union.core.model.trait.TraitProperty
-import com.rarible.protocol.union.dto.BlockchainDto
-import com.rarible.protocol.union.dto.ItemIdDto
+import com.rarible.protocol.union.dto.ExtendedTraitPropertyDto
+import com.rarible.protocol.union.dto.TraitDto
 import com.rarible.protocol.union.dto.TraitEntryDto
-import com.rarible.protocol.union.dto.TraitsDto
-import com.rarible.protocol.union.enrichment.repository.CollectionRepository
 import com.rarible.protocol.union.enrichment.repository.search.EsItemRepository
-import com.rarible.protocol.union.enrichment.test.data.randomEnrichmentCollection
+import com.rarible.protocol.union.enrichment.repository.search.EsTraitRepository
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestFactory
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient
+import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 
-@IntegrationTest
-internal class ItemTraitServiceTest {
-    @Autowired
-    private lateinit var repository: EsItemRepository
+@ExtendWith(MockKExtension::class)
+class ItemTraitServiceTest {
 
-    @Autowired
-    private lateinit var elasticClient: ReactiveElasticsearchClient
+    @MockK
+    private lateinit var legacyItemTraitService: LegacyItemTraitService
 
-    @Autowired
-    private lateinit var elasticsearchTestBootstrapper: ElasticsearchTestBootstrapper
+    @MockK
+    private lateinit var esTraitRepository: EsTraitRepository
 
-    @Autowired
-    private lateinit var collectionApiService: CollectionApiService
+    @MockK
+    private lateinit var esItemRepository: EsItemRepository
 
-    @Autowired
-    private lateinit var collectionRepository: CollectionRepository
+    @MockK
+    private lateinit var ff: FeatureFlagsProperties
 
+    private val esProperties = mockk<EsProperties> {
+        every { itemsTraitsKeysLimit } returns 100
+        every { itemsTraitsValuesLimit } returns 100
+    }
+
+    @InjectMockKs
     private lateinit var itemTraitService: ItemTraitService
 
-    private val properties = EsProperties(
-        itemsTraitsKeysLimit = 3,
-        itemsTraitsValuesLimit = 15
-    )
-
-    @BeforeEach
-    fun setUp() = runBlocking<Unit> {
-        itemTraitService = ItemTraitService(
-            elasticClient = elasticClient,
-            esItemRepository = repository,
-            esProperties = properties,
-            collectionApiService = collectionApiService,
-            collectionRepository = collectionRepository,
-        )
-        elasticsearchTestBootstrapper.bootstrap()
-    }
-
-    @TestFactory
-    fun `search items traits successfully`(): List<DynamicTest> = runBlocking {
-        val collection1 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = true))
-        val collection2 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = true))
-        val collection3 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = true))
-        val collection4 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = true))
-        val collection5 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = false))
-        listOf(
-            randomEsItem(
-                collection = collection1.id.toString(),
-                traits = listOf(
-                    EsItemTrait("key1", "value11"),
-                    EsItemTrait("key3", "value222"),
-                    EsItemTrait("key4", "value22"),
-                    EsItemTrait("key5", "value22"),
-                    EsItemTrait("eyes", "googly")
-                )
-            ),
-            randomEsItem(
-                collection = collection2.id.toString(),
-                traits = listOf(
-                    EsItemTrait("key1", "value22"),
-                    EsItemTrait("key2", "value222"),
-                    EsItemTrait("key6", "value61")
-                )
-            ),
-            randomEsItem(
-                collection = collection3.id.toString(),
-                traits = listOf(
-                    EsItemTrait("key1", "value13"),
-                    EsItemTrait("key2", "value222")
-                )
-            ),
-            randomEsItem(
-                collection = collection4.id.toString(),
-                traits = listOf(
-                    EsItemTrait("key1", "value11")
-                )
-            ),
-            randomEsItem(
-                collection = collection5.id.toString(),
-                traits = listOf(
-                    EsItemTrait("key1", "value11"),
-                    EsItemTrait("key3", "value222"),
-                    EsItemTrait("key4", "value22"),
-                    EsItemTrait("key5", "value22"),
-                    EsItemTrait("key6", "value61"),
-                    EsItemTrait("eyes", "googly")
-                )
-            ),
-        ).map { repository.save(it) }
-
-        listOf("eyes", "ey", "googly", "goo").map {
-
-            DynamicTest.dynamicTest("search items traits successfully: $it") {
-                runBlocking {
-
-                    val collectionIds = listOf(
-                        collection1.id.toString(),
-                        collection2.id.toString(),
-                        collection4.id.toString(),
-                        collection5.id.toString()
-                    )
-
-                    val result = itemTraitService.searchTraits(it, collectionIds)
-
-                    assertThat(result.traits.size).isEqualTo(1)
-                    assertThat(result.traits[0].key.value).isEqualTo("eyes")
-                    assertThat(result.traits[0].values[0].value).isEqualTo("googly")
-                }
-            }
-        }
-    }
-
     @Test
-    fun `get collection traits with rarity`(): Unit = runBlocking {
-        val collection1 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = true))
-        val collection2 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = true))
-        listOf(
-            randomEsItem(
-                collection = collection1.id.toString(),
-                traits = listOf(
-                    EsItemTrait("eyes", "green"),
-                    EsItemTrait("eyes", "green"),
-                    EsItemTrait("eyes", "green"),
-                    EsItemTrait("background", "yellow"),
-                )
-            ),
-            randomEsItem(
-                collection = collection1.id.toString(),
-                traits = listOf(
-                    EsItemTrait("eyes", "blue"),
-                    EsItemTrait("background", "white"),
-                )
-            ),
-            randomEsItem(
-                collection = collection1.id.toString(),
-                traits = listOf(
-                    EsItemTrait("eyes", "blue"),
-                    EsItemTrait("eyes", "gray"),
-                    EsItemTrait("background", "black"),
-                )
-            ),
-            randomEsItem(
-                collection = collection1.id.toString(),
-                traits = listOf(
-                    EsItemTrait("eyes", "red-gray")
-                )
-            ),
-            randomEsItem(
-                collection = collection2.id.toString(),
-                traits = listOf(
-                    EsItemTrait("eyes", "black"),
-                    EsItemTrait("background", "purple"),
-                )
-            )
-        ).map { repository.save(it) }
+    fun `getTraitsWithRarity - optimised`() = runBlocking<Unit> {
+        val collectionId = randomString()
+        val properties1 = TraitProperty(key = randomString(), randomString())
+        val properties2 = TraitProperty(key = randomString(), randomString())
+        val properties = setOf(properties1, properties2)
 
-        val properties = setOf(
-            TraitProperty("eyes", "green"),
-            TraitProperty("eyes", "blue"),
-            TraitProperty("eyes", "gray"),
-            TraitProperty("eyes", "black"),
-            TraitProperty("eyes", "red-gray"),
-            TraitProperty("background", "yellow"),
-            TraitProperty("background", "white"),
-            TraitProperty("background", "black"),
-            TraitProperty("background", "purple")
+        every { ff.enableOptimizedSearchForTraits } returns true
+        coEvery { esItemRepository.countItemsInCollection(collectionId) } returns 100
+        coEvery { esTraitRepository.getTraits(collectionId, properties) } returns listOf(
+            Trait(
+                key = TraitEntry(
+                    value = "key1",
+                    count = 10,
+                ),
+                values = listOf(
+                    TraitEntry(
+                        value = "value1",
+                        count = 20,
+                    ),
+                    TraitEntry(
+                        value = "value2",
+                        count = 30,
+                    ),
+                )
+            ),
+            Trait(
+                key = TraitEntry(
+                    value = "key2",
+                    count = 15,
+                ),
+                values = listOf(
+                    TraitEntry(
+                        value = "value3",
+                        count = 40,
+                    ),
+                    TraitEntry(
+                        value = "value4",
+                        count = 50,
+                    ),
+                )
+            ),
         )
 
-        val result: List<Trait> = itemTraitService.getTraitsDistinct(collection1.id.toString(), properties)
-
-        assertThat(result.size).isEqualTo(2)
-        val keys = result.map { it.key }
-        assertThat(keys).containsExactlyInAnyOrder(TraitEntry("eyes", 4), TraitEntry("background", 3))
-
-        val eyesTraits = result.first { it.key.value == "eyes" }.values
-        assertThat(eyesTraits).containsExactlyInAnyOrder(
-            TraitEntry("green", 1),
-            TraitEntry("blue", 2),
-            TraitEntry("gray", 1),
-            TraitEntry("red-gray", 1),
-            TraitEntry("black", 0)
-        )
-
-        val backgroundTraits = result.first { it.key.value == "background" }.values
-        assertThat(backgroundTraits).containsExactlyInAnyOrder(
-            TraitEntry("yellow", 1),
-            TraitEntry("white", 1),
-            TraitEntry("black", 1),
-            TraitEntry("purple", 0),
-        )
-    }
-
-    @Test
-    fun `get empty Traits`(): Unit = runBlocking {
-        val collection1 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = true))
         val result = itemTraitService.getTraitsWithRarity(
-            collection1.id.toString(),
-            setOf(
-                TraitProperty("eyes", "green")
+            collectionId = collectionId,
+            properties = properties
+        )
+        assertThat(result).hasSize(4)
+        assertThat(result).containsExactlyElementsOf(
+            listOf(
+                ExtendedTraitPropertyDto(
+                    key = "key1",
+                    value = "value1",
+                    rarity = BigDecimal("20.0000000"),
+                ),
+                ExtendedTraitPropertyDto(
+                    key = "key1",
+                    value = "value2",
+                    rarity = BigDecimal("30.0000000"),
+                ),
+                ExtendedTraitPropertyDto(
+                    key = "key2",
+                    value = "value3",
+                    rarity = BigDecimal("40.0000000"),
+                ),
+                ExtendedTraitPropertyDto(
+                    key = "key2",
+                    value = "value4",
+                    rarity = BigDecimal("50.0000000"),
+                ),
             )
         )
-        assertThat(result.size).isEqualTo(1)
-
-        assertThat(result.first { it.key == "eyes" }
-            .rarity).isEqualTo(BigDecimal.ZERO)
     }
 
     @Test
-    fun `get items traits successfully`(): Unit = runBlocking {
-        val collection1 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = true))
-        val collection2 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = true))
-        val collection3 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = true))
-        val collection4 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = true))
-        val collection5 = collectionRepository.save(randomEnrichmentCollection().copy(hasTraits = false))
-        listOf(
-            randomEsItem(
-                collection = collection1.id.toString(),
-                traits = listOf(
-                    EsItemTrait("key1", "value11"),
-                    EsItemTrait("key3", "value222"),
-                    EsItemTrait("key4", "value22"),
-                    EsItemTrait("key5", "value22")
-                )
-            ),
-            randomEsItem(
-                collection = collection2.id.toString(),
-                traits = listOf(
-                    EsItemTrait("key1", "value22"),
-                    EsItemTrait("key2", "value222"),
-                    EsItemTrait("key6", "value61")
-                )
-            ),
-            randomEsItem(
-                collection = collection3.id.toString(),
-                traits = listOf(
-                    EsItemTrait("key1", "value13"),
-                    EsItemTrait("key2", "value222")
-                )
-            ),
-            randomEsItem(
-                collection = collection4.id.toString(),
-                traits = listOf(
-                    EsItemTrait("key1", "value11")
-                )
-            ),
-            randomEsItem(
-                collection = collection5.id.toString(),
-                traits = listOf(
-                    EsItemTrait("key1", "value11"),
-                    EsItemTrait("key3", "value222"),
-                    EsItemTrait("key4", "value22"),
-                    EsItemTrait("key5", "value22")
-                )
-            ),
-        ).map { repository.save(it) }
+    fun `searchTraits - optimised`() = runBlocking<Unit> {
+        val collectionId1 = randomString()
+        val collectionId2 = randomString()
+        val filter = "test"
 
-        val collectionIds = listOf(
-            collection1.id.toString(),
-            collection2.id.toString(),
-            collection4.id.toString(),
-            collection5.id.toString()
+        every { ff.enableOptimizedSearchForTraits } returns true
+
+        coEvery {
+            esTraitRepository.searchTraits(
+                EsTraitFilter(
+                    text = filter,
+                    collectionIds = setOf(collectionId1, collectionId2),
+                    keysLimit = 100,
+                    valuesLimit = 100,
+                )
+            )
+        } returns listOf(
+            Trait(
+                key = TraitEntry(
+                    value = "key1",
+                    count = 10,
+                ),
+                values = listOf(
+                    TraitEntry(
+                        value = "value1",
+                        count = 20,
+                    ),
+                    TraitEntry(
+                        value = "value2",
+                        count = 30,
+                    ),
+                )
+            ),
+            Trait(
+                key = TraitEntry(
+                    value = "key2",
+                    count = 40,
+                ),
+                values = listOf(
+                    TraitEntry(
+                        value = "value3",
+                        count = 50,
+                    ),
+                    TraitEntry(
+                        value = "value4",
+                        count = 60,
+                    ),
+                )
+            ),
         )
-        val keysLimit = 3
-        val valuesLimit = 15
 
-        var result: TraitsDto = itemTraitService.queryTraits(collectionIds, emptyList())
-
-        assertThat(result.traits.size).isEqualTo(keysLimit)
-
-        validateTraitEntry(traitEntry = result.traits[0].key, value = "key1", count = 3)
-        var values = result.traits[0].values
-        assertThat(values.size).isEqualTo(2)
-        validateTraitEntry(traitEntry = values[0], value = "value11", count = 2)
-        validateTraitEntry(traitEntry = values[1], value = "value22", count = 1)
-
-        validateTraitEntry(traitEntry = result.traits[1].key, value = "key2", count = 1)
-        values = result.traits[1].values
-        assertThat(values.size).isEqualTo(1)
-        validateTraitEntry(traitEntry = values[0], value = "value222", count = 1)
-
-        validateTraitEntry(traitEntry = result.traits[2].key, value = "key3", count = 1)
-        values = result.traits[2].values
-        assertThat(values.size).isEqualTo(1)
-        validateTraitEntry(traitEntry = values[0], value = "value222", count = 1)
-
-        result = itemTraitService.queryTraits(collectionIds, listOf("key1"))
-        assertThat(result.traits.size).isEqualTo(1)
-        validateTraitEntry(traitEntry = result.traits[0].key, value = "key1", count = 3)
-
-        result = itemTraitService.queryTraits(collectionIds, listOf("key1", "key6"))
-        assertThat(result.traits.size).isEqualTo(2)
-        validateTraitEntry(traitEntry = result.traits[0].key, value = "key1", count = 3)
-        validateTraitEntry(traitEntry = result.traits[1].key, value = "key6", count = 1)
-
-        result = itemTraitService.queryTraits(collectionIds, listOf("key2"))
-        assertThat(result.traits.size).isEqualTo(1)
-        validateTraitEntry(traitEntry = result.traits[0].key, value = "key2", count = 1)
-        validateTraitEntry(traitEntry = result.traits[0].values[0], value = "value222", count = 1)
-    }
-
-    fun randomEsItem(collection: String? = randomAddress().toString(), traits: List<EsItemTrait>): EsItem {
-        val blockchain = BlockchainDto.ETHEREUM
-        val itemId = ItemIdDto(blockchain, randomAddress().prefixed(), randomBigInt())
-        return EsItem(
-            id = randomString(),
-            itemId = itemId.fullId(),
-            blockchain = blockchain,
-            collection = collection,
-            token = itemId.value.split(":")[0],
-            tokenId = itemId.value.split(":")[1],
-            name = randomString(),
-            description = randomString(),
-            traits = traits,
-            creators = listOf(randomAddress().toString()),
-            mintedAt = nowMillis(),
-            lastUpdatedAt = nowMillis()
+        val result = itemTraitService.searchTraits(
+            filter = filter,
+            collectionIds = listOf(collectionId1, collectionId2),
         )
-    }
-
-    private fun validateTraitEntry(traitEntry: TraitEntryDto, value: String, count: Long) {
-        assertThat(traitEntry.value).isEqualTo(value)
-        assertThat(traitEntry.count).isEqualTo(count)
+        assertThat(result.traits).containsExactlyElementsOf(
+            listOf(
+                TraitDto(
+                    key = TraitEntryDto(
+                        value = "key1",
+                        count = 10
+                    ),
+                    values = listOf(
+                        TraitEntryDto(
+                            value = "value1",
+                            count = 20
+                        ),
+                        TraitEntryDto(
+                            value = "value2",
+                            count = 30
+                        ),
+                    )
+                ),
+                TraitDto(
+                    key = TraitEntryDto(
+                        value = "key2",
+                        count = 40
+                    ),
+                    values = listOf(
+                        TraitEntryDto(
+                            value = "value3",
+                            count = 50
+                        ),
+                        TraitEntryDto(
+                            value = "value4",
+                            count = 60
+                        ),
+                    )
+                ),
+            )
+        )
     }
 }
